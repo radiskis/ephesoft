@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Image_Process_Create_OCR_Input_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+	<start g="67,16,80,40">
+		<transition to="create-ocr-input-images"/>
+	</start>
+
+	<java continue="async" expr="#{imageProcessService}" g="16,88,183,59" method="createOcrInputImages" name="create-ocr-input-images">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Image_Process_Create_OCR_Input_Plugin"/>
+		</arg>
+		<arg>
+			<object expr="#{PNG_IMAGE}"/>
+		</arg>
+	<transition to="end"/>
+	</java>
+
+	<end g="72,255,80,40" name="end"/>
+	
+</process>

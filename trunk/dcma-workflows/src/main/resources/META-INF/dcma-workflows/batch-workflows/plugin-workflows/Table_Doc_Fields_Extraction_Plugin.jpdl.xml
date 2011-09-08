@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Table_Doc_Fields_Extraction_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="162,16,80,40">
+		<transition to="extract-table-data"/>
+	</start>
+
+	<java continue="async" expr="#{tableExtractionService}" g="89,99,205,59" method="extractTableDocumentFields" name="extract-table-data">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Table_Doc_Fields_Extraction_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="164,192,80,40" name="end"/>
+	
+</process>

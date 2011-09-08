@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Review_Document_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="93,15,80,40">
+		<transition to="set-status-ready-for-review"/>
+	</start>
+	
+	<java continue="async" expr="#{batchInstanceService}" g="16,88,207,60" method="updateBatchInstanceStatus" name="set-status-ready-for-review">
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<batch-instance-status value="READY_FOR_REVIEW"/>
+		</arg>
+		<transition to="review-document"/>
+	</java>
+
+	<state continue="async" g="37,190,167,68" name="review-document">
+		<transition to="Workflow_Status_Running"/>
+	</state>
+	
+	<sub-process continue="async" g="72,272,176,68" name="Workflow_Status_Running" sub-process-key="Workflow_Status_Running">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="backup-batch-xml"/>
+	</sub-process>
+	
+	
+	<java continue="async" expr="#{batchSchemaService}" g="88,357,163,59" method="backUpBatchXML" name="backup-batch-xml">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Review_Document_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="86,432,80,40" name="end"/>
+</process>

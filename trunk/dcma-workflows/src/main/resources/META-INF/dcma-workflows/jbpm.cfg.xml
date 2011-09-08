@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jbpm-configuration spring="enabled">
+
+	<import resource="jbpm.jpdl.cfg.xml" />
+	<!-- import resource="jbpm.bpmn.cfg.xml" /-->
+
+	<process-engine-context>
+		<job-executor/>
+		<repository-service />
+		<object class="org.jbpm.pvm.internal.repository.RepositoryCacheImpl" />
+		<execution-service />
+		<history-service />
+		<management-service />
+		<identity-service />
+		<task-service />
+
+		<string name="spring.cfg" value="applicationContext.xml" />
+
+		<types resource="jbpm.variable.types.xml" />
+
+		<object class="org.jbpm.pvm.internal.id.DatabaseDbidGenerator">
+			<field name="commandService">
+				<ref object="newTxRequiredCommandService" />
+			</field>
+		</object>
+		<object class="com.ephesoft.dcma.workflow.jbpm.pvm.internal.id.EphesoftDatabaseIdComposer"
+			init="eager" />
+
+		<command-service name="txRequiredCommandService">
+			<skip-interceptor />
+			<retry-interceptor />
+			<environment-interceptor />
+			<spring-transaction-interceptor />
+		</command-service>
+
+		<command-service name="newTxRequiredCommandService">
+			<retry-interceptor />
+			<environment-interceptor policy="requiresNew" />
+			<spring-transaction-interceptor policy="requiresNew" />
+		</command-service>
+
+	</process-engine-context>
+
+
+	<transaction-context>
+		<repository-session />
+		<db-session />
+		<message-session />
+		<timer-session />
+		<identity-session />
+
+		<history-sessions>
+			<object class="org.jbpm.pvm.internal.history.HistorySessionImpl" />
+		</history-sessions>
+
+		<transaction type="spring"/>
+		<hibernate-session current="true"/>
+	</transaction-context>
+</jbpm-configuration>

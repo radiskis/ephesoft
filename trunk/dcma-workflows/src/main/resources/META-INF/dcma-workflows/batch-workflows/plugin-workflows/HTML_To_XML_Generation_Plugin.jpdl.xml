@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="HTML_To_XML_Generation_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="64,16,80,40">
+		<transition to="html-to-xml-generation"/>
+	</start>
+
+	<java continue="async" expr="#{batchSchemaService}" g="16,88,177,59" method="htmlToXmlGeneration" name="html-to-xml-generation">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="HTML_To_XML_Generation_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="64,179,80,40" name="end"/>
+</process>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+	<!-- Definition of new Model -->
+
+	<!--
+		The important part here is the name - Note: the use of the my:
+		namespace which is defined further on in the document
+	-->
+<model name="ephesoft:custommodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+	<!-- Optional meta-data about the model -->
+	<description>Example Ephesoft custom Model</description>
+	<author></author>
+	<version>1.0</version>
+
+	<!--
+		Imports are required to allow references to definitions in other
+		models
+	-->
+	<imports>
+		<!-- Import Alfresco Dictionary Definitions -->
+		<import uri="http://www.alfresco.org/model/dictionary/1.0"
+			prefix="d" />
+		<!-- Import Alfresco Content Domain Model Definitions -->
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+	</imports>
+
+	<!-- Introduction of new namespaces defined by this model -->
+	<!--
+		NOTE: The following namespace my.new.model should be changed to
+		reflect your own namespace
+	-->
+	<namespaces>
+		<namespace uri="custom.model" prefix="ephesoft" />
+	</namespaces>
+
+	<types>
+
+		<!-- Definition of new Content Type: Standard Operating Procedure -->
+		<type name="ephesoft:document">
+			<title>Ephesoft Document</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="ephesoft:partNumber">
+					<type>d:text</type>
+				</property>
+				<property name="ephesoft:invoiceTotal">
+					<type>d:text</type>
+				</property>
+				<property name="ephesoft:state">
+					<type>d:text</type>
+				</property>
+				<property name="ephesoft:city">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+
+	</types>
+
+	<aspects>
+
+		<!-- Definition of new Content Aspect: Image Classification -->
+		<aspect name="ephesoft:documentClassification">
+			<title>Ephesoft Document Classfication</title>
+			<properties>
+				<property name="ephesoft:size">
+					<type>d:int</type>
+				</property>
+				<property name="ephesoft:type">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
+	</aspects>
+
+</model>

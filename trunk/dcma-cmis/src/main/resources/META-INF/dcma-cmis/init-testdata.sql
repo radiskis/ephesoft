@@ -1,0 +1,1 @@
+insert into batch_class(creation_date,last_modified,batch_description,batch_name,priority,unc_folder) values(now(), now(), 'invoice batch', 'invoice',1,'unc');

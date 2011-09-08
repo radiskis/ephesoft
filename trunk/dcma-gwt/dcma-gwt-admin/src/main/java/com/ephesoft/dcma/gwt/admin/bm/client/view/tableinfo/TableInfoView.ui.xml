@@ -1,0 +1,67 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:table-info='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size="43">
+			<g:CaptionPanel ui:field="tableInfoCaptionPanel"
+				height="90%" width="97%">
+				<g:ScrollPanel height="100%" width="100%">
+					<g:VerticalPanel height="100%" width="100%">
+						<g:VerticalPanel ui:field="tableInfoVerticalPanel"
+							height="100%" width="100%">
+							<table-info:TableInfoDetailView
+								ui:field="tableInfoDetailView" width='100%' height="100%" />
+							<g:HorizontalPanel width="100%">
+								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editTableInfoPropertiesButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+
+						<g:VerticalPanel ui:field="tableInfoConfigVerticalPanel"
+							height="100%" visible="false" width="100%">
+							<table-info:EditTableInfoView
+								ui:field="editTableInfoView" width='100%' />
+						</g:VerticalPanel>
+					</g:VerticalPanel>
+				</g:ScrollPanel>
+			</g:CaptionPanel>
+		</g:north>
+		<g:center>
+			<g:TabLayoutPanel barHeight="16" barUnit="PCT">
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Table Columns Info Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="tableColumnInfoCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%" ui:field="tableColumnInfoButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addTCButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editTCButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteTCButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="tableColumnInfoListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+			</g:TabLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

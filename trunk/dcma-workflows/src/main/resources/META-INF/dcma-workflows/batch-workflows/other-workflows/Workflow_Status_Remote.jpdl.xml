@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Workflow_Status_Remote" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="157,16,55,42">
+      <transition to="set-status-to-remote"/>
+	</start>
+	
+	<java expr="#{batchInstanceService}" g="78,101,207,60" method="updateBatchInstanceStatus" name="set-status-to-remote">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<batch-instance-status value="TRANSFERRED"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="162,199,80,40" name="end"/>
+	
+</process>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Image_Process_Create_Display_Image_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+	<start g="92,15,80,40">
+		<transition to="create-display-image"/>
+	</start>
+
+	<java continue="async" expr="#{imageProcessService}" g="36,106,163,59" method="createDisplayImages" name="create-display-image">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Image_Process_Create_Display_Image_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="92,208,80,40" name="end"/>
+	
+</process>

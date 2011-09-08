@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Regex_Doc_Fields_Extraction_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="162,16,80,40">
+		<transition to="extract-key-value-fields"/>
+	</start>
+
+	<java continue="async" expr="#{kvExtractionService}" g="78,104,236,59" method="extractKVDocumentFields" name="extract-key-value-fields">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Regex_Doc_Fields_Extraction_Plugin"/>
+		</arg>
+		
+		<transition to="end"/>
+	</java>
+
+	<end g="174,206,80,40" name="end"/>
+	
+</process>

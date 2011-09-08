@@ -1,0 +1,18 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<ui:style>
+		.anchor {
+			margin: 0 8px;
+		}
+	</ui:style>
+
+	<g:HTMLPanel>
+		<g:Anchor styleName='{style.anchor}' ui:field='newerButton'
+			href='javascript:;'>&lt; newer
+		</g:Anchor>
+		<g:Anchor styleName='{style.anchor}' ui:field='olderButton'
+			href='javascript:;'>
+			older &gt; </g:Anchor>
+	</g:HTMLPanel>
+</ui:UiBinder>

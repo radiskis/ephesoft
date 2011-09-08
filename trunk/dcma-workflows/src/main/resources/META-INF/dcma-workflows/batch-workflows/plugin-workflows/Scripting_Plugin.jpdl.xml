@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Scripting_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="95,16,80,40">
+		<transition to="script-executor"/>
+	</start>
+
+	<java continue="async" expr="#{scriptService}" g="45,102,166,59" method="executeScript" name="script-executor">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="#{backUpFileName}"/>
+		</arg>
+		<arg>
+			<object expr="#{scriptName}"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="103,196,80,40" name="end"/>
+	
+</process>

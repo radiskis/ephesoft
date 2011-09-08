@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171 (http://www.liquid-technologies.com)-->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="batchStatus_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Locked" />
+			<xs:enumeration value="Ready" />
+			<xs:enumeration value="Error" />
+			<xs:enumeration value="Finished" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="confidence_type">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="coordinates_type">
+		<xs:sequence>
+			<xs:element name="x0" type="xs:integer" />
+			<xs:element name="y0" type="xs:integer" />
+			<xs:element name="x1" type="xs:integer" />
+			<xs:element name="y1" type="xs:integer" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="field_type">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="Value" type="xs:string" />
+			<xs:element name="Confidence" type="confidence_type" />
+			<xs:element name="Coordinates" type="coordinates_type" />
+			<xs:element name="Page" type="xs:integer" />
+			<xs:element name="OverlayedImageFileName" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="docField_type">
+		<xs:complexContent>
+			<xs:extension base="field_type">
+				<xs:sequence>
+					<xs:element name="AlternateValues">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element minOccurs="0" maxOccurs="unbounded" name="AlternateValue" type="field_type" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="page_type">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:integer" />
+			<xs:element name="OldFileName" type="xs:string" />
+			<xs:element name="NewFileName" type="xs:string" />
+			<xs:element name="PageLevelFields">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="PageLevelField" type="docField_type" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="HocrFileName" type="xs:string" />
+			<xs:element name="ThumbnailFileName" type="xs:string" />
+			<xs:element name="DisplayFileName" type="xs:string" />
+			<xs:element name="OCRInputFileName" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="document_type">
+		<xs:sequence>
+			<xs:element name="Id" type="xs:integer" />
+			<xs:element name="Type" type="xs:string" />
+			<xs:element name="Confidence" type="confidence_type" />
+			<xs:element name="DocumentLevelFields">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="DocumentLevelField" type="docField_type" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Pages">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Page" type="page_type" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="MultiPageTiffFile" type="xs:string" />
+			<xs:element name="MultiPagePdfFile" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Batch">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="BatchID" type="xs:string" />
+				<xs:element name="BatchClassName" type="xs:string" />
+				<xs:element name="BatchClassDesciption" type="xs:string" />
+				<xs:element name="BatchClassVersion" type="xs:string" />
+				<xs:element name="BatchName" type="xs:string" />
+				<xs:element name="BatchDescription" type="xs:string" />
+				<xs:element name="BatchPriority" type="xs:string" />
+				<xs:element name="BatchStatus" type="batchStatus_type" />
+				<xs:element name="CurrentModule" type="xs:string" />
+				<xs:element name="Documents">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element minOccurs="0" maxOccurs="unbounded" name="Document" type="document_type" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

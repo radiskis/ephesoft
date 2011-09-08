@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>com.ephesoft.dcma</groupId>
+		<artifactId>dcma-parent</artifactId>
+		<version>0.0.12-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	<artifactId>dcma-batch</artifactId>
+	<name>DCMA: Batch Model</name>
+	<description>The DCMA Batch model.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-data-access</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>add-jaxb-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${basedir}/src-generated/main/java</source>
+								<targetPath>target/classes</targetPath>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- jaxb plugin -->
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.7.3</version>
+				<executions>
+					<execution>
+						<id>batch</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<args>
+								<param>-npa</param>
+							</args>
+							<npa>true</npa>
+							<schemaDirectory>${basedir}/src/main/resources/META-INF/dcma-batch/schema/batch</schemaDirectory>
+							<schemaIncludes>
+								<include>Common.xsd</include>
+								<include>Batch.xsd</include>
+								<include>Hocr.xsd</include>
+							</schemaIncludes>
+							<removeOldOutput>true</removeOldOutput>
+							<!-- generate lots of output -->
+							<verbose>true</verbose>
+							<generatePackage>com.ephesoft.dcma.batch.schema</generatePackage>
+							<generateDirectory>${basedir}/src-generated/main/java</generateDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-jaxb-batch-source</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<copydir dest="${basedir}/target/classes" src="${basedir}/src-generated/main/java" forceoverwrite="true" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

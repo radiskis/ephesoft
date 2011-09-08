@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+            			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+           				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         					"
+	default-autowire="byName">
+
+	<context:annotation-config />
+	
+	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
+	
+	<bean id="mailServiceConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="placeholderPrefix" value="$mail{" />
+		<property name="placeholderSuffix" value="}" />
+		<property name="locations"
+			value="classpath:/META-INF/dcma-mail/mail.properties">
+		</property>
+	</bean>	
+	
+	<bean class="com.ephesoft.dcma.core.hibernate.EntityFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>com.ephesoft.dcma.mail.domain.EmailData</value>
+			</list>
+		</property>
+	 </bean>
+
+	<!--
+		bean id="mailQueueService"
+		class="com.ephesoft.dcma.mail.service.MailQueueServiceImpl"> <property
+		name="fetchMaxCount" value="$mail{dcma.mail.fetch_max_count}" />
+		</bean
+	-->
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="$mail{mail.host}" />
+		<property name="username" value="$mail{mail.username}" />
+		<property name="password" value="$mail{mail.password}" />
+		<property name="port" value="$mail{mail.port}" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.socketFactory.fallback">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="mailService" class="com.ephesoft.dcma.mail.service.MailServiceImpl">
+		<property name="mailSender" ref="mailSender" />
+		<property name="freemarkerMailConfiguration" ref="freemarkerMailConfiguration" />
+		<property name="suppressMail" value="$mail{mail.suppress}"/>
+	</bean>
+
+	<bean id="freemarkerMailConfiguration"
+		class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+		<property name="templateLoaderPath" value="classpath:META-INF/mail-template" />
+	</bean>
+	
+	<context:component-scan base-package="com.ephesoft.dcma.mail.dao" />
+	<context:component-scan base-package="com.ephesoft.dcma.mail.service" />
+</beans>

@@ -1,0 +1,109 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<ui:image field='gradient' src='gradient_bg_dark.png'
+		repeatStyle='Horizontal' />
+
+	<ui:style>
+		.outer {
+			border-left: 1px solid #999;
+			border-bottom: 1px solid #999;
+			cursor: pointer;
+			cursor: hand;
+		}
+		
+		.table {
+			table-layout: fixed;
+			width: 100%;
+		}
+		
+		.table td {
+			border-top: 1px solid #fff;
+			border-bottom: 1px solid #fff;
+			padding: 2px 0 2px 0px;
+			cursor: pointer;
+		}
+	</ui:style>
+
+	<ui:style field='selectionStyle'
+		type='com.ephesoft.dcma.gwt.core.client.ui.table.Table.SelectionStyle'>
+			.selectedRow {
+				background: #adcce7;
+			}
+			
+			.selectedRow td {
+				border-top: 1px solid #88a4d6;
+				border-bottom: 1px solid #7b97d0;
+			}
+			
+			.oddRow {
+				background: #e7e9e9;
+			}
+			
+			.oddRow td {
+				border-top: 1px solid #e7e9e9;
+				border-bottom: 1px solid #e7e9e9;
+			}
+			
+			.evenRow {
+				background: #ffffff;
+			}
+			
+			.evenRow td {
+				border-top: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+			}
+			
+			@sprite .header {
+				gwt-image: 'gradient';
+				background-color: #ceebff;
+				background-image: none !important;
+				table-layout: fixed;
+				height: 32px;
+				border-left: 1px solid #999;
+				border-right: 1px solid #999;
+			}
+			
+			.header td {
+				font-weight: bold;
+				text-shadow: #fff 0 2px 2px;
+				border-top: 1px solid #ceebff;
+				border-bottom: 1px solid #ceebff;
+			}
+			
+			.boldText {
+				font-weight: bold;
+				padding-right: 10px;
+			}
+			
+			.rowHighlighted {
+				background: #92C1F0 !important;
+			}
+			
+			.rowHighlighted td {
+				border-top: 1px solid #92C1F0;
+				border-bottom: 1px solid #92C1F0;
+			}
+		</ui:style>
+
+	<g:DockLayoutPanel unit="PX">
+		<g:north size="22">
+			<g:FlexTable ui:field='navBarTable' cellSpacing='0'
+				cellPadding='0' width="100%" />
+		</g:north>
+		<g:center>
+			<g:DockLayoutPanel unit="PX">
+				<g:north size="25">
+					<g:FlexTable ui:field='headerTable' cellSpacing='0'
+						cellPadding='0' width="100%" />
+				</g:north>
+				<g:center>
+					<g:ScrollPanel height="100%">
+						<g:FlexTable ui:field='table' styleName='{style.table}'
+							cellSpacing='0' cellPadding='0' width="100%" />
+					</g:ScrollPanel>
+				</g:center>
+			</g:DockLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

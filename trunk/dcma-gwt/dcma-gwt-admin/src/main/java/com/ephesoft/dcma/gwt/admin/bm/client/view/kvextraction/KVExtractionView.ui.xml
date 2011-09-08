@@ -1,0 +1,33 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:kvextraction-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size="43">
+			<g:CaptionPanel ui:field="kvConfigurationCaptionPanel"
+				height="80%" width="97%">
+				<g:ScrollPanel height="100%" width="100%">
+					<g:VerticalPanel height="100%" width="100%">
+						<g:VerticalPanel ui:field="kvExtractionTypeVerticalPanel"
+							height="100%" width="100%">
+							<kvextraction-type:KVExtractionDetailView
+								ui:field="kvextractionDetailView" width='100%' height="100%" />
+							<g:HorizontalPanel width="100%">
+								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editKVPropertiesButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+
+						<g:VerticalPanel ui:field="kvTypeConfigVerticalPanel"
+							height="100%" visible="false" width="100%">
+							<kvextraction-type:EditKVExtractionView
+								ui:field="editKVExtractionView" width='100%' />
+						</g:VerticalPanel>
+					</g:VerticalPanel>
+				</g:ScrollPanel>
+			</g:CaptionPanel>
+		</g:north>
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

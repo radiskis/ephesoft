@@ -1,0 +1,151 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:core='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
+
+	<g:DockLayoutPanel unit='PCT' ui:field="mainLayoutPanel"
+		width="99%">
+		<g:west size="1">
+			<g:Label />
+		</g:west>
+		<g:north size="13">
+			<g:VerticalPanel ui:field="labelPanel" width="100%"
+				height="50px">
+				<g:HorizontalPanel ui:field="reportingInfo" width="100%"
+					height="100%">
+					<g:cell>
+						<g:Label ui:field="completeInfo"></g:Label>
+					</g:cell>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel ui:field="valuesPanel" width="100%"
+					height="100%">
+					<g:cell width="18%">
+						<g:Label ui:field="totalBatchesLabel">
+						</g:Label>
+					</g:cell>
+					<g:cell width="10%">
+						<g:Label ui:field="totalBatches" />
+					</g:cell>
+					<g:cell width="20%">
+						<g:Label ui:field="totalDocumentsLabel">
+						</g:Label>
+					</g:cell>
+					<g:cell width="5%">
+						<g:Label ui:field="totalDocuments" />
+					</g:cell>
+					<g:cell width="18%">
+						<g:Label ui:field="totalPagesLabel">
+						</g:Label>
+					</g:cell>
+					<g:cell width="17%">
+						<g:Label ui:field="totalPages" />
+					</g:cell>
+					<g:cell>
+						<g:Button ui:field="syncButton"></g:Button>
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:north>
+		<g:center>
+			<g:DockLayoutPanel ui:field="reportPanel" height="100%"
+				unit="PCT">
+				<g:north size="35">
+					<g:DockLayoutPanel width="100%" unit="PX">
+						<g:center>
+							<g:DockLayoutPanel width="100%" unit="PCT"
+								height="100%">
+								<g:center>
+									<g:VerticalPanel width="100%" height="50px">
+										<g:HorizontalPanel ui:field="batchClassPanel"
+											height="15px">
+											<g:cell>
+												<g:Label>Batch Class</g:Label>
+											</g:cell>
+											<g:cell>
+												<g:ListBox ui:field="batchClassList"></g:ListBox>
+											</g:cell>
+										</g:HorizontalPanel>
+										<g:HorizontalPanel width="50%"
+											ui:field="radioSelectionPanel" height="5px">
+											<g:cell width="1%">
+												<g:Label />
+											</g:cell>
+											<g:cell>
+												<g:HorizontalPanel ui:field="modulePanel">
+													<g:RadioButton ui:field="moduleSelection"
+														name="a"></g:RadioButton>
+													<g:Label>Module</g:Label>
+												</g:HorizontalPanel>
+											</g:cell>
+											<g:cell>
+												<g:HorizontalPanel ui:field="pluginPanel">
+													<g:RadioButton ui:field="pluginSelection"
+														name="b"></g:RadioButton>
+													<g:Label>Plugin</g:Label>
+												</g:HorizontalPanel>
+											</g:cell>
+											<g:cell>
+												<g:HorizontalPanel ui:field="userPanel">
+													<g:RadioButton ui:field="userSelection" name="c"></g:RadioButton>
+													<g:Label width="33px">User</g:Label>
+													<g:ListBox ui:field="userList"></g:ListBox>
+												</g:HorizontalPanel>
+											</g:cell>
+										</g:HorizontalPanel>
+										<g:HorizontalPanel height="3px">
+											<g:Label />
+										</g:HorizontalPanel>
+										<g:HorizontalPanel ui:field="datePanel"
+											height="15px">
+											<g:cell width="11%">
+												<g:Label>Start Date</g:Label>
+											</g:cell>
+											<g:cell>
+												<g:TextBox ui:field="startDateText"></g:TextBox>
+											</g:cell>
+											<g:cell width="13%">
+												<g:Label ui:field="startDateFormat"></g:Label>
+											</g:cell>
+											<!--
+												<g:cell> <g:HorizontalPanel> <core:CalendarWidget
+												ui:field="startDateCalendar"></core:CalendarWidget>
+												</g:HorizontalPanel> </g:cell>
+											-->
+											<g:cell width="10%">
+												<g:Label>End Date</g:Label>
+											</g:cell>
+											<g:cell>
+												<g:TextBox ui:field="endDateText"></g:TextBox>
+											</g:cell>
+											<g:cell width="13%">
+												<g:Label ui:field="endDateFormat"></g:Label>
+											</g:cell>
+											<!--
+												<g:cell> <g:DockLayoutPanel unit="PCT"
+												ui:field="endCalendar"> <g:center> <core:CalendarWidget
+												ui:field="endDateCalendar"></core:CalendarWidget>
+												</g:center> </g:DockLayoutPanel> </g:cell>
+											-->
+											<g:cell>
+												<g:Button ui:field="goButton">Go</g:Button>
+											</g:cell>
+											<g:cell horizontalAlignment="ALIGN_RIGHT" width="94%">
+												<g:Label>Unit</g:Label>
+											</g:cell>
+											<g:cell horizontalAlignment="ALIGN_RIGHT">
+												<g:ListBox ui:field="intervalListBox"></g:ListBox>
+											</g:cell>
+
+										</g:HorizontalPanel>
+									</g:VerticalPanel>
+								</g:center>
+							</g:DockLayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:north>
+				<g:center>
+					<g:LayoutPanel ui:field="reportTablePanel">
+					</g:LayoutPanel>
+				</g:center>
+			</g:DockLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

@@ -1,0 +1,156 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:batch-class='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.batch'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size='37'>
+			<g:CaptionPanel ui:field="batchClassConfigurationCaptionPanel"
+				height="80%" width="97%">
+				<g:LayoutPanel ui:field="viewEditLayoutPanel" width="100%"
+					height="100%">
+					<g:layer>
+						<g:ScrollPanel height="100%" width="100%">
+							<g:VerticalPanel height="100%" width="100%">
+								<g:VerticalPanel ui:field="batchClassViewVerticalPanel"
+									width="100%" height="100%">
+									<batch-class:BatchClassDetailView
+										ui:field="batchClassDetailView" width='100%' />
+									<g:HorizontalPanel width="100%">
+										<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+											<g:Button ui:field="editBatchPropertiesButton"></g:Button>
+										</g:cell>
+									</g:HorizontalPanel>
+								</g:VerticalPanel>
+								<g:VerticalPanel ui:field="batchClassConfigVerticalPanel"
+									height="100%" visible="false" width="100%">
+									<batch-class:EditBatchClassView
+										ui:field="editBatchClassView" width='100%' />
+								</g:VerticalPanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+					</g:layer>
+				</g:LayoutPanel>
+			</g:CaptionPanel>
+		</g:north>
+		<g:center>
+			<g:TabLayoutPanel barHeight="10" barUnit="PCT">
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Modules</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="moduleTypeListPanel"
+						width="98%" height="92%" unit="PCT">
+						<g:north size="10">
+							<g:HorizontalPanel width="99%" ui:field="buttonPanel">
+								<g:cell width="80%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editModuleButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel height="100%" ui:field="moduleListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Document Types</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="docTypeListPanel"
+						width="98%" height="92%">
+						<g:north size="27">
+							<g:HorizontalPanel width="99%" ui:field="documentButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addDocumentButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editDocumentButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="copyDocumentButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteDocumentButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="docTypeLayoutPanel">
+							</g:LayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Email Configuration</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="emailListPanel"
+						width="98%" height="92%">
+						<g:north size="27">
+							<g:HorizontalPanel width="99%" ui:field="emailButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addEmailButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editEmailButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteEmailButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="emailLayoutPanel">
+							</g:LayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Batch Class Field</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="batchClassFieldListPanel"
+						width="98%" height="92%">
+						<g:north size="27">
+							<g:HorizontalPanel width="99%" ui:field="batchClassFieldButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addBatchClassFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editBatchClassFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteBatchClassFieldButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="batchClassFieldLayoutPanel">
+							</g:LayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+			</g:TabLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Image_Process_Classify_Images_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+	<start g="92,15,80,40">
+		<transition to="classify-images"/>
+	</start>
+
+	<java continue="async" expr="#{imageProcessService}" g="26,361,163,59" method="classifyImages" name="classify-images">
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Image_Process_Classify_Images_Plugin"/>
+		</arg>
+
+		<transition to="end"/>
+	</java>
+
+
+	<end g="78,454,80,40" name="end"/>
+	
+</process>

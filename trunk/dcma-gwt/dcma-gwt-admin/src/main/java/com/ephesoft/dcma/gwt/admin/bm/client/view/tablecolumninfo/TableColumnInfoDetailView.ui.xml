@@ -1,0 +1,67 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:VerticalPanel width="100%">
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="betweenLeftLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="betweenLeft" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="betweenRightLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="betweenRight" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="columnNameLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="columnName" />
+			</g:cell>
+		</g:HorizontalPanel>
+		
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="columnPatternLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="columnPattern" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="isRequiredLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:CheckBox ui:field="isRequired" />
+			</g:cell>
+
+		</g:HorizontalPanel>
+
+	</g:VerticalPanel>
+</ui:UiBinder>   

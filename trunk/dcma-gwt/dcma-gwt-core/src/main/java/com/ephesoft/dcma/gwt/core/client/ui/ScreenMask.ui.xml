@@ -1,0 +1,35 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+  <ui:image field='logo' src='scrollTableLoading.gif'/>
+
+  <ui:style>
+  .panel {
+    padding: 10px;
+ 	}
+
+  .aboutText {
+    text-align: left;
+  }
+
+  @sprite .logo {
+    gwt-image: 'logo';
+    float: left;
+    padding-right: 1em;
+  }
+
+  .buttons {
+    text-align: right;
+  }
+  </ui:style>
+
+  <g:HTMLPanel width='28em' styleName='{style.panel}'>
+    <div class='{style.logo}'/>
+
+    <div class='{style.aboutText}'>
+    <g:Label ui:field="message"></g:Label>
+    </div>
+
+    
+  </g:HTMLPanel>
+</ui:UiBinder>

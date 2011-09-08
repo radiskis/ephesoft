@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+            			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+           				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         					"
+	default-autowire="byName">
+
+	<context:annotation-config />
+	
+	<context:spring-configured/>
+
+	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
+
+	<context:component-scan base-package="com.ephesoft.dcma.workflow.spring">
+		<context:exclude-filter expression=".*_Roo_.*"
+			type="regex" />
+		<context:exclude-filter expression="org.springframework.stereotype.Controller"
+			type="annotation" />
+	</context:component-scan>
+	
+	<bean class="com.ephesoft.dcma.core.hibernate.MappingFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>classpath:jbpm.execution.hbm.xml</value>
+				<value>classpath:jbpm.repository.hbm.xml</value>
+				<value>classpath:jbpm.task.hbm.xml</value>
+				<value>classpath:jbpm.history.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+	<util:list id="workflowsDefinitionList" value-type="java.lang.String" list-class="java.util.ArrayList">
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Automated_Regex_Validation_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CleanUp_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CMIS_Export_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Copy_Batch_XML_Files_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Document_Assembler_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Docushare_Export_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/FuzzyDB_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/HTML_To_XML_Generation_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Image_Process_Classify_Images_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Image_Process_Create_Display_Image_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Image_Process_Create_OCR_Input_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Image_Process_Create_Thumbnails_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Image_Process_CreateMultiPage_Files_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Import_Batch_Folder_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Import_MultiPage_Files_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Regular_Regex_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Regex_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/OCROPS_Generate_HOCR_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/KV_Page_Processing_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Review_Document_Plugin.jpdl.xml</value>		
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Search_Classification_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Table_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Tesseract_HOCR_Generation_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Validate_Document_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Zxing_Extract_BarCode_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Filebound_Export_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Scripting_Plugin.jpdl.xml</value>
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/BarCode_Extraction_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/NSI_Export_Plugin.jpdl.xml</value>
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Automated_Validation_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Document_Assembler_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Export_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Folder_Import_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Page_Process_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Review_Document_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Tesseract_Extraction_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Tesseract_Page_Process_Module.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Validate_Document_Module.jpdl.xml</value>
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/other-workflows/Workflow_Status_Finished.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/other-workflows/Workflow_Status_Running.jpdl.xml</value>
+		
+		<value>/META-INF/dcma-workflows/batch-workflows/TesseractMailRoom.jpdl.xml</value>
+	</util:list>
+</beans>

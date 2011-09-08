@@ -1,0 +1,147 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:document-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size="43">
+			<g:CaptionPanel ui:field="documentConfigurationCaptionPanel"
+				height="90%" width="97%">
+				<g:ScrollPanel height="100%" width="100%">
+					<g:VerticalPanel height="100%" width="100%">
+						<g:VerticalPanel ui:field="documentTypeVerticalPanel"
+							height="100%" width="100%">
+							<document-type:DocumentTypeDetailView
+								ui:field="documentTypeDetailView" width='100%' height="100%" />
+							<g:HorizontalPanel width="100%">
+								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editDocumentPropertiesButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+						<g:VerticalPanel ui:field="documentTypeConfigVerticalPanel"
+							height="100%" visible="false" width="100%">
+							<document-type:EditDocumentTypeView
+								ui:field="editDocumentTypeView" width='100%' />
+						</g:VerticalPanel>
+					</g:VerticalPanel>
+				</g:ScrollPanel>
+			</g:CaptionPanel>
+		</g:north>
+		<g:center>
+			<g:TabLayoutPanel barHeight="16" barUnit="PCT">
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Field Type Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="fieldTypeCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%" ui:field="fieldButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteFieldButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="fieldTypeListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Page Type Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="pageTypeCompletePanel"
+						width="98%">
+						<g:center>
+							<g:LayoutPanel ui:field="pageTypeListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Table Info Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="tableInfoCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%" ui:field="tableInfoButtonPanel">
+								<g:cell width="65%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="testTableButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell width="32%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addTableInfoFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editTableInfoFieldButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteTableInfoFieldButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="tableInfoListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Function Key Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="functionKeyCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%"
+								ui:field="functionKeyButtonPanel">
+								<g:cell width="66%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell width="32%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addFunctionKeyButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editFunctionKeyButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteFunctionKeyButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="functionKeyListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+			</g:TabLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

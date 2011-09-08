@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='core'>
+	<inherits name='com.google.gwt.user.User' />
+	<source path='client' />
+	<source path='shared' />
+	<inherits name="com.googlecode.gwt.math.Math" />
+	<inherits name="com.ephesoft.dcma.batch.Batch" />
+	<inherits name="com.ephesoft.dcma.core.Common" />
+	<inherits name="com.ephesoft.dcma.da.Property" />
+	<inherits name="com.google.gwt.i18n.I18N" />
+
+	<inherits name='com.google.gwt.user.theme.standard.Standard' />
+	<stylesheet src='css/style.css' />
+
+
+
+</module>

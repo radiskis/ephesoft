@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:core='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
+
+	<g:HorizontalPanel>
+		<g:cell width="48%">
+			<g:Label></g:Label>
+		</g:cell>
+		<g:cell>
+			<g:Anchor ui:field="link"></g:Anchor>
+		</g:cell>
+	</g:HorizontalPanel>
+
+</ui:UiBinder>

@@ -1,0 +1,333 @@
+.top_Panel {
+	background: #e7e9e9 none repeat scroll 0 0 !important;
+	border: 1px solid #6FA6C4 !important;;
+}
+
+.image_overlay_panel {
+	border: 1px solid #6FA6C4;
+	height: 100%;
+}
+
+.bold_text {
+	font-weight: bold;
+}
+
+.back_button {
+	background: transparent url(images/back.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 75px;
+	padding: 0 5px 20px 15px;
+	text-decoration: none;
+	width: 60px;
+}
+
+.next_button {
+	background: transparent url(images/next.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 20px 15px;
+	text-decoration: none;
+	width: 60px;
+}
+
+.next_button_disabled {
+	background: transparent url(images/next_disabled.png) no-repeat scroll
+		left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 20px 15px;
+	text-decoration: none;
+	width: 60px;
+}
+
+.info_button {
+	background: transparent url(images/info.jpg) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 20px 15px;
+	text-decoration: none;
+	width: 25px;
+}
+
+.review_validate_panel {
+	border-left: 1px solid #6FA6C4;
+	border-top: 1px solid #6FA6C4;
+	width: 100%;
+	height: 100%;
+	padding-top: 20px;
+}
+
+.doc_tree {
+	border-left: 1px solid #6FA6C4;
+	border-top: 1px solid #6FA6C4;
+	height: 99% %;
+	padding-top: 20px;
+}
+
+.split_button {
+	background: transparent url(images/split.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.split_button {
+	background: transparent url(images/split.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.delete_button {
+	background: transparent url(images/delete.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.duplicate_button {
+	background: transparent url(images/duplicate.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.move_page_button {
+	background: transparent url(images/move.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.zoom_in {
+	background: transparent url(images/zoom-in.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.zoom_out {
+	background: transparent url(images/zoom-out.png) no-repeat scroll left 0
+		;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.rotate_button {
+	background: transparent url(images/rotate.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.fit_to_page {
+	background: transparent url(images/fittopage.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.no_error_icon {
+	background: transparent url(images/icon_cirTic.gif) no-repeat scroll
+		left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 19px 15px;
+	text-decoration: none;
+}
+
+.error_icon {
+	background: transparent url(images/icon_cirHelp.gif) no-repeat scroll
+		left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 19px 15px;
+	text-decoration: none;
+}
+
+.logoImage {
+	background: transparent url(images/logo.gif) no-repeat scroll 0 0;
+	height: 40px;
+	width: 185px;
+}
+
+.header_panel {
+	background-color: white;
+	padding-top: 5px;
+}
+
+.square {
+	border: 1px solid #FF0000;
+	background-color: yellow;
+	opacity: 0.4;
+	position: absolute;
+}
+
+.squareRow {
+	border: 1px solid #92C1F0;
+	background-color: #98AFC7;
+	opacity: 0.4;
+	position: absolute;
+}
+
+.thumbnailHighlighted {
+	border: 2px solid #31123F !important;
+}
+
+.thumbnailDefault {
+	border: 2px solid #9172EC;
+}
+
+.thumbnail {
+	border: 2px solid #9172EC;
+	cursor: pointer;
+	}
+
+.signOutPanel {
+	padding-top: 4px;
+}
+
+.body_panel {
+	background-color: white;
+}
+
+.button_image_overlay {
+	background: transparent url(images/move_bg.gif) repeat-x scroll 0 0;
+	border: 1px solid #B3B3B3;
+	height: 50px;
+	margin-bottom: 5px;
+	width: 100%;
+}
+
+a,a:visited,a:hover {
+	color: #0000AA;
+	padding-right: 8px !important;
+}
+
+a {
+	color: #0284d0;
+	text-decoration: underline
+}
+
+a:hover {
+	color: #0284d0;
+	text-decoration: none
+}
+
+.highlight_documentTitle {
+	background-color: #E6E6E6 !important;
+}
+
+.document-style {
+	background-color: #eff7f7 !important;
+	border-bottom: 1px solid #d6e7ef;
+	border-top: 1px solid #d6e7ef;
+}
+
+.gwt-Tree .gwt-TreeItem-selected {
+	background: none !important;
+}
+
+.pipe {
+	background: transparent url(images/loginPage_left.png) no-repeat scroll
+		0 0;
+	height: 100%;
+	width: 100%;
+	color: #D0E4F6;
+}
+
+.reviewPanel-style {
+	background-color: #E6E6E6 !important;
+	border: 10px solid #E6E6E6 !important;
+}
+
+.validatePanel-style {
+	background-color: #E6E6E6 !important;
+	border: 10px solid #E6E6E6;
+}
+
+.seperator {
+	color: #FFFFFF;
+	background-color: #FFFFFF;
+}
+
+.fuzzy-seperator { /*background-color: #E6E6E6 !important;*/
+	color: #E6E6E6;
+	height: 10px;
+}
+
+.review-style {
+	background-color: #eff7f7 !important;
+	border-bottom: 1px solid #d6e7ef;
+	border-top: 1px solid #d6e7ef;
+	padding-left: 5px;
+}
+
+.validatePanelListBox {
+	border: 1px solid #92C1F0 !important;
+	width: 150px;
+	height: 20px;
+}
+
+.tableViewButton {
+	background: transparent url(images/tableView.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	text-decoration: none;
+	width: 20px;
+	height: 20px;
+}
+.row_selection_style {
+	background-color: transparent; color:#347C2C; font-weight: bold;
+}
+
+.dropdownBox {
+	width : 150px;	
+}
+.cursor_style{
+	cursor: pointer;
+	}

@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:rv='urn:import:com.ephesoft.dcma.gwt.rv.client.view'>
+
+	<g:ScrollPanel ui:field="scrollPanel">
+		<g:FocusPanel width='98%' height='99%'>
+			<g:Tree ui:field="docTree" />
+		</g:FocusPanel>
+	</g:ScrollPanel>
+</ui:UiBinder>

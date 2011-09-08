@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="KV_Page_Processing_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="57,16,80,40">
+		<transition to="generate-regex-page-level-field"/>
+	</start>
+
+	<java continue="async" expr="#{regexPPService}" g="16,88,185,59" method="regexPPReader" name="generate-regex-page-level-field">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="KV_Page_Processing_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="57,179,80,40" name="end"/>
+</process>

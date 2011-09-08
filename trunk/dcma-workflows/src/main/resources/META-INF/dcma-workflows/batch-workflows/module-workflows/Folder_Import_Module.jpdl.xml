@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Folder_Import_Module" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="104,18,80,40">
+		<transition to="Import_MultiPage_Files_Plugin"/>
+	</start>
+
+	<sub-process continue="async" g="25,90,211,59" name="Import_MultiPage_Files_Plugin" sub-process-key="Import_MultiPage_Files_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Import_Batch_Folder_Plugin"/>
+	</sub-process>	
+	
+	<sub-process continue="async" g="36,187,211,59" name="Import_Batch_Folder_Plugin" sub-process-key="Import_Batch_Folder_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="end"/>
+	</sub-process>	
+
+	<end g="106,292,80,40" name="end"/>
+</process>

@@ -1,0 +1,31 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:batch-class='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.plugin'>
+
+	<g:VerticalPanel width="100%">
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="docName"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="docNameLabel" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="mappedTo"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="tableName" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+	</g:VerticalPanel>
+</ui:UiBinder>

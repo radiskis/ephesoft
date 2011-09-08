@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+            			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         					"
+	default-autowire="byName">
+
+	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
+	<import resource="classpath:/META-INF/applicationContext-batch.xml" />
+
+	<bean id="imageProcessService"
+		class="com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl" />
+
+	<bean id="imageClassifier"
+		class="com.ephesoft.dcma.imagemagick.imageClassifier.ImageClassifier" />
+
+	<bean id="imageComparisonUtil"
+		class="com.ephesoft.dcma.imagemagick.imageClassifier.ImageComparisonUtil" />
+
+	<bean id="sampleThumbnailGenerator"
+		class="com.ephesoft.dcma.imagemagick.imageClassifier.SampleThumbnailGenerator" />
+
+	<bean id="thumbnailPNGCreator" class="com.ephesoft.dcma.imagemagick.ThumbnailPNGCreator" />
+
+	<bean id="multiPageToSinglePageConverter" class="com.ephesoft.dcma.imagemagick.MultiPageToSinglePageConverter" />
+
+	<bean id="imageRotator" class=" com.ephesoft.dcma.imagemagick.ImageRotator" />
+
+	<bean id="imagemagickConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="placeholderPrefix" value="$imagemagick{" />
+		<property name="placeholderSuffix" value="}" />
+		<property name="locations">
+			<value>classpath:/META-INF/dcma-imagemagick/imagemagick.properties</value>
+		</property>
+	</bean>
+
+	<bean id="multipageTiffPdfCreator" class="com.ephesoft.dcma.imagemagick.MultiPageTiffPdfCreator"
+		p:tiffCmds="$imagemagick{imagemagick.multi_tiff_commands}" p:pdfCmds="$imagemagick{imagemagick.multi_pdf_commands}"
+		p:unixTiffCmds="$imagemagick{imagemagick.unix_multi_tiff_commands}" p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
+		p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"
+		p:pdfCompression="$imagemagick{imagemagick.pdf_compression}"
+		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}">
+	</bean>
+
+	<context:component-scan base-package="com.ephesoft.dcma.imagemagick" />
+
+</beans>

@@ -1,0 +1,24 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<g:DockLayoutPanel ui:field="kvConfigPanel" unit="PCT">
+		<g:north size="20">
+			<g:HorizontalPanel width="99%" ui:field="kvButtonPanel">
+				<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="addKVPPConfigButton"></g:Button>
+				</g:cell>
+				<g:cell width="1%">
+					<g:Label></g:Label>
+				</g:cell>
+				<g:cell horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="editKVPPConfigButton"></g:Button>
+				</g:cell>
+				<g:cell width="1%">
+					<g:Label></g:Label>
+				</g:cell>
+				<g:cell horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="deleteKVPPConfigButton"></g:Button>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:north>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

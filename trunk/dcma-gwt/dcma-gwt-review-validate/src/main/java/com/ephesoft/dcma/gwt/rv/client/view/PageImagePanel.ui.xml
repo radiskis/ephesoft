@@ -1,0 +1,32 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c='urn:import:com.ephesoft.dcma.gwt.core.client.ui'>
+
+	<g:DockLayoutPanel unit="PCT">
+		<g:north size="50">
+			<g:VerticalPanel></g:VerticalPanel>
+		</g:north>
+		<g:center>
+			<g:HorizontalPanel ui:field="imagesPanel" horizontalAlignment="ALIGN_LEFT" width="100%">
+				<g:cell verticalAlignment="ALIGN_MIDDLE">
+					<c:RotatableImage ui:field="previousPageImageButton" />
+				</g:cell>
+				<g:cell verticalAlignment="ALIGN_MIDDLE">
+					<c:RotatableImage ui:field="previousPageImage" />
+				</g:cell>
+				<g:cell verticalAlignment="ALIGN_MIDDLE">
+					<c:RotatableImage ui:field="currPageImage" />
+				</g:cell>
+				<g:cell verticalAlignment="ALIGN_MIDDLE">
+					<c:RotatableImage ui:field="nextPageImage" />
+				</g:cell>
+				<g:cell verticalAlignment="ALIGN_MIDDLE">
+					<c:RotatableImage ui:field="nextPageImageButton" />
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:center>
+		<g:south size="10">
+			<g:VerticalPanel></g:VerticalPanel>
+		</g:south>
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

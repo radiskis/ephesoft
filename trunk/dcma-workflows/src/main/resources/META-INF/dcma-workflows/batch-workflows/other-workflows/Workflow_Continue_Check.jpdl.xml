@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Workflow_Continue_Check" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="95,16,80,40">
+		<transition to="next-module-execution"/>
+	</start>
+
+	<java continue="async" expr="#{nextModuleExecution}" g="18,88,163,59" method="execute" name="next-module-execution"> 
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="90,270,80,40" name="end"/>
+	
+</process>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Workflow_Status_Running" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="154,20,55,42">
+      <transition to="set-status-to-running"/>
+	</start>
+	
+	<java expr="#{batchInstanceService}" g="72,112,207,60" method="updateBatchInstanceStatus" name="set-status-to-running">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<batch-instance-status value="RUNNING"/>
+		</arg>
+      <transition g="-23,-18" name="end" to="end"/>
+	</java>
+
+	<end g="151,216,80,40" name="end"/>
+	
+</process>

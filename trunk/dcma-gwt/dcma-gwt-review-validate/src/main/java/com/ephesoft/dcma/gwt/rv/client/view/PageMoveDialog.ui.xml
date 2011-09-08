@@ -1,0 +1,33 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:mail='urn:import:com.ephesoft.dcma.gwt.rv.client.view'>
+
+  <ui:image field='logo' src='gwt-logo.png'/>
+
+  <ui:style>
+  .panel {
+    padding: 10px;
+ 	}
+
+  .aboutText {
+    text-align: left;
+  }
+
+  @sprite .logo {
+    gwt-image: 'logo';
+    float: left;
+    padding-right: 1em;
+  }
+
+  .buttons {
+    text-align: right;
+  }
+  </ui:style>
+
+  <g:HTMLPanel width='24em' styleName='{style.panel}'>
+    <div class='{style.logo}'/>
+    <div>
+    <g:VerticalPanel ui:field="vPanel"></g:VerticalPanel>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

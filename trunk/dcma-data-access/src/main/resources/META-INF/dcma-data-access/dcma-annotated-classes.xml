@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	default-autowire="byName" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  ">
+
+	<bean class="com.ephesoft.dcma.core.hibernate.EntityFactoryBean">
+		<property name="sourceList">
+			<list>
+				<value>com.ephesoft.dcma.da.domain.BatchClass</value>
+				<value>com.ephesoft.dcma.da.domain.BatchInstance</value>
+				<value>com.ephesoft.dcma.da.domain.DocumentType</value>
+				<value>com.ephesoft.dcma.da.domain.FieldType</value>
+				<value>com.ephesoft.dcma.da.domain.Module</value>
+				<value>com.ephesoft.dcma.da.domain.Plugin</value>
+				<value>com.ephesoft.dcma.da.domain.ModulePlugin</value>
+				<value>com.ephesoft.dcma.da.domain.PageType</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassModule</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassPlugin</value>
+				<value>com.ephesoft.dcma.da.domain.PluginConfig</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassPluginConfig</value>
+				<value>com.ephesoft.dcma.da.domain.PluginConfigSampleValue</value>
+				<value>com.ephesoft.dcma.da.domain.KVExtraction</value>
+				<value>com.ephesoft.dcma.da.domain.RegexValidation</value>
+				<value>com.ephesoft.dcma.da.domain.ServerRegistry</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration</value>
+				<value>com.ephesoft.dcma.da.domain.TableInfo</value>
+				<value>com.ephesoft.dcma.da.domain.TableColumnsInfo</value>
+				<value>com.ephesoft.dcma.da.domain.KVPageProcess</value>
+				<value>com.ephesoft.dcma.da.domain.Role</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassGroups</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassField</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig</value>
+				<value>com.ephesoft.dcma.da.domain.FunctionKey</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassModuleConfig</value>			
+				<value>com.ephesoft.dcma.da.domain.RemoteBatchInstance</value>
+				<value>com.ephesoft.dcma.da.domain.ModuleConfig</value>
+			</list>
+		</property>
+	</bean>
+</beans>

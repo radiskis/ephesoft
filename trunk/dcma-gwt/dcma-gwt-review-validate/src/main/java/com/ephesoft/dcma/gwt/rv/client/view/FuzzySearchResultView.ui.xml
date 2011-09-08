@@ -1,0 +1,5 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:core='com.ephesoft.dcma.gwt.core.client.validator'
+	xmlns:v="urn:import:com.ephesoft.dcma.gwt.core.client.validator">
+	<g:FlowPanel ui:field="fuzzySearchListPanel" width="100%"/>
+</ui:UiBinder>

@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="com.ephesoft.dcma.performance.reporting.domain.ReportData"
+		table="report_data" schema="reports">
+		<id name="id" column="id" type="long">
+			<generator class="increment"></generator>
+		</id>
+
+		<property column="PROCESS_ID" name="processId" type="java.lang.String" />
+		<property column="DBID_" name="dbId" type="java.math.BigInteger" />
+		<property column="WORKFLOW_ID" name="workflowId" type="java.lang.String" />
+		<property column="PROCESS_KEY" name="processKey" type="java.lang.String" />
+		<property column="START_TIME" name="startTime" type="java.util.Date" />
+		<property column="END_TIME" name="endTime" type="java.util.Date" />
+		<property column="DURATION" name="duration" type="java.math.BigInteger" />		
+		<property column="BATCH_INSTANCE_ID" name="batchInstanceId" type="java.lang.String" />
+		
+		<property column="TOTAL_NUMBER_PAGES" name="totalNumberPages"
+			type="java.math.BigInteger" />
+		<property column="TOTAL_NUMBER_DOCUMENTS" name="totalNumberDocuments"
+			type="java.math.BigInteger" />
+		<property column="USER_NAME" name="userName" type="java.lang.String" />
+		<property column="WORKFLOW_NAME" name="workflowName" type="java.lang.String" />
+		
+		<property  column="WORKFLOW_TYPE" name="workflowType" length="30">
+			<type name="org.hibernate.type.EnumType">
+				<param name="enumClass">com.ephesoft.dcma.core.common.WorkflowType</param>
+				<param name="type">12</param> 
+			</type>
+		</property> 
+		
+	</class>
+
+	<sql-query name="getSystemStatistics">
+	
+		<return-scalar column="batch" type="integer" />
+		<return-scalar column="docs" type="integer" />
+		<return-scalar column="pages" type="integer" />
+
+		SELECT 
+		   COUNT(report.PROCESS_KEY) as batch,
+		   IFNULL(SUM(report.TOTAL_NUMBER_DOCUMENTS),0) as docs,
+		   IFNULL(SUM(report.TOTAL_NUMBER_PAGES),0) as pages
+		FROM
+			report_data report
+		WHERE 
+			report.PROCESS_KEY Is not null
+		AND	
+			report.END_TIME &lt;= :end_time 
+		AND
+			report.START_TIME &gt;= :start_time
+				
+	</sql-query>
+
+	<sql-query name="getReportByWorkflow">
+		<!-- Get the report for Modules , Plugins -->
+		<return-scalar column="entityName" type="string" />
+		<return-scalar column="batch" type="double" />
+		<return-scalar column="docs" type="double" />
+		<return-scalar column="pages" type="double" />
+		
+		SELECT 
+			report.WORKFLOW_NAME as entityName,			 
+		    (Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+		FROM
+			report_data report
+		WHERE 
+			report.WORKFLOW_TYPE = :workflow_type
+		AND
+			report.BATCH_CLASS_ID IN (:batch_class_id_list)
+		AND
+			report.END_TIME &lt;= :end_time 
+		AND
+			report.START_TIME &gt;= :start_time	
+		GROUP BY 
+			report.WORKFLOW_NAME
+		ORDER BY
+			:order_property :order
+		LIMIT 
+			:start_index , :range
+		
+	</sql-query>
+	
+	<sql-query name="getReportByUserName">
+	
+		<return-scalar column="entityName" type="string" />
+		<return-scalar column="batch" type="double" />
+		<return-scalar column="docs" type="double" />
+		<return-scalar column="pages" type="double" />
+		
+		SELECT 
+			report.WORKFLOW_NAME as entityName,
+			(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+		FROM
+			report_data report
+		WHERE 
+			report.USER_NAME in (:user_name)
+		AND
+			report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+		AND
+			report.END_TIME &lt;= :end_time 
+		AND
+			report.START_TIME &gt;= :start_time	
+		GROUP BY 
+			report.WORKFLOW_NAME
+		ORDER BY
+			:order_property :order
+		LIMIT 
+			:start_index , :range
+		
+	</sql-query>
+
+	<sql-query name="getReportForAllUsers">
+	
+		<return-scalar column="entityName" type="string" />
+		<return-scalar column="batch" type="double" />
+		<return-scalar column="docs" type="double" />
+		<return-scalar column="pages" type="double" />
+		
+		SELECT 
+			report.WORKFLOW_NAME as entityName,
+			(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+		FROM
+			report_data report
+		WHERE
+			report.USER_NAME Is not Null
+		AND
+			report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+		AND
+			report.END_TIME &lt;= :end_time 
+		AND
+			report.START_TIME &gt;= :start_time	
+		GROUP BY 
+			report.WORKFLOW_NAME
+		ORDER BY
+			:order_property :order
+		LIMIT 
+			:start_index , :range
+		
+	</sql-query>
+	
+	<sql-query name="getTotalRowCountByWorkflow">
+	
+		<return-scalar column="totalRowCount" type="integer" />
+		
+		SELECT COUNT(*) as totalRowCount FROM (
+			SELECT 
+				report.WORKFLOW_NAME as entityName,
+			    (Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			FROM
+				report_data report
+			WHERE 
+				report.WORKFLOW_TYPE = :workflow_type
+			AND
+				report.END_TIME &lt;= :end_time 
+			AND
+				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+			AND
+				report.START_TIME &gt;= :start_time	
+			GROUP BY 
+				report.WORKFLOW_NAME
+		) reports		
+	</sql-query>
+	
+	<sql-query name="getTotalRowCountByUserName">
+	
+		<return-scalar column="totalRowCount" type="integer" />
+		
+		SELECT COUNT(*) as totalRowCount FROM (
+			SELECT 
+				report.WORKFLOW_NAME as entityName,
+				(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			FROM
+				report_data report
+			WHERE 
+				report.USER_NAME in (:user_name)
+			AND
+				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+			AND
+				report.END_TIME &lt;= :end_time 
+			AND
+				report.START_TIME &gt;= :start_time	
+			GROUP BY 
+				report.WORKFLOW_NAME
+		) reports		
+	</sql-query>
+
+	<sql-query name="getTotalRowCountByAllUsers">
+	
+		<return-scalar column="totalRowCount" type="integer" />
+		
+		SELECT COUNT(*) as totalRowCount FROM (
+			SELECT 
+				report.WORKFLOW_NAME as entityName,
+				(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			FROM
+				report_data report
+			WHERE
+				report.USER_NAME Is not Null
+			AND
+				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+			AND
+				report.END_TIME &lt;= :end_time 
+			AND
+				report.START_TIME &gt;= :start_time	
+			GROUP BY 
+				report.WORKFLOW_NAME
+		) reports		
+	</sql-query>
+
+</hibernate-mapping>
+
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Tesseract_Page_Process_Module" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="109,16,80,40">
+		<transition to="Image_Process_Create_OCR_Input_Plugin"/>
+	</start>
+
+	<sub-process continue="async" g="23,88,252,59" name="Image_Process_Create_OCR_Input_Plugin" sub-process-key="Image_Process_Create_OCR_Input_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Image_Process_Create_Display_Image_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="26,179,247,59" name="Image_Process_Create_Display_Image_Plugin" sub-process-key="Image_Process_Create_Display_Image_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Image_Process_Create_Thumbnails_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="28,270,243,59" name="Image_Process_Create_Thumbnails_Plugin" sub-process-key="Image_Process_Create_Thumbnails_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Image_Process_Classify_Images_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="33,361,233,59" name="Image_Process_Classify_Images_Plugin" sub-process-key="Image_Process_Classify_Images_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Tesseract_HOCR_Generation_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="16,452,267,55" name="Tesseract_HOCR_Generation_Plugin" sub-process-key="Tesseract_HOCR_Generation_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="HTML_To_XML_Generation_Plugin"/>
+	</sub-process>
+
+	<sub-process continue="async" g="27,539,244,55" name="HTML_To_XML_Generation_Plugin" sub-process-key="HTML_To_XML_Generation_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Zxing_Extract_BarCode_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="37,626,224,54" name="Zxing_Extract_BarCode_Plugin" sub-process-key="Zxing_Extract_BarCode_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Search_Classification_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="45,712,208,54" name="Search_Classification_Plugin" sub-process-key="Search_Classification_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="KV_Page_Processing_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="40,798,219,54" name="KV_Page_Processing_Plugin" sub-process-key="KV_Page_Processing_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Scripting_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="81,340,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<parameter-in subvar="backUpFileName" expr="Tesseract_Page_Process_Module_Scripting_Plugin"/>
+		<parameter-in subvar="scriptName" expr="ScriptPageProcessing"/>
+		<transition to="end"/>
+	</sub-process>
+
+	<end g="109,884,80,40" name="end"/>
+</process>

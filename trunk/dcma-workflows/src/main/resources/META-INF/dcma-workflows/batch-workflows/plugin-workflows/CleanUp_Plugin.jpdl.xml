@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="CleanUp_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="92,19,80,40">
+		<transition to="clean-up"/>
+	</start>
+
+	<java continue="async" expr="#{cleanupService}" g="31,107,163,59" method="cleanup" name="clean-up">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="CleanUp_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="88,221,80,40" name="end"/>
+</process>

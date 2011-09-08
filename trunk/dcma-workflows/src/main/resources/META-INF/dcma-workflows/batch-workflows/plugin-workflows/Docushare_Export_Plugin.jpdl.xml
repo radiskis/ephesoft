@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Docushare_Export_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="92,19,80,40">
+		<transition to="export-docushare-files"/>
+	</start>
+
+	<java continue="async" expr="#{docushareExportService}" g="27,98,177,59" method="exportDocushareFiles" name="export-docushare-files">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Docushare_Export_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="93,190,80,40" name="end"/>
+</process>

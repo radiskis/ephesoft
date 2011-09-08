@@ -1,0 +1,57 @@
+body {
+	background-color: #b3daee;
+	font-size: 13px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #424242;
+	margin: 0px;
+}
+
+a {
+	color: #0284d0;
+	text-decoration: underline
+}
+
+a:hover {
+	color: #0284d0;
+	text-decoration: none
+}
+
+input[type="text"],input[type="password"],select,textarea {
+	color: #727272;
+	font-size: 12px;
+}
+
+.tableWidth {
+	margin: 135px auto;
+}
+
+.loginBody_bg {
+	background: url(../images/loginPage_bg.png) bottom repeat-x;
+	padding: 20px 15px 15px 35px
+}
+
+.text_bold {
+	font-weight: bold;
+}
+
+.btn_blue {
+	float: left;
+	background: url(../images/btn_blueBG.gif) repeat-x;
+	height: 26px;
+	text-decoration: none;
+	cursor: pointer;
+	border: 1px solid #34a7db;
+	font-weight: bold
+}
+
+.alignRight {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	padding-right: 6px;
+	text-align: right;
+}
+
+.alignLeft {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
