@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Search_Classification_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="208,50,80,40">
+		<transition to="generate-confidence-score"/>
+	</start>
+
+	<java expr="#{searchClassService}" g="150,151,163,59" method="generateConfidenceScore" name="generate-confidence-score" continue="async">
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Search_Classification_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="208,256,80,40" name="end"/>
+</process>

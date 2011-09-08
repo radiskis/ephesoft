@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Tesseract_Extraction_Module" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="129,16,80,40">
+		<transition to="BarCode_Extraction_Plugin"/>
+	</start>
+
+	<sub-process continue="async" g="16,88,211,59" name="BarCode_Extraction_Plugin" sub-process-key="BarCode_Extraction_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Regular_Regex_Doc_Fields_Extraction_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="16,179,211,59" name="Regular_Regex_Doc_Fields_Extraction_Plugin" sub-process-key="Regular_Regex_Doc_Fields_Extraction_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Regex_Doc_Fields_Extraction_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="16,270,211,59" name="Regex_Doc_Fields_Extraction_Plugin" sub-process-key="Regex_Doc_Fields_Extraction_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="FuzzyDB_Doc_Fields_Extraction_Plugin"/>
+	</sub-process>
+	
+	<sub-process continue="async" g="19,361,205,59" name="FuzzyDB_Doc_Fields_Extraction_Plugin" sub-process-key="FuzzyDB_Doc_Fields_Extraction_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Table_Doc_Fields_Extraction_Plugin"/>
+	</sub-process>
+
+	<sub-process continue="async" g="21,452,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<parameter-in expr="Tesseract_Extraction_Module_Scripting_Plugin" subvar="backUpFileName"/>
+		<parameter-in expr="ScriptExtraction" subvar="scriptName"/>
+		<transition to="end"/>
+	</sub-process> 
+	
+	<sub-process continue="async" g="26,543,190,59" name="Table_Doc_Fields_Extraction_Plugin" sub-process-key="Table_Doc_Fields_Extraction_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Scripting_Plugin"/>
+	</sub-process>
+	
+	<end g="81,634,80,40" name="end"/>
+	
+</process>

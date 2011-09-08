@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Filebound_Export_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="74,16,80,40">
+		<transition to="filebound-export-content"/>
+	</start>
+	
+	<java continue="async" expr="#{fileBoundService}" g="16,88,163,59" method="exportContent" name="filebound-export-content">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Filebound_Export_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="75,179,80,40" name="end"/>
+</process>

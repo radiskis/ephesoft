@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="CMIS_Export_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="92,19,80,40">
+		<transition to="cmis-export-content"/>
+	</start>
+	
+	<java continue="async" expr="#{cmisExportService}" g="34,102,163,59" method="exportContent" name="cmis-export-content">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="CMIS_Export_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="88,211,80,40" name="end"/>
+</process>

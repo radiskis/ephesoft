@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>com.ephesoft.dcma</groupId>
+    <artifactId>dcma-parent</artifactId>
+    <version>0.0.12-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
+  </parent>
+  <artifactId>dcma-lucene</artifactId>
+  <name>DCMA: Lucene Model</name>
+  <description>The DCMA Lucene model.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-data-access</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-batch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-test</artifactId>
+	    </dependency>
+	    <dependency>
+		    <groupId>org.apache.lucene</groupId>
+		    <artifactId>lucene-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queries</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+  </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>add-lucene-demo-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${basedir}/src-3rd-party/main/java</source>
+								<targetPath>target/classes</targetPath>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>learn-files</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.1.1</version>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>com.ephesoft.dcma.lucene.LearnFiles</mainClass>
+									<arguments>
+										<argument>none</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

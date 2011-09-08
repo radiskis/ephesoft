@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:complexType name="coordinates">
+		<xs:sequence>
+			<xs:element name="x0" type="xs:integer" />
+			<xs:element name="y0" type="xs:integer" />
+			<xs:element name="x1" type="xs:integer" />
+			<xs:element name="y1" type="xs:integer" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

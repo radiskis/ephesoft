@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb"
+                xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+                xsi:schemaLocation="
+http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd
+http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd"
+    version="2.1">
+    <bindings schemaLocation="Common.xsd">
+        <schemaBindings>
+            <package name="com.ephesoft.dcma.batch.schema" />
+        </schemaBindings>
+        <globalBindings>
+            <serializable uid="100" />
+        </globalBindings>
+    </bindings>
+</bindings>

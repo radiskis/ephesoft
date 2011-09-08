@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Import_Batch_Folder_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="78,18,80,40">
+		<transition to="import-batch-folder"/>
+	</start>
+
+	<java continue="async" expr="#{importService}" g="20,89,163,59" method="importBatchFolder" name="import-batch-folder">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Import_Batch_Folder_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="76,178,80,40" name="end"/>
+</process>

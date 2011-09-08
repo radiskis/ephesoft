@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:include schemaLocation="Common.xsd" />
+
+	<xs:simpleType name="batchStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Locked" />
+			<xs:enumeration value="Ready" />
+			<xs:enumeration value="Running" />
+			<xs:enumeration value="ReadyForReview" />
+			<xs:enumeration value="Reviewed" />
+			<xs:enumeration value="ReadyForValidation" />
+			<xs:enumeration value="Validated" />
+			<xs:enumeration value="Transferred" />
+			<xs:enumeration value="Error" />
+			<xs:enumeration value="Finished" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="confidence">
+		<xs:restriction base="xs:float">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="direction">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="EAST" />
+			<xs:enumeration value="SOUTH" />
+			<xs:enumeration value="WEST" />
+			<xs:enumeration value="NORTH" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="field">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="Value" type="xs:string" />
+			<xs:element name="Type" type="xs:string" />
+			<xs:element name="Confidence" type="confidence" />
+			<xs:element name="CoordinatesList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Coordinates"
+							type="coordinates" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Page" type="xs:string" />
+			<xs:element name="OverlayedImageFileName" type="xs:string" />
+			<xs:element name="FieldOrderNumber" type="xs:int" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="docField">
+		<xs:complexContent>
+			<xs:extension base="field">
+				<xs:sequence>
+					<xs:element name="AlternateValues">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element minOccurs="0" maxOccurs="unbounded" name="AlternateValue"
+									type="field" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="page">
+		<xs:sequence>
+			<xs:element name="Identifier" type="xs:string" />
+			<xs:element name="OldFileName" type="xs:string" />
+			<xs:element name="NewFileName" type="xs:string" />
+			<xs:element name="PageLevelFields">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="PageLevelField"
+							type="docField" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="HocrFileName" type="xs:string" />
+			<xs:element name="ThumbnailFileName" type="xs:string" />
+			<xs:element name="ComparisonThumbnailFileName" type="xs:string" />
+			<xs:element name="DisplayFileName" type="xs:string" />
+			<xs:element name="OCRInputFileName" type="xs:string" />
+			<xs:element name="Direction" type="direction" />
+			<xs:element name="IsRotated" type="xs:boolean" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="column">
+		<xs:complexContent>
+			<xs:extension base="field">
+				<xs:sequence>
+					<xs:element name="Valid" type="xs:boolean" />
+					<xs:element name="ValidationRequired" type="xs:boolean" />
+					<xs:element name="AlternateValues">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element minOccurs="0" maxOccurs="unbounded" name="AlternateValue"
+									type="field" />
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="headerRow">
+		<xs:sequence>
+			<xs:element name="Columns">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Column"
+							type="column" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="row">
+		<xs:sequence>
+			<xs:element name="RowCoordinates" type="coordinates" />
+			<xs:element name="MannualExtraction" type="xs:boolean" />
+			<xs:element name="Columns">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Column"
+							type="column" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="dataTable">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="HeaderRow" type="headerRow" />
+			<xs:element name="Rows">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Row"
+							type="row" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="document">
+		<xs:sequence>
+			<xs:element name="Identifier" type="xs:string" />
+			<xs:element name="Type" type="xs:string" />
+			<xs:element name="Confidence" type="confidence" />
+			<xs:element name="ConfidenceThreshold" type="confidence" />
+			<xs:element name="Valid" type="xs:boolean" />
+			<xs:element name="Reviewed" type="xs:boolean" />
+			<xs:element name="ErrorMessage" type="xs:string" />
+			<xs:element name="DocumentLevelFields">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded"
+							name="DocumentLevelField" type="docField" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Pages">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="Page"
+							type="page" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="DataTables">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" name="DataTable"
+							type="dataTable" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="MultiPageTiffFile" type="xs:string" />
+			<xs:element name="MultiPagePdfFile" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="batchLevelField">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string" />
+			<xs:element name="Value" type="xs:string" />
+			<xs:element name="Type" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Batch">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="BatchInstanceIdentifier" type="xs:string" />
+				<xs:element name="BatchClassIdentifier" type="xs:string" />
+				<xs:element name="BatchClassName" type="xs:string" />
+				<xs:element name="BatchClassDescription" type="xs:string" />
+				<xs:element name="BatchClassVersion" type="xs:string" />
+				<xs:element name="BatchName" type="xs:string" />
+				<xs:element name="BatchDescription" type="xs:string" />
+				<xs:element name="BatchPriority" type="xs:string" />
+				<xs:element name="BatchStatus" type="batchStatus" />
+				<xs:element name="BatchLocalPath" type="xs:string" />
+				<xs:element name="CurrentModule" type="xs:string" />
+				<xs:element name="DocumentClassificationTypes">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element minOccurs="0" maxOccurs="unbounded"
+								name="DocumentClassificationType" type="xs:string" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Documents">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element minOccurs="0" maxOccurs="unbounded" name="Document"
+								type="document" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="BatchLevelFields">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element minOccurs="0" maxOccurs="unbounded" name="BatchLevelField"
+								type="batchLevelField" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

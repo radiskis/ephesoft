@@ -1,0 +1,7 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:core='com.ephesoft.dcma.gwt.core.client.validator'
+	xmlns:v="urn:import:com.ephesoft.dcma.gwt.core.client.validator">
+	<g:ScrollPanel ui:field="scrollPanel">
+		<g:FlowPanel ui:field="kvExtractionListPanel" />
+	</g:ScrollPanel>
+</ui:UiBinder>

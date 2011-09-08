@@ -1,0 +1,165 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:batch-class='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.batch'
+	xmlns:module='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.module'
+	xmlns:plugin='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.plugin'
+	xmlns:doc-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype'
+	xmlns:page-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.pagetype'
+	xmlns:field-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype'
+	xmlns:kvextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction'
+	xmlns:advancedkvextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction'
+	xmlns:table-info='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo'
+	xmlns:table-column-info='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo'
+	xmlns:regex='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.regex'
+	xmlns:breadcrumb='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view'
+	xmlns:bcf='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield'
+	xmlns:email='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.email'
+	xmlns:function-key='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey'>
+
+	<g:DockLayoutPanel unit='PCT' ui:field="mainLayoutPanel">
+		<g:north size="2">
+			<g:Label></g:Label>
+		</g:north>
+		<g:west size="2">
+			<g:Label></g:Label>
+		</g:west>
+		<g:east size="2">
+			<g:Label></g:Label>
+		</g:east>
+		<g:south size="2">
+			<g:Label></g:Label>
+		</g:south>
+		<g:center>
+			<g:DockLayoutPanel unit='PCT' ui:field="mainDockPanel">
+				<g:north size="6">
+					<breadcrumb:BatchClassBreadCrumbView
+						ui:field="batchClassBreadCrumbView" />
+				</g:north>
+				<g:center>
+					<g:DockLayoutPanel unit='PCT' ui:field="mainPanel">
+						<g:north size='100'>
+							<g:LayoutPanel ui:field="tabLayoutPanel">
+								<g:layer>
+									<batch-class:BatchClassView
+										ui:field="batchClassView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<module:ModuleView ui:field="moduleView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:PluginView ui:field="pluginView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:KV_PP_PropertiesView
+										ui:field="kvPPPropertiesView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:FuzzyDBPluginView ui:field="fuzzyDBPluginView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<doc-type:DocumentTypeView ui:field="documentTypeView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<email:EmailView ui:field="emailView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<function-key:FunctionKeyView ui:field="functionKeyView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<bcf:BatchClassFieldView ui:field="batchClassFieldView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:DocTypeMappingView ui:field="docTypeMappingView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:DocTypeFieldsMappingView
+										ui:field="docTypeFieldsMappingView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<field-type:FieldTypeView ui:field="fieldTypeView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<kvextraction:KVExtractionView
+										ui:field="kvExtractionView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<advancedkvextraction:AdvancedKVExtractionView
+										ui:field="advancedKVExtractionView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<regex:RegexView ui:field="regexView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<plugin:KV_PP_AddEditListView
+										ui:field="kvPPAddEditListView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<table-info:TableInfoView ui:field="tableInfoView"
+										visible="false" />
+								</g:layer>
+								<g:layer>
+									<table-column-info:TableColumnInfoView
+										ui:field="tableColumnInfoView" visible="false" />
+								</g:layer>
+							</g:LayoutPanel>
+						</g:north>
+					</g:DockLayoutPanel>
+				</g:center>
+				<g:south size="5">
+					<g:VerticalPanel height="100%" ui:field="bottomPanel">
+						<g:HorizontalPanel height="5px" width="100%">
+						</g:HorizontalPanel>
+						<g:HorizontalPanel width="100%" ui:field="bottomButtons">
+							<g:cell>
+								<g:Button ui:field="submit"></g:Button>
+							</g:cell>
+							<g:cell width="1%">
+								<g:Label></g:Label>
+							</g:cell>
+							<g:cell>
+								<g:Button ui:field="apply"></g:Button>
+							</g:cell>
+							<g:cell width="1%">
+								<g:Label></g:Label>
+							</g:cell>
+
+							<g:cell width="40%" horizontalAlignment="ALIGN_LEFT">
+								<g:Button ui:field="cancel"></g:Button>
+							</g:cell>
+
+							<g:cell width="57%" horizontalAlignment="ALIGN_RIGHT">
+								<g:HorizontalPanel ui:field="rightButtons">
+									<g:cell horizontalAlignment="ALIGN_RIGHT">
+										<g:Button ui:field="sample"></g:Button>
+									</g:cell>
+									<g:cell width="3%">
+										<g:Label></g:Label>
+									</g:cell>
+									<g:cell horizontalAlignment="ALIGN_RIGHT">
+										<g:Button ui:field="learn"></g:Button>
+									</g:cell>
+									<g:cell width="3%">
+										<g:Label></g:Label>
+									</g:cell>
+									<g:cell horizontalAlignment="ALIGN_RIGHT">
+										<g:Button ui:field="learnDB"></g:Button>
+									</g:cell>
+								</g:HorizontalPanel>
+							</g:cell>
+							<g:cell width="2%" horizontalAlignment="ALIGN_LEFT">
+								<g:Label></g:Label>
+							</g:cell>
+						</g:HorizontalPanel>
+					</g:VerticalPanel>
+				</g:south>
+			</g:DockLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

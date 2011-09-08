@@ -1,0 +1,96 @@
+.users {
+	padding: 4px;
+}
+
+.userList {
+	width: 800px;
+	border: 1px solid black;
+}
+
+.userList .header {
+	background-color: #2062B8;
+	color: white;
+	font-style: italic;
+}
+
+.userList .selected {
+	background: silver;
+}
+
+body {
+	background-color: #b3daee;
+	font-size: 13px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #424242;
+	margin: 0px;
+}
+
+a {
+	color: #0284d0;
+	text-decoration: underline
+}
+
+a:hover {
+	color: #0284d0;
+	text-decoration: none
+}
+
+input[type="text"],input[type="password"],select,textarea {
+	color: #727272;
+	font-size: 12px;
+}
+
+.tableWidth {
+	margin: 135px auto;
+}
+
+.loginBody_bg {
+	background: url(../images/loginPage_bg.png) bottom repeat-x;
+	padding: 20px 15px 15px 35px
+}
+
+.btn_blue {
+	float: left;
+	background: url(../images/btn_blueBG.gif) repeat-x;
+	padding: 2px 10px 0px 10px;
+	height: 20px;
+	text-decoration: none;
+	cursor: pointer;
+	border: 1px solid #34a7db;
+	font-weight: bold
+}
+
+.logout {
+	padding: 7px 10px 6px 10px;
+	border-left: 1px solid #3082ae;
+}
+
+.logout a {
+	text-decoration: none;
+	color: #252525
+}
+
+.logout a:hover {
+	text-decoration: underline;
+	color: #252525
+}
+
+.logoImage {
+	background: transparent url(images/logo.gif) no-repeat scroll 0 0;
+	height: 40px;
+	width: 185px;
+}
+
+
+.signOutPanel {
+	padding-top: 4px;
+}
+
+a,a:visited,a:hover {
+	color: #0000AA;
+	padding-right: 8px !important;
+}
+
+.gwt-TabLayoutPanelContent {
+	border: 2px solid #92C1F0 !important;
+	}

@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size="100">
+			<g:LayoutPanel ui:field="layoutPanel" />
+		</g:north>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

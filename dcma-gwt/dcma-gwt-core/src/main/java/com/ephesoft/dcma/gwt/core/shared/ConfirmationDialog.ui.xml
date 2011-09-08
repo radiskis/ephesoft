@@ -1,0 +1,32 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:mail='urn:import:com.ephesoft.dcma.gwt.core.shared'>
+
+  <ui:style>
+  .panel {
+    padding: 10px;
+ 	}
+
+  .aboutText {
+  	text-align: left;
+  }
+
+  .buttons {
+    text-align: right;
+  }
+  .defaultSpace {
+  	height: 5px;	
+  }
+  </ui:style>
+
+  <g:HTMLPanel width='28em' styleName='{style.panel}' ui:field="panel">
+    <div id="textPanel" class='{style.aboutText}'>
+    <g:HTML width="100%" ui:field="centerWidget"></g:HTML>
+    </div>
+	<div class='{style.defaultSpace}' />
+    <div class='{style.buttons}'>
+      <g:Button ui:field='okButton'/>
+      <g:Button ui:field='cancelButton'/>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

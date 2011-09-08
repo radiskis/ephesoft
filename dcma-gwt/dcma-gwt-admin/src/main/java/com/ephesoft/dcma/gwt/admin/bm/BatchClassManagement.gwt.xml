@@ -1,0 +1,10 @@
+<module rename-to="bm">
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
+	<inherits name='com.ephesoft.dcma.gwt.admin.Admin' />
+	<set-configuration-property name="CssResource.obfuscationPrefix"
+		value="M" />
+
+	<entry-point
+		class='com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagement' />
+</module>

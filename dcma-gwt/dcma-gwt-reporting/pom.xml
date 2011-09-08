@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>com.ephesoft.dcma</groupId>
+		<artifactId>dcma-gwt</artifactId>
+		<version>0.0.12-SNAPSHOT</version>
+	</parent>
+	<artifactId>dcma-gwt-reporting</artifactId>
+	<name>DCMA: Reporting Module</name>
+	<description>The DCMA Reporting Module.</description>
+	
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-gwt-core</artifactId>
+		</dependency>
+    </dependencies>
+</project>

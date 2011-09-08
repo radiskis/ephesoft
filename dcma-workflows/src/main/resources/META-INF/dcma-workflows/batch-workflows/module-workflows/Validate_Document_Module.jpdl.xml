@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Validate_Document_Module" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="114,-4,80,40">
+		<transition to="Validate_Document_Plugin"/>
+	</start>
+
+	<sub-process continue="async" g="25,90,252,59" name="Validate_Document_Plugin" sub-process-key="Validate_Document_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="end"/>
+	</sub-process>	
+	<end g="133,184,80,40" name="end"/>
+</process>

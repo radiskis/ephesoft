@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Regular_Regex_Doc_Fields_Extraction_Plugin"
+	xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="162,16,80,40">
+		<transition to="extract-document-level-fields" />
+	</start>
+
+	<java continue="async" expr="#{regularRegexExtractionService}" g="78,104,236,59"
+		method="extractDocumentFields" name="extract-document-level-fields">
+		<arg>
+			<object expr="#{batchInstanceID}" />
+		</arg>
+		<arg>
+			<object expr="Regular_Regex_Doc_Fields_Extraction_Plugin" />
+		</arg>
+
+		<transition to="end" />
+	</java>
+
+	<end g="174,206,80,40" name="end" />
+
+</process>

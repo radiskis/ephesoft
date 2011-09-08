@@ -1,0 +1,354 @@
+/** Example rules used by the template application (remove for your app) */
+body{background:#a4d0e6 !important;}
+
+h1 {
+	font-size: 2em;
+	font-weight: bold;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
+}
+
+.helpButton {
+	display: block;
+	font-size: 26pt;
+	width: 50px;
+	background-color: blue;
+}
+
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+	width: 400px;
+}
+
+.dialogVPanel {
+	margin: 5px;
+}
+
+.serverResponseLabelError {
+	color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+	margin: 15px 6px 6px;
+}
+
+.alert-panel {
+	text-align: left;
+	vertical-align: middle;
+}
+
+.top_link_panel {
+	text-align: left;
+	vertical-align: bottom;
+}
+
+.alert-label {
+	text-align: left;
+	vertical-align: middle;
+}
+
+.add_border {
+	border: 2px solid;
+}
+
+.bold {
+	border-bottom: 1px solid #83BBD9;
+	border-top: 1px solid #83BBD9;
+	color: #0A5B93;
+	font-weight: bold;
+	padding: 2px 10px;
+	text-align: left;
+}
+
+.top-links {
+	text-align: left;
+	font-weight: normal;
+}
+
+.batch-priority-urgent {
+	background-color: red;
+	color: white;
+	width: 50px;
+	height: 17.5px;
+}
+
+.batch-priority-high {
+	background-color: #FF9C00;
+	width: 50px;
+	height: 17.5px;
+}
+
+.batch-priority-medium {
+	background-color: #FFF600;
+	width: 50px;
+	height: 17.5px;
+}
+
+.mainBody_box {
+	border: 1px solid #83BBD9;
+	padding: 10px;
+	font-weight: bold;
+}
+
+.mainBody_box1 {
+	padding: 10px;
+}
+
+.btn_blue {
+	-moz-background-clip: border !important;
+	-moz-background-inline-policy: continuous !important;
+	-moz-background-origin: padding !important;
+	background: transparent url(resources/images/btn_blueBG.gif) repeat-x
+		scroll 0 0 !important;
+	border: 1px solid #34A7DB !important;
+	cursor: pointer !important;
+	float: left;
+	font-weight: bold;
+	height: 26px !important;
+	
+	padding: 0px 10px 0 !important;
+	text-decoration: none !important;
+	font-size:12px;
+}
+.gridHeading {
+	color: #0A5B93;
+	font-size: 14px;
+	font-weight: bold;
+	padding: 5px 10px;
+}
+
+.priority_combo_width {
+	width: 70px;
+}
+
+.grid_th {
+	border-bottom: 1px solid #83BBD9;
+	border-top: 1px solid #83BBD9;
+	color: #0A5B93;
+	font-weight: bold;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px !important;
+}
+
+.strong_label {
+	font-weight: bold;
+}
+
+.strong_label_black {
+	color: black;
+	font-weight: bold;
+}
+
+.fontBlue_16 {
+	color: #0A5B93;
+	font-size: 16px;
+	font-weight: bold;
+}
+.fontBlue_16_header {
+	color: #0A5B93;
+	font-size: 16px;
+	font-weight: bold;
+	padding-left: 10px;
+	padding-right: 20px;
+}
+
+.EphesoftTableRow {
+	border: 1px solid #83BBD9;
+}
+
+.grid_td {
+	border-bottom: 1px solid #83BBD9;
+	border-top: 1px solid #83BBD9;
+	color: #0A5B93;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+.grid_first_cell_first_row {
+	border-top: 1px solid #83BBD9 !important;
+	border-bottom: 1px solid #D9D9D9;
+	padding:2px 65px 2px 20px;
+	text-align: left;
+	font-size: 12px;
+	
+}
+.grid_center_cell_first_row {
+	border-top: 1px solid #83BBD9 !important;
+	border-bottom: 1px solid #D9D9D9 !important;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+.grid_last_cell_first_row {
+	border-top: 1px solid #83BBD9 !important;
+	border-bottom: 1px solid #D9D9D9 !important;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_td_first {
+	border-bottom: 1px solid #D9D9D9;
+	color: #0A5B93;
+	padding: 2px 20px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_td_last {
+	border-bottom: 1px solid #83BBD9;
+	border-right: 1px solid #83BBD9;
+	color: #0A5B93;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_row {
+	color: #0A5B93;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_cell_center {
+	border-bottom: 1px solid #D9D9D9;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_cell_center_left {
+	border-bottom: 1px solid #83BBD9;
+	border-left: 1px solid #83BBD9;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.grid_cell_center_right {
+	border-bottom: 1px solid #D9D9D9;
+	padding: 2px 10px;
+	text-align: left;
+	font-size: 12px;
+}
+
+.home-body {
+	/*padding-left: 20px;*/
+	background: #FFFFFF !important;
+	border:1px solid #6FA6C4 !important;
+	margin:5px 2px 0 !important;
+	padding:18px 10px 10px 13px !important;
+}
+
+.button-home-panel {
+	padding-top: 30px;
+}
+
+.landing-header {
+	
+}
+
+.row-highlight {
+	background-color: #FFF380;
+}
+
+.row-unhighlight {
+	background-color: #FFFFFF;
+}
+.logo_image {
+	width: 197px;
+	height:  35px;
+}
+.headerPanel {
+	background: #FFFFFF;
+}
+.dataTable {
+	border-left: 1px Solid #FF0000;
+	border-right: 1px Solid #FF0000;
+	border-top: 1px Solid #FF0000;
+}
+
+
+.table {
+ border:1px;
+}
+.gwt-TabBar .gwt-TabBarItem {
+	-moz-background-clip:border;
+	-moz-background-inline-policy:continuous;
+	-moz-background-origin:padding;
+	background:#D0E4F6 none repeat scroll 0 0;
+	color:black;
+	cursor:pointer;
+	font-weight:bold;
+	margin-left:0px !important;
+	padding:0px 0px !important;
+	text-align:center;
+}
+.header_label {
+}
+.landing-table {
+	border-bottom: 1px solid #83BBD9 !important;
+	border-top: 1px solid #83BBD9 !important;
+	border-right: 1px solid #83BBD9 !important;
+	border-left: 1px solid #83BBD9 !important;
+}
+.landing_header_table td {
+	border-style:solid;
+	white-space:nowrap;
+	border-top: 1px solid #83BBD9 !important;
+	border-bottom-style:none;
+	border-left-style:none;
+	border-right-style:none;
+	color: #0A5B93;
+	font-weight: bold;
+	padding-right: 50px;
+	padding-left: 10px;
+}
+select, input[type="text"] {
+	border:1px solid #969696;
+	font-size:11px !important;
+}
+.landing_header_table div{
+	float:left;
+}
+.landing_header_table {
+	table-layout:auto !important;
+	width:100% !important;
+}
+.square {
+	border: 1px solid #FF0000;
+	background-color: yellow;
+	opacity: 0.4;
+	position: absolute;
+}
+.landing_data_table {
+	table-layout:auto !important;
+	width:100% !important;
+}
+.thumbnailHighlighted {
+	border: 2px solid #9172EC !important;
+}
+/* GWT Tree */
+.gwt-Tree {
+	border:1px solid;
+}
+.gwt-Tree .gwt-TreeItem {
+  color:#252525;
+	cursor:pointer;
+	font-size:11px;
+	font-weight:bold;
+	margin:0;
+	padding:1px 0;
+	white-space:nowrap;
+}
+.gwt-Tree .gwt-TreeItem-selected {
+  background: #ccc;
+}
+.tree_panel{
+}
+.review_validate_panel{
+}

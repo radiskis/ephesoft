@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="FuzzyDB_Doc_Fields_Extraction_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="162,16,80,40">
+		<transition to="extract-fuzzydb-fields"/>
+	</start>
+
+	<java continue="async" expr="#{fuzzyDBService}" g="83,99,205,59" method="extractDataBaseFields" name="extract-fuzzydb-fields">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="FuzzyDB_Doc_Fields_Extraction_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="161,195,80,40" name="end"/>
+	
+</process>

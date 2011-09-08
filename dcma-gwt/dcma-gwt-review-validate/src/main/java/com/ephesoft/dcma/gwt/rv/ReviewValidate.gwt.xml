@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='reviewValidate'>
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
+	
+	<inherits name='com.google.gwt.user.theme.standard.Standard'/>
+	
+	<entry-point class='com.ephesoft.dcma.gwt.rv.client.ReviewValidate' />
+
+	<source path='client' />
+	<source path='shared' />
+</module>

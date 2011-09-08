@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Tesseract_HOCR_Generation_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="208,50,80,40">
+		<transition to="generate-HOCR-files"/>
+	</start>
+
+	<java expr="#{tesseractService}" g="150,151,163,59" method="generateHOCRFiles" name="generate-HOCR-files" continue="async">
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Tesseract_HOCR_Generation_Plugin"/>
+		</arg>
+
+		<transition to="end"/>
+	</java>
+	
+	<end g="208,256,80,40" name="end"/>
+</process>

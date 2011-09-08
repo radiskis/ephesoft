@@ -1,0 +1,208 @@
+.sampleData {
+	color: red;
+	font-weight: 8;
+}
+
+body,table {
+	font-size: small;
+}
+
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	color: #111;
+	background: #fff;
+}
+
+a:link,a:visited,a:hover,a:active {
+	color: #000;
+}
+
+/* Dialog boxes */
+.dialogTopLeftInner,.dialogMiddleLeftInner,.dialogBottomLeftInner,.dialogTopRightInner,.dialogMiddleRightInner,.dialogBottomRightInner
+	{
+	display: none;
+}
+
+.gwt-DialogBox {
+	background-color: white;
+	border: 1px solid #666;
+	z-index: 2;
+}
+
+.gwt-DialogBox .Caption {
+	background: #d3d6dd repeat-x bottom left;
+	font-weight: bold;
+	text-shadow: #fff 0 2px 2px;
+	cursor: default;
+	padding: 5px 10px;
+	border-bottom: 1px solid #999;
+	text-align: left;
+}
+
+.gwt-DialogBox .dialogContent {
+	
+}
+
+.gwt-DialogBox .gwt-Button {
+	margin: 10px;
+}
+
+.gwt-PopupPanelGlass {
+	background-color: #000;
+	opacity: 0.3;
+	filter: literal("alpha(opacity=30)");
+	z-index: 2;
+}
+
+/* GWT Tree */
+.gwt-Tree {
+	
+}
+
+.gwt-Tree .gwt-TreeItem {
+	padding: 0;
+	cursor: hand;
+	cursor: pointer;
+	display: block !important;
+}
+
+.gwt-Tree .gwt-TreeItem-selected {
+	background: #ccc;
+}
+
+/* Splitters */
+.gwt-SplitLayoutPanel-HDragger,.gwt-SplitLayoutPanel-VDragger {
+	background-color: white;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
+	cursor: col-resize;
+}
+
+.gwt-SplitLayoutPanel-VDragger {
+	cursor: row-resize;
+}
+
+.gwt-TabLayoutPanel {
+	
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
+	
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+	border-color: #92c1f0;
+	border-style: solid;
+	border-width: 3px 2px 2px;
+	overflow: hidden;
+	padding: 6px;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+	margin-left: 6px;
+	padding: 3px 6px 3px 6px;
+	cursor: pointer;
+	cursor: hand;
+	color: black;
+	font-weight: bold;
+	text-align: center;
+	background: #d0e4f6;
+}
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected {
+	cursor: default;
+	background: #92c1f0;
+}
+
+.editButton {
+	background: transparent url(images/editButton.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 40px;
+	padding: 0 10px 15px 15px;
+	text-decoration: none;
+	width: 60px;
+	height: 20px;
+}
+
+.deleteButton {
+	background: transparent url(images/delete.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 40px;
+	padding: 0 10px 15px 15px;
+	text-decoration: none;
+	width: 60px;
+	height: 20px;
+}
+
+.viewButton {
+	background: transparent url(images/viewButton.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 75px;
+	padding: 0 10px 15px 15px;
+	text-decoration: none;
+	width: 60px;
+	height: 20px;
+}
+
+.gwt-TabBar {
+	
+}
+
+.gwt-TabBar .gwt-TabBarFirst {
+	width: 5px; /* first tab distance from the left */
+}
+
+.gwt-TabBar .gwt-TabBarRest {
+	
+}
+
+.gwt-TabBar .gwt-TabBarItem {
+	margin-left: 6px;
+	padding: 3px 6px 3px 6px;
+	cursor: pointer;
+	cursor: hand;
+	color: black;
+	font-weight: bold;
+	text-align: center;
+	background: #d0e4f6;
+}
+
+.gwt-TabBar .gwt-TabBarItem-selected {
+	cursor: hand;
+	background: #92c1f0;
+}
+
+.gwt-TabBar .gwt-TabBarItem-disabled {
+	cursor: default;
+	color: #999999;
+}
+
+.bold_text {
+	font-weight: bold;
+}
+
+.padd {
+	padding-top: 10px;
+	padding-left: 4px;
+}
+
+.blankImage {
+	background: transparent url(images/noimage.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 75px;
+	padding: 0 10px 15px 15px;
+	text-decoration: none;
+	width: 60px;
+	height: 20px;
+}

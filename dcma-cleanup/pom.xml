@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!-- $Id: pom.xml 5634 2010-04-04 12:31:38Z deepak538 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>com.ephesoft.dcma</groupId>
+		<artifactId>dcma-parent</artifactId>
+		<version>0.0.12-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	<artifactId>dcma-cleanup</artifactId>
+	<name>DCMA: Cleanup Model</name>
+	<description>The DCMA Cleanup model.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-data-access</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-batch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-test</artifactId>
+		</dependency>
+	</dependencies>
+</project>

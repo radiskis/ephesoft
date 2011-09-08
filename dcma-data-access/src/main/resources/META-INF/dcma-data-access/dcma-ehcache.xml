@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ehcache xsi:noNamespaceSchemaLocation="ehcache.xsd" name="dcma-cache">
+
+<!-- Automatic Peer Discovery Enabled -->
+	<cacheManagerPeerProviderFactory
+		class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+		properties="peerDiscovery=automatic,multicastGroupAddress=230.0.0.1,multicastGroupPort=4446" />
+
+<!-- To implement manual Peer Discovery disable automatic Peer discovery and enable the below cacheManagerPeerProviderFactory-->
+<!-- Settings for Server 1 : Replace name_of_server with that of server2 -->
+<!-- Settings for Server 2 : Replace name_of_server with that of server1 -->
+<!-- The name_of_server refers to the ip address of the server or the unique identifier of the server -->
+<!-- The port number can be any number such as 40001 -->
+
+<!-- Suppose there are n numbers of system. The configuration of the kth server would contain the name of all n-1 servers(not including the own server) and
+the port on which each server is transmitting the state of cache(can be the same value) to the other server.
+The rmiUrl's for all the cache's will need to be a replica containing the name of the //server:port/caches. -->
+
+
+<!-- Each rmiUrl has the following 
+//tell this server : on this port / of the changes in this cache.
+-->
+
+<!--
+<cacheManagerPeerProviderFactory
+	class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+	properties="peerDiscovery=manual,
+	rmiUrls=//name_of_server:port_number/com.ephesoft.dcma.da.domain.BatchClass
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.ServerRegistry
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.Module
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.Plugin
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.DocumentType
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.FieldType
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.PageType
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.BatchClassModule
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.BatchClassPlugin
+			//name_of_server:port_number/com.ephesoft.dcma.da.domain.BatchClassPluginConfig
+			//name_of_server:port_number/org.hibernate.cache.StandardQueryCache
+			//name_of_server:port_number/pluginPropertiesCache
+			"
+/> 
+ -->
+
+<!-- Default Peer Listener -->
+	<cacheManagerPeerListenerFactory
+		class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory" />
+	
+	<!-- To enable manual peer listener disable automatic Peer Listener-->
+	<!-- For server 1 : Replace localhost with hostName of the host the listener is running on. Typically it is the same machine.
+	Hence the host name can be the ip of the machine or localhost. 
+	The port number should be the one on which other servers are transmitting the cache state to this machine. 
+	To avoid unnecessary complexity use the same port number on all machines.
+	Best if all other machines transmit to this server on the same port.
+	Similiarly for server 2 -->
+	
+	<!-- The properties of the cacheManagerPeerListenerFactory if
+	properties="hostname=listen on this machine, port=on this port for changes in cache, socketTimeoutMillis=milliseconds" /> -->
+	<!-- 	
+		<cacheManagerPeerListenerFactory
+class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
+properties="hostName=localhost, port=port_number,socketTimeoutMillis=2000"/>
+-->
+
+	<defaultCache maxElementsInMemory="10000"
+		timeToIdleSeconds="3600" timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+		<!-- terracotta /-->
+	</defaultCache>
+
+	<cache name="com.ephesoft.dcma.da.domain.BatchClass"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.Module"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.Plugin"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.DocumentType"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.FieldType"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.TableInfo"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.TableColumnsInfo"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.PageType"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.BatchClassModule"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.BatchClassPlugin"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.BatchClassPluginConfig"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="com.ephesoft.dcma.da.domain.PluginConfig"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.KVPageProcess"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="org.hibernate.cache.StandardQueryCache"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+	<cache name="pluginPropertiesCache" maxElementsInMemory="10000"
+		eternal="false" timeToIdleSeconds="3600" timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+
+   <cache name="com.ephesoft.dcma.da.domain.BatchClassField"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+	
+	<cache name="com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
+</ehcache>

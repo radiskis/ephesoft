@@ -1,0 +1,109 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:field-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype'>
+
+	<g:DockLayoutPanel unit='PCT'>
+		<g:north size="43">
+			<g:CaptionPanel ui:field="fieldConfigurationCaptionPanel"
+				height="90%" width="97%">
+				<g:ScrollPanel height="100%" width="100%">
+					<g:VerticalPanel height="100%" width="100%">
+						<g:VerticalPanel ui:field="fieldTypeVerticalPanel"
+							height="100%" width="100%">
+							<field-type:FieldTypeDetailView
+								ui:field="fieldTypeDetailView" width='100%' height="100%" />
+							<g:HorizontalPanel width="100%">
+								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editFieldPropertiesButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+
+						<g:VerticalPanel ui:field="fieldTypeConfigVerticalPanel"
+							height="100%" visible="false" width="100%">
+							<field-type:EditFieldTypeView
+								ui:field="editFieldTypeView" width='100%' />
+						</g:VerticalPanel>
+					</g:VerticalPanel>
+				</g:ScrollPanel>
+			</g:CaptionPanel>
+		</g:north>
+		<g:center>
+			<g:TabLayoutPanel barHeight="16" barUnit="PCT">
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Key Value Fields Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="kvExtractionCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%" ui:field="kvButtonPanel">
+								<g:cell width="62%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="testKVButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addKVButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editKVButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteKVButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addAdvancedKVAddButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editAdvancedKVButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="kvFieldTypeListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Regular Expression Listing</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="regexCompletePanel"
+						width="98%">
+						<g:north size="25">
+							<g:HorizontalPanel width="99%" ui:field="regexButtonPanel">
+								<g:cell width="80%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addRegexBtn"></g:Button>
+								</g:cell>
+								<g:cell width="4%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editRegexBtn"></g:Button>
+								</g:cell>
+								<g:cell width="5%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteRegexBtn"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="regexListPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+			</g:TabLayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

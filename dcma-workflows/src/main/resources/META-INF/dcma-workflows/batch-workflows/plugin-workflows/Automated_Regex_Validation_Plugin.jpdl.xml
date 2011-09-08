@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Automated_Regex_Validation_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="95,16,80,40">
+		<transition to="regex-automated-validation"/>
+	</start>
+
+	<java continue="async" expr="#{regexValidationService}" g="18,88,163,59" method="regexValidation" name="regex-automated-validation"> 
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Automated_Regex_Validation_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="90,270,80,40" name="end"/>
+	
+</process>

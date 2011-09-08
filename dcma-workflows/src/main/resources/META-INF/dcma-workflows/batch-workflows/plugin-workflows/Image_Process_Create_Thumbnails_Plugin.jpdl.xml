@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Image_Process_Create_Thumbnails_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+	<start g="92,15,80,40">
+		<transition to="create-thumbnails"/>
+	</start>
+
+	<java continue="async" expr="#{imageProcessService}" g="26,270,163,59" method="createThumbnails" name="create-thumbnails">
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Image_Process_Create_Thumbnails_Plugin"/>
+		</arg>
+
+		<transition to="end"/>
+	</java>
+
+	<end g="78,454,80,40" name="end"/>
+	
+</process>

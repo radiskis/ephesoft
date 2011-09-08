@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8" />
+
+<title></title>
+<link href="css/login_style.css" rel="stylesheet" type="text/css" />
+  <link type="text/css" rel="stylesheet" href="EpheSoft.css">
+<!--                                           -->
+<!-- This script loads your compiled module.   -->
+<!-- If you add any GWT meta tags, they must   -->
+<!-- be added before this line.                -->
+<!--                                           -->
+<script type="text/javascript" language="javascript" src="login/login.nocache.js"></script>
+<script type="text/javascript" language="javascript" src="utility.js"></script>
+
+<script type="text/javascript" language="javascript" src="i18n/common/locale.js"></script>
+<script type="text/javascript" language="javascript" src="i18n/login/locale.js"></script>
+
+</head>
+
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
+<body onload="document.login.j_username.focus()">
+
+<!-- OPTIONAL: include this if you want history support -->
+<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
+	style="position: absolute; width: 0; height: 0; border: 0"></iframe>
+
+<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+<noscript>
+<div
+	style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+Your web browser must have JavaScript enabled in order for this
+application to display correctly.</div>
+</noscript>
+<form name="login" method="post" action="j_security_check">
+<table border="0" align="center" cellpadding="0" cellspacing="0"
+	class="tableWidth">
+	<tr>
+		<td><img src="images/loginPage_logo.png" width="469px" height="90px"/></td>
+	</tr>
+	<tr>
+		<td>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td><img src="images/loginPage_left.png" width="9" height="196" /></td>
+				
+				<td width="98%" valign="top" class="loginBody_bg">
+
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td id="userName"></td>
+					</tr>
+					<tr>
+						<td><input type="text" name="j_username" id="j_username"
+							style="width: 275px" /></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td id="password"></td>
+					</tr>
+					<tr>
+						<td><input type="password" name="j_password" id="j_password"
+							style="width: 275px" /></td>
+					</tr>
+					<tr>
+						<td><img src="images/spacer.gif" width="5" height="5" /></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td>
+						<table border="0" cellpadding="0" cellspacing="0" width="80%">
+							<tr>
+								<td id="buttonLogin"></td>
+								<td id="version" class="alignRight"></td>
+								<td id="versionLabel" class="alignLeft"></td>
+							</tr>
+						</table>
+						</td>
+					</tr>
+				</table>
+
+				</td>
+				
+				<td><img src="images/loginPage_right.png" width="9"
+					height="196" /></td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+	<tr>
+		<td align="right"><img src="images/loginPage_footer.png" /></td>
+	</tr>
+</table>
+</form>
+</body>
+</html>

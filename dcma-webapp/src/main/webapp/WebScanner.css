@@ -1,0 +1,111 @@
+.top_Panel {
+	background:none repeat scroll 0 0 #E7E9E9 !important;
+	border:1px solid #6FA6C4 !important
+}
+
+.scanned_images_panel {
+	border-left: 1px solid #6FA6C4;
+	border-top: 1px solid #6FA6C4;
+	height: 99% %;
+	padding-top: 20px;
+}
+
+.image_processing_panel {
+	border: 1px solid #6FA6C4;
+	height: 100%;
+}
+
+a,a:visited,a:hover {
+	color: #0000AA;
+	padding-right: 8px !important;
+}
+
+a {
+	color: #0284d0;
+	text-decoration: underline
+}
+
+a:hover {
+	color: #0284d0;
+	text-decoration: none
+}
+
+.thumbnailDefault {
+	border: 2px solid #9172EC;
+}
+
+.signOutPanel {
+	padding-top: 4px;
+}
+
+.body_panel {
+	background-color: white;
+}
+
+.button_image_overlay {
+	background: transparent url(images/move_bg.gif) repeat-x scroll 0 0;
+	border: 0px solid #B3B3B3;
+	height: 50px;
+	margin-bottom: 5px;
+	width: 100%;
+}
+
+.zoom_in {
+	background: transparent url(images/zoom-in.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 10px 5px 15px 15px;
+	text-decoration: none;
+}
+
+.zoom_out {
+	background: transparent url(images/zoom-out.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 10px 5px 15px 15px;
+	text-decoration: none;
+}
+
+.rotate_button {
+	background: transparent url(images/rotate.png) no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 10px 5px 15px 15px;
+	text-decoration: none;
+}
+
+.fit_to_page {
+	background: transparent url(images/fittopage.png) no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 10px 5px 15px 15px;
+	text-decoration: none;
+}
+
+.thumbnail {
+	cursor: pointer;
+	border: 1px solid #B3B3B3;
+	font-size: small;
+}
+.imagePanel {
+	border: 1px solid #B3B3B3;
+	background: #E6E6E6 !important;
+}
+.thumbsPanel {
+	border: 1px solid #B3B3B3;
+}
+.selectedThumb {
+	border: 2px solid blue;
+}
+.imageView {
+	border: 1px solid #B3B3B3;
+}

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+            			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+           				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+                        http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd
+         					"
+	default-autowire="byName">
+
+
+	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
+
+	<bean id="batchConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="placeholderPrefix" value="$batch{" />
+		<property name="placeholderSuffix" value="}" />
+		<property name="locations"
+			value="classpath:/META-INF/dcma-batch/dcma-batch.properties">
+		</property>
+	</bean>
+
+	<context:annotation-config />
+
+	<oxm:jaxb2-marshaller id="batchMarshaller"
+		contextPath="com.ephesoft.dcma.batch.schema" />
+
+	<bean id="batchJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">
+		<constructor-arg type="org.springframework.oxm.jaxb.Jaxb2Marshaller"
+			ref="batchMarshaller" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.base_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.local_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.export_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.base_http_url}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.base_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.sample_folders}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.search_sample_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.search_index_folder_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.imagemagick_base_folder_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.fuzzydb_index_folder_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.webscanner_local_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.emial_folder}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.project_files_base_folder}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.test_kv_extraction_sample_folder_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.script_folder_name}" />
+		<constructor-arg type="java.lang.String"
+			value="$batch{batch.cmis_plugin_mapping_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.export_import_folder}" />	
+		<constructor-arg type="java.lang.String" value="$batch{batch.batch_class_serializable_file}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.filebound_plugin_mapping_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.validation_script}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.temp_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.test_table_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.threadpool_lock_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.add_new_table_script}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.test_folder}" />		
+	</bean>
+
+	<bean id="hocrJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">
+		<constructor-arg type="org.springframework.oxm.jaxb.Jaxb2Marshaller"
+			ref="batchMarshaller" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.local_folder}" />
+	</bean>
+
+	<bean id="batchSchemaService" class="com.ephesoft.dcma.batch.service.BatchSchemaServiceImpl" />
+
+	<context:component-scan base-package="com.ephesoft.dcma.batch.service" />
+	<context:component-scan base-package="com.ephesoft.dcma.batch.dao" />
+
+</beans>
