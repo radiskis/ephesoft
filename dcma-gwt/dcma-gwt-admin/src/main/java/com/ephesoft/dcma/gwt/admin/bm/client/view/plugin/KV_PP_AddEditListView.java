@@ -53,28 +53,29 @@ public class KV_PP_AddEditListView extends View<KV_PP_AddEditListPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, KV_PP_AddEditListView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	KV_PP_AddEditDetailView kvPPDetailView;
+	protected KV_PP_AddEditDetailView kvPPDetailView;
 
 	@UiField
-	KV_PP_AddEditView editKVPPView;
+	protected KV_PP_AddEditView editKVPPView;
 
 	@UiField
-	VerticalPanel kvPPTypeVerticalPanel;
+	protected VerticalPanel kvPPTypeVerticalPanel;
 
 	@UiField
-	VerticalPanel kvPPTypeConfigVerticalPanel;
+	protected VerticalPanel kvPPTypeConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel kvPPConfigurationCaptionPanel;
+	protected CaptionPanel kvPPConfigurationCaptionPanel;
 
 	@UiField
-	Button editKVPPPropertiesButton;
+	protected Button editKVPPPropertiesButton;
 
 	public KV_PP_AddEditListView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		kvPPConfigurationCaptionPanel.setCaptionHTML(AdminConstants.KV_PP_DETAILS_HTML);
 
 		editKVPPPropertiesButton.setText(AdminConstants.EDIT_BUTTON);

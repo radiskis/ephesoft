@@ -49,15 +49,15 @@ import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
 import com.ephesoft.dcma.da.domain.BatchClassGroups;
 
 @Repository
-public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups>
-		implements BatchClassGroupsDao {
+public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups> implements BatchClassGroupsDao {
 
 	@Override
 	public Set<String> getBatchClassIdentifierForUsers(Set<String> userGroups) {
+		boolean isValid = true;
 		if (userGroups == null || userGroups.size() == 0) {
-			return null;
+			isValid = false;
 		}
-		Set<String> batchIdentifier = new HashSet<String>();
+		Set<String> batchIdentifiers = null;
 
 //		Old version of fetching.
 //				
@@ -72,17 +72,19 @@ public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups>
 //		}
 
 		// New version of fetching.
-		DetachedCriteria criteria = criteria();
-		Disjunction disjunction = Restrictions.disjunction();
-		for (String string : userGroups) {
-			disjunction.add(Restrictions.eq("groupName", string));
+		if (isValid) {
+			batchIdentifiers = new HashSet<String>();
+			DetachedCriteria criteria = criteria();
+			Disjunction disjunction = Restrictions.disjunction();
+			for (String string : userGroups) {
+				disjunction.add(Restrictions.eq("groupName", string));
+			}
+			criteria.add(disjunction);
+			List<BatchClassGroups> batchClassGroups = find(criteria);
+			for (BatchClassGroups batchClassGroups2 : batchClassGroups) {
+				batchIdentifiers.add(batchClassGroups2.getBatchClass().getIdentifier());
+			}
 		}
-		criteria.add(disjunction);
-		List<BatchClassGroups> batchClassGroups = find(criteria);
-		for (BatchClassGroups batchClassGroups2 : batchClassGroups) {
-			batchIdentifier.add(batchClassGroups2.getBatchClass()
-					.getIdentifier());
-		}
-		return batchIdentifier;
+		return batchIdentifiers;
 	}
 }

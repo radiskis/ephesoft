@@ -55,12 +55,12 @@ public interface BatchClassService {
 	/**
 	 * An api to fetch BatchClass by id.
 	 * 
-	 * @param id Serializable
+	 * @param identifier Serializable
 	 * @return BatchClass
 	 */
-	BatchClass get(Serializable id);
+	BatchClass get(Serializable identifier);
 
-	void delete(Serializable id);
+	void delete(Serializable identifier);
 
 	/**
 	 * An api to save or update the batch class.
@@ -98,14 +98,14 @@ public interface BatchClassService {
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClasses();
+	List<BatchClass> getAllBatchClasses();
 
 	/**
 	 * This API will fetch all the unlocked batch classes.
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllUnlockedBatchClasses();
+	List<BatchClass> getAllUnlockedBatchClasses();
 
 	/**
 	 * API to fetch a batch class by id.
@@ -113,7 +113,7 @@ public interface BatchClassService {
 	 * @param batchClassId
 	 * @return BatchClass
 	 */
-	public BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
+	BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
 
 	/**
 	 * API to acquire a batch on the basis of batchClassID and userName.
@@ -122,7 +122,7 @@ public interface BatchClassService {
 	 * @param userName
 	 * @return BatchClass
 	 */
-	public BatchClass acquireBatchClass(String batchClassIdentifier, String currentUser) throws BatchAlreadyLockedException;
+	BatchClass acquireBatchClass(String batchClassIdentifier, String currentUser) throws BatchAlreadyLockedException;
 
 	/**
 	 * Unlocks the currently acquired batch by the user (currentUser).
@@ -130,14 +130,14 @@ public interface BatchClassService {
 	 * @param batchInstanceId
 	 * @param currentUser
 	 */
-	public void unlockCurrentBatchClass(String batchClassIdentifier);
+	void unlockCurrentBatchClass(String batchClassIdentifier);
 
 	/**
 	 * Unlocks all the batches acquired by the user.
 	 * 
 	 * @param currentUser
 	 */
-	public void unlockAllBatchClassesForCurrentUser(String currentUser);
+	void unlockAllBatchClassesForCurrentUser(String currentUser);
 
 	/**
 	 * Api to merge the batch class.
@@ -151,7 +151,7 @@ public interface BatchClassService {
 	 * 
 	 * @param batchClass
 	 */
-	public void evict(BatchClass batchClass);
+	void evict(BatchClass batchClass);
 
 	/**
 	 * API to get the list of Batch Classes specifying startindex, no of results and sorting if any.
@@ -161,39 +161,39 @@ public interface BatchClassService {
 	 * @param order
 	 * @return List of batch class.
 	 */
-	public List<BatchClass> getBatchClassList(int firstResult, int maxResults, Order order);
+	List<BatchClass> getBatchClassList(int firstResult, int maxResults, Order order);
 
 	/**
 	 * API to count all the batch classes.
 	 * 
 	 * @return count
 	 */
-	public int countAllBatchClassesExcludeDeleted();
+	int countAllBatchClassesExcludeDeleted();
 
-	public BatchClass createBatchClass(BatchClass batchClass);
+	BatchClass createBatchClass(BatchClass batchClass);
 
 	/**
 	 * This API will fetch all the batch classes on user role.
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClassesByUserRoles(Set<String> userRoles);
+	List<BatchClass> getAllBatchClassesByUserRoles(Set<String> userRoles);
 
-	public List<BatchClass> getAllBatchClassesExcludeDeleted();
+	List<BatchClass> getAllBatchClassesExcludeDeleted();
 
 	/**
 	 * This API will fetch the batch class (eagerly loaded) on the basis of identifier.
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public BatchClass getLoadedBatchClassByIdentifier(String batchClassIdentifier);
+	BatchClass getLoadedBatchClassByIdentifier(String batchClassIdentifier);
 
 	/**
 	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllLoadedBatchClassExcludeDeleted();
+	List<BatchClass> getAllLoadedBatchClassExcludeDeleted();
 
 	/**
 	 * API to merge a batch class.
@@ -201,7 +201,7 @@ public interface BatchClassService {
 	 * @param batchClass
 	 * @return BatchClass
 	 */
-	public BatchClass merge(BatchClass batchClass);
+	BatchClass merge(BatchClass batchClass);
 
 	
 	/** API to  get all the associated UNC folders with a workflow
@@ -241,5 +241,5 @@ public interface BatchClassService {
 	 * @param batchClass
 	 * @return
 	 */
-	public BatchClass createBatchClassWithoutWatch(BatchClass batchClass);
+	BatchClass createBatchClassWithoutWatch(BatchClass batchClass);
 }

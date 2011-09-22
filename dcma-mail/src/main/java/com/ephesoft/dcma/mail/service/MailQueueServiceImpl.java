@@ -51,8 +51,8 @@ import com.ephesoft.dcma.mail.domain.EmailData;
  */
 public class MailQueueServiceImpl implements MailQueueService {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	 
+	private final static Logger LOG = LoggerFactory.getLogger(MailQueueServiceImpl.class);
+
 	@Autowired
 	private MailService mailService;
 
@@ -63,9 +63,9 @@ public class MailQueueServiceImpl implements MailQueueService {
 
 	@Override
 	public void processPendingMails() {
-		List<EmailData> emails = emailQueueDao.findReadyToSend(fetchMaxCount);
+		final List<EmailData> emails = emailQueueDao.findReadyToSend(fetchMaxCount);
 		if (!emails.isEmpty()) {
-			log.info("Processing " + emails.size() + " email(s).");
+			LOG.info("Processing " + emails.size() + " email(s).");
 			for (EmailData emailData : emails) {
 				sendEmail(emailData);
 				emailQueueDao.remove(emailData);
@@ -74,19 +74,19 @@ public class MailQueueServiceImpl implements MailQueueService {
 	}
 
 	@Override
-	public void queueEmail(MailMetaData mailMetaData, String content) {
-		EmailData email = new EmailData(mailMetaData, content);
+	public void queueEmail(final MailMetaData mailMetaData, final String content) {
+		final EmailData email = new EmailData(mailMetaData, content);
 		email.setContentTypeHtml(true);
 		queueEmail(email);
 	}
 
 	@Override
-	public void sendEmail(MailMetaData mailMetaData, String content) {
+	public void sendEmail(final MailMetaData mailMetaData, final String content) {
 		mailService.sendTextMail(mailMetaData, content);
 	}
-	
-	private void sendEmail(EmailData emailData) {
-		MailMetaData metaData = new MailMetaData();
+
+	private void sendEmail(final EmailData emailData) {
+		final MailMetaData metaData = new MailMetaData();
 		metaData.setBccAddresses(Arrays.asList(emailData.getBccList()));
 		metaData.setCcAddresses(Arrays.asList(emailData.getCcList()));
 		metaData.setContentTypeHtml(emailData.isContentTypeHtml());
@@ -94,10 +94,10 @@ public class MailQueueServiceImpl implements MailQueueService {
 		metaData.setFromName(emailData.getSenderName());
 		metaData.setSubject(emailData.getSubject());
 		metaData.setToAddresses(Arrays.asList(emailData.getRecipient()));
-		sendEmail(metaData, emailData.getContent() );
+		sendEmail(metaData, emailData.getContent());
 	}
-	
-	private void queueEmail(EmailData email) {
+
+	private void queueEmail(final EmailData email) {
 		emailQueueDao.create(email);
 	}
 
@@ -105,7 +105,7 @@ public class MailQueueServiceImpl implements MailQueueService {
 		return fetchMaxCount;
 	}
 
-	public void setFetchMaxCount(int fetchMaxCount) {
+	public void setFetchMaxCount(final int fetchMaxCount) {
 		this.fetchMaxCount = fetchMaxCount;
 	}
 }

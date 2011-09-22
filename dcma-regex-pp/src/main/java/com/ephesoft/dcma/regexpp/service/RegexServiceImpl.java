@@ -51,7 +51,7 @@ import com.ephesoft.dcma.util.BackUpFileService;
 
 public class RegexServiceImpl implements RegexService {
 
-	private Logger logger = LoggerFactory.getLogger(RegexServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegexServiceImpl.class);
 
 	@Autowired
 	private transient RegexReader regexReader;
@@ -71,10 +71,10 @@ public class RegexServiceImpl implements RegexService {
 	@Override
 	public void regexPPReader(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
-			logger.info("batchInstanceId : " + batchInstanceID.getID());
+			LOGGER.info("batchInstanceId : " + batchInstanceID.getID());
 			regexReader.readRegex(batchInstanceID);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}

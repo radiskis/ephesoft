@@ -55,32 +55,32 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 	}
 
 	@UiField
-	Label priority;
+	protected Label priority;
 	@UiField
-	Label uncFolder;
+	protected Label uncFolder;
 	@UiField
-	Label description;
+	protected Label description;
 	@UiField
-	Label version;
+	protected Label version;
 	@UiField
-	Label role;
+	protected Label role;
 
 	@UiField
-	Label priorityLabel;
+	protected Label priorityLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label uncLabel;
+	protected Label uncLabel;
 	@UiField
-	Label versionLabel;
+	protected Label versionLabel;
 	@UiField
-	Label roleLabel;
+	protected Label roleLabel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public BatchClassDetailView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		priorityLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PRIORITY_LABEL)
 				+ AdminConstants.COLON);
@@ -123,7 +123,7 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 			if (isFirst) {
 				isFirst = false;
 			}else {
-				role.append(";");
+				role.append(';');
 			}
 			role.append(roleDTO.getName());
 

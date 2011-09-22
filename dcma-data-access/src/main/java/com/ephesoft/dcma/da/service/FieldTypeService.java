@@ -111,7 +111,7 @@ public interface FieldTypeService {
 	 * @param documentType DocumentType
 	 * @return List<FieldType>
 	 */
-	public List<FieldType> getFdTypeByDocumentType(DocumentType documentType);
+	List<FieldType> getFdTypeByDocumentType(DocumentType documentType);
 
 	/**
 	 * An api to insert the fieldType object.

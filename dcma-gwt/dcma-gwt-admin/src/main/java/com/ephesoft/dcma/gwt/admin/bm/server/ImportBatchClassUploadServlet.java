@@ -79,8 +79,8 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		String lastAttachedZipSourcePath = req.getParameter("lastAttachedZipSourcePath");
-		if(lastAttachedZipSourcePath != null && !lastAttachedZipSourcePath.isEmpty()) {
-			if(new File(lastAttachedZipSourcePath).exists()){
+		if (lastAttachedZipSourcePath != null && !lastAttachedZipSourcePath.isEmpty()) {
+			if (new File(lastAttachedZipSourcePath).exists()) {
 				FileUtils.deleteDirectoryAndContentsRecursive(new File(lastAttachedZipSourcePath));
 			}
 		}
@@ -89,7 +89,7 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 
 	private void attachFile(HttpServletRequest req, HttpServletResponse resp, BatchSchemaService batchSchemaService)
 			throws IOException {
-		PrintWriter pw = resp.getWriter();
+		PrintWriter printWriter = resp.getWriter();
 		File tempZipFile = null;
 		InputStream instream = null;
 		OutputStream out = null;
@@ -103,7 +103,6 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 				exportSerailizationFolder.mkdir();
 			}
 
-			
 			String zipFileName = "";
 			String zipPathname = "";
 			List<FileItem> items;
@@ -113,8 +112,8 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 
 					if (!item.isFormField() && "importFile".equals(item.getFieldName())) {
 						zipFileName = item.getName();
-						if(zipFileName != null) {
-							zipFileName = zipFileName.substring(zipFileName.lastIndexOf(File.separator)+1);
+						if (zipFileName != null) {
+							zipFileName = zipFileName.substring(zipFileName.lastIndexOf(File.separator) + 1);
 						}
 						zipPathname = exportSerailizationFolderPath + File.separator + zipFileName;
 						// get only the file name not whole path
@@ -124,21 +123,22 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 						try {
 							instream = item.getInputStream();
 							tempZipFile = new File(zipPathname);
-							if(tempZipFile.exists()) {
+							if (tempZipFile.exists()) {
 								tempZipFile.delete();
 							}
 							out = new FileOutputStream(tempZipFile);
 							byte buf[] = new byte[1024];
 							int len;
-							while ((len = instream.read(buf)) > 0)
+							while ((len = instream.read(buf)) > 0) {
 								out.write(buf, 0, len);
+							}
 						} catch (FileNotFoundException e) {
 							log.error("Unable to create the export folder." + e, e);
-							pw.write("Unable to create the export folder.Please try again.");
+							printWriter.write("Unable to create the export folder.Please try again.");
 
 						} catch (IOException e) {
 							log.error("Unable to read the file." + e, e);
-							pw.write("Unable to read the file.Please try again.");
+							printWriter.write("Unable to read the file.Please try again.");
 						} finally {
 							if (out != null) {
 								out.close();
@@ -151,7 +151,7 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 				}
 			} catch (FileUploadException e) {
 				log.error("Unable to read the form contents." + e, e);
-				pw.write("Unable to read the form contents.Please try again.");
+				printWriter.write("Unable to read the form contents.Please try again.");
 			}
 
 			tempOutputUnZipDir = exportSerailizationFolderPath + File.separator
@@ -160,7 +160,7 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 				FileUtils.unzip(tempZipFile, tempOutputUnZipDir);
 			} catch (Exception e) {
 				log.error("Unable to unzip the file." + e, e);
-				pw.write("Unable to unzip the file.Please try again.");
+				printWriter.write("Unable to unzip the file.Please try again.");
 				tempZipFile.delete();
 			}
 
@@ -173,19 +173,20 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 			} catch (Exception e) {
 				tempZipFile.delete();
 				log.error("Error while importing" + e, e);
-				pw.write("Error while importing.Please try again.");
+				printWriter.write("Error while importing.Please try again.");
 			}
 
 		} else {
 			log.error("Request contents type is not supported.");
-			pw.write("Request contents type is not supported.");
+			printWriter.write("Request contents type is not supported.");
 		}
-		if(tempZipFile != null)
+		if (tempZipFile != null) {
 			tempZipFile.delete();
-		pw.write("workFlowName:" + zipWorkFlowName);
-		pw.append("|");
-		pw.append("filePath:").append(tempOutputUnZipDir);
-		pw.append("|");
-		pw.flush();
+		}
+		printWriter.write("workFlowName:" + zipWorkFlowName);
+		printWriter.append("|");
+		printWriter.append("filePath:").append(tempOutputUnZipDir);
+		printWriter.append("|");
+		printWriter.flush();
 	}
 }

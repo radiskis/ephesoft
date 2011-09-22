@@ -51,6 +51,8 @@ public class DocumentTypeDBBean implements IsSerializable {
 	private String description;
 	
 	private String rspProjectFileName;
+	
+	private  boolean isHidden;
 
 	public BatchClassBean getBatchClass() {
 		return batchClass;
@@ -98,5 +100,13 @@ public class DocumentTypeDBBean implements IsSerializable {
 	
 	public void setRspProjectFileName(String rspProjectFileName) {
 		this.rspProjectFileName = rspProjectFileName;
+	}
+	
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	public void setHidden(boolean isHidden) {
+		this.isHidden = isHidden;
 	}
 }

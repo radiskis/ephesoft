@@ -53,8 +53,6 @@ import com.ephesoft.dcma.util.BackUpFileService;
 
 public class ImportServiceImpl implements ImportService, ICommonConstants {
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	@Autowired
 	private BatchInstanceDao batchInstanceDao;
 

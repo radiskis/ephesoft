@@ -52,7 +52,7 @@ public interface EmailImporterService {
 	 * This API reads the mailboxes for all the Batch classes for which email has been configured. It processes the mails, creates a
 	 * batch for a mail and moves that batch to the UNC folder for the specified batch class.
 	 */
-	public void processMails();
+	 void processMails();
 
 	/**
 	 * This api downloads a mail object to a folder including attachments.
@@ -62,5 +62,5 @@ public interface EmailImporterService {
 	 * @return
 	 * @throws DCMAApplicationException
 	 */
-	public void downloadMail(CustomMessage cm, String folderPath) throws DCMAApplicationException;
+	 void downloadMail(CustomMessage customMessage, String folderPath) throws DCMAApplicationException;
 }

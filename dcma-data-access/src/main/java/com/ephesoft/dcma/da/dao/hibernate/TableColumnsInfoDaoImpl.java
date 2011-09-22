@@ -58,7 +58,7 @@ import com.ephesoft.dcma.da.domain.TableInfo;
 @Repository
 public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> implements TableColumnsInfoDao {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(TableColumnsInfoDaoImpl.class);
 
 	/**
 	 * An api to fetch all TableColumnsInfo by document type name.
@@ -69,7 +69,7 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	@Override
 	public List<TableColumnsInfo> getTableColumnsInfoByTableInfo(TableInfo tableInfo) {
 
-		logger.info("TableInfo : " + tableInfo);
+		LOGGER.info("TableInfo : " + tableInfo);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("tableInfo", tableInfo));
 
@@ -87,7 +87,7 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	@Override
 	public List<TableColumnsInfo> getTableColumnsInfo(String docTypeName, String tableName) {
 
-		logger.info("docTypeName  : " + docTypeName);
+		LOGGER.info("docTypeName  : " + docTypeName);
 		DetachedCriteria criteria = criteria();
 		criteria.createAlias("tableInfo", "tableInfo", JoinFragment.INNER_JOIN);
 		criteria.add(Restrictions.eq("tableInfo.name", tableName));

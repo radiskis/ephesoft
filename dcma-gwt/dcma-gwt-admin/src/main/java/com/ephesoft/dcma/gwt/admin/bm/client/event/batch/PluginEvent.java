@@ -52,7 +52,7 @@ public class PluginEvent extends GwtEvent<PluginHandler> {
 	/**
 	 * Type of event.
 	 */
-	public static Type<PluginHandler> TYPE = new Type<PluginHandler>();
+	public static Type<PluginHandler> type = new Type<PluginHandler>();
 
 	/**
 	 * Action taken by user.
@@ -85,7 +85,7 @@ public class PluginEvent extends GwtEvent<PluginHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<PluginHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public PluginDetailsDTO getPlugin() {

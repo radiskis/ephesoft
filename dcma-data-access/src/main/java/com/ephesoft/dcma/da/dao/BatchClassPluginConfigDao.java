@@ -43,25 +43,25 @@ import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 
 public interface BatchClassPluginConfigDao extends CacheableDao<BatchClassPluginConfig> {
 
-	public List<BatchClassPluginConfig> getPluginPropertiesForBatch(String batchInstanceIdentifier, String pluginName);
+	List<BatchClassPluginConfig> getPluginPropertiesForBatch(String batchInstanceIdentifier, String pluginName);
 
-	public List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId);
+	List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId);
 
-	public List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName);
+	List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName);
 
-	public void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs);
+	void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs);
 
-	public void updateSinglePluginConfiguration(BatchClassPluginConfig batchClassPluginConfig);
+	void updateSinglePluginConfiguration(BatchClassPluginConfig batchClassPluginConfig);
 
-	public void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
+	void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
 
-	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchInstance(String batchInstanceIdentifier);
+	List<BatchClassPluginConfig> getAllPluginPropertiesForBatchInstance(String batchInstanceIdentifier);
 
-	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClass(String batchClassIdentifier);
+	List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClass(String batchClassIdentifier);
 
-	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier,
+	List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier,
 			String pluginName, String qualifier);
 
-	public List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
+	List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty);
 }

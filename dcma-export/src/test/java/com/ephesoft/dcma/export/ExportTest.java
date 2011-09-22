@@ -145,7 +145,7 @@ public class ExportTest extends AbstractExportTest {
 	/**
 	 * Variable for property file.
 	 */
-	private Properties prop = new Properties();
+	private final Properties prop = new Properties();
 	/**
 	 * Variable for initial property values.
 	 */

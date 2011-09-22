@@ -53,34 +53,35 @@ public class TableColumnInfoDetailView extends View<TableColumnInfoDetailPresent
 	}
 
 	@UiField
-	Label betweenLeftLabel;
+	protected Label betweenLeftLabel;
 	@UiField
-	Label betweenLeft;
+	protected Label betweenLeft;
 
 	@UiField
-	Label betweenRightLabel;
+	protected Label betweenRightLabel;
 	@UiField
-	Label betweenRight;
+	protected Label betweenRight;
 
 	@UiField
-	Label columnNameLabel;
+	protected Label columnNameLabel;
 	@UiField
-	Label columnName;
+	protected Label columnName;
 
 	@UiField
-	Label columnPatternLabel;
+	protected Label columnPatternLabel;
 	@UiField
-	Label columnPattern;
+	protected Label columnPattern;
 
 	@UiField
-	Label isRequiredLabel;
+	protected Label isRequiredLabel;
 	@UiField
-	CheckBox isRequired;
+	protected CheckBox isRequired;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public TableColumnInfoDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		betweenLeftLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BETWEEN_LEFT)
 				+ AdminConstants.COLON);

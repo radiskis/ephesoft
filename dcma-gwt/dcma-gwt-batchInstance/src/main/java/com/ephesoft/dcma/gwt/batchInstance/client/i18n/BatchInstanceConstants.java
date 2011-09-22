@@ -171,4 +171,6 @@ public interface BatchInstanceConstants extends LocaleCommonConstants {
 
 	String EMPTY_VALUE = "";
 
+	String TEXT_RESTART_IN_PROGRESS = "restart_in_progress";
+
 }

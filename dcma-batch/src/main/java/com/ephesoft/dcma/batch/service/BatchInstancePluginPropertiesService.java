@@ -144,6 +144,7 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 					tempDocType.setLastModified(serializedDocType.getLastModified());
 					tempDocType.setMinConfidenceThreshold(serializedDocType.getMinConfidenceThreshold());
 					tempDocType.setPriority(Integer.valueOf(serializedDocType.getPriority()));
+					tempDocType.setHidden(serializedDocType.isHidden());
 					returnList.add(tempDocType);
 				}
 			}
@@ -171,6 +172,7 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 				tempDocType.setLastModified(serializedDocType.getLastModified());
 				tempDocType.setMinConfidenceThreshold(serializedDocType.getMinConfidenceThreshold());
 				tempDocType.setPriority(Integer.valueOf(serializedDocType.getPriority()));
+				tempDocType.setHidden(serializedDocType.isHidden());
 				returnList.add(tempDocType);
 			}
 		}
@@ -371,6 +373,7 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 									tempDocType.setName(docType.getName());
 									tempDocType.setDescription(docType.getDescription());
 									tempDocType.setRspProjectFileName(docType.getRspProjectFileName());
+									tempDocType.setHidden(docType.isHidden());
 									tempDocType.setBatchClass(docType.getBatchClass());
 									tempDocType.setCreationDate(docType.getCreationDate());
 									tempDocType.setLastModified(docType.getLastModified());

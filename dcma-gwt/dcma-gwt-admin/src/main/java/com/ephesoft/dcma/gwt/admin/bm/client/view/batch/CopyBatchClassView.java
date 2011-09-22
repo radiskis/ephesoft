@@ -60,53 +60,54 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 	}
 
 	@UiField
-	TextBox priority;
+	protected TextBox priority;
 	@UiField
-	TextBox uncFolder;
+	protected TextBox uncFolder;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	Label priorityLabel;
+	protected Label priorityLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label uncLabel;
+	protected Label uncLabel;
 
 	@UiField
-	Label star;
+	protected Label star;
 
 	@UiField
-	Label uncStar;
+	protected Label uncStar;
 
 	@UiField
-	HorizontalPanel editBatchPanel;
+	protected HorizontalPanel editBatchPanel;
 
 	@UiField
-	Label descStar;
+	protected Label descStar;
 
-	private ValidatableWidget<TextBox> validateTextBox;
-	private ValidatableWidget<TextBox> validateDescTextBox;
-	private ValidatableWidget<TextBox> validateUNCTextBox;
+	private final ValidatableWidget<TextBox> validateTextBox;
+	private final ValidatableWidget<TextBox> validateDescTextBox;
+	private final ValidatableWidget<TextBox> validateUNCTextBox;
 
 	private DialogBox dialogBox;
 
 	@UiField
-	VerticalPanel editBatchClassViewPanel;
+	protected VerticalPanel editBatchClassViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public CopyBatchClassView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);

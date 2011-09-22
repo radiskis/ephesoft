@@ -42,6 +42,7 @@ var batchInstanceConstants = {
 		restart_title : "Restart",
 		label_table_column_is_remote : "Is Remote",
 		batch_status_transferred : "Transferred",
+		restart_in_progress : "Restart in Progress", 
 		search_criteria: "",
 		select_one_module : "Select atleast one module to restart",
 		restart_error_message : "Failed to restart. Please restart after sometime"
@@ -55,7 +56,7 @@ var batchInstanceMessages = {
 		delete_failed : "Unable to delete record.",
 		non_deletable : "This record is not deletable.",
 		restart_failure : "Failed to restart record.",
-		restart_successfull : "Batch {0} was restarted sucessfully.",
+		restart_successfull : "Batch {0} is sent for restarting and will be restarted shortly.",
 		not_restartable : "This record cannot be restarted.",
 		delete_confirmation_text : "Are you sure you want to delete this record?",
 		restart_confirmation_text : "Are you sure you want to restart this record?",
@@ -111,6 +112,7 @@ var batchInstanceConstants_tk = {
 		restart_title : "Restart",
 		label_table_column_is_remote : "Is Remote",
 		batch_status_transferred : "Transferred",
+		restart_in_progress : "Restart in Progress",
 		search_criteria: "",
 		select_one_module : "Select atleast one module to restart",
 		restart_error_message : "Failed to restart. Please restart after sometime"
@@ -124,7 +126,7 @@ var batchInstanceMessages_tk = {
 		delete_failed : "This record cannot be deleted.",
 		non_deletable : "This record is not deletable",
 		restart_failure : "Failed to restart record.",
-		restart_successfull : "Batch was restarted sucessfully.",
+		restart_successfull : "Batch {0} is sent for restarting and will be restarted shortly.",
 		not_restartable : "This record cannot be restarted.",
 		delete_confirmation_text : "Are you sure you want to delete this record?",
 		restart_confirmation_text : "Are you sure you want to restart this record?",

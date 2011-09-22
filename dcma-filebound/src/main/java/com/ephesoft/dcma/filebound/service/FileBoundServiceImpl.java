@@ -38,7 +38,6 @@ package com.ephesoft.dcma.filebound.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.Assert;
 
 import com.ephesoft.dcma.core.DCMAException;
@@ -47,7 +46,6 @@ import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.filebound.FileBoundExporter;
-import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.ephesoft.dcma.util.BackUpFileService;
 
 public class FileBoundServiceImpl implements FileBoundService, ICommonConstants {
@@ -58,13 +56,13 @@ public class FileBoundServiceImpl implements FileBoundService, ICommonConstants 
 	private FileBoundExporter fileBoundExporter;
 
 	@PreProcess
-	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
+	public void preProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
 		BackUpFileService.backUpBatch(batchInstanceID.getID());
 	}
 
 	@PostProcess
-	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
+	public void postProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
 		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
 	}
@@ -78,13 +76,4 @@ public class FileBoundServiceImpl implements FileBoundService, ICommonConstants 
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
-
-	public static void main(String[] args) throws DCMAException {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"classpath:/META-INF/applicationContext-filebound.xml");
-		context.start();
-		FileBoundService fileBoundService = ApplicationContextUtil.getSingleBeanOfType(context, FileBoundService.class);
-		fileBoundService.exportContent(new BatchInstanceID("BI2"), "Filebound_Export_Plugin");
-	}
-
 }

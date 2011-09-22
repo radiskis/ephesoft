@@ -64,16 +64,16 @@ public class TestHOCRFileReader extends TestCase {
 
 		Boolean isSuccess = Boolean.FALSE;
 		try {
-			String s = HOCRFileReader.getInstance().readHOCRFile(
+			String hicrReaderObj = HOCRFileReader.getInstance().readHOCRFile(
 					"E:\\file\\111\\output1024.html");
-			if (null == s || "".equals(s)) {
+			if (null == hicrReaderObj || "".equals(hicrReaderObj)) {
 				isSuccess = Boolean.FALSE;
 			} else {
 				isSuccess = Boolean.TRUE;
 			}
 		} catch (DCMAApplicationException e) {
 			LOGGER.error("Exception in execute method " + e.getMessage());
-			assertTrue(false);
+			assertTrue(e.getMessage(), false);
 		}
 		assertTrue(isSuccess.booleanValue());
 	}

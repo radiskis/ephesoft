@@ -62,13 +62,13 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 		boolean validFlag = true;
 		if (validFlag && !view.getValidatePatternTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag && (controller.isAdd() && controller.getSelectedDocumentLevelField().checkRegex(view.getPattern()))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.NAME_COMMON_ERROR)));
+					BatchClassManagementMessages.NAME_COMMON_ERROR));
 			validFlag = false;
 		}
 		if (validFlag) {

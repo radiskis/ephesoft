@@ -60,42 +60,42 @@ public class KV_PP_PropertiesView extends View<KV_PP_PropertiesPresenter> {
 	}
 
 	@UiField
-	PluginData pluginData;
+	protected PluginData pluginData;
 
 	@UiField
-	KV_PP_DetailView kvPPDetailView;
+	protected KV_PP_DetailView kvPPDetailView;
 
 	@UiField
-	KV_PP_EditView kvPPEditView;
+	protected KV_PP_EditView kvPPEditView;
 
 	@UiField
-	KV_PP_ConfigView configView;
+	protected KV_PP_ConfigView configView;
 
 	@UiField
-	VerticalPanel kvppPluginViewVerticalPanel;
+	protected VerticalPanel kvppPluginViewVerticalPanel;
 
 	@UiField
-	LayoutPanel kvppViewEditPluginPanel;
+	protected LayoutPanel kvppViewEditPluginPanel;
 
 	@UiField
-	CaptionPanel pluginDetailsCaptionPanel;
+	protected CaptionPanel pluginDetailsCaptionPanel;
 
 	@UiField
-	CaptionPanel kvppPluginConfigurationCaptionPanel;
+	protected CaptionPanel kvppPluginConfigurationCaptionPanel;
 
 	@UiField
-	VerticalPanel kvppPluginConfigVerticalPanel;
+	protected VerticalPanel kvppPluginConfigVerticalPanel;
 
 	@UiField
-	HorizontalPanel kvppEditButtonPanel;
+	protected HorizontalPanel kvppEditButtonPanel;
 
 	@UiField
-	Button configButton;
+	protected Button configButton;
 
-	private Button edit;
+	private final Button edit;
 
 	@UiField
-	ScrollPanel scrollPanel;
+	protected ScrollPanel scrollPanel;
 
 	private KV_PP_ConfigView kvPPConfigView;
 
@@ -110,7 +110,7 @@ public class KV_PP_PropertiesView extends View<KV_PP_PropertiesPresenter> {
 		return noResultLabel;
 	}
 
-	private Label noResultLabel;
+	private final Label noResultLabel;
 
 	public VerticalPanel getKvppPluginViewVerticalPanel() {
 		return kvppPluginViewVerticalPanel;
@@ -136,10 +136,11 @@ public class KV_PP_PropertiesView extends View<KV_PP_PropertiesPresenter> {
 		return kvPPConfigView;
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_PropertiesView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		edit = new Button();
 		noResultLabel = new Label();
 		noResultLabel.setText(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_FOUND));

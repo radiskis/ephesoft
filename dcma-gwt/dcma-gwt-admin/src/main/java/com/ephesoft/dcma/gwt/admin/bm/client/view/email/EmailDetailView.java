@@ -52,44 +52,45 @@ public class EmailDetailView extends View<EmailDetailPresenter> {
 	}
 
 	@UiField
-	Label userNameLabel;
+	protected Label userNameLabel;
 	@UiField
-	Label userName;
+	protected Label userName;
 
 	@UiField
-	Label passwordLabel;
+	protected Label passwordLabel;
 	@UiField
-	Label password;
+	protected Label password;
 
 	@UiField
-	Label serverNameLabel;
+	protected Label serverNameLabel;
 	@UiField
-	Label serverName;
+	protected Label serverName;
 
 	@UiField
-	Label serverTypeLabel;
+	protected Label serverTypeLabel;
 	@UiField
-	Label serverType;
+	protected Label serverType;
 
 	@UiField
-	Label folderNameLabel;
+	protected Label folderNameLabel;
 	@UiField
-	Label folderName;
+	protected Label folderName;
 	
 	@UiField
-	Label sslLabel;
+	protected Label sslLabel;
 	@UiField
-	Label ssl;
+	protected Label ssl;
 	
 	@UiField
-	Label portNumberLabel;
+	protected Label portNumberLabel;
 	@UiField
-	Label portNumber;
+	protected Label portNumber;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EmailDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		userNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.USERNAME) + AdminConstants.COLON);
 		passwordLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PASSWORD) + AdminConstants.COLON);
 		serverNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.SERVER_NAME)

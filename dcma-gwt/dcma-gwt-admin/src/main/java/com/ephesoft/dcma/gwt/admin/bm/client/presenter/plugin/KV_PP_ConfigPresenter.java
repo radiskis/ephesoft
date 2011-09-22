@@ -49,11 +49,11 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_ConfigView> {
 
-	BatchClassPluginConfigDTO batchClassPluginConfigDTO;
+	private BatchClassPluginConfigDTO batchClassPluginConfigDTO;
 
-	KVPageProcessDTO kvPageProcessDTO;
+	private KVPageProcessDTO kvPageProcessDTO;
 
-	Collection<KVPageProcessDTO> kvPageProcessDTOs;
+	private Collection<KVPageProcessDTO> kvPageProcessDTOs;
 
 	public KV_PP_ConfigPresenter(BatchClassManagementController controller, KV_PP_ConfigView view) {
 		super(controller, view);

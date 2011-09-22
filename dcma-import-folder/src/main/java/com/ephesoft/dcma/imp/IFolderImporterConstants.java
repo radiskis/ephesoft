@@ -37,8 +37,12 @@ package com.ephesoft.dcma.imp;
 
 public interface IFolderImporterConstants {
 
-	public static int HUNDERED = 100;
-	public static int KBYTE = 1024;
-	public static int ZERO = 0;
+	int HUNDERED = 100;
+	int KBYTE = 1024;
+	int ZERO = 0;
+	int ONE = 1;
+	
+	String TRUE = "true";
+	String YES = "YES";
 	
 }

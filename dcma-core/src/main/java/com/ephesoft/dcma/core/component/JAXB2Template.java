@@ -72,6 +72,8 @@ public class JAXB2Template {
 	private String threadpoolLockFolder;
 	private String addNewTableScriptName;
 	private String testFolderLocation;
+	private String scriptConfigFolderName;	
+	
 	
 
 	/**
@@ -100,6 +102,7 @@ public class JAXB2Template {
 	 * @param testTableFolderName
 	 * @param threadpoolLockFolder
 	 * @param testFolderLocation
+	 * @param scriptConfigFolderName
 	 */
 	public JAXB2Template(Jaxb2Marshaller jaxb2Marshaller, String baseFolderLocation, String localFolderLocation,
 			String exportFolderLocation, String baseHttpURL, String baseSampleFdLoc, String sampleFolders, String searchSampleName,
@@ -107,7 +110,8 @@ public class JAXB2Template {
 			String webScannerScannedImagesFolderPath, String emailFolderName, String projectFilesBaseFolder, String testKVExtFolder,
 			String scriptFolderName, String cmisPluginMappingFolderName, String batchExportFolder, String batchClassSerializableFile,
 			String fileboundPluginMappingFolderName, String validationScriptName, String tempFolder, String testTableFolderName,
-			String threadpoolLockFolder,String addNewTableScriptName, String testFolderLocation) {
+			String threadpoolLockFolder,String addNewTableScriptName, String testFolderLocation,
+			String scriptConfigFolderName) {
 		super();
 		this.jaxb2Marshaller = jaxb2Marshaller;
 		this.baseFolderLocation = baseFolderLocation;
@@ -135,6 +139,7 @@ public class JAXB2Template {
 		this.threadpoolLockFolder = threadpoolLockFolder;
 		this.addNewTableScriptName = addNewTableScriptName;
 		this.testFolderLocation = FileUtils.getAbsoluteFilePath(testFolderLocation);
+		this.scriptConfigFolderName = scriptConfigFolderName;
 	}
 
 	
@@ -408,4 +413,14 @@ public class JAXB2Template {
 	{
 		this.baseFolderLocation = baseFolderLocation;
 	}
+	
+	
+	public String getScriptConfigFolderName() {
+		return scriptConfigFolderName;
+	}
+	
+	public void setScriptConfigFolderName(String scriptConfigFolderName) {
+		this.scriptConfigFolderName = scriptConfigFolderName;
+	}
+	
 }

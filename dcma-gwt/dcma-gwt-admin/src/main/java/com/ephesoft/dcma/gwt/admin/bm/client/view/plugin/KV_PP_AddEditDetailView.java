@@ -53,42 +53,43 @@ public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> 
 	}
 
 	@UiField
-	Label keyPatternLabel;
+	protected Label keyPatternLabel;
 
 	@UiField
-	Label keyPattern;
+	protected Label keyPattern;
 
 	@UiField
-	Label valuePatternLabel;
+	protected Label valuePatternLabel;
 
 	@UiField
-	Label valuePattern;
+	protected Label valuePattern;
 
 	@UiField
-	Label locationLabel;
+	protected Label locationLabel;
 
 	@UiField
-	Label location;
+	protected Label location;
 
 	@UiField
-	Label noOfWordsLabel;
+	protected Label noOfWordsLabel;
 
 	@UiField
-	Label noOfWords;
-	
-	@UiField
-	Label pageLevelFieldNameLabel;
+	protected Label noOfWords;
 
 	@UiField
-	Label pageLevelFieldName;
+	protected Label pageLevelFieldNameLabel;
 
 	@UiField
-	VerticalPanel kvPPDetailVerticalPanel;
+	protected Label pageLevelFieldName;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	@UiField
+	protected VerticalPanel kvPPDetailVerticalPanel;
+
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_AddEditDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		keyPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KEY_PATTERN)
 				+ AdminConstants.COLON);
 		valuePatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VALUE_PATTERN)
@@ -96,7 +97,8 @@ public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> 
 		locationLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION) + AdminConstants.COLON);
 		noOfWordsLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NO_OF_WORDS)
 				+ AdminConstants.COLON);
-		pageLevelFieldNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KV_PAGE_LEVEL_FIELD_NAME)
+		pageLevelFieldNameLabel.setText(LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.KV_PAGE_LEVEL_FIELD_NAME)
 				+ AdminConstants.COLON);
 
 		kvPPDetailVerticalPanel.setSpacing(5);
@@ -124,13 +126,13 @@ public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> 
 	}
 
 	public void setlocation(LocationType location) {
-		if (location != null)
+		if (location != null) {
 			this.location.setText(location.name());
-		else
+		} else {
 			this.location.setText(LocationType.LEFT.name());
+		}
 	}
-	
-	
+
 	public void setPageLevelFieldNameeldName(String pageLevelFieldName) {
 		this.pageLevelFieldName.setText(pageLevelFieldName);
 	}

@@ -55,7 +55,7 @@ public enum FileBoundProperties implements PluginProperty {
 	
 	String key;
 	
-	FileBoundProperties(String key) {
+	FileBoundProperties(final String key) {
 		this.key = key;
 	}
 

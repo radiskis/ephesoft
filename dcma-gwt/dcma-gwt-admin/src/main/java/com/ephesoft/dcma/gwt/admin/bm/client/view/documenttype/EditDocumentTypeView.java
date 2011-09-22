@@ -51,6 +51,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -62,35 +63,40 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label descStar;
+	protected Label descStar;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 
 	@UiField
-	Label confLabel;
+	protected Label confLabel;
 	@UiField
-	Label confStar;
+	protected Label confStar;
 	@UiField
-	TextBox confidence;
+	protected TextBox confidence;
 
 	@UiField
-	Label recostarExtractionLabel;
+	protected Label recostarExtractionLabel;
 	@UiField
-	ListBox recostarExtraction;
+	protected ListBox recostarExtraction;
 
 	@UiField
-	Button saveButton;
+	protected Label isHiddenLabel;
 	@UiField
-	Button cancelButton;
+	protected CheckBox isHidden;
+
+	@UiField
+	protected Button saveButton;
+	@UiField
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
 	private ValidatableWidget<TextBox> validateConfidenceTextBox;
@@ -99,10 +105,11 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 	@UiField
 	VerticalPanel editDocumentTypeViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BNIDER = GWT.create(Binder.class);
 
 	public EditDocumentTypeView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BNIDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 
@@ -141,7 +148,7 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 				+ AdminConstants.COLON);
 		recostarExtractionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.RECOSTAR_PROJECT_FILE)
 				+ AdminConstants.COLON);
-
+		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
 		nameStar.setText(AdminConstants.STAR);
 		descStar.setText(AdminConstants.STAR);
 		confStar.setText(AdminConstants.STAR);
@@ -150,7 +157,7 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 		descLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		confLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		recostarExtractionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
-
+		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		nameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		descStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		confStar.setStyleName(AdminConstants.FONT_RED_STYLE);
@@ -273,6 +280,14 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 				}
 			}
 		}
+	}
+
+	public boolean isHidden() {
+		return this.isHidden.getValue();
+	}
+
+	public void setHidden(boolean isHidden) {
+		this.isHidden.setValue(isHidden);
 	}
 
 }

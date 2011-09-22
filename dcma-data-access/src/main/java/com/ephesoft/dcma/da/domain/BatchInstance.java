@@ -114,9 +114,6 @@ public class BatchInstance extends AbstractChangeableEntity {
 	@JoinColumn(name = "remote_batch_instance_id")
 	private RemoteBatchInstance remoteBatchInstance;
 
-	public BatchInstance() {
-	}
-
 	public int getPriority() {
 		return priority;
 	}

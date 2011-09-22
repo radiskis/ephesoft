@@ -92,137 +92,138 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	interface Binder extends UiBinder<DockLayoutPanel, AdvancedKVExtractionView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	DockLayoutPanel advancedKVLayoutPanel;
+	protected DockLayoutPanel advancedKVLayoutPanel;
 
 	@UiField
-	Label keyPatternLabel;
+	protected Label keyPatternLabel;
 	@UiField
-	Label keyPatternStar;
+	protected Label keyPatternStar;
 	@UiField
-	TextBox keyPattern;
+	protected TextBox keyPattern;
 
 	@UiField
-	Label valuePatternLabel;
+	protected Label valuePatternLabel;
 	@UiField
-	Label valuePatternStar;
+	protected Label valuePatternStar;
 	@UiField
-	TextBox valuePattern;
-	
-	@UiField
-	Label locationLabel;
-	@UiField
-	Label locationStar;
-	@UiField
-	TextBox location;
+	protected TextBox valuePattern;
 
 	@UiField
-	Label fetchValueLabel;
+	protected Label locationLabel;
 	@UiField
-	ListBox fetchValue;
+	protected Label locationStar;
 	@UiField
-	Label fetchValueStar;
+	protected TextBox location;
 
 	@UiField
-	Label lengthLabel;
+	protected Label fetchValueLabel;
 	@UiField
-	TextBox length;
+	protected ListBox fetchValue;
 	@UiField
-	Label lengthStar;
+	protected Label fetchValueStar;
 
 	@UiField
-	Label widthLabel;
+	protected Label lengthLabel;
 	@UiField
-	TextBox width;
+	protected TextBox length;
 	@UiField
-	Label widthStar;
+	protected Label lengthStar;
 
 	@UiField
-	Label xOffsetLabel;
+	protected Label widthLabel;
 	@UiField
-	TextBox xOffset;
+	protected TextBox width;
 	@UiField
-	Label xOffsetStar;
+	protected Label widthStar;
 
 	@UiField
-	Label yOffsetLabel;
+	protected Label xOffsetLabel;
 	@UiField
-	TextBox yOffset;
+	protected TextBox xOffset;
 	@UiField
-	Label yOffsetStar;
+	protected Label xOffsetStar;
 
 	@UiField
-	Label multiplierLabel;
+	protected Label yOffsetLabel;
 	@UiField
-	TextBox multiplier;
+	protected TextBox yOffset;
+	@UiField
+	protected Label yOffsetStar;
 
 	@UiField
-	Button saveButton;
+	protected Label multiplierLabel;
 	@UiField
-	Button cancelButton;
+	protected TextBox multiplier;
 
 	@UiField
-	VerticalPanel oldKVExtractionProperties;
+	protected Button saveButton;
+	@UiField
+	protected Button cancelButton;
 
 	@UiField
-	DockLayoutPanel groupingKVExtractionProperties;
+	protected VerticalPanel oldKVExtractionProperties;
 
 	@UiField
-	VerticalPanel newKVExtractionProperties;
+	protected DockLayoutPanel groupingKVExtractionProperties;
 
 	@UiField
-	FormPanel imageUpload;
+	protected VerticalPanel newKVExtractionProperties;
 
 	@UiField
-	FileUpload importFile;
+	protected FormPanel imageUpload;
 
 	@UiField
-	Hidden batchClassID;
+	protected FileUpload importFile;
 
 	@UiField
-	RotatableImage pageImage;
+	protected Hidden batchClassID;
 
 	@UiField
-	Button captureKey;
+	protected RotatableImage pageImage;
 
 	@UiField
-	Button captureValue;
+	protected Button captureKey;
 
 	@UiField
-	Button clearButton;
+	protected Button captureValue;
 
 	@UiField
-	HorizontalPanel captureValues;
-
-	KeyValueCoordinates keyValueCoordinates = null;
-
-	Integer originalWidth = 0;
-	Integer originalHeight = 0;
+	protected Button clearButton;
 
 	@UiField
-	ScrollPanel imageScroll;
-	
+	protected HorizontalPanel captureValues;
+
+	private KeyValueCoordinates keyValueCoordinates = null;
+
+	private Integer originalWidth = 0;
+	private Integer originalHeight = 0;
+
 	@UiField
-	RotatableImage tempImage;
+	protected ScrollPanel imageScroll;
+
+	@UiField
+	protected RotatableImage tempImage;
 
 	private ValidatableWidget<TextBox> validateKeyPatternTextBox;
 	private ValidatableWidget<TextBox> validateValuePatternTextBox;
 	private ValidatableWidget<TextBox> validateMultiplierTextBox;
 
 	public AdvancedKVExtractionView() {
-		initWidget(binder.createAndBindUi(this));
-		
+		super();
+		initWidget(BINDER.createAndBindUi(this));
+
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-		
+
 		keyPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KEY_PATTERN)
 				+ AdminConstants.COLON);
 		keyPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		keyPatternStar.setText(AdminConstants.STAR);
 		keyPatternStar.setStyleName(AdminConstants.FONT_RED_STYLE);
-		
+
 		valuePatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VALUE_PATTERN)
 				+ AdminConstants.COLON);
 		valuePatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -319,50 +320,51 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		yOffset.setReadOnly(true);
 
 		captureValues.setSpacing(3);
-		
+
 		tempImage.setVisible(false);
 
 		keyValueCoordinates = new KeyValueCoordinates(this);
 		tempImage.addLoadHandler(new LoadHandler() {
-			
+
 			@Override
 			public void onLoad(LoadEvent arg0) {
 				pageImage.setVisible(true);
 				ScreenMaskUtility.unmaskScreen();
-				DOM.setElementAttribute(pageImage.getElement(), "src",(DOM.getElementAttribute(tempImage.getElement(), "src")));
+				DOM.setElementAttribute(pageImage.getElement(), "src", (DOM.getElementAttribute(tempImage.getElement(), "src")));
 				pageImage.setUrl(tempImage.getUrl());
-				if(tempImage.getHeight() != 0) {
+				if (tempImage.getHeight() != 0) {
 					originalWidth = tempImage.getWidth();
-					originalHeight = tempImage.getHeight();					
+					originalHeight = tempImage.getHeight();
 				} else {
 					originalWidth = pageImage.getWidth();
-					originalHeight = pageImage.getHeight();	
+					originalHeight = pageImage.getHeight();
 				}
 				loadImage();
 			}
 		});
-		
+
 		tempImage.addErrorHandler(new ErrorHandler() {
-			
+
 			@Override
 			public void onError(ErrorEvent arg0) {
 				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
 			}
 		});
-		
+
 		pageImage.addLoadHandler(new LoadHandler() {
 
 			@Override
 			public void onLoad(LoadEvent arg0) {
-				//loadImage();
+				// loadImage();
 			}
 		});
 		importFile.addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent arg0) {
-				//ScreenMaskUtility.maskScreen();
+				// ScreenMaskUtility.maskScreen();
 				batchClassID.setValue(presenter.getController().getBatchClass().getIdentifier());
 				imageUpload.submit();
 			}
@@ -384,22 +386,21 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent arg0) {
-				
-				if(arg0.getResults().toLowerCase().indexOf(AdminConstants.ERROR_CODE_TEXT) > -1) {					
+
+				if (arg0.getResults().toLowerCase().indexOf(AdminConstants.ERROR_CODE_TEXT) > -1) {
 					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
 					return;
 				}
 				String fileName = importFile.getFilename();
-				if(fileName != null) {
-					fileName = fileName.substring(fileName.lastIndexOf("\\")+1);
+				if (fileName != null) {
+					fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
 				}
-				String pngFileName = fileName.substring(0,fileName.lastIndexOf(".") + 1) + "png";
+				String pngFileName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "png";
 				presenter.getPageImageUrl(presenter.getController().getBatchClass().getIdentifier(), pngFileName);
 			}
 		});
-		
-
 
 		pageImage.addStyleName("pointer");
 
@@ -427,7 +428,7 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 
 			}
 		});
-		
+
 		pageImage.setVisible(false);
 
 	}
@@ -501,11 +502,12 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		pageImage.setVisible(true);
 		int screenWidth = getViewPortWidth();
 		Integer imageWidth = screenWidth * 70 / 100;
-		Integer imageHeight = new Integer(0);
-		
-		if (originalWidth != 0)
+		Integer imageHeight = Integer.valueOf(0);
+
+		if (originalWidth != 0) {
 			imageHeight = originalHeight * imageWidth / originalWidth;
-		if(imageHeight == 0) {
+		}
+		if (imageHeight == 0) {
 			int screenHeight = getViewPortHeight();
 			imageHeight = screenHeight * 70 / 100;
 		}
@@ -546,7 +548,7 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 
 	public void setPageImageUrl(final String pageImageUrl) {
 		DOM.setElementAttribute(this.tempImage.getElement(), "src", pageImageUrl);
-		this.tempImage.setUrl(pageImageUrl);		
+		this.tempImage.setUrl(pageImageUrl);
 	}
 
 	public String getMultiplier() {
@@ -621,8 +623,9 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		String selected = this.fetchValue.getItemText(this.fetchValue.getSelectedIndex());
 		KVFetchValue[] allKVFetchValue = KVFetchValue.values();
 		for (KVFetchValue kvFetchValue : allKVFetchValue) {
-			if (kvFetchValue.name().equals(selected))
+			if (kvFetchValue.name().equals(selected)) {
 				return kvFetchValue;
+			}
 		}
 		return allKVFetchValue[0];
 	}
@@ -648,8 +651,9 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		String selected = this.location.getValue();
 		LocationType[] allLocationTypes = LocationType.values();
 		for (LocationType locationType : allLocationTypes) {
-			if (locationType.name().equals(selected))
+			if (locationType.name().equals(selected)) {
 				return locationType;
+			}
 		}
 		return allLocationTypes[0];
 	}
@@ -677,6 +681,7 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	public String getValuePattern() {
 		return valuePattern.getText();
 	}
+
 	// public void setLocation(LocationType locationType) {
 	// if (this.location.getItemCount() == 0)
 	// setLocation();
@@ -691,14 +696,16 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	}
 
 	public void setFetchValue(KVFetchValue kvFetchValue) {
-		if (this.fetchValue.getItemCount() == 0)
+		if (this.fetchValue.getItemCount() == 0) {
 			setFetchValue();
+		}
 		this.fetchValue.setSelectedIndex(findKVIndex(kvFetchValue));
 	}
 
 	private int findKVIndex(KVFetchValue kvFetchValue) {
-		if (kvFetchValue == null)
+		if (kvFetchValue == null) {
 			return 0;
+		}
 		KVFetchValue[] allLocationTypes = KVFetchValue.values();
 		List<KVFetchValue> tempList = Arrays.asList(allLocationTypes);
 		return tempList.indexOf(kvFetchValue);
@@ -715,7 +722,8 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	@UiHandler("captureKey")
 	public void captureKeyClicked(ClickEvent clickEvent) {
 		if (keyValueCoordinates.isMouseStatus()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MOUSE_NOT_CLICK_ERROR));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.MOUSE_NOT_CLICK_ERROR));
 			return;
 		}
 		keyValueCoordinates.finalizeKey();
@@ -725,11 +733,13 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	@UiHandler("captureValue")
 	public void captureValueClicked(ClickEvent clickEvent) {
 		if (keyValueCoordinates.isMouseStatus()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MOUSE_NOT_CLICK_ERROR));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.MOUSE_NOT_CLICK_ERROR));
 			return;
 		}
 		if (!keyValueCoordinates.isKeyFinalized()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.KEY_NOT_FINAL_ERROR));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.KEY_NOT_FINAL_ERROR));
 			return;
 		}
 		keyValueCoordinates.finalizeValue();
@@ -916,7 +926,8 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	}
 
 	private void errorInKey() {
-		ConfirmationDialogUtil.showConfirmationDialogError("The value overlaps with key. Please choose some different location for value.");
+		ConfirmationDialogUtil
+				.showConfirmationDialogError("The value overlaps with key. Please choose some different location for value.");
 
 	}
 
@@ -943,11 +954,11 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	public TextBox getValuePatternTextBox() {
 		return this.valuePattern;
 	}
-	
+
 	public TextBox getMultiplierTextBox() {
 		return this.multiplier;
 	}
-	
+
 	public void togglePageImageShowHide(boolean visibile) {
 		pageImage.setVisible(visibile);
 	}

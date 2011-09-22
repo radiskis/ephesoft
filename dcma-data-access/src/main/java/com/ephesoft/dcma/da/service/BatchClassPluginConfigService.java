@@ -63,21 +63,21 @@ public interface BatchClassPluginConfigService {
 	 * @param pluginId
 	 * @return
 	 */
-	public List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId);
+	List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId);
 	
 	/**
 	 * @param batchInstanceIdentifier
 	 * @param pluginName
 	 * @return
 	 */
-	public List<BatchClassPluginConfig> getAllPluginConfiguration(String batchInstanceIdentifier, String pluginName);
+	List<BatchClassPluginConfig> getAllPluginConfiguration(String batchInstanceIdentifier, String pluginName);
 
 	/**
 	 * @param batchClassId
 	 * @param pluginName
 	 * @return
 	 */
-	public Map<String, String> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
+	Map<String, String> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty);
 
 	/**
@@ -85,14 +85,14 @@ public interface BatchClassPluginConfigService {
 	 * 
 	 * @param batchClassPluginConfigs
 	 */
-	public void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs);
+	void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs);
 
 	/**
 	 * API to save the plugin configuration value into db.
 	 * 
 	 * @param batchClassPluginConfigs
 	 */
-	public void updateSinglePluginConfiguration(BatchClassPluginConfig batchClassPluginConfig);
+	void updateSinglePluginConfiguration(BatchClassPluginConfig batchClassPluginConfig);
 
 	/**
 	 * API to get the plugin properties based on configuration type.
@@ -102,7 +102,7 @@ public interface BatchClassPluginConfigService {
 	 * @param confType
 	 * @return Map of properties
 	 */
-	public Map<String, String> getPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier, String pluginName,
+	Map<String, String> getPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier, String pluginName,
 			String qualifier);
 
 	/**
@@ -110,6 +110,6 @@ public interface BatchClassPluginConfigService {
 	 * 
 	 * @param batchClassPluginConfig
 	 */
-	public void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
+	void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
 
 }

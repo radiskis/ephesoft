@@ -36,7 +36,6 @@
 package com.ephesoft.dcma.fuzzydb.service;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +67,7 @@ public class FuzzyDBSearchServiceImpl implements FuzzyDBSearchService {
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		Pattern p = Pattern.compile("^[A-Za-z0-9]+$");
-		if ((pluginWorkflow != null) && (p.matcher(pluginWorkflow).matches())) {
+		if ((pluginWorkflow != null) && (pluginWorkflow.equals("FuzzyDB_Doc_Fields_Extraction_Plugin"))) {
 			BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
 		}
 	}

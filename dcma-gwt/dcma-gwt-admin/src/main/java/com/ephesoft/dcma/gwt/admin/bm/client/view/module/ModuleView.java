@@ -70,41 +70,42 @@ public class ModuleView extends View<ModuleViewPresenter> {
 	}
 
 	@UiField
-	ModuleDetailView moduleDetailView;
+	protected ModuleDetailView moduleDetailView;
 
 	@UiField
-	EditModuleView editModuleView;
+	protected EditModuleView editModuleView;
 
 	@UiField
-	LayoutPanel pluginListPanel;
+	protected LayoutPanel pluginListPanel;
 
-	PluginListView pluginListView;
-
-	@UiField
-	CaptionPanel moduleConfigurationCaptionPanel;
+	protected PluginListView pluginListView;
 
 	@UiField
-	Button editPlugin;
+	protected CaptionPanel moduleConfigurationCaptionPanel;
 
 	@UiField
-	HorizontalPanel buttonPanel;
+	protected Button editPlugin;
 
 	@UiField
-	VerticalPanel moduleViewPanel;
+	protected HorizontalPanel buttonPanel;
 
 	@UiField
-	VerticalPanel moduleDetailViewPanel;
+	protected VerticalPanel moduleViewPanel;
 
 	@UiField
-	VerticalPanel editModuleViewPanel;
+	protected VerticalPanel moduleDetailViewPanel;
 
 	@UiField
-	Button editModuleButton;
+	protected VerticalPanel editModuleViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	@UiField
+	protected Button editModuleButton;
+
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ModuleView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		pluginListView = new PluginListView();
 		moduleConfigurationCaptionPanel.setCaptionHTML(AdminConstants.MODULE_CONFIGURATION);

@@ -196,6 +196,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			bean.setMinConfidenceThreshold(documentType.getMinConfidenceThreshold());
 			bean.setName(documentType.getName());
 			bean.setPriority(documentType.getPriority());
+			bean.setHidden(documentType.isHidden());
 
 			BatchClassBean classBean = new BatchClassBean();
 			classBean.setDescription(documentType.getBatchClass().getDescription());
@@ -205,8 +206,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			classBean.setUncFolder(documentType.getBatchClass().getUncFolder());
 			classBean.setVersion(documentType.getBatchClass().getVersion());
 			bean.setBatchClass(classBean);
-
-			documentTypeBeans.add(bean);
+			if (!bean.isHidden()) {
+				documentTypeBeans.add(bean);
+			}
 		}
 
 		return documentTypeBeans;

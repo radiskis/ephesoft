@@ -108,5 +108,5 @@ public interface DocumentTypeService {
 	 * 
 	 * @param documentType
 	 */
-	public void evict(DocumentType documentType);
+	void evict(DocumentType documentType);
 }

@@ -55,27 +55,28 @@ public class ScriptServiceImpl implements ScriptService {
 	private ScriptExecutor scriptExecutor;
 
 	@PreProcess
-	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
+	public void preProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
 		BackUpFileService.backUpBatch(batchInstanceID.getID());
 	}
 
 	@PostProcess
-	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
+	public void postProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
 		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
 	}
 
 	@Override
-	public void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String nameOfPluginScript) throws DCMAException{
-		executeScript(batchInstanceID, pluginWorkflow, nameOfPluginScript, null,null);
+	public void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String pluginScriptName)
+			throws DCMAException {
+		executeScript(batchInstanceID, pluginWorkflow, pluginScriptName, null, null);
 	}
-	
+
 	@Override
-	public void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String nameOfPluginScript,
+	public void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String pluginScriptName,
 			final String docIdentifier, final String methodName) throws DCMAException {
 		try {
-			scriptExecutor.extractFields(batchInstanceID.getID(), nameOfPluginScript,docIdentifier,methodName);
+			scriptExecutor.extractFields(batchInstanceID.getID(), pluginScriptName, docIdentifier, methodName);
 		} catch (Exception e) {
 			LOGGER.error("The result of execution for ScriptsService was unsuccessful.", e.getMessage());
 			throw new DCMAException("The result of execution for ScriptsService was unsuccessful.", e);

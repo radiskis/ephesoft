@@ -41,7 +41,16 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.RoleDao;
 import com.ephesoft.dcma.da.domain.Role;
 
+/**
+ * This class is responsible to fetch data of role table from data base.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 @Repository
 public class RoleDaoImpl extends HibernateDao<Role> implements RoleDao {
 
+	public RoleDaoImpl() {
+		super();
+	}
 }

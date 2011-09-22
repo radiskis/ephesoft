@@ -53,44 +53,45 @@ public class BatchClassFieldDetailView extends View<BatchClassFieldDetailPresent
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label name;
+	protected Label name;
 
 	@UiField
-	Label descriptionLabel;
+	protected Label descriptionLabel;
 	@UiField
-	Label description;
+	protected Label description;
 
 	@UiField
-	Label dataTypeLabel;
+	protected Label dataTypeLabel;
 	@UiField
-	Label dataType;
+	protected Label dataType;
 
 	@UiField
-	Label fieldOrderNumberLabel;
+	protected Label fieldOrderNumberLabel;
 	@UiField
-	Label fieldOrderNumber;
+	protected Label fieldOrderNumber;
 
 	@UiField
-	Label sampleValueLabel;
+	protected Label sampleValueLabel;
 	@UiField
-	Label sampleValue;
+	protected Label sampleValue;
 
 	@UiField
-	Label validationPatternLabel;
+	protected Label validationPatternLabel;
 	@UiField
-	Label validationPattern;
+	protected Label validationPattern;
 
 	@UiField
-	Label fieldOptionValueListLabel;
+	protected Label fieldOptionValueListLabel;
 	@UiField
-	Label fieldOptionValueList;
+	protected Label fieldOptionValueList;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public BatchClassFieldDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BATCH_CLASS_FIELD_NAME)
 				+ AdminConstants.COLON);
 		descriptionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BATCH_CLASS_FIELD_DESCRIPTION)
@@ -118,10 +119,11 @@ public class BatchClassFieldDetailView extends View<BatchClassFieldDetailPresent
 	}
 
 	public void setDataType(DataType dataType) {
-		if (dataType != null)
+		if (dataType != null) {
 			this.dataType.setText(dataType.name());
-		else
+		} else {
 			this.dataType.setText(DataType.STRING.name());
+		}
 	}
 
 	public void setName(String name) {

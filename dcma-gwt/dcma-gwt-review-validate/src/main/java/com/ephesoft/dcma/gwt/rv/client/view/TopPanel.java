@@ -494,7 +494,11 @@ public class TopPanel extends RVBasePanel {
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.NEXT_PAGE_TYPE)
 				+ "</td><td>CTRL + p</td></tr>" + "<tr><td>35 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.PREV_PAGE_TYPE)
-				+ "</td><td>CTRL + Shift + p</td></tr>" + "</table>";
+				+ "</td><td>CTRL + Shift + p</td></tr>" +"<tr><td>36 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.FUNCTION_KEY_SHORTCUTS)
+				+ "</td><td>F1 to F11[except F5]" +"<tr><td>37 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.MODAL_WINDOW_SHORTCUTS)
+				+ "</td><td>CTRL + [4/7/8/9]</td></tr>" + "</table>";
 		return keyBoardShortcuts;
 	}
 }

@@ -2519,6 +2519,11 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	@Override
+	public String getScriptConfigFolderName() {
+		return batchSchemaDao.getJAXB2Template().getScriptConfigFolderName();
+	}
+
+	@Override
 	public void setBaseFolderLocation(String baseFolderLocation) {
 		if (null != baseFolderLocation && !baseFolderLocation.isEmpty()) {
 			batchSchemaDao.getJAXB2Template().setBaseFolderLocation(baseFolderLocation);

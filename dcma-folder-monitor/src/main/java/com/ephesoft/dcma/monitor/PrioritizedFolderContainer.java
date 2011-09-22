@@ -49,82 +49,90 @@ import org.slf4j.LoggerFactory;
 import com.ephesoft.dcma.da.domain.BatchClass;
 
 public final class PrioritizedFolderContainer {
-	
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private long waitTime;
+	private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizedFolderContainer.class);
+
+	final private long waitTime;
 
 	public Map<BatchClass, UncFolder> uncFolders = new TreeMap<BatchClass, UncFolder>(new Comparator<BatchClass>() {
+
 		@Override
-		public int compare(BatchClass o1, BatchClass o2) {
+		public int compare(final BatchClass batchClass1, final BatchClass batchClass2) {
 			int result = 0;
-			if(o1.getId() != o2.getId()) {
-				Integer o1Priority = Integer.valueOf(o1.getPriority());
-				Integer o2Priority = Integer.valueOf(o2.getPriority());
+			if (batchClass1.getId() != batchClass2.getId()) {
+				final Integer o1Priority = Integer.valueOf(batchClass1.getPriority());
+				final Integer o2Priority = Integer.valueOf(batchClass2.getPriority());
 
 				result = o1Priority.compareTo(o2Priority);
-				if(result == 0) result = +1;
+				if (result == 0) {
+					result = +1;
+				}
 			}
 			return result;
 		}
 	});
-	
+
 	public PrioritizedFolderContainer(long waitTime) {
 		this.waitTime = waitTime;
 	}
-	
+
 	public void addBatchClasss(BatchClass batchClass) {
 		uncFolders.put(batchClass, new UncFolder(batchClass.getUncFolder()));
 	}
-	
+
 	public synchronized void addFolderDetail(FolderDetail folderDetail) {
-		Collection<UncFolder> folders = uncFolders.values();
+		final Collection<UncFolder> folders = uncFolders.values();
 		for (UncFolder uncFolder : folders) {
-			if(uncFolder.getUncFolderPath().equals(folderDetail.getParentPath())) {
+			if (uncFolder.getUncFolderPath().equals(folderDetail.getParentPath())) {
 				uncFolder.addFolderDetail(folderDetail);
 				break;
 			}
 		}
 	}
-	
+
 	public synchronized FolderDetail next() {
 		FolderDetail detail = null;
-		Set<Map.Entry<BatchClass, UncFolder>> uncFolderSet = uncFolders.entrySet();
+		final Set<Map.Entry<BatchClass, UncFolder>> uncFolderSet = uncFolders.entrySet();
 		for (Map.Entry<BatchClass, UncFolder> entry : uncFolderSet) {
 			detail = entry.getValue().poll();
-			if(detail != null) break;
+			if (detail != null) {
+				break;
+			}
 		}
 		return detail;
 	}
-	
+
 	private class UncFolder {
-		private String uncFolderPath;
-		private TreeSet<FolderDetail> folderDetails = new TreeSet<FolderDetail>();
-		
-		public UncFolder(String uncFolderPath) {
+
+		final private String uncFolderPath;
+		final private Set<FolderDetail> folderDetails = new TreeSet<FolderDetail>();
+
+		public UncFolder(final String uncFolderPath) {
 			this.uncFolderPath = uncFolderPath;
 		}
-		
+
 		public void addFolderDetail(FolderDetail folderDetail) {
 			folderDetails.add(folderDetail);
-			logger.trace("PUSH::" + folderDetail.getFullPath());
+			LOGGER.trace("PUSH::" + folderDetail.getFullPath());
 		}
-		
+
 		public FolderDetail poll() {
+			FolderDetail folderDetail = null;
 			try {
-				FolderDetail folderDetail = this.folderDetails.first();
-				if (folderDetail != null) {
-					if ((System.currentTimeMillis() - folderDetail.getCreationTime()) >= waitTime) {
-						logger.trace("PULL::" + folderDetail.getFullPath());
-						return this.folderDetails.pollFirst();
-					}
+				folderDetail = ((TreeSet<FolderDetail>) this.folderDetails).first();
+				if (folderDetail != null && (System.currentTimeMillis() - folderDetail.getCreationTime()) >= waitTime) {
+					LOGGER.trace("PULL::" + folderDetail.getFullPath());
+					folderDetail = ((TreeSet<FolderDetail>) this.folderDetails).pollFirst();
 				}
-			} catch (NoSuchElementException e) { }
-			return null;
+			} catch (NoSuchElementException e) {
+				LOGGER.error("No such element is found:" +e.getMessage(),e);
+			}
+			return folderDetail;
 		}
-		
+
 		public String getUncFolderPath() {
 			return uncFolderPath;
 		}
 	}
+
 }

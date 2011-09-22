@@ -54,6 +54,8 @@ import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
  */
 public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfigService {
 
+	private static final String INVALID_PLUGIN_NAME = "Invalid Plugin name.";
+
 	/**
 	 * LOGGER to print the LOGGERging information.
 	 */
@@ -73,7 +75,7 @@ public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfig
 				returnMap.put(config.getName(), config.getValue());
 			}
 		} else {
-			LOGGER.debug("Invalid Plugin name.");
+			LOGGER.debug(INVALID_PLUGIN_NAME);
 		}
 		return returnMap;
 	}
@@ -87,7 +89,7 @@ public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfig
 		if (pluginName != null && pluginName.length() > 0) {
 			allPluginProperties = batchClassPluginConfigDao.getPluginPropertiesForBatch(batchInstanceIdentifier, pluginName);
 		} else {
-			LOGGER.debug("Invalid Plugin name.");
+			LOGGER.debug(INVALID_PLUGIN_NAME);
 		}
 		
 		return allPluginProperties;
@@ -106,7 +108,7 @@ public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfig
 				returnMap.put(config.getName(), config.getValue());
 			}
 		} else {
-			LOGGER.debug("Invalid Plugin name.");
+			LOGGER.debug(INVALID_PLUGIN_NAME);
 		}
 		return returnMap;
 	}
@@ -134,7 +136,7 @@ public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfig
 				returnMap.put(config.getName(), config.getValue());
 			}
 		} else {
-			LOGGER.debug("Invalid Plugin name.");
+			LOGGER.debug(INVALID_PLUGIN_NAME);
 		}
 		return returnMap;
 	}

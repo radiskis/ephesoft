@@ -46,113 +46,115 @@ import com.ephesoft.dcma.core.common.MailMetaData;
 import com.ephesoft.dcma.core.model.common.AbstractEntity;
 
 @Entity
-@Table(name="email_data")
+@Table(name = "email_data")
 public class EmailData extends AbstractEntity implements Serializable, Cloneable {
 
-    private static final long serialVersionUID = 8351775124202755008L;
+	private static final long serialVersionUID = 8351775124202755008L;
 
-    public EmailData() {
-        super();
-    }
+	public EmailData() {
+		super();
+	}
 
-    public EmailData(String sender, String senderName, String recipient, String subject, String content) {
-        this.sender = sender;
-        this.senderName = senderName;
-        this.recipient = recipient;
-        this.subject = subject;
-        this.content = content;
-    }
+	public EmailData(final String sender, final String senderName, final String recipient, final String subject, final String content) {
+		super();
+		this.sender = sender;
+		this.senderName = senderName;
+		this.recipient = recipient;
+		this.subject = subject;
+		this.content = content;
+	}
 
-    /**
-     * Constructs an <code>EmailData</code> using the first reciever als single receiver.
-     */
-    public EmailData(MailMetaData mailMetaData, String content) {
-        this.sender = mailMetaData.getFromAddress();
-        this.senderName = mailMetaData.getFromName();
-        this.recipient = mailMetaData.getToAddresses().get(0);
-        this.subject = mailMetaData.getSubject();
-        this.content = content;
-        this.isContentTypeHtml = mailMetaData.isContentTypeHtml();
-    }
+	/**
+	 * Constructs an <code>EmailData</code> using the first reciever als single receiver.
+	 */
+	public EmailData(final MailMetaData mailMetaData, final String content) {
+		super();
+		this.sender = mailMetaData.getFromAddress();
+		this.senderName = mailMetaData.getFromName();
+		this.recipient = mailMetaData.getToAddresses().get(0);
+		this.subject = mailMetaData.getSubject();
+		this.content = content;
+		this.contentTypeHtml = mailMetaData.isContentTypeHtml();
+	}
 
-    @Lob
-    @Column(length = 100000)
-    private String content; // sync size with Message.content!
+	@Lob
+	@Column(length = 100000)
+	private String content; // sync size with Message.content!
 
-    @Column(nullable = false)
-    private String recipient;
+	@Column(nullable = false)
+	private String recipient;
 
-    @Column(nullable = false)
-    private String sender;
+	@Column(nullable = false)
+	private String sender;
 
-    @Column
-    private String senderName;
+	@Column
+	private String senderName;
 
-    @Column
-    private String subject;
-    
-    @Column(name="isContentTypeHtml")
-	private boolean isContentTypeHtml;
-    
-    @Column(length = 500)
+	@Column
+	private String subject;
+
+	@Column(name = "isContentTypeHtml")
+	private boolean contentTypeHtml;
+
+	@Column(length = 500)
 	private String ccList;
-	
+
 	@Column(length = 500)
 	private String bccList;
 
-    public String getContent() {
-        return content;
-    }
-
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public String getSender() {
-        return sender;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-	public boolean isContentTypeHtml() {
-		return isContentTypeHtml;
+	public String getContent() {
+		return content;
 	}
 
-	public void setContentTypeHtml(boolean isContentTypeHtml) {
-		this.isContentTypeHtml = isContentTypeHtml;
+	public String getRecipient() {
+		return recipient;
+	}
+
+	public String getSender() {
+		return sender;
+	}
+
+	public String getSenderName() {
+		return senderName;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setContent(final String content) {
+		this.content = content;
+	}
+
+	public void setRecipient(final String recipient) {
+		this.recipient = recipient;
+	}
+
+	public void setSender(final String sender) {
+		this.sender = sender;
+	}
+
+	public void setSenderName(final String senderName) {
+		this.senderName = senderName;
+	}
+
+	public void setSubject(final String subject) {
+		this.subject = subject;
+	}
+
+	public boolean isContentTypeHtml() {
+		return contentTypeHtml;
+	}
+
+	public void setContentTypeHtml(final boolean contentTypeHtml) {
+		this.contentTypeHtml = contentTypeHtml;
 	}
 
 	public String getCcList() {
 		return ccList;
 	}
 
-	public void setCcList(String ccList) {
+	public void setCcList(final String ccList) {
 		this.ccList = ccList;
 	}
 
@@ -160,7 +162,7 @@ public class EmailData extends AbstractEntity implements Serializable, Cloneable
 		return bccList;
 	}
 
-	public void setBccList(String bccList) {
+	public void setBccList(final String bccList) {
 		this.bccList = bccList;
 	}
 }

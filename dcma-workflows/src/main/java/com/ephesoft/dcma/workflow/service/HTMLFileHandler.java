@@ -72,7 +72,7 @@ public class HTMLFileHandler {
 	/**
 	 * Initializing logger {@link Logger}.
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(HTMLFileHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HTMLFileHandler.class);
 
 	/**
 	 * API changes old batchInstance identifier to new batch instance identifier in html file specified in file path.
@@ -88,9 +88,9 @@ public class HTMLFileHandler {
 			Document dom = null;
 			try {
 				// Using factory get an instance of document builder
-				DocumentBuilder db = dbf.newDocumentBuilder();
+				DocumentBuilder databaseBuilder = dbf.newDocumentBuilder();
 				// parse using builder to get DOM representation of the XML file
-				dom = db.parse(filePath);
+				dom = databaseBuilder.parse(filePath);
 				if (dom != null) {
 					Node node = dom.getElementsByTagName(WorkFlowConstants.DIV_HTML_TAG).item(0);
 					NamedNodeMap nodeAttribute = node.getAttributes();
@@ -109,21 +109,21 @@ public class HTMLFileHandler {
 						File newFile = new File(newFilePath);
 						newFile.renameTo(file);
 					} else {
-						logger.error("Error in deleting file :" +filePath);
-						logger.error("Unable to correct the file information.");
+						LOGGER.error("Error in deleting file :" +filePath);
+						LOGGER.error("Unable to correct the file information.");
 					}
 				}
 			} catch (ParserConfigurationException pce) {
-				logger.error(pce.getMessage(), pce);
+				LOGGER.error(pce.getMessage(), pce);
 			} catch (SAXException se) {
-				logger.error(se.getMessage(), se);
+				LOGGER.error(se.getMessage(), se);
 			} catch (IOException ioe) {
-				logger.error(ioe.getMessage(), ioe);
+				LOGGER.error(ioe.getMessage(), ioe);
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+				LOGGER.error(e.getMessage(), e);
 			}
 		} else {
-			logger.error("Either file path or batchInstance identifiers is null during parsing HTML file" + filePath);
+			LOGGER.error("Either file path or batchInstance identifiers is null during parsing HTML file" + filePath);
 		}
 	}
 
@@ -145,16 +145,16 @@ public class HTMLFileHandler {
 				xformer = TransformerFactory.newInstance().newTransformer();
 			}
 		} catch (TransformerConfigurationException e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 		} catch (TransformerFactoryConfigurationError e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 		}
 		try {
 			if (source != null && result != null && xformer != null) {
 				xformer.transform(source, result);
 			}
 		} catch (TransformerException e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 

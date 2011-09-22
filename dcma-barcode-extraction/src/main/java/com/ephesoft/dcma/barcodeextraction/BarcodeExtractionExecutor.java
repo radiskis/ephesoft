@@ -64,16 +64,17 @@ import com.google.zxing.multi.GenericMultipleBarcodeReader;
 
 public class BarcodeExtractionExecutor extends AbstractRunnable {
 
-	private String sourcePath;
-	private String fileName;
-	private String[] appReaderTypes;
+	private final String sourcePath;
+	private final String fileName;
+	private final String[] appReaderTypes;
 	private BarcodeExtractionResult[] barCodeResults;
-	private Document document;
-	private Page page;
+	private final Document document;
+	private final Page page;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeExtractionExecutor.class);
 
 	public BarcodeExtractionExecutor(String sourcePath, String fileName, String[] appReaderTypes, Page page, Document document) {
+		super();
 		this.sourcePath = sourcePath;
 		this.fileName = fileName;
 		this.appReaderTypes = appReaderTypes;
@@ -195,10 +196,10 @@ public class BarcodeExtractionExecutor extends AbstractRunnable {
 			barcodeResults = new BarcodeExtractionResult[results.length];
 			for (int i = 0; i < results.length; i++) {
 				barcodeResults[i] = new BarcodeExtractionResult();
-				barcodeResults[i].setX0(results[i].getResultPoints()[0].getX());
-				barcodeResults[i].setX1(results[i].getResultPoints()[1].getX());
-				barcodeResults[i].setY0(results[i].getResultPoints()[0].getY());
-				barcodeResults[i].setY1(results[i].getResultPoints()[1].getY());
+				barcodeResults[i].setX0Coordinate(results[i].getResultPoints()[0].getX());
+				barcodeResults[i].setX1Coordinate(results[i].getResultPoints()[1].getX());
+				barcodeResults[i].setY0Coordinate(results[i].getResultPoints()[0].getY());
+				barcodeResults[i].setY1Coordinate(results[i].getResultPoints()[1].getY());
 				barcodeResults[i].setTexts(results[i].getText());
 				if (BarcodeFormat.CODE_39.getName().equalsIgnoreCase(results[i].getBarcodeFormat().getName())) {
 					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODE39);

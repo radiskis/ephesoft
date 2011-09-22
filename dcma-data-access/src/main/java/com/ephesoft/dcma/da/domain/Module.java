@@ -60,9 +60,6 @@ public class Module extends AbstractChangeableEntity {
 	@Column(name = "module_version")
 	private String version;
 
-	public Module() {
-	}
-
 	public String getName() {
 		return name;
 	}

@@ -39,14 +39,13 @@ import org.springframework.context.ApplicationEvent;
 
 import com.ephesoft.dcma.da.id.BatchClassID;
 
-
 public class DeleteBatchClassEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final BatchClassID batchClassID;
-	
-	public DeleteBatchClassEvent(Object source, BatchClassID batchClassID) {
+
+	public DeleteBatchClassEvent(final Object source, final BatchClassID batchClassID) {
 		super(source);
 		this.batchClassID = batchClassID;
 	}

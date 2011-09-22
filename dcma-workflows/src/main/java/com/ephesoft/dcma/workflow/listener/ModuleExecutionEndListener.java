@@ -41,6 +41,8 @@ import org.jbpm.api.listener.EventListener;
 import org.jbpm.api.listener.EventListenerExecution;
 import org.jbpm.pvm.internal.env.EnvironmentImpl;
 import org.jbpm.pvm.internal.model.ExecutionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
@@ -53,14 +55,15 @@ import com.ephesoft.dcma.workflow.service.common.JBPMVariables;
 public class ModuleExecutionEndListener implements EventListener {
 
 	private static final long serialVersionUID = -2076024339760462947L;
-
-	private BatchInstanceID batchInstanceID;
-	private String moduleWorkflowName;
-
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleExecutionEndListener.class);
+	
 	@Override
 	public void notify(EventListenerExecution execution) throws Exception {
-		batchInstanceID = (BatchInstanceID) execution.getVariables().get(JBPMVariables.BATCH_INSTANCE_ID);
-		moduleWorkflowName = ((ExecutionImpl) execution).getActivityName();
+		LOGGER.info("Module Execution End Event Fired.");
+		BatchInstanceID batchInstanceID = (BatchInstanceID) execution.getVariables().get(JBPMVariables.BATCH_INSTANCE_ID);
+		String moduleWorkflowName = ((ExecutionImpl) execution).getActivityName();
+		LOGGER.info("Module Name:" + moduleWorkflowName);
 		BatchInstanceService batchInstanceService = EnvironmentImpl.getCurrent().get(BatchInstanceService.class);
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID.getID());
 		BatchClass batchClass = batchInstance.getBatchClass();
@@ -69,6 +72,7 @@ public class ModuleExecutionEndListener implements EventListener {
 		for (BatchClassModule bcm : batchClassModules) {
 			if (bcm.getWorkflowName().equalsIgnoreCase(moduleWorkflowName)) {
 				executedModuleIdString = batchInstance.getExecutedModules();
+				LOGGER.info("Executed Module List:" + executedModuleIdString);
 				if (executedModuleIdString == null) {
 					executedModuleIdString = new String();
 				}
@@ -78,8 +82,10 @@ public class ModuleExecutionEndListener implements EventListener {
 				}
 			}
 		}
+		LOGGER.info("Final Executed Module List:" + executedModuleIdString);
 		batchInstance.setExecutedModules(executedModuleIdString);
 		batchInstanceService.updateBatchInstance(batchInstance);
+		LOGGER.info("Module Execution End Event Ends.");
 	}
 
 }

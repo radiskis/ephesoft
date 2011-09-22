@@ -52,7 +52,7 @@ public class ModuleEvent extends GwtEvent<ModuleHandler> {
 	/**
 	 * Type of event.
 	 */
-	public static Type<ModuleHandler> TYPE = new Type<ModuleHandler>();
+	public static Type<ModuleHandler> type = new Type<ModuleHandler>();
 
 	/**
 	 * Action taken by user.
@@ -90,7 +90,7 @@ public class ModuleEvent extends GwtEvent<ModuleHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<ModuleHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public ModuleDTO getModule() {

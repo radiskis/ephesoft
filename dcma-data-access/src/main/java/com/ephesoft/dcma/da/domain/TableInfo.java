@@ -76,9 +76,6 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 	@JoinColumn(name = "table_info_id")
 	private List<TableColumnsInfo> tableColumnsInfo = new ArrayList<TableColumnsInfo>();
 
-	public TableInfo() {
-	}
-
 	public DocumentType getDocType() {
 		return docType;
 	}
@@ -119,28 +116,22 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 		return tableColumnsInfo;
 	}
 
-	public boolean removeTableColumnsInfoById(Long id) {
-
-		if (null == this.tableColumnsInfo) {
-			return false;
-		}
-
-		int index = 0;
-		TableColumnsInfo removalElement = null;
-		for (TableColumnsInfo actualElement : this.tableColumnsInfo) {
-			if (id == actualElement.getId()) {
-				removalElement = this.tableColumnsInfo.get(index);
-				break;
+	public boolean removeTableColumnsInfoById(Long identifier) {
+		boolean isRemoved = false;
+		if (null != this.tableColumnsInfo) {
+			int index = 0;
+			TableColumnsInfo removalElement = null;
+			for (TableColumnsInfo actualElement : this.tableColumnsInfo) {
+				if (identifier == actualElement.getId()) {
+					removalElement = this.tableColumnsInfo.get(index);
+					isRemoved = this.tableColumnsInfo.remove(removalElement);
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
 
-		if (null == removalElement) {
-			return false;
-		}
-
-		return this.tableColumnsInfo.remove(removalElement);
-
+		return isRemoved;
 	}
 
 	public void addTableColumnsInfo(TableColumnsInfo tableColumnsInfo) {
@@ -153,20 +144,18 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 	}
 
 	public TableColumnsInfo getTableColumnsInfobyIdOfColumn(Long tableColumnInfoId) {
-
-		if (null == tableColumnInfoId || this.tableColumnsInfo == null || this.tableColumnsInfo.isEmpty()) {
-			return null;
-		}
-
-		for (TableColumnsInfo tableColumn : this.tableColumnsInfo) {
-			if (tableColumn.getId() == tableColumnInfoId) {
-				return tableColumn;
+		TableColumnsInfo tableColumnsInfo1 = null;
+		if (null != tableColumnInfoId && this.tableColumnsInfo != null && !this.tableColumnsInfo.isEmpty()) {
+			for (TableColumnsInfo tableColumn : this.tableColumnsInfo) {
+				if (tableColumn.getId() == tableColumnInfoId) {
+					tableColumnsInfo1 = tableColumn;
+					break;
+				}
 			}
 		}
-
-		return null;
+		return tableColumnsInfo1;
 	}
-	
+
 	/**
 	 * Adds a Table Column Info to this table
 	 * 
@@ -180,7 +169,6 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 
 		this.tableColumnsInfo.add(tableColumnsInfo);
 	}
-	
 
 	/**
 	 * Returns a Table Columns Info based on identifier
@@ -189,19 +177,16 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 	 * @return Table Columns Info if found. null otherwise
 	 */
 	public TableColumnsInfo getTableColumnInfobyIdentifier(String identifier) {
-
-		if (null == identifier || this.tableColumnsInfo == null || this.tableColumnsInfo.isEmpty()) {
-			return null;
-		}
-
-		for (TableColumnsInfo columnsInfo : this.tableColumnsInfo) {
-			if (String.valueOf(columnsInfo.getId()).equals(identifier)) {
-				return columnsInfo;
+		TableColumnsInfo tableColumnsInfo = null;
+		if (null != identifier && this.tableColumnsInfo != null && !this.tableColumnsInfo.isEmpty()) {
+			for (TableColumnsInfo columnsInfo : this.tableColumnsInfo) {
+				if (String.valueOf(columnsInfo.getId()).equals(identifier)) {
+					tableColumnsInfo = columnsInfo;
+					break;
+				}
 			}
 		}
-
-		return null;
+		return tableColumnsInfo;
 	}
-
 
 }

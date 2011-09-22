@@ -51,5 +51,8 @@ import com.ephesoft.dcma.test.DcmaTestCase;
 @ContextConfiguration(locations = { "classpath:META-INF/applicationContext-ocropus.xml" })
 @Module("dcma-ocropus")
 public abstract class AbstractOcrTests extends DcmaTestCase {
-
+	
+	protected AbstractOcrTests() {
+		super();
+	}
 }

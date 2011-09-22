@@ -50,6 +50,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import com.ephesoft.dcma.da.domain.BatchClass;
@@ -68,10 +69,13 @@ import com.ephesoft.dcma.da.domain.RegexValidation;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.util.ApplicationContextUtil;
 
 public class UpgradePatchPreparation {
 
-	private static final Logger log = LoggerFactory.getLogger(UpgradePatchPreparation.class);
+	private static final String ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE = "Error occurred while creating the serializable file.";
+
+	private static final Logger LOG = LoggerFactory.getLogger(UpgradePatchPreparation.class);
 
 	private static final String PROPERTY_FILE = "db-patch";
 	private static final String META_INF_PATH = "META-INF\\dcma-data-access";
@@ -90,9 +94,9 @@ public class UpgradePatchPreparation {
 
 	private static HashMap<String, ArrayList<BatchClass>> batchClassNameVsBatchClassMap = new HashMap<String, ArrayList<BatchClass>>();
 
-	private static Properties loadProperties(String propertyName) throws IOException {
-		String filePath = META_INF_PATH + File.separator + propertyName + ".properties";
-		Properties properties = new Properties();
+	private static Properties loadProperties(final String propertyName) throws IOException {
+		final String filePath = META_INF_PATH + File.separator + propertyName + ".properties";
+		final Properties properties = new Properties();
 		InputStream propertyInStream = null;
 		try {
 			propertyInStream = new ClassPathResource(filePath).getInputStream();
@@ -104,18 +108,18 @@ public class UpgradePatchPreparation {
 		return properties;
 	}
 
-	public static void createDBPatch(BatchClassService service) {
+	public static void createDBPatch(final BatchClassService service) {
 		String pluginInfo = null;
 		String pluginConfigInfo = null;
 		String moduleInfo = null;
 		String batchClassInfo = null;
 		String moduleConfigInfo = null;
 		try {
-			Properties props = loadProperties(PROPERTY_FILE);
+			final Properties props = loadProperties(PROPERTY_FILE);
 
 			upgradePatchFolderPath = props.getProperty("upgradePatch.folder");
 			if (upgradePatchFolderPath == null || upgradePatchFolderPath.isEmpty()) {
-				log.error("Patch folder not specified. Unable to complete patch creation.");
+				LOG.error("Patch folder not specified. Unable to complete patch creation.");
 				return;
 			}
 
@@ -145,13 +149,13 @@ public class UpgradePatchPreparation {
 			}
 
 		} catch (IOException e) {
-			log.error("Unable to load properties file.", e);
+			LOG.error("Unable to load properties file.", e);
 		}
 	}
 
-	private static void createPatchForPlugin(BatchClassService service, String pluginInfo) {
+	private static void createPatchForPlugin(final BatchClassService service, final String pluginInfo) {
 
-		StringTokenizer pluginTokens = new StringTokenizer(pluginInfo, ";");
+		final StringTokenizer pluginTokens = new StringTokenizer(pluginInfo, ";");
 		while (pluginTokens.hasMoreTokens()) {
 			String pluginToken = pluginTokens.nextToken();
 			StringTokenizer pluginConfigTokens = new StringTokenizer(pluginToken, ",");
@@ -175,7 +179,7 @@ public class UpgradePatchPreparation {
 				}
 
 			} catch (NoSuchElementException e) {
-				log.info("Incomplete data specifiedin properties file.", e);
+				LOG.info("Incomplete data specifiedin properties file.", e);
 			}
 		}
 
@@ -184,11 +188,11 @@ public class UpgradePatchPreparation {
 			SerializationUtils.serialize(batchClassNameVsPluginsMap, new FileOutputStream(serializedExportFile));
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
-			log.error("Error occurred while creating the serializable file." + e.getMessage(), e);
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 		}
 	}
 
-	private static void createPatchForPluginConfig(BatchClassService service, String pluginConfigInfo) {
+	private static void createPatchForPluginConfig(BatchClassService service, final String pluginConfigInfo) {
 		StringTokenizer pluginTokens = new StringTokenizer(pluginConfigInfo, ";");
 		while (pluginTokens.hasMoreTokens()) {
 			String pluginToken = pluginTokens.nextToken();
@@ -201,7 +205,7 @@ public class UpgradePatchPreparation {
 				createPatch(pluginId, pluginConfigId, service);
 
 			} catch (NoSuchElementException e) {
-				log.error("Incomplete data specified in properties file.", e);
+				LOG.error("Incomplete data specified in properties file.", e);
 			}
 		}
 
@@ -210,7 +214,7 @@ public class UpgradePatchPreparation {
 			SerializationUtils.serialize(pluginIdVsBatchPluginConfigList, new FileOutputStream(serializedExportFile));
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
-			log.error("Error occurred while creating the serializable file." + e.getMessage(), e);
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 		}
 	}
 
@@ -236,7 +240,7 @@ public class UpgradePatchPreparation {
 				}
 
 			} catch (NoSuchElementException e) {
-				log.error("Incomplete data specified in properties file.", e);
+				LOG.error("Incomplete data specified in properties file.", e);
 			}
 		}
 
@@ -245,7 +249,7 @@ public class UpgradePatchPreparation {
 			SerializationUtils.serialize(batchClassNameVsModulesMap, new FileOutputStream(serializedExportFile));
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
-			log.error("Error occurred while creating the serializable file." + e.getMessage(), e);
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 		}
 
 	}
@@ -267,7 +271,7 @@ public class UpgradePatchPreparation {
 				}
 
 			} catch (NoSuchElementException e) {
-				log.error("Incomplete data specified in properties file.", e);
+				LOG.error("Incomplete data specified in properties file.", e);
 			}
 		}
 
@@ -276,7 +280,7 @@ public class UpgradePatchPreparation {
 			SerializationUtils.serialize(batchClassNameVsBatchClassMap, new FileOutputStream(serializedExportFile));
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
-			log.error("Error occurred while creating the serializable file." + e.getMessage(), e);
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 		}
 	}
 
@@ -306,7 +310,7 @@ public class UpgradePatchPreparation {
 			}
 
 		} catch (NumberFormatException e) {
-			log.error("Module Id should be numeric." + e.getMessage(), e);
+			LOG.error("Module Id should be numeric." + e.getMessage(), e);
 		}
 		return createdModule;
 	}
@@ -359,7 +363,7 @@ public class UpgradePatchPreparation {
 			}
 
 		} catch (NumberFormatException e) {
-			log.error("Module Id should be numeric." + e.getMessage(), e);
+			LOG.error("Module Id should be numeric." + e.getMessage(), e);
 		}
 		return createdBatchClass;
 	}
@@ -397,7 +401,7 @@ public class UpgradePatchPreparation {
 			}
 
 		} catch (NumberFormatException e) {
-			log.error("Module Id and Plugin Id should be numeric." + e.getMessage(), e);
+			LOG.error("Module Id and Plugin Id should be numeric." + e.getMessage(), e);
 		}
 		return createdPlugin;
 	}
@@ -574,7 +578,7 @@ public class UpgradePatchPreparation {
 			}
 
 		} catch (NumberFormatException e) {
-			log.error("Plugin Id and Plugin Config Id should be numeric." + e.getMessage(), e);
+			LOG.error("Plugin Id and Plugin Config Id should be numeric." + e.getMessage(), e);
 		}
 
 	}
@@ -603,8 +607,16 @@ public class UpgradePatchPreparation {
 						+ SERIALIZATION_EXT);
 				SerializationUtils.serialize(moduleIdVsBatchClassModuleConfigMap, new FileOutputStream(serializedExportFile));
 			} catch (FileNotFoundException e) {
-				log.error("Error occurred while creating the serializable file." + e.getMessage(), e);
+				LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"classpath:/META-INF/applicationContext-data-access.xml");
+		context.start();
+		BatchClassService batchClassService = ApplicationContextUtil.getSingleBeanOfType(context, BatchClassService.class);
+		createDBPatch(batchClassService);
 	}
 }

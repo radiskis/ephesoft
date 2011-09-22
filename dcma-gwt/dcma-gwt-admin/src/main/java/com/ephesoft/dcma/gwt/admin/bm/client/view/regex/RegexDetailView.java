@@ -52,15 +52,16 @@ public class RegexDetailView  extends View<RegexDetailPresenter> {
 	}
 
 	@UiField
-	Label patternLabel;
+	protected Label patternLabel;
 
 	@UiField
-	Label pattern;
+	protected Label pattern;
 	
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public RegexDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		patternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PATTERN)+AdminConstants.COLON);
 
 		patternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);

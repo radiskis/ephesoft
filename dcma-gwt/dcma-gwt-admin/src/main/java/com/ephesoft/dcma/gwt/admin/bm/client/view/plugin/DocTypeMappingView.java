@@ -53,26 +53,29 @@ public class DocTypeMappingView extends View<DocTypeMappingPresenter> {
 	}
 
 	@UiField
-	FlexTable flexEditTable;
+	protected FlexTable flexEditTable;
 
 	private FlexTable detailsTable;
 
 	private int rowCounter = 0;
 	
-	@UiField PluginData pluginData;
+	@UiField 
+	PluginData pluginData;
 	
-	@UiField CaptionPanel dbMappingPanel;
-	@UiField CaptionPanel pluginDetailsPanel;
+	@UiField 
+	protected CaptionPanel dbMappingPanel;
+	@UiField 
+	protected CaptionPanel pluginDetailsPanel;
 
 	private String driverName;
 	private String url;
 	private String userName;
 	private String password;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocTypeMappingView() {
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		dbMappingPanel.setCaptionHTML(AdminConstants.DATABASE_MAPPING_HTML);
 		pluginDetailsPanel.setCaptionHTML(AdminConstants.PLUGIN_DETAILS_HTML);

@@ -53,6 +53,12 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
 
 public class CleanupServiceImpl implements CleanupService, ICommonConstants {
 
+	private static final String EXCEPTION_WHILE_DELETING_FOLDER = "Exception while deleting folder : ";
+
+	private static final String NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER = "Not enough permission to delete folder : ";
+
+	private static final String COULD_NOT_DELETE_FOLDER = "Could not delete folder : ";
+
 	private static final String PROPERTIES_DIRECTORY = "properties";
 
 	private static final String PROPERTIES_FILE_EXTENSION = ".ser";
@@ -60,76 +66,76 @@ public class CleanupServiceImpl implements CleanupService, ICommonConstants {
 	/**
 	 * Logger reference.
 	 */
-	private Logger logger = LoggerFactory.getLogger(CleanupServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CleanupServiceImpl.class);
 
 	@Autowired
 	private BatchInstanceDao batchInstanceDao;
 
 	@Override
 	public void cleanup(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
-		BatchInstance batchInstance = batchInstanceDao.getBatchInstancesForIdentifier(batchInstanceID.getID());
+		// throw new DCMAException("********Explicit exception thrown************");
+		final BatchInstance batchInstance = batchInstanceDao.getBatchInstancesForIdentifier(batchInstanceID.getID());
 		boolean isRemoteBatchInstance = false;
 		String delUncFolder = null;
-		String sBatchFolder = batchInstance.getLocalFolder() + File.separator + batchInstance.getIdentifier();
-		CleanupComponent cleanUpComponet = new CleanupComponent();
-		RemoteBatchInstance remoteBatchInstance = batchInstance.getRemoteBatchInstance();
+		final String sBatchFolder = batchInstance.getLocalFolder() + File.separator + batchInstance.getIdentifier();
+		final CleanupComponent cleanUpComponet = new CleanupComponent();
+		final RemoteBatchInstance remoteBatchInstance = batchInstance.getRemoteBatchInstance();
 		delUncFolder = batchInstance.getUncSubfolder();
-		if (remoteBatchInstance != null && (remoteBatchInstance.getRemoteURL() != null || remoteBatchInstance.getPreviousRemoteURL() != null) ) {
-			if (delUncFolder == null) {
-				isRemoteBatchInstance = true;
-			}
+		if (remoteBatchInstance != null
+				&& (remoteBatchInstance.getRemoteURL() != null || remoteBatchInstance.getPreviousRemoteURL() != null)
+				&& delUncFolder == null) {
+			isRemoteBatchInstance = true;
 		}
 		if (!isRemoteBatchInstance) {
 			try {
 				cleanUpComponet.execute(delUncFolder);
 			} catch (IOException e) {
-				logger.error("Unable to delete folder : " + delUncFolder, e);
+				LOGGER.error("Unable to delete folder : " + delUncFolder, e);
 			} catch (DCMAApplicationException e) {
-				logger.error("Could not delete folder : " + delUncFolder, e);
-				throw new DCMAException("Could not delete folder : " + delUncFolder, e);
+				LOGGER.error(COULD_NOT_DELETE_FOLDER + delUncFolder, e);
+				throw new DCMAException(COULD_NOT_DELETE_FOLDER + delUncFolder, e);
 			} catch (SecurityException e) {
-				logger.error("Not enough permission to delete folder : " + delUncFolder, e);
-				throw new DCMAException("Not enough permission to delete folder : " + delUncFolder, e);
+				LOGGER.error(NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER + delUncFolder, e);
+				throw new DCMAException(NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER + delUncFolder, e);
 			} catch (Exception e) {
-				logger.error("Exception while deleting folder : " + delUncFolder, e);
-				throw new DCMAException("Exception while deleting folder : " + delUncFolder, e);
+				LOGGER.error(EXCEPTION_WHILE_DELETING_FOLDER + delUncFolder, e);
+				throw new DCMAException(EXCEPTION_WHILE_DELETING_FOLDER + delUncFolder, e);
 			}
 		}
 
-		String serializedFilePath = batchInstance.getLocalFolder() + File.separator + PROPERTIES_DIRECTORY + File.separator
+		final String serializedFilePath = batchInstance.getLocalFolder() + File.separator + PROPERTIES_DIRECTORY + File.separator
 				+ batchInstance.getIdentifier() + PROPERTIES_FILE_EXTENSION;
 		try {
 			cleanUpComponet.deleteFile(serializedFilePath);
-			logger.info(serializedFilePath + " deleted successfully");
+			LOGGER.info(serializedFilePath + " deleted successfully");
 		} catch (IOException e) {
-			logger.error("Unable to delete file : " + serializedFilePath, e);
+			LOGGER.error("Unable to delete file : " + serializedFilePath, e);
 		} catch (DCMAApplicationException e) {
-			logger.error("Could not delete file : " + serializedFilePath, e);
+			LOGGER.error("Could not delete file : " + serializedFilePath, e);
 			throw new DCMAException("Could not delete file : " + serializedFilePath, e);
 		} catch (SecurityException e) {
-			logger.error("Not enough permission to delete file : " + serializedFilePath, e);
+			LOGGER.error("Not enough permission to delete file : " + serializedFilePath, e);
 			throw new DCMAException("Not enough permission to delete file : " + serializedFilePath, e);
 		} catch (Exception e) {
-			logger.error("Exception while deleting file : " + serializedFilePath, e);
+			LOGGER.error("Exception while deleting file : " + serializedFilePath, e);
 			throw new DCMAException("Exception while deleting file : " + serializedFilePath, e);
 		}
 
 		try {
 			cleanUpComponet.execute(sBatchFolder);
-			logger.info(sBatchFolder + " deleted successfully");
+			LOGGER.info(sBatchFolder + " deleted successfully");
 		} catch (IOException e) {
-			logger.error("Unable to delete folder : " + sBatchFolder, e);
+			LOGGER.error("Unable to delete folder : " + sBatchFolder, e);
 		} catch (DCMAApplicationException e) {
-			logger.error("Could not delete folder : " + sBatchFolder, e);
-			throw new DCMAException("Could not delete folder : " + sBatchFolder, e);
+			LOGGER.error(COULD_NOT_DELETE_FOLDER + sBatchFolder, e);
+			throw new DCMAException(COULD_NOT_DELETE_FOLDER + sBatchFolder, e);
 		} catch (SecurityException e) {
-			logger.error("Not enough permission to delete folder : " + sBatchFolder, e);
-			throw new DCMAException("Not enough permission to delete folder : " + sBatchFolder, e);
+			LOGGER.error(NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER + sBatchFolder, e);
+			throw new DCMAException(NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER + sBatchFolder, e);
 		} catch (Exception e) {
-			logger.error("Exception while deleting folder : " + sBatchFolder, e);
-			throw new DCMAException("Exception while deleting folder : " + sBatchFolder, e);
+			LOGGER.error(EXCEPTION_WHILE_DELETING_FOLDER + sBatchFolder, e);
+			throw new DCMAException(EXCEPTION_WHILE_DELETING_FOLDER + sBatchFolder, e);
 		}
-
 	}
 
 }

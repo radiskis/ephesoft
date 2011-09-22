@@ -60,7 +60,7 @@ import com.ephesoft.dcma.da.domain.DocumentType;
 @Repository
 public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements DocumentTypeDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(DocumentTypeDaoImpl.class);
 
 	/**
 	 * An api to fetch all DocumentType by batch instance id.
@@ -70,7 +70,7 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 	 */
 	@Override
 	public List<DocumentType> getDocTypeByBatchInstanceIdentifier(String batchInstanceIdentifier) {
-		log.info("batchInstanceID : " + batchInstanceIdentifier);
+		LOG.info("batchInstanceID : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
 		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));

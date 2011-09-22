@@ -48,12 +48,13 @@ public class KV_PP_DetailView extends View<KV_PP_DetailPresenter> {
 	}
 
 	@UiField
-	FlexTable viewTable;
+	protected FlexTable viewTable;
 
-	private final Binder binder = GWT.create(Binder.class);
+	private final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_DetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	public FlexTable getViewTable() {

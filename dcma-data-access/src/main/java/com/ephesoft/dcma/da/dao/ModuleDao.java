@@ -44,6 +44,6 @@ public interface ModuleDao extends CacheableDao<Module> {
 	 * @param configName
 	 * @return
 	 */
-	public Module getModuleByName(String moduleName); 
+	Module getModuleByName(String moduleName); 
 
 }

@@ -62,14 +62,15 @@ import com.google.zxing.multi.GenericMultipleBarcodeReader;
 
 public class BarcodeExecutor extends AbstractRunnable {
 
-	private String sourcePath;
-	private String fileName;
-	private String[] appReaderTypes;
+	private final String sourcePath;
+	private final String fileName;
+	private final String[] appReaderTypes;
 	private BarcodeResult[] barCodeResults;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeExecutor.class);
 
 	public BarcodeExecutor(String sourcePath, String fileName, String[] appReaderTypes) {
+		super();
 		this.sourcePath = sourcePath;
 		this.fileName = fileName;
 		this.appReaderTypes = appReaderTypes;
@@ -94,33 +95,29 @@ public class BarcodeExecutor extends AbstractRunnable {
 		try {
 			if (sourcePath != null && !sourcePath.isEmpty()) {
 				sourceImage = ImageIO.read(new File(sourcePath));
-			} else {
-				LOGGER.error("No valid extensions are specified in resources");
-				setDcmaApplicationException(new DCMAApplicationException("No valid extensions are specified in resources"));
-				return;
 			}
-			if (sourceImage == null) {
+			if (sourceImage != null) {
+				if (appReaderTypes != null && appReaderTypes.length > 0) {
+					for (String appReaderType : appReaderTypes) {
+
+						if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODE39.name())) {
+							barCodeFormatVector.add(BarcodeFormat.CODE_39);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.QR.name())) {
+							barCodeFormatVector.add(BarcodeFormat.QR_CODE);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.DATAMATRIX.name())) {
+							barCodeFormatVector.add(BarcodeFormat.DATA_MATRIX);
+						}
+					}
+					codeResults = getBarCodeResults(sourceImage, fileName, barCodeFormatVector);
+					barCodeResults = setBarcodeResults(codeResults);
+
+				} else {
+					LOGGER.error("No proper Barcode reader is specified in resources");
+					setDcmaApplicationException(new DCMAApplicationException("No proper Barcode reader is specified in resources"));
+				}
+			} else {
 				LOGGER.error("Source image is null for image : " + sourcePath);
 				setDcmaApplicationException(new DCMAApplicationException("Source image is null for image : " + sourcePath));
-				return;
-			}
-			if (appReaderTypes != null && appReaderTypes.length > 0) {
-				for (String appReaderType : appReaderTypes) {
-
-					if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODE39.name())) {
-						barCodeFormatVector.add(BarcodeFormat.CODE_39);
-					} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.QR.name())) {
-						barCodeFormatVector.add(BarcodeFormat.QR_CODE);
-					} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.DATAMATRIX.name())) {
-						barCodeFormatVector.add(BarcodeFormat.DATA_MATRIX);
-					}
-				}
-				codeResults = getBarCodeResults(sourceImage, fileName, barCodeFormatVector);
-				barCodeResults = setBarcodeResults(codeResults);
-
-			} else {
-				LOGGER.error("No proper Barcode reader is specified in resources");
-				setDcmaApplicationException(new DCMAApplicationException("No proper Barcode reader is specified in resources"));
 			}
 		} catch (IOException e) {
 			LOGGER.error("Could not read sourceImage " + sourcePath);
@@ -128,7 +125,6 @@ public class BarcodeExecutor extends AbstractRunnable {
 		} finally {
 			if (sourceImage != null) {
 				sourceImage.flush();
-				barCodeFormatVector = null;
 			}
 		}
 	}
@@ -160,8 +156,6 @@ public class BarcodeExecutor extends AbstractRunnable {
 			LOGGER.info("The image was not of types defined in the system" + re.getMessage());
 		} catch (Exception re) {
 			LOGGER.info("Barcode Reader could not read image file: " + fileName);
-		} finally {
-			hints = null;
 		}
 		return codeResults;
 	}
@@ -178,10 +172,10 @@ public class BarcodeExecutor extends AbstractRunnable {
 			barcodeResults = new BarcodeResult[results.length];
 			for (int i = 0; i < results.length; i++) {
 				barcodeResults[i] = new BarcodeResult();
-				barcodeResults[i].setX0(results[i].getResultPoints()[0].getX());
-				barcodeResults[i].setX1(results[i].getResultPoints()[1].getX());
-				barcodeResults[i].setY0(results[i].getResultPoints()[0].getY());
-				barcodeResults[i].setY1(results[i].getResultPoints()[1].getY());
+				barcodeResults[i].setX0Cord(results[i].getResultPoints()[0].getX());
+				barcodeResults[i].setX1Cord(results[i].getResultPoints()[1].getX());
+				barcodeResults[i].setY0Cord(results[i].getResultPoints()[0].getY());
+				barcodeResults[i].setY1Cord(results[i].getResultPoints()[1].getY());
 				barcodeResults[i].setTexts(results[i].getText());
 				if (BarcodeFormat.CODE_39.getName().equalsIgnoreCase(results[i].getBarcodeFormat().getName())) {
 					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODE39);

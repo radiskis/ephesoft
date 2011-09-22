@@ -50,8 +50,8 @@ import com.ephesoft.dcma.da.domain.ServerRegistry;
 public class ServerRegistryDaoImpl extends HibernateDao<ServerRegistry> implements ServerRegistryDao {
 
 	@Override
-	public ServerRegistry getServerRegistry(Serializable id) {
-		return get(id);
+	public ServerRegistry getServerRegistry(Serializable identifier) {
+		return get(identifier);
 	}
 
 	@Override

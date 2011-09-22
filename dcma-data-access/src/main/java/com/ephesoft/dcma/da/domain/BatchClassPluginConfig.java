@@ -147,38 +147,33 @@ public class BatchClassPluginConfig extends AbstractChangeableEntity implements 
 		this.kvPageProcesses.add(kvPageProcess);
 	}
 
-	public boolean removeKvPageProcessById(long id) {
-		if (null == this.kvPageProcesses) {
-			return false;
-		}
-		int index = 0;
-		KVPageProcess kvPage = null;
-		for (KVPageProcess kvPageProcess : this.kvPageProcesses) {
-			if (id == kvPageProcess.getId()) {
-				kvPage = this.kvPageProcesses.get(index);
-				break;
+	public boolean removeKvPageProcessById(long identifier) {
+		boolean isRemoved = false;
+		if (null != this.kvPageProcesses) {
+			int index = 0;
+			KVPageProcess kvPage = null;
+			for (KVPageProcess kvPageProcess : this.kvPageProcesses) {
+				if (identifier == kvPageProcess.getId()) {
+					kvPage = this.kvPageProcesses.get(index);
+					isRemoved = this.kvPageProcesses.remove(kvPage);
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
-		if (null == kvPage) {
-			return false;
-		}
-		return this.kvPageProcesses.remove(kvPage);
+		return isRemoved;
 	}
 
 	public KVPageProcess getKVPageProcessbyIdentifier(String identifier) {
-
-		if (null == identifier || this.kvPageProcesses == null || this.kvPageProcesses.isEmpty()) {
-			return null;
-		}
-
-		for (KVPageProcess kvPageProcess : this.kvPageProcesses) {
-			if (String.valueOf(kvPageProcess.getId()).equals(identifier)) {
-				return kvPageProcess;
+		KVPageProcess kvPageProcess1 = null;
+		if (null != identifier && this.kvPageProcesses != null && !this.kvPageProcesses.isEmpty()) {
+			for (KVPageProcess kvPageProcess : this.kvPageProcesses) {
+				if (String.valueOf(kvPageProcess.getId()).equals(identifier)) {
+					kvPageProcess1 = kvPageProcess;
+				}
 			}
 		}
-
-		return null;
+		return kvPageProcess1;
 	}
 
 	public Object clone() throws CloneNotSupportedException {

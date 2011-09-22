@@ -150,10 +150,10 @@ public class PasswordEncryptor {
 			}
 		} while (wantToContinue);
 		try {
-			if(br != null) {
+			if (br != null) {
 				br.close();
 			}
-			if(inputStreamReader != null) {
+			if (inputStreamReader != null) {
 				inputStreamReader.close();
 			}
 		} catch (IOException e) {

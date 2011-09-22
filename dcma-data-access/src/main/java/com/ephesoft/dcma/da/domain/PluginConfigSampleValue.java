@@ -61,7 +61,7 @@ public class PluginConfigSampleValue extends AbstractChangeableEntity {
 		return pluginConfig;
 	}
 	
-	public String getSample_value() {
+	public String getSampleValue() {
 		return sample_value;
 	}
 }

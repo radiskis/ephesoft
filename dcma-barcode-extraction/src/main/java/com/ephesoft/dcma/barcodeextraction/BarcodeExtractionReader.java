@@ -102,7 +102,7 @@ public class BarcodeExtractionReader implements ICommonConstants {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeExtractionReader.class);
 
-	private static final String ON = "ON";
+	private static final String SWITCH_ON = "ON";
 
 	/**
 	 * The prefix for name to be stored in batch xml.
@@ -285,13 +285,13 @@ public class BarcodeExtractionReader implements ICommonConstants {
 		docField.setFieldOrderNumber(fieldType.getFieldOrderNumber());
 		Coordinates coordinates = new Coordinates();
 		coordinates.setX0(new BigInteger(String.valueOf((int) barCodeResult.getX0())));
-		coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResult.getX1())));
-		coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResult.getY0())));
-		coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResult.getY1())));
+		coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResult.getX1Coordinate())));
+		coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResult.getY0Coordinate())));
+		coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResult.getY1Coordinate())));
 		CoordinatesList coordinatesList = new CoordinatesList();
 		coordinatesList.getCoordinates().add(coordinates);
 		docField.setCoordinatesList(coordinatesList);
-		if (docField.getValue() != null || !docField.getValue().isEmpty()) {
+		if (docField != null && docField.getValue() != null && !docField.getValue().isEmpty()) {
 			docField.setConfidence(Integer.valueOf(maxConfidence));
 		} else {
 			docField.setConfidence(Integer.valueOf(minConfidence));
@@ -313,7 +313,7 @@ public class BarcodeExtractionReader implements ICommonConstants {
 	public void readBarcode(final String batchInstanceIdentifier, String pluginName) throws DCMAApplicationException {
 		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, BARCODE_EXTRACTION_PLUGIN,
 				BarcodeExtractionProperties.BARCODE_SWITCH);
-		if (switchValue.equalsIgnoreCase(ON)) {
+		if (switchValue.equalsIgnoreCase(SWITCH_ON)) {
 			LOGGER.info("Started Processing image at " + new Date());
 
 			// Initialize properties
@@ -373,7 +373,7 @@ public class BarcodeExtractionReader implements ICommonConstants {
 					boolean isFileValid = false;
 					if (validExtensions != null && validExtensions.length > 0) {
 						for (int l = 0; l < validExtensions.length; l++) {
-							if (eachPage.substring(eachPage.indexOf(".") + 1).equalsIgnoreCase(validExtensions[l])) {
+							if (eachPage.substring(eachPage.indexOf('.') + 1).equalsIgnoreCase(validExtensions[l])) {
 								isFileValid = true;
 								break;
 							}

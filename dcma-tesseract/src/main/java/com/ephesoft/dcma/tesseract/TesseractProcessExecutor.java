@@ -56,16 +56,17 @@ import com.ephesoft.dcma.util.OSUtil;
 
 public class TesseractProcessExecutor {
 
-	private String fileName;
-	private Batch batch;
-	private String batchInstanceID;
-	private List<String> cmdList;
-	private String actualFolderLocation;
-	private String cmdLanguage;
-	private BatchInstanceThread thread;
+	final private static String TESSERACT_BASE_PATH_NOT_CONFIGURED = "Tesseract Base path not configured.";
+	final private String fileName;
+	final private Batch batch;
+	final private String batchInstanceID;
+	final private List<String> cmdList;
+	final private String actualFolderLocation;
+	final private String cmdLanguage;
+	final private BatchInstanceThread thread;
 	private String targetHOCR;
-	private String tesseractVersion;
-	private String colorSwitch;
+	final private String tesseractVersion;
+	final private String colorSwitch;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractProcessExecutor.class);
 
@@ -84,26 +85,17 @@ public class TesseractProcessExecutor {
 		run();
 	}
 
-	public void run() throws DCMAApplicationException {
+	public final void run() throws DCMAApplicationException {
 		List<String> cmdListLocal = new ArrayList<String>();
 		cmdListLocal.addAll(this.cmdList);
 		if (fileName.contains(" ")) {
 			LOGGER.error(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
 			throw new DCMAApplicationException(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
 		}
-
-		String tesseractBasePath = "";
-		try {
-			ApplicationConfigProperties app = new ApplicationConfigProperties();
-			tesseractBasePath = app.getProperty(tesseractVersion);
-		} catch (IOException ioe) {
-			LOGGER.error("Tesseract Base path not configured." + ioe, ioe);
-			throw new DCMAApplicationException("Tesseract Base path not configured.", ioe);
-		}
-
+		String tesseractBasePath = getTesseractVersion();
 		if (tesseractBasePath == null) {
-			LOGGER.error("Tesseract Base path not configured.");
-			throw new DCMAApplicationException("Tesseract Base path not configured.");
+			LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED);
+			throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED);
 		}
 
 		// process each image file to generate HOCR files
@@ -124,7 +116,6 @@ public class TesseractProcessExecutor {
 				} else {
 					sImageFile = page.getNewFileName();
 				}
-
 				if (fileName.equalsIgnoreCase(sImageFile)) {
 					oldFileName = page.getOldFileName();
 					ocrInputFileName = page.getOCRInputFileName();
@@ -136,8 +127,9 @@ public class TesseractProcessExecutor {
 			FileNameFormatter fileFormatter = new FileNameFormatter();
 			if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 				/*
-				 * # Changed due to Tesseract 3.0: # Sending an empty string in the extension part which Tesseract automatically does #
-				 * to the name we give to the file
+				  # Changed due to Tesseract 3.0: 
+				  # Sending an empty string in the extension part which Tesseract automatically does 
+				  # to the name we give to the file
 				 */
 				targetHOCR = fileFormatter.getHocrFileName(String.valueOf(batchInstanceID), oldFileName, fileName, ocrInputFileName,
 						"", pageId, false);
@@ -145,7 +137,6 @@ public class TesseractProcessExecutor {
 				targetHOCR = fileFormatter.getHocrFileName(String.valueOf(batchInstanceID), oldFileName, fileName, ocrInputFileName,
 						".html", pageId, false);
 			}
-
 		} catch (Exception e1) {
 			LOGGER.error("Exception retrieving the name of HOCR file" + e1.getMessage(), e1);
 			throw new DCMAApplicationException("Exception retrieving the name of HOCR file" + e1.getMessage(), e1);
@@ -156,26 +147,10 @@ public class TesseractProcessExecutor {
 		try {
 			if (!cmdListLocal.isEmpty()) {
 				if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
-					if (OSUtil.isWindows()) {
-						cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
-						cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
-						cmdListLocal.add("-l");
-						cmdListLocal.add(cmdLanguage);
-						cmdListLocal.add("+hocr.txt");
-					} else {
-						cmdListLocal.add(actualFolderLocation + File.separator + fileName);
-						cmdListLocal.add(actualFolderLocation + File.separator + targetHOCR);
-						cmdListLocal.add("-l");
-						cmdListLocal.add(cmdLanguage);
-						cmdListLocal.add("+hocr.txt");
-					}
+					creatingTesseractVersion3Command(cmdListLocal, targetHOCR);
 				} else {
-					cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
-					cmdListLocal.add(cmdLanguage);
-					cmdListLocal.add(">");
-					cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
+					creatingTesseractVersion2Command(cmdListLocal, targetHOCR);
 				}
-
 				String[] cmds = new String[cmdListLocal.size()];
 				for (int i = 0; i < cmdListLocal.size(); i++) {
 					if (cmdListLocal.get(i).contains("cmd")) {
@@ -189,13 +164,11 @@ public class TesseractProcessExecutor {
 						cmds[i] = cmdListLocal.get(i);
 					}
 				}
-
 				LOGGER.info("command formed is :");
 				for (int i = 0; i < cmds.length; i++) {
 					LOGGER.info(cmds[i]);
 				}
 				LOGGER.info("command formed Ends.");
-
 				thread.add(new ProcessExecutor(cmds, new File(tesseractBasePath)));
 			}
 		} catch (Exception e) {
@@ -208,6 +181,41 @@ public class TesseractProcessExecutor {
 		} else {
 			this.targetHOCR = targetHOCR;
 		}
+	}
+
+	private void creatingTesseractVersion2Command(List<String> cmdListLocal, String targetHOCR) {
+		cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
+		cmdListLocal.add(cmdLanguage);
+		cmdListLocal.add(">");
+		cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
+	}
+
+	private void creatingTesseractVersion3Command(List<String> cmdListLocal, String targetHOCR) {
+		if (OSUtil.isWindows()) {
+			cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
+			cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
+			cmdListLocal.add("-l");
+			cmdListLocal.add(cmdLanguage);
+			cmdListLocal.add("+hocr.txt");
+		} else {
+			cmdListLocal.add(actualFolderLocation + File.separator + fileName);
+			cmdListLocal.add(actualFolderLocation + File.separator + targetHOCR);
+			cmdListLocal.add("-l");
+			cmdListLocal.add(cmdLanguage);
+			cmdListLocal.add("+hocr.txt");
+		}
+	}
+
+	private String getTesseractVersion() throws DCMAApplicationException {
+		String tesseractBasePath = null;
+		try {
+			ApplicationConfigProperties app = new ApplicationConfigProperties();
+			tesseractBasePath = app.getProperty(tesseractVersion);
+		} catch (IOException ioe) {
+			LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe.getMessage(), ioe);
+			throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED, ioe);
+		}
+		return tesseractBasePath;
 	}
 
 	public String getTargetHOCR() {

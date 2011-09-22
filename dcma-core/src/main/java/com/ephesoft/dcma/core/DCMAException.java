@@ -38,18 +38,16 @@ package com.ephesoft.dcma.core;
 public class DCMAException extends Exception {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	public DCMAException(String message) {
 		super(message);
 	}
-	
 
-	
-	 public DCMAException(String message, Throwable cause) {
-	        super(message, cause);
-	    }
-	
+	public DCMAException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 	public DCMAException() {
-		
+
 	}
 }

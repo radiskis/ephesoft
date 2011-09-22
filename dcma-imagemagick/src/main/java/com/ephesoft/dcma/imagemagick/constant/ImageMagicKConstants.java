@@ -35,24 +35,36 @@
 
 package com.ephesoft.dcma.imagemagick.constant;
 
-
 public interface ImageMagicKConstants {
+
 	/**
 	 * Image magic plugin name
 	 */
 	String CLASSIFY_IMAGES_PLUGIN = "CLASSIFY_IMAGES";
-	
+
 	String CREATE_THUMBNAILS_PLUGIN = "CREATE_THUMBNAILS";
-	
+
 	String CREATE_OCR_INPUT_PLUGIN = "CREATE_OCR_INPUT";
-	
+
 	String CREATE_DISPLAY_IMAGE_PLUGIN = "CREATE_DISPLAY_IMAGE";
-	
+
 	String CREATEMULTIPAGE_FILES_PLUGIN = "CREATEMULTIPAGE_FILES";
-	
+
 	String IMPORT_MULTIPAGE_FILES_PLUGIN = "IMPORT_MULTIPAGE_FILES";
-	
+
 	String IMAGE_MAGIC_PLUGIN_NAME_CONSTANT = "IMAGE_MAGIC";
-	
+
 	String HOCR_TO_PDF_PLUGIN_NAME_CONSTANT = "HOCRtoPDF";
+
+	String GHOST_SCRIPT_COMMAND_PARAMETERS = "-dNOPAUSE -r300 -sDEVICE=";
+
+	String GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS = "-dBATCH -sOutputFile=";
+
+	String TIF_DEVICE = "tiffg4";
+
+	String PDF_DEVICE = "pdfwrite";
+
+	String ON_SWITCH = "ON";
+
+	String TEMP_FILE_NAME = "tempFile";
 }

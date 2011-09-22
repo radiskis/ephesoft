@@ -77,9 +77,12 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 
 	@Column(name = "document_type_description")
 	private String description;
-	
+
 	@Column(name = "rsp_project_file_name")
 	private String rspProjectFileName;
+
+	@Column(name = "is_hidden", columnDefinition = "bit(1) default false")
+	private boolean isHidden;
 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
@@ -190,6 +193,14 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 
 	public void setRspProjectFileName(String rspProjectFileName) {
 		this.rspProjectFileName = rspProjectFileName;
+	}
+
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	public void setHidden(boolean isHidden) {
+		this.isHidden = isHidden;
 	}
 
 	public void postPersist() {

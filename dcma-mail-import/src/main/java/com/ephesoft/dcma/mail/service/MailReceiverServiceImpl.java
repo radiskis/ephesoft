@@ -78,14 +78,12 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private BatchSchemaService batchSchemaService;
-	private String defaultFolderLocation;
 	private Store store = null;
 	private Session session = null;
-	String folderPath = null;
 
 	@Override
 	public List<CustomMessage> readMails(BatchClassEmailConfiguration configuration) throws DCMAApplicationException {
-		defaultFolderLocation = batchSchemaService.getEmailFolderPath();
+		String	defaultFolderLocation = batchSchemaService.getEmailFolderPath();
 		Folder folder = null;
 		Message[] messages = null;
 		Boolean isSSL = false;
@@ -102,7 +100,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 					store = connectWithIMAPSSL(configuration);
 				} else {
 					logger.error("Error in Server Type Configuration, only imap/pop3 is allowed");
-					throw (new DCMAApplicationException("Error in Server Type Configuration, only imap/pop3 is allowed"));
+					throw new DCMAApplicationException("Error in Server Type Configuration, only imap/pop3 is allowed");
 				}
 
 			} else {
@@ -264,17 +262,17 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
 	}
 
-	public String getText(Part p) throws MessagingException, IOException {
-		if (p.isMimeType("text/*")) {
-			String s = (String) p.getContent();
+	public String getText(Part part) throws MessagingException, IOException {
+		if (part.isMimeType("text/*")) {
+			String s = (String) part.getContent();
 			return s;
 		}
 
-		if (p.isMimeType("multipart/alternative")) {
-			Multipart mp = (Multipart) p.getContent();
+		if (part.isMimeType("multipart/alternative")) {
+			Multipart multiPart = (Multipart) part.getContent();
 			String text = null;
-			for (int i = 0; i < mp.getCount(); i++) {
-				Part bp = mp.getBodyPart(i);
+			for (int i = 0; i < multiPart.getCount(); i++) {
+				Part bp = multiPart.getBodyPart(i);
 				if (bp.isMimeType("text/plain")) {
 					if (text == null) {
 						text = getText(bp);
@@ -290,10 +288,10 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				}
 			}
 			return text;
-		} else if (p.isMimeType("multipart/*")) {
-			Multipart mp = (Multipart) p.getContent();
-			for (int i = 0; i < mp.getCount(); i++) {
-				String s = getText(mp.getBodyPart(i));
+		} else if (part.isMimeType("multipart/*")) {
+			Multipart multiPart = (Multipart) part.getContent();
+			for (int i = 0; i < multiPart.getCount(); i++) {
+				String s = getText(multiPart.getBodyPart(i));
 				if (s != null)
 					return s;
 			}

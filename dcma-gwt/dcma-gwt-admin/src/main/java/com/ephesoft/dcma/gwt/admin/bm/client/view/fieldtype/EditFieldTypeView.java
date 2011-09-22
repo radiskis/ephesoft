@@ -65,80 +65,86 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label descStar;
+	protected Label descStar;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 
 	@UiField
-	Label dataTypeLabel;
+	protected Label dataTypeLabel;
 	@UiField
-	Label dataTypeStar;
+	protected Label dataTypeStar;
 	@UiField
-	ListBox dataType;
+	protected ListBox dataType;
 
 	@UiField
-	Label patternLabel;
+	protected Label patternLabel;
 	@UiField
-	Label patternStar;
+	protected Label patternStar;
 	@UiField
-	TextBox pattern;
+	protected TextBox pattern;
 
 	@UiField
-	Label fdOrderLabel;
+	protected Label fdOrderLabel;
 	@UiField
-	Label fdOrderStar;
+	protected Label fdOrderStar;
 	@UiField
-	TextBox fdOrder;
+	protected TextBox fdOrder;
 
 	@UiField
-	Label sampleValueLabel;
+	protected Label sampleValueLabel;
 	@UiField
-	Label sampleValueStar;
+    Label sampleValueStar;
 	@UiField
-	TextBox sampleValue;
+	protected TextBox sampleValue;
 
 	@UiField
-	Label fieldOptionValueListLabel;
+	protected Label fieldOptionValueListLabel;
 	@UiField
-	TextBox fieldOptionValueList;
+	protected TextBox fieldOptionValueList;
 
 	@UiField
-	Label barcodeTypeLabel;
+	protected Label barcodeTypeLabel;
 	@UiField
-	ListBox barcodeTypeListBox;
+	protected ListBox barcodeTypeListBox;
 
 	@UiField
-	Label isHiddenLabel;
+	protected Label isHiddenLabel;
 	@UiField
-	CheckBox isHidden;
+	protected CheckBox isHidden;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
+	
+	public CheckBox getIsHidden() {
+		return isHidden;
+	}
+
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
 	private ValidatableWidget<TextBox> validatePatternTextBox;
 	private ValidatableWidget<TextBox> validateFdOrderTextBox;
 	@UiField
-	VerticalPanel editDocumentTypeViewPanel;
+	protected VerticalPanel editDocumentTypeViewPanel;
 
-	List<String> allBarcodeValues = null;
+	private List<String> allBarcodeValues = null;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditFieldTypeView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
@@ -215,13 +221,13 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
-			presenter.onSave();
-		
+	public void onSaveClicked(ClickEvent clickEvent) {
+		presenter.onSave();
+
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
@@ -249,28 +255,30 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		String selected = this.dataType.getItemText(this.dataType.getSelectedIndex());
 		DataType[] allDataTypes = DataType.values();
 		for (DataType dataType2 : allDataTypes) {
-			if (dataType2.name().equals(selected))
+			if (dataType2.name().equals(selected)) {
 				return dataType2;
+			}
 		}
 		return allDataTypes[0];
 	}
 
 	public String getBarcodeType() {
-		String selected = this.barcodeTypeListBox.getItemText(this.barcodeTypeListBox.getSelectedIndex());
-		return selected;
+		return  this.barcodeTypeListBox.getItemText(this.barcodeTypeListBox.getSelectedIndex());
 	}
 
 	private int findIndex(DataType datatype) {
-		if (datatype == null)
+		if (datatype == null) {
 			return 0;
+		}
 		DataType[] allDataTypes = DataType.values();
 		List<DataType> tempList = Arrays.asList(allDataTypes);
 		return tempList.indexOf(datatype);
 	}
 
 	private int findIndex(String barcodeType) {
-		if (barcodeType == null || barcodeType.isEmpty())
+		if (barcodeType == null || barcodeType.isEmpty()) {
 			return 0;
+		}
 		if (allBarcodeValues != null && !allBarcodeValues.isEmpty()) {
 			return (allBarcodeValues.indexOf(barcodeType)) + 1;
 		}
@@ -296,14 +304,16 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	}
 
 	public void setDataType(DataType datatype) {
-		if (this.dataType.getItemCount() == 0)
+		if (this.dataType.getItemCount() == 0) {
 			setDataType();
+		}
 		this.dataType.setSelectedIndex(findIndex(datatype));
 	}
 
 	public void setBarcodeType(String barcodeType) {
-		if (this.barcodeTypeListBox.getItemCount() == 0)
+		if (this.barcodeTypeListBox.getItemCount() == 0) {
 			setBarcodeType();
+		}
 		this.barcodeTypeListBox.setSelectedIndex(findIndex(barcodeType));
 	}
 

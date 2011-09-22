@@ -64,52 +64,53 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 	}
 
 	@UiField
-	Label keyPatternLabel;
+	protected Label keyPatternLabel;
 	@UiField
-	Label keyPatternStar;
+	protected Label keyPatternStar;
 	@UiField
-	TextBox keyPattern;
+	protected TextBox keyPattern;
 
 	@UiField
-	Label valuePatternLabel;
+	protected Label valuePatternLabel;
 	@UiField
-	Label valuePatternStar;
+	protected Label valuePatternStar;
 	@UiField
-	TextBox valuePattern;
+	protected TextBox valuePattern;
 
 	@UiField
-	Label locationLabel;
+	protected Label locationLabel;
 	@UiField
-	Label locationStar;
+	protected Label locationStar;
 	@UiField
-	ListBox location;
+	protected ListBox location;
 
 	@UiField
-	Label noOfWordsLabel;
+	protected Label noOfWordsLabel;
 	@UiField
-	TextBox noOfWords;
+	protected TextBox noOfWords;
 	@UiField
-	Label noOFWordsStar;
+	protected Label noOFWordsStar;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateKeyPatternTextBox;
 	private ValidatableWidget<TextBox> validateValuePatternTextBox;
 	private ValidatableWidget<TextBox> validateNoOfWordsTextBox;
 
 	@UiField
-	VerticalPanel editKVTypeViewPanel;
+	protected VerticalPanel editKVTypeViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditKVExtractionView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-	
+
 		validateKeyPatternTextBox = new ValidatableWidget<TextBox>(keyPattern);
 		validateKeyPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -163,12 +164,12 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
@@ -200,15 +201,17 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 		String selected = this.location.getItemText(this.location.getSelectedIndex());
 		LocationType[] allLocationTypes = LocationType.values();
 		for (LocationType locationType : allLocationTypes) {
-			if (locationType.name().equals(selected))
+			if (locationType.name().equals(selected)) {
 				return locationType;
+			}
 		}
 		return allLocationTypes[0];
 	}
 
 	private int findIndex(LocationType locationType) {
-		if (locationType == null)
+		if (locationType == null) {
 			return 0;
+		}
 		LocationType[] allLocationTypes = LocationType.values();
 		List<LocationType> tempList = Arrays.asList(allLocationTypes);
 		return tempList.indexOf(locationType);
@@ -223,8 +226,9 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 	}
 
 	public void setLocation(LocationType locationType) {
-		if (this.location.getItemCount() == 0)
+		if (this.location.getItemCount() == 0) {
 			setLocation();
+		}
 		this.location.setSelectedIndex(findIndex(locationType));
 	}
 

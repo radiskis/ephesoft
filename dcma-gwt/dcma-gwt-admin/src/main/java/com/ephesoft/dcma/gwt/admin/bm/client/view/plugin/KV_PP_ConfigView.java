@@ -59,23 +59,24 @@ public class KV_PP_ConfigView extends View<KV_PP_ConfigPresenter> {
 	}
 
 	@UiField
-	DockLayoutPanel kvConfigPanel;
+	protected DockLayoutPanel kvConfigPanel;
 
 	@UiField
-	Button addKVPPConfigButton;
+	protected Button addKVPPConfigButton;
 
 	@UiField
-	Button editKVPPConfigButton;
+	protected Button editKVPPConfigButton;
 
 	@UiField
-	Button deleteKVPPConfigButton;
+	protected Button deleteKVPPConfigButton;
 
-	private KV_PP_ConfigListView kvPPConfigListView;
+	private final KV_PP_ConfigListView kvPPConfigListView;
 
-	private final Binder binder = GWT.create(Binder.class);
+	private final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_ConfigView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		addKVPPConfigButton.setText(AdminConstants.ADD_BUTTON);
 		editKVPPConfigButton.setText(AdminConstants.EDIT_BUTTON);
 		deleteKVPPConfigButton.setText(AdminConstants.DELETE_BUTTON);
@@ -109,7 +110,7 @@ public class KV_PP_ConfigView extends View<KV_PP_ConfigPresenter> {
 
 	public Collection<Record> setKVPageProcessList(Collection<KVPageProcessDTO> fields) {
 		List<Record> recordList = new LinkedList<Record>();
-		if (fields != null && !fields.isEmpty())
+		if (fields != null && !fields.isEmpty()) {
 			for (final KVPageProcessDTO kvPageProcessDTO : fields) {
 				Record record = new Record(String.valueOf(kvPageProcessDTO.getIdentifier()));
 				record.addWidget(kvPPConfigListView.keyPattern, new Label(kvPageProcessDTO.getKeyPattern()));
@@ -119,6 +120,7 @@ public class KV_PP_ConfigView extends View<KV_PP_ConfigPresenter> {
 				record.addWidget(kvPPConfigListView.pageLevelFieldName, new Label(kvPageProcessDTO.getPageLevelFieldName()));
 				recordList.add(record);
 			}
+		}
 		return recordList;
 	}
 

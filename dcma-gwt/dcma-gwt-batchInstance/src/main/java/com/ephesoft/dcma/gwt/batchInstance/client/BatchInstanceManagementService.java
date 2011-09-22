@@ -38,6 +38,7 @@ package com.ephesoft.dcma.gwt.batchInstance.client;
 import java.util.List;
 import java.util.Map;
 
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstancePresenter.Results;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
@@ -56,6 +57,8 @@ public interface BatchInstanceManagementService extends DCMARemoteService {
 	Results deleteBatchInstance(String identifier) throws GWTException;
 
 	Results restartBatchInstance(String identifier, String moduleName) throws GWTException;
+	
+	Results updateBatchInstanceStatus(String identifier, BatchInstanceStatus biStatus) throws GWTException;
 
 	Integer[] getIndividualRowCount();
 

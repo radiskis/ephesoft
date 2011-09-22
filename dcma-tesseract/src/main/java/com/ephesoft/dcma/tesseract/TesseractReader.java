@@ -203,110 +203,112 @@ public class TesseractReader implements ICommonConstants {
 	 * @throws DCMABusinessException
 	 */
 	public void readOCR(final String batchInstanceID, String pluginName) throws DCMAApplicationException {
-		LOGGER.info("Started Processing image at " + new Date());
-		String actualFolderLocation = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+		String tesseractSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+				TesseractProperties.TESSERACT_SWITCH);
+		if (("ON").equalsIgnoreCase(tesseractSwitch)) {
+			LOGGER.info("Started Processing image at " + new Date());
+			String actualFolderLocation = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+			// Initialize properties
+			LOGGER.info("Initializing properties...");
+			String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+					TesseractProperties.TESSERACT_VALID_EXTNS);
+			String cmdLanguage = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+					TesseractProperties.TESSERACT_LANGUAGE);
+			String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+					TesseractVersionProperty.TESSERACT_VERSIONS);
+			String colorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+					TesseractProperties.TESSERACT_COLOR_SWITCH);
+			LOGGER.info("Properties Initialized Successfully");
 
-		// Initialize properties
-		LOGGER.info("Initializing properties...");
-		String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
-				TesseractProperties.TESSERACT_VALID_EXTNS);
-		String cmdLanguage = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
-				TesseractProperties.TESSERACT_LANGUAGE);
-		String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
-				TesseractVersionProperty.TESSERACT_VERSIONS);
-		String colorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
-				TesseractProperties.TESSERACT_COLOR_SWITCH);
-		LOGGER.info("Properties Initialized Successfully");
-
-		String[] validExtensions = validExt.split(";");
-		List<String> cmdList = populateCommandsList();
-
-		Batch batch = batchSchemaService.getBatch(batchInstanceID);
-
-		List<String> allPages = null;
-		try {
-			allPages = findAllPagesFromXML(batch, colorSwitch);
-		} catch (DCMAApplicationException e1) {
-			LOGGER.error("Exception while reading from XML" + e1.getMessage());
-			throw new DCMAApplicationException(e1.getMessage(), e1);
-		}
-		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
-		String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID
-				+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
-		try {
-			FileUtils.createThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
-		} catch (IOException ioe) {
-			LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
-			throw new DCMABusinessException(ioe.getMessage(), ioe);
-		}
-
-		List<TesseractProcessExecutor> tesseractProcessExecutors = new ArrayList<TesseractProcessExecutor>();
-		if (!allPages.isEmpty()) {
-			for (int i = 0; i < allPages.size(); i++) {
-				String eachPage = allPages.get(i);
-				eachPage = eachPage.trim();
-				boolean isFileValid = false;
-				if (validExtensions != null && validExtensions.length > 0) {
-					for (int l = 0; l < validExtensions.length; l++) {
-						if (eachPage.substring(eachPage.indexOf('.') + 1).equalsIgnoreCase(validExtensions[l])) {
-							isFileValid = true;
-							break;
-						}
-					}
-				} else {
-					LOGGER.error("No valid extensions are specified in resources");
-					throw new DCMAApplicationException("No valid extensions are specified in resources");
-				}
-				if (isFileValid) {
-					try {
-						LOGGER.info("Adding to thread pool");
-						tesseractProcessExecutors.add(new TesseractProcessExecutor(eachPage, batch, batchInstanceID, cmdList,
-								actualFolderLocation, cmdLanguage, batchInstanceThread, tesseractVersion, colorSwitch));
-					} catch (DCMAApplicationException e) {
-						LOGGER.error("Image Processing or XML updation failed for image: " + actualFolderLocation + File.separator
-								+ eachPage);
-						throw new DCMAApplicationException(e.getMessage(), e);
-					}
-				} else {
-					LOGGER.debug("File " + eachPage + " has invalid extension.");
-					throw new DCMABusinessException("File " + eachPage + " has invalid extension.");
-				}
-			}
+			String[] validExtensions = validExt.split(";");
+			List<String> cmdList = populateCommandsList();
+			Batch batch = batchSchemaService.getBatch(batchInstanceID);
+			List<String> allPages = null;
 			try {
-				LOGGER.info("Started execution using thread pool");
-				batchInstanceThread.execute();
-				LOGGER.info("Finished execution using thread pool");
-			} catch (DCMAApplicationException dcmae) {
-				LOGGER.error("Error in tesseract reader executor using threadpool" + dcmae.getMessage(), dcmae);
-				batchInstanceThread.remove();
-				batchSchemaService.updateBatch(batch);
-
-				// Throw the exception to set the batch status to Error by Application aspect
-				throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-			} finally {
-				try {
-					FileUtils.deleteThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
-				} catch (IOException ioe) {
-					LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
-					throw new DCMABusinessException(ioe.getMessage(), ioe);
+				allPages = findAllPagesFromXML(batch, colorSwitch);
+			} catch (DCMAApplicationException e1) {
+				LOGGER.error("Exception while reading from XML" + e1.getMessage());
+				throw new DCMAApplicationException(e1.getMessage(), e1);
+			}
+			BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
+			String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID
+					+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
+			try {
+				FileUtils.createThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
+			} catch (IOException ioe) {
+				LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
+				throw new DCMABusinessException(ioe.getMessage(), ioe);
+			}
+			List<TesseractProcessExecutor> tesseractProcessExecutors = new ArrayList<TesseractProcessExecutor>();
+			if (!allPages.isEmpty()) {
+				for (int i = 0; i < allPages.size(); i++) {
+					String eachPage = allPages.get(i);
+					eachPage = eachPage.trim();
+					boolean isFileValid = false;
+					if (validExtensions != null && validExtensions.length > 0) {
+						for (int l = 0; l < validExtensions.length; l++) {
+							if (eachPage.substring(eachPage.indexOf('.') + 1).equalsIgnoreCase(validExtensions[l])) {
+								isFileValid = true;
+								break;
+							}
+						}
+					} else {
+						LOGGER.error("No valid extensions are specified in resources");
+						throw new DCMAApplicationException("No valid extensions are specified in resources");
+					}
+					if (isFileValid) {
+						try {
+							LOGGER.info("Adding to thread pool");
+							tesseractProcessExecutors.add(new TesseractProcessExecutor(eachPage, batch, batchInstanceID, cmdList,
+									actualFolderLocation, cmdLanguage, batchInstanceThread, tesseractVersion, colorSwitch));
+						} catch (DCMAApplicationException e) {
+							LOGGER.error("Image Processing or XML updation failed for image: " + actualFolderLocation + File.separator
+									+ eachPage);
+							throw new DCMAApplicationException(e.getMessage(), e);
+						}
+					} else {
+						LOGGER.debug("File " + eachPage + " has invalid extension.");
+						throw new DCMABusinessException("File " + eachPage + " has invalid extension.");
+					}
 				}
+				try {
+					LOGGER.info("Started execution using thread pool");
+					batchInstanceThread.execute();
+					LOGGER.info("Finished execution using thread pool");
+				} catch (DCMAApplicationException dcmae) {
+					LOGGER.error("Error in tesseract reader executor using threadpool" + dcmae.getMessage(), dcmae);
+					batchInstanceThread.remove();
+					batchSchemaService.updateBatch(batch);
+					// Throw the exception to set the batch status to Error by Application aspect
+					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+				} finally {
+					try {
+						FileUtils.deleteThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
+					} catch (IOException ioe) {
+						LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
+						throw new DCMABusinessException(ioe.getMessage(), ioe);
+					}
+				}
+				for (TesseractProcessExecutor tesseractProcessExecutor : tesseractProcessExecutors) {
+					LOGGER.info("Started Updating batch XML");
+					updateBatchXML(tesseractProcessExecutor.getFileName(), tesseractProcessExecutor.getTargetHOCR(), batch,
+							colorSwitch);
+					LOGGER.info("Finished Updating batch XML");
+					LOGGER.info("Cleaning up intermediate PNG files");
+				}
+				cleanUpIntrmediatePngs(actualFolderLocation);
+			} else {
+				LOGGER.error("No pages found in batch XML.");
+				throw new DCMAApplicationException("No pages found in batch XML.");
 			}
-
-			for (TesseractProcessExecutor tesseractProcessExecutor : tesseractProcessExecutors) {
-				LOGGER.info("Started Updating batch XML");
-				updateBatchXML(tesseractProcessExecutor.getFileName(), tesseractProcessExecutor.getTargetHOCR(), batch, colorSwitch);
-				LOGGER.info("Finished Updating batch XML");
-				LOGGER.info("Cleaning up intermediate PNG files");
-			}
-			cleanUpIntrmediatePngs(actualFolderLocation);
+			LOGGER.info("Started Updating batch XML");
+			batchSchemaService.updateBatch(batch);
+			LOGGER.info("Finished Updating batch XML");
+			LOGGER.info("Processing finished at " + new Date());
 		} else {
-			LOGGER.error("No pages found in batch XML.");
-			throw new DCMAApplicationException("No pages found in batch XML.");
+			LOGGER.info("Skipping tesseract plgugin. Switch set as OFF");
 		}
-		LOGGER.info("Started Updating batch XML");
-		batchSchemaService.updateBatch(batch);
-		LOGGER.info("Finished Updating batch XML");
-		LOGGER.info("Processing finished at " + new Date());
+
 	}
 
 	/**

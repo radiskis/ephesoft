@@ -58,7 +58,7 @@ import com.ephesoft.dcma.da.domain.TableInfo;
 @Repository
 public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableInfoDao {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(TableInfoDaoImpl.class);
 
 	/**
 	 * An api to fetch all TableInfo by document type name.
@@ -70,7 +70,7 @@ public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableIn
 	@Override
 	public List<TableInfo> getTableInfoByDocTypeName(String docTypeName, String batchClassIdentifier) {
 
-		logger.info("Document type name : " + docTypeName);
+		LOGGER.info("Document type name : " + docTypeName);
 		DetachedCriteria criteria = criteria();
 		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
 		criteria.add(Restrictions.eq("docType.name", docTypeName));

@@ -85,7 +85,7 @@ public class RegexReader implements ICommonConstants {
 
 	private static final String KV_PAGE_PROCESS_PLUGIN = "KV_PAGE_PROCESS";
 
-	private static final String ON = "ON";
+	private static final String ON_SWTICH = "ON";
 
 	/**
 	 * Instance of BatchSchemaService.
@@ -106,7 +106,7 @@ public class RegexReader implements ICommonConstants {
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
-	private Logger logger = LoggerFactory.getLogger(RegexReader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegexReader.class);
 
 	/**
 	 * @return the batchSchemaService
@@ -139,7 +139,7 @@ public class RegexReader implements ICommonConstants {
 
 		if (page == null) {
 			errMsg = "In valid page.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
@@ -243,18 +243,18 @@ public class RegexReader implements ICommonConstants {
 
 		if (batchClassPluginConfigList == null) {
 			errMsg = "In valid parameters.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
 		for (BatchPluginConfiguration batchPluginConfiguration : batchClassPluginConfigList) {
 			if (null == batchPluginConfiguration) {
-				logger.error("BatchPluginConfiguration is null.");
+				LOGGER.error("BatchPluginConfiguration is null.");
 				continue;
 			}
 			for (KVPageProcess kvPageProcess : batchPluginConfiguration.getKvPageProcesses()) {
 				if (null == kvPageProcess) {
-					logger.error("KVPageProcess is null.");
+					LOGGER.error("KVPageProcess is null.");
 					continue;
 				}
 				createInputData(kvPageProcess, mapCarrier);
@@ -272,10 +272,10 @@ public class RegexReader implements ICommonConstants {
 	public void readRegex(final BatchInstanceID batchInstanceID) throws DCMAApplicationException, DCMAException {
 		String regexSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
 				RegexProperties.KVPAGEPROCESS_SWITCH);
-		if (regexSwitch.equalsIgnoreCase(ON)) {
+		if (regexSwitch.equalsIgnoreCase(ON_SWTICH)) {
 			String errMsg = null;
 			String batchInstanceIdentifier = batchInstanceID.getID();
-			logger.info("Initializing......");
+			LOGGER.info("Initializing......");
 			// String pluginName = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
 			// RegexProperties.KEY_VALUE_PATTERNS);
 			String maxValue = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
@@ -284,13 +284,13 @@ public class RegexReader implements ICommonConstants {
 			try {
 				maxVal = Integer.parseInt(maxValue);
 			} catch (NumberFormatException e) {
-				logger.info("Cannot parse max result count. Using default value 10 for max results.");
+				LOGGER.info("Cannot parse max result count. Using default value 10 for max results.");
 			}
-			logger.info("Properties Initialized Successfully");
+			LOGGER.info("Properties Initialized Successfully");
 
 			if (null == batchInstanceIdentifier) {
 				errMsg = "Invalid batchInstanceIdentifier.";
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				throw new DCMAApplicationException(errMsg);
 			}
 
@@ -304,7 +304,7 @@ public class RegexReader implements ICommonConstants {
 
 			if (batch == null) {
 				errMsg = "Invalid batch.";
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				throw new DCMAApplicationException(errMsg);
 			}
 
@@ -329,7 +329,7 @@ public class RegexReader implements ICommonConstants {
 
 					if (hocrPages == null) {
 						errMsg = "Invalid hocrPages.";
-						logger.error(errMsg);
+						LOGGER.error(errMsg);
 						throw new DCMAApplicationException(errMsg);
 					}
 
@@ -337,7 +337,7 @@ public class RegexReader implements ICommonConstants {
 
 					if (hocrPageList == null) {
 						errMsg = "Invalid hocrPageList.";
-						logger.error(errMsg);
+						LOGGER.error(errMsg);
 						throw new DCMAApplicationException(errMsg);
 					}
 					HocrPage hocrPage = hocrPageList.get(0);
@@ -346,9 +346,9 @@ public class RegexReader implements ICommonConstants {
 						List<InputDataCarrier> inputDataCarriersForDesc = mapCarrier.get(string);
 						outputDataCarriers = kvFinderService.findKeyValue(inputDataCarriersForDesc, hocrPage, maxVal);
 						Boolean isSuccessful = updateBatchXML(page, outputDataCarriers, batchInstanceID, string);
-						if (isSuccessful == false) {
+						if (!isSuccessful) {
 							errMsg = ("Error in upadting the page in batch.xml" + page);
-							logger.error(errMsg);
+							LOGGER.error(errMsg);
 							throw new DCMAApplicationException(errMsg);
 						}
 					}
@@ -357,42 +357,33 @@ public class RegexReader implements ICommonConstants {
 
 			batchSchemaService.updateBatch(batch);
 
-			logger.info("Update Sucessfully." + batchInstanceIdentifier);
+			LOGGER.info("Update Sucessfully." + batchInstanceIdentifier);
 		} else {
-			logger.info("Skipping regex classification. Switch set as OFF");
+			LOGGER.info("Skipping regex classification. Switch set as OFF");
 		}
 	}
 
 	/**
-	 * This method is used to create the inputdatacarriers from the KVPageProcess object and stored it on the map.
+	 * This method is used to create the input data carriers from the KVPageProcess object and stored it on the map.
 	 * 
 	 * @param kvPageProcess {@link KVPageProcess}
 	 * @param mapCarrier Map<String, List<InputDataCarrier>>
 	 * @return inputDataCarrier
 	 */
 	private void createInputData(final KVPageProcess kvPageProcess, final Map<String, List<InputDataCarrier>> mapCarrier) {
-		if (kvPageProcess == null) {
-			return;
+		if (kvPageProcess != null && mapCarrier != null) {
+			InputDataCarrier inputDataCarrier = new InputDataCarrier(kvPageProcess.getLocationType(), kvPageProcess.getKeyPattern(),
+					kvPageProcess.getValuePattern(), kvPageProcess.getNoOfWords());
+			String description = kvPageProcess.getPageLevelFieldName();
+			if (null != description && !description.isEmpty()) {
+				List<InputDataCarrier> inputDataCarrierList = mapCarrier.get(description);
+				if (null == inputDataCarrierList) {
+					inputDataCarrierList = new ArrayList<InputDataCarrier>();
+				}
+				inputDataCarrierList.add(inputDataCarrier);
+				mapCarrier.put(description, inputDataCarrierList);
+			}
 		}
-		if (mapCarrier == null) {
-			return;
-		}
-		InputDataCarrier inputDataCarrier = new InputDataCarrier(kvPageProcess.getLocationType(), kvPageProcess.getKeyPattern(),
-				kvPageProcess.getValuePattern(), kvPageProcess.getNoOfWords());
-
-		String description = kvPageProcess.getPageLevelFieldName();
-
-		if (null == description || description.isEmpty()) {
-			return;
-		}
-
-		List<InputDataCarrier> inputDataCarrierList = mapCarrier.get(description);
-		if (null == inputDataCarrierList) {
-			inputDataCarrierList = new ArrayList<InputDataCarrier>();
-		}
-		inputDataCarrierList.add(inputDataCarrier);
-		mapCarrier.put(description, inputDataCarrierList);
-
 	}
 
 }

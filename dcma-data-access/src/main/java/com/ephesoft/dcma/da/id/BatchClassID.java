@@ -37,37 +37,37 @@ package com.ephesoft.dcma.da.id;
 
 import java.io.Serializable;
 
-
 public class BatchClassID implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private String ID;
 
-	public BatchClassID(String ID) throws IllegalArgumentException {
-		if (ID == null) {
+	private final String identifier;
+
+	public BatchClassID(String identifier) throws IllegalArgumentException {
+		if (identifier == null) {
 			throw new IllegalArgumentException("null identifier not allowed");
 		}
-		this.ID = ID;
+		this.identifier = identifier;
 	}
 
 	public String getID() {
-		return ID;
+		return identifier;
 	}
-	
+
 	public String toString() {
-		return this.ID;
+		return this.identifier;
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof BatchClassID)) {
-			return false;
+		boolean isEquals = false;
+		if (obj instanceof BatchClassID) {
+			BatchClassID cidObj = (BatchClassID) obj;
+			isEquals = identifier.equals(cidObj.getID());
 		}
-		BatchClassID cidObj = (BatchClassID) obj;
-		return ID.equals(cidObj.getID());
+		return isEquals;
 	}
 
 	public int hashCode() {
-		return ID.hashCode();
+		return identifier.hashCode();
 	}
 }

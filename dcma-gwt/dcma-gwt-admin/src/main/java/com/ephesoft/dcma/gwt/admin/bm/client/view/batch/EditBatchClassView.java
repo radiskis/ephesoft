@@ -65,54 +65,55 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	}
 
 	@UiField
-	TextBox priority;
+	protected TextBox priority;
 	@UiField
-	Label uncFolder;
+	protected Label uncFolder;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 	@UiField
-	Label version;
+	protected Label version;
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	Label priorityLabel;
+	protected Label priorityLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label uncLabel;
+	protected Label uncLabel;
 	@UiField
-	Label versionLabel;
+	protected Label versionLabel;
 
 	@UiField
-	Label star;
+	protected Label star;
 
 	@UiField
 	HorizontalPanel editBatchPanel;
 
 	@UiField
-	Label descStar;
+	protected Label descStar;
 
 	@UiField
-	Label roleLabel;
+	protected Label roleLabel;
 
 	@UiField
-	HorizontalPanel listBoxPanel;
+	protected HorizontalPanel listBoxPanel;
 
-	ListBox role;
+	private ListBox role;
 
-	private ValidatableWidget<TextBox> validateTextBox;
-	private ValidatableWidget<TextBox> validateDescTextBox;
+	private final ValidatableWidget<TextBox> validateTextBox;
+	private final ValidatableWidget<TextBox> validateDescTextBox;
 
 	@UiField
 	VerticalPanel editBatchClassViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditBatchClassView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validateTextBox = new ValidatableWidget<TextBox>(priority);
@@ -155,12 +156,12 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
@@ -214,14 +215,15 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 
 	public String getRole() {
 		int numberOfRole = role.getItemCount();
-		String selected = "";
-		if (role.getSelectedIndex() >= 0)
+		StringBuffer selected = new  StringBuffer("");
+		if (role.getSelectedIndex() >= 0) {
 			for (int index = 0; index < numberOfRole; index++) {
 				if (role.isItemSelected(index)) {
-					selected = selected + role.getItemText(index) + ";";
+					selected.append(role.getItemText(index)).append(';');
 				}
 			}
-		return selected;
+		}
+		return selected.toString();
 	}
 
 	public List<RoleDTO> getRoleList() {
@@ -262,8 +264,7 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 				int index = 0;
 				for (RoleDTO roleDTO : roleList) {
 					for (RoleDTO assignedRoleDTO : assignedRole) {
-						if (roleDTO != null && assignedRoleDTO != null
-								&& roleDTO.getName().equals(assignedRoleDTO.getName())) {
+						if (roleDTO != null && assignedRoleDTO != null && roleDTO.getName().equals(assignedRoleDTO.getName())) {
 							role.setItemSelected(index, true);
 						}
 					}

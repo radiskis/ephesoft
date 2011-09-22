@@ -157,6 +157,7 @@
 		<xs:sequence>
 			<xs:element name="Identifier" type="xs:string" />
 			<xs:element name="Type" type="xs:string" />
+			<xs:element name="Size" type="xs:string" />
 			<xs:element name="Confidence" type="confidence" />
 			<xs:element name="ConfidenceThreshold" type="confidence" />
 			<xs:element name="Valid" type="xs:boolean" />

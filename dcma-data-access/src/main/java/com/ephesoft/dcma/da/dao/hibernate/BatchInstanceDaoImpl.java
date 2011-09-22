@@ -69,6 +69,18 @@ import com.ephesoft.dcma.da.property.BatchPriority;
 @Repository
 public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements BatchInstanceDao {
 
+	private static final String BATCH_CLASS_PROCESS_NAME = "batchClass.processName";
+	private static final String BATCH_CLASS_NAME = "batchClass.name";
+	private static final String VALIDATION_USER_NAME = "validationUserName";
+	private static final String REVIEW_USER_NAME = "reviewUserName";
+	private static final String BATCH_NAME = "batchName";
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	private static final String CURRENT_USER = "currentUser";
+	private static final String IS_REMOTE = "isRemote";
+	private static final String PRIORITY = "priority";
+	private static final String STATUS = "status";
+	private static final String BATCH_CLASS = "batchClass";
+
 	/**
 	 * An api to fetch all batch instance by batch class.
 	 * 
@@ -78,15 +90,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByBatchClass(BatchClass batchClass) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("batchClass", batchClass));
+		criteria.add(Restrictions.eq(BATCH_CLASS, batchClass));
 		return find(criteria);
 	}
 
 	@Override
 	public List<BatchInstance> getBatchInstancesByBatchName(String batchName) {
 		DetachedCriteria criteria = criteria();
-		batchName = batchName.replaceAll("%", "\\\\%");
-		criteria.add(Restrictions.like("batchName", "%" + batchName + "%"));
+		String batchNameLocal = batchName.replaceAll("%", "\\\\%");
+		criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
 		return find(criteria);
 	}
 
@@ -108,7 +120,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByReviewUserName(String reviewUserName) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("reviewUserName", reviewUserName));
+		criteria.add(Restrictions.eq(REVIEW_USER_NAME, reviewUserName));
 		return find(criteria);
 	}
 
@@ -121,7 +133,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByValidationUserName(String validationUserName) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("validationUserName", validationUserName));
+		criteria.add(Restrictions.eq(VALIDATION_USER_NAME, validationUserName));
 		return find(criteria);
 	}
 
@@ -134,8 +146,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByStatus(BatchInstanceStatus batchInstanceStatus) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("status", batchInstanceStatus));
-		criteria.addOrder(org.hibernate.criterion.Order.asc("priority"));
+		criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(PRIORITY));
 		return find(criteria);
 	}
 
@@ -147,16 +159,17 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 */
 	@Override
 	public int getCount(BatchInstanceStatus batchInstanceStatus, String userName, Set<String> batchClassIdentifier) {
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return 0;
+		int count = 0;
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+			DetachedCriteria criteria = criteria();
+			criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
+			criteria.add(Restrictions.eq(IS_REMOTE, false));
+			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			count = count(criteria);
 		}
-		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("status", batchInstanceStatus));
-		criteria.add(Restrictions.eq("isRemote", false));
-		criteria.add(Restrictions.or(Restrictions.isNull("currentUser"), Restrictions.eq("currentUser", userName)));
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-		return count(criteria);
+		return count;
 
 	}
 
@@ -185,17 +198,17 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		EphesoftCriteria criteria = criteria();
 
 		if (null != statusList) {
-			criteria.add(Restrictions.in("status", statusList));
-			criteria.add(Restrictions.or(Restrictions.isNull("currentUser"), Restrictions.eq("currentUser", userName)));
+			criteria.add(Restrictions.in(STATUS, statusList));
+			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
 		}
-		
+
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
 			Disjunction disjunction = Restrictions.disjunction();
 			for (BatchPriority batchPriority : batchPriorities) {
 				if (null != batchPriority) {
 					Integer lowValue = batchPriority.getLowerLimit();
 					Integer upperValue = batchPriority.getUpperLimit();
-					disjunction.add(Restrictions.between("priority", lowValue, upperValue));
+					disjunction.add(Restrictions.between(PRIORITY, lowValue, upperValue));
 				} else {
 					disjunction = Restrictions.disjunction();
 					break;
@@ -205,26 +218,25 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		}
 
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return new ArrayList<BatchInstance>();
+		List<BatchInstance> batchInstaceList = new ArrayList<BatchInstance>();
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+
+			BatchInstanceFilter[] filters = null;
+			if (filterClauseList != null) {
+				filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
+			}
+			Order[] orders = null;
+			if (orderList != null) {
+				orders = orderList.toArray(new Order[orderList.size()]);
+			}
+
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			batchInstaceList = find(criteria, firstResult, maxResults, filters, orders);
 		}
-
-		BatchInstanceFilter[] filters = null;
-		if (filterClauseList != null) {
-			filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
-		}
-		Order[] orders = null;
-		if (orderList != null) {
-			orders = orderList.toArray(new Order[orderList.size()]);
-		}
-
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-
-		return find(criteria, firstResult, maxResults, filters, orders);
-
+		return batchInstaceList;
 	}
-	
+
 	/**
 	 * An api to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
 	 * retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the sort property and order of
@@ -244,15 +256,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Override
-	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
-			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, final Set<String> batchClassIdentifier) {
+	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
+			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
+			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier) {
 		EphesoftCriteria criteria = criteria();
 
 		if (null != statusList) {
-			criteria.add(Restrictions.in("status", statusList));
-			criteria.add(Restrictions.or(Restrictions.isNull("currentUser"), Restrictions.eq("currentUser", userName)));
-			criteria.add(Restrictions.eq("isRemote", false));
+			criteria.add(Restrictions.in(STATUS, statusList));
+			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+			criteria.add(Restrictions.eq(IS_REMOTE, false));
 		}
 
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
@@ -261,7 +273,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 				if (null != batchPriority) {
 					Integer lowValue = batchPriority.getLowerLimit();
 					Integer upperValue = batchPriority.getUpperLimit();
-					disjunction.add(Restrictions.between("priority", lowValue, upperValue));
+					disjunction.add(Restrictions.between(PRIORITY, lowValue, upperValue));
 				} else {
 					disjunction = Restrictions.disjunction();
 					break;
@@ -270,25 +282,23 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 			criteria.add(disjunction);
 
 		}
+		List<BatchInstance> batchInstanceList = new ArrayList<BatchInstance>();
 
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return new ArrayList<BatchInstance>();
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+			BatchInstanceFilter[] filters = null;
+			if (filterClauseList != null) {
+				filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
+			}
+			Order[] orders = null;
+			if (orderList != null) {
+				orders = orderList.toArray(new Order[orderList.size()]);
+			}
+
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			batchInstanceList = find(criteria, firstResult, maxResults, filters, orders);
 		}
-
-		BatchInstanceFilter[] filters = null;
-		if (filterClauseList != null) {
-			filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
-		}
-		Order[] orders = null;
-		if (orderList != null) {
-			orders = orderList.toArray(new Order[orderList.size()]);
-		}
-
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-
-		return find(criteria, firstResult, maxResults, filters, orders);
-
+		return batchInstanceList;
 	}
 
 	/**
@@ -303,27 +313,26 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	public List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final Set<String> batchClassIdentifier) {
 
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return new ArrayList<BatchInstance>();
+		List<BatchInstance> batchInstances = new ArrayList<BatchInstance>();
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+			EphesoftCriteria criteria = criteria();
+			DetachedCriteria subQuery = criteria();
+			subQuery.add(Restrictions.in(STATUS, statusList));
+			subQuery.setProjection(Projections.min(PRIORITY));
+			subQuery.add(Restrictions.isNull(CURRENT_USER));
+			criteria.add(Subqueries.propertyIn(PRIORITY, subQuery));
+			criteria.add(Restrictions.in(STATUS, statusList));
+			criteria.add(Restrictions.isNull(CURRENT_USER));
+			criteria.add(Restrictions.eq(IS_REMOTE, false));
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			List<Order> orderList = new ArrayList<Order>();
+			Order order = new Order(BatchInstanceProperty.LASTMODIFIED, true);
+			orderList.add(order);
+
+			batchInstances = find(criteria, firstResult, maxResults, orderList.toArray(new Order[orderList.size()]));
 		}
-
-		EphesoftCriteria criteria = criteria();
-		DetachedCriteria subQuery = criteria();
-		subQuery.add(Restrictions.in("status", statusList));
-		subQuery.setProjection(Projections.min("priority"));
-		subQuery.add(Restrictions.isNull("currentUser"));
-		criteria.add(Subqueries.propertyIn("priority", subQuery));
-		criteria.add(Restrictions.in("status", statusList));
-		criteria.add(Restrictions.isNull("currentUser"));
-		criteria.add(Restrictions.eq("isRemote", false));
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-
-		List<Order> orderList = new ArrayList<Order>();
-		Order order = new Order(BatchInstanceProperty.LASTMODIFIED, true);
-		orderList.add(order);
-
-		return find(criteria, firstResult, maxResults, orderList.toArray(new Order[orderList.size()]));
+		return batchInstances;
 	}
 
 	/**
@@ -369,16 +378,16 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		DetachedCriteria criteria = criteria();
 
 		if (null != batchInstStatusList) {
-			criteria.add(Restrictions.in("status", batchInstStatusList));
-		} 
-		
+			criteria.add(Restrictions.in(STATUS, batchInstStatusList));
+		}
+
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
 			Disjunction disjunction = Restrictions.disjunction();
 			for (BatchPriority batchPriority : batchPriorities) {
 				if (null != batchPriority) {
 					Integer lowValue = batchPriority.getLowerLimit();
 					Integer upperValue = batchPriority.getUpperLimit();
-					disjunction.add(Restrictions.between("priority", lowValue, upperValue));
+					disjunction.add(Restrictions.between(PRIORITY, lowValue, upperValue));
 				} else {
 					disjunction = Restrictions.disjunction();
 					break;
@@ -386,18 +395,18 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 			}
 			criteria.add(disjunction);
 		}
-
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return 0;
+		int count = 0;
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			// Add check for null current users only.
+			// Now we will count only for those current users those are null.
+			if (!isAllCurrUsrReq) {
+				criteria.add(Restrictions.isNull(CURRENT_USER));
+			}
+			count = count(criteria);
 		}
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-		// Add check for null current users only.
-		// Now we will count only for those current users those are null.
-		if (!isAllCurrUsrReq) {
-			criteria.add(Restrictions.isNull("currentUser"));
-		} 
-		return count(criteria);
+		return count;
 	}
 
 	/**
@@ -411,7 +420,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		DetachedCriteria criteria = criteria();
 		Integer lowValue = batchPriority.getLowerLimit();
 		Integer upperValue = batchPriority.getUpperLimit();
-		criteria.add(Restrictions.between("priority", lowValue, upperValue));
+		criteria.add(Restrictions.between(PRIORITY, lowValue, upperValue));
 		return find(criteria);
 	}
 
@@ -424,8 +433,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByBatchClassName(String batchClassName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.name", batchClassName));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_NAME, batchClassName));
 		return find(criteria);
 	}
 
@@ -438,8 +447,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstByBatchClassProcessName(String batchClassProcessName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.processName", batchClassProcessName));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_PROCESS_NAME, batchClassProcessName));
 		return find(criteria);
 	}
 
@@ -464,11 +473,11 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		String batchName = null;
 		if (null != uncSubfolder) {
-			int index = uncSubfolder.lastIndexOf("\\");
+			int index = uncSubfolder.lastIndexOf('\\');
 			if (index != -1) {
 				batchName = uncSubfolder.substring(index + 1);
 			} else {
-				index = uncSubfolder.lastIndexOf("/");
+				index = uncSubfolder.lastIndexOf('/');
 				if (index != -1) {
 					batchName = uncSubfolder.substring(index + 1);
 				}
@@ -532,8 +541,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getBatchInstanceList(String batchClassName, List<String> batchInstanceIDList) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.name", batchClassName));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_NAME, batchClassName));
 		criteria.add(Restrictions.in("identifier", batchInstanceIDList));
 		return find(criteria);
 	}
@@ -541,7 +550,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getAllBatchInstancesForCurrentUser(String currentUser) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("currentUser", currentUser));
+		criteria.add(Restrictions.eq(CURRENT_USER, currentUser));
 		return find(criteria);
 	}
 
@@ -553,11 +562,11 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.ne("status", BatchInstanceStatus.NEW));
-		criteria.add(Restrictions.ne("status", BatchInstanceStatus.ERROR));
-		criteria.add(Restrictions.ne("status", BatchInstanceStatus.FINISHED));
-		criteria.add(Restrictions.ne("status", BatchInstanceStatus.READY_FOR_REVIEW));
-		criteria.add(Restrictions.ne("status", BatchInstanceStatus.READY_FOR_VALIDATION));
+		criteria.add(Restrictions.ne(STATUS, BatchInstanceStatus.NEW));
+		criteria.add(Restrictions.ne(STATUS, BatchInstanceStatus.ERROR));
+		criteria.add(Restrictions.ne(STATUS, BatchInstanceStatus.FINISHED));
+		criteria.add(Restrictions.ne(STATUS, BatchInstanceStatus.READY_FOR_REVIEW));
+		criteria.add(Restrictions.ne(STATUS, BatchInstanceStatus.READY_FOR_VALIDATION));
 		criteria.add(Restrictions.eq("lockOwner", lockOwner));
 		return find(criteria);
 	}
@@ -571,7 +580,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
 		criteria.add(Restrictions.eq("batchClass.uncFolder", uncFolder));
 
 		List<BatchInstanceStatus> statusList = new ArrayList<BatchInstanceStatus>();
@@ -582,7 +591,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		statusList.add(BatchInstanceStatus.RUNNING);
 		statusList.add(BatchInstanceStatus.READY);
 
-		criteria.add(Restrictions.in("status", statusList));
+		criteria.add(Restrictions.in(STATUS, statusList));
 
 		return find(criteria);
 	}
@@ -598,14 +607,14 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		batchInsctance.setUncSubfolder(uncFolder);
 		saveOrUpdate(batchInsctance);
 	}
-	
+
 	/**
 	 * An API return all unfinished remotely executing batch instances.
 	 */
 	@Override
 	public List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance() {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("isRemote", true));
+		criteria.add(Restrictions.eq(IS_REMOTE, true));
 		List<BatchInstanceStatus> statusList = new ArrayList<BatchInstanceStatus>();
 		statusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
@@ -613,15 +622,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		statusList.add(BatchInstanceStatus.TRANSFERRED);
 		statusList.add(BatchInstanceStatus.READY);
 
-		criteria.add(Restrictions.in("status", statusList));
+		criteria.add(Restrictions.in(STATUS, statusList));
 		return find(criteria);
 
 	}
-	
+
 	/**
-	 * An api to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon the number of objects to be
-	 * retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the sort property and order of
-	 * that property. If orderList parameter is null or empty then this parameter is avoided.
+	 * An api to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
+	 * the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the
+	 * sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
 	 * @param statusList List<BatchInstanceStatus> status list of batch instance status.
 	 * @param firstResult the first result to retrieve, numbered from <tt>0</tt>
@@ -637,15 +646,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Override
-	public List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
-			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, final Set<String> batchClassIdentifier) {
+	public List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult,
+			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
+			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier) {
 		EphesoftCriteria criteria = criteria();
 
 		if (null != statusList) {
-			criteria.add(Restrictions.in("status", statusList));
-			criteria.add(Restrictions.or(Restrictions.isNull("currentUser"), Restrictions.eq("currentUser", userName)));
-			criteria.add(Restrictions.eq("isRemote", true));
+			criteria.add(Restrictions.in(STATUS, statusList));
+			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+			criteria.add(Restrictions.eq(IS_REMOTE, true));
 		}
 
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
@@ -654,7 +663,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 				if (null != batchPriority) {
 					Integer lowValue = batchPriority.getLowerLimit();
 					Integer upperValue = batchPriority.getUpperLimit();
-					disjunction.add(Restrictions.between("priority", lowValue, upperValue));
+					disjunction.add(Restrictions.between(PRIORITY, lowValue, upperValue));
 				} else {
 					disjunction = Restrictions.disjunction();
 					break;
@@ -664,23 +673,23 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		}
 
-		if (null == batchClassIdentifier || batchClassIdentifier.size() == 0) {
-			return new ArrayList<BatchInstance>();
+		List<BatchInstance> batchInstances = new ArrayList<BatchInstance>();
+
+		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
+			BatchInstanceFilter[] filters = null;
+			if (filterClauseList != null) {
+				filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
+			}
+			Order[] orders = null;
+			if (orderList != null) {
+				orders = orderList.toArray(new Order[orderList.size()]);
+			}
+
+			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+			batchInstances = find(criteria, firstResult, maxResults, filters, orders);
 		}
 
-		BatchInstanceFilter[] filters = null;
-		if (filterClauseList != null) {
-			filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
-		}
-		Order[] orders = null;
-		if (orderList != null) {
-			orders = orderList.toArray(new Order[orderList.size()]);
-		}
-
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifier));
-
-		return find(criteria, firstResult, maxResults, filters, orders);
-
+		return batchInstances;
 	}
 }

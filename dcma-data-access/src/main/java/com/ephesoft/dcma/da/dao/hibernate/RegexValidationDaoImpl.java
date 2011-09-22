@@ -57,7 +57,7 @@ import com.ephesoft.dcma.da.domain.RegexValidation;
 @Repository
 public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implements RegexValidationDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(RegexValidationDaoImpl.class);
 
 	/**
 	 * An api to fetch all Regex Validation by field type.
@@ -67,7 +67,7 @@ public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implem
 	 */
 	@Override
 	public List<RegexValidation> getRegexValidationByFieldType(FieldType fieldType) {
-		log.info("field type : " + fieldType);
+		LOG.info("field type : " + fieldType);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("fieldType", fieldType));
 		return find(criteria);

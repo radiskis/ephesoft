@@ -38,12 +38,14 @@ package com.ephesoft.dcma.user.connectivity;
 import java.util.Set;
 
 /**
- * This class connect to the LDAP server and fetching the result from the LDAP directory server.
+ * This class connect to the user authentication based server and fetching the Set of groups or User
+ * from that server.
  * 
  * @author Ephesoft
  * @version 1.0
  * 
  */
+
 public interface UserConnectivity {
 
 	/**
@@ -51,13 +53,13 @@ public interface UserConnectivity {
 	 * 
 	 * @return Set<String> if result is found else return null
 	 */
-	public Set<String> getAllGroups();
+	Set<String> getAllGroups();
 
 	/**
 	 * This method is used to return set of string of all the users.
 	 * 
 	 * @return Set<String> if result is found else return null
 	 */
-	public Set<String> getAllUser();
+	Set<String> getAllUser();
 
 }

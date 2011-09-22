@@ -53,27 +53,28 @@ public class FunctionKeyView extends View<FunctionKeyViewPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, FunctionKeyView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 	@UiField
-	FunctionKeyDetailView functionKeyDetailView;
+	protected FunctionKeyDetailView functionKeyDetailView;
 
 	@UiField
-	EditFunctionKeyView editFunctionKeyView;
+	protected EditFunctionKeyView editFunctionKeyView;
 
 	@UiField
-	VerticalPanel functionKeyVerticalPanel;
+	protected VerticalPanel functionKeyVerticalPanel;
 
 	@UiField
-	VerticalPanel functionKeyConfigVerticalPanel;
+	protected VerticalPanel functionKeyConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel functionKeyCaptionPanel;
+	protected CaptionPanel functionKeyCaptionPanel;
 
 	@UiField
-	Button editFunctionKeyPropertiesButton;
+	protected Button editFunctionKeyPropertiesButton;
 
 	public FunctionKeyView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		functionKeyCaptionPanel.setCaptionHTML(AdminConstants.FUNCTION_KEY_HTML);
 		editFunctionKeyPropertiesButton.setText(AdminConstants.EDIT_BUTTON);

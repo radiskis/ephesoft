@@ -66,17 +66,18 @@ public class KV_PP_EditView extends View<KV_PP_EditPresenter> {
 	}
 
 	@UiField
-	FlexTable flexEditTable;
+	protected FlexTable flexEditTable;
 
-	FlexTable editTable;
+	private FlexTable editTable;
 
-	Button cancel;
-	Button save;
+	private Button cancel;
+	private Button save;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_EditView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	public FlexTable getFlexEditTable() {

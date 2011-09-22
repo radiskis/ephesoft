@@ -53,28 +53,29 @@ public class RegexView extends View<RegexPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, RegexView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	RegexDetailView regexDetailView;
+	protected RegexDetailView regexDetailView;
 
 	@UiField
-	EditRegexView editRegexView;
+	protected EditRegexView editRegexView;
 
 	@UiField
-	VerticalPanel regexVerticalPanel;
+	protected VerticalPanel regexVerticalPanel;
 
 	@UiField
-	VerticalPanel regexConfigVerticalPanel;
+	protected VerticalPanel regexConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel regexCaptionPanel;
+	protected CaptionPanel regexCaptionPanel;
 
 	@UiField
-	Button editRegexPropertiesBtn;
+	protected Button editRegexPropertiesBtn;
 
 	public RegexView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		regexCaptionPanel.setCaptionHTML(AdminConstants.REGEX_CONFIGURATION_HTML);
 
 		editRegexPropertiesBtn.setText(AdminConstants.EDIT_BUTTON);

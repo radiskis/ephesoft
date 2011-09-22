@@ -63,20 +63,20 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 		boolean validFlag = true;
 		if (validFlag && (!view.getValidateKeyPatternTextBox().validate() || !view.getValidateValuePatternTextBox().validate())) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag
 				&& (!view.getValidateNoOfWordsTextBox().validate() && (view.getNoOfWords() == null || view.getNoOfWords().length() == 0))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag && !view.getValidateNoOfWordsTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.NUMBER_ERROR))
+					BatchClassManagementMessages.NUMBER_ERROR)
 					+ " " + view.getNoOfWordsLabel().getText().substring(0, view.getNoOfWordsLabel().getText().length()));
 			validFlag = false;
 		}
@@ -85,7 +85,7 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 				&& (controller.isAdd() && controller.getSelectedDocumentLevelField().checkKVExtractionDetails(view.getKeyPattern(),
 						view.getValuePattern(), view.getLocation()))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.NAME_COMMON_ERROR)));
+					BatchClassManagementMessages.NAME_COMMON_ERROR));
 			validFlag = false;
 		}
 		if (validFlag) {

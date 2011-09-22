@@ -48,7 +48,7 @@ public interface PluginDao extends CacheableDao<Plugin> {
 	 * @param pluginId
 	 * @return Plugin
 	 */
-	public Plugin getPluginPropertiesForPluginId(Long pluginId);
+	Plugin getPluginPropertiesForPluginId(Long pluginId);
 
 	/**
 	 * @param moduleId Long
@@ -56,7 +56,7 @@ public interface PluginDao extends CacheableDao<Plugin> {
 	 * @param maxResult int
 	 * @return List<Plugin>
 	 */
-	public List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
+	List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
 
 	/**
 	 * API to get Plugin by Name.
@@ -64,5 +64,5 @@ public interface PluginDao extends CacheableDao<Plugin> {
 	 * @param pluginName
 	 * @return
 	 */
-	public Plugin getPluginByName(String pluginName);
+	Plugin getPluginByName(String pluginName);
 }

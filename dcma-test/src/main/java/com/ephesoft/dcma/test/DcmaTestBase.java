@@ -65,7 +65,7 @@ import com.ephesoft.dcma.util.ApplicationContextUtil;
 public abstract class DcmaTestBase extends TestCase implements ApplicationContextAware {
 
 	/** Logger available to subclasses. */
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected static final Logger LOGGER = LoggerFactory.getLogger(DcmaTestBase.class);
 
 	/**
 	 * The {@link ApplicationContext} that was injected into this test instance via {@link #setApplicationContext(ApplicationContext)}.

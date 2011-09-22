@@ -44,8 +44,8 @@ public class EnterpriseToCommunity {
 	
 	public static void main(String[] args) {
 		
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:/META-INF/applicationContext-data-access.xml");
-		BatchClassService batchClassService = ApplicationContextUtil.getSingleBeanOfType(context, BatchClassService.class);
+		final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:/META-INF/applicationContext-data-access.xml");
+		final BatchClassService batchClassService = ApplicationContextUtil.getSingleBeanOfType(context, BatchClassService.class);
 		
 		batchClassService.delete(1l);
 		

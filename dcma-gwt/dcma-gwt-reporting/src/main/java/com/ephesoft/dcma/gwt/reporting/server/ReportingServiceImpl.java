@@ -191,16 +191,18 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 	@Override
 	public void syncDatabase() throws GWTException {
 		ApplicationConfigProperties app = new ApplicationConfigProperties();
+		InputStreamReader inputStreamReader = null;
+		BufferedReader input = null;
 		try {
 			String antPath = app.getProperty("report.ant.buildfile.path");
-			String  commandStr = "";
-			if(OSUtil.isWindows()) {
+			String commandStr = "";
+			if (OSUtil.isWindows()) {
 				commandStr = "cmd /c";
-			} 
+			}
 			commandStr = commandStr + " ant manual-report-generator -f " + antPath;
-			Process process = Runtime.getRuntime().exec(commandStr, null,
-					new File(System.getenv(ANT_HOME_PATH)));
-			BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			Process process = Runtime.getRuntime().exec(commandStr, null, new File(System.getenv(ANT_HOME_PATH)));
+			inputStreamReader = new InputStreamReader(process.getInputStream());
+			input = new BufferedReader(inputStreamReader);
 			String line = null;
 			do {
 				line = input.readLine();
@@ -209,18 +211,33 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 			int exitValue = process.waitFor();
 			log.debug("System exited with error code:" + exitValue);
 			if (exitValue != 0) {
-				log.debug("exitValue for command:"+exitValue);
+				log.debug("exitValue for command:" + exitValue);
 				log.error("Non-zero exit value for command found. So exiting the application.");
 				throw new GWTException("Non-zero exit value for command found. So exiting the application");
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace(System.out);
-			log.error("Exception while Reading Ant File." + ioe, ioe);
+			log.error("Exception while Reading Ant File." + ioe.getMessage(), ioe);
 			throw new GWTException("Exception while reading Ant File. " + ioe.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
-			log.error("Exception while Executing Ant Task." + e, e);
+			log.error("Exception while Executing Ant Task." + e.getMessage(), e);
 			throw new GWTException("Exception while Executing Ant Task." + e.getMessage());
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+			if (inputStreamReader != null) {
+				try {
+					inputStreamReader.close();
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+			}
 		}
 	}
 

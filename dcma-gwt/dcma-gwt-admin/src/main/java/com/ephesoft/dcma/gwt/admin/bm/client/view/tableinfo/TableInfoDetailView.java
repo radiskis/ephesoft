@@ -52,27 +52,28 @@ public class TableInfoDetailView extends View<TableInfoDetailPresenter> {
 	}
 	
 	@UiField
-	Label name;
+	protected Label name;
 
 	@UiField
-	Label startPattern;
+	protected Label startPattern;
 	
 	@UiField
-	Label endPattern;
+	protected Label endPattern;
 	
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 
 	@UiField
-	Label startPatternLabel;
+	protected Label startPatternLabel;
 
 	@UiField
-	Label endPatternLabel;
+	protected Label endPatternLabel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public TableInfoDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME)+AdminConstants.COLON);
 		startPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.START_PATTERN)+AdminConstants.COLON);
 		endPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.END_PATTERN)+AdminConstants.COLON);

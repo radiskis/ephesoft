@@ -50,9 +50,9 @@ import com.google.gwt.user.client.ui.Label;
 
 public class KV_PP_DetailPresenter extends AbstractBatchClassPresenter<KV_PP_DetailView> {
 
-	FlexTable viewTable;
+	private FlexTable viewTable;
 
-	FlexTable dataTable;
+	private FlexTable dataTable;
 
 	private void setProperties() {
 		int row = 0;

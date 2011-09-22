@@ -46,7 +46,7 @@ public class NewBatchClassEvent extends ApplicationEvent {
 
 	private final BatchClassID batchClassID;
 	
-	public NewBatchClassEvent(Object source, BatchClassID batchClassID) {
+	public NewBatchClassEvent(final Object source, final BatchClassID batchClassID) {
 		super(source);
 		this.batchClassID = batchClassID;
 	}

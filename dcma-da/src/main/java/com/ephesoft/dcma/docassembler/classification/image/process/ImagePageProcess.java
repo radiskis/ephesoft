@@ -119,7 +119,7 @@ public class ImagePageProcess {
 	/**
 	 * @param propertyMap the propertyMap to set
 	 */
-	public void setPropertyMap(Map<String, String> propertyMap) {
+	public final void setPropertyMap(final Map<String, String> propertyMap) {
 		this.propertyMap = propertyMap;
 	}
 
@@ -189,7 +189,7 @@ public class ImagePageProcess {
 	/**
 	 * @param pluginPropertiesService the pluginPropertiesService to set
 	 */
-	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
+	public void setPluginPropertiesService(final PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
@@ -205,8 +205,8 @@ public class ImagePageProcess {
 		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
 		 * batchInstanceID);
 		 */
-		List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pluginPropertiesService.getDocTypeByPageTypeName(batchInstanceID,
-				pageTypeName);
+		final List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pluginPropertiesService.getDocTypeByPageTypeName(
+				batchInstanceID, pageTypeName);
 
 		String docTypeName = null;
 		float minConfidenceThreshold = 0;
@@ -214,9 +214,9 @@ public class ImagePageProcess {
 		if (null == docTypes || docTypes.isEmpty()) {
 			LOGGER.info("No Document Type found for the input page type name.");
 		} else {
-			Iterator<com.ephesoft.dcma.da.domain.DocumentType> itr = docTypes.iterator();
+			final Iterator<com.ephesoft.dcma.da.domain.DocumentType> itr = docTypes.iterator();
 			while (itr.hasNext()) {
-				com.ephesoft.dcma.da.domain.DocumentType docTypeDB = itr.next();
+				final com.ephesoft.dcma.da.domain.DocumentType docTypeDB = itr.next();
 				docTypeName = docTypeDB.getName();
 				minConfidenceThreshold = docTypeDB.getMinConfidenceThreshold();
 				LOGGER.debug("DocumentType name : " + docTypeName + "  minConfidenceThreshold : " + minConfidenceThreshold);
@@ -226,14 +226,14 @@ public class ImagePageProcess {
 			}
 		}
 
-		if (null != docTypeName) {
+		if (null == docTypeName) {
+			final String errMsg = "DocumentType name is not found in the data base " + "for page type name: " + pageTypeName;
+			LOGGER.info(errMsg);
+		} else {
 			docType.setType(docTypeName);
-			DecimalFormat twoDForm = new DecimalFormat("#.##");
+			final DecimalFormat twoDForm = new DecimalFormat("#.##");
 			minConfidenceThreshold = Float.valueOf(twoDForm.format(minConfidenceThreshold));
 			docType.setConfidenceThreshold(minConfidenceThreshold);
-		} else {
-			String errMsg = "DocumentType name is not found in the data base " + "for page type name: " + pageTypeName;
-			LOGGER.info(errMsg);
 		}
 	}
 
@@ -403,21 +403,20 @@ public class ImagePageProcess {
 			xmlDocuments.remove(indexDocType);
 		}
 
-		
 		// set the confidence score and document type name on the basis of
 		// defined rules.
 		setDocConfAndDocType(xmlDocuments);
 
 		// merge the unknown documents on the basis of a check
-		String mergeSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
-				DocumentAssemblerProperties.DA_MERGE_UNKNOWN_DOCUMENT_SWITCH);
+		String mergeSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID,
+				DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN, DocumentAssemblerProperties.DA_MERGE_UNKNOWN_DOCUMENT_SWITCH);
 		int xmlDocSize = xmlDocuments.size();
-		if(mergeSwitch != null && mergeSwitch.equalsIgnoreCase(DocumentAssemblerConstants.DA_MERGE_SWITCH_ON) && xmlDocSize > 1) {
+		if (mergeSwitch != null && mergeSwitch.equalsIgnoreCase(DocumentAssemblerConstants.DA_MERGE_SWITCH_ON) && xmlDocSize > 1) {
 			for (int i = 1; i < xmlDocuments.size();) {
 				final Document document = xmlDocuments.get(i);
 				String docType = document.getType();
 				if (null != docType && docType.equals(EphesoftProperty.UNKNOWN.getProperty())) {
-					final Document prevDocument = xmlDocuments.get(i-1);
+					final Document prevDocument = xmlDocuments.get(i - 1);
 					if (null != prevDocument.getType() && !prevDocument.getType().equals(EphesoftProperty.UNKNOWN.getProperty())) {
 						prevDocument.getPages().getPage().addAll(document.getPages().getPage());
 						xmlDocuments.remove(i);
@@ -429,13 +428,13 @@ public class ImagePageProcess {
 				}
 			}
 		}
-		
+
 		// setting the batch level documentClassificationTypes.
 		DocumentClassificationTypes documentClassificationTypes = new DocumentClassificationTypes();
 		List<String> documentClassificationType = documentClassificationTypes.getDocumentClassificationType();
 		documentClassificationType.add(getPropertyMap().get(DocumentAssemblerConstants.FACTORY_CLASSIFICATION));
 		batch.setDocumentClassificationTypes(documentClassificationTypes);
-		
+
 		// Set the error message explicitly to blank to display the node in batch xml
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			final Document document = xmlDocuments.get(i);
@@ -549,15 +548,15 @@ public class ImagePageProcess {
 			confidenceScore = Float.valueOf(twoDForm.format(confidenceScore));
 
 			docType.setConfidence(confidenceScore);
-			if (null != checkTypeList && !checkTypeList.isEmpty()) {
+			if (null == checkTypeList || checkTypeList.isEmpty()) {
 				StringBuilder stringBuilder = new StringBuilder("");
-				stringBuilder.append(pageTypeName);	
-				stringBuilder.append(checkTypeList.get(0));
+				stringBuilder.append(pageTypeName);
+				stringBuilder.append(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE));
 				pageTypeName = stringBuilder.toString();
 			} else {
 				StringBuilder stringBuilder = new StringBuilder("");
-				stringBuilder.append(pageTypeName);	
-				stringBuilder.append(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE));
+				stringBuilder.append(pageTypeName);
+				stringBuilder.append(checkTypeList.get(0));
 				pageTypeName = stringBuilder.toString();
 			}
 
@@ -573,7 +572,7 @@ public class ImagePageProcess {
 	 * @param checkTypeList List<String>
 	 * @return multiplyingFactor float
 	 */
-	private float multiplyingFactor(List<String> checkTypeList) {
+	private float multiplyingFactor(final List<String> checkTypeList) {
 
 		// fp + mp + lp = 1
 		// fp = 0.50
@@ -667,7 +666,7 @@ public class ImagePageProcess {
 	 * @param docConfidence Map<String, List<Float>>
 	 */
 	@SuppressWarnings("unchecked")
-	private void traversePgFds(PageLevelFields pageLevelFields, Map<String, Object[]> docConfidence) {
+	private void traversePgFds(final PageLevelFields pageLevelFields, final Map<String, Object[]> docConfidence) {
 
 		String name = null;
 		String value = null;

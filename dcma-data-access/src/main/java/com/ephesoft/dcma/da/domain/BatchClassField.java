@@ -87,9 +87,6 @@ public class BatchClassField extends AbstractChangeableEntity implements
 	
 	private String value;
 
-	public BatchClassField() {
-	}
-
 	public BatchClass getBatchClass() {
 		return batchClass;
 	}

@@ -64,44 +64,44 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	}
 
 	@UiField
-	Label keyPatternLabel;
+	protected Label keyPatternLabel;
 	@UiField
-	Label keyPatternStar;
+	protected Label keyPatternStar;
 	@UiField
-	TextBox keyPattern;
+	protected TextBox keyPattern;
 
 	@UiField
-	Label valuePatternLabel;
+	protected Label valuePatternLabel;
 	@UiField
-	Label valuePatternStar;
+	protected Label valuePatternStar;
 	@UiField
-	TextBox valuePattern;
+	protected TextBox valuePattern;
 
 	@UiField
-	Label locationLabel;
+	protected Label locationLabel;
 	@UiField
-	Label locationStar;
+	protected Label locationStar;
 	@UiField
-	ListBox location;
+	protected ListBox location;
 
 	@UiField
-	Label noOfWordsLabel;
+	protected Label noOfWordsLabel;
 	@UiField
-	Label noOfWordsStar;
+	protected Label noOfWordsStar;
 	@UiField
-	TextBox noOfWords;
-	
-	@UiField
-	Label pageLevelFieldNameLabel;
-	@UiField
-	Label pageLevelFieldNameStar;
-	@UiField
-	TextBox pageLevelFieldName;
+	protected TextBox noOfWords;
 
 	@UiField
-	Button saveButton;
+	protected Label pageLevelFieldNameLabel;
 	@UiField
-	Button cancelButton;
+	protected Label pageLevelFieldNameStar;
+	@UiField
+	protected TextBox pageLevelFieldName;
+
+	@UiField
+	protected Button saveButton;
+	@UiField
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateKeyPatternTextBox;
 	private ValidatableWidget<TextBox> validateValuePatternTextBox;
@@ -109,12 +109,13 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	private ValidatableWidget<TextBox> validatePageLevelFieldNameLabelTextBox;
 
 	@UiField
-	VerticalPanel editKVPPTypeViewPanel;
+	protected VerticalPanel editKVPPTypeViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public KV_PP_AddEditView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validateKeyPatternTextBox = new ValidatableWidget<TextBox>(keyPattern);
@@ -143,7 +144,7 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 				validateNoOfWordsTextBox.toggleValidDateBox();
 			}
 		});
-		
+
 		validatePageLevelFieldNameLabelTextBox = new ValidatableWidget<TextBox>(pageLevelFieldName);
 		validatePageLevelFieldNameLabelTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -162,7 +163,8 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 		locationLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION) + AdminConstants.COLON);
 		noOfWordsLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NO_OF_WORDS)
 				+ AdminConstants.COLON);
-		pageLevelFieldNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KV_PAGE_LEVEL_FIELD_NAME) 
+		pageLevelFieldNameLabel.setText(LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.KV_PAGE_LEVEL_FIELD_NAME)
 				+ AdminConstants.COLON);
 
 		keyPatternStar.setText(AdminConstants.STAR);
@@ -183,7 +185,6 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 		pageLevelFieldNameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 	}
 
-	
 	/**
 	 * @return the noOfWordsLabel
 	 */
@@ -192,12 +193,12 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
@@ -229,20 +230,21 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 		String selected = this.location.getItemText(this.location.getSelectedIndex());
 		LocationType[] allLocationTypes = LocationType.values();
 		for (LocationType locationType : allLocationTypes) {
-			if (locationType.name().equals(selected))
+			if (locationType.name().equals(selected)) {
 				return locationType;
+			}
 		}
 		return allLocationTypes[0];
 	}
 
 	public LocationType getDefaultLocation() {
-		LocationType locationType = LocationType.TOP;
-		return locationType;
+		return LocationType.TOP;
 	}
 
 	private int findIndex(LocationType locationType) {
-		if (locationType == null)
+		if (locationType == null) {
 			return 0;
+		}
 		LocationType[] allLocationTypes = LocationType.values();
 		List<LocationType> tempList = Arrays.asList(allLocationTypes);
 		return tempList.indexOf(locationType);
@@ -257,8 +259,9 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	}
 
 	public void setLocation(LocationType locationType) {
-		if (this.location.getItemCount() == 0)
+		if (this.location.getItemCount() == 0) {
 			setLocation();
+		}
 		this.location.setSelectedIndex(findIndex(locationType));
 	}
 
@@ -297,11 +300,11 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	public TextBox getNoOfWordsTextBox() {
 		return noOfWords;
 	}
-	
+
 	public ValidatableWidget<TextBox> getValidatePageLevelFieldNameLabelTextBox() {
 		return validatePageLevelFieldNameLabelTextBox;
 	}
-	
+
 	public void setValidatePageLevelFieldNameLabelTextBox(ValidatableWidget<TextBox> validatePageLevelFieldNameLabelTextBox) {
 		this.validatePageLevelFieldNameLabelTextBox = validatePageLevelFieldNameLabelTextBox;
 	}
@@ -309,7 +312,7 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	public Label getDescriptionLabel() {
 		return pageLevelFieldNameLabel;
 	}
-	
+
 	public String getPageLevelFieldName() {
 		return this.pageLevelFieldName.getValue();
 	}
@@ -317,9 +320,9 @@ public class KV_PP_AddEditView extends View<KV_PP_AddEditPresenter> {
 	public void setPageLevelFieldName(String description) {
 		this.pageLevelFieldName.setValue(description);
 	}
-	
+
 	public TextBox getPageLevelFieldNameTextBox() {
 		return pageLevelFieldName;
 	}
-	
+
 }

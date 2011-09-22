@@ -67,12 +67,12 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 	interface Binder extends UiBinder<ScrollPanel, TableTestResultView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private FlexTable resultTable;
 
 	@UiField
-	FlowPanel tableListPanel;
+	protected FlowPanel tableListPanel;
 
 	private HorizontalPanel buttonPanel;
 
@@ -83,7 +83,8 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 	@UiField ScrollPanel scrollPanel;
 
 	public TableTestResultView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		
 		scrollPanel.setSize("500px", "300px");
 		

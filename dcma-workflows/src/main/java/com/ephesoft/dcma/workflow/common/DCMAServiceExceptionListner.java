@@ -40,14 +40,16 @@ import org.jbpm.api.listener.EventListenerExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+
 public class DCMAServiceExceptionListner implements EventListener {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAServiceExceptionListner.class);
 	
 	@Override
-	public void notify(EventListenerExecution execution) throws Exception {
-		logger.debug("Notified error signal");
+	public void notify(EventListenerExecution execution) throws DCMAApplicationException {
+		LOGGER.debug("Notified error signal");
 	}
 }

@@ -106,6 +106,8 @@ import com.ephesoft.dcma.da.service.BatchInstanceService;
 @Component
 public class CMISExporter implements ICommonConstants {
 
+	private static final String CONVERTING = "Converting";
+
 	private static final String CMIS_EXPORT_PLUGIN = "CMIS_EXPORT";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMISExporter.class);
@@ -290,12 +292,10 @@ public class CMISExporter implements ICommonConstants {
 				ObjectId mainFolderID = createMainFolder(session, parentId, rootFolder);
 				// get an object
 				CmisObject object = session.getObject(mainFolderID);
-				if (object != null) {
-					if (object instanceof Folder) {
-						mainFolder = (Folder) object;
-						LOGGER.info("main folder : " + mainFolder);
-						LOGGER.info("main folder ID : " + mainFolderID);
-					}
+				if (object instanceof Folder) {
+					mainFolder = (Folder) object;
+					LOGGER.info("main folder : " + mainFolder);
+					LOGGER.info("main folder ID : " + mainFolderID);
 				}
 			}
 
@@ -305,12 +305,10 @@ public class CMISExporter implements ICommonConstants {
 				ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder, batchInstanceIdentifier);
 				// get an object
 				CmisObject object = session.getObject(batchInstanceFolderID);
-				if (object != null) {
-					if (object instanceof Folder) {
-						batchInstanceFolder = (Folder) object;
-						LOGGER.info("batchInstance folder : " + batchInstanceFolder);
-						LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
-					}
+				if (object instanceof Folder) {
+					batchInstanceFolder = (Folder) object;
+					LOGGER.info("batchInstance folder : " + batchInstanceFolder);
+					LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
 				}
 			}
 
@@ -462,10 +460,8 @@ public class CMISExporter implements ICommonConstants {
 
 		Folder folder = null;
 
-		if (folderObj != null) {
-			if (folderObj != null && folderObj instanceof Folder) {
-				folder = (Folder) folderObj;
-			}
+		if (folderObj instanceof Folder) {
+			folder = (Folder) folderObj;
 		}
 
 		return folder;
@@ -492,10 +488,8 @@ public class CMISExporter implements ICommonConstants {
 
 		Folder folder = null;
 
-		if (folderObj != null) {
-			if (folderObj instanceof Folder) {
-				folder = (Folder) folderObj;
-			}
+		if (folderObj instanceof Folder) {
+			folder = (Folder) folderObj;
 		}
 
 		return folder;
@@ -537,7 +531,7 @@ public class CMISExporter implements ICommonConstants {
 	 * @param file File
 	 * @param document DocumentType
 	 * @param batchInstanceIdentifier String
-	 * @param batchClassIdentifier Stirng
+	 * @param batchClassIdentifier String
 	 * @throws IOException
 	 */
 	private void uploadDocument(Session session, Folder folder, File file, Document document, String batchInstanceIdentifier,
@@ -723,7 +717,7 @@ public class CMISExporter implements ICommonConstants {
 					date = (Date) formatter.parse(value);
 					calendar.setTime(date);
 					returnValue = calendar;
-					LOGGER.info("Converting" + property + " to dataType date");
+					LOGGER.info(CONVERTING + property + " to dataType date");
 				} catch (ParseException e) {
 					LOGGER.error("Could not parse date. Using string instead to upload document" + e);
 					returnValue = (Object) value;
@@ -734,23 +728,23 @@ public class CMISExporter implements ICommonConstants {
 				break;
 			case DOUBLE:
 			case FLOAT:
-				LOGGER.info("Converting" + property + " to dataType BigDecimal");
+				LOGGER.info(CONVERTING + property + " to dataType BigDecimal");
 				returnValue = new BigDecimal(value);
 				break;
 			case INTEGER:
-				LOGGER.info("Converting" + property + " to dataType Integer");
+				LOGGER.info(CONVERTING + property + " to dataType Integer");
 				returnValue = Integer.valueOf(value);
 				break;
 			case LONG:
-				LOGGER.info("Converting" + property + " to dataType Long");
+				LOGGER.info(CONVERTING + property + " to dataType Long");
 				returnValue = Long.valueOf(value);
 				break;
 			case STRING:
-				LOGGER.info("Converting" + property + " to dataType String");
+				LOGGER.info(CONVERTING + property + " to dataType String");
 				returnValue = (Object) value;
 				break;
 			default:
-				LOGGER.info("Converting" + property + " to default value of String");
+				LOGGER.info(CONVERTING + property + " to default value of String");
 				returnValue = (Object) value;
 				break;
 		}
@@ -823,8 +817,9 @@ public class CMISExporter implements ICommonConstants {
 			Folder batchInstanceFolder = checkBatchInstanceFolder(mainFolder, batchInstanceIdentifier);
 
 			for (CmisObject childrens : batchInstanceFolder.getChildren()) {
-				if (childrens.getName().contains(uploadFileTypeExt))
-					;
+				if (childrens.getName().contains(uploadFileTypeExt)){
+					LOGGER.debug(childrens.getName());
+				}
 				childrens.delete(true);
 			}
 

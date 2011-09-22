@@ -52,31 +52,32 @@ public class ModuleDetailView extends View<ModuleDetailPresenter> {
 	}
 
 	@UiField
-	Label name;
+	protected Label name;
 	@UiField
-	Label description;
+	protected Label description;
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 
 	@UiField
-	Label remoteUrl;
+	protected Label remoteUrl;
 	@UiField
-	Label remoteBatchClassIdentifier;
+	protected Label remoteBatchClassIdentifier;
 
 	@UiField
-	Label remoteUrlLabel;
+	protected Label remoteUrlLabel;
 	@UiField
-	Label remoteBatchClassIdentifierLabel;
+	protected Label remoteBatchClassIdentifierLabel;
 
 	// private ModuleDetailPresenter presenter;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ModuleDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + AdminConstants.COLON);

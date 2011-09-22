@@ -51,20 +51,21 @@ public class FuzzyDBDocTypeDetailView extends View<FuzzyDBDocTypeDetailPresenter
 	interface Binder extends UiBinder<VerticalPanel, FuzzyDBDocTypeDetailView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	Label docName;
+	protected Label docName;
 	@UiField
-	Label mappedTo;
+	protected Label mappedTo;
 
 	@UiField
-	Label docNameLabel;
+	protected Label docNameLabel;
 	@UiField
-	Label tableName;
+	protected Label tableName;
 
 	public FuzzyDBDocTypeDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		docName.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DOCUMENT_NAME) + AdminConstants.COLON);
 		mappedTo.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.MAPPED_TO) + AdminConstants.COLON);

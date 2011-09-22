@@ -39,17 +39,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MailContentModel {
-	
-	private Map<String, Object> model = new HashMap<String, Object>();
-	
-	public void add(String key, Object value) {
+
+	final private Map<String, Object> model = new HashMap<String, Object>();
+
+	public void add(final String key, final Object value) {
 		model.put(key, value);
 	}
-	
-	public void remove(String key) {
+
+	public void remove(final String key) {
 		model.remove(key);
 	}
-	
+
 	public Map<String, Object> getModel() {
 		return this.model;
 	}

@@ -52,7 +52,7 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
 @Aspect
 public class DCMAPreProcessAspect {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAPreProcessAspect.class);
 	
 	@Before("execution(* com.ephesoft.dcma.*.service.*.*(..)) " +
 			"&& !within(com.ephesoft.dcma.da.service.*) " +
@@ -61,23 +61,28 @@ public class DCMAPreProcessAspect {
 
 		try {
 			Object target = joinPoint.getTarget();
-			if(target == null) return;
+			if(target == null) {
+				return;
+			}
 			
 			Class<?> clazz = ClassUtils.getUserClass(target);
 			Method[] methods = clazz.getMethods();
-			if(methods != null && methods.length > 0)
+			if(methods != null && methods.length > 0) {
 				for (int i = 0; i < methods.length; i++) {
 					Annotation annotation =  methods[i].getAnnotation(PreProcess.class);
 					if(annotation != null) {
 						if(joinPoint.getArgs().length >= 1 && 
-								(joinPoint.getArgs()[0] instanceof BatchInstanceID)) 
+								(joinPoint.getArgs()[0] instanceof BatchInstanceID)) {
 							methods[i].invoke(target, joinPoint.getArgs()[0], joinPoint.getArgs()[1]);
-						else 
-							log.info("Method " + methods[i]+ " does not comply to Pre-process agreement. So.. not invoked.");
+						}
+						else { 
+							LOGGER.info("Method " + methods[i]+ " does not comply to Pre-process agreement. So.. not invoked.");
+						}
 					}
 				}
+			}
 		} catch (Exception e) {
-			log.error("Exception in Pre-processing", e);
+			LOGGER.error("Exception in Pre-processing", e);
 			throw new DCMAException("Exception in Pre-processing",e);
 		}
 	}

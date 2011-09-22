@@ -53,7 +53,7 @@ import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 @Entity
 @Table(name = "batch_class_plugin")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class BatchClassPlugin extends AbstractChangeableEntity  implements Cloneable {
+public class BatchClassPlugin extends AbstractChangeableEntity implements Cloneable {
 
 	/**
 	 * 
@@ -76,7 +76,7 @@ public class BatchClassPlugin extends AbstractChangeableEntity  implements Clone
 	@JoinColumn(name = "batch_class_plugin_id")
 	@javax.persistence.OrderBy("id")
 	private List<BatchClassPluginConfig> batchClassPluginConfigs;
-	
+
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "batch_class_plugin_id")
@@ -115,14 +115,14 @@ public class BatchClassPlugin extends AbstractChangeableEntity  implements Clone
 		this.batchClassPluginConfigs = batchClassPluginConfigs;
 	}
 
-	public BatchClassPluginConfig getBatchClassPluginConfigById(long id) {
+	public BatchClassPluginConfig getBatchClassPluginConfigById(long identifier) {
 		BatchClassPluginConfig pluginConfig = null;
-		if (getBatchClassPluginConfigs() == null || getBatchClassPluginConfigs().size() == 0)
-			return pluginConfig;
-		for (BatchClassPluginConfig batchClassPluginConfig : getBatchClassPluginConfigs()) {
-			if (batchClassPluginConfig.getId() == id) {
-				pluginConfig = batchClassPluginConfig;
-				break;
+		if (getBatchClassPluginConfigs() != null && getBatchClassPluginConfigs().size() > 0) {
+			for (BatchClassPluginConfig batchClassPluginConfig : getBatchClassPluginConfigs()) {
+				if (batchClassPluginConfig.getId() == identifier) {
+					pluginConfig = batchClassPluginConfig;
+					break;
+				}
 			}
 		}
 		return pluginConfig;
@@ -152,29 +152,28 @@ public class BatchClassPlugin extends AbstractChangeableEntity  implements Clone
 		}
 		getBatchClassPluginConfigs().remove(index);
 	}
-	
+
 	public List<BatchClassDynamicPluginConfig> getBatchClassDynamicPluginConfigs() {
 		return batchClassDynamicPluginConfigs;
 	}
-	
+
 	public void setBatchClassDynamicPluginConfigs(List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs) {
 		this.batchClassDynamicPluginConfigs = batchClassDynamicPluginConfigs;
 	}
-	
-	public BatchClassDynamicPluginConfig getBatchClassDynamicPluginConfigById(long id) {
+
+	public BatchClassDynamicPluginConfig getBatchClassDynamicPluginConfigById(long identifier) {
 		BatchClassDynamicPluginConfig dynamicPluginConfig = null;
-		if (getBatchClassDynamicPluginConfigs() == null || getBatchClassDynamicPluginConfigs().size() == 0)
-			return dynamicPluginConfig;
-		for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : getBatchClassDynamicPluginConfigs()) {
-			if (batchClassDynamicPluginConfig.getId() == id) {
-				dynamicPluginConfig = batchClassDynamicPluginConfig;
-				break;
+		if (getBatchClassDynamicPluginConfigs() != null && getBatchClassDynamicPluginConfigs().size() > 0) {
+			for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : getBatchClassDynamicPluginConfigs()) {
+				if (batchClassDynamicPluginConfig.getId() == identifier) {
+					dynamicPluginConfig = batchClassDynamicPluginConfig;
+					break;
+				}
 			}
 		}
 		return dynamicPluginConfig;
 	}
 
-	
 	public void addBatchClassDynamicPluginConfig(BatchClassDynamicPluginConfig config) {
 		if (this.getBatchClassDynamicPluginConfigs() == null) {
 			setBatchClassDynamicPluginConfigs(new ArrayList<BatchClassDynamicPluginConfig>());
@@ -199,7 +198,7 @@ public class BatchClassPlugin extends AbstractChangeableEntity  implements Clone
 		}
 		getBatchClassDynamicPluginConfigs().remove(index);
 	}
-	
+
 	public Object clone() throws CloneNotSupportedException {
 		Object obj = null;
 		obj = super.clone();

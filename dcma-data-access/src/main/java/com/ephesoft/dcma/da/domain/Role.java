@@ -59,6 +59,14 @@ public class Role extends AbstractChangeableEntity {
 	}
 
 	@Override
+	public int hashCode() {
+		int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object anObject) {
 		boolean equal = false;
 		if (anObject instanceof Role) {
@@ -66,4 +74,5 @@ public class Role extends AbstractChangeableEntity {
 		}
 		return equal;
 	}
+
 }

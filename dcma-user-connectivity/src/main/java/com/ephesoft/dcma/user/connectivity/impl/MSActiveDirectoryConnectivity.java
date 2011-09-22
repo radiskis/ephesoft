@@ -68,7 +68,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	/**
 	 * Used for handling logs.
 	 */
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(MSActiveDirectoryConnectivity.class);
 
 	/**
 	 * This value get from the user.msactivedirectory_url in user-connectivity.properties file.
@@ -212,12 +212,12 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	public Set<String> getAllGroups() {
 		Set<String> allGroups = null;
 		try {
-			log.info("======Inside MSActiveDirectoryConnectivity======");
-			log.info("Fetching all available groups from the active directory");
+			LOG.info("======Inside MSActiveDirectoryConnectivity======");
+			LOG.info("Fetching all available groups from the active directory");
 			allGroups = this.fetchActiveDirectoryList(UserConnectivityConstant.MSACTIVEDIRECTORY_GROUP);
-			log.info("Ending fetching list from Active Directory");
+			LOG.info("Ending fetching list from Active Directory");
 		} catch (Exception e) {
-			log.error("Error in fetching all groups " + e.getMessage(), e);
+			LOG.error("Error in fetching all groups " + e.getMessage(), e);
 		}
 		return allGroups;
 	}
@@ -231,13 +231,12 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	 */
 	private Set<String> fetchActiveDirectoryList(final String name) {
 		Set<String> resultList = new HashSet<String>();
-		boolean isValid = true;
 
-		isValid = isValidData(isValid);
+		boolean isValid = isValidData();
 
 		if (isValid) {
 
-			Hashtable<Object, Object> env = new Hashtable<Object, Object>();
+			Hashtable<Object, Object> env = new Hashtable<Object, Object>(); // NOPMD . Required to work with Hashtable for Active Directory 
 			env.put(Context.INITIAL_CONTEXT_FACTORY, msActiveDirectoryConfig);
 			env.put(Context.PROVIDER_URL, msActiveDirectoryURL);
 			env.put(Context.SECURITY_PRINCIPAL, msActiveDirectoryUserName);
@@ -245,10 +244,10 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 
 			DirContext dctx = null;
 			List<NamingEnumeration<?>> results = null;
-			dctx = createDirectoryConnection(env, dctx);
+			dctx = createDirectoryConnection(env);
 
 			if (dctx != null) {
-				log.info("Start Fetching result set from Active Directory");
+				LOG.info("Start Fetching result set from Active Directory");
 				results = getResultSet(name, dctx);
 
 				if (results != null) {
@@ -256,26 +255,26 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 						resultSetValues(resultList, resultContainer);
 					}
 				} else {
-					log.error("Results found from Active Directory is  null or empty.");
+					LOG.error("Results found from Active Directory is  null or empty.");
 				}
 				try {
 					if (dctx != null) {
-						log.info("Closing directory context of Active Directory");
+						LOG.info("Closing directory context of Active Directory");
 						dctx.close();
 					}
 					if (results != null && !results.isEmpty()) {
 						for (NamingEnumeration<?> resultContainer : results) {
-							log.info("Closing result set of Active Directory");
+							LOG.info("Closing result set of Active Directory");
 							resultContainer.close();
 						}
 					}
 				} catch (NamingException ne) {
-					log.error(ne.getMessage(), ne);
+					LOG.error(ne.getMessage(), ne);
 				} catch (Exception e) {
-					log.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			} else {
-				log.error("Invalid directory context of Active Directory.");
+				LOG.error("Invalid directory context of Active Directory.");
 			}
 		}
 		return resultList;
@@ -288,13 +287,14 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	 * @param directory
 	 * @return
 	 */
-	private DirContext createDirectoryConnection(Hashtable<Object, Object> environment, DirContext directory) {
+	private DirContext createDirectoryConnection(Hashtable<Object, Object> environment) { // NOPMD by ankit1464 . // NOPMD by ankit1464. Required to work with Hashtable for Active Directory
+		DirContext directory = null;
 		try {
 			directory = new InitialDirContext(environment);
 		} catch (NamingException ne) {
-			log.error(ne.getMessage(), ne);
+			LOG.error(ne.getMessage(), ne);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		return directory;
 	}
@@ -313,24 +313,28 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		searchControl.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		String filter = UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER + name
 				+ UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER;
-		log.info("Added filter to Active Directory :" + filter);
+		LOG.info("Added filter to Active Directory :" + filter);
 		List<NamingEnumeration<?>> results = new ArrayList<NamingEnumeration<?>>();
 		String[] msActiveDirectoryContextPathName = msActiveDirectoryContextPath.split(DOUBLE_SEMICOLON_DELIMITER);
 		for (String msActiveDirectoryFullPath : msActiveDirectoryContextPathName) {
 			String paramName = null;
 			try {
 				StringBuffer stringBuffer = new StringBuffer(msActiveDirectoryFullPath);
-				stringBuffer.append(UserConnectivityConstant.COMMA_SYMBOL + UserConnectivityConstant.DOMAIN_COMPONENT
-						+ UserConnectivityConstant.EQUAL_SYMBOL + msActiveDirectoryDomainName + UserConnectivityConstant.COMMA_SYMBOL
-						+ UserConnectivityConstant.DOMAIN_COMPONENT + UserConnectivityConstant.EQUAL_SYMBOL
-						+ msActiveDirectoryDomainOrganization);
+				stringBuffer.append(UserConnectivityConstant.COMMA_SYMBOL);
+				stringBuffer.append(UserConnectivityConstant.DOMAIN_COMPONENT);
+				stringBuffer.append(UserConnectivityConstant.EQUAL_SYMBOL);
+				stringBuffer.append(msActiveDirectoryDomainName);
+				stringBuffer.append(UserConnectivityConstant.COMMA_SYMBOL);
+				stringBuffer.append(UserConnectivityConstant.DOMAIN_COMPONENT);
+				stringBuffer.append(UserConnectivityConstant.EQUAL_SYMBOL);
+				stringBuffer.append(msActiveDirectoryDomainOrganization);
 				paramName = stringBuffer.toString();
-				log.info("Context Path for Active Directory :" + paramName);
+				LOG.info("Context Path for Active Directory :" + paramName);
 				results.add(dctx.search(paramName, filter, searchControl));
 			} catch (NamingException ne) {
-				log.error(ne.getMessage(), ne);
+				LOG.error(ne.getMessage(), ne);
 			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 		return results;
@@ -349,11 +353,11 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 				try {
 					searchResult = (SearchResult) results.next();
 				} catch (NamingException e) {
-					log.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 
 				if (null != searchResult) {
-					log.info("Group found of Active Directory is :" + searchResult);
+					LOG.info("Group found of Active Directory is :" + searchResult);
 					String result = searchResult.toString().split(UserConnectivityConstant.COLON_SYMBOL)[0];
 					if (null != result && !result.isEmpty()) {
 						String[] cnConnectionNameArr = result.split(UserConnectivityConstant.COLON_SYMBOL);
@@ -366,54 +370,69 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 						}
 					}
 				} else {
-					log.error("No groups found in the active directory.");
+					LOG.error("No groups found in the active directory.");
 				}
 			}
 		} catch (NamingException ne) {
-			log.error("No result found" + ne.getMessage(), ne);
+			LOG.error("No result found" + ne.getMessage(), ne);
 		}
 	}
 
 	/**
 	 * Check the user-connectivity.properties are valid or not
 	 * 
-	 * @param check
+	 * @param isValid
 	 * @return true if valid else false
 	 */
-	private boolean isValidData(boolean check) {
+	private boolean isValidData() {
+		boolean check = true;
 		if (null == msActiveDirectoryConfig || msActiveDirectoryConfig.isEmpty()) {
-			log.error("msactivedirectoryConfig not found.");
-			check = false;
+			LOG.error("msactivedirectoryConfig not found.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryURL || msActiveDirectoryURL.isEmpty()) {
-			log.error("msactivedirectoryUrl not found.");
-			check = false;
+			LOG.error("msactivedirectoryUrl not found.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryDomainName || msActiveDirectoryDomainName.isEmpty()) {
-			log.error("msactivedirectoryDomainName is null or empty.");
-			check = false;
+			LOG.error("msactivedirectoryDomainName is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryDomainOrganization || msActiveDirectoryDomainOrganization.isEmpty()) {
-			log.error("msactivedirectoryDomainOrganization is null or empty.");
-			check = false;
+			LOG.error("msactivedirectoryDomainOrganization is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryContextPath || msActiveDirectoryContextPath.isEmpty()) {
-			log.error("msActiveDirectoryContainer is null or empty.");
-			check = false;
+			LOG.error("msActiveDirectoryContainer is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryUserName || msActiveDirectoryUserName.isEmpty()) {
-			log.error("msActiveDirectoryUserName is null or empty.");
-			check = false;
+			LOG.error("msActiveDirectoryUserName is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == msActiveDirectoryPassword || msActiveDirectoryPassword.isEmpty()) {
-			log.error("msActiveDirectoryPassword is null or empty.");
-			check = false;
+			LOG.error("msActiveDirectoryPassword is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 		return check;
 	}
@@ -429,7 +448,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		try {
 			allUser = fetchActiveDirectoryList(UserConnectivityConstant.MSACTIVEDIRECTORY_USER);
 		} catch (Exception e) {
-			log.error("Error in fetching all users " + e.getMessage(), e);
+			LOG.error("Error in fetching all users " + e.getMessage(), e);
 		}
 		return allUser;
 	}

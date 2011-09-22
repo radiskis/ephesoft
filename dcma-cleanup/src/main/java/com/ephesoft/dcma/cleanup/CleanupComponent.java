@@ -49,7 +49,7 @@ public class CleanupComponent {
 	/**
 	 * Logger reference.
 	 */
-	private Logger logger = LoggerFactory.getLogger(CleanupComponent.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(CleanupComponent.class);
 
 	/**
 	 * This method simply deletes the contents of the folder to be cleaned up. And after that it deletes the folder itself.
@@ -58,29 +58,29 @@ public class CleanupComponent {
 	 * @throws DCMAApplicationException If the folder does not exits.
 	 * @throws IOException If it is unable to delete the folder.
 	 */
-	public void execute(String sFolderToBeCleaned) throws DCMAApplicationException, IOException {
+	public void execute(final String sFolderToBeCleaned) throws DCMAApplicationException, IOException {
 
 		if (null == sFolderToBeCleaned) {
 			throw new DCMAApplicationException("Invalid input parameter. Folder name is null.");
 		}
 
-		File fFolderToBeCleaned = new File(sFolderToBeCleaned);
+		final File fFolderToBeCleaned = new File(sFolderToBeCleaned);
 		if (!fFolderToBeCleaned.exists()) {
-			logger.error("Folder does not exist. Folder name : " + fFolderToBeCleaned);
+			LOGGER.error("Folder does not exist. Folder name : " + fFolderToBeCleaned);
 			throw new DCMAApplicationException("Folder does not exist. Folder name : " + fFolderToBeCleaned);
 		}
 		if (!fFolderToBeCleaned.isDirectory()) {
-			logger.error("The path specified does not point to a directory path : " + fFolderToBeCleaned);
+			LOGGER.error("The path specified does not point to a directory path : " + fFolderToBeCleaned);
 			throw new DCMAApplicationException("The path specified does not point to a directory path : " + fFolderToBeCleaned);
 		}
 
 		boolean deleteFiles = FileUtils.deleteDirectoryAndContents(fFolderToBeCleaned);
 		if (deleteFiles) {
-			logger.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
+			LOGGER.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
 		} else {
 			deleteFiles = FileUtils.deleteDirectoryAndContents(fFolderToBeCleaned);
 			if (deleteFiles) {
-				logger.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
+				LOGGER.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
 			} else {
 				throw new IOException("Unable to delete Folder : " + fFolderToBeCleaned);
 			}
@@ -95,28 +95,28 @@ public class CleanupComponent {
 	 * @throws DCMAApplicationException If the file does not exits.
 	 * @throws IOException If it is unable to delete the file.
 	 */
-	public void deleteFile(String file) throws DCMAApplicationException, IOException {
+	public void deleteFile(final String file) throws DCMAApplicationException, IOException {
 
 		if (null == file) {
 			throw new DCMAApplicationException("Invalid input parameter. File name is null.");
 		}
 
-		File fileToBeDeleted = new File(file);
+		final File fileToBeDeleted = new File(file);
 		boolean deleteSuccess = true;
 		if (fileToBeDeleted.exists()) {
 			deleteSuccess = fileToBeDeleted.delete();
 			if (deleteSuccess) {
-				logger.info("File delete successfully. File name : " + file);
+				LOGGER.info("File delete successfully. File name : " + file);
 			} else {
 				deleteSuccess = fileToBeDeleted.delete();
 				if (deleteSuccess) {
-					logger.info("File delete successfully. File name : " + file);
+					LOGGER.info("File delete successfully. File name : " + file);
 				} else {
 					throw new IOException("Unable to delete the file. File name : " + file);
 				}
 			}
 		} else {
-			logger.error("File does not exist file name : " + file);
+			LOGGER.error("File does not exist file name : " + file);
 			throw new DCMAApplicationException("File does not exist file name : " + file);
 		}
 	}

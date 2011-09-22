@@ -61,7 +61,8 @@ public class EditTableColumnInfoPresenter extends AbstractBatchClassPresenter<Ed
 	public void onSave() {
 		boolean validFlag = true;
 		if (validFlag && (!view.getValidateColumnNameTextBox().validate() || !view.getValidateColumnPatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.BLANK_ERROR)));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 

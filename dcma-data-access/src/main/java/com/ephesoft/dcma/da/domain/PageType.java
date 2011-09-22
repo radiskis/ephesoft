@@ -66,9 +66,6 @@ public class PageType extends AbstractChangeableEntity implements Serializable {
 	@Column(name = "identifier")
 	private String identifier;
 
-	public PageType() {
-	}
-
 	public DocumentType getDocType() {
 		return docType;
 	}

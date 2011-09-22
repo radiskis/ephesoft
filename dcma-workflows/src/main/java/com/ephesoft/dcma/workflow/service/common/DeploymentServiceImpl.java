@@ -64,7 +64,7 @@ import com.ephesoft.dcma.util.FileUtils;
  */
 public class DeploymentServiceImpl implements DeploymentService {
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
+	protected static final Logger LOGGER = LoggerFactory.getLogger(DeploymentServiceImpl.class);
 
 	@Autowired
 	private RepositoryService repositoryService;
@@ -101,7 +101,7 @@ public class DeploymentServiceImpl implements DeploymentService {
 			}
 
 		} catch (IOException e) {
-			log.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
+			LOGGER.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
 			throw new RuntimeException( "An error occured while trying to deploy a process definition", e);
 		}
 
@@ -116,7 +116,7 @@ public class DeploymentServiceImpl implements DeploymentService {
 			FileUtils.updateProperty(propertyFile, propertyMap, comments);
 			
 		} catch (IOException e) {
-			log.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
+			LOGGER.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
 			//Continuing without throwing exception.
 		}
 			

@@ -163,6 +163,7 @@ public class BatchPluginPropertyContainer implements Serializable {
 				localDocumentType.setBatchClass(documentType.getBatchClass());
 				localDocumentType.setCreationDate(documentType.getCreationDate());
 				localDocumentType.setLastModified(documentType.getLastModified());
+				localDocumentType.setHidden(documentType.isHidden());
 				// populating page types
 				List<com.ephesoft.dcma.da.domain.PageType> pageTypesList = documentType.getPages();
 				Map<String, PageType> tempPageTypes = new HashMap<String, PageType>();
@@ -638,6 +639,7 @@ public class BatchPluginPropertyContainer implements Serializable {
 		private String rspProjectFileName;
 		private float minConfidenceThreshold;
 		private String priority;
+		private boolean isHidden;
 		private BatchClass batchClass;
 		private Map<String, PageType> docPageTypes = new HashMap<String, PageType>();
 		private Map<String, FieldType> docFieldTypes = new HashMap<String, FieldType>();
@@ -776,6 +778,23 @@ public class BatchPluginPropertyContainer implements Serializable {
 		public void setLastModified(Date lastModified) {
 			this.lastModified = lastModified;
 		}
+		
+		/**
+		 * 
+		 * @return isHidden
+		 */
+		public boolean isHidden() {
+			return isHidden;
+		}
+
+		/**
+		 * 
+		 * @param isHidden
+		 */
+		public void setHidden(boolean isHidden) {
+			this.isHidden = isHidden;
+		}
+
 
 		/**
 		 * @return the batchClass

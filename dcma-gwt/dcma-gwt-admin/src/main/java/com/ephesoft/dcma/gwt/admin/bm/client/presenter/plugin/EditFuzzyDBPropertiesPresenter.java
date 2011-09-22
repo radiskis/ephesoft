@@ -61,8 +61,9 @@ public class EditFuzzyDBPropertiesPresenter extends AbstractBatchClassPresenter<
 	public void bind() {
 		view.getDocFieldWidgets().clear();
 		if (!(controller.getSelectedPlugin() != null && controller.getSelectedPlugin().getPlugin().getPluginName().equals(
-				PluginNameConstants.FUZZYDB_PLUGIN)))
+				PluginNameConstants.FUZZYDB_PLUGIN))) {
 			return;
+		}
 		BatchClassPluginDTO batchPluginDTO = controller.getSelectedPlugin();
 		int row = 0;
 		for (BatchClassPluginConfigDTO pluginConfigDTO : batchPluginDTO.getBatchClassPluginConfigs()) {
@@ -106,17 +107,19 @@ public class EditFuzzyDBPropertiesPresenter extends AbstractBatchClassPresenter<
 						BatchClassPluginConfigDTO batchClassPluginConfigDTO = docFieldWidget.getData();
 						if (docFieldWidget.isListBox()) {
 							if (docFieldWidget.getListBoxwidget().isMultipleSelect()) {
-								String selectedItem = "";
+								StringBuffer selectedItem = new StringBuffer("");
 								Integer numberOfItemSelected = docFieldWidget.getListBoxwidget().getItemCount();
 								for (int i = 0; i < numberOfItemSelected; i++) {
-									if (docFieldWidget.getListBoxwidget().isItemSelected(i))
-										selectedItem += docFieldWidget.getListBoxwidget().getItemText(i) + ";";
+									if (docFieldWidget.getListBoxwidget().isItemSelected(i)) {
+										selectedItem.append(docFieldWidget.getListBoxwidget().getItemText(i)).append(';');
+									}
 								}
-								selectedItem = selectedItem.substring(0, selectedItem.length() - 1);
-								batchClassPluginConfigDTO.setValue(selectedItem);
-							} else
+								selectedItem = new StringBuffer(selectedItem.substring(0, selectedItem.length() - 1));
+								batchClassPluginConfigDTO.setValue(selectedItem.toString());
+							} else {
 								batchClassPluginConfigDTO.setValue(docFieldWidget.getListBoxwidget().getItemText(
 										docFieldWidget.getListBoxwidget().getSelectedIndex()));
+							}
 						} else {
 							batchClassPluginConfigDTO.setValue(docFieldWidget.getTextBoxWidget().getWidget().getValue());
 						}

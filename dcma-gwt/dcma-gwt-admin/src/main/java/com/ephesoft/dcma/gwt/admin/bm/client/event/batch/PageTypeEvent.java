@@ -52,7 +52,7 @@ public class PageTypeEvent extends GwtEvent<PageTypeHandler> {
 	/**
 	 * Type of event.
 	 */
-	public static Type<PageTypeHandler> TYPE = new Type<PageTypeHandler>();
+	public static Type<PageTypeHandler> type = new Type<PageTypeHandler>();
 
 	/**
 	 * Action taken by user.
@@ -90,7 +90,7 @@ public class PageTypeEvent extends GwtEvent<PageTypeHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<PageTypeHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public PageTypeDTO getPageType() {

@@ -64,7 +64,7 @@ public class FolderExporter implements ICommonConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FolderExporter.class);
 
-	private static final String ON = "ON";
+	private static final String ON_EXPORT = "ON";
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -125,7 +125,7 @@ public class FolderExporter implements ICommonConstants {
 		LOGGER.info("Properties Initialized Successfully");
 
 		// String exportToFolder = batchSchemaService.getExportFolderLocation();
-		if (exportToFolderSwitch.equalsIgnoreCase(ON)) {
+		if (exportToFolderSwitch.equalsIgnoreCase(ON_EXPORT)) {
 			File fFolderToBeExported = new File(sFolderToBeExported);
 			if (!fFolderToBeExported.exists() || !fFolderToBeExported.isDirectory()) {
 				LOGGER.error("Folder does not exist folder name=" + fFolderToBeExported);

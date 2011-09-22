@@ -126,8 +126,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	@UiField
 	HorizontalPanel actionPanel;
 
-	private int retryAttempts;
-
 	private Button restartBatchButton;
 
 	private Button deleteBatchButton;
@@ -160,17 +158,9 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 	private BatchInstanceListView batchInstanceListView;
 
-	private boolean refreshEnable;
-
-	private int selectedIndex;
-
 	private Map<String, BatchInstanceDTO> batchInstanceDTOMap = new HashMap<String, BatchInstanceDTO>();
 
 	interface Binder extends UiBinder<DockLayoutPanel, BatchInstanceView> {
-	}
-
-	public int getSelectedIndex() {
-		return selectedIndex;
 	}
 
 	private static final Binder binder = GWT.create(Binder.class);
@@ -285,18 +275,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		batchInstanceListBox.setVisibleItemCount(3);
 		clearRestartOptions();
 		restartOptions.setWidth("100%");
-		refreshEnable = true;
-		Timer timer = new Timer() {
-
-			public void run() {
-				if (refreshEnable) {
-					selectedIndex = restartOptions.getSelectedIndex();
-					performRestartOptionsPopulate();
-				}
-			}
-		};
-
-		timer.scheduleRepeating(5000);
 
 		refreshButton.addClickHandler(new ClickHandler() {
 
@@ -328,7 +306,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				refreshEnable = false;
 				if (checkRowSelection()) {
 					if (!checkRowSelectedIsValid(batchInstanceListView.listView.getSelectedRowIndex())) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -440,6 +417,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_TRANSFERRED),
 				BatchInstanceStatus.TRANSFERRED.getId().toString());
 
+		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_RESTART_IN_PROGRESS),
+				BatchInstanceStatus.RESTART_IN_PROGRESS.getId().toString());
 	}
 
 	private void fillPriorityListBox() {
@@ -562,13 +541,13 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			public void onOkClick() {
 				confirmationDialog.hide();
 				presenter.onRestartBatchButtonClicked(identifier, moduleName);
-				refreshEnable = true;
+
 			}
 
 			@Override
 			public void onCancelClick() {
 				confirmationDialog.hide();
-				refreshEnable = true;
+
 			}
 		});
 		confirmationDialog.center();
@@ -815,23 +794,5 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				presenter.getRestartOptions(batchInstanceListView.listView.getSelectedRowIndex());
 			}
 		}
-	}
-
-	/**
-	 * @param retryAttempts the retryAttempts to set
-	 */
-	public void setRetryAttempts(int retryAttempts) {
-		this.retryAttempts = retryAttempts;
-	}
-
-	/**
-	 * @return the retryAttempts
-	 */
-	public int getRetryAttempts() {
-		return retryAttempts;
-	}
-
-	public void setSelectedIndex(int selectedIndex) {
-		this.selectedIndex = selectedIndex;
 	}
 }

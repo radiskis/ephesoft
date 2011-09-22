@@ -43,6 +43,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.EditFunctionKeyPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.core.client.GWT;
@@ -53,6 +54,8 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -66,51 +69,65 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 	interface Binder extends UiBinder<VerticalPanel, EditFunctionKeyView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	Label methodNameLabel;
+	protected Label methodNameLabel;
+	@UiField
+	protected Label methodNameStar;
+	@UiField
+	protected TextBox methodName;
 
 	@UiField
-	Label methodNameStar;
+	protected Label keyNameLabel;
+	@UiField
+	protected Label keyNameStar;
+	@UiField
+	protected TextBox keyName;
 
 	@UiField
-	TextBox methodName;
+	protected Label keyWariningLabel;
 
 	@UiField
-	Label keyNameLabel;
+	protected Label methodDescriptionLabel;
+	@UiField
+	protected TextBox methodDescription;
+	@UiField
+	protected Label methodDescriptionStar;
 
 	@UiField
-	Label keyNameStar;
+	protected Button saveButton;
 
 	@UiField
-	TextBox keyName;
-	
-	@UiField
-	Label keyWariningLabel;
+	protected Button cancelButton;
 
 	@UiField
-	Label methodDescriptionLabel;
+	protected VerticalPanel editFunctionKeyViewPanel;
 
-	@UiField
-	TextBox methodDescription;
-
-	@UiField
-	Label methodDescriptionStar;
-
-	@UiField
-	Button saveButton;
-
-	@UiField
-	Button cancelButton;
-
-	@UiField
-	VerticalPanel editFunctionKeyViewPanel;
+	private ValidatableWidget<TextBox> validateMethodNameTextBox;
+	private ValidatableWidget<TextBox> validateMethodDescriptionTextBox;
 
 	private final List<String> allowedKeys = new ArrayList<String>();
 
 	public EditFunctionKeyView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
+		validateMethodNameTextBox = new ValidatableWidget<TextBox>(methodName);
+		validateMethodNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateMethodNameTextBox.toggleValidDateBox();
+			}
+		});
+		validateMethodDescriptionTextBox = new ValidatableWidget<TextBox>(methodDescription);
+		validateMethodDescriptionTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateMethodDescriptionTextBox.toggleValidDateBox();
+			}
+		});
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		editFunctionKeyViewPanel.setSpacing(5);
@@ -133,21 +150,6 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 		keyWariningLabel.setStyleName(AdminConstants.FONT_RED_STYLE);
 		methodDescriptionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		setAllowedKeys();
-
-		methodDescription.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent arg0) {
-				if (methodDescription.getText().isEmpty()) {
-					methodDescription.addStyleName("dateBoxFormatError");
-				} else {
-					methodDescription.removeStyleName("dateBoxFormatError");
-				}
-
-			}
-
-		});
-
 		keyName.addKeyDownHandler(new KeyDownHandler() {
 
 			@Override
@@ -166,6 +168,8 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 					case 122:
 						arg0.getNativeEvent().preventDefault();
 						break;
+					default:
+						break;
 				}
 			}
 		});
@@ -179,24 +183,11 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 						showKeyErrorDialog("Only keys from F1 to F11(excluding F5) allowed.");
 					} else {
 						keyName.setText(keyName.getText().toUpperCase());
-						keyName.removeStyleName("dateBoxFormatError");
+						keyName.removeStyleName(AdminConstants.VALIDATION_STYLE);
 					}
 				} else {
-					keyName.addStyleName("dateBoxFormatError");
+					keyName.addStyleName(AdminConstants.VALIDATION_STYLE);
 				}
-			}
-		});
-
-		methodName.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent arg0) {
-				if (methodName.getText().isEmpty()) {
-					methodName.addStyleName("dateBoxFormatError");
-				} else {
-					methodName.removeStyleName("dateBoxFormatError");
-				}
-
 			}
 		});
 
@@ -243,9 +234,27 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 					case 8:
 						setKeyName(null);
 						break;
+					default:
+						break;
 				}
 			}
 		});
+	}
+
+	public ValidatableWidget<TextBox> getValidateMethodNameTextBox() {
+		return validateMethodNameTextBox;
+	}
+
+	public void setValidateMethodNameTextBox(ValidatableWidget<TextBox> validateMethodNameTextBox) {
+		this.validateMethodNameTextBox = validateMethodNameTextBox;
+	}
+
+	public ValidatableWidget<TextBox> getValidateMethodDescriptionTextBox() {
+		return validateMethodDescriptionTextBox;
+	}
+
+	public void setValidateMethodDescriptionTextBox(ValidatableWidget<TextBox> validateMethodDescriptionTextBox) {
+		this.validateMethodDescriptionTextBox = validateMethodDescriptionTextBox;
 	}
 
 	private void setAllowedKeys() {
@@ -267,8 +276,7 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 			if (!keyName.getText().isEmpty()) {
 				if (presenter.checkKeyUsedAlready(keyName.getText())) {
 					showKeyErrorDialog("The key is already in use.");
-				}
-				else {
+				} else {
 					presenter.onSave();
 				}
 			}
@@ -343,11 +351,6 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 	}
 
 	public void setMethodName(String name) {
-		if (name == null || (name.isEmpty())) {
-			this.methodName.addStyleName("dateBoxFormatError");
-		} else {
-			this.methodName.removeStyleName("dateBoxFormatError");
-		}
 		this.methodName.setValue(name);
 	}
 
@@ -356,11 +359,6 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 	}
 
 	public void setMethodDescription(String description) {
-		if (description == null || description.isEmpty()) {
-			this.methodDescription.addStyleName("dateBoxFormatError");
-		} else {
-			this.methodDescription.removeStyleName("dateBoxFormatError");
-		}
 		this.methodDescription.setValue(description);
 	}
 
@@ -370,11 +368,19 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 
 	public void setKeyName(String name) {
 		if (name == null || (name.isEmpty())) {
-			this.keyName.addStyleName("dateBoxFormatError");
+			this.keyName.addStyleName(AdminConstants.VALIDATION_STYLE);
 		} else {
-			this.keyName.removeStyleName("dateBoxFormatError");
+			this.keyName.removeStyleName(AdminConstants.VALIDATION_STYLE);
 		}
 		this.keyName.setValue(name);
+	}
+
+	public TextBox getMethodNameTextBox() {
+		return this.methodName;
+	}
+
+	public TextBox getMethodDescriptionTextBox() {
+		return methodDescription;
 	}
 
 }

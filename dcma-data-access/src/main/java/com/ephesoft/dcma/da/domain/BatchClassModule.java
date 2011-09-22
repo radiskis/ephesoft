@@ -119,14 +119,14 @@ public class BatchClassModule extends AbstractChangeableEntity {
 		this.batchClassPlugins = batchClassPlugins;
 	}
 
-	public BatchClassPlugin getBatchClassPluginById(long id) {
+	public BatchClassPlugin getBatchClassPluginById(long identifier) {
 		BatchClassPlugin plugin = null;
-		if (getBatchClassPlugins() == null || getBatchClassPlugins().size() == 0)
-			return plugin;
-		for (BatchClassPlugin batchClassPlugin : getBatchClassPlugins()) {
-			if (batchClassPlugin.getId() == id) {
-				plugin = batchClassPlugin;
-				break;
+		if (getBatchClassPlugins() != null && getBatchClassPlugins().size() > 0) {
+			for (BatchClassPlugin batchClassPlugin : getBatchClassPlugins()) {
+				if (batchClassPlugin.getId() == identifier) {
+					plugin = batchClassPlugin;
+					break;
+				}
 			}
 		}
 		return plugin;
@@ -139,11 +139,11 @@ public class BatchClassModule extends AbstractChangeableEntity {
 	public void setWorkflowName(String workflowName) {
 		this.workflowName = workflowName;
 	}
-	
+
 	public List<BatchClassModuleConfig> getBatchClassModuleConfig() {
 		return batchClassModuleConfig;
 	}
-	
+
 	public void setBatchClassModuleConfig(List<BatchClassModuleConfig> batchClassModuleConfig) {
 		this.batchClassModuleConfig = batchClassModuleConfig;
 	}

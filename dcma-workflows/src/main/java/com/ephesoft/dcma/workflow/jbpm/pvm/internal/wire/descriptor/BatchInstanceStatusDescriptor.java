@@ -45,9 +45,10 @@ public class BatchInstanceStatusDescriptor extends AbstractDescriptor {
 
 	private static final long serialVersionUID = 1L;
 	
-	BatchInstanceStatus status;
+	private BatchInstanceStatus status;
 	
 	public BatchInstanceStatusDescriptor(BatchInstanceStatus batchInstanceStatus) {
+		super();
 		status = batchInstanceStatus; 
 	}
 

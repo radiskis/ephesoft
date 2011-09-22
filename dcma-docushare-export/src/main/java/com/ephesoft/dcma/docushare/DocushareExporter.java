@@ -214,6 +214,7 @@ public class DocushareExporter implements ICommonConstants {
 		 * String exportToFolder = pluginPropertiesService.getPropertyValue(batchInstanceID, DCMAPlugin.COPY_BATCH_XML,
 		 * DocushareExportProperties.EXPORT_FOLDER);
 		 */
+		final String temp_var_to = " to ";
 		String exportToFolder = batchSchemaService.getLocalFolderLocation();
 		LOGGER.info("Properties Initialized Successfully");
 
@@ -227,14 +228,14 @@ public class DocushareExporter implements ICommonConstants {
 			LOGGER.error("Could not find xsl file in the classpath resource", e2);
 			throw new DCMAApplicationException("Could not find xsl file in the classpath resource", e2);
 		}
-		LOGGER.debug("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
+		LOGGER.debug("Transforming XML " + sourceXMLPath +  temp_var_to + targetXmlPath);
 		try {
 			com.ephesoft.dcma.util.XMLUtil.transformXML(sourceXMLPath, targetXmlPath, xslStream);
 		} catch (FileNotFoundException e1) {
 			LOGGER.error("Could not find docushareTransform.xsl file : " + e1, e1);
 			throw new DCMAApplicationException("Could not find docushareTransform.xsl file : " + e1, e1);
 		} catch (TransformerException e1) {
-			LOGGER.error("Problem occured in transforming " + sourceXMLPath + " to " + targetXmlPath + e1);
+			LOGGER.error("Problem occured in transforming " + sourceXMLPath + temp_var_to + targetXmlPath + e1);
 			throw new DCMAApplicationException("Could not find docushareTransform.xsl file : " + e1, e1);
 		} finally {
 			if (xslStream != null) {
@@ -255,14 +256,15 @@ public class DocushareExporter implements ICommonConstants {
 
 		String finalZipFileName = pathToDocShareExportFolder + File.separator + batchInstanceID + zipFileName;
 		LOGGER.debug("Exporting zip file " + finalZipFileName);
+		final String temp_var_zip = "Problem in zipping directory ";
 		try {
 			FileUtils.zipDirectory(baseDocsFolder, finalZipFileName, true);
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("Problem in zipping directory " + baseDocsFolder + " to " + finalZipFileName, e);
-			throw new DCMAApplicationException("Problem in zipping directory " + baseDocsFolder + " to " + finalZipFileName, e);
+			LOGGER.error(temp_var_zip + baseDocsFolder + temp_var_to + finalZipFileName, e);
+			throw new DCMAApplicationException(temp_var_zip + baseDocsFolder + temp_var_to + finalZipFileName, e);
 		} catch (IOException e) {
-			LOGGER.error("Problem in zipping directory " + baseDocsFolder + " to " + finalZipFileName, e);
-			throw new DCMAApplicationException("Problem in zipping directory " + baseDocsFolder + " to " + finalZipFileName, e);
+			LOGGER.error(temp_var_zip + baseDocsFolder + temp_var_to + finalZipFileName, e);
+			throw new DCMAApplicationException(temp_var_zip + baseDocsFolder + temp_var_to + finalZipFileName, e);
 		}
 	}
 }

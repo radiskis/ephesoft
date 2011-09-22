@@ -69,45 +69,46 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, TableInfoView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private TableColumnInfoListView tableColumnInfoListView;
-
-	@UiField
-	LayoutPanel tableColumnInfoListPanel;
+	private final TableColumnInfoListView tableColumnInfoListView;
 
 	@UiField
-	TableInfoDetailView tableInfoDetailView;
+	protected LayoutPanel tableColumnInfoListPanel;
 
 	@UiField
-	EditTableInfoView editTableInfoView;
+	protected TableInfoDetailView tableInfoDetailView;
 
 	@UiField
-	Button editTableInfoPropertiesButton;
+	protected EditTableInfoView editTableInfoView;
 
 	@UiField
-	VerticalPanel tableInfoVerticalPanel;
+	protected Button editTableInfoPropertiesButton;
 
 	@UiField
-	VerticalPanel tableInfoConfigVerticalPanel;
+	protected VerticalPanel tableInfoVerticalPanel;
 
 	@UiField
-	CaptionPanel tableInfoCaptionPanel;
+	protected VerticalPanel tableInfoConfigVerticalPanel;
 
 	@UiField
-	Button addTCButton;
+	protected CaptionPanel tableInfoCaptionPanel;
 
 	@UiField
-	Button editTCButton;
+	protected Button addTCButton;
 
 	@UiField
-	Button deleteTCButton;
+	protected Button editTCButton;
 
 	@UiField
-	HorizontalPanel tableColumnInfoButtonPanel;
+	protected Button deleteTCButton;
+
+	@UiField
+	protected HorizontalPanel tableColumnInfoButtonPanel;
 
 	public TableInfoView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		tableColumnInfoListView = new TableColumnInfoListView();
 		tableColumnInfoListPanel.add(tableColumnInfoListView.listView);

@@ -66,7 +66,7 @@ public class TomcatConnectivity implements UserConnectivity {
 	/**
 	 * Used for handling logs.
 	 */
-	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(TomcatConnectivity.class);
 
 	private String tomcatUserXmlPath;
 
@@ -90,23 +90,23 @@ public class TomcatConnectivity implements UserConnectivity {
 	 * @param batchXmlFile xml file path
 	 * @return {@link Document}
 	 */
-	Document getDocument(String tomcatUserXmlPath) {
+	private Document getDocument(String tomcatUserXmlPath) {
 		Document document = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
 		try {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		try {
 			if (builder != null) {
 				document = builder.parse(tomcatUserXmlPath);
 			}
 		} catch (SAXException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		return document;
 	}

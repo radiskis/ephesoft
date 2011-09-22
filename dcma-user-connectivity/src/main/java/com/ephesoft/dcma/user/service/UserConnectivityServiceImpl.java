@@ -58,7 +58,7 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 	/**
 	 * Used for handling logs.
 	 */
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(UserConnectivityServiceImpl.class);
 
 	/**
 	 * Instance of UserConnectivityFactory.
@@ -68,50 +68,53 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 
 	@Override
 	public Set<String> getAllGroups() {
+		LOG.info("Inside get all groups.");
 		boolean isValid = true;
 		Set<String> allGroups = null;
 		Set<String> resultAllgroups = null;
 		if (factory == null) {
-			log.error("Factory is null");
+			LOG.error("User Connectivity Factory is null. Hence returning");
 			isValid = false;
 		}
 		if (isValid) {
 			UserConnectivity userConnectivity = factory.getImplementation();
 			if (userConnectivity != null) {
 				allGroups = userConnectivity.getAllGroups();
-				if (allGroups != null) {
-					resultAllgroups = new TreeSet<String>();
-					for (String group : allGroups) {
-						resultAllgroups.add(group);
-					}
-				}
+				resultAllgroups = performAddtionToResultSet(allGroups);
 			}
 		}
+		LOG.info("Successfully returning groups.");
 		return resultAllgroups;
+	}
+
+	private Set<String> performAddtionToResultSet(Set<String> dataSet) {
+		Set<String> resultSet = new TreeSet<String>();
+		if (dataSet != null) {
+			for (String data : dataSet) {
+				resultSet.add(data);
+			}
+		}
+		return resultSet;
 	}
 
 	@Override
 	public Set<String> getAllUser() {
+		LOG.info("Inside get all users.");
 		Set<String> allUser = null;
 		Set<String> resultAllUser = null;
 		boolean isValid = true;
 		if (factory == null) {
-			log.error("Factory is null");
+			LOG.error("User Connectivity Factory is null. Hence returning");
 			isValid = false;
 		}
 		if (isValid) {
 			UserConnectivity userConnectivity = factory.getImplementation();
 			if (userConnectivity != null) {
 				allUser = userConnectivity.getAllUser();
-				
-				if (allUser != null) {
-					resultAllUser = new TreeSet<String>();
-					for (String user : allUser) {
-						resultAllUser.add(user);
-					}
-				}
+				resultAllUser = performAddtionToResultSet(allUser);
 			}
 		}
+		LOG.info("Successfully returning users.");
 		return resultAllUser;
 	}
 

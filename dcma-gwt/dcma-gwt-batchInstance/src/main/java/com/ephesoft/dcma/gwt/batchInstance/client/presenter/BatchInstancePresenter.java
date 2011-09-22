@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.batchInstance.client.BatchInstanceController;
 import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceConstants;
@@ -271,37 +272,46 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	}
 
 	public void onRestartBatchButtonClicked(final String identifier, final String module) {
-		ScreenMaskUtility.maskScreen();
-		try {
-			controller.getRpcService().restartBatchInstance(identifier, module, new AsyncCallback<Results>() {
+		controller.getRpcService().updateBatchInstanceStatus(identifier, BatchInstanceStatus.RESTART_IN_PROGRESS,
+				new AsyncCallback<Results>() {
 
-				@Override
-				public void onFailure(Throwable arg0) {
-					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchInstanceMessages.MSG_RESTART_FAILURE));
-				}
-
-				@Override
-				public void onSuccess(Results arg0) {
-					if (arg0.name().equals(Results.SUCCESSFUL.name())) {
-						showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_RESTART_SUCCESSFUL,
-								identifier), startIndex, maxResult, order);
-					} else {
+					@Override
+					public void onFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_RESTART_FAILURE));
+								BatchInstanceMessages.MSG_RESTART_FAILURE, identifier));
 					}
-				}
-			});
-		} catch (GWTException e) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchInstanceMessages.MSG_RESTART_ERROR, e.getMessage()));
-		}
+
+					@Override
+					public void onSuccess(Results arg0) {
+						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
+								BatchInstanceMessages.MSG_RESTART_SUCCESSFUL, identifier));
+
+						try {
+							controller.getRpcService().restartBatchInstance(identifier, module, new AsyncCallback<Results>() {
+
+								@Override
+								public void onFailure(Throwable arg0) {
+
+								}
+
+								@Override
+								public void onSuccess(Results arg0) {
+									updateTable(startIndex, maxResult, order);
+
+								}
+							});
+						} catch (GWTException e) {
+
+						}
+
+					}
+				});
+
 	}
 
 	@Override
 	public void onRowSelected(String identifer) {
-		view.setSelectedIndex(0);
+		view.restartOptions.setSelectedIndex(0);
 		view.performRestartOptionsPopulate();
 		if (!view.checkRowSelectedIsValid(identifer) || view.checkRemotelyExecutingBatch(identifer)) {
 			view.disableButtons();
@@ -350,18 +360,12 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 			@Override
 			public void onFailure(Throwable paramThrowable) {
-				view.setRetryAttempts(view.getRetryAttempts() + 1);
-				if (view.getRetryAttempts() < 2) {
-					view.showErrorRetrievingRestartOptions(batchInstanceIdentifier);
-				}
+				view.showErrorRetrievingRestartOptions(batchInstanceIdentifier);
 			}
 
 			@Override
 			public void onSuccess(Map<String, String> restartOptionsList) {
-				view.setRetryAttempts(0);
 				view.setRestartOptions(restartOptionsList);
-				int selectedIndex = view.getSelectedIndex();
-				view.restartOptions.setSelectedIndex(selectedIndex);
 			}
 		});
 	}

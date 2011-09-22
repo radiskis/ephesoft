@@ -54,10 +54,13 @@ public class DocumentTypeDetailPresenter extends AbstractBatchClassPresenter<Doc
 			view.setName(controller.getSelectedDocument().getName());
 			view.setDescription(controller.getSelectedDocument().getDescription());
 			view.setMinConfidenceThreshold(String.valueOf(controller.getSelectedDocument().getMinConfidenceThreshold()));
-			if (controller.getSelectedDocument().getRspProjectFileName() == null)
+			view.setIsHidden(controller.getSelectedDocument().isHidden());
+			if (controller.getSelectedDocument().getRspProjectFileName() == null) {
 				view.setRecostarExtraction(AdminConstants.EMPTY_STRING);
-			else
+			}
+			else {
 				view.setRecostarExtraction(controller.getSelectedDocument().getRspProjectFileName());
+			}
 		}
 	}
 

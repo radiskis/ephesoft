@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EphesoftFolderListner implements JNotifyListener, ApplicationContextAware {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(EphesoftFolderListner.class);
 	
 	private ApplicationContext applicationContext;
 
@@ -60,22 +60,22 @@ public class EphesoftFolderListner implements JNotifyListener, ApplicationContex
 
 	@Override
 	public void fileCreated(int arg0, String arg1, String arg2) {
-		log.trace("WATCH::" + arg1 + File.separator + arg2);
+		LOG.trace("WATCH::" + arg1 + File.separator + arg2);
 		applicationContext.publishEvent(new FolderModificationEvent(applicationContext, new FolderDetail(arg1, arg2)));
 	}
 
 	@Override
 	public void fileDeleted(int arg0, String arg1, String arg2) {
-		log.trace("We are doing nothing with file deletion.");
+		LOG.trace("We are doing nothing with file deletion.");
 	}
 
 	@Override
 	public void fileModified(int arg0, String arg1, String arg2) {
-		log.trace("We are doing nothing with file modification.");
+		LOG.trace("We are doing nothing with file modification.");
 	}
 
 	@Override
 	public void fileRenamed(int arg0, String arg1, String arg2, String arg3) {
-		log.trace("We are doing nothing with file renaming.");
+		LOG.trace("We are doing nothing with file renaming.");
 	}
 }

@@ -37,6 +37,7 @@ package com.ephesoft.dcma.lucene;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.slf4j.Logger;
@@ -81,14 +82,19 @@ public class LearnFiles {
 									String imageAbsolutePath = pageFolderPath + File.separator + eachImageFile;
 									String targetHTMlAbsolutePath = pageFolderPath + File.separator
 											+ eachImageFile.substring(0, eachImageFile.lastIndexOf(".")) + ".html";
+
+									InputStreamReader inputStreamReader = null;
+									BufferedReader input = null;
 									try {
 										Runtime runtime = Runtime.getRuntime();
 										String[] cmds = new String[3];
 										cmds[0] = "cmd";
 										cmds[1] = "/c";
-										cmds[2] = "RecostarPlugin.exe Fpr.rsp \"" + imageAbsolutePath + "\"  \"" + targetHTMlAbsolutePath + "\"";
+										cmds[2] = "RecostarPlugin.exe Fpr.rsp \"" + imageAbsolutePath + "\"  \""
+												+ targetHTMlAbsolutePath + "\"";
 										Process process = runtime.exec(cmds, null, new File(System.getenv(RECOSTAR_BASE_PATH)));
-										BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+										inputStreamReader = new InputStreamReader(process.getInputStream());
+										input = new BufferedReader(inputStreamReader);
 										String line = null;
 										do {
 											line = input.readLine();
@@ -100,6 +106,21 @@ public class LearnFiles {
 										LOGGER.error("Exception while generating HOCR for image" + imageAbsolutePath + e.getMessage());
 										throw new DCMAApplicationException("Exception while generating HOCR for image"
 												+ imageAbsolutePath + e.getMessage(), e);
+									} finally {
+										if (input != null) {
+											try {
+												input.close();
+											} catch (IOException e) {
+												LOGGER.error(e.getMessage(), e);
+											}
+										}
+										if (inputStreamReader != null) {
+											try {
+												inputStreamReader.close();
+											} catch (IOException e) {
+												LOGGER.error(e.getMessage(), e);
+											}
+										}
 									}
 								} else {
 									LOGGER.info("No Image file with valid extension found");

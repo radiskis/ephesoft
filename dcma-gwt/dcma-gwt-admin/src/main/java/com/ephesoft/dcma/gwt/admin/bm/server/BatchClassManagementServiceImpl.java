@@ -584,6 +584,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 		documentType.setName(documentTypeDTO.getName());
 		documentType.setDescription(documentTypeDTO.getDescription());
 		documentType.setMinConfidenceThreshold(documentTypeDTO.getMinConfidenceThreshold());
+		documentType.setHidden(documentTypeDTO.isHidden());
 		documentType.setId(0);
 	}
 

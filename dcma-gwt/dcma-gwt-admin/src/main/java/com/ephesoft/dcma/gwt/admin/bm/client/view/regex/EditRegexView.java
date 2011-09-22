@@ -59,26 +59,27 @@ public class EditRegexView extends View<EditRegexPresenter> {
 	}
 	
 	@UiField
-	Label patternLabel;
+	protected Label patternLabel;
 	@UiField
-	Label patternStar;
+	protected Label patternStar;
 	@UiField
-	TextBox pattern;
+	protected TextBox pattern;
 	
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 	
-	private ValidatableWidget<TextBox> validatePatternTextBox;
+	private final ValidatableWidget<TextBox> validatePatternTextBox;
 	
 	@UiField
-	VerticalPanel editRegexViewPanel;
+	protected VerticalPanel editRegexViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 	
 	public EditRegexView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validatePatternTextBox = new ValidatableWidget<TextBox>(pattern);
@@ -98,12 +99,12 @@ public class EditRegexView extends View<EditRegexPresenter> {
 	}
 	
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 

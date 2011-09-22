@@ -54,7 +54,7 @@ public interface PluginService {
 	 * @param pluginId
 	 * @return Plugin
 	 */
-	public Plugin getPluginPropertiesForPluginId(Long pluginId);
+	Plugin getPluginPropertiesForPluginId(Long pluginId);
 
 	/**
 	 * API to get the plugin details by Id.
@@ -62,7 +62,7 @@ public interface PluginService {
 	 * @param pluginId
 	 * @return Plugin
 	 */
-	public Plugin getPluginPropertiesForPluginName(String pluginName);
+	Plugin getPluginPropertiesForPluginName(String pluginName);
 
 	/**
 	 * @param moduleId Long
@@ -70,5 +70,5 @@ public interface PluginService {
 	 * @param maxResult int
 	 * @return List<Plugin>
 	 */
-	public List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
+	List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
 }

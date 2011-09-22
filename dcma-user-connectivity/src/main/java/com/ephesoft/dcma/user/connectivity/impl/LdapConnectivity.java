@@ -66,7 +66,7 @@ public class LdapConnectivity implements UserConnectivity {
 	/**
 	 * Used for handling logs.
 	 */
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(LdapConnectivity.class);
 
 	/**
 	 * This value get from the user.ldap_url in user-connectivity.properties file.
@@ -153,12 +153,12 @@ public class LdapConnectivity implements UserConnectivity {
 	public Set<String> getAllGroups() {
 		Set<String> allGroups = null;
 		try {
-			log.info("======Inside LDAPUserConnectivity======");
-			log.info("Fetching all available groups from the LDAP");
+			LOG.info("======Inside LDAPUserConnectivity======");
+			LOG.info("Fetching all available groups from the LDAP");
 			allGroups = this.fetchLDAPList(UserConnectivityConstant.LDAP_GROUPS);
-			log.info("Ending fetching list from LDAP");
+			LOG.info("Ending fetching list from LDAP");
 		} catch (Exception e) {
-			log.error("Error in fetching all groups " + e.getMessage(), e);
+			LOG.error("Error in fetching all groups " + e.getMessage(), e);
 		}
 		return allGroups;
 	}
@@ -175,11 +175,11 @@ public class LdapConnectivity implements UserConnectivity {
 		Set<String> resultList = null;
 		boolean isValid = true;
 
-		isValid = isValidData(isValid);
+		isValid = isValidData();
 
 		if (isValid) {
 
-			Hashtable<Object, Object> env = new Hashtable<Object, Object>();
+			Hashtable<Object, Object> env = new Hashtable<Object, Object>(); // NOPMD. Required to work with Hashtable for LDAP.
 			env.put(Context.INITIAL_CONTEXT_FACTORY, ldapConfig);
 			env.put(Context.PROVIDER_URL, ldapURL);
 
@@ -188,38 +188,38 @@ public class LdapConnectivity implements UserConnectivity {
 			try {
 				dctx = new InitialDirContext(env);
 			} catch (NamingException ne) {
-				log.error(ne.getMessage(), ne);
+				LOG.error(ne.getMessage(), ne);
 			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 
 			if (dctx != null) {
-				log.info("Start Fetching result set from Active Directory");
+				LOG.info("Start Fetching result set from Active Directory");
 				results = getResultSet(name, dctx);
 
 				if (results != null) {
 					resultList = new HashSet<String>();
 					resultSetValues(resultList, results);
 				} else {
-					log.error("Results found from LDAP is  null or empty.");
+					LOG.error("Results found from LDAP is  null or empty.");
 				}
 
 				try {
 					if (dctx != null) {
-						log.info("Closing directory context of LDAP");
+						LOG.info("Closing directory context of LDAP");
 						dctx.close();
 					}
 					if (results != null) {
-						log.info("Closing result set of LDAP");
+						LOG.info("Closing result set of LDAP");
 						results.close();
 					}
 				} catch (NamingException ne) {
-					log.error(ne.getMessage(), ne);
+					LOG.error(ne.getMessage(), ne);
 				} catch (Exception e) {
-					log.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 			} else {
-				log.error("Invalid directory context of LDAP.");
+				LOG.error("Invalid directory context of LDAP.");
 			}
 		}
 		return resultList;
@@ -239,19 +239,19 @@ public class LdapConnectivity implements UserConnectivity {
 		searchControl.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
 		String filter = UserConnectivityConstant.LDAP_FILTER;
-		log.info("Added filter to LDAP :" + filter);
+		LOG.info("Added filter to LDAP :" + filter);
 		NamingEnumeration<?> results = null;
 		try {
 			String paramName = UserConnectivityConstant.ORGANIZATIONAL_UNIT + UserConnectivityConstant.EQUAL_SYMBOL + name
 					+ UserConnectivityConstant.COMMA_SYMBOL + UserConnectivityConstant.DOMAIN_COMPONENT
 					+ UserConnectivityConstant.EQUAL_SYMBOL + ldapDomainName + UserConnectivityConstant.COMMA_SYMBOL
 					+ UserConnectivityConstant.DOMAIN_COMPONENT + UserConnectivityConstant.EQUAL_SYMBOL + ldapDomainOrganization;
-			log.info("Context Path for LDAP :" + paramName);
+			LOG.info("Context Path for LDAP :" + paramName);
 			results = dctx.search(paramName, filter, searchControl);
 		} catch (NamingException ne) {
-			log.error(ne.getMessage(), ne);
+			LOG.error(ne.getMessage(), ne);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		return results;
 	}
@@ -269,11 +269,11 @@ public class LdapConnectivity implements UserConnectivity {
 				try {
 					searchResult = (SearchResult) results.next();
 				} catch (NamingException e) {
-					log.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 
 				if (null != searchResult) {
-					log.info("Group found of LDAP is :" + searchResult);
+					LOG.info("Group found of LDAP is :" + searchResult);
 					String result = searchResult.toString().split(UserConnectivityConstant.COLON_SYMBOL)[0];
 					if (null != result && !result.isEmpty()) {
 						String[] cnConnectionNameArr = result.split(UserConnectivityConstant.COLON_SYMBOL);
@@ -286,39 +286,48 @@ public class LdapConnectivity implements UserConnectivity {
 						}
 					}
 				} else {
-					log.error("No groups found in the LDAP.");
+					LOG.error("No groups found in the LDAP.");
 				}
 			}
 		} catch (NamingException ne) {
-			log.error(ne.getMessage(), ne);
+			LOG.error(ne.getMessage(), ne);
 		}
 	}
 
 	/**
 	 * Check the user-connectivity.properties are valid or not
 	 * 
-	 * @param check
+	 * @param isValid
 	 * @return true if valid else false
 	 */
-	private boolean isValidData(boolean check) {
+	private boolean isValidData() {
+		boolean check = true; 
 		if (null == ldapConfig || ldapConfig.isEmpty()) {
-			log.error("ldapConfig not found.");
-			check = false;
+			LOG.error("ldapConfig not found.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == ldapURL || ldapURL.isEmpty()) {
-			log.error("ldapUrl not found.");
-			check = false;
+			LOG.error("ldapUrl not found.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == ldapDomainName || ldapDomainName.isEmpty()) {
-			log.error("ldapDomainName is null or empty.");
-			check = false;
+			LOG.error("ldapDomainName is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 
 		if (null == ldapDomainOrganization || ldapDomainOrganization.isEmpty()) {
-			log.error("ldapDomainOrganization is null or empty.");
-			check = false;
+			LOG.error("ldapDomainOrganization is null or empty.");
+			if(check){
+				check = false;
+			}
 		}
 		return check;
 	}
@@ -334,7 +343,7 @@ public class LdapConnectivity implements UserConnectivity {
 		try {
 			allUser = fetchLDAPList(UserConnectivityConstant.LDAP_PEOPLE);
 		} catch (Exception e) {
-			log.error("Error in fetching all users " + e.getMessage(), e);
+			LOG.error("Error in fetching all users " + e.getMessage(), e);
 		}
 		return allUser;
 	}

@@ -50,65 +50,71 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 
+	
+	public CheckBox getIsHidden() {
+		return isHidden;
+	}
+
 	interface Binder extends UiBinder<VerticalPanel, FieldTypeDetailView> {
 	}
 
 	@UiField
-	Label name;
+	protected Label name;
 
 	@UiField
-	Label description;
+	protected Label description;
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 
 	@UiField
-	Label descriptionLabel;
+	protected Label descriptionLabel;
 
 	@UiField
-	Label dataType;
+	protected Label dataType;
 
 	@UiField
-	Label pattern;
+	protected Label pattern;
 
 	@UiField
-	Label dataTypeLabel;
+	protected Label dataTypeLabel;
 
 	@UiField
-	Label patternLabel;
+	protected Label patternLabel;
 
 	@UiField
-	Label fdOrderLabel;
+	protected Label fdOrderLabel;
 
 	@UiField
-	Label fdOrder;
+	protected Label fdOrder;
 
 	@UiField
-	Label sampleValueLabel;
+	protected Label sampleValueLabel;
 
 	@UiField
-	Label sampleValue;
+	protected Label sampleValue;
 
 	@UiField
-	Label fieldOptionValueListLabel;
+	protected Label fieldOptionValueListLabel;
 	@UiField
-	Label fieldOptionValueList;
+	protected Label fieldOptionValueList;
 
 	@UiField
-	Label barcodeTypeLabel;
+	protected Label barcodeTypeLabel;
 
 	@UiField
-	Label barcodeType;
-	
-	@UiField
-	Label isHiddenLabel;
-	@UiField
-	CheckBox isHidden;
+	protected Label barcodeType;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	@UiField
+	protected Label isHiddenLabel;
+	@UiField
+	protected CheckBox isHidden;
+
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public FieldTypeDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		descriptionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION)
 				+ AdminConstants.COLON);
@@ -123,8 +129,7 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 				+ AdminConstants.COLON);
 		barcodeTypeLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BARCODE_TYPE)
 				+ AdminConstants.COLON);
-		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) 
-				+ AdminConstants.COLON);
+		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descriptionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		dataTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -135,6 +140,10 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 		barcodeTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHidden.setEnabled(false);
+	}
+
+	public Label getIsHiddenLabel() {
+		return isHiddenLabel;
 	}
 
 	public void setName(String name) {
@@ -150,10 +159,11 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 	}
 
 	public void setDataType(DataType dataType) {
-		if (dataType != null)
+		if (dataType != null) {
 			this.dataType.setText(dataType.name());
-		else
+		} else {
 			this.dataType.setText(DataType.STRING.name());
+		}
 	}
 
 	public void setFdOrder(String fdOrder) {
@@ -175,5 +185,5 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 	public void setIsHidden(boolean isHidden) {
 		this.isHidden.setValue(isHidden);
 	}
-	
+
 }

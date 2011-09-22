@@ -42,7 +42,7 @@ public class FolderModificationEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private FolderDetail folderDetail;
+	final private FolderDetail folderDetail;
 	
 	public FolderModificationEvent(Object source, FolderDetail folderDetail ) {
 		super(source);

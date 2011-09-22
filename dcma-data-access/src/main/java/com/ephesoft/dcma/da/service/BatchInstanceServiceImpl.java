@@ -68,6 +68,8 @@ import com.ephesoft.dcma.da.property.BatchPriority;
  */
 public class BatchInstanceServiceImpl implements BatchInstanceService {
 
+	private static final String BATCH_ALREADY_LOCKED = "Batch already locked";
+
 	/**
 	 * LOGGER to print the LOGGERging information.
 	 */
@@ -512,37 +514,39 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	/**
 	 * This method will update the status of batch instance for input id and status.
 	 * 
-	 * @param id String
+	 * @param identifier String
 	 * @param status String
 	 */
 	@Transactional
 	@Override
-	public void updateBatchInstanceStatusByIdentifier(String id, String status) {
-		if (null == id || null == status || "".equals(status)) {
+	public void updateBatchInstanceStatusByIdentifier(String identifier, String status) {
+		if (null == identifier || null == status || "".equals(status)) {
 			LOGGER.info("id/status are null or empty.");
 		} else {
-			this.updateBatchInstanceStatusByIdentifier(id, BatchInstanceStatus.valueOf(status));
+			this.updateBatchInstanceStatusByIdentifier(identifier, BatchInstanceStatus.valueOf(status));
 		}
 	}
 
 	@Transactional
 	@Override
-	public void updateBatchInstanceStatus(BatchInstanceID ID, BatchInstanceStatus status) {
-		Assert.notNull(ID, "Batch Instance ID can not be null");
-		this.updateBatchInstanceStatusByIdentifier(ID.getID(), status);
+	public void updateBatchInstanceStatus(BatchInstanceID identifier, BatchInstanceStatus status) {
+		Assert.notNull(identifier, "Batch Instance ID can not be null");
+		this.updateBatchInstanceStatusByIdentifier(identifier.getID(), status);
 	}
 
 	@Transactional
 	@Override
 	public BatchInstance getBatchInstanceByIdentifier(String batchInstanceIdentifierentifier) {
-		BatchInstance batchInstance = batchInstanceDao.getBatchInstancesForIdentifier(batchInstanceIdentifierentifier);
+		BatchInstance batchInstance = null;
+		batchInstance = batchInstanceDao.getBatchInstancesForIdentifier(batchInstanceIdentifierentifier);
 		return batchInstance;
 	}
 
 	@Transactional
 	@Override
 	public List<BatchInstance> getBatchInstanceByBatchName(String batchName) {
-		List<BatchInstance> batchInstances = batchInstanceDao.getBatchInstancesByBatchName(batchName);
+		List<BatchInstance> batchInstances = null;
+		batchInstances = batchInstanceDao.getBatchInstancesByBatchName(batchName);
 		return batchInstances;
 	}
 
@@ -551,44 +555,43 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	public synchronized BatchInstance acquireBatchInstance(String batchInstanceIdentifier, String currentUser)
 			throws BatchAlreadyLockedException {
 		BatchInstance batchInstance = null;
-		if (null == batchInstanceIdentifier) {
-			LOGGER.warn("batchInstanceIdentifier id is null. Cannot Proceed further..Returning");
-			return null;
-		}
-		batchInstance = getBatchInstanceByIdentifier(batchInstanceIdentifier);
-		if (batchInstance.getCurrentUser() != null && !(batchInstance.getCurrentUser().equalsIgnoreCase(currentUser))) {
-			throw new BatchAlreadyLockedException("Batch Instance " + batchInstance + " is already locked by "
-					+ batchInstance.getCurrentUser());
-		} else {
-			// Updating the state of the batch to locked and saving in the
-			// database.
-			LOGGER.info("" + currentUser + " is getting lock on batch " + batchInstanceIdentifier);
-			if (!currentUser.trim().isEmpty()) {
-				batchInstance.setCurrentUser(currentUser);
+		if (null != batchInstanceIdentifier) {
+			batchInstance = getBatchInstanceByIdentifier(batchInstanceIdentifier);
+			if (batchInstance.getCurrentUser() != null && !(batchInstance.getCurrentUser().equalsIgnoreCase(currentUser))) {
+				throw new BatchAlreadyLockedException("Batch Instance " + batchInstance + " is already locked by "
+						+ batchInstance.getCurrentUser());
+			} else {
+				// Updating the state of the batch to locked and saving in the
+				// database.
+				LOGGER.info(currentUser + " is getting lock on batch " + batchInstanceIdentifier);
+				if (!currentUser.trim().isEmpty()) {
+					batchInstance.setCurrentUser(currentUser);
+				}
+				batchInstanceDao.updateBatchInstance(batchInstance);
 			}
-			batchInstanceDao.updateBatchInstance(batchInstance);
-			return batchInstance;
+		} else {
+			LOGGER.warn("batchInstanceIdentifier id is null. Cannot Proceed further..Returning");
 		}
-
+		return batchInstance;
 	}
 
 	@Transactional
 	@Override
 	public void unlockAllBatchInstancesForCurrentUser(String currentUser) {
-		if (currentUser == null || currentUser.isEmpty()) {
-			LOGGER.warn("Username not specified or is Null. Returning.");
-			return;
-		}
-		List<BatchInstance> batchInstanceList = batchInstanceDao.getAllBatchInstancesForCurrentUser(currentUser);
-		if (batchInstanceList == null || batchInstanceList.isEmpty()) {
-			LOGGER.warn("No batches exist for the username " + currentUser);
-			return;
-		}
-		for (BatchInstance batchInstance : batchInstanceList) {
-			LOGGER.info("Unlocking batches for " + currentUser);
-			batchInstance.setCurrentUser(null);
-			batchInstanceDao.updateBatchInstance(batchInstance);
+		if (currentUser != null && !currentUser.isEmpty()) {
+			List<BatchInstance> batchInstanceList = batchInstanceDao.getAllBatchInstancesForCurrentUser(currentUser);
+			if (batchInstanceList == null || batchInstanceList.isEmpty()) {
+				LOGGER.warn("No batches exist for the username " + currentUser);
+				return;
+			}
+			for (BatchInstance batchInstance : batchInstanceList) {
+				LOGGER.info("Unlocking batches for " + currentUser);
+				batchInstance.setCurrentUser(null);
+				batchInstanceDao.updateBatchInstance(batchInstance);
 
+			}
+		} else {
+			LOGGER.warn("Username not specified or is Null. Returning.");
 		}
 	}
 
@@ -620,10 +623,10 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 				batchInstance.setLockOwner(lockOwner);
 				batchInstanceDao.saveOrUpdate(batchInstance);
 			} else {
-				throw new LockAcquisitionException("Batch already locked", null);
+				throw new LockAcquisitionException(BATCH_ALREADY_LOCKED, null);
 			}
 		} catch (Exception e) {
-			throw new LockAcquisitionException("Batch already locked", null);
+			throw new LockAcquisitionException(BATCH_ALREADY_LOCKED, null);
 		}
 	}
 
@@ -636,13 +639,13 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 				batchInstance.setStatus(BatchInstanceStatus.LOCKED);
 				batchInstanceDao.saveOrUpdate(batchInstance);
 			} else {
-				throw new LockAcquisitionException("Batch already locked", null);
+				throw new LockAcquisitionException(BATCH_ALREADY_LOCKED, null);
 			}
+		} catch (LockAcquisitionException le) {
+			throw (LockAcquisitionException) le;
 		} catch (Exception e) {
-			if (e instanceof LockAcquisitionException) {
-				throw (LockAcquisitionException) e;
-			}
-			throw new LockAcquisitionException("Batch already locked", null);
+			LOGGER.error("Exeception occur while acquiring lock." + e.getMessage(), e);
+			throw new LockAcquisitionException(BATCH_ALREADY_LOCKED, null);
 		}
 	}
 
@@ -650,7 +653,7 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	public List<BatchInstance> getAllBatchInstances(List<Order> orders) {
 		return batchInstanceDao.getAllBatchInstances(orders);
 	}
-	
+
 	/**
 	 * API return all unfinished batch instances.
 	 * 
@@ -661,7 +664,7 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	public List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder) {
 		return batchInstanceDao.getAllUnFinishedBatchInstances(uncFolder);
 	}
-	
+
 	/**
 	 * API to merge batch instance and returning updated batch instance.
 	 * 
@@ -673,7 +676,7 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	public BatchInstance merge(BatchInstance batchInstance) {
 		return batchInstanceDao.merge(batchInstance);
 	}
-	
+
 	/**
 	 * API to get all unfinshedRemotelyExecutedBatchInstance.
 	 * 
@@ -682,7 +685,8 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Transactional
 	@Override
 	public List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance() {
-		List<BatchInstance> batchInstances = batchInstanceDao.getAllUnfinshedRemotelyExecutedBatchInstance();
+		List<BatchInstance> batchInstances = null;
+		batchInstances = batchInstanceDao.getAllUnfinshedRemotelyExecutedBatchInstance();
 		return batchInstances;
 	}
 

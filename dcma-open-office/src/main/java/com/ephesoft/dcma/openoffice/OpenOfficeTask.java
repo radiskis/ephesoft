@@ -51,7 +51,7 @@ public class OpenOfficeTask {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public void start() {
-		Thread t = new Thread(new Runnable() {
+		Thread thread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -67,7 +67,7 @@ public class OpenOfficeTask {
 				}
 			}
 		});
-		t.start();
+		thread.start();
 	}
 
 	public void setServer(String server) {

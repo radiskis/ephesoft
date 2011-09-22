@@ -80,83 +80,83 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
-	private final String attachFormAction = "dcma-gwt-admin/importBatchClassUpload?";
+	private static final String ATTACH_FORM_ACTION = "dcma-gwt-admin/importBatchClassUpload?";
 
 	interface Binder extends UiBinder<VerticalPanel, ImportBatchClassView> {
 	}
 
 	@UiField
-	TextBox priority;
+	protected TextBox priority;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 	@UiField
-	FileUpload importFile;
+	protected FileUpload importFile;
 
 	@UiField
-	CheckBox useSource;
+	protected CheckBox useSource;
 	@UiField
-	CheckBox useExisting;
+	protected CheckBox useExisting;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	FormPanel attachZipFilePanel;
+	protected FormPanel attachZipFilePanel;
 	@UiField
-	Button attachButton;
+	protected Button attachButton;
 
 	@UiField
-	DockLayoutPanel importPanel;
+	protected DockLayoutPanel importPanel;
 
 	@UiField
-	Label priorityLabel;
+	protected Label priorityLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label uncLabel;
+	protected Label uncLabel;
 	@UiField
-	Label importLabel;
+	protected Label importLabel;
 
 	@UiField
-	Label priorityStar;
+	protected Label priorityStar;
 
 	@UiField
-	Label uncStar;
+	protected Label uncStar;
 
 	@UiField
-	Label importStar;
+	protected Label importStar;
 
 	@UiField
-	HorizontalPanel importBatchPanel;
+	protected HorizontalPanel importBatchPanel;
 
 	@UiField
-	Label descStar;
+	protected Label descStar;
 
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 
 	@UiField
-	VerticalPanel importFolderListViewPanel;
+	protected VerticalPanel importFolderListViewPanel;
 
 	@UiField
-	HorizontalPanel uncPanel;
+	protected HorizontalPanel uncPanel;
 
 	@UiField
-	Tree batchClassFolderView;
+	protected Tree batchClassFolderView;
 
-	ListBox uncFolderList;
-	TextBox uncFolder;
+	private final ListBox uncFolderList;
+	private final TextBox uncFolder;
 
-	private ValidatableWidget<TextBox> validateTextBox;
-	private ValidatableWidget<TextBox> validateDescTextBox;
-	private ValidatableWidget<TextBox> validateUNCTextBox;
-	private ValidatableWidget<TextBox> validateNameTextBox;
+	private final ValidatableWidget<TextBox> validateTextBox;
+	private final ValidatableWidget<TextBox> validateDescTextBox;
+	private final ValidatableWidget<TextBox> validateUNCTextBox;
+	private final ValidatableWidget<TextBox> validateNameTextBox;
 	private final ImportBatchClassUserOptionDTO importBatchClassUserOptionDTO;
 
 	private DialogBox dialogBox;
@@ -169,13 +169,14 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	}
 
 	@UiField
-	VerticalPanel importBatchClassViewPanel;
+	protected VerticalPanel importBatchClassViewPanel;
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 	private static final String TRUE = "true";
 	private static final String FALSE = "false";
 
 	public ImportBatchClassView() {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
@@ -275,7 +276,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 		attachZipFilePanel.setEncoding(FormPanel.ENCODING_MULTIPART);
 		attachZipFilePanel.setMethod(FormPanel.METHOD_POST);
-		attachZipFilePanel.setAction(attachFormAction);
+		attachZipFilePanel.setAction(ATTACH_FORM_ACTION);
 
 		importFolderListViewPanel.add(importExisting);
 		importPanel.setVisible(Boolean.FALSE);
@@ -349,7 +350,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 					event.cancel();
 				} else {
 					String lastAttachedZipSourcePath = "lastAttachedZipSourcePath=" + importBatchClassUserOptionDTO.getZipFileName();
-					attachZipFilePanel.setAction(attachFormAction + lastAttachedZipSourcePath);
+					attachZipFilePanel.setAction(ATTACH_FORM_ACTION + lastAttachedZipSourcePath);
 				}
 			}
 		});
@@ -367,9 +368,10 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				}
 				String keyWorkFlowName = "workFlowName:";
 				String keyZipFolderPath = "filePath:";
-				String workFlowName = result
-						.substring(result.indexOf(keyWorkFlowName) + keyWorkFlowName.length(), result.indexOf('|',result.indexOf(keyWorkFlowName)));
-				String zipSourcePath = result.substring(result.indexOf(keyZipFolderPath) + keyZipFolderPath.length(), result.indexOf('|',result.indexOf(keyZipFolderPath)));
+				String workFlowName = result.substring(result.indexOf(keyWorkFlowName) + keyWorkFlowName.length(), result.indexOf('|',
+						result.indexOf(keyWorkFlowName)));
+				String zipSourcePath = result.substring(result.indexOf(keyZipFolderPath) + keyZipFolderPath.length(), result.indexOf(
+						'|', result.indexOf(keyZipFolderPath)));
 				name.setText(workFlowName);
 				importBatchClassUserOptionDTO.setName(workFlowName);
 				importBatchClassUserOptionDTO.setZipFileName(zipSourcePath);
@@ -396,11 +398,13 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	}
 
 	public String getUncFolder() {
+		String returnVal;
 		if (importExisting.equals(TRUE)) {
-			return uncFolderList.getValue(uncFolderList.getSelectedIndex()).trim();
+			returnVal = uncFolderList.getValue(uncFolderList.getSelectedIndex()).trim();
 		} else {
-			return uncFolder.getText().trim();
+			returnVal = uncFolder.getText().trim();
 		}
+		return returnVal;
 	}
 
 	public void setUncFolder(String uncFolder) {
