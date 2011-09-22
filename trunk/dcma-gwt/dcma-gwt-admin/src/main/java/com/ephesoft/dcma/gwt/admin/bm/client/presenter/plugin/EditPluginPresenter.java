@@ -99,7 +99,7 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 						Integer numberOfItemSelected = docFieldWidgets.get(index).getListBoxwidget().getItemCount();
 						for (int i = 0; i < numberOfItemSelected; i++) {
 							if (docFieldWidgets.get(index).getListBoxwidget().isItemSelected(i)) {
-								selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(";");
+								selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(';');
 							}
 						}
 						String selectedItemString = selectedItem.toString();
@@ -203,7 +203,7 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 	private static class EditableWidgetStorage {
 
 		private ValidatableWidget<TextBox> widget;
-		private boolean isListBox;
+		private  boolean isListBox;
 		private ListBox listBoxwidget;
 		private boolean isValidatable;
 

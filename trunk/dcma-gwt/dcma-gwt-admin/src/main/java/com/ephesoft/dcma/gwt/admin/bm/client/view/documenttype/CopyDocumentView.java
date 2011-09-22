@@ -61,33 +61,33 @@ public class CopyDocumentView extends View<CopyDocumentTypePresenter> {
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label descStar;
+	protected Label descStar;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 
 	@UiField
-	Label minConfidenceThresholdLabel;
+	protected Label minConfidenceThresholdLabel;
 	@UiField
-	Label minConfidenceThresholdStar;
+	protected Label minConfidenceThresholdStar;
 	@UiField
-	TextBox minConfidenceThreshold;
+	protected TextBox minConfidenceThreshold;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	HorizontalPanel editDocumentPanel;
+	protected HorizontalPanel editDocumentPanel;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
@@ -96,12 +96,13 @@ public class CopyDocumentView extends View<CopyDocumentTypePresenter> {
 	private DialogBox dialogBox;
 
 	@UiField
-	VerticalPanel editDocumentViewPanel;
+	protected VerticalPanel editDocumentViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public CopyDocumentView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);

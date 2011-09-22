@@ -54,6 +54,6 @@ public interface MailReceiverService {
 	 * @return {@link CustomMessage}
 	 * @throws DCMAApplicationException
 	 */
-	public List<CustomMessage> readMails(BatchClassEmailConfiguration configuration)throws DCMAApplicationException;
+	 List<CustomMessage> readMails(BatchClassEmailConfiguration configuration)throws DCMAApplicationException;
 
 }

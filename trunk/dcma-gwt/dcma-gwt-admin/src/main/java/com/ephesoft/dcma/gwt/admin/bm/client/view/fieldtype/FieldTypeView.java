@@ -72,74 +72,75 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, FieldTypeView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private KVFieldTypeListView kvFieldTypeListView;
+	private final KVFieldTypeListView kvFieldTypeListView;
 
-	private RegexListView regexListView;
-
-	@UiField
-	LayoutPanel kvFieldTypeListPanel;
+	private final RegexListView regexListView;
 
 	@UiField
-	LayoutPanel regexListPanel;
+	protected LayoutPanel kvFieldTypeListPanel;
 
 	@UiField
-	FieldTypeDetailView fieldTypeDetailView;
+	protected LayoutPanel regexListPanel;
 
 	@UiField
-	EditFieldTypeView editFieldTypeView;
+	protected FieldTypeDetailView fieldTypeDetailView;
 
 	@UiField
-	Button editFieldPropertiesButton;
+	protected EditFieldTypeView editFieldTypeView;
 
 	@UiField
-	VerticalPanel fieldTypeVerticalPanel;
+	protected Button editFieldPropertiesButton;
 
 	@UiField
-	VerticalPanel fieldTypeConfigVerticalPanel;
+	protected VerticalPanel fieldTypeVerticalPanel;
 
 	@UiField
-	CaptionPanel fieldConfigurationCaptionPanel;
+	protected VerticalPanel fieldTypeConfigVerticalPanel;
+
+	@UiField
+	protected CaptionPanel fieldConfigurationCaptionPanel;
 
 	@UiField
 	DockLayoutPanel kvExtractionCompletePanel;
 
 	@UiField
-	Button addKVButton;
+	protected Button addKVButton;
 
 	@UiField
-	Button testKVButton;
+	protected Button testKVButton;
 
 	@UiField
-	Button editKVButton;
+	protected Button editKVButton;
 
 	@UiField
-	Button deleteKVButton;
+	protected Button deleteKVButton;
 
 	@UiField
-	Button addRegexBtn;
+	protected Button addRegexBtn;
 
 	@UiField
-	Button editRegexBtn;
+	protected Button editRegexBtn;
 
 	@UiField
-	Button deleteRegexBtn;
+	protected Button deleteRegexBtn;
 
 	@UiField
-	HorizontalPanel kvButtonPanel;
+	protected HorizontalPanel kvButtonPanel;
 
 	@UiField
-	HorizontalPanel regexButtonPanel;
+	protected HorizontalPanel regexButtonPanel;
 
 	@UiField
-	Button addAdvancedKVAddButton;
+	protected Button addAdvancedKVAddButton;
 
 	@UiField
-	Button editAdvancedKVButton;
+	protected Button editAdvancedKVButton;
 
 	public FieldTypeView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		kvFieldTypeListView = new KVFieldTypeListView();
 		kvFieldTypeListPanel.add(kvFieldTypeListView.listView);
 		regexListView = new RegexListView();
@@ -208,11 +209,11 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 			if (multiplier != null) {
 				float Rval = multiplier;
 				int Rpl = 2;
-				float p = (float) Math.pow(10, Rpl);
-				Rval = Rval * p;
+				float pVarLocal = (float) Math.pow(10, Rpl);
+				Rval = Rval * pVarLocal;
 				float tmp = Math.round(Rval);
-				Float f = (float) tmp / p;
-				record.addWidget(kvFieldTypeListView.multiplier, new Label(String.valueOf(f.toString())));
+				Float fVarLocal = (float) tmp / pVarLocal;
+				record.addWidget(kvFieldTypeListView.multiplier, new Label(String.valueOf(fVarLocal.toString())));
 			} else {
 				record.addWidget(kvFieldTypeListView.multiplier, new Label(AdminConstants.EMPTY_STRING));
 			}
@@ -372,7 +373,7 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
 	@UiHandler("addRegexBtn")
 	public void onAddRegexBtnClicked(ClickEvent clickEvent) {
-		if (fieldTypeDetailView.isHidden.getValue() || editFieldTypeView.isHidden.getValue()) {
+		if (fieldTypeDetailView.getIsHidden().getValue() || editFieldTypeView.getIsHidden().getValue()) {
 			final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
 			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_REGEX_FAILURE));
 			confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(

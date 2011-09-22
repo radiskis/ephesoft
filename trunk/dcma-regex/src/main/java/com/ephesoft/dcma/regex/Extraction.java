@@ -112,7 +112,7 @@ public class Extraction {
 	/**
 	 * Default name for first page.
 	 */
-	private boolean isFirstFieldValue;
+	private boolean firstFieldValue;
 
 	/**
 	 * Reference of FieldTypeService.
@@ -138,7 +138,7 @@ public class Extraction {
 	 * @return isFirstFieldValue boolean
 	 */
 	public boolean isFirstFieldValue() {
-		return isFirstFieldValue;
+		return firstFieldValue;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class Extraction {
 	 */
 
 	public final void setFirstFieldValue(final boolean isFirstFieldValue) {
-		this.isFirstFieldValue = isFirstFieldValue;
+		this.firstFieldValue = isFirstFieldValue;
 	}
 
 	/**
@@ -410,63 +410,57 @@ public class Extraction {
 	 */
 	private void sortDocFdWithConfidence(final DocField updtDocFdType) {
 
-		if (null == updtDocFdType) {
-			return;
-		}
+		if (null != updtDocFdType) {
+			AlternateValues alternateValues = updtDocFdType.getAlternateValues();
+			if (null != alternateValues) {
 
-		AlternateValues alternateValues = updtDocFdType.getAlternateValues();
-		if (null == alternateValues) {
-			return;
-		}
+				List<Field> alternateValue = alternateValues.getAlternateValue();
+				if (!alternateValue.isEmpty()) {
 
-		List<Field> alternateValue = alternateValues.getAlternateValue();
+					Field localFdType = new Field();
+					localFdType.setName(updtDocFdType.getName());
+					localFdType.setFieldOrderNumber(updtDocFdType.getFieldOrderNumber());
+					localFdType.setValue(updtDocFdType.getValue());
+					localFdType.setConfidence(updtDocFdType.getConfidence());
+					localFdType.setCoordinatesList(updtDocFdType.getCoordinatesList());
+					localFdType.setPage(updtDocFdType.getPage());
+					localFdType.setType(updtDocFdType.getType());
 
-		if (alternateValue.isEmpty()) {
-			return;
-		}
+					alternateValue.add(0, localFdType);
 
-		Field localFdType = new Field();
-		localFdType.setName(updtDocFdType.getName());
-		localFdType.setFieldOrderNumber(updtDocFdType.getFieldOrderNumber());
-		localFdType.setValue(updtDocFdType.getValue());
-		localFdType.setConfidence(updtDocFdType.getConfidence());
-		localFdType.setCoordinatesList(updtDocFdType.getCoordinatesList());
-		localFdType.setPage(updtDocFdType.getPage());
-		localFdType.setType(updtDocFdType.getType());
+					// sort the field type on the basis of confidence score.
+					Collections.sort(alternateValue, new Comparator<Field>() {
 
-		alternateValue.add(0, localFdType);
+						public int compare(Field fdType1, Field fdType2) {
 
-		// sort the field type on the basis of confidence score.
-		Collections.sort(alternateValue, new Comparator<Field>() {
+							float confidenceFd = fdType1.getConfidence() - fdType2.getConfidence();
 
-			public int compare(Field fdType1, Field fdType2) {
+							if (confidenceFd > 0) {
+								return -1;
+							}
+							if (confidenceFd < 0) {
+								return 1;
+							}
 
-				float f = fdType1.getConfidence() - fdType2.getConfidence();
+							return 0;
+						}
+					});
 
-				if (f > 0) {
-					return -1;
+					// get the maximum confidence value.
+					Field fdType = alternateValue.get(0);
+
+					updtDocFdType.setConfidence(fdType.getConfidence());
+					updtDocFdType.setCoordinatesList(fdType.getCoordinatesList());
+					updtDocFdType.setName(fdType.getName());
+					updtDocFdType.setFieldOrderNumber(fdType.getFieldOrderNumber());
+					updtDocFdType.setPage(fdType.getPage());
+					updtDocFdType.setType(fdType.getType());
+					updtDocFdType.setValue(fdType.getValue());
+
+					alternateValue.remove(0);
 				}
-				if (f < 0) {
-					return 1;
-				}
-
-				return 0;
 			}
-		});
-
-		// get the maximum confidence value.
-		Field fdType = alternateValue.get(0);
-
-		updtDocFdType.setConfidence(fdType.getConfidence());
-		updtDocFdType.setCoordinatesList(fdType.getCoordinatesList());
-		updtDocFdType.setName(fdType.getName());
-		updtDocFdType.setFieldOrderNumber(fdType.getFieldOrderNumber());
-		updtDocFdType.setPage(fdType.getPage());
-		updtDocFdType.setType(fdType.getType());
-		updtDocFdType.setValue(fdType.getValue());
-
-		alternateValue.remove(0);
-
+		}
 	}
 
 	/**
@@ -545,7 +539,7 @@ public class Extraction {
 				coordinates.setX1(hocrCoordinates.getX1());
 				coordinates.setY0(hocrCoordinates.getY0());
 				coordinates.setY1(hocrCoordinates.getY1());
-				CoordinatesList coordinatesList=new CoordinatesList();
+				CoordinatesList coordinatesList = new CoordinatesList();
 				coordinatesList.getCoordinates().add(coordinates);
 				updtDocFdType.setCoordinatesList(coordinatesList);
 				setFirstFieldValue(false);
@@ -569,11 +563,9 @@ public class Extraction {
 				coordinates.setY0(hocrCoordinates.getY0());
 				coordinates.setY1(hocrCoordinates.getY1());
 
-				CoordinatesList coordinatesList=new CoordinatesList();
+				CoordinatesList coordinatesList = new CoordinatesList();
 				coordinatesList.getCoordinates().add(coordinates);
 				fieldType.setCoordinatesList(coordinatesList);
-
-				
 
 				alternateValue.add(fieldType);
 				updtDocFdType.setAlternateValues(alternateValues);
@@ -656,7 +648,7 @@ public class Extraction {
 
 		private String value;
 
-		public DataCarrier(Span span, float confidence, String value) {
+		public DataCarrier(final Span span, final float confidence, final String value) {
 			super();
 			this.span = span;
 			this.confidence = confidence;
@@ -669,16 +661,18 @@ public class Extraction {
 		 */
 		public int compareTo(DataCarrier dataCarrier) {
 
-			float f = this.getConfidence() - dataCarrier.getConfidence();
+			int returnValue = 0;
 
-			if (f > 0) {
-				return -1;
+			float confidenceData = this.getConfidence() - dataCarrier.getConfidence();
+
+			if (confidenceData > 0) {
+				returnValue = -1;
 			}
-			if (f < 0) {
-				return 1;
+			if (confidenceData < 0) {
+				returnValue = 1;
 			}
 
-			return 0;
+			return returnValue;
 		}
 
 		/**

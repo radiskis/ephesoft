@@ -53,30 +53,30 @@ public class DocTypeFieldsMappingView extends View<DocTypeFieldsMappingPresenter
 	}
 
 	@UiField
-	CaptionPanel documentTypeDetails;
+	protected CaptionPanel documentTypeDetails;
 
 	@UiField
-	CaptionPanel fieldMapping;
+	protected CaptionPanel fieldMapping;
 
 	@UiField
-	FlexTable flexEditTable;
+	protected FlexTable flexEditTable;
 
 	private FlexTable detailsTable;
 
 	private int rowCounter = 0;
 
 	@UiField
-	FuzzyDBDocTypeDetailView fuzzyDBDocTypeDetailView;
+	protected FuzzyDBDocTypeDetailView fuzzyDBDocTypeDetailView;
 
 	private String driverName;
 	private String url;
 	private String userName;
 	private String password;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocTypeFieldsMappingView() {
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		documentTypeDetails.setCaptionHTML(AdminConstants.DOCUMENT_TYPE_HTML);
 		fieldMapping.setCaptionHTML(AdminConstants.FIELD_MAPPING_HTML);

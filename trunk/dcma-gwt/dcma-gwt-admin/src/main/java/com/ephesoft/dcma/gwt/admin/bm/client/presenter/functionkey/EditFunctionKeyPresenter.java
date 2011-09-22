@@ -38,6 +38,7 @@ package com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.EditFunctionKeyView;
+import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
@@ -60,7 +61,10 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 			view.setKeyName(controller.getSelectedFunctionKeyDTO().getShortcutKeyName());
 			view.setMethodDescription(controller.getSelectedFunctionKeyDTO().getMethodDescription());
 		}
-
+		view.getValidateMethodNameTextBox().addValidator(new EmptyStringValidator(view.getMethodNameTextBox()));
+		view.getValidateMethodDescriptionTextBox().addValidator(new EmptyStringValidator(view.getMethodDescriptionTextBox()));
+		view.getValidateMethodNameTextBox().toggleValidDateBox();
+		view.getValidateMethodDescriptionTextBox().toggleValidDateBox();
 	}
 
 	public void onSave() {
@@ -94,11 +98,12 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 	}
 
 	public boolean checkKeyUsedAlready(String keyName) {
+		boolean result = false;
 		DocumentTypeDTO docuTypeDTO = controller.getSelectedDocument();
 		if (docuTypeDTO.getFunctionKeyDTOByShorcutKeyName(keyName) != null
 				&& docuTypeDTO.getFunctionKeyDTOByShorcutKeyName(keyName) != controller.getSelectedFunctionKeyDTO()) {
-			return true;
+			result = true;
 		}
-		return false;
+		return result;
 	}
 }

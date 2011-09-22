@@ -64,52 +64,52 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Label descriptionLabel;
+	protected Label descriptionLabel;
 	@UiField
-	Label descriptionStar;
+	protected Label descriptionStar;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 
 	@UiField
-	Label dataTypeLabel;
+	protected Label dataTypeLabel;
 	@UiField
-	Label dataTypeStar;
+	protected Label dataTypeStar;
 	@UiField
-	ListBox dataType;
+	protected ListBox dataType;
 
 	@UiField
-	Label fieldOrderNumberLabel;
+	protected Label fieldOrderNumberLabel;
 	@UiField
-	Label fieldOrderNumberStar;
+	protected Label fieldOrderNumberStar;
 	@UiField
-	TextBox fieldOrderNumber;
+	protected TextBox fieldOrderNumber;
 
 	@UiField
-	Label sampleValueLabel;
+	protected Label sampleValueLabel;
 	@UiField
-	TextBox sampleValue;
+	protected TextBox sampleValue;
 
 	@UiField
-	Label validationPatternLabel;
+	protected Label validationPatternLabel;
 	@UiField
-	TextBox validationPattern;
+	protected TextBox validationPattern;
 
 	@UiField
-	Label fieldOptionValueListLabel;
+	protected Label fieldOptionValueListLabel;
 	@UiField
-	TextBox fieldOptionValueList;
+	protected TextBox fieldOptionValueList;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
@@ -117,12 +117,13 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	private ValidatableWidget<TextBox> validateValidationPatternTextBox;
 
 	@UiField
-	VerticalPanel editBatchClassFieldViewPanel;
+	protected VerticalPanel editBatchClassFieldViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditBatchClassFieldView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 
@@ -168,12 +169,12 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
@@ -197,15 +198,17 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		String selected = this.dataType.getItemText(this.dataType.getSelectedIndex());
 		DataType[] allDataTypes = DataType.values();
 		for (DataType dataType2 : allDataTypes) {
-			if (dataType2.name().equals(selected))
+			if (dataType2.name().equals(selected)) {
 				return dataType2;
+			}
 		}
 		return allDataTypes[0];
 	}
 
 	private int findIndex(DataType datatype) {
-		if (datatype == null)
+		if (datatype == null) {
 			return 0;
+		}
 		DataType[] allDataTypes = DataType.values();
 		List<DataType> tempList = Arrays.asList(allDataTypes);
 		return tempList.indexOf(datatype);
@@ -220,8 +223,9 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	}
 
 	public void setDataType(DataType datatype) {
-		if (this.dataType.getItemCount() == 0)
+		if (this.dataType.getItemCount() == 0) {
 			setDataType();
+		}
 		this.dataType.setSelectedIndex(findIndex(datatype));
 	}
 
@@ -328,7 +332,7 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 				validateFieldOrderNumberTextBox.toggleValidDateBox();
 			}
 		});
-		
+
 		validateValidationPatternTextBox = new ValidatableWidget<TextBox>(validationPattern);
 
 	}

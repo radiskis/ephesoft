@@ -52,6 +52,6 @@ public interface ModuleService {
 	 * @param configName
 	 * @return
 	 */
-	public Module getModuleByName(String moduleName);
+	Module getModuleByName(String moduleName);
 
 }

@@ -54,20 +54,23 @@ import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 @Repository
 public class BatchClassEmailConfigDaoImpl extends HibernateDao<BatchClassEmailConfiguration> implements BatchClassEmailConfigDao {
 
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	private static final String BATCH_CLASS = "batchClass";
+
 	@Override
-	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(String batchClassIdentifier) {
+	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(final String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return find(criteria);
 	}
 
 	@Override
-	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(String batchClassIdentifier, int firstIndex,
-			int maxResults) {
+	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(final String batchClassIdentifier, final int firstIndex,
+			final int maxResults) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return find(criteria, firstIndex, maxResults);
 	}
 

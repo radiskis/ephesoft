@@ -54,27 +54,28 @@ public class EmailView extends View<EmailViewPresenter> {
 	}
 
 	@UiField
-	EmailDetailView emailDetailView;
+	protected EmailDetailView emailDetailView;
 
 	@UiField
-	EditEmailView editEmailView;
+	protected EditEmailView editEmailView;
 
 	@UiField
-	VerticalPanel emailVerticalPanel;
+	protected VerticalPanel emailVerticalPanel;
 
 	@UiField
-	VerticalPanel emailConfigVerticalPanel;
+	protected VerticalPanel emailConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel emailConfigurationCaptionPanel;
+	protected CaptionPanel emailConfigurationCaptionPanel;
 
 	@UiField
-	Button editEmailPropertiesButton;
+	protected Button editEmailPropertiesButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EmailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		emailConfigurationCaptionPanel.setCaptionHTML(AdminConstants.EMAIL_CONFIGURATION_HTML);
 

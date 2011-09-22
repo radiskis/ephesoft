@@ -56,18 +56,19 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 	}
 
 	@UiField
-	Label breadCrumbs;
+	protected Label breadCrumbs;
 
 	@UiField
-	Button previousButton;
+	protected Button previousButton;
 
 	@UiField
-	HorizontalPanel breadCrumbPanel;
+	protected HorizontalPanel breadCrumbPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public BatchClassBreadCrumbView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		previousButton.setText(AdminConstants.BACK_BUTTON);
 		previousButton.setEnabled(false);
@@ -173,9 +174,9 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 
 	public static class BreadCrumbView {
 
-		ViewType viewType;
-		String breadCrumbName;
-		String identifier;
+		private ViewType viewType;
+		private String breadCrumbName;
+	   String identifier;
 
 		public BreadCrumbView(ViewType viewType, String breadCrumbName, String identifier) {
 			this.viewType = viewType;
@@ -193,18 +194,23 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (getClass() != obj.getClass()) {
 				return false;
+			}
 			BreadCrumbView other = (BreadCrumbView) obj;
 			if (viewType == null) {
-				if (other.viewType != null)
+				if (other.viewType != null) {
 					return false;
-			} else if (!viewType.equals(other.viewType))
+				}
+			} else if (!viewType.equals(other.viewType)) {
 				return false;
+			}
 			return true;
 		}
 	}

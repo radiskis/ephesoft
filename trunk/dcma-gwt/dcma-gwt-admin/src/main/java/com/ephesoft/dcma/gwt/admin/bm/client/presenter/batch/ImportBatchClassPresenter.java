@@ -69,7 +69,7 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 	 */
 	private BatchFolderListDTO batchFolderListDTO;
 
-	private List<Node> uiConfigList = new ArrayList<Node>();
+	private final List<Node> uiConfigList = new ArrayList<Node>();
 
 	public ImportBatchClassPresenter(final BatchClassManagementController controller, final ImportBatchClassView view) {
 		super(controller, view);

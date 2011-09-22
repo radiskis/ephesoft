@@ -44,7 +44,7 @@ public class BatchClassDaoTest extends AbstractDataAccessTests {
 //	private BatchClassDao batchClassDao;
 	
 	@Test
-	public void findBatchClassTest() {
+	protected void findBatchClassTest() {
 		//BatchClass batchClass = batchClassDao.getBatchClassbyUncFolder("unc");
 		//assertNotNull(batchClass);
 	}

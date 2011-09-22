@@ -94,11 +94,11 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 			if (controller.getSelectedKVExtraction().getMultiplier() != null) {
 				float Rval = controller.getSelectedKVExtraction().getMultiplier();
 				int Rpl = 2;
-				float p = (float) Math.pow(10, Rpl);
-				Rval = Rval * p;
+				float pVarLocal = (float) Math.pow(10, Rpl);
+				Rval = Rval * pVarLocal;
 				float tmp = Math.round(Rval);
-				Float f = (float) tmp / p;
-				view.setMultiplier(String.valueOf(f.toString()));
+				Float fVarLocal = (float) tmp / pVarLocal;
+				view.setMultiplier(String.valueOf(fVarLocal.toString()));
 			} else {
 				view.setMultiplier(AdminConstants.EMPTY_STRING);
 			}
@@ -130,18 +130,18 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 	public void onSaveButtonClicked() {
 		boolean validFlag = true;
 		if (validFlag && (!view.getValidateKeyPatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.BLANK_ERROR)));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag && (!view.getValidateValuePatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.BLANK_ERROR)));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag && !view.getValidateMultiplierTextBox().validate()) {
 			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.MULTIPLIER_ERROR)));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MULTIPLIER_ERROR));
 			}
 			validFlag = false;
 		}
@@ -149,7 +149,7 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
 				Integer mult = (int)(Float.parseFloat(view.getMultiplier()) * 100);
 				if (mult > 100 || mult < 0) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.MULTIPLIER_ERROR)));
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MULTIPLIER_ERROR));
 					validFlag = false;
 				}
 			}
@@ -171,7 +171,7 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 				width = Integer.parseInt(view.getWidth());
 			}
 			if (length==0 || width==0){
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.ADVANCED_KV_ERROR)));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADVANCED_KV_ERROR));
 				validFlag=false;
 			}
 		}

@@ -74,14 +74,14 @@ public class EmailConvertorImpl implements EmailConvertor {
 	}
 
 	@Override
-	public void convert(CustomMessage cm, String outputFilePath) throws DCMAApplicationException {
+	public void convert(CustomMessage customMessage, String outputFilePath) throws DCMAApplicationException {
 		FileOutputStream fileOutputStream = null;
 		MailMetaData mail = null;
 		try {
-			if (cm.getMessage().getContent() instanceof Multipart) {
+			if (customMessage.getMessage().getContent() instanceof Multipart) {
 				File createFolders = new File(outputFilePath);
 				createFolders.mkdirs();
-				mail = cm.getMailMetaData();
+				mail = customMessage.getMailMetaData();
 				File file = new File(outputFilePath + File.separator + TEMP_FILE_NAME + FileType.TXT.getExtensionWithDot());
 				fileOutputStream = new FileOutputStream(file);
 				fileOutputStream.write(mail.toString().getBytes());

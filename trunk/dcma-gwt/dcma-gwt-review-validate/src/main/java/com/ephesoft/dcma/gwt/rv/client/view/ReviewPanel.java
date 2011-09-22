@@ -47,6 +47,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.ui.SuggestionBox;
 import com.ephesoft.dcma.gwt.core.client.validator.SuggestBoxValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
@@ -93,9 +94,10 @@ public class ReviewPanel extends RVBasePanel {
 	@UiField
 	VerticalPanel documentTypePanel;
 
-	private SuggestBox documentTypeSuggestBox;
+	private SuggestionBox documentTypeSuggestBox;
 
 	private ListBox documentTypes;
+
 
 	ValidatableWidget<SuggestBox> validatableSuggestBox;
 
@@ -175,33 +177,46 @@ public class ReviewPanel extends RVBasePanel {
 								documentTypes.clear();
 								documentTypes.addStyleName(ReviewValidateConstants.DROPBOX_STYLE);
 								int index = 0;
+								int indexUnknown = 0;
+								boolean docSelected = false;
 								String actualValue = null;
 								for (DocumentTypeDBBean bean : documentTypesList) {
 									if (bean.getName().equalsIgnoreCase("Unknown")) {
 										documentTypes.addItem(LocaleDictionary.get().getConstantValue(
 												ReviewValidateConstants.document_type_unknown), bean.getName());
+										indexUnknown = index;
 									} else {
 										documentTypes.addItem(bean.getDescription(), bean.getName());
 									}
 									if (bean.getName().equals(presenter.document.getType())) {
 										documentTypes.setItemSelected(index, true);
 										actualValue = bean.getDescription();
+										docSelected = true;
 									}
+
 									index++;
 								}
+								if (!docSelected) {
+									documentTypes.setSelectedIndex(indexUnknown);
+									actualValue = "Unknown";
+								}
 								documentTypes.setVisible(true);
+								if(documentTypeSuggestBox!=null) {
+									documentTypeSuggestBox.getSuggestBox().hideSuggestionList();
+
+								}
 								MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-								documentTypeSuggestBox = new SuggestBox(oracle);
+								documentTypeSuggestBox = new SuggestionBox(new SuggestBox(oracle));
+								documentTypeSuggestBox.getSuggestBox().hideSuggestionList();
+								documentTypeSuggestBox.getSuggestBox().addStyleName(ReviewValidateConstants.INPUTBOX_STYLE);
 
-								documentTypeSuggestBox.addStyleName(ReviewValidateConstants.INPUTBOX_STYLE);
-
-								setHandlerForSuggestBox(documentTypeSuggestBox);
+								setHandlerForSuggestBox(documentTypeSuggestBox.getSuggestBox());
 								actualValue = null == actualValue ? "" : actualValue;
 								oracle.add(actualValue);
 								for (int i = 0; i < documentTypes.getItemCount(); i++) {
 									oracle.add(documentTypes.getItemText(i));
 								}
-								documentTypeSuggestBox.setValue(actualValue, true);
+								documentTypeSuggestBox.getSuggestBox().setValue(actualValue, true);
 								if (currentDocTypeView == null) {
 									presenter.rpcService.getDefaultDocTypeView(new AsyncCallback<String>() {
 
@@ -383,34 +398,38 @@ public class ReviewPanel extends RVBasePanel {
 	public void setFocus() {
 		if (documentTypes.isVisible()) {
 			documentTypes.setFocus(true);
-		} else if (documentTypeSuggestBox.isVisible()) {
-			documentTypeSuggestBox.setFocus(true);
+		} else if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
+			documentTypeSuggestBox.getSuggestBox().setFocus(true);
 		}
 	}
 
 	private void setFocus(boolean isSuggestBox) {
 		if (isSuggestBox) {
-			documentTypeSuggestBox.setFocus(true);
+
+			documentTypeSuggestBox.getSuggestBox().setFocus(true);
 		} else {
+
 			documentTypes.setFocus(true);
 		}
 	}
 
 	private void enableSuggestBox() {
 		documentTypePanel.clear();
-		documentTypePanel.add(documentTypeSuggestBox);
-		documentTypeSuggestBox.setVisible(true);
-		documentTypeSuggestBox.setText(documentTypes.getItemText(documentTypes.getSelectedIndex()));
+		documentTypePanel.add(documentTypeSuggestBox.getSuggestBox());
+		documentTypeSuggestBox.getSuggestBox().setVisible(true);
+		documentTypeSuggestBox.getSuggestBox().setText(documentTypes.getItemText(documentTypes.getSelectedIndex()));
 		documentTypes.setVisible(false);
 		currentDocTypeView = SUGGEST_BOX_VIEW;
-		setFocus(true);
+		documentTypeSuggestBox.getSuggestBox().getTextBox().selectAll();
+		setFocus(true);		
 	}
 
 	private void enableListBox() {
+
 		documentTypePanel.clear();
 		documentTypePanel.add(documentTypes);
 		documentTypes.setVisible(true);
-		documentTypeSuggestBox.setVisible(false);
+		documentTypeSuggestBox.getSuggestBox().setVisible(false);
 		currentDocTypeView = LIST_VIEW;
 		setFocus(false);
 	}
@@ -418,7 +437,7 @@ public class ReviewPanel extends RVBasePanel {
 	private void toggleView() {
 		if (documentTypes.isVisible()) {
 			enableSuggestBox();
-		} else if (documentTypeSuggestBox.isVisible()) {
+		} else if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
 			enableListBox();
 		}
 	}
@@ -495,7 +514,7 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	public boolean isSuggestBoxValid() {
-		if (documentTypeSuggestBox.isVisible()) {
+		if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
 			return validatableSuggestBox.validate();
 		}
 		return true;

@@ -60,6 +60,7 @@ public class JbpmProcessLookup {
 	 * @return {@link ProcessDefinition}
 	 */
 	public ProcessDefinition getCurrent() {
+		ProcessDefinition processDefinition = null;
 		ProcessDefinitionQuery dfq = repositoryService.createProcessDefinitionQuery();
 		List<ProcessDefinition> result = dfq.processDefinitionKey(processKey)
 			.orderDesc(ProcessDefinitionQuery.PROPERTY_VERSION)
@@ -67,10 +68,9 @@ public class JbpmProcessLookup {
 			.list();
 		
 		if(!result.isEmpty()) {
-			return result.get(0);
-		} else {
-			return null;
-		}
+			processDefinition = result.get(0);
+		} 
+		return processDefinition;
 	}
 	
 	/**
@@ -91,11 +91,10 @@ public class JbpmProcessLookup {
 	 * @return {@link ProcessDefinition} with current process key and given version.
 	 */
 	public ProcessDefinition getVersion(int version) {
-		String id = String.format("%s-%d", processKey, version);
+		String processDefId = String.format("%s-%d", processKey, version);
 		
-		ProcessDefinitionQuery dfq = repositoryService.createProcessDefinitionQuery();
-		ProcessDefinition df = dfq.processDefinitionId(id).uniqueResult();
-		return df;
+		ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
+		return processDefinitionQuery.processDefinitionId(processDefId).uniqueResult();
 	}
 
 	/* Setters / Getters for Spring injection */

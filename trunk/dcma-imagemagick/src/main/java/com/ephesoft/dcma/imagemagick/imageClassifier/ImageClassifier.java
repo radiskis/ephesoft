@@ -80,7 +80,7 @@ import com.ephesoft.dcma.util.CustomValueSortedMap;
  */
 public class ImageClassifier {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected final static Logger LOGGER = LoggerFactory.getLogger(ImageClassifier.class);
 
 	/**
 	 * Instance of PluginPropertiesService.
@@ -95,6 +95,9 @@ public class ImageClassifier {
 	@Autowired
 	// @Qualifier("imageComparisonUtil")
 	private ImageComparisonUtil imageComparisonUtil;
+
+	@Autowired
+	private BatchSchemaService batchSchemaService;
 
 	/**
 	 * @return the pluginPropertiesService
@@ -129,15 +132,17 @@ public class ImageClassifier {
 	 * @param batchSchemaService
 	 * @throws IOException
 	 */
-	public void classifyAllImgsOfBatch(String batchInstanceIdentifier, String batchClassIdentifier, String sBatchFolder,
-			BatchSchemaService batchSchemaService) throws IOException, DCMAApplicationException {
+	public void classifyAllImgsOfBatch(String batchInstanceIdentifier, String sBatchFolder) throws IOException,
+			DCMAApplicationException {
 
 		// Initialize properties
-		logger.info("Initializing properties...");
-		String sampleBaseFolderPath = batchSchemaService.getImageMagickBaseFolderPath(batchClassIdentifier, false);
-		logger.info("Properties Initialized Successfully");
-
+		LOGGER.info("Initializing properties...");
 		Batch parsedXmlFile = batchSchemaService.getBatch(batchInstanceIdentifier);
+		String batchClassIdentifier = parsedXmlFile.getBatchClassIdentifier();
+		LOGGER.info("batchClassIdentifier = " + batchClassIdentifier);
+		String sampleBaseFolderPath = batchSchemaService.getImageMagickBaseFolderPath(batchClassIdentifier, false);
+		LOGGER.info("Properties Initialized Successfully, sampleBaseFolderPath = " + sampleBaseFolderPath);
+
 		// Get list of Page names from parsedXmlFile.
 		List<String> listOfUnclasifiedPgPth = new LinkedList<String>();
 		Map<String, Integer> unclassifiedPgIndexMap = new HashMap<String, Integer>();
@@ -150,28 +155,27 @@ public class ImageClassifier {
 		int maxValue = 10;
 		try {
 			maxValue = Integer.valueOf(maxVal);
-		} catch (NumberFormatException e) {
-			logger.error("Max value is not a number. Using default value of 10");
+			LOGGER.info("maxValue = " + maxValue);
+		} catch (NumberFormatException nfe) {
+			LOGGER.error("Max value is not a number. Using default value of 10. " + nfe.getMessage(), nfe);
 		}
 		// CustomValueSortedMap finalUnclasifiedPageConfidenceMap = new CustomValueSortedMap(maxValue);
 		Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap = new HashMap<String, CustomValueSortedMap>();
 		for (String unclasifiedPagePath : listOfUnclasifiedPgPth) {
 			CustomValueSortedMap sampleConfidenceList = new CustomValueSortedMap(maxValue);
 			for (String documentName : documentTypeArray) {
+				LOGGER.info("documentName = " + documentName);
 				File fdocumentName = new File(documentName);
 				if (fdocumentName.isHidden()) {
 					continue;
 				}
 				List<String> listOfSamplePages = getListOfSamplePagesForDoc(documentName, sampleBaseFolderPath);
 				for (String samplePageName : listOfSamplePages) {
-
 					List<String> listOfSambleThumbsPaths = getListOfThumbnailPaths(samplePageName, documentName, sampleBaseFolderPath);
-
 					double maxConfidence = getMaxCondifence(unclasifiedPagePath, listOfSambleThumbsPaths, batchInstanceIdentifier);
+					LOGGER.info("samplePageName = " + samplePageName + ", maxConfidence = " + maxConfidence);
 					sampleConfidenceList.add(samplePageName, maxConfidence);
-
 				}
-
 			}
 			finalUnclasifiedPageConfidenceMap.put(unclasifiedPagePath, sampleConfidenceList);
 		}
@@ -255,24 +259,28 @@ public class ImageClassifier {
 			imageComparisonUtil = new ImageComparisonUtil(true);
 		}
 		double maxConfidence = 0;
+		LOGGER.info("unclasifiedPagePath = " + unclasifiedPagePath);
 		for (String sampleThumbnailPath : listOfSambleThumbsPaths) {
+			LOGGER.info("sampleThumbnailPath = " + sampleThumbnailPath);
 			double confidence = 0;
 			try {
 				File fSampleThumb = new File(sampleThumbnailPath);
 				if (!fSampleThumb.exists()) {
-					logger.info("Thumbnail File does not exist filename=" + fSampleThumb);
+					LOGGER.info("Thumbnail File does not exist filename = " + fSampleThumb);
 					continue;
 				}
 				confidence = imageComparisonUtil.compareImagesRuntime(unclasifiedPagePath, sampleThumbnailPath, batchInstanceID);
-
+				LOGGER.info("confidence = " + confidence);
 			} catch (Exception e) {
-				logger.info("Problem comparing images " + unclasifiedPagePath + "," + sampleThumbnailPath + " Exception =" + e);
+				LOGGER.info("Problem comparing images " + unclasifiedPagePath + "," + sampleThumbnailPath + " Exception = "
+						+ e.getMessage(), e);
 				continue;
 			}
 			if (confidence > maxConfidence) {
 				maxConfidence = confidence;
 			}
 		}
+		LOGGER.info("maxConfidence = " + maxConfidence);
 		return maxConfidence;
 	}
 

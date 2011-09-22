@@ -54,7 +54,7 @@ public class EditPluginEvent extends GwtEvent<EditPluginHandler> {
 	/**
 	 * Type of event.
 	 */
-	public static Type<EditPluginHandler> TYPE = new Type<EditPluginHandler>();
+	public static Type<EditPluginHandler> type = new Type<EditPluginHandler>();
 
 	/**
 	 * Action taken by user.
@@ -93,7 +93,7 @@ public class EditPluginEvent extends GwtEvent<EditPluginHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<EditPluginHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public List<PluginConfigurationDTO> getPluginList() {

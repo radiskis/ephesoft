@@ -50,22 +50,22 @@ public class BarcodeResult {
 	/**
 	 * x co-ordinate from page left to the top-left corner of barcode.
 	 */
-	private double x0;
+	private double x0Cord;
 
 	/**
 	 * y co-ordinate from page top to the top-left corner of barcode.
 	 */
-	private double y0;
+	private double y0Cord;
 
 	/**
 	 * x co-ordinate from page left to the bottom-right corner of barcode.
 	 */
-	private double x1;
+	private double x1Cord;
 
 	/**
 	 * y co-ordinate from page left to the top-left corner of barcode.
 	 */
-	private double y1;
+	private double y1Cord;
 
 	/**
 	 * The value on barcode.
@@ -77,36 +77,36 @@ public class BarcodeResult {
 	 */
 	private BarcodeReaderTypes barcodeType;
 
-	public double getX0() {
-		return x0;
+	public double getX0Cord() {
+		return x0Cord;
 	}
 
-	public void setX0(final double x0) {
-		this.x0 = x0;
+	public void setX0Cord(final double x0Cord) {
+		this.x0Cord = x0Cord;
 	}
 
-	public double getY0() {
-		return y0;
+	public double getY0Cord() {
+		return y0Cord;
 	}
 
-	public void setY0(final double y0) {
-		this.y0 = y0;
+	public void setY0Cord(final double y0Cord) {
+		this.y0Cord = y0Cord;
 	}
 
-	public double getX1() {
-		return x1;
+	public double getX1Cord() {
+		return x1Cord;
 	}
 
-	public void setX1(final double x1) {
-		this.x1 = x1;
+	public void setX1Cord(final double x1Cord) {
+		this.x1Cord = x1Cord;
 	}
 
-	public double getY1() {
-		return y1;
+	public double getY1Cord() {
+		return y1Cord;
 	}
 
-	public void setY1(final double y1) {
-		this.y1 = y1;
+	public void setY1Cord(final double y1Cord) {
+		this.y1Cord = y1Cord;
 	}
 
 	public String getTexts() {

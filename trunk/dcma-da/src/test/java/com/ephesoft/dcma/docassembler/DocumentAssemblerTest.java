@@ -91,7 +91,7 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	/**
 	 * String constants.
 	 */
-	private static final String TEST_CASE2_BATCH_INSTANCE_ID = "testcase2.batchInstanceId";
+	// private static final String TEST_CASE2_BATCH_INSTANCE_ID = "testcase2.batchInstanceId";
 	/**
 	 * String constants.
 	 */
@@ -103,7 +103,7 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	/**
 	 * String constants.
 	 */
-	private static final String TEST_CASE2_CLASSIFICATION = "testcase2.classification";
+	// private static final String TEST_CASE2_CLASSIFICATION = "testcase2.classification";
 	/**
 	 * String constants.
 	 */
@@ -115,7 +115,7 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	/**
 	 * String constants.
 	 */
-	private static final String TEST_CASE2_BATCH_CLASS_ID = "testcase2.batchClassId";
+	// private static final String TEST_CASE2_BATCH_CLASS_ID = "testcase2.batchClassId";
 	/**
 	 * String constants.
 	 */
@@ -190,14 +190,14 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	/**
 	 * Variable for property file.
 	 */
-	private transient  Properties prop = new Properties();;
+	private transient final Properties prop = new Properties();;
 
 	/**
 	 * Method to initialize resources.
 	 */
 	@Before
 	public void setUp() {
-		boolean result = false;
+		final boolean result = false;
 		String testFolderLocation;
 		localFolderLocation = batchSchemaService.getLocalFolderLocation();
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
@@ -219,7 +219,7 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	 */
 	@Test
 	public void testDocAssemblerForLucene() {
-		boolean result = false;
+		final boolean result = false;
 		batchInstanceId = prop.getProperty(TEST_CASE1_BATCH_INSTANCE_ID);
 		batchClassId = prop.getProperty(TEST_CASE1_BATCH_CLASS_ID);
 		boolean created = false;
@@ -272,64 +272,64 @@ public class DocumentAssemblerTest extends AbstractDATests {
 	/**
 	 * Test a scenario for barcode document assembler.
 	 */
-//	@Test
-//	public void testDocAssemblerForBarcode() {
-//		boolean result = false;
-//		batchInstanceId = prop.getProperty(TEST_CASE2_BATCH_INSTANCE_ID);
-//		batchClassId = prop.getProperty(TEST_CASE2_BATCH_CLASS_ID);
-//		boolean created = false;
-//		BatchClass initialBatchClass = new BatchClass();
-//		try {
-//			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
-//			if (null == batchInstance) {
-//				batchInstance = new BatchInstance();
-//				batchInstance.setIdentifier(batchInstanceId);
-//				BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
-//				batchInstance.setBatchClass(batchClass);
-//				batchInstanceService.createBatchInstance(batchInstance);
-//				created = true;
-//			} else {
-//				initialBatchClass = batchInstance.getBatchClass();
-//				BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
-//				batchInstance.setBatchClass(batchClass);
-//
-//			}
-//			List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPluginConfigService.getAllPluginConfiguration(
-//					batchInstanceId, DA_PLUGIN);
-//			for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
-//				if (batchClassPluginConfig.getName().equals(DA_CLASSIFICATION)) {
-//					initialClassification = batchClassPluginConfig.getValue();
-//					batchClassPluginConfig.setValue(prop.getProperty(TEST_CASE2_CLASSIFICATION));
-//				}
-//			}
-//			batchClassPluginConfigService.updatePluginConfiguration(batchClassPluginConfigs);
-//			documentAssamblerService.createDocumentXml(new BatchInstanceID(batchInstanceId), null);
-//			// compare two XML's
-//			compareXMLs(actualOutputFolder, expectedOutputFolder, batchInstanceId);
-//		} catch (DCMAException e) {
-//			assertTrue(e.getMessage(), result);
-//		} catch (Exception e) {
-//			assertTrue(e.getMessage(), result);
-//		} finally {
-//			if (created) {
-//				BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
-//				if (batchInstance != null) {
-//					batchInstanceService.removeBatchInstance(batchInstance);
-//				}
-//			} else {
-//				BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
-//				batchInstance.setBatchClass(initialBatchClass);
-//				batchInstanceService.updateBatchInstance(batchInstance);
-//			}
-//		}
-//	}
+	// @Test
+	// public void testDocAssemblerForBarcode() {
+	// boolean result = false;
+	// batchInstanceId = prop.getProperty(TEST_CASE2_BATCH_INSTANCE_ID);
+	// batchClassId = prop.getProperty(TEST_CASE2_BATCH_CLASS_ID);
+	// boolean created = false;
+	// BatchClass initialBatchClass = new BatchClass();
+	// try {
+	// BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+	// if (null == batchInstance) {
+	// batchInstance = new BatchInstance();
+	// batchInstance.setIdentifier(batchInstanceId);
+	// BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
+	// batchInstance.setBatchClass(batchClass);
+	// batchInstanceService.createBatchInstance(batchInstance);
+	// created = true;
+	// } else {
+	// initialBatchClass = batchInstance.getBatchClass();
+	// BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
+	// batchInstance.setBatchClass(batchClass);
+	//
+	// }
+	// List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPluginConfigService.getAllPluginConfiguration(
+	// batchInstanceId, DA_PLUGIN);
+	// for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
+	// if (batchClassPluginConfig.getName().equals(DA_CLASSIFICATION)) {
+	// initialClassification = batchClassPluginConfig.getValue();
+	// batchClassPluginConfig.setValue(prop.getProperty(TEST_CASE2_CLASSIFICATION));
+	// }
+	// }
+	// batchClassPluginConfigService.updatePluginConfiguration(batchClassPluginConfigs);
+	// documentAssamblerService.createDocumentXml(new BatchInstanceID(batchInstanceId), null);
+	// // compare two XML's
+	// compareXMLs(actualOutputFolder, expectedOutputFolder, batchInstanceId);
+	// } catch (DCMAException e) {
+	// assertTrue(e.getMessage(), result);
+	// } catch (Exception e) {
+	// assertTrue(e.getMessage(), result);
+	// } finally {
+	// if (created) {
+	// BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+	// if (batchInstance != null) {
+	// batchInstanceService.removeBatchInstance(batchInstance);
+	// }
+	// } else {
+	// BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+	// batchInstance.setBatchClass(initialBatchClass);
+	// batchInstanceService.updateBatchInstance(batchInstance);
+	// }
+	// }
+	// }
 
 	/**
 	 * Test a scenario for image document assembler.
 	 */
 	@Test
 	public void testDocAssemblerForImage() {
-		boolean result = false;
+		final boolean result = false;
 		batchInstanceId = prop.getProperty(TEST_CASE3_BATCH_INSTANCE_ID);
 		batchClassId = prop.getProperty(TEST_CASE3_BATCH_CLASS_ID);
 		boolean created = false;

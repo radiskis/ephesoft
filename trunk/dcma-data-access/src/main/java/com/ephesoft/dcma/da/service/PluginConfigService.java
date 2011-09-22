@@ -52,6 +52,6 @@ public interface PluginConfigService {
 	 * @param configName
 	 * @return
 	 */
-	public PluginConfig getPluginConfigByName(String configName);
+	PluginConfig getPluginConfigByName(String configName);
 
 }

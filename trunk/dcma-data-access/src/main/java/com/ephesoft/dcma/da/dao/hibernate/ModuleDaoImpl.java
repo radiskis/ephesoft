@@ -48,10 +48,10 @@ import com.ephesoft.dcma.da.domain.Module;
 @Repository
 public class ModuleDaoImpl extends HibernateDao<Module> implements ModuleDao {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleDaoImpl.class);
 
 	public Module getModuleByName(String moduleName) {
-		logger.debug(moduleName);
+		LOGGER.debug(moduleName);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("name", moduleName));
 		return this.findSingle(criteria);

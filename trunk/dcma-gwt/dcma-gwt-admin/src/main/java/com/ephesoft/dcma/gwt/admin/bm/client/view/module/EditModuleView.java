@@ -57,36 +57,37 @@ public class EditModuleView extends View<EditModulePresenter> {
 	}
 
 	@UiField
-	TextBox name;
+	protected TextBox name;
 	@UiField
-	TextBox description;
+	protected TextBox description;
 	@UiField
-	TextBox remoteUrl;
+	protected TextBox remoteUrl;
 	@UiField
-	TextBox remoteBatchClassIdentifier;
+	protected TextBox remoteBatchClassIdentifier;
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label descLabel;
+	protected Label descLabel;
 	@UiField
-	Label remoteUrlLabel;
+	protected Label remoteUrlLabel;
 	@UiField
-	Label remoteBatchClassIdentifierLabel;
+	protected Label remoteBatchClassIdentifierLabel;
 	@UiField
-	HorizontalPanel editModulePanel;
+    HorizontalPanel editModulePanel;
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	VerticalPanel editPanel;
+	protected VerticalPanel editPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditModuleView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		editPanel.setSpacing(5);
 
@@ -130,12 +131,12 @@ public class EditModuleView extends View<EditModulePresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 

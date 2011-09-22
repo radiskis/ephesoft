@@ -38,7 +38,7 @@ package com.ephesoft.dcma.workflow.service.common;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JBPMVariables {
+public final class JBPMVariables {
 
 	public static final String BATCH_INSTANCE_ID = "batchInstanceID";
 

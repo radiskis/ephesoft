@@ -74,6 +74,7 @@ public interface AdminConstants {
 	String DELETE_BUTTON = "Delete";
 	String ADD_BUTTON = "Add";
 	String BUTTON_STYLE = "gwt-Button";
+	String VALIDATION_STYLE = "dateBoxFormatError";
 	String DISABLED_BUTTON_STYLE = "disableButton";
 	String FULL_WIDTH_STYLE = "fullWidth";
 	String COPY_BUTTON = "Copy";
@@ -153,12 +154,12 @@ public interface AdminConstants {
 	/**
 	 * Lower limit on priority value possible.
 	 */
-	static final int PRIORITY_LOWER_LIMIT = 1;
+	 int PRIORITY_LOWER_LIMIT = 1;
 
 	/**
 	 * Upper limit on priority value possible.
 	 */
-	static final int PRIORITY_UPPER_LIMIT = 100;
+    int PRIORITY_UPPER_LIMIT = 100;
 
 	String TEST_KV_BUTTON = "Test KV";
 
@@ -189,7 +190,7 @@ public interface AdminConstants {
 	String ATTACH_BUTTON = "Attach";
 
 	String SAVE_BATCH_TITLE = "Save Batch";
-	
+
 	/**
 	 * Maximum length of text that can be shown in listBox beyond which it will be trimmed.
 	 */

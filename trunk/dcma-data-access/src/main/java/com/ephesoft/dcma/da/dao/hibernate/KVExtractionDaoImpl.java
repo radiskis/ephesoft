@@ -57,7 +57,7 @@ import com.ephesoft.dcma.da.domain.KVExtraction;
 @Repository
 public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements KVExtractionDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(KVExtractionDaoImpl.class);
 
 	/**
 	 * An api to fetch all KV Extraction by field type.
@@ -67,7 +67,7 @@ public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements K
 	 */
 	@Override
 	public List<KVExtraction> getKVExtractionByFieldType(FieldType fieldType) {
-		log.info("field type : " + fieldType);
+		LOG.info("field type : " + fieldType);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("fieldType", fieldType));
 		return find(criteria);

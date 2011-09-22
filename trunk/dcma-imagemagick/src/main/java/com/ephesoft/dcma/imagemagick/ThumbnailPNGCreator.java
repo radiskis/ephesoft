@@ -208,6 +208,9 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		}
 		final String thumbNailH = thumbnailH;
 		final String thumbNailW = thumbnailW;
+		final String thumbnailT =  thumbnailType;
+		
+		
 		for (int i = 0; i < sListOfTiffFiles.length; i++) {
 			final String[] files = sListOfTiffFiles[i];
 			batchInstanceThread.add(new AbstractRunnable() {
@@ -218,7 +221,13 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 						ConvertCmd convertcmd = new ConvertCmd();
 						IMOperation operation = new IMOperation();
 						operation.addImage();
-						operation.colorspace("gray");
+						
+						// added for color pdf handling.
+						// Generate the display thumbnails as gray and compare thumbnails as per the color of input tiff.
+						if (thumbnailT.equals(IImageMagickCommonConstants.THUMB_TYPE_DISP)) {
+							operation.colorspace("gray");
+						}
+						
 						operation.thumbnail(Integer.parseInt(thumbNailH), Integer.parseInt(thumbNailW));
 						operation.addImage();
 

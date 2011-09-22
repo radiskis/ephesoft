@@ -97,8 +97,8 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 						}
 					} else if (!item.isFormField() && "importFile".equals(item.getFieldName())) {
 						fileName = item.getName();
-						if(fileName != null) {
-							fileName = fileName.substring(fileName.lastIndexOf("\\")+1);
+						if (fileName != null) {
+							fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
 						}
 						instream = item.getInputStream();
 					}
@@ -112,8 +112,10 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 					try {
 						boolean tempPath = uploadFolder.mkdirs();
 						if (!tempPath) {
-							log.error("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
-							resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+							log
+									.error("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
+							resp
+									.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 											"Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
 							return;
 						}
@@ -129,8 +131,9 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 				out = new FileOutputStream(uploadPath);
 				byte buf[] = new byte[1024];
 				int len;
-				while ((len = instream.read(buf)) > 0)
+				while ((len = instream.read(buf)) > 0) {
 					out.write(buf, 0, len);
+				}
 
 				// convert tiff to png
 				ImageProcessService imageProcessService = this.getSingleBeanOfType(ImageProcessService.class);

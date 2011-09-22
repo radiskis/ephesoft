@@ -32,17 +32,20 @@
 	<import resource="classpath:/META-INF/applicationContext-table-extraction.xml" />
 	<import resource="classpath:/META-INF/applicationContext-docushare-export.xml" />
 	<import resource="classpath:/META-INF/applicationContext-regex-pp.xml" />
-	<import resource="classpath:/META-INF/applicationContext-performance-reporting.xml" />
+	<import	resource="classpath:/META-INF/applicationContext-performance-reporting.xml" />
 	<import resource="classpath:/META-INF/applicationContext-filebound.xml" />
 	<import resource="classpath:/META-INF/applicationContext-regex-pp.xml" />
 	<import resource="classpath:/META-INF/applicationContext-barcode-extraction.xml" />
 	<import resource="classpath:/META-INF/applicationContext-user.xml" />
 	<import resource="classpath:/META-INF/applicationContext-nsi-export.xml" />
-	
-	<import resource="dcma-jbpm.xml"/>
-	<import resource="dcma-batch-scheduling.xml"/>
-	<import resource="dcma-workflows-aspects.xml"/>
-	
+	<import resource="classpath:/META-INF/applicationContext-tabbed-pdf.xml" />
+	<import resource="classpath:/META-INF/applicationContext-csv-file-creation.xml" />
+	<import resource="classpath:/META-INF/applicationContext-ibm-cm.xml" />
+
+	<import resource="dcma-jbpm.xml" />
+	<import resource="dcma-batch-scheduling.xml" />
+	<import resource="dcma-workflows-aspects.xml" />
+
 	<bean id="workflowConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="placeholderPrefix" value="$wf{" />
@@ -53,16 +56,16 @@
 	</bean>
 
 	<bean id="deploymentService" class="com.ephesoft.dcma.workflow.service.common.DeploymentServiceImpl"
-	 	p:workflowsDefinitionList-ref="workflowsDefinitionList" p:delpoy="$wf{workflow.deploy}">
+		p:workflowsDefinitionList-ref="workflowsDefinitionList" p:delpoy="$wf{workflow.deploy}">
 	</bean>
-	
-	<bean id="pickupService" class="com.ephesoft.dcma.workflow.service.PickupServiceImpl"/>
-	
+
+	<bean id="pickupService" class="com.ephesoft.dcma.workflow.service.PickupServiceImpl" />
+
 	<bean id="workflowService" class="com.ephesoft.dcma.workflow.service.common.WorkflowServiceImpl"
 		p:fromMail="$wf{workflow.error.from_mail}" p:toMail="$wf{workflow.error.to_mail}"
 		p:subject="$wf{workflow.error.subject}" p:mailTemplatePath="dcma-workflows/workflow-error.ftl">
 	</bean>
-	
+
 	<context:component-scan base-package="com.ephesoft.dcma.workflow.service" />
-	
+
 </beans>

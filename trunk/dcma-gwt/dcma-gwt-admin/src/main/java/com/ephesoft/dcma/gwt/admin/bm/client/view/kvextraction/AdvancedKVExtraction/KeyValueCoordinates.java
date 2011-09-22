@@ -37,7 +37,7 @@ package com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtrac
 
 public class KeyValueCoordinates {
 
-	private AdvancedKVExtractionView advancedKVExtractionView;
+	private final AdvancedKVExtractionView advancedKVExtractionView;
 
 	private Coordinates keyCoordinates = null;
 
@@ -55,19 +55,19 @@ public class KeyValueCoordinates {
 		valueCoordinates = new Coordinates(advancedKVExtractionView);
 	}
 
-	public void mouseDownat(int x, int y) {
+	public void mouseDownat(int xCoordinate, int yCoordinate) {
 		if (!mouseStatus) {
 			if (!this.keyFinalized) {
-				keyCoordinates.setInitialCoordinates(x, y);
+				keyCoordinates.setInitialCoordinates(xCoordinate, yCoordinate);
 			} else {
-				valueCoordinates.setInitialCoordinates(x, y);
+				valueCoordinates.setInitialCoordinates(xCoordinate, yCoordinate);
 				this.valueFinalized=false;
 			}
 		} else {
 			if (!this.keyFinalized) {
-				keyCoordinates.setOtherCoordinates(x, y, true);
+				keyCoordinates.setOtherCoordinates(xCoordinate, yCoordinate, true);
 			} else {
-				valueCoordinates.setOtherCoordinates(x, y, true);
+				valueCoordinates.setOtherCoordinates(xCoordinate, yCoordinate, true);
 				this.valueFinalized=false;
 			}
 		}
@@ -89,13 +89,13 @@ public class KeyValueCoordinates {
 		advancedKVExtractionView.findLocation(keyCoordinates, valueCoordinates);
 	}
 
-	public void mouseMoveat(int x, int y) {
+	public void mouseMoveat(int xCoordinate, int yCordinate) {
 		if (mouseStatus) {
 			if (!this.keyFinalized) {
-				keyCoordinates.setOtherCoordinates(x, y, false);
+				keyCoordinates.setOtherCoordinates(xCoordinate, yCordinate, false);
 				keyCoordinates.doOverlay();
 			} else {
-				valueCoordinates.setOtherCoordinates(x, y, false);
+				valueCoordinates.setOtherCoordinates(xCoordinate, yCordinate, false);
 				valueCoordinates.doOverlay(keyCoordinates, this.valueFinalized);
 			}
 		}

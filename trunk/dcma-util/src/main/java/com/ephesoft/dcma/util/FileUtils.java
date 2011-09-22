@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -224,11 +225,11 @@ public class FileUtils {
 			}
 
 			String[] files = srcPath.list();
-			if(files.length > 0) {
+			if (files.length > 0) {
 				Arrays.sort(files);
-				
+
 				for (int i = 0; i < files.length; i++) {
-					
+
 					copyDirectoryWithContents(new File(srcPath, files[i]), new File(dstPath, files[i]));
 				}
 			}
@@ -273,11 +274,11 @@ public class FileUtils {
 			}
 
 			String[] files = srcPath.list();
-			if(files.length > 0) {
+			if (files.length > 0) {
 				Arrays.sort(files);
-				
+
 				for (int i = 0; i < files.length; i++) {
-					
+
 					copyDirectoryWithContents(new File(srcPath, files[i]), new File(dstPath, files[i]));
 				}
 			}
@@ -533,7 +534,7 @@ public class FileUtils {
 	 */
 	public static void unzip(File zipFile, String destinationDir) {
 		File destinationFile = new File(destinationDir);
-		if(destinationFile.exists()) {
+		if (destinationFile.exists()) {
 			destinationFile.delete();
 		}
 		final class Expander extends Expand {
@@ -554,7 +555,7 @@ public class FileUtils {
 	public static String getFileNameOfTypeFromFolder(String dirLocation, String fileExtOrFolderName) {
 		String fileOrFolderName = "";
 		File[] listFiles = new File(dirLocation).listFiles();
-		if(listFiles != null) {			
+		if (listFiles != null) {
 			for (int index = 0; index < listFiles.length; index++) {
 				if (listFiles[index].getName().toLowerCase().indexOf(fileExtOrFolderName.toLowerCase()) > -1) {
 					fileOrFolderName = listFiles[index].getPath();
@@ -591,7 +592,7 @@ public class FileUtils {
 		boolean success = true;
 		File sourceDir = new File(sourceDirPath);
 		File destDir = new File(destDirPath);
-		if(sourceDir.exists() && destDir.exists()) {
+		if (sourceDir.exists() && destDir.exists()) {
 			// delete the directory if it already exists
 			deleteDirectoryAndContentsRecursive(destDir);
 			success = sourceDir.renameTo(destDir);
@@ -608,5 +609,72 @@ public class FileUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * This API is creating file if not exists.
+	 * 
+	 * @param filePath {@link String}
+	 * @return isFileCreated
+	 */
+	public static boolean createFile(String filePath) {
+		boolean isFileCreated = false;
+		File file = new File(filePath);
+		if (file.exists()) {
+			isFileCreated = true;
+		} else {
+			try {
+				isFileCreated = file.createNewFile();
+			} catch (IOException e) {
+				LOGGER.error("Unable to create file" + e.getMessage(), e);
+			}
+		}
+		return isFileCreated;
+	}
+
+	/**
+	 * This method append the src file to dest file.
+	 * 
+	 * @param srcFile
+	 * @param destFile
+	 * @throws Exception
+	 */
+	public static void appendFile(File srcFile, File destFile) throws Exception {
+		InputStream in = null;
+		in = new FileInputStream(srcFile);
+		FileOutputStream out = new FileOutputStream(destFile, true);
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		if (in != null) {
+			in.close();
+		}
+		if (out != null) {
+			out.close();
+		}
+
+	}
+
+	/**
+	 * This API merging the input files into single output file.
+	 * 
+	 * @param srcFiles {@link String}
+	 * @param destFile {@link String}
+	 * @return
+	 */
+	public static boolean mergeFilesIntoSingleFile(List<String> srcFiles, String destFile) {
+		boolean isFileMerged = false;
+		File outputFile = new File(destFile);
+		for (String string : srcFiles) {
+			File inputFile = new File(string);
+			try {
+				appendFile(inputFile, outputFile);
+			} catch (Exception e) {
+				LOGGER.error("Error in copying file" + e.getMessage(), e);
+			}
+		}
+		return isFileMerged;
 	}
 }

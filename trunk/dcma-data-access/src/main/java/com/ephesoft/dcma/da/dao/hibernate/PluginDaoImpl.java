@@ -53,11 +53,11 @@ import com.ephesoft.dcma.da.domain.Plugin;
 @Repository
 public class PluginDaoImpl extends HibernateDao<Plugin> implements PluginDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(PluginDaoImpl.class);
 
 	@Override
 	public Plugin getPluginPropertiesForPluginId(Long pluginId) {
-		log.info("pluginId : " + pluginId);
+		LOG.info("pluginId : " + pluginId);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("id", pluginId));
 		return this.findSingle(criteria);

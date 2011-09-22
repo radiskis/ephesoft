@@ -54,7 +54,10 @@
 		<module>dcma-user-connectivity</module>
 		<module>dcma-encryption</module>
 		<module>dcma-nsi-export</module>
-		</modules>
+		<module>dcma-tabbed-pdf</module>
+		<module>dcma-csv-file-creation</module>
+		<module>dcma-ibm-cm</module>
+	</modules>
 
 	<build>
 		<plugins>
@@ -293,6 +296,21 @@
 			<dependency>
 				<groupId>com.ephesoft.dcma</groupId>
 				<artifactId>dcma-nsi-export</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-tabbed-pdf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-csv-file-creation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-imload-script</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

@@ -54,27 +54,28 @@ public class BatchClassFieldView extends View<BatchClassFieldViewPresenter> {
 	}
 
 	@UiField
-	BatchClassFieldDetailView batchClassFieldDetailView;
+	protected BatchClassFieldDetailView batchClassFieldDetailView;
 
 	@UiField
-	EditBatchClassFieldView editBatchClassFieldView;
+	protected EditBatchClassFieldView editBatchClassFieldView;
 
 	@UiField
-	VerticalPanel batchClassFieldVerticalPanel;
+	protected VerticalPanel batchClassFieldVerticalPanel;
 	
 	@UiField
-	VerticalPanel batchClassFieldConfigVerticalPanel;
+	protected VerticalPanel batchClassFieldConfigVerticalPanel;
 	
 	@UiField
-	CaptionPanel batchClassFieldCaptionPanel;
+	protected CaptionPanel batchClassFieldCaptionPanel;
 
 	@UiField
-	Button editBatchClassFieldPropertiesButton;
+	protected Button editBatchClassFieldPropertiesButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public BatchClassFieldView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		batchClassFieldCaptionPanel.setCaptionHTML(AdminConstants.BATCH_CLASS_FIELD_HTML);
 

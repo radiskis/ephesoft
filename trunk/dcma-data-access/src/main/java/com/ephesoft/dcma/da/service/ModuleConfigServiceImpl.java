@@ -49,15 +49,15 @@ public class ModuleConfigServiceImpl implements ModuleConfigService {
 	/**
 	 * LOGGER to print the Logging information.
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(ModuleConfigServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleConfigServiceImpl.class);
 
 	@Autowired
 	private ModuleConfigDao moduleConfigDao;
 
 	@Override
 	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory) {
-		logger.debug(moduleConfigKey);
-		logger.debug(String.valueOf(isMandatory));
+		LOGGER.debug(moduleConfigKey);
+		LOGGER.debug(String.valueOf(isMandatory));
 		return moduleConfigDao.getModuleConfigByKeyAndMandatory(moduleConfigKey, isMandatory);
 	}
 }

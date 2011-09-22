@@ -244,7 +244,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param currentUser
 	 * @return
 	 */
-	public List<BatchInstance> getAllBatchInstancesForCurrentUser(String currentUser);
+	List<BatchInstance> getAllBatchInstancesForCurrentUser(String currentUser);
 
 	/**
 	 * API to get all batch instances which are currently being executed for a specific IP Address. Output will be all batch instances
@@ -253,7 +253,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param serverInfo
 	 * @return List<BatchInstance>
 	 */
-	public List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner);
+	List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner);
 
 	/**
 	 * API to get a batch by applying Hibernate level optimistic locking.
@@ -262,7 +262,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param lockMode
 	 * @return BatchInstance
 	 */
-	public BatchInstance getBatch(long batchId, LockMode lockMode);
+	BatchInstance getBatch(long batchId, LockMode lockMode);
 
 	/**
 	 * API to get all the batch instances in sorted order.
@@ -277,7 +277,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param uncFolder
 	 * @return List<BatchInstance> - List of all batch instances.
 	 */
-	public List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder);
+	List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder);
 
 	/**
 	 * API to update local folder for a batch.
@@ -285,7 +285,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param batchInsctance
 	 * @param localFolder
 	 */
-	public void updateBatchInstanceLocalFolder(BatchInstance batchInsctance, String localFolder);
+	void updateBatchInstanceLocalFolder(BatchInstance batchInsctance, String localFolder);
 
 	/**
 	 * API to update unc folder for a batch.
@@ -293,14 +293,14 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param batchInsctance
 	 * @param uncFolder
 	 */
-	public void updateBatchInstanceUncFolder(BatchInstance batchInsctance, String uncFolder);
+	void updateBatchInstanceUncFolder(BatchInstance batchInsctance, String uncFolder);
 
 	/**
 	 * API to get all unfinished remotely executed batches.
 	 * 
 	 * @return List<BatchInstance> list of batch instance
 	 */
-	public List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance();
+	List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance();
 
 	/**
 	 * An api to fetch all the batch instances excluded remotely executing batches by status list. Parameter firstResult set a limit
@@ -320,7 +320,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param currentUserRoles Current User Role.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
-	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
+	List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
 			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
 			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier);
 
@@ -342,7 +342,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param currentUserRoles Current User Role.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
-	public List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult,
+	List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult,
 			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
 			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier);
 

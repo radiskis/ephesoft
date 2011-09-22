@@ -66,23 +66,24 @@ public class ExportBatchClassView extends View<ExportBatchClassPresenter> {
 	}
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	VerticalPanel exportBatchClassViewPanel;
+	protected VerticalPanel exportBatchClassViewPanel;
 
 	private DialogBox dialogBox;
 	private String exportBatchClassIdentifier;
 	
 	@UiField
-	FormPanel exportFormPanel;
+	protected FormPanel exportFormPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ExportBatchClassView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);

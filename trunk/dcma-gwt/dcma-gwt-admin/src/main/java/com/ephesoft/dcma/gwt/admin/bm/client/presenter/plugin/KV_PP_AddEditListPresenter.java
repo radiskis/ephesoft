@@ -42,9 +42,9 @@ import com.google.gwt.event.shared.HandlerManager;
 
 public class KV_PP_AddEditListPresenter extends AbstractBatchClassPresenter<KV_PP_AddEditListView> {
 
-	private KV_PP_AddEditDetailPresenter kvPPAddEditDetailPresenter;
+	private final KV_PP_AddEditDetailPresenter kvPPAddEditDetailPresenter;
 
-	private KV_PP_AddEditPresenter kvPPAddEditPresenter;
+	private final KV_PP_AddEditPresenter kvPPAddEditPresenter;
 
 	public KV_PP_AddEditListPresenter(BatchClassManagementController controller, KV_PP_AddEditListView view) {
 		super(controller, view);

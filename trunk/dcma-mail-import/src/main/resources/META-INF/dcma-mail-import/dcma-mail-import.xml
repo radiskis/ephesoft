@@ -28,7 +28,7 @@
 	<bean id="mailReceiverService" class="com.ephesoft.dcma.mail.service.MailReceiverServiceImpl" />
 
 	<bean id="emailImporterService" class="com.ephesoft.dcma.mail.service.EmailImporterServiceImpl" >
-		<property name="ignoreAttachmentExtensions" value="$dcmamail{dcma.ignore.attachment.extension}" />
+		<property name="supportedAttachmentExtensions" value="$dcmamail{dcma.supported.attachment.extension}" />
 	</bean>
 
 	<bean id="freemarkerMailConfiguration"

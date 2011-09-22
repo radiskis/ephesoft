@@ -71,24 +71,24 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 	//
 	// private static final String TIMEFORMAT_PM = "PM";
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	protected static final Logger LOGGER = LoggerFactory.getLogger(FolderMonitorServiceImpl.class);
 
 	@Autowired
-	BatchClassService batchClassService;
+	private BatchClassService batchClassService;
 	@Autowired
-	BatchInstanceService batchInstanceService;
+	private BatchInstanceService batchInstanceService;
 	@Autowired
-	BatchSchemaService batchSchemaService;
+	private BatchSchemaService batchSchemaService;
 
 	@Autowired
-	EphesoftFolderListner listner;
+	private EphesoftFolderListner listner;
 
 	// @Autowired
 	// private ServerRegistryService registryService;
 
-	private Map<String, Integer> batchClassIdVsWatchIdMap = new HashMap<String, Integer>();
+	final private Map<String, Integer> batchClassIdVsWatchIdMap = new HashMap<String, Integer>();
 	private FileChannel fileChannel;
-	private boolean isRunning = false;
+	private boolean running = false;
 
 	private long waitTime;
 
@@ -100,7 +100,7 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 		for (BatchClass batchClass : batchClasses) {
 			addWatch(batchClass);
 		}
-		isRunning = true;
+		running = true;
 	}
 
 	private void pickOldUnPickedBatches(List<BatchClass> batchClasses) {
@@ -111,10 +111,8 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 			String[] folders = uncFolder.list();
 			if (batches != null && folders != null) {
 				for (String folderName : folders) {
-					if (folderName != null) {
-						if (!isFolderPresent(folderName, batches)) {
-							createBatchInstance(batchClass, uncFolder, folderName);
-						}
+					if (folderName != null && !isFolderPresent(folderName, batches)) {
+						createBatchInstance(batchClass, uncFolder, folderName);
 					}
 				}
 			}
@@ -132,12 +130,12 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 	public void stop() {
 		removeWatch();
 		unlockLocalFolder();
-		isRunning = false;
+		running = false;
 	}
 
 	@Override
 	public boolean isRunning() {
-		return isRunning;
+		return running;
 	}
 
 	@Override
@@ -196,7 +194,7 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 			int watchID = JNotify.addWatch(batchClass.getUncFolder(), JNotify.FILE_CREATED, false, listner);
 			this.batchClassIdVsWatchIdMap.put(batchClass.getIdentifier(), watchID);
 		} catch (JNotifyException e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMABusinessException(e.getMessage(), e);
 		}
 	}
@@ -207,7 +205,7 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 				JNotify.removeWatch(watchID);
 			}
 		} catch (JNotifyException e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMABusinessException(e.getMessage(), e);
 		}
 	}
@@ -224,14 +222,14 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 			try {
 				lock = fileChannel.tryLock();
 			} catch (OverlappingFileLockException e) {
-				logger.trace("File is already locked in this thread or virtual machine");
+				LOGGER.trace("File is already locked in this thread or virtual machine");
 			}
 			if (lock == null) {
-				logger.trace("File is already locked in this thread or virtual machine");
+				LOGGER.trace("File is already locked in this thread or virtual machine");
 			}
 
 		} catch (Exception e) {
-			logger.error("Unable to aquire lock on file : " + lockFileName, e);
+			LOGGER.error("Unable to aquire lock on file : " + lockFileName, e);
 			throw new DCMABusinessException("Unable to aquire lock on file : " + lockFileName, e);
 		}
 	}
@@ -248,7 +246,7 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 				}
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMABusinessException(e.getMessage(), e);
 		}
 	}
@@ -258,11 +256,11 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 		Integer watchId = batchClassIdVsWatchIdMap.get(batchClassID.getID());
 		if (watchId != null) {
 			try {
-				logger.info("Removing watch on Batch Class:" + batchClassID.getID());
+				LOGGER.info("Removing watch on Batch Class:" + batchClassID.getID());
 				JNotify.removeWatch(watchId);
-				logger.info("Watch successfully removed");
+				LOGGER.info("Watch successfully removed");
 			} catch (JNotifyException e) {
-				logger.error("Unable to remove watch on batch class: " + batchClassID.getID(), e);
+				LOGGER.error("Unable to remove watch on batch class: " + batchClassID.getID(), e);
 			}
 		}
 	}

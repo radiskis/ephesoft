@@ -48,15 +48,15 @@ public enum BarcodeProperties implements PluginProperty {
 	/**
 	 * Valid extensions for barcode.
 	 */
-	BARCODE_VALID_EXTNS("barcode.valid_extensions"), 
+	BARCODE_VALID_EXTNS("barcode.valid_extensions"),
 	/**
 	 * Maximum confidence for barcode.
 	 */
-	MAX_CONFIDENCE("barcode.max_confidence"), 
+	MAX_CONFIDENCE("barcode.max_confidence"),
 	/**
 	 * Minimum confidence for barcode.
 	 */
-	MIN_CONFIDENCE("barcode.min_confidence"), 
+	MIN_CONFIDENCE("barcode.min_confidence"),
 	/**
 	 * Reader types for barcode.
 	 */
@@ -65,11 +65,12 @@ public enum BarcodeProperties implements PluginProperty {
 	 * Switch for barcode reader.
 	 */
 	BARCODE_SWITCH("barcode.switch");
+
 	/**
 	 * Property key.
 	 */
 	private String key;
-	
+
 	BarcodeProperties(final String key) {
 		this.key = key;
 	}

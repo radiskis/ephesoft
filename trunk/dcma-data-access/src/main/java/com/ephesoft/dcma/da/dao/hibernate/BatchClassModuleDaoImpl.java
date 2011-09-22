@@ -53,29 +53,32 @@ import com.ephesoft.dcma.da.domain.Module;
 @Repository
 public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> implements BatchClassModuleDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String BATCH_CLASS = "batchClass";
+	private static final String MODULE = "module";
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	private static final Logger LOG = LoggerFactory.getLogger(BatchClassModuleDaoImpl.class);
 
 	@Override
 	public Integer countModules(String batchClassIdentifier) {
-		log.info("batchClassIdentifier : " + batchClassIdentifier);
+		LOG.info("batchClassIdentifier : " + batchClassIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return count(criteria);
 	}
 
 	@Override
 	public List<Module> getBatchClassModule(String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
-		criteria.setProjection(Projections.property("module"));
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+		criteria.setProjection(Projections.property(MODULE));
 		return find(criteria);
 	}
 
 	@Override
 	public List<Module> getModules(String batchClassIdentifier, int firstIndex, int maxResults) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
-		criteria.setProjection(Projections.property("module"));
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+		criteria.setProjection(Projections.property(MODULE));
 		criteria.addOrder(Order.asc("orderNumber"));
 		return find(criteria, firstIndex, maxResults);
 	}
@@ -83,9 +86,9 @@ public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> impl
 	@Override
 	public BatchClassModule getModuleByName(String batchClassIdentifier, String moduleName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass");
-		criteria.createAlias("module", "module");
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+		criteria.createAlias(MODULE, MODULE);
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		criteria.add(Restrictions.eq("module.name", moduleName));
 		return findSingle(criteria);
 	}
@@ -93,9 +96,9 @@ public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> impl
 	@Override
 	public BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass");
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 		criteria.add(Restrictions.eq("workflowName", workflowName));
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return findSingle(criteria);
 	}
 

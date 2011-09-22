@@ -80,12 +80,12 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 				&& (!view.getValidateConfidenceTextBox().validate() || !view.getValidateDescriptionTextBox().validate() || !view
 						.getValidateNameTextBox().validate())) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 		if (validFlag && (controller.isAdd() && controller.getBatchClass().checkDocumentTypeName(view.getName()))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.NAME_COMMON_ERROR)));
+					BatchClassManagementMessages.NAME_COMMON_ERROR));
 			validFlag = false;
 		}
 		if (validFlag) {
@@ -97,6 +97,7 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 			controller.getSelectedDocument().setDescription(view.getDescription());
 			controller.getSelectedDocument().setRspProjectFileName(view.getRecostarExtraction());
 			controller.getSelectedDocument().setMinConfidenceThreshold(Float.parseFloat(view.getConfidence()));
+			controller.getSelectedDocument().setHidden(view.isHidden());
 			controller.getMainPresenter().getDocumentTypeViewPresenter().bind();
 			controller.getMainPresenter().getDocumentTypeViewPresenter().showDocumentTypeView();
 			if (controller.getSelectedDocument().isNew()) {
@@ -128,7 +129,7 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 			view.setName(controller.getSelectedDocument().getName());
 			view.setConfidence(String.valueOf(controller.getSelectedDocument().getMinConfidenceThreshold()));
 			view.getNameTextBox().setReadOnly(!controller.getSelectedDocument().isNew());
-
+			view.setHidden(controller.getSelectedDocument().isHidden());
 			view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
 			view.getValidateConfidenceTextBox().addValidator(new EmptyStringValidator(view.getConfidenceTextBox()));
 			view.getValidateDescriptionTextBox().addValidator(new EmptyStringValidator(view.getDescriptionTextBox()));

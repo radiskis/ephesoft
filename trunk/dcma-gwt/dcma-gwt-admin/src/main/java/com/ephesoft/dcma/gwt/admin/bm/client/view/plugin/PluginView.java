@@ -56,17 +56,17 @@ public class PluginView extends View<PluginViewPresenter> {
 	}
 
 	@UiField
-	LayoutPanel viewEditPluginPanel;
+   LayoutPanel viewEditPluginPanel;
 
 	@UiField
-	PluginDetailView pluginDetailView;
+	protected PluginDetailView pluginDetailView;
 	@UiField
-	EditPluginView editPluginView;
+	protected EditPluginView editPluginView;
 	@UiField
-	PluginData pluginData;
+	protected PluginData pluginData;
 
 	@UiField
-	VerticalPanel pluginViewVerticalPanel;
+	protected VerticalPanel pluginViewVerticalPanel;
 
 	public VerticalPanel getPluginViewVerticalPanel() {
 		return pluginViewVerticalPanel;
@@ -77,22 +77,23 @@ public class PluginView extends View<PluginViewPresenter> {
 	}
 
 	@UiField
-	VerticalPanel pluginConfigVerticalPanel;
-	private Button edit;
-	private Label noResuleLabel;
+	protected VerticalPanel pluginConfigVerticalPanel;
+	private final Button edit;
+	private final Label noResuleLabel;
 
 	@UiField
-	CaptionPanel pluginDetailsCaptionPanel;
+	protected CaptionPanel pluginDetailsCaptionPanel;
 	@UiField
-	CaptionPanel pluginConfigurationCaptionPanel;
+	protected CaptionPanel pluginConfigurationCaptionPanel;
 
 	@UiField
-	VerticalPanel editButtonPanel;
+	protected VerticalPanel editButtonPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public PluginView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		edit = new Button();
 		noResuleLabel = new Label();
 		noResuleLabel.setText(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_FOUND));

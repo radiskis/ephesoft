@@ -77,6 +77,7 @@ public final class JavaCompiler {
 	 */
 	@SuppressWarnings("restriction")
 	public String compile(final String srcFiles[]) {
+		String errorStr = null;
 		final StringWriter err = new StringWriter();
 		final PrintWriter errPrinter = new PrintWriter(err);
 
@@ -84,7 +85,11 @@ public final class JavaCompiler {
 		final int resultCode = com.sun.tools.javac.Main.compile(args, errPrinter);
 
 		errPrinter.close();
-		return (resultCode == 0) ? null : err.toString();
+		
+		if(resultCode != 0) {
+			errorStr = err.toString();
+		}
+		return errorStr;
 	}
 
 	public String compile(final File srcFiles[]) {

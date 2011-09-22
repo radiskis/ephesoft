@@ -87,16 +87,16 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 
 	@Column(name = "sample_value")
 	private String sampleValue;
-	
+
 	@Column(name = "barcode_type")
 	private String barcodeType;
-	
+
 	@Column(name = "field_option_value_list")
-	private String fieldOptionValueList; 
-	
+	private String fieldOptionValueList;
+
 	@Column(name = "is_hidden", columnDefinition = "bit(1) default false")
 	private boolean isHidden;
-	
+
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "field_type_id")
@@ -105,10 +105,7 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "field_type_id")
-	private List<RegexValidation> regexValidation = new ArrayList<RegexValidation>();;
-
-	public FieldType() {
-	}
+	private List<RegexValidation> regexValidation = new ArrayList<RegexValidation>();
 
 	public DocumentType getDocType() {
 		return docType;
@@ -189,11 +186,11 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	public void setSampleValue(String sampleValue) {
 		this.sampleValue = sampleValue;
 	}
-	
+
 	public String getBarcodeType() {
 		return barcodeType;
 	}
-	
+
 	public void setBarcodeType(String barcodeType) {
 		this.barcodeType = barcodeType;
 	}
@@ -201,16 +198,15 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	public String getFieldOptionValueList() {
 		return fieldOptionValueList;
 	}
-	
+
 	public void setFieldOptionValueList(String fieldOptionValueList) {
 		this.fieldOptionValueList = fieldOptionValueList;
 	}
-		
+
 	public boolean isHidden() {
 		return isHidden;
 	}
 
-	
 	public void setHidden(boolean isHidden) {
 		this.isHidden = isHidden;
 	}
@@ -218,31 +214,24 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	/**
 	 * Removes a KV Extraction from the field type based on id (Used in same respect as identifier)
 	 * 
-	 * @param id the id corresponding to the KV Extraction
+	 * @param identifier the id corresponding to the KV Extraction
 	 * @return true if KV Extraction could be found and removed. False otherwise
 	 */
-	public boolean removeKvExtractionById(Long id) {
-
-		if (null == this.kvExtraction) {
-			return false;
-		}
-
-		int index = 0;
-		KVExtraction kvExt = null;
-		for (KVExtraction kvExtn : this.kvExtraction) {
-			if (id == kvExtn.getId()) {
-				kvExt = this.kvExtraction.get(index);
-				break;
+	public boolean removeKvExtractionById(Long identifier) {
+		boolean isRemoved = false;
+		if (null != this.kvExtraction) {
+			int index = 0;
+			KVExtraction kvExt = null;
+			for (KVExtraction kvExtn : this.kvExtraction) {
+				if (identifier == kvExtn.getId()) {
+					kvExt = this.kvExtraction.get(index);
+					isRemoved = this.kvExtraction.remove(kvExt);
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
-
-		if (null == kvExt) {
-			return false;
-		}
-
-		return this.kvExtraction.remove(kvExt);
-
+		return isRemoved;
 	}
 
 	/**
@@ -270,42 +259,33 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	 * @return KV Extraction if found. null otherwise
 	 */
 	public KVExtraction getKVExtractionbyIdentifier(String identifier) {
-
-		if (null == identifier || this.kvExtraction == null || this.kvExtraction.isEmpty()) {
-			return null;
-		}
-
-		for (KVExtraction kvExtraction : this.kvExtraction) {
-			if (String.valueOf(kvExtraction.getId()).equals(identifier)) {
-				return kvExtraction;
+		KVExtraction kvExtraction1 = null;
+		if (null != identifier && this.kvExtraction != null && !this.kvExtraction.isEmpty()) {
+			for (KVExtraction kvExtraction : this.kvExtraction) {
+				if (String.valueOf(kvExtraction.getId()).equals(identifier)) {
+					kvExtraction1 = kvExtraction;
+					break;
+				}
 			}
 		}
-
-		return null;
+		return kvExtraction1;
 	}
 
-	public boolean removeRegexValidationById(Long id) {
-
-		if (null == this.regexValidation) {
-			return false;
-		}
-
-		int index = 0;
-		RegexValidation removalElement = null;
-		for (RegexValidation actualElement : this.regexValidation) {
-			if (id == actualElement.getId()) {
-				removalElement = this.regexValidation.get(index);
-				break;
+	public boolean removeRegexValidationById(Long identifier) {
+		boolean isRemoved = false;
+		if (null != this.regexValidation) {
+			int index = 0;
+			RegexValidation removalElement = null;
+			for (RegexValidation actualElement : this.regexValidation) {
+				if (identifier == actualElement.getId()) {
+					removalElement = this.regexValidation.get(index);
+					isRemoved = this.regexValidation.remove(removalElement);
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
-
-		if (null == removalElement) {
-			return false;
-		}
-
-		return this.regexValidation.remove(removalElement);
-
+		return isRemoved;
 	}
 
 	public void addRegexValidation(RegexValidation regexValidation) {
@@ -318,18 +298,16 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	}
 
 	public RegexValidation getRegexValidationbyIdentifier(String identifier) {
-
-		if (null == identifier || this.regexValidation == null || this.regexValidation.isEmpty()) {
-			return null;
-		}
-
-		for (RegexValidation regexVdn : this.regexValidation) {
-			if (String.valueOf(regexVdn.getId()).equals(identifier)) {
-				return regexVdn;
+		RegexValidation regexValidation1 = null;
+		if (null != identifier && this.regexValidation != null && !this.regexValidation.isEmpty()) {
+			for (RegexValidation regexVdn : this.regexValidation) {
+				if (String.valueOf(regexVdn.getId()).equals(identifier)) {
+					regexValidation1 = regexVdn;
+					break;
+				}
 			}
 		}
 
-		return null;
+		return regexValidation1;
 	}
-
 }

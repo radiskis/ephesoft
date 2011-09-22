@@ -128,7 +128,7 @@ public class DocushareExportTest extends AbstractDocushareExportTest {
 	/**
 	 * Variable for property file.
 	 */
-	private transient Properties prop = new Properties();
+	private final transient Properties prop = new Properties();
 
 	/**
 	 * Method to initialize resources.

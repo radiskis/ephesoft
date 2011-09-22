@@ -41,33 +41,34 @@ public class BatchInstanceID implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String ID;
+	private final String identifier;
 
-	public BatchInstanceID(String ID) throws IllegalArgumentException {
-		if (ID == null) {
+	public BatchInstanceID(String identifier) throws IllegalArgumentException {
+		if (identifier == null) {
 			throw new IllegalArgumentException("null identifier not allowed");
 		}
-		this.ID = ID;
+		this.identifier = identifier;
 	}
 
 	public String getID() {
-		return ID;
+		return identifier;
 	}
-	
+
 	public String toString() {
-		return this.ID;
+		return this.identifier;
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof BatchInstanceID)) {
-			return false;
+		boolean isEquals = false;
+		if (obj instanceof BatchInstanceID) {
+			BatchInstanceID cidObj = (BatchInstanceID) obj;
+			isEquals = identifier.equals(cidObj.getID());
 		}
-		BatchInstanceID cidObj = (BatchInstanceID) obj;
-		return ID.equals(cidObj.getID());
+		return isEquals;
 	}
 
 	public int hashCode() {
-		return ID.hashCode();
+		return identifier.hashCode();
 	}
 
 }

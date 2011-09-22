@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.workflow.aspects;
 
+import java.io.File;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -42,20 +44,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
+import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
 @Aspect
 public class DCMAExceptionAspect {
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAExceptionAspect.class);
 
 	@Autowired
 	private BatchInstanceService batchInstanceService;
+
+	@Autowired
+	private BatchSchemaService batchSchemaService;
 
 	@Autowired
 	private WorkflowService workflowService;
@@ -65,8 +72,9 @@ public class DCMAExceptionAspect {
 		Object[] args = joinPoint.getArgs();
 		if (args[0] instanceof BatchInstanceID) {
 			final BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(args[0].toString());
-			if (batchInstance == null)
+			if (batchInstance == null) {
 				throw new Exception("Batch Instance can not be null to handle this aspect.");
+			}
 
 			if (batchInstance.getStatus() != BatchInstanceStatus.ERROR) {
 
@@ -74,7 +82,8 @@ public class DCMAExceptionAspect {
 
 					@Override
 					public void run() {
-						batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.ERROR);
+						batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(),
+								BatchInstanceStatus.ERROR);
 					}
 				};
 
@@ -82,9 +91,18 @@ public class DCMAExceptionAspect {
 				thread.start();
 
 				try {
+					// RESTART BATCH functionality changes.
+					// Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING					
+					String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator
+							+ batchInstance.getIdentifier() + File.separator + batchSchemaService.getThreadpoolLockFolderName();
+					File threadPoolLockFolder = new File(threadPoolLockFolderPath);
+					if(threadPoolLockFolder != null && threadPoolLockFolder.isDirectory()) {
+						boolean deleteSrcDir = false;
+						FileUtils.deleteDirectoryAndContentsRecursive(threadPoolLockFolder, deleteSrcDir);
+					}	
 					workflowService.mailOnError(batchInstance);
 				} catch (Exception mailExp) {
-					log.error("Some internal error occured during sending the mail. Check the mail configuration.", mailExp);
+					LOGGER.error("Some internal error occured during sending the mail. Check the mail configuration.", mailExp);
 				}
 			}
 		}

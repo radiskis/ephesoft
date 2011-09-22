@@ -41,9 +41,18 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.ModulePluginDao;
 import com.ephesoft.dcma.da.domain.ModulePlugin;
 
+/**
+ * This class is responsible to fetch data of module plugin table from data base.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 @Repository
 public class ModulePluginDaoImpl extends HibernateDao<ModulePlugin> implements ModulePluginDao {
 
-//	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	// module plugin table data access object implementation
 
+	public ModulePluginDaoImpl() {
+		super();
+	}
 }

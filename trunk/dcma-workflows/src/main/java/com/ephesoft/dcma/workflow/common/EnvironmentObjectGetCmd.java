@@ -46,7 +46,7 @@ public class EnvironmentObjectGetCmd implements Command<Object> {
 
 	private static final long serialVersionUID = 1L;
 
-	private Class<?> objClass;
+	private final Class<?> objClass;
 	
 	public <T> EnvironmentObjectGetCmd(Class<?> objClazz) {
 		this.objClass = objClazz;
@@ -54,8 +54,7 @@ public class EnvironmentObjectGetCmd implements Command<Object> {
 	
 	
 	public Object execute(Environment environment) throws Exception {
-		Object es = environment.get(objClass);
-		return es;
+		return environment.get(objClass);
 	}
 
 }

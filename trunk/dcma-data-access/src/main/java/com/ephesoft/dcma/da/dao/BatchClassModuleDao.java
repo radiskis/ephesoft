@@ -49,7 +49,7 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	 * @param batchClassId
 	 * @return Integer (count of modules)
 	 */
-	public Integer countModules(String batchClassIdentifier);
+	Integer countModules(String batchClassIdentifier);
 
 	/**
 	 * API to fetch List of modules corresponding to a batch class.
@@ -57,7 +57,7 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	 * @param batchClassId
 	 * @return List<Module>
 	 */
-	public List<Module> getBatchClassModule(String batchClassIdentifier);
+	List<Module> getBatchClassModule(String batchClassIdentifier);
 
 	/**
 	 * API to fetch Modules starting from firstIndex and as many results as MaxResults from a batch class.
@@ -67,7 +67,7 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	 * @param maxResults
 	 * @return List<Module>
 	 */
-	public List<Module> getModules(String batchClassIdentifier, final int firstIndex, final int maxResults);
+	List<Module> getModules(String batchClassIdentifier, final int firstIndex, final int maxResults);
 
 	/**
 	 * API to fetch the modules by name
@@ -76,8 +76,15 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	 * @param moduleName
 	 * @return
 	 */
-	public BatchClassModule getModuleByName(String batchClassIdentifier, String moduleName);
+	BatchClassModule getModuleByName(String batchClassIdentifier, String moduleName);
 
-	public BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName);
+	/**
+	 * API to fetch the modules by workflow name
+	 * 
+	 * @param batchClassIdentifier
+	 * @param workflowName
+	 * @return batch class module object
+	 */
+	BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName);
 
 }

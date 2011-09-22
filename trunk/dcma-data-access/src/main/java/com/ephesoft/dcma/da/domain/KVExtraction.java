@@ -107,10 +107,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	@Column(name = "y_offset")
 	private Integer yoffset;
 
-	
-	public KVExtraction() {
-	}
-
 	/**
 	 * @return the fieldType
 	 */

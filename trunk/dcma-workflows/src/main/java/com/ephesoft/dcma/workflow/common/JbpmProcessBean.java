@@ -71,7 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class JbpmProcessBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(JbpmProcessBean.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JbpmProcessBean.class);
 	
 	// name of jpdl.xml file
 	private String resourceName;
@@ -99,14 +99,14 @@ public class JbpmProcessBean {
 	@Transactional
 	public void initialize() {
 		// deploy process
-		logger.info(String.format("Deploying process with key %s ...",processKey));
+		LOGGER.info(String.format("Deploying process with key %s ...",processKey));
 		deploymentId = repositoryService.createDeployment()
 				.addResourceFromClasspath(resourceName).deploy();
 
 		// lookup processDefinitionId
-		ProcessDefinition pd = repositoryService.createProcessDefinitionQuery().deploymentId(deploymentId).uniqueResult();
-		logger.debug(String.format("Deployed process with ID:%s, Name:%s, Key:%s, Version:%s", pd.getId(), pd.getName(), pd.getKey(), pd.getVersion()));
-		processDefinitionId = pd.getId();
+		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deploymentId).uniqueResult();
+		LOGGER.debug(String.format("Deployed process with ID:%s, Name:%s, Key:%s, Version:%s", processDefinition.getId(), processDefinition.getName(), processDefinition.getKey(), processDefinition.getVersion()));
+		processDefinitionId = processDefinition.getId();
 	}
 	
 	/**
@@ -115,9 +115,9 @@ public class JbpmProcessBean {
 	@PreDestroy
 	public void destroy() {
 		// delete deployed process
-		logger.info(String.format("Deleting deployed process with key %s ...",processKey));
+		LOGGER.info(String.format("Deleting deployed process with key %s ...",processKey));
 		repositoryService.deleteDeploymentCascade(deploymentId);
-		logger.info("Process undeployed.");
+		LOGGER.info("Process undeployed.");
 	}
 	
 	/* 
@@ -193,38 +193,39 @@ public class JbpmProcessBean {
 		
 		boolean withVariables = variables != null;
 		boolean withBusinessKey = businessKey != null;
-		
+		ProcessInstance processInstance = null;
 		if(processKey != null) {
 			// START WITH PROCESS KEY
 			if(withBusinessKey && withVariables) { // start with business key AND variables 
-				logger.info(String.format("Starting process using process key %s and business key %s and variables ...", processKey, businessKey));
-				return executionService.startProcessInstanceByKey(processKey, variables, businessKey);
+				LOGGER.info(String.format("Starting process using process key %s and business key %s and variables ...", processKey, businessKey));
+				processInstance = executionService.startProcessInstanceByKey(processKey, variables, businessKey);
 			} else if(withBusinessKey) { // start with business key AND NO variables
-				logger.info(String.format("Starting process using process key %s and business key %s ...", processKey, businessKey));
-				return executionService.startProcessInstanceByKey(processKey, businessKey);
+				LOGGER.info(String.format("Starting process using process key %s and business key %s ...", processKey, businessKey));
+				processInstance = executionService.startProcessInstanceByKey(processKey, businessKey);
 			} else if(withVariables) { // start WITHOUT business key BUT WITH variables
-				logger.info(String.format("Starting process using process key %s and variables ...", processKey));
-				return executionService.startProcessInstanceByKey(processKey, variables);
+				LOGGER.info(String.format("Starting process using process key %s and variables ...", processKey));
+				processInstance = executionService.startProcessInstanceByKey(processKey, variables);
 			} else { // start WITHOUT business key AND WITHOUT variables
-				logger.info(String.format("Starting process using process key %s ...", processKey));
-				return executionService.startProcessInstanceByKey(processKey);
+				LOGGER.info(String.format("Starting process using process key %s ...", processKey));
+				processInstance = executionService.startProcessInstanceByKey(processKey);
 			}
 		} else {
 			// START WITH DEPLOYMENT ID
 			if(withBusinessKey && withVariables) { // start with business key AND variables 
-				logger.info(String.format("Starting process using deployment id %s and business key %s and variables ...", processDefinitionId, businessKey));
-				return executionService.startProcessInstanceById(processDefinitionId, variables, businessKey);
+				LOGGER.info(String.format("Starting process using deployment id %s and business key %s and variables ...", processDefinitionId, businessKey));
+				processInstance = executionService.startProcessInstanceById(processDefinitionId, variables, businessKey);
 			} else if(withBusinessKey) { // start with business key AND NO variables
-				logger.info(String.format("Starting process using deployment id %s and business key %s ...", deploymentId, businessKey));
-				return executionService.startProcessInstanceById(processDefinitionId, businessKey);
+				LOGGER.info(String.format("Starting process using deployment id %s and business key %s ...", deploymentId, businessKey));
+				processInstance = executionService.startProcessInstanceById(processDefinitionId, businessKey);
 			} else if(withVariables) { // start WITHOUT business key BUT WITH variables
-				logger.info(String.format("Starting process using deployment id %s and variables ...", deploymentId));
-				return executionService.startProcessInstanceById(processDefinitionId, variables);
+				LOGGER.info(String.format("Starting process using deployment id %s and variables ...", deploymentId));
+				processInstance = executionService.startProcessInstanceById(processDefinitionId, variables);
 			} else { // start WITHOUT business key AND WITHOUT variables
-				logger.info(String.format("Starting process using deployment id %s ...", deploymentId));
-				return executionService.startProcessInstanceById(processDefinitionId);
+				LOGGER.info(String.format("Starting process using deployment id %s ...", deploymentId));
+				processInstance = executionService.startProcessInstanceById(processDefinitionId);
 			}
 		}
+		return processInstance;
 	}
 	
 	/*
@@ -240,7 +241,7 @@ public class JbpmProcessBean {
 	 */
 	public Object getVariable(String processExecutionId, String variableName) {
 		Object varValue = executionService.getVariable(processExecutionId, variableName);
-		logger.debug(String.format("Value of variable name '%s': %s", variableName, varValue.toString()));
+		LOGGER.debug(String.format("Value of variable name '%s': %s", variableName, varValue.toString()));
 		return varValue;
 	}
 	
@@ -252,7 +253,7 @@ public class JbpmProcessBean {
 	 */
 	public Set<String> getVariableNames(String processExecutionId) {
 		Set<String> names = executionService.getVariableNames(processExecutionId);
-		logger.debug(String.format("Found %d variable names for process %s", names.size(), processExecutionId));
+		LOGGER.debug(String.format("Found %d variable names for process %s", names.size(), processExecutionId));
 		return names;
 	}
 	
@@ -265,7 +266,7 @@ public class JbpmProcessBean {
 	 */
 	public Map<String,Object> getVariables(String processExecutionId, Set<String> variableNames) {
 		Map<String,Object> vars = executionService.getVariables(processExecutionId, variableNames);
-		logger.debug(String.format("Found %d variables for process %s", vars.size(), processExecutionId));
+		LOGGER.debug(String.format("Found %d variables for process %s", vars.size(), processExecutionId));
 		return vars;
 	}
 

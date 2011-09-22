@@ -6,6 +6,12 @@ alter table kv_extraction modify column multiplier Float;
 
 alter table kv_page_process modify page_level_field_name varchar(100) not null default 'KV_Page_Process';
 
+delete from plugin_config_sample_value where sample_value = 'AutomaticClassification' and plugin_config_id in (select id from plugin_config where config_name='da.factory_classification');
+
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
+
+ALTER TABLE plugin_config_sample_value ADD UNIQUE (sample_value,plugin_config_id);
+
 INSERT INTO plugin(id, creation_date,last_modified,plugin_name,plugin_desc,plugin_version,workflow_name) VALUES (50, now(),now(),'REGULAR_REGEX_EXTRACTION','Regular Regex Extraction Plugin','1.0.0.0','Regular_Regex_Doc_Fields_Extraction_Plugin');
 
 /*ModuleUpdate*/
@@ -79,8 +85,6 @@ delete from plugin_config_sample_value where plugin_config_id in (select id from
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='NSI.final_xml_name');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.versions');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.confidence_score');
-delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
-
 
 delete from plugin_config where plugin_config.config_name='fuzzydb.query_delimiters';
 delete from plugin_config where plugin_config.config_name='createMultipageTif.export_process';
@@ -280,3 +284,51 @@ CREATE TABLE batch_class_module_config (
 	CONSTRAINT `FKE4C5156947189631` FOREIGN KEY (batch_class_module_id) REFERENCES batch_class_module (id),
 	CONSTRAINT `FKE4C51569E0DA1978` FOREIGN KEY (module_config_id) REFERENCES module_config (id)
 );
+
+
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL1(Ctrl+4)', b'0', 'validation.url(Ctrl+4)', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL2(Ctrl+7)', b'0', 'validation.url(Ctrl+7)', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL3(Ctrl+8)', b'0', 'validation.url(Ctrl+8)', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL4(Ctrl+9)', b'0', 'validation.url(Ctrl+9)', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'X Dimension', b'0', 'validation.x_dimension', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'Y Dimension', b'0', 'validation.y_dimension', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'External Application Switch', b'0', 'validation.external_app_switch', NULL);
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.external_app_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.external_app_switch'));
+
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'Tabbed PDF Plugin', 'TABBED_PDF', '1.0.0.0', 'Tabbed_Pdf_Plugin');
+
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract Switch',0,'tesseract.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Switch',0,'recostar.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Export Folder',0,'tabbedPdf.final_export_folder',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Switch',0,'tabbedPdf.switch',null);
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tesseract.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tesseract.switch'));
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.switch'));
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tabbedPdf.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tabbedPdf.switch'));
+
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound index field',0,'filebound.index_field',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound division',0,'filebound.division',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound separator',0,'filebound.separator',null);
+
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'CSV File Creation Plugin', 'CSV_FILE_CREATION_PLUGIN', '1.0.0.0', 'CSV_File_Creation_Plugin');
+
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Switch',0,'csvFileCreation.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Final Export Folder',0,'csvFileCreation.final_export_folder',null);
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='csvFileCreation.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='csvFileCreation.switch'));
+
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'XML for IBM CM Plugin', 'IBM_CM_PLUGIN', '1.0.0.0', 'IBM_CM_Plugin');
+
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Switch',0,'ibmCm.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Final Export Folder',0,'ibmCm.final_export_folder',null);
+
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='ibmCm.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='ibmCm.switch'));

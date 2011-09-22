@@ -84,7 +84,7 @@ public class KeyValueExtraction {
 	/**
 	 * LOGGER to print the logging information.
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(KeyValueExtraction.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(KeyValueExtraction.class);
 
 	/**
 	 * fieldService FieldService.
@@ -114,7 +114,7 @@ public class KeyValueExtraction {
 	/**
 	 * Default name for first page.
 	 */
-	private boolean isFirstFieldValue;
+	private boolean firstFieldValue;
 
 	/**
 	 * Reference of FieldTypeService.
@@ -131,7 +131,7 @@ public class KeyValueExtraction {
 	 * @return isFirstFieldValue boolean
 	 */
 	public final boolean isFirstFieldValue() {
-		return isFirstFieldValue;
+		return firstFieldValue;
 	}
 
 	/**
@@ -141,7 +141,7 @@ public class KeyValueExtraction {
 	 */
 
 	public final void setFirstFieldValue(final boolean isFirstFieldValue) {
-		this.isFirstFieldValue = isFirstFieldValue;
+		this.firstFieldValue = isFirstFieldValue;
 	}
 
 	/**
@@ -203,17 +203,17 @@ public class KeyValueExtraction {
 		String errMsg = null;
 		if (null == batchInstanceId) {
 			errMsg = "Invalid batchInstanceId.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
 		if (null == fieldTypeService) {
 			errMsg = "Invalid intialization of FieldService.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		logger.info("batchInstanceId : " + batchInstanceId);
+		LOGGER.info("batchInstanceId : " + batchInstanceId);
 
 		final Batch batch = batchSchemaService.getBatch(batchInstanceId);
 
@@ -223,16 +223,16 @@ public class KeyValueExtraction {
 			final List<Document> docTypeList = batch.getDocuments().getDocument();
 
 			if (null == docTypeList) {
-				logger.info("In valid batch documents.");
+				LOGGER.info("In valid batch documents.");
 			} else {
 				isSuccessful = processDocPage(docTypeList, batchInstanceId, batch);
 			}
 
 		} catch (DCMAApplicationException e) {
-			logger.error(e.getMessage());
+			LOGGER.error(e.getMessage());
 			throw new DCMAApplicationException(e.getMessage(), e);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			LOGGER.error(e.getMessage());
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 		return isSuccessful;
@@ -262,7 +262,7 @@ public class KeyValueExtraction {
 		for (Document document : xmlDocuments) {
 			final List<Page> pageList = document.getPages().getPage();
 			final String docTypeName = document.getType();
-			logger.info("docTypeName : " + docTypeName);
+			LOGGER.info("docTypeName : " + docTypeName);
 			// read all the extraction fields one by one to all the
 			// pages document.
 
@@ -273,7 +273,7 @@ public class KeyValueExtraction {
 
 			if (null == allFdTypes || allFdTypes.isEmpty()) {
 				errMsg = "No FieldType data found from data base for document type : " + docTypeName;
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				updtDocList.add(null);
 				isValidateDataList.add(null);
 				continue;
@@ -281,7 +281,7 @@ public class KeyValueExtraction {
 
 			final List<DocField> updtDocFdTyList = new ArrayList<DocField>();
 
-			logger.info("FieldType data found from data base for document type : " + docTypeName);
+			LOGGER.info("FieldType data found from data base for document type : " + docTypeName);
 
 			for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
 				final String key = fdType.getName();
@@ -301,9 +301,9 @@ public class KeyValueExtraction {
 					keyExtraction(updtDocFdType, alternateValues, pageList, fdType, batchInstanceID);
 					sortDocFdWithConfidence(updtDocFdType);
 				} catch (DCMAApplicationException dcma) {
-					logger.error(dcma.getMessage());
+					LOGGER.error(dcma.getMessage());
 				} catch (Exception e) {
-					logger.error(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 
 				if (!isFirstFieldValue()) {
@@ -325,7 +325,7 @@ public class KeyValueExtraction {
 
 		updateBatchXML(batchInstanceID, updtDocList, batch, isValidateDataList);
 
-		logger.info("All files are written.");
+		LOGGER.info("All files are written.");
 		return isSuccessful;
 	}
 
@@ -349,7 +349,7 @@ public class KeyValueExtraction {
 
 		if (null == kvExtractionList) {
 			final String errMsg = "No KVExtraction data found from data base for field type : " + key;
-			logger.info(errMsg);
+			LOGGER.info(errMsg);
 			return;
 		}
 
@@ -375,7 +375,7 @@ public class KeyValueExtraction {
 
 				HocrPage hocrPage = hocrPageList.get(0);
 
-				logger.info("HocrPage page ID : " + pageID);
+				LOGGER.info("HocrPage page ID : " + pageID);
 
 				List<OutputDataCarrier> valueFoundData = null;
 
@@ -389,7 +389,7 @@ public class KeyValueExtraction {
 				try {
 					valueFoundData = kvFinderService.findKeyValue(inputDataCarrierList, hocrPage, Integer.MAX_VALUE);
 				} catch (DCMAException e) {
-					logger.error(e.getMessage(), e);
+					LOGGER.error(e.getMessage(), e);
 				}
 
 				if (valueFoundData != null && !valueFoundData.isEmpty()) {
@@ -552,19 +552,19 @@ public class KeyValueExtraction {
 
 		if (null == batchInstanceId || KVExtractionConstants.EMPTY.equals(batchInstanceId)) {
 			errMsg = "Invalid argument batchInstanceId.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
 		if (null == isValidateDataList || isValidateDataList.isEmpty()) {
 			errMsg = "Invalid argument isValidateDataList.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
 		if (null == updtDocList || updtDocList.isEmpty()) {
 			errMsg = "Invalid argument DocFieldType.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
@@ -618,12 +618,12 @@ public class KeyValueExtraction {
 		// now write the state of the object to the xml file.
 		if (isWrite) {
 			batchSchemaService.updateBatch(batch);
-			logger.info("Document level fields are added" + " to the batch xml file.");
+			LOGGER.info("Document level fields are added" + " to the batch xml file.");
 		} else {
-			logger.info("Document level fields are not added" + " to the batch xml file.");
+			LOGGER.info("Document level fields are not added" + " to the batch xml file.");
 		}
 
-		logger.info("updateBatchXML done.");
+		LOGGER.info("updateBatchXML done.");
 
 	}
 

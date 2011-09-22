@@ -174,12 +174,12 @@ public class OpenOfficeConvertor implements SmartLifecycle, FileFormatConvertor 
 
 	public void setMaxTasksPerProcess(int maxTasksPerProcess) {
 		this.maxTasksPerProcess = maxTasksPerProcess;
-		logger.debug("" + this.maxTasksPerProcess);
+		logger.debug(Integer.valueOf(this.maxTasksPerProcess).toString());
 	}
 
 	public void setTaskExecutionTimeout(int taskExecutionTimeout) {
 		this.taskExecutionTimeout = taskExecutionTimeout;
-		logger.debug("" + this.taskExecutionTimeout);
+		logger.debug(Integer.valueOf(this.taskExecutionTimeout).toString());
 	}
 
 	public String getServer() {

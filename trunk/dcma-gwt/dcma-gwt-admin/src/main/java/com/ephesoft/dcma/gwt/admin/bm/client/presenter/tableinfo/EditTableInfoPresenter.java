@@ -65,7 +65,7 @@ public class EditTableInfoPresenter extends AbstractBatchClassPresenter<EditTabl
 				&& (!view.getValidateNameTextBox().validate() || !view.getValidateStartPatternTextBox().validate() || !view
 						.getValidateEndPatternTextBox().validate())) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 

@@ -62,7 +62,20 @@ import com.ephesoft.dcma.da.domain.PageType;
 @Repository
 public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String DOC_TYPE_IDENTIFIER = "docType.identifier";
+	private static final String NAME = "name";
+	private static final String DOC_TYPE_NAME = "docType.name";
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	private static final String BATCH_CLASS1_IDENTIFIER = "batchClass1.identifier";
+	private static final String BATCH_CLASS2_IDENTIFIER = "batchClass2.identifier";
+	private static final String BATCH_CLASS2 = "batchClass2";
+	private static final String BATCH_CLASS = "batchClass";
+	private static final String IDENTIFIER = "identifier";
+	private static final String BATCH_CLASS1 = "batchClass1";
+	private static final String DOC_TYPE_BATCH_CLASS = "docType.batchClass";
+	private static final String DOC_TYPE = "docType";
+	private static final String DOCUMENT_TYPE = "documentType : ";
+	private static final Logger LOGGER = LoggerFactory.getLogger(PageTypeDaoImpl.class);
 
 	/**
 	 * An api to fetch all page types by document type
@@ -72,9 +85,9 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	 */
 	@Override
 	public List<PageType> getPageTypesByDocumentType(DocumentType documentType) {
-		log.info("documentType : " + documentType);
+		LOGGER.info(DOCUMENT_TYPE + documentType);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("docType", documentType));
+		criteria.add(Restrictions.eq(DOC_TYPE, documentType));
 		return find(criteria);
 	}
 
@@ -87,14 +100,14 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	@Override
 	public List<PageType> getPageTypesByBatchInstanceID(String batchInstanceIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-		subQuery.setProjection(Projections.property("batchClass2.identifier"));
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
 
-		criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 
 		return find(criteria);
 	}
@@ -108,13 +121,13 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	@Override
 	public List<Object[]> getDocTypeNameAndPgTypeName(List<String> batchClassIdentifierList) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.RIGHT_OUTER_JOIN);
-		criteria.createAlias("docType.batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.in("batchClass.identifier", batchClassIdentifierList));
-		criteria.addOrder(Order.asc("batchClass.identifier"));
-		criteria.addOrder(Order.asc("docType.name"));
-		criteria.setProjection(Projections.projectionList().add(Projections.property("batchClass.identifier")).add(
-				Projections.property("docType.name")).add(Projections.property("name")));
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.RIGHT_OUTER_JOIN);
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifierList));
+		criteria.addOrder(Order.asc(BATCH_CLASS_IDENTIFIER));
+		criteria.addOrder(Order.asc(DOC_TYPE_NAME));
+		criteria.setProjection(Projections.projectionList().add(Projections.property(BATCH_CLASS_IDENTIFIER)).add(
+				Projections.property(DOC_TYPE_NAME)).add(Projections.property(NAME)));
 		return find(criteria);
 	}
 
@@ -128,15 +141,15 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	@Override
 	public List<PageType> getPageTypeByName(String name, String batchInstanceIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", name));
+		criteria.add(Restrictions.eq(NAME, name));
 		if (null != batchInstanceIdentifier) {
-			criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-			criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+			criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+			criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 			DetachedCriteria subQuery = criteria(BatchInstance.class);
-			subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-			subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-			subQuery.setProjection(Projections.property("batchClass2.identifier"));
-			criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+			subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+			subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+			subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
+			criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 		}
 		return find(criteria);
 	}
@@ -150,8 +163,8 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	@Override
 	public List<PageType> getPageTypeByDocTypeName(String docTypeName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
 		return find(criteria);
 	}
 
@@ -166,8 +179,8 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	@Override
 	public List<PageType> getPageTypes(String documentTypeIdentifier, int startResult, int maxResult) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.identifier", documentTypeIdentifier));
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_IDENTIFIER, documentTypeIdentifier));
 		return find(criteria, startResult, maxResult);
 	}
 

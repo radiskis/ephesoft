@@ -103,13 +103,13 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	/**
 	 * An api to fetch BatchClass by id.
 	 * 
-	 * @param id Serializable
+	 * @param identifier Serializable
 	 * @return BatchClass
 	 */
 	@Transactional(readOnly = true)
 	@Override
-	public BatchClass get(Serializable id) {
-		return batchClassDao.getBatchClassByIdentifier((String) id);
+	public BatchClass get(Serializable identifier) {
+		return batchClassDao.getBatchClassByIdentifier((String) identifier);
 	}
 
 	/**
@@ -225,42 +225,42 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	public synchronized BatchClass acquireBatchClass(String batchClassIdentifier, String currentUser)
 			throws BatchAlreadyLockedException {
 		BatchClass batchClass = null;
-		if (null == batchClassIdentifier) {
-			LOGGER.warn("batchClassID id is null.");
-			return null;
-		}
-		batchClass = getBatchClassByIdentifier(batchClassIdentifier);
-		if (!currentUser.equals(batchClass.getCurrentUser()) && batchClass.getCurrentUser() != null) {
-			throw new BatchAlreadyLockedException("Batch Class " + batchClass + " is already locked by " + batchClass.getCurrentUser());
-		} else {
-			// Updating the state of the batch to locked and saving in the
-			// database.
-			LOGGER.info("" + currentUser + " is getting lock on batch " + batchClassIdentifier);
-			if (!currentUser.trim().isEmpty()) {
-				batchClass.setCurrentUser(currentUser);
+		if (null != batchClassIdentifier) {
+			batchClass = getBatchClassByIdentifier(batchClassIdentifier);
+			if (!currentUser.equals(batchClass.getCurrentUser()) && batchClass.getCurrentUser() != null) {
+				throw new BatchAlreadyLockedException("Batch Class " + batchClass + " is already locked by "
+						+ batchClass.getCurrentUser());
+			} else {
+				// Updating the state of the batch to locked and saving in the
+				// database.
+				LOGGER.info(currentUser + " is getting lock on batch " + batchClassIdentifier);
+				if (!currentUser.trim().isEmpty()) {
+					batchClass.setCurrentUser(currentUser);
+				}
+				batchClassDao.updateBatchClass(batchClass);
 			}
-			batchClassDao.updateBatchClass(batchClass);
-			return batchClass;
+		} else {
+			LOGGER.warn("batchClassID id is null.");
 		}
-
+		return batchClass;
 	}
 
 	@Transactional
 	@Override
 	public void unlockAllBatchClassesForCurrentUser(String currentUser) {
-		if (currentUser == null || currentUser.isEmpty()) {
+		if (currentUser != null && !currentUser.isEmpty()) {
+			List<BatchClass> batchClassList = batchClassDao.getAllBatchClassesForCurrentUser(currentUser);
+			if (batchClassList != null && !batchClassList.isEmpty()) {
+				for (BatchClass batchClass : batchClassList) {
+					LOGGER.info("Unlocking batches for " + currentUser);
+					batchClass.setCurrentUser(null);
+					batchClassDao.updateBatchClass(batchClass);
+				}
+			} else {
+				LOGGER.warn("No batches exist for the username " + currentUser);
+			}
+		} else {
 			LOGGER.warn("Username not specified or is Null. Returning.");
-			return;
-		}
-		List<BatchClass> batchClassList = batchClassDao.getAllBatchClassesForCurrentUser(currentUser);
-		if (batchClassList == null || batchClassList.isEmpty()) {
-			LOGGER.warn("No batches exist for the username " + currentUser);
-			return;
-		}
-		for (BatchClass batchClass : batchClassList) {
-			LOGGER.info("Unlocking batches for " + currentUser);
-			batchClass.setCurrentUser(null);
-			batchClassDao.updateBatchClass(batchClass);
 		}
 	}
 
@@ -311,17 +311,18 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 
 	@Override
 	@Transactional
-	public void delete(Serializable id) {
-		BatchClass object = batchClassDao.get(id);
+	public void delete(Serializable identifier) {
+		BatchClass object = batchClassDao.get(identifier);
 		batchClassDao.remove(object);
 	}
 
 	@Override
 	@Transactional
 	public BatchClass createBatchClass(BatchClass batchClass) {
-		batchClass = batchClassDao.merge(batchClass);
+		BatchClass batchClass1 = null;
+		batchClass1 = batchClassDao.merge(batchClass);
 		applicationContext.publishEvent(new NewBatchClassEvent(applicationContext, new BatchClassID(batchClass.getIdentifier())));
-		return batchClass;
+		return batchClass1;
 	}
 
 	@Override
@@ -360,7 +361,8 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	@Override
 	@Transactional
 	public List<String> getAssociatedUNCList(String workflowName) {
-		List<String> uncFolderList = batchClassDao.getAllAssociatedUNCFolders(workflowName);
+		List<String> uncFolderList = null;
+		uncFolderList = batchClassDao.getAllAssociatedUNCFolders(workflowName);
 		return uncFolderList;
 	}
 
@@ -373,7 +375,7 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 			for (BatchClassModule mod : batchClass.getBatchClassModules()) {
 				for (BatchClassModuleConfig importConfig : mod.getBatchClassModuleConfig()) {
 					if (LOGGER.isDebugEnabled() && importConfig != null) {
-						// LOGGER.debug(importConfig.getChildDisplayName());
+						LOGGER.debug(importConfig.toString());
 					}
 				}
 			}
@@ -482,7 +484,8 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	@Override
 	@Transactional
 	public BatchClass createBatchClassWithoutWatch(BatchClass batchClass) {
-		batchClass = batchClassDao.merge(batchClass);
-		return batchClass;
+		BatchClass batchClass1 = null;
+		batchClass1 = batchClassDao.merge(batchClass);
+		return batchClass1;
 	}
 }

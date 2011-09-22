@@ -48,14 +48,14 @@ public class DocumentTypeListView extends View<DocumentTypeListPresenter> {
 		return listView;
 	}
 
-	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 10);
+	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 30);
 	public HeaderColumn description = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.DESCRIPTION), 30);
-
+	public HeaderColumn isHidden = new HeaderColumn(3,"Hidden" , 20);
 	public ListView listView = new ListView();
 
 	public DocumentTypeListView() {
 		super();
-		listView.addHeaderColumns(name, description);
+		listView.addHeaderColumns(name, description,isHidden);
 	}
 }

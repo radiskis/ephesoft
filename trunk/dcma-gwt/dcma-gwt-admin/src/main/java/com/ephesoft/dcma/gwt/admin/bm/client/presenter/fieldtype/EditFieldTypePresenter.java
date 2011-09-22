@@ -77,7 +77,7 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 			} catch (NumberFormatException nfe) {
 				validFlag = false;
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						(BatchClassManagementMessages.NUMBER_ERROR))
+						BatchClassManagementMessages.NUMBER_ERROR)
 						+ " " + view.getFdOrderLabel().getText().subSequence(0, view.getFdOrderLabel().getText().length() - 1));
 			}
 		}
@@ -104,13 +104,13 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 				&& (!view.getValidatePatternTextBox().validate() || !view.getValidateDescriptionTextBox().validate()
 						|| !view.getValidateNameTextBox().validate() || !view.getValidateFdOrderTextBox().validate())) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.BLANK_ERROR)));
+					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
 
 		if (validFlag && (controller.isAdd() && controller.getSelectedDocument().checkFieldTypeName(view.getName()))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					(BatchClassManagementMessages.NAME_COMMON_ERROR)));
+					BatchClassManagementMessages.NAME_COMMON_ERROR));
 			validFlag = false;
 		}
 

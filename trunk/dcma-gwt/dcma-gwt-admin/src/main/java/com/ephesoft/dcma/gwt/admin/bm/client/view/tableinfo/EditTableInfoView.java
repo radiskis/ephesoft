@@ -59,30 +59,30 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 	}
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 	@UiField
-	Label nameStar;
+	protected Label nameStar;
 	@UiField
-	TextBox name;
+	protected TextBox name;
 
 	@UiField
-	Label startPatternLabel;
+	protected Label startPatternLabel;
 	@UiField
-	Label startPatternStar;
+	protected Label startPatternStar;
 	@UiField
-	TextBox startPattern;
+	protected TextBox startPattern;
 
 	@UiField
-	Label endPatternLabel;
+	protected Label endPatternLabel;
 	@UiField
-	Label endPatternStar;
+	protected Label endPatternStar;
 	@UiField
-	TextBox endPattern;
+	protected TextBox endPattern;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateStartPatternTextBox;
@@ -90,12 +90,13 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 	
 
 	@UiField
-	VerticalPanel editTableInfoViewPanel;
+	protected VerticalPanel editTableInfoViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditTableInfoView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
@@ -147,12 +148,12 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 

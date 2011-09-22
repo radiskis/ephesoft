@@ -54,6 +54,7 @@ public class RegexListView extends View<RegexListPresenter> {
 	public ListView listView = new ListView();
 
 	public RegexListView() {
+		super();
 		listView.addHeaderColumns(pattern,blank);
 	}
 }

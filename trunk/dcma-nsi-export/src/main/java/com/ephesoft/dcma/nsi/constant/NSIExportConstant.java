@@ -42,28 +42,28 @@ package com.ephesoft.dcma.nsi.constant;
  * @version 1.0
  */
 public interface NSIExportConstant {
-	
+
 	String HOURS = "hours";
-	
+
 	String DATE = "date";
-	
+
 	String COLON = ":";
-	
+
 	String HYPEN = "-";
-	
+
 	String NSI_PLUGIN_NAME = "NSI_EXPORT";
-	
+
 	String TIME_ZONE_ID = "Europe/Madrid";
-	
+
 	String BATCH_XML = "_batch.xml";
-	
+
 	String DAT_WITH_DOT_EXTENSION = ".dat";
-	
+
 	String TIF_WITH_DOT_EXTENSION = ".tif";
-	
+
 	String IMAGE_FOLDER_NAME = "images";
-	
+
 	String EXPORT_FOLDER_PATH = "nsiExportPath";
-	
+
 	String BASE_DOC_FOLDER_PATH = "nsiBasePath";
 }

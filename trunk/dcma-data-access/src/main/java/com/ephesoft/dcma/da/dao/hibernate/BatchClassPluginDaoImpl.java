@@ -39,8 +39,18 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.BatchClassPluginDao;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 
+/**
+ * This class is responsible to fetch data of batch class plugin table from data base.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class BatchClassPluginDaoImpl extends HibernateDao<BatchClassPlugin> implements BatchClassPluginDao {
 
-	// private final Logger log = LoggerFactory.getLogger(this.getClass());
+	//Empty Constructor.
+		public BatchClassPluginDaoImpl() {
+			super();
+	}
 
 }
+	

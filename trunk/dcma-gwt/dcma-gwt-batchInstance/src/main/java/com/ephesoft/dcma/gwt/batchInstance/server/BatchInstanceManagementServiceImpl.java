@@ -286,7 +286,25 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 	}
 
 	@Override
+	public Results updateBatchInstanceStatus(String identifier, BatchInstanceStatus biStatus) throws GWTException {
+		Results result = Results.FAILURE;
+		try {
+			if (identifier != null) {
+				BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+				batchInstanceService.updateBatchInstanceStatusByIdentifier(identifier, BatchInstanceStatus.RESTART_IN_PROGRESS);
+			}
+		} catch (Exception e) {
+			result = Results.FAILURE;
+			log.error("Error in updating batch instance status" + e.getMessage(), e);
+			throw new GWTException(e.getMessage());
+		}
+		
+		return result;
+	}
+
+	@Override
 	public Results restartBatchInstance(String identifier, String moduleName) throws GWTException {
+		JbpmService jbpmService = null;
 		Results result = Results.FAILURE;
 		if (identifier != null) {
 			BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
@@ -294,29 +312,34 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 			BatchClassModuleService batchClassModuleService = this.getSingleBeanOfType(BatchClassModuleService.class);
 			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(identifier);
-			if (batchInstance != null && batchClassService != null && batchSchemaService != null && batchClassModuleService != null) {
+			if (batchInstance != null && batchClassService != null && batchSchemaService != null && batchClassModuleService != null
+					&& batchInstanceService != null) {
+
 				result = Results.SUCCESSFUL;
 				try {
-					// check if all threads associated with the current batch have completed.
-
 					String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + identifier
 							+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
-					while (true) {
-						String fileNameList[] = new File(threadPoolLockFolderPath).list();
-						if (fileNameList != null && fileNameList.length == 0) {
-							break;
+					File threadPoolLockFolder = new File(threadPoolLockFolderPath);
+					if(threadPoolLockFolder.exists() && threadPoolLockFolder.isDirectory()) {
+						while (true) {
+							String fileNameList[] = threadPoolLockFolder.list();
+							if (fileNameList != null && fileNameList.length == 0) {
+								break;
+							}
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException ie) {
+								log.error("Error in restarting batch instance " + ie.getMessage(), ie);
+								result = Results.FAILURE;
+								throw new GWTException(ie.getMessage());
+							}
 						}
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException ie) {
-							log.error("Error in restarting batch instance " + ie.getMessage(), ie);
-							result = Results.FAILURE;
-							throw new GWTException(ie.getMessage());
-						}
+						
 					}
-					JbpmService jbpmService = this.getSingleBeanOfType(JbpmService.class);
+					
+					jbpmService = this.getSingleBeanOfType(JbpmService.class);
 					jbpmService.deleteProcessInstance(batchInstance.getProcessInstanceKey());
-
+					
 					if (moduleName == null) {
 						if (batchInstance.getRemoteBatchInstance() != null) {
 							moduleName = batchInstance.getRemoteBatchInstance().getSourceModule();
@@ -329,47 +352,41 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 						deleteBatchFolder(batchInstance);
 						moduleName = BatchInstanceConstants.FOLDER_IMPORT_MODULE;
 					}
-
+					
 					WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
 					String activeModule = workflowService.getActiveModule(batchInstance);
-
-					String executedModules = batchInstance.getExecutedModules();
-					if (executedModules != null) {
-						String batchClassIdentifier = batchInstanceService.getBatchClassIdentifier(identifier);
-						if (batchClassIdentifier != null) {
-							BatchClassModule batchClassModuleItem = batchClassModuleService.getBatchClassModuleByWorkflowName(
-									batchClassIdentifier, moduleName);
-							BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassIdentifier);
-							List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
-							if (null != batchClassModules) {
-								for (BatchClassModule batchClassModule : batchClassModules) {
-									if (batchClassModule != null && batchClassModule.getModule() != null) {
-										if (batchClassModule.getOrderNumber() >= batchClassModuleItem.getOrderNumber()) {
-											String replaceText = batchClassModule.getModule().getId()
-													+ BatchInstanceConstants.SEMICOLON;
-											executedModules = executedModules.replace(replaceText, BatchInstanceConstants.EMPTY_VALUE);
+					String executedModules = "";
+					if (moduleName != null) {
+						executedModules = batchInstance.getExecutedModules();
+						if (executedModules != null) {
+							String batchClassIdentifier = batchInstanceService.getBatchClassIdentifier(identifier);
+							if (batchClassIdentifier != null) {
+								BatchClassModule batchClassModuleItem = batchClassModuleService.getBatchClassModuleByWorkflowName(
+										batchClassIdentifier, moduleName);
+								BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassIdentifier);
+								List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
+								if (null != batchClassModules) {
+									for (BatchClassModule batchClassModule : batchClassModules) {
+										if (batchClassModule != null && batchClassModule.getModule() != null) {
+											if (batchClassModule.getOrderNumber() >= batchClassModuleItem.getOrderNumber()) {
+												String replaceText = batchClassModule.getModule().getId()
+														+ BatchInstanceConstants.SEMICOLON;
+												executedModules = executedModules.replace(replaceText,
+														BatchInstanceConstants.EMPTY_VALUE);
+											}
 										}
 									}
 								}
 							}
 						}
+					} else {
+						executedModules = "";
 					}
-					/*
-					 * if (moduleName != null) { if (batchInstance != null && batchInstance.getExecutedModules() != null) { String
-					 * batchClassIdentifier = batchInstanceService.getBatchClassIdentifier(identifier); if (batchClassIdentifier !=
-					 * null) { String moduleNameValue = moduleName.replace("_", " "); BatchClass batchClass =
-					 * batchClassService.getBatchClassByIdentifier(batchClassIdentifier); List<BatchClassModule> batchClassModules =
-					 * batchClass.getBatchClassModules(); for (BatchClassModule batchClassModule : batchClassModules) { if
-					 * (!batchClassModule.getModule().getName().equalsIgnoreCase(moduleNameValue)) { if (executedModules == null) { if
-					 * (batchInstance.getExecutedModules().contains( batchClassModule.getModule().getId() +
-					 * BatchInstanceConstants.SEMICOLON)) { executedModules = batchClassModule.getModule().getId() +
-					 * BatchInstanceConstants.SEMICOLON; } } else { if (batchInstance.getExecutedModules().contains(
-					 * batchClassModule.getModule().getId() + BatchInstanceConstants.SEMICOLON)) { executedModules = executedModules +
-					 * batchClassModule.getModule().getId() + BatchInstanceConstants.SEMICOLON; } } } else { break; } } } } }
-					 */
-
+					
+					batchInstance = batchInstanceService.getBatchInstanceByIdentifier(identifier);
 					batchInstance.setExecutedModules(executedModules);
-					batchInstanceService.updateBatchInstance(batchInstance);
+					//log.error("****Explicit message for StaleException Check:*******" + identifier);
+					batchInstance = batchInstanceService.merge(batchInstance);
 
 					if (activeModule != null && activeModule.contains(BatchInstanceConstants.WORKFLOW_CONTINUE_CHECK)) {
 						log.error("Error in restarting batch instance.");
@@ -380,6 +397,12 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 				} catch (Exception e) {
 					result = Results.FAILURE;
 					log.error("Error in restarting batch instance " + e.getMessage(), e);
+					
+					// update the batch instance to ERROR state.
+					if(jbpmService != null) {
+						jbpmService.deleteProcessInstance(batchInstance.getProcessInstanceKey());
+					}
+					batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.ERROR);
 					throw new GWTException(e.getMessage());
 				}
 			}

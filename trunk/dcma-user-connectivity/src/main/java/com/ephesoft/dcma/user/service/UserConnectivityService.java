@@ -52,12 +52,12 @@ public interface UserConnectivityService {
 	 * 
 	 * @return Set<String> if result is found else return null
 	 */
-	public Set<String> getAllGroups();
+	Set<String> getAllGroups();
 
 	/**
 	 * This method is used to return set of string of all the users.
 	 * 
 	 * @return Set<String> if result is found else return null
 	 */
-	public Set<String> getAllUser();
+	Set<String> getAllUser();
 }

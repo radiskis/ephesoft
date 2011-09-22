@@ -118,7 +118,9 @@ var rvConstants = {
 	name_of_app_shortcut_ctrl_4 : "App1",
 	name_of_app_shortcut_ctrl_7 : "App2",
 	name_of_app_shortcut_ctrl_8 : "App3",
-	name_of_app_shortcut_ctrl_9 : "App4"
+	name_of_app_shortcut_ctrl_9 : "App4",
+	modal_window_shortcuts : "Modal Window Shortcuts",
+	function_key_shortcuts : "Function Key Shortcuts"
 };
 
 var rvMessages = {
@@ -297,7 +299,9 @@ var rvConstants_tk = {
 	name_of_app_shortcut_ctrl_4 : "App1",
 	name_of_app_shortcut_ctrl_7 : "App2",
 	name_of_app_shortcut_ctrl_8 : "App3",
-	name_of_app_shortcut_ctrl_9 : "App4"
+	name_of_app_shortcut_ctrl_9 : "App4",
+	modal_window_shortcuts : "Kalıcı Window Kısayolları",
+	function_key_shortcuts : "İşlev Tuşu Kısayolları"
 };
 
 var rvMessages_tk = {

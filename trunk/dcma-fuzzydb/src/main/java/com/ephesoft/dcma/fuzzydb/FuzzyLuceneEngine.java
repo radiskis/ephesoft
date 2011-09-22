@@ -98,6 +98,8 @@ import com.ephesoft.dcma.da.service.PageTypeService;
 public class FuzzyLuceneEngine implements ICommonConstants {
 
 	private static final String FUZZYDB_PLUGIN = "FUZZYDB";
+	private static final String COLUMN_NAME_ERROR_MSG = "Unable to fetch column names from DB";
+	private static final String CONFIDENCE_ERROR_MSG = "Problem generating confidence score for Document :  ";
 	private static final String SPACE_DELIMITER = " ";
 	private static final String QUERY_STRING_DELIMITER = ":";
 	public static final String TIMESTAMP_NAME = "Timestamp";
@@ -263,12 +265,6 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	}
 
 	/**
-	 * Default constructor.
-	 */
-	public FuzzyLuceneEngine() {
-	}
-
-	/**
 	 * This method is used to generate the indexes for the tables mapped for each document type in database. The indexes are stored in
 	 * a hierarchical structure: batch class id >> database name >> table name.
 	 * 
@@ -289,7 +285,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			String dateFormat = properties.get(FuzzyDBProperties.FUZZYDB_DATE_FORMAT.getPropertyKey());
 			String dbName = "";
 			if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-				dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf("/") + 1, dbConnectionURL.length());
+				dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
 			}
 			LOGGER.info("Properties fetched successfully from DB");
 			String baseFuzzyIndexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
@@ -360,37 +356,38 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	public List<Object[]> fetchDataForRow(int rowId, String tableName, String dbConnectionURL, String dbName, String dbDriver,
 			String dbUserName, String dbPassword, BatchDynamicPluginConfiguration eachConfig) throws DCMAApplicationException {
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
+		List<Object[]> dataList = null;
 		if (eachConfig != null) {
 			allColumnNames = eachConfig.getChildren();
 			if (allColumnNames != null && !allColumnNames.isEmpty()) {
 				DynamicHibernateDao dynamicHibernateDao = new DynamicHibernateDao(dbUserName, dbPassword, dbDriver, dbConnectionURL);
-				String dbQuery = "select ";
+				StringBuffer dbQuery = new StringBuffer("select ");
 				int count = 0;
 				String retrunFieldName = "id";
 				if (allColumnNames != null && !allColumnNames.isEmpty()) {
 					for (BatchDynamicPluginConfiguration eachColumn : allColumnNames) {
 						count++;
 						if (count < allColumnNames.size()) {
-							dbQuery +="`"+ eachColumn.getValue()+"`,";
+							dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`,"));
 						} else {
-							dbQuery +="`" + eachColumn.getValue() + "`";
+							dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`"));
 						}
 						if (eachColumn.getKey().equalsIgnoreCase(rowID)) {
-							retrunFieldName ="`" +eachColumn.getValue() + "`";
+							retrunFieldName = "`" + eachColumn.getValue() + "`";
 						}
 					}
 				} else {
-					LOGGER.info("Unable to fetch column names from DB");
-					throw new DCMAApplicationException("Unable to fetch column names from DB");
+					LOGGER.info(COLUMN_NAME_ERROR_MSG);
+					throw new DCMAApplicationException(COLUMN_NAME_ERROR_MSG);
 				}
-				dbQuery += " from " + tableName + " where " + retrunFieldName + " = " + rowId;
-				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery);
-				List<Object[]> dataList = query.list();
+				dbQuery.append(" from ").append(tableName).append(" where ").append(retrunFieldName).append(" = ").append(rowId);
+				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
+				dataList = query.list();
 				dynamicHibernateDao.closeSession();
-				return dataList;
+
 			}
 		}
-		return null;
+		return dataList;
 	}
 
 	/**
@@ -413,12 +410,13 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			String dbName, String dbDriver, String dbUserName, String dbPassword, BatchDynamicPluginConfiguration eachConfig,
 			boolean isHeaderAdded) throws DCMAApplicationException {
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
-		List<List<String>> extractedData = new ArrayList<List<String>>();
+		List<List<String>> extractedData = null;
 		if (eachConfig != null) {
+			extractedData = new ArrayList<List<String>>();
 			allColumnNames = eachConfig.getChildren();
 			if (allColumnNames != null && !allColumnNames.isEmpty()) {
 				DynamicHibernateDao dynamicHibernateDao = new DynamicHibernateDao(dbUserName, dbPassword, dbDriver, dbConnectionURL);
-				String dbQuery = "select ";
+				StringBuffer dbQuery = new StringBuffer("select ");
 				int count = 0;
 				String retrunFieldName = "id";
 
@@ -428,9 +426,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						list.add(eachColumn.getDescription());
 						count++;
 						if (count < allColumnNames.size()) {
-							dbQuery += "`" + eachColumn.getValue() + "`,";
+							dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`,"));
 						} else {
-							dbQuery += "`" + eachColumn.getValue() + "`";
+							dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`"));
 						}
 						if (eachColumn.getKey().equalsIgnoreCase(rowID)) {
 							retrunFieldName = "`" + eachColumn.getValue() + "`";
@@ -441,19 +439,20 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						extractedData.add(list);
 					}
 				} else {
-					LOGGER.info("Unable to fetch column names from DB");
-					throw new DCMAApplicationException("Unable to fetch column names from DB");
+					LOGGER.info(COLUMN_NAME_ERROR_MSG);
+					throw new DCMAApplicationException(COLUMN_NAME_ERROR_MSG);
 				}
-				dbQuery += " from " + tableName + " where " + retrunFieldName + " = " + rowId;
-				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery);
+				dbQuery.append(new StringBuffer(" from ")).append(tableName).append(new StringBuffer(" where ")).append(retrunFieldName).append(new StringBuffer(" = ")).append(rowId);
+				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 				List<Object[]> dataList = query.list();
 
 				if (null != dataList) {
 					for (Object[] obj : dataList) {
 						List<String> list = new ArrayList<String>();
 						for (Object object : obj) {
-							if (object == null)
-								object = new String(" ");
+							if (object == null) {
+								object = new StringBuffer(" ");
+							}
 							list.add(object.toString());
 						}
 						list.add(confidenceScore);
@@ -461,10 +460,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					}
 				}
 				dynamicHibernateDao.closeSession();
-				return extractedData;
 			}
 		}
-		return null;
+		return extractedData;
 	}
 
 	/**
@@ -511,7 +509,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	public List<String> fetchAllRecordsToBeIndexed(String tableName, String dbConnectionURL, String dbName, String dbDriver,
 			String dbUserName, String dbPassword, String dateFormat, BatchDynamicPluginConfiguration eachConfig)
 			throws DCMAApplicationException {
-		List<String> returnList = new ArrayList<String>();
+		List<String> returnList = null;
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
 		if (eachConfig != null) {
 			allColumnNames = eachConfig.getChildren();
@@ -523,15 +521,15 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 				} catch (SQLException e) {
 					LOGGER.info("Could not find Column names from table : " + tableName);
 				}
-				String dbQuery = "select ";
+				StringBuffer dbQuery = new  StringBuffer("select ");
 				int count = 0;
 				List<Integer> dateColIndex = new ArrayList<Integer>();
 				for (BatchDynamicPluginConfiguration eachColumn : allColumnNames) {
 					count++;
 					if (count < allColumnNames.size()) {
-						dbQuery += "`" + eachColumn.getValue() + "`,";
+						dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`,"));
 					} else {
-						dbQuery += "`" + eachColumn.getValue() + "`";
+						dbQuery.append(new StringBuffer("`")).append(eachColumn.getValue()).append(new StringBuffer("`"));
 					}
 					String colDataType = getColumnDataType(eachColumn.getValue(), colNames);
 					if (colDataType != null
@@ -539,19 +537,20 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						dateColIndex.add(count);
 					}
 				}
-				dbQuery += " from " + tableName;
-				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery);
+				dbQuery.append(new StringBuffer(" from ")).append(tableName);
+				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 				List<Object[]> dataList = query.list();
 
-				String dbRow = "";
+				StringBuffer dbRow = new StringBuffer("");
 				int indexCount = 0;
 				if (dataList != null && !dataList.isEmpty()) {
+					returnList = new ArrayList<String>();
 					if (dataList.size() > 1) {
 						LOGGER.info("More than One records found. So picking first record.");
 					}
 					for (Object[] eachRecord : dataList) {
 						indexCount = 0;
-						dbRow = "";
+						dbRow = new  StringBuffer("");
 						for (Object eachElement : eachRecord) {
 							indexCount++;
 							if (eachElement != null) {
@@ -559,24 +558,24 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 									SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
 									eachElement = simpleDateFormat.format(eachElement);
 								}
-								dbRow += eachElement + ";;;";
+								dbRow.append(eachElement).append(new StringBuffer(";;;"));
 							} else {
-								dbRow += " " + ";;;";
+								dbRow.append(new StringBuffer(" ;;;"));
 							}
 						}
-						returnList.add(dbRow);
+						returnList.add(dbRow.toString());
 					}
 				} else {
 					LOGGER.info("Unable to fetch data for query : " + dbQuery);
-					return null;
+					
 				}
 				dynamicHibernateDao.closeSession();
-				return returnList;
+				
 			} else {
 				LOGGER.info("No column names configured for table name : " + eachConfig.getValue());
 			}
 		}
-		return null;
+		return returnList;
 	}
 
 	/**
@@ -587,14 +586,16 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	 * @return
 	 */
 	public String getColumnDataType(String eachColumn, List<ColumnDefinition> colNames) {
+		String columnDataType = null;
 		if (colNames != null && !colNames.isEmpty()) {
 			for (ColumnDefinition eachColName : colNames) {
 				if (eachColumn.equalsIgnoreCase(eachColName.getColumnName())) {
-					return eachColName.getType().getSimpleName();
+					columnDataType = eachColName.getType().getSimpleName();
+					break;
 				}
 			}
 		}
-		return null;
+		return columnDataType;
 	}
 
 	/**
@@ -652,14 +653,14 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 				FuzzyDBProperties.FUZZYDB_INCLUDE_PAGES);
 		String dbName = "";
 		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf("/") + 1, dbConnectionURL.length());
+			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
 		}
 		LOGGER.info("Properties Initialized Successfully");
 
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 		String batchClassIdentifier = batch.getBatchClassIdentifier();
 		String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
-
+		
 		if (dbName.length() <= 0) {
 			LOGGER.info("Wrong DB name found");
 			return false;
@@ -714,10 +715,10 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 				}
 				MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
 				moreLikeThis.setFieldNames(allIndexFields);
-				moreLikeThis.setMinTermFreq(Integer.valueOf(minTermFreq).intValue());
-				moreLikeThis.setMinDocFreq(Integer.valueOf(minDocFreq).intValue());
-				moreLikeThis.setMinWordLen(Integer.valueOf(minWordLength).intValue());
-				moreLikeThis.setMaxQueryTerms(Integer.valueOf(maxQueryTerms).intValue());
+				moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
+				moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
+				moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
+				moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
 				if (allStopWords != null && allStopWords.length > 0) {
 					Set<String> stopWordsTemp = new HashSet<String>();
 					for (int i = 0; i < allStopWords.length; i++) {
@@ -767,10 +768,10 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							LOGGER.info("Generating query for Document: " + eachDoc);
 							String docHocr = docHocrContent.get(eachDoc);
 							if (null != docHocr) {
-								InputStream is = null;
+								InputStream inputStream = null;
 								try {
-									is = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
-									query = moreLikeThis.like(is);
+									inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
+									query = moreLikeThis.like(inputStream);
 								} catch (UnsupportedEncodingException e) {
 									LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
 									continue;
@@ -778,9 +779,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 									LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
 									continue;
 								} finally {
-									if (is != null) {
+									if (inputStream != null) {
 										try {
-											is.close();
+											inputStream.close();
 										} catch (IOException e) {
 											LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
 										}
@@ -797,10 +798,10 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 									returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD,
 											Integer.valueOf(numOfPages));
 								} catch (NumberFormatException e) {
-									LOGGER.error("Problem generating confidence score for Document :  " + eachDoc, e);
+									LOGGER.error(CONFIDENCE_ERROR_MSG+ eachDoc, e);
 									continue;
 								} catch (Exception e) {
-									LOGGER.error("Problem generating confidence score for Document :  " + eachDoc, e);
+									LOGGER.error(CONFIDENCE_ERROR_MSG+ eachDoc, e);
 									continue;
 								}
 								LOGGER.info("Return Map is : " + returnMap);
@@ -829,7 +830,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 		cleanUpResource(reader);
 		batchSchemaService.updateBatch(batch);
 		LOGGER.info("updateBatchXML done.");
-		return true;
+		return false;
 	}
 
 	public void cleanUpResource(IndexReader reader) {
@@ -853,7 +854,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	public List<List<String>> fuzzyTextSearch(final String batchInstanceIdentifier, String searchText) throws DCMAApplicationException {
 		LOGGER.info("Initializing properties...");
 
-		searchText = searchText.toLowerCase();
+		searchText.toLowerCase();
 		List<List<String>> extractedData = null;
 		String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
@@ -869,7 +870,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 				FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
 		String dbName = "";
 		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf("/") + 1, dbConnectionURL.length());
+			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
 		}
 
 		String queryDelimiters = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
@@ -941,11 +942,11 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD, Integer
 								.valueOf(numOfPages));
 					} catch (NumberFormatException e) {
-						LOGGER.error("Problem generating confidence score for Document :  " + searchText, e);
+						LOGGER.error(CONFIDENCE_ERROR_MSG + searchText, e);
 						cleanUpResource(reader);
 						continue;
 					} catch (Exception e) {
-						LOGGER.error("Problem generating confidence score for Document :  " + searchText, e);
+						LOGGER.error(CONFIDENCE_ERROR_MSG + searchText, e);
 						cleanUpResource(reader);
 						continue;
 					}

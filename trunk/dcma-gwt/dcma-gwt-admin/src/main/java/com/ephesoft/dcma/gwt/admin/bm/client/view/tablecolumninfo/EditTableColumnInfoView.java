@@ -60,49 +60,50 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 	}
 
 	@UiField
-	Label betweenLeftLabel;
+	protected Label betweenLeftLabel;
 	@UiField
-	TextBox betweenLeft;
+	protected TextBox betweenLeft;
 
 	@UiField
-	Label betweenRightLabel;
+	protected Label betweenRightLabel;
 	@UiField
-	TextBox betweenRight;
+	protected TextBox betweenRight;
 
 	@UiField
-	Label columnNameLabel;
+	protected Label columnNameLabel;
 	@UiField
-	Label columnNameStar;
+	protected Label columnNameStar;
 	@UiField
-	TextBox columnName;
+	protected TextBox columnName;
 
 	@UiField
-	Label columnPatternLabel;
+	protected Label columnPatternLabel;
 	@UiField
-	Label columnPatternStar;
+	protected Label columnPatternStar;
 	@UiField
-	TextBox columnPattern;
+	protected TextBox columnPattern;
 
 	@UiField
-	Label isRequiredLabel;
+	protected Label isRequiredLabel;
 	@UiField
-	CheckBox isRequired;
+	protected CheckBox isRequired;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateColumnNameTextBox;
 	private ValidatableWidget<TextBox> validateColumnPatternTextBox;
 
 	@UiField
-	VerticalPanel editTableColumnInfoViewPanel;
+	protected VerticalPanel editTableColumnInfoViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditTableColumnInfoView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
@@ -152,12 +153,12 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 

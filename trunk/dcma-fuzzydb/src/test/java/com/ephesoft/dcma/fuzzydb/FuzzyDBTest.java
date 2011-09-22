@@ -139,7 +139,7 @@ public class FuzzyDBTest extends AbstractFuzzyDBTest {
 	/**
 	 * Variable for property file.
 	 */
-	private Properties prop = new Properties();
+	private final Properties prop = new Properties();
 
 	/**
 	 * Method to initialize resources.

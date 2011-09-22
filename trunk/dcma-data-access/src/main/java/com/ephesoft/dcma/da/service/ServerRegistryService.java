@@ -45,17 +45,17 @@ public interface ServerRegistryService {
 	/**
 	 * An API to fetch a Server Registry.
 	 * 
-	 * @param id
+	 * @param identifier
 	 * @return ServerRegistry
 	 */
-	public ServerRegistry getServerRegistry(Serializable id);
+	ServerRegistry getServerRegistry(Serializable identifier);
 
 	/**
 	 * An API to fetch all Server Registry.
 	 * 
 	 * @return List<ServerRegistry> return the server registry list.
 	 */
-	public List<ServerRegistry> getAllServerRegistry();
+	List<ServerRegistry> getAllServerRegistry();
 
 	/**
 	 * An api to fetch all the Server Registry by ip address, port number and context.
@@ -66,32 +66,32 @@ public interface ServerRegistryService {
 	 * 
 	 * @return ServerRegistry return the server registry.
 	 */
-	public ServerRegistry getServerRegistry(String ipAddress, String portNumber, String context);
+	ServerRegistry getServerRegistry(String ipAddress, String portNumber, String context);
 
 	/**
 	 * API to save or update a Server Registry.
 	 * 
 	 * @param serverRegistry
 	 */
-	public void updateServerRegistry(ServerRegistry serverRegistry);
+	void updateServerRegistry(ServerRegistry serverRegistry);
 
 	/**
 	 * API to create a new Server Registry.
 	 * 
 	 * @param serverRegistry
 	 */
-	public void createServerRegistry(ServerRegistry serverRegistry);
+	void createServerRegistry(ServerRegistry serverRegistry);
 
 	/**
 	 * API to remove an existing Server Registry.
 	 * 
 	 * @param serverRegistry
 	 */
-	public void removeServerRegistry(ServerRegistry serverRegistry);
+	void removeServerRegistry(ServerRegistry serverRegistry);
 	
 	/**
 	 * API to get the inactive servers.
 	 * @return
 	 */
-	public List<ServerRegistry> getInactiveServers();
+	List<ServerRegistry> getInactiveServers();
 }

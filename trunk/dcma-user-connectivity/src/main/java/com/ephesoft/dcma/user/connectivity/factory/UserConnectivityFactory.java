@@ -49,8 +49,9 @@ import com.ephesoft.dcma.user.connectivity.UserConnectivity;
  * 
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.user.connectivity.LdapConnectivity
- * @see com.ephesoft.dcma.user.connectivity.MSActiveDirectoryConnectivity
+ * @see com.ephesoft.dcma.user.connectivity.impl.LdapConnectivity
+ * @see com.ephesoft.dcma.user.connectivity.impl.MSActiveDirectoryConnectivity
+ * @see com.ephesoft.dcma.user.connectivity.impl.TomcatConnectivity
  */
 @Component
 public class UserConnectivityFactory {
@@ -58,7 +59,7 @@ public class UserConnectivityFactory {
 	/**
 	 * Used for handling logs.
 	 */
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOG = LoggerFactory.getLogger(UserConnectivityFactory.class);
 
 	/**
 	 * Instance of LdapConnectivity.
@@ -102,13 +103,13 @@ public class UserConnectivityFactory {
 	 */
 	public UserConnectivity getImplementation() {
 		if (ldapConnectivity == null) {
-			log.error("Ldap Connectivity is null");
+			LOG.error("Ldap Connectivity is null");
 		}
 		if (msActiveDirectoryConnectivity == null) {
-			log.error("MsActiveDirectory Connectivity is null");
+			LOG.error("MsActiveDirectory Connectivity is null");
 		}
 		if (tomcatConnectivity == null) {
-			log.error("Tomcat Connectivity is null");
+			LOG.error("Tomcat Connectivity is null");
 		}
 		UserConnectivity connectivity = null;
 		if (choice == 0) {

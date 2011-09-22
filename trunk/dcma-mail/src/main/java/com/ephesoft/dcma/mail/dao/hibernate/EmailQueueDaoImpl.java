@@ -49,8 +49,8 @@ import com.ephesoft.dcma.mail.domain.EmailData;
 public class EmailQueueDaoImpl extends HibernateDao<EmailData> implements EmailQueueDao {
 
 	@Override
-	public List<EmailData> findReadyToSend(int fetchMaxCount) {
-		DetachedCriteria criteria = criteria();
+	public List<EmailData> findReadyToSend(final int fetchMaxCount) {
+		final DetachedCriteria criteria = criteria();
 		criteria.addOrder(Order.asc("creationDate"));
 		return find(criteria, -1, fetchMaxCount);
 	}

@@ -52,15 +52,16 @@ public class FuzzyDBPropertiesView extends View<FuzzyDBPropertiesViewPresenter> 
 	interface Binder extends UiBinder<FlexTable, FuzzyDBPropertiesView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	FlexTable viewTable;
+	protected FlexTable viewTable;
 
-	private FlexTable detailTable;
+	private final FlexTable detailTable;
 
 	public FuzzyDBPropertiesView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		detailTable = new FlexTable();
 		detailTable.setWidth("100%");
 		detailTable.getColumnFormatter().setWidth(0, "40%");

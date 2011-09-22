@@ -57,7 +57,7 @@ import com.ephesoft.dcma.util.BackUpFileService;
  */
 public class NsiExportServiceImpl implements NsiExportService, ICommonConstants {
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
+	protected static final Logger LOGGER = LoggerFactory.getLogger(NsiExportServiceImpl.class);
 
 	@Autowired
 	private NsiExporter nsiExporter;

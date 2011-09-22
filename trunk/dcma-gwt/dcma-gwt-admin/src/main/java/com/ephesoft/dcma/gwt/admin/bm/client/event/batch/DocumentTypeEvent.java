@@ -52,7 +52,7 @@ public class DocumentTypeEvent extends GwtEvent<DocumentTypeHandler> {
 	/**
 	 * Type of event.
 	 */
-	public static Type<DocumentTypeHandler> TYPE = new Type<DocumentTypeHandler>();
+	public static Type<DocumentTypeHandler> type = new Type<DocumentTypeHandler>();
 
 	/**
 	 * Action taken.
@@ -90,7 +90,7 @@ public class DocumentTypeEvent extends GwtEvent<DocumentTypeHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<DocumentTypeHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public DocumentTypeDTO getDocumentType() {

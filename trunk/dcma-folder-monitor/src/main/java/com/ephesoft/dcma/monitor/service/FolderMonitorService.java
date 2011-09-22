@@ -50,8 +50,8 @@ import com.ephesoft.dcma.da.id.BatchClassID;
  */
 public interface FolderMonitorService extends SmartLifecycle {
 	
-	public void monitorBatchClass(final BatchClassID batchClassID);
+	void monitorBatchClass(final BatchClassID batchClassID);
 	
-	public void removeWatchFromBatchClass(final BatchClassID batchClassID);
+	void removeWatchFromBatchClass(final BatchClassID batchClassID);
 
 }

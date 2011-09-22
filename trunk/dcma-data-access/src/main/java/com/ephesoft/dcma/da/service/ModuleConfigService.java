@@ -53,6 +53,6 @@ public interface ModuleConfigService {
 	 * @param isMandatory
 	 * @return
 	 */
-	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory);
+	ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory);
 
 }

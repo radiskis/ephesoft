@@ -248,7 +248,7 @@ public class BarcodePageProcess {
 	/**
 	 * This method will create new document for pages that was found in the batch.xml file for Unknown type document.
 	 * 
-	 * @param docPageInfo List<PageType>
+	 * @param docPageInfo List<Page>
 	 * @throws DCMAApplicationException Check for input parameters, create new documents for page found in document type Unknown.
 	 */
 	public final void createDocForPages(final List<Page> docPageInfo) throws DCMAApplicationException {

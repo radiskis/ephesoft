@@ -58,6 +58,8 @@ import com.ephesoft.dcma.da.domain.FieldType;
 @Service
 public class FieldTypeServiceImpl extends DataAccessService implements FieldTypeService {
 
+	private static final String DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY = "Document type name is null or empty.";
+
 	/**
 	 * LOGGER to print the logging information.
 	 */
@@ -71,7 +73,7 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	public List<FieldType> getFdTypeByDocTypeNameForBatchInstance(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
 		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info("Document type name is null or empty.");
+			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocTypeNameForBatchInstance(docTypeName, batchInstanceIdentifier);
 		}
@@ -90,7 +92,7 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	public FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier) {
 		FieldType fdTypes = null;
 		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info("Document type name is null or empty.");
+			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFieldType(fieldTypeName, docTypeName, batchInstanceIdentifier);
 		}
@@ -109,7 +111,7 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	public List<FieldType> getFdTypeByDocTypeName(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
 		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info("Document type name is null or empty.");
+			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocumentTypeName(docTypeName, batchInstanceIdentifier, false);
 		}
@@ -130,7 +132,7 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 			boolean isKVExtraction) {
 		List<FieldType> fdTypes = null;
 		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info("Document type name is null or empty.");
+			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocumentTypeName(docTypeName, batchInstanceIdentifier, isKVExtraction);
 		}
@@ -149,7 +151,7 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	public List<FieldType> getFdTypeAndRegexValidationByDocTypeName(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
 		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info("Document type name is null or empty.");
+			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeAndRegexValidationByDocTypeName(docTypeName, batchInstanceIdentifier);
 		}

@@ -50,7 +50,7 @@ public interface EmailConvertor {
 	 * @param outputFilePath - folder Path where mail is to be stored
 	 * @throws DCMAApplicationException
 	 */
-	public void convert(CustomMessage cm, URI outputFileURI) throws DCMAApplicationException;
+	 void convert(CustomMessage customMessage, URI outputFileURI) throws DCMAApplicationException;
 
 	/**
 	 * This API converts a mail message into PDF. Message is the mail object. OutputFilePath is the absolute path of the folder where
@@ -60,6 +60,6 @@ public interface EmailConvertor {
 	 * @param outputFilePath - folder Path where mail is to be stored
 	 * @throws DCMAApplicationException
 	 */
-	public void convert(CustomMessage cm, String outputFilePath) throws DCMAApplicationException;
+	 void convert(CustomMessage customMessage, String outputFilePath) throws DCMAApplicationException;
 
 }

@@ -55,7 +55,7 @@ public interface BatchClassModuleService {
 	 * @param id
 	 * @return count of Modules.
 	 */
-	public Integer countModules(String batchClassIdentifier);
+	Integer countModules(String batchClassIdentifier);
 
 	/**
 	 * API to fetch all the modules contained in the batch class.
@@ -63,7 +63,7 @@ public interface BatchClassModuleService {
 	 * @param batchClassId
 	 * @return List<Module>.
 	 */
-	public List<Module> getBatchClassModule(String batchClassIdentifier);
+	List<Module> getBatchClassModule(String batchClassIdentifier);
 
 	/**
 	 * API to fetch Modules starting from firstIndex and as many results as MaxResults from a batch class.
@@ -73,7 +73,7 @@ public interface BatchClassModuleService {
 	 * @param maxResults
 	 * @return List<Module>
 	 */
-	public List<Module> getModules(String batchClassIdentifier, final int firstIndex, final int maxResults);
+	List<Module> getModules(String batchClassIdentifier, final int firstIndex, final int maxResults);
 
 	/**
 	 * API to fetch BatchClassModule by batch class id and module name.
@@ -82,14 +82,14 @@ public interface BatchClassModuleService {
 	 * @param moduleName {@link String}
 	 * @return {@link BatchClassModule}
 	 */
-	public BatchClassModule getBatchClassModuleByName(String batchClassIdentifier, String moduleName);
+	BatchClassModule getBatchClassModuleByName(String batchClassIdentifier, String moduleName);
 	
 	/**
 	 * API to evict a batch class module object.
 	 * 
 	 * @param batchClassModule {@link BatchClassModule}
 	 */
-	public void evict(BatchClassModule batchClassModule);
+	void evict(BatchClassModule batchClassModule);
 	
-	public BatchClassModule getBatchClassModuleByWorkflowName(String batchClassIdentifier, String workflowName);
+	BatchClassModule getBatchClassModuleByWorkflowName(String batchClassIdentifier, String workflowName);
 }

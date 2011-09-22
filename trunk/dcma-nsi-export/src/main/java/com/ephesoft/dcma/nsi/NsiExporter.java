@@ -70,7 +70,7 @@ import com.ephesoft.dcma.util.FileUtils;
 @Component
 public class NsiExporter implements ICommonConstants {
 
-	private final Logger logger = LoggerFactory.getLogger(NsiExporter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NsiExporter.class);
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -138,64 +138,54 @@ public class NsiExporter implements ICommonConstants {
 	 * @throws DCMAApplicationException
 	 */
 	public void exportFiles(String batchInstanceID) throws JAXBException, DCMAApplicationException {
-
-		logger.info("NSI export plugin.");
-		logger.info("Initializing properties...");
-
+		LOGGER.info("NSI export plugin.");
+		LOGGER.info("Initializing properties...");
 		String isNsiSwitchON = pluginPropertiesService.getPropertyValue(batchInstanceID, NSIExportConstant.NSI_PLUGIN_NAME,
 				NsiExporterProperties.NSI_SWITCH);
-
 		if ("ON".equalsIgnoreCase(isNsiSwitchON)) {
 			String exportFolder = pluginPropertiesService.getPropertyValue(batchInstanceID, NSIExportConstant.NSI_PLUGIN_NAME,
 					NsiExporterProperties.NSI_EXPORT_FOLDER);
 			String xmlTagStyle = pluginPropertiesService.getPropertyValue(batchInstanceID, NSIExportConstant.NSI_PLUGIN_NAME,
 					NsiExporterProperties.NSI_XML_NAME);
-
 			if (null == exportFolder || "".equalsIgnoreCase(exportFolder)) {
 				throw new DCMAApplicationException(
 						"NSI Export Folder value is null/empty from the database. Invalid initializing of properties.");
 			}
-
 			if (null == xmlTagStyle || "".equalsIgnoreCase(xmlTagStyle)) {
 				throw new DCMAApplicationException(
 						"Nsi Xml file naming convention is null/empty from the data base. Invalid initializing of properties.");
 			}
-			logger.info("Properties Initialized Successfully");
-
+			LOGGER.info("Properties Initialized Successfully");
 			String exportToFolder = batchSchemaService.getLocalFolderLocation();
 			String baseDocsFolder = exportToFolder + File.separator + batchInstanceID;
 			String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + NSIExportConstant.BATCH_XML;
 			String targetXmlPath = exportFolder + File.separator + batchInstanceID + xmlTagStyle;
-
 			InputStream xslStream = null;
 			try {
-				logger.info("xslResource = " + xslResource.toString());
+				LOGGER.info("xslResource = " + xslResource.toString());
 				xslStream = xslResource.getInputStream();
 			} catch (IOException e) {
-				logger.error("Could not find xsl file in the classpath resource", e.getMessage(), e);
+				LOGGER.error("Could not find xsl file in the classpath resource", e.getMessage(), e);
 				throw new DCMAApplicationException("Could not find xsl file in the classpath resource", e);
 			}
-
-			logger.debug("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
+			LOGGER.debug("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
 			if (xslStream != null) {
 				try {
 					TransformerFactory tFactory = TransformerFactory.newInstance();
 					// NOTE, this needs to be fixed to use the InputStream xslStream object, not a hardcoded path to the file.
 					Transformer transformer = tFactory.newTransformer(new StreamSource(xslStream));
-
 					DateTimeZone zone = DateTimeZone.forID(NSIExportConstant.TIME_ZONE_ID);
-					DateTime dt = new DateTime(zone);
-
-					String date = Integer.toString(dt.getYear()) + NSIExportConstant.HYPEN + Integer.toString(dt.getMonthOfYear())
-							+ NSIExportConstant.HYPEN + Integer.toString(dt.getDayOfMonth());
-					String time = Integer.toString(dt.getHourOfDay()) + NSIExportConstant.COLON
-							+ Integer.toString(dt.getMinuteOfHour()) + NSIExportConstant.COLON
-							+ Integer.toString(dt.getSecondOfMinute());
+					DateTime dateTime = new DateTime(zone);
+					String date = Integer.toString(dateTime.getYear()) + NSIExportConstant.HYPEN
+							+ Integer.toString(dateTime.getMonthOfYear()) + NSIExportConstant.HYPEN
+							+ Integer.toString(dateTime.getDayOfMonth());
+					String time = Integer.toString(dateTime.getHourOfDay()) + NSIExportConstant.COLON
+							+ Integer.toString(dateTime.getMinuteOfHour()) + NSIExportConstant.COLON
+							+ Integer.toString(dateTime.getSecondOfMinute());
 					transformer.setParameter(NSIExportConstant.DATE, date);
 					transformer.setParameter(NSIExportConstant.HOURS, time);
 					transformer.setParameter(NSIExportConstant.BASE_DOC_FOLDER_PATH, baseDocsFolder + File.separator);
 					transformer.setParameter(NSIExportConstant.EXPORT_FOLDER_PATH, exportFolder + File.separator);
-
 					File file = new File(exportFolder);
 					boolean isFileCreated = false;
 					if (!file.exists()) {
@@ -213,7 +203,7 @@ public class NsiExporter implements ICommonConstants {
 							isImageFolderCreated = true;
 						}
 						if (isImageFolderCreated) {
-							logger.info(exportFolder + " folder created");
+							LOGGER.info(exportFolder + " folder created");
 							Batch batch = batchSchemaService.getBatch(batchInstanceID);
 							List<Document> documentList = batch.getDocuments().getDocument();
 							transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
@@ -232,26 +222,26 @@ public class NsiExporter implements ICommonConstants {
 									try {
 										FileUtils.copyFile(oldFile, newFile);
 									} catch (Exception e) {
-										logger.error("Error creating in file: " + newFile + "is" + e.getMessage(), e);
+										LOGGER.error("Error creating in file: " + newFile + "is" + e.getMessage(), e);
 									}
 								}
 							}
 						}
 					} else {
-						logger.error("Access is denied for creating: " + file.getName());
+						LOGGER.error("Access is denied for creating: " + file.getName());
 					}
 				} catch (FileNotFoundException e1) {
-					logger.error("Could not find NSITransform.xsl file : " + e1.getMessage(), e1);
+					LOGGER.error("Could not find NSITransform.xsl file : " + e1.getMessage(), e1);
 					throw new DCMAApplicationException("Could not find nsiTransform.xsl file : " + e1.getMessage(), e1);
 				} catch (TransformerException e1) {
-					logger.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + e1.getMessage(), e1);
+					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + e1.getMessage(), e1);
 					throw new DCMAApplicationException("Could not find nsiTransform.xsl file : ", e1);
 				}
 			} else {
-				logger.info("Invalid input stream for :" + xslResource.toString());
+				LOGGER.info("Invalid input stream for :" + xslResource.toString());
 			}
 		} else {
-			logger.info("NSI Exporter is switched off");
+			LOGGER.info("NSI Exporter is switched off");
 		}
 	}
 }

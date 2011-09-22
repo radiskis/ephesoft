@@ -54,7 +54,7 @@ public interface ModuleConfigDao extends CacheableDao<ModuleConfig> {
 	 * @param childName
 	 * @return List<ModuleConfig> list of module configs.
 	 */
-	public List<ModuleConfig> getModuleByChildName(String childName);
+	List<ModuleConfig> getModuleByChildName(String childName);
 	
 	/**
 	 * API to get the moduleconfig by key and mandatory.
@@ -63,5 +63,5 @@ public interface ModuleConfigDao extends CacheableDao<ModuleConfig> {
 	 * @param isMandatory
 	 * @return
 	 */
-	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory);
+	ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory);
 }

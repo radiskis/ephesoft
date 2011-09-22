@@ -78,89 +78,89 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 	}
 
 	@UiField
-	DocumentTypeDetailView documentTypeDetailView;
+	protected DocumentTypeDetailView documentTypeDetailView;
 
 	@UiField
-	EditDocumentTypeView editDocumentTypeView;
+	protected EditDocumentTypeView editDocumentTypeView;
 
 	@UiField
-	LayoutPanel pageTypeListPanel;
+	protected LayoutPanel pageTypeListPanel;
 
-	PageTypeListView pageTypeListView;
-
-	@UiField
-	LayoutPanel functionKeyListPanel;
-
-	FunctionKeyListView functionKeyListView;
+	private PageTypeListView pageTypeListView;
 
 	@UiField
-	Button addFunctionKeyButton;
+	protected LayoutPanel functionKeyListPanel;
+
+	private FunctionKeyListView functionKeyListView;
 
 	@UiField
-	Button editFunctionKeyButton;
+	protected Button addFunctionKeyButton;
 
 	@UiField
-	Button deleteFunctionKeyButton;
+	protected Button editFunctionKeyButton;
 
 	@UiField
-	LayoutPanel fieldTypeListPanel;
+	protected Button deleteFunctionKeyButton;
 
 	@UiField
-	VerticalPanel documentTypeVerticalPanel;
+	protected LayoutPanel fieldTypeListPanel;
 
 	@UiField
-	VerticalPanel documentTypeConfigVerticalPanel;
-
-	FieldTypeListView fieldTypeListView;
+	protected VerticalPanel documentTypeVerticalPanel;
 
 	@UiField
-	CaptionPanel documentConfigurationCaptionPanel;
+	protected VerticalPanel documentTypeConfigVerticalPanel;
+
+	private FieldTypeListView fieldTypeListView;
 
 	@UiField
-	Button editDocumentPropertiesButton;
+	protected CaptionPanel documentConfigurationCaptionPanel;
+
+	@UiField
+	protected Button editDocumentPropertiesButton;
 
 	@UiField
 	DockLayoutPanel fieldTypeCompletePanel;
 
 	@UiField
-	Button addFieldButton;
+	protected Button addFieldButton;
 
 	@UiField
-	Button editFieldButton;
+	protected Button editFieldButton;
 
 	@UiField
-	Button deleteFieldButton;
+	protected Button deleteFieldButton;
 
 	@UiField
-	HorizontalPanel fieldButtonPanel;
+	protected HorizontalPanel fieldButtonPanel;
 
-	TableInfoListView tableInfoListView;
+	private TableInfoListView tableInfoListView;
 
 	@UiField
 	DockLayoutPanel tableInfoCompletePanel;
 
 	@UiField
-	Button addTableInfoFieldButton;
+	protected Button addTableInfoFieldButton;
 
 	@UiField
-	Button editTableInfoFieldButton;
+	protected Button editTableInfoFieldButton;
 
 	@UiField
-	Button deleteTableInfoFieldButton;
+	protected Button deleteTableInfoFieldButton;
 
 	@UiField
-	LayoutPanel tableInfoListPanel;
+	protected LayoutPanel tableInfoListPanel;
 
 	@UiField
-	HorizontalPanel tableInfoButtonPanel;
+	protected HorizontalPanel tableInfoButtonPanel;
 
 	@UiField
-	Button testTableButton;
+	protected Button testTableButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocumentTypeView() {
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		pageTypeListView = new PageTypeListView();
 		addFieldButton.setText(AdminConstants.ADD_BUTTON);
@@ -610,9 +610,11 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 		int rowCount = tableInfoListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_TABLE_TO_TEST));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_TABLE_TO_TEST));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}

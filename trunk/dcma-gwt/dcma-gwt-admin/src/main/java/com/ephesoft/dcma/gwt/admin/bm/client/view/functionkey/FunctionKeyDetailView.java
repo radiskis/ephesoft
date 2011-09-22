@@ -52,23 +52,24 @@ public class FunctionKeyDetailView extends View<FunctionKeyDetailPresenter> {
 	}
 
 	@UiField
-	Label methodNameLabel;
+	protected Label methodNameLabel;
 	@UiField
-	Label methodName;
+	protected Label methodName;
 
 	@UiField
-	Label methodDescriptionLabel;
+	protected Label methodDescriptionLabel;
 	@UiField
-	Label methodDescription;
+	protected Label methodDescription;
 
 	@UiField
-	Label keyNameLabel;
+	protected Label keyNameLabel;
 	@UiField
-	Label keyName;
-	private static final Binder binder = GWT.create(Binder.class);
+	protected Label keyName;
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public FunctionKeyDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		methodNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.FUNCTION_KEY_METHOD_NAME)
 				+ AdminConstants.COLON);

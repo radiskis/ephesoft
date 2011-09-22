@@ -54,14 +54,19 @@ import com.ephesoft.dcma.da.domain.BatchInstance;
 public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClassDynamicPluginConfig> implements
 		BatchClassDynamicPluginConfigDao {
 
+	private static final String BATCH_CLASS_MODULE = "batchClassModule";
+	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE = "batchClassPlugin.batchClassModule";
+	private static final String BATCH_CLASS = "batchClass";
+	private static final String BATCH_CLASS_PLUGIN = "batchClassPlugin";
+
 	@Override
 	public List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty) {
 
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClassPlugin", "batchClassPlugin", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule", "batchClassModule", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", "batchClass", JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN, BATCH_CLASS_PLUGIN, JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE, BATCH_CLASS_MODULE, JoinFragment.INNER_JOIN);
+		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", BATCH_CLASS, JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.plugin", "plugin", JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.batchClassDynamicPluginConfigs", "batchClassDynamicPluginConfigs",
 				JoinFragment.INNER_JOIN);
@@ -76,9 +81,9 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 	@Override
 	public List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchInstance(String batchInstanceIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClassPlugin", "batchClassPlugin");
-		criteria.createAlias("batchClassPlugin.batchClassModule", "batchClassModule");
-		criteria.createAlias("batchClassModule.batchClass", "batchClass");
+		criteria.createAlias(BATCH_CLASS_PLUGIN, BATCH_CLASS_PLUGIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE, BATCH_CLASS_MODULE);
+		criteria.createAlias("batchClassModule.batchClass", BATCH_CLASS);
 
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
 		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
@@ -92,9 +97,9 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 	@Override
 	public List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchClass(String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClassPlugin", "batchClassPlugin", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule", "batchClassModule", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", "batchClass", JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN, BATCH_CLASS_PLUGIN, JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE, BATCH_CLASS_MODULE, JoinFragment.INNER_JOIN);
+		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", BATCH_CLASS, JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.plugin", "plugin", JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.batchClassDynamicPluginConfigs", "batchClassDynamicPluginConfigs",
 				JoinFragment.INNER_JOIN);
@@ -105,9 +110,9 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 	@Override
 	public List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClassPlugin", "batchClassPlugin", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule", "batchClassModule", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", "batchClass", JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN, BATCH_CLASS_PLUGIN, JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE, BATCH_CLASS_MODULE, JoinFragment.INNER_JOIN);
+		criteria.createAlias("batchClassPlugin.batchClassModule.batchClass", BATCH_CLASS, JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.plugin", "plugin", JoinFragment.INNER_JOIN);
 		criteria.createAlias("batchClassPlugin.batchClassDynamicPluginConfigs", "batchClassDynamicPluginConfigs",
 				JoinFragment.INNER_JOIN);

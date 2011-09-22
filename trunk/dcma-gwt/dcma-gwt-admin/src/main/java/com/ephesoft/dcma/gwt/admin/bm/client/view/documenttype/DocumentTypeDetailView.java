@@ -43,6 +43,7 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -52,33 +53,39 @@ public class DocumentTypeDetailView extends View<DocumentTypeDetailPresenter> {
 	}
 
 	@UiField
-	Label name;
+	protected Label name;
 
 	@UiField
-	Label description;
+	protected Label description;
 
 	@UiField
-	Label minConfidenceThreshold;
+	protected Label minConfidenceThreshold;
 
 	@UiField
-	Label nameLabel;
+	protected Label nameLabel;
 
 	@UiField
-	Label descriptionLabel;
+	protected Label descriptionLabel;
 
 	@UiField
-	Label minConfidenceThresholdLabel;
+	protected Label minConfidenceThresholdLabel;
 
 	@UiField
-	Label recostarExtractionLabel;
+	protected Label recostarExtractionLabel;
 
 	@UiField
-	Label recostarExtraction;
+	protected Label recostarExtraction;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	@UiField
+	protected Label isHiddenLabel;
+	@UiField
+	protected CheckBox isHidden;
+
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocumentTypeDetailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		descriptionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION)
 				+ AdminConstants.COLON);
@@ -87,11 +94,13 @@ public class DocumentTypeDetailView extends View<DocumentTypeDetailPresenter> {
 				+ AdminConstants.COLON);
 		recostarExtractionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.RECOSTAR_PROJECT_FILE)
 				+ AdminConstants.COLON);
-
+		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descriptionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		minConfidenceThresholdLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		recostarExtractionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		isHidden.setEnabled(false);
 	}
 
 	public void setName(String name) {
@@ -110,4 +119,7 @@ public class DocumentTypeDetailView extends View<DocumentTypeDetailPresenter> {
 		this.recostarExtraction.setText(recostarExtraction);
 	}
 
+	public void setIsHidden(boolean isHidden) {
+		this.isHidden.setValue(isHidden);
+	}
 }

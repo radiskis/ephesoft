@@ -60,14 +60,15 @@ public class ServerRegistryServiceImpl implements ServerRegistryService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<ServerRegistry> getAllServerRegistry() {
-		List<ServerRegistry> serverRegistries = serverRegistryDao.getAllServerRegistry();
+		List<ServerRegistry> serverRegistries = null;
+		serverRegistries = serverRegistryDao.getAllServerRegistry();
 		return serverRegistries;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public ServerRegistry getServerRegistry(Serializable id) {
-		return serverRegistryDao.getServerRegistry(id);
+	public ServerRegistry getServerRegistry(Serializable identifier) {
+		return serverRegistryDao.getServerRegistry(identifier);
 	}
 
 	@Override

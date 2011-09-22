@@ -671,4 +671,10 @@ public interface BatchSchemaService {
 	 */
 	BatchClassModule getDetachedBatchClassModuleByName(String batchClassIdentifier, String moduleName);
 
+	/**
+	 * API to get Script Config Folder Name.
+	 *
+	 */
+	public String getScriptConfigFolderName();
+
 }

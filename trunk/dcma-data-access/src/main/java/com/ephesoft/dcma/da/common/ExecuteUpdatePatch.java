@@ -72,7 +72,15 @@ import com.ephesoft.dcma.util.FileUtils;
 
 public class ExecuteUpdatePatch {
 
-	private static final Logger log = LoggerFactory.getLogger(ExecuteUpdatePatch.class);
+	private static final String PROBLEM_CLOSING_STREAM_FOR_FILE = "Problem closing stream for file :";
+
+	private static final String ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE = "Error during de-serializing the properties for Database Upgrade: ";
+
+	private static final String ERROR_DURING_READING_THE_SERIALIZED_FILE = "Error during reading the serialized file. ";
+
+	private static final String UPDATING_BATCH_CLASSES = "Updating Batch Classes....";
+
+	private static final Logger LOG = LoggerFactory.getLogger(ExecuteUpdatePatch.class);
 
 	@Autowired
 	private BatchClassService batchClassService;
@@ -98,68 +106,68 @@ public class ExecuteUpdatePatch {
 
 	private boolean patchEnabled;
 
-	private Map<Integer, List<BatchClassPluginConfig>> newPluginConfigMap = new HashMap<Integer, List<BatchClassPluginConfig>>();
+	
 
 	private Map<String, List<BatchClassModule>> batchClassNameVsModulesMap = new HashMap<String, List<BatchClassModule>>();
 
-	private Map<String, List<BatchClass>> nameVsBatchClassListMap = new HashMap<String, List<BatchClass>>();
+	final private Map<String, List<BatchClass>> nameVsBatchClassListMap = new HashMap<String, List<BatchClass>>();
 
 	private Map<String, List<BatchClassPlugin>> batchClassNameVsBatchClassPluginMap = new HashMap<String, List<BatchClassPlugin>>();
 
 	private Map<String, List<BatchClass>> batchClassNameVsBatchClassMap = new HashMap<String, List<BatchClass>>();
 
-	private Map<Long, List<BatchClassModuleConfig>> moduleIdVsBatchClassModuleConfigs = new HashMap<Long, List<BatchClassModuleConfig>>();
+	
 
 	public void init() {
 		if (!patchEnabled) {
-			log.info("No Upgrade Patch Configured. Continuing with the start up.");
+			LOG.info("No Upgrade Patch Configured. Continuing with the start up.");
 			return;
 		}
 		try {
-			log.info("==============Running the Upgrade Patch=======================");
+			LOG.info("==============Running the Upgrade Patch=======================");
 
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/pre-schema.sql"));
 
 			populateMap();
 
-			log.info("==========Running Upgrade Patch for Module Configs.==========");
+			LOG.info("==========Running Upgrade Patch for Module Configs.==========");
 
 			updateModuleConfigs();
 
-			log.info("Upgrade Patch for Module Configs executed successfully.");
+			LOG.info("Upgrade Patch for Module Configs executed successfully.");
 
-			log.info("==========Running Upgrade Patch for Module.==========");
+			LOG.info("==========Running Upgrade Patch for Module.==========");
 
 			updateModules();
 
-			log.info("Upgrade Patch for Modules executed successfully.");
+			LOG.info("Upgrade Patch for Modules executed successfully.");
 
-			log.info("==========Running Upgrade Patch for Plugins.==========");
+			LOG.info("==========Running Upgrade Patch for Plugins.==========");
 
 			updatePlugin();
 
-			log.info("Upgrade Patch for Plugins executed successfully.");
+			LOG.info("Upgrade Patch for Plugins executed successfully.");
 
-			log.info("==========Running Upgrade Patch for Plugin Configs.==========");
+			LOG.info("==========Running Upgrade Patch for Plugin Configs.==========");
 
 			updatePluginConfig();
 
-			log.info("Upgrade Patch for Plugin Configs executed successfully.");
+			LOG.info("Upgrade Patch for Plugin Configs executed successfully.");
 
-			log.info("==========Running Upgrade Patch for Batch Class.==========");
+			LOG.info("==========Running Upgrade Patch for Batch Class.==========");
 
 			updateBatchClasses();
 
-			log.info("Upgrade Patch for Batch Class executed successfully.");
+			LOG.info("Upgrade Patch for Batch Class executed successfully.");
 
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/post-schema.sql"));
 
-			log.info("==========Upgrade Patch finished successfully.==========");
+			LOG.info("==========Upgrade Patch finished successfully.==========");
 
 			updateSQLFiles();
 
 		} catch (Exception e) {
-			log.error("An Exception occurred while executing the patch." + e.getMessage(), e);
+			LOG.error("An Exception occurred while executing the patch." + e.getMessage(), e);
 		}
 	}
 
@@ -174,6 +182,7 @@ public class ExecuteUpdatePatch {
 
 			FileUtils.updateProperty(propertyFile, propertyMap, comments);
 		} catch (IOException e) {
+			LOG.error("An Exception occurred while executing the patch." + e.getMessage(), e);
 		}
 	}
 
@@ -181,7 +190,7 @@ public class ExecuteUpdatePatch {
 
 		batchClassNameVsModulesMap = readModuleSerializeFile();
 		if (batchClassNameVsModulesMap == null || batchClassNameVsModulesMap.isEmpty()) {
-			log.info("No data recovered from serialized file. Returning..");
+			LOG.info("No data recovered from serialized file. Returning..");
 			return;
 		}
 
@@ -210,7 +219,7 @@ public class ExecuteUpdatePatch {
 					}
 				}
 			}
-			log.info("Updating Batch Classes....");
+			LOG.info(UPDATING_BATCH_CLASSES);
 			for (BatchClass batchClass : batchClasses) {
 				batchClassService.merge(batchClass);
 			}
@@ -227,7 +236,7 @@ public class ExecuteUpdatePatch {
 		populateMap();
 
 		if (batchClassNameVsBatchClassPluginMap == null || batchClassNameVsBatchClassPluginMap.isEmpty()) {
-			log.info("No data recovered from serialized file.");
+			LOG.info("No data recovered from serialized file.");
 			return;
 		}
 
@@ -261,7 +270,7 @@ public class ExecuteUpdatePatch {
 					}
 				}
 
-				log.info("Updating Batch Classes....");
+				LOG.info(UPDATING_BATCH_CLASSES);
 				for (BatchClass batchClass : batchClasses) {
 					batchClass = batchClassService.merge(batchClass);
 				}
@@ -270,10 +279,10 @@ public class ExecuteUpdatePatch {
 				populateMap();
 
 			} catch (NoSuchElementException e) {
-				log.error("Incomplete data specified in properties file.", e);
+				LOG.error("Incomplete data specified in properties file.", e);
 				batchClassNameVsBatchClassPluginMap.clear();
 			} catch (NumberFormatException e) {
-				log.error("Module Id or Plugin id is not numeric.", e);
+				LOG.error("Module Id or Plugin id is not numeric.", e);
 				batchClassNameVsBatchClassPluginMap.clear();
 			}
 		}
@@ -286,7 +295,7 @@ public class ExecuteUpdatePatch {
 
 		batchClassNameVsBatchClassMap = readBatchClassSerializeFile();
 		if (batchClassNameVsBatchClassMap == null || batchClassNameVsBatchClassMap.isEmpty()) {
-			log.info("No data recovered from serialized file. Returning..");
+			LOG.info("No data recovered from serialized file. Returning..");
 			return;
 		}
 
@@ -309,30 +318,35 @@ public class ExecuteUpdatePatch {
 
 				List<BatchClass> newBatchClassToBeAdded = batchClassNameVsBatchClassMap.get(batchClassName);
 				ClassPathResource classPathResource = new ClassPathResource("META-INF/dcma-batch/dcma-batch.properties");
-				String uncFolderLocation = null;
+				StringBuffer uncFolderLocation = new StringBuffer();
 				try {
 					File propertyFile = classPathResource.getFile();
 					Properties properties = new Properties();
 					FileInputStream fileInputStream = new FileInputStream(propertyFile);
 					properties.load(fileInputStream);
-					uncFolderLocation = properties.getProperty(DataAccessConstant.BASE_FOLDER_LOCATION);
+					uncFolderLocation.append(properties.getProperty(DataAccessConstant.BASE_FOLDER_LOCATION));
 				} catch (IOException e) {
-					log.error("Unable to retriving property file :" + e.getMessage(), e);
+					LOG.error("Unable to retriving property file :" + e.getMessage(), e);
 				}
 
 				if (newBatchClassToBeAdded != null && !newBatchClassToBeAdded.isEmpty()) {
 					for (BatchClass batchClass : newBatchClassToBeAdded) {
-						uncFolderLocation = uncFolderLocation + File.separator + new File(batchClass.getUncFolder()).getName();
-						batchClass.setUncFolder(uncFolderLocation);
-						File file = new File(uncFolderLocation);
-						if (!file.exists()) {
-							file.mkdir();
-						}
+						createUNCFolder(uncFolderLocation, batchClass);
 						batchClassService.createBatchClassWithoutWatch(batchClass);
 					}
 				}
-				log.info("Updating Batch Classes....");
+				LOG.info(UPDATING_BATCH_CLASSES);
 			}
+		}
+	}
+
+	private void createUNCFolder(StringBuffer uncFolderLocation, BatchClass batchClass) {
+		uncFolderLocation.append(File.separator);
+		uncFolderLocation.append(new File(batchClass.getUncFolder()).getName());
+		batchClass.setUncFolder(uncFolderLocation.toString());
+		File file = new File(uncFolderLocation.toString());
+		if (!file.exists()) {
+			file.mkdir();
 		}
 	}
 
@@ -348,17 +362,18 @@ public class ExecuteUpdatePatch {
 			newModulesMap = (Map<String, List<BatchClassModule>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, moduleFilePath);
 		} catch (IOException e) {
-			log.info("Error during reading the serialized file. ");
+			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE + e.getMessage(), e);
 		} catch (Exception e) {
-			log.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOG.error(ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE + e.getMessage(), e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					log.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOG.error(PROBLEM_CLOSING_STREAM_FOR_FILE + serializedFile.getName());
+				}
 			}
 		}
 
@@ -377,17 +392,18 @@ public class ExecuteUpdatePatch {
 			newBatchClassMap = (Map<String, List<BatchClass>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, batchClassFilePath);
 		} catch (IOException e) {
-			log.info("Error during reading the serialized file. ");
+			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
 		} catch (Exception e) {
-			log.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOG.error(ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE, e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					log.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOG.error(PROBLEM_CLOSING_STREAM_FOR_FILE + serializedFile.getName());
+				}
 			}
 		}
 
@@ -405,17 +421,18 @@ public class ExecuteUpdatePatch {
 					.deserialize(fileInputStream);
 			updateFile(serializedFile, pluginFilePath);
 		} catch (IOException e) {
-			log.info("Error during reading the serialized file. ");
+			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
 		} catch (Exception e) {
-			log.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOG.error(ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE, e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					log.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOG.error(PROBLEM_CLOSING_STREAM_FOR_FILE + serializedFile.getName());
+				}
 			}
 		}
 	}
@@ -431,17 +448,18 @@ public class ExecuteUpdatePatch {
 			newPluginConfigsMap = (Map<Integer, List<BatchClassPluginConfig>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, pluginConfigFilePath);
 		} catch (IOException e) {
-			log.info("Error during reading the serialized file. ");
+			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
 		} catch (Exception e) {
-			log.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOG.error(ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE, e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					log.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOG.error(PROBLEM_CLOSING_STREAM_FOR_FILE + serializedFile.getName());
+				}
 			}
 		}
 		return newPluginConfigsMap;
@@ -458,26 +476,28 @@ public class ExecuteUpdatePatch {
 			newModuleConfigsMap = (Map<Long, List<BatchClassModuleConfig>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, moduleConfigFilePath);
 		} catch (IOException e) {
-			log.info("Error during reading the serialized file. ");
+			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
 		} catch (Exception e) {
-			log.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOG.error(ERROR_DURING_DE_SERIALIZING_THE_PROPERTIES_FOR_DATABASE_UPGRADE, e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					log.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOG.error(PROBLEM_CLOSING_STREAM_FOR_FILE + serializedFile.getName());
+				}
 			}
 		}
 		return newModuleConfigsMap;
 	}
 
 	public void updatePluginConfig() throws CloneNotSupportedException {
+		Map<Integer, List<BatchClassPluginConfig>> newPluginConfigMap = new HashMap<Integer, List<BatchClassPluginConfig>>();
 		newPluginConfigMap = readPluginConfigSerializeFile();
 		if (newPluginConfigMap == null || newPluginConfigMap.isEmpty()) {
-			log.info("No data recovered from serialized file.");
+			LOG.info("No data recovered from serialized file.");
 			return;
 		}
 		for (Integer pluginId : newPluginConfigMap.keySet()) {
@@ -495,7 +515,7 @@ public class ExecuteUpdatePatch {
 					List<BatchClassPlugin> batchClassPlugins = bcm.getBatchClassPlugins();
 					for (BatchClassPlugin bcp : batchClassPlugins) {
 						if (bcp.getPlugin().getId() == plgId.longValue()) {
-							List<BatchClassPluginConfig> toBeAddedConfigs = newPluginConfigMap.get(new Integer(plgId));
+							List<BatchClassPluginConfig> toBeAddedConfigs = newPluginConfigMap.get(Integer.valueOf(plgId));
 							for (BatchClassPluginConfig bcpc : toBeAddedConfigs) {
 								boolean isPresnt = isBatchClassPluginConfigPresent(bcpc, bcp.getBatchClassPluginConfigs());
 								if (!isPresnt) {
@@ -516,9 +536,10 @@ public class ExecuteUpdatePatch {
 	}
 
 	public void updateModuleConfigs() {
+		Map<Long, List<BatchClassModuleConfig>> moduleIdVsBatchClassModuleConfigs = new HashMap<Long, List<BatchClassModuleConfig>>();
 		moduleIdVsBatchClassModuleConfigs = readModuleConfigSerializeFile();
 		if (moduleIdVsBatchClassModuleConfigs == null || moduleIdVsBatchClassModuleConfigs.isEmpty()) {
-			log.info("No Serialize file present for Module Configs... Returning..");
+			LOG.info("No Serialize file present for Module Configs... Returning..");
 			return;
 		}
 		for (Long pluginId : moduleIdVsBatchClassModuleConfigs.keySet()) {
@@ -533,7 +554,7 @@ public class ExecuteUpdatePatch {
 				List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
 				for (BatchClassModule bcm : batchClassModules) {
 					if (bcm.getModule().getId() == modId.longValue()) {
-						List<BatchClassModuleConfig> toBeAddedConfigs = moduleIdVsBatchClassModuleConfigs.get(new Long(modId));
+						List<BatchClassModuleConfig> toBeAddedConfigs = moduleIdVsBatchClassModuleConfigs.get(Long.valueOf(modId));
 						for (BatchClassModuleConfig bcmc : toBeAddedConfigs) {
 							boolean isPresnt = isBatchClassModuleConfigPresent(bcmc, bcm.getBatchClassModuleConfig());
 							if (!isPresnt) {
@@ -551,7 +572,7 @@ public class ExecuteUpdatePatch {
 				}
 			}
 		}
-		log.info("Updating Batch Classes....");
+		LOG.info(UPDATING_BATCH_CLASSES);
 		for (BatchClass batchClass : batchClasses) {
 			batchClass = batchClassService.merge(batchClass);
 		}
@@ -713,12 +734,12 @@ public class ExecuteUpdatePatch {
 			File dest = new File(filePath + "-executed");
 			boolean renameSuccess = serialFile.renameTo(dest);
 			if (renameSuccess) {
-				log.info(serialFile.getName() + " renamed successfully to " + dest.getName());
+				LOG.info(serialFile.getName() + " renamed successfully to " + dest.getName());
 			} else {
-				log.debug("Unable to rename the serialize file " + serialFile.getName() + " to " + dest.getName());
+				LOG.debug("Unable to rename the serialize file " + serialFile.getName() + " to " + dest.getName());
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 
 	}
@@ -734,7 +755,7 @@ public class ExecuteUpdatePatch {
 						isPresent = true;
 						break;
 					} else if (childKey == null && config.getModuleConfig() != null
-							&& childKey == config.getModuleConfig().getChildKey()
+							&& null == config.getModuleConfig().getChildKey()
 							&& batchClassModuleConfig.getModuleConfig().isMandatory() == config.getModuleConfig().isMandatory()) {
 						isPresent = true;
 						break;
@@ -745,3 +766,4 @@ public class ExecuteUpdatePatch {
 		return isPresent;
 	}
 }
+

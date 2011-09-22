@@ -58,17 +58,17 @@ import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 public class BatchClassEmailConfigServiceImpl extends DataAccessService implements BatchClassEmailConfigService {
 
 	@Autowired
-	BatchClassEmailConfigDao batConfigDao;
+	private BatchClassEmailConfigDao batConfigDao;
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
-	private Logger logger = LoggerFactory.getLogger(BatchClassEmailConfigServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassEmailConfigServiceImpl.class);
 
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(String batchClassIdentifier) {
-		logger.debug(batchClassIdentifier);
+		LOGGER.debug(batchClassIdentifier);
 		return batConfigDao.getEmailConfigByBatchClassIdentifier(batchClassIdentifier);
 	}
 

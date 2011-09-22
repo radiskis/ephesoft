@@ -64,7 +64,7 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegexValidationServiceImpl.class);
 
 	@Autowired
-	private RegexValidationDao RegexValidationDao;
+	private RegexValidationDao regexValidationDao;
 
 	/**
 	 * An api to fetch all KV Extraction by field type.
@@ -79,7 +79,7 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 		if (null == fieldType) {
 			LOGGER.info("Field Type object is null.");
 		} else {
-			RegexValidation = RegexValidationDao.getRegexValidationByFieldType(fieldType);
+			RegexValidation = regexValidationDao.getRegexValidationByFieldType(fieldType);
 		}
 		return RegexValidation;
 	}
@@ -95,7 +95,7 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 		if (null == RegexValidation) {
 			LOGGER.info("RegexValidation object is null.");
 		} else {
-			RegexValidationDao.insertRegexValidation(RegexValidation);
+			regexValidationDao.insertRegexValidation(RegexValidation);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 		if (null == RegexValidation) {
 			LOGGER.info("RegexValidation object is null.");
 		} else {
-			RegexValidationDao.updateRegexValidation(RegexValidation);
+			regexValidationDao.updateRegexValidation(RegexValidation);
 		}
 	}
 
@@ -125,7 +125,7 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 		if (null == RegexValidation) {
 			LOGGER.info("RegexValidation object is null.");
 		} else {
-			RegexValidationDao.removeRegexValidation(RegexValidation);
+			regexValidationDao.removeRegexValidation(RegexValidation);
 		}
 	}
 }

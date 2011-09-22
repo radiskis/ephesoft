@@ -35,8 +35,6 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
@@ -44,7 +42,7 @@ import com.ephesoft.dcma.da.dao.BatchClassModuleConfigDao;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 
 /**
- * This class is responsible to fetch data of import batch class config from data base.
+ * This class is responsible to fetch data of import batch class module config from data base.
  * This table is from developers perspective.
  * 
  * @author Ephesoft
@@ -53,6 +51,7 @@ import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 @Repository
 public class BatchClassModuleConfigDaoImpl extends HibernateDao<BatchClassModuleConfig> implements BatchClassModuleConfigDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
+	public BatchClassModuleConfigDaoImpl() {
+		super();		
+	}
 }

@@ -37,6 +37,7 @@ package com.ephesoft.dcma.ocr;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -217,13 +218,35 @@ public class OcrReader implements ICommonConstants {
 				}
 				LOGGER.info("command formed is :" + cmds[2]);
 				Process process = runtime.exec(cmds);
-				BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				String line = null;
-				do {
-					line = input.readLine();
-					LOGGER.debug(line);
-				} while (line != null);
 
+				InputStreamReader inputStreamReader = null;
+				BufferedReader input = null;
+				try {
+					inputStreamReader = new InputStreamReader(process.getInputStream());
+					input = new BufferedReader(inputStreamReader);
+					String line = null;
+					do {
+						line = input.readLine();
+						LOGGER.debug(line);
+					} while (line != null);
+				} catch (IOException e) {
+					LOGGER.error(e.getMessage(), e);
+				} finally {
+					if (input != null) {
+						try {
+							input.close();
+						} catch (IOException e) {
+							LOGGER.error(e.getMessage(), e);
+						}
+					}
+					if (inputStreamReader != null) {
+						try {
+							inputStreamReader.close();
+						} catch (IOException e) {
+							LOGGER.error(e.getMessage(), e);
+						}
+					}
+				}
 				LOGGER.info("Command " + i + " exited with error code no " + process.exitValue());
 			}
 
@@ -246,8 +269,7 @@ public class OcrReader implements ICommonConstants {
 		LOGGER.info("Started Processing image at " + new Date());
 
 		LOGGER.info("Initializing properties...");
-		String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, OCROPUS_PLUGIN,
-				OCRProperties.OCROPUS_VALID_EXTNS);
+		String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, OCROPUS_PLUGIN, OCRProperties.OCROPUS_VALID_EXTNS);
 		LOGGER.info("Properties Initialized Successfully");
 
 		String[] validExtensions = validExt.split(";");

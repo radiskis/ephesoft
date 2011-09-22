@@ -63,7 +63,18 @@ import com.ephesoft.dcma.da.domain.FieldType;
 @Repository
 public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTypeDao {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String REGEX_VALIDATION = "regexValidation";
+	private static final String NAME = "name";
+	private static final String BATCH_CLASS1_IDENTIFIER = "batchClass1.identifier";
+	private static final String BATCH_CLASS2_IDENTIFIER = "batchClass2.identifier";
+	private static final String BATCH_CLASS2 = "batchClass2";
+	private static final String BATCH_CLASS = "batchClass";
+	private static final String IDENTIFIER = "identifier";
+	private static final String BATCH_CLASS1 = "batchClass1";
+	private static final String DOC_TYPE_BATCH_CLASS = "docType.batchClass";
+	private static final String DOC_TYPE_NAME = "docType.name";
+	private static final String DOC_TYPE = "docType";
+	private static final Logger LOG = LoggerFactory.getLogger(FieldTypeDaoImpl.class);
 
 	/**
 	 * An api to fetch all Field types by document type name.
@@ -75,16 +86,16 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	@Override
 	public List<FieldType> getFdTypeByDocTypeNameForBatchInstance(String docTypeName, String batchInstanceIdentifier) {
 
-		log.info("batchInstanceID  : " + batchInstanceIdentifier);
+		LOG.info("batchInstanceID  : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-		subQuery.setProjection(Projections.property("batchClass2.identifier"));
-		criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 
 		return find(criteria);
 
@@ -93,17 +104,17 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	@Override
 	public FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier) {
 
-		log.info("batchInstanceID  : " + batchInstanceIdentifier);
+		LOG.info("batchInstanceID  : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", fieldTypeName));
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(NAME, fieldTypeName));
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-		subQuery.setProjection(Projections.property("batchClass2.identifier"));
-		criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 
 		return findSingle(criteria);
 
@@ -118,7 +129,7 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	@Override
 	public List<FieldType> getFdTypeByDocumentType(DocumentType documentType) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("docType", documentType));
+		criteria.add(Restrictions.eq(DOC_TYPE, documentType));
 		return find(criteria);
 	}
 
@@ -132,11 +143,11 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	 */
 	@Override
 	public List<FieldType> getFdTypeByDocumentTypeName(String docTypeName, String batchInstanceIdentifier, boolean isKVExtraction) {
-		log.info("batchInstanceID ID  : " + batchInstanceIdentifier);
+		LOG.info("batchInstanceID ID  : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 
 		if (isKVExtraction) {
 			criteria.setFetchMode("kvExtraction", FetchMode.JOIN);
@@ -144,10 +155,10 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		}
 
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-		subQuery.setProjection(Projections.property("batchClass2.identifier"));
-		criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 		return find(criteria);
 	}
 
@@ -161,20 +172,20 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	@Override
 	public List<FieldType> getFdTypeAndRegexValidationByDocTypeName(String docTypeName, String batchInstanceIdentifier) {
 
-		log.info("batchInstanceID ID  : " + batchInstanceIdentifier);
+		LOG.info("batchInstanceID ID  : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 
-		criteria.setFetchMode("regexValidation", FetchMode.JOIN);
+		criteria.setFetchMode(REGEX_VALIDATION, FetchMode.JOIN);
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.createAlias("batchClass", "batchClass2", JoinFragment.INNER_JOIN);
-		subQuery.setProjection(Projections.property("batchClass2.identifier"));
-		criteria.add(Subqueries.propertyEq("batchClass1.identifier", subQuery));
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchInstanceIdentifier));
+		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
+		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 
 		return find(criteria);
 
@@ -209,12 +220,12 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 
 	@Override
 	public List<FieldType> getFdTypeByDocumentTypeNameForBatchClass(String docTypeName, String batchClassIdentifier) {
-		log.info("batchClassID ID  : " + batchClassIdentifier);
+		LOG.info("batchClassID ID  : " + batchClassIdentifier);
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("docType", "docType", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("docType.name", docTypeName));
-		criteria.createAlias("docType.batchClass", "batchClass1", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass1.identifier", batchClassIdentifier));
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS1_IDENTIFIER, batchClassIdentifier));
 		return find(criteria);
 	}
 }

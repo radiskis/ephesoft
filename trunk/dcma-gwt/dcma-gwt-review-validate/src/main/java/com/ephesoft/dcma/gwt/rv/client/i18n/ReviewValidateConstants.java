@@ -296,4 +296,8 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 	String APP_CTRL_9 = "name_of_app_shortcut_ctrl_9";
 
 	String CONFIGURED_DIMENSIONS_DIALOG = "configurable-DialogBox";
+
+	String MODAL_WINDOW_SHORTCUTS ="modal_window_shortcuts";
+
+	String FUNCTION_KEY_SHORTCUTS = "function_key_shortcuts";
 }

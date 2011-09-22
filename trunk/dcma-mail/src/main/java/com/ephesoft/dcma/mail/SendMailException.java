@@ -35,14 +35,11 @@
 
 package com.ephesoft.dcma.mail;
 
+public class SendMailException extends RuntimeException {
 
-public class SendMailException extends RuntimeException
-{
+	private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 1L;
-
-    public SendMailException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+	public SendMailException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
 }

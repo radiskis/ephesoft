@@ -67,7 +67,7 @@ import com.ephesoft.dcma.util.FileUtils;
  * 
  * 
  */
-public class CmisTest extends AbstactCmisTest {
+public class CmisTest extends AbstractCmisTest {
 
 	/**
 	 * String constants.
@@ -230,7 +230,7 @@ public class CmisTest extends AbstactCmisTest {
 	/**
 	 * Variable for property file.
 	 */
-	private Properties prop = new Properties();
+	private final Properties prop = new Properties();
 	/**
 	 * Variable for initial property values.
 	 */

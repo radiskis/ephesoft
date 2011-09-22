@@ -51,13 +51,13 @@ public class BatchInstanceStatusBinding extends BasicTypeBinding {
 
 	protected AbstractDescriptor createDescriptor(String value, Element element, Parse parse) {
 		BatchInstanceStatus batchInstanceStatus;
+		BatchInstanceStatusDescriptor descriptor = null;
 		try {
 			batchInstanceStatus = BatchInstanceStatus.valueOf(value);
+			descriptor = new BatchInstanceStatusDescriptor(batchInstanceStatus);
 		} catch (IllegalArgumentException e) {
 			parse.addProblem(createValueExceptionMessage("'" + value + "' cannot be parsed to a BatchInstanceStatus", element),	element);
-			return null;
 		}
-		BatchInstanceStatusDescriptor descriptor = new BatchInstanceStatusDescriptor(batchInstanceStatus);
 		return descriptor;
 	}
 }

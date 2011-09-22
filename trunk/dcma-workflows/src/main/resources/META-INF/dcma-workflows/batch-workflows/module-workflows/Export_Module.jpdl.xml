@@ -3,50 +3,77 @@
 <process name="Export_Module" xmlns="http://jbpm.org/4.3/jpdl">
 
 	<start g="16,25,80,40">
-		<transition to="Scripting_Plugin"/>
+		<transition to="CSV_File_Creation_Plugin" />
 	</start>
 
-	<sub-process continue="async" g="128,16,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<parameter-in expr="Export_Module_Scripting_Plugin" subvar="backUpFileName"/>
-		<parameter-in expr="ScriptExport" subvar="scriptName"/>
-		<transition to="Image_Process_CreateMultiPage_Files_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="361,16,252,59" name="Image_Process_CreateMultiPage_Files_Plugin" sub-process-key="Image_Process_CreateMultiPage_Files_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Copy_Batch_XML_Files_Plugin"/>
-	</sub-process>	
-	
-	<sub-process continue="async" g="645,16,176,59" name="Copy_Batch_XML_Files_Plugin" sub-process-key="Copy_Batch_XML_Files_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Docushare_Export_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="853,16,176,59" name="Docushare_Export_Plugin" sub-process-key="Docushare_Export_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="CMIS_Export_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="853,16,176,59" name="NSI_Export_Plugin" sub-process-key="NSI_Export_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="CleanUp_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="1061,16,176,59" name="CMIS_Export_Plugin" sub-process-key="CMIS_Export_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Filebound_Export_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="1269,16,176,59" name="Filebound_Export_Plugin" sub-process-key="Filebound_Export_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="NSI_Export_Plugin"/>
-	</sub-process>
-	
-	<sub-process continue="async" g="1477,16,176,59" name="CleanUp_Plugin" sub-process-key="CleanUp_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="end"/>
+	<sub-process continue="async" g="128,16,201,59" name="Scripting_Plugin"
+		sub-process-key="Scripting_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in expr="Export_Module_Scripting_Plugin"
+			subvar="backUpFileName" />
+		<parameter-in expr="ScriptExport" subvar="scriptName" />
+		<transition to="Image_Process_CreateMultiPage_Files_Plugin" />
 	</sub-process>
 
-	<end g="1685,25,80,40" name="end"/>
+	<sub-process continue="async" g="361,16,252,59"
+		name="Image_Process_CreateMultiPage_Files_Plugin" sub-process-key="Image_Process_CreateMultiPage_Files_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="IBM_CM_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="645,16,176,59" name="CSV_File_Creation_Plugin"
+		sub-process-key="CSV_File_Creation_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Scripting_Plugin" />
+	</sub-process>
+	
+	<sub-process continue="async" g="645,16,176,59" name="IBM_CM_Plugin"
+		sub-process-key="IBM_CM_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Tabbed_Pdf_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="645,16,176,59" name="Tabbed_Pdf_Plugin"
+		sub-process-key="Tabbed_Pdf_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Copy_Batch_XML_Files_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="645,16,176,59"
+		name="Copy_Batch_XML_Files_Plugin" sub-process-key="Copy_Batch_XML_Files_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Docushare_Export_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="853,16,176,59" name="Docushare_Export_Plugin"
+		sub-process-key="Docushare_Export_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="CMIS_Export_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="853,16,176,59" name="NSI_Export_Plugin"
+		sub-process-key="NSI_Export_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="CleanUp_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="1061,16,176,59" name="CMIS_Export_Plugin"
+		sub-process-key="CMIS_Export_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Filebound_Export_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="1269,16,176,59" name="Filebound_Export_Plugin"
+		sub-process-key="Filebound_Export_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="NSI_Export_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="1477,16,176,59" name="CleanUp_Plugin"
+		sub-process-key="CleanUp_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="end" />
+	</sub-process>
+
+	<end g="1685,25,80,40" name="end" />
 </process>

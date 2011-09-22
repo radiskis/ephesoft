@@ -67,7 +67,8 @@
 		<constructor-arg type="java.lang.String" value="$batch{batch.test_table_folder_name}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.threadpool_lock_folder}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.add_new_table_script}" />
-		<constructor-arg type="java.lang.String" value="$batch{batch.test_folder}" />		
+		<constructor-arg type="java.lang.String" value="$batch{batch.test_folder}" />	
+		<constructor-arg type="java.lang.String" value="$batch{batch.script_properties_folder}" />	
 	</bean>
 
 	<bean id="hocrJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">

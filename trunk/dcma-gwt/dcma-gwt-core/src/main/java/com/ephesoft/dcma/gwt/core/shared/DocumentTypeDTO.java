@@ -68,6 +68,8 @@ public class DocumentTypeDTO implements IsSerializable {
 	private Map<String, TableInfoDTO> tableInfoMap = new LinkedHashMap<String, TableInfoDTO>();
 
 	private Map<String, FunctionKeyDTO> functionKeyMap = new LinkedHashMap<String, FunctionKeyDTO>();
+	
+	private boolean isHidden;
 
 	public BatchClassDTO getBatchClass() {
 		return batchClass;
@@ -313,4 +315,14 @@ public class DocumentTypeDTO implements IsSerializable {
 			}
 		return null;
 	}
+	
+	public boolean isHidden() {
+		return isHidden;
+	}
+
+	
+	public void setHidden(boolean isHidden) {
+		this.isHidden = isHidden;
+	}
+
 }

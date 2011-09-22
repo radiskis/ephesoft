@@ -79,6 +79,14 @@ import com.ephesoft.dcma.util.FileUtils;
 @Component
 public class BarcodeReader implements ICommonConstants {
 
+	private static final char DOT_DELIMITER = '.';
+
+	private static final String SEMICOLON_DELIMITER = ";";
+
+	private static final String EMPTY_STRING = "";
+
+	private static final int BARCODE_FIELD_SUFFIX = 1;
+
 	private static final String BARCODE_READER_PLUGIN = "BARCODE_READER";
 
 	/**
@@ -103,7 +111,7 @@ public class BarcodeReader implements ICommonConstants {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeReader.class);
 
-	private static final String ON = "ON";
+	private static final String SWITCH_ON = "ON";
 
 	/**
 	 * The prefix for name to be stored in batch xml.
@@ -212,10 +220,10 @@ public class BarcodeReader implements ICommonConstants {
 									docFieldType.setConfidence(Integer.valueOf(minConfidence));
 								}
 								Coordinates coordinates = new Coordinates();
-								coordinates.setX0(new BigInteger(String.valueOf((int) barCodeResults[k].getX0())));
-								coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResults[k].getX1())));
-								coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResults[k].getY0())));
-								coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResults[k].getY1())));
+								coordinates.setX0(new BigInteger(String.valueOf((int) barCodeResults[k].getX0Cord())));
+								coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResults[k].getX1Cord())));
+								coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResults[k].getY0Cord())));
+								coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResults[k].getY1Cord())));
 								CoordinatesList coordinatesList = new CoordinatesList();
 								coordinatesList.getCoordinates().add(coordinates);
 								docFieldType.setCoordinatesList(coordinatesList);
@@ -235,10 +243,10 @@ public class BarcodeReader implements ICommonConstants {
 									fieldType.setConfidence(Integer.valueOf(minConfidence));
 								}
 								Coordinates coordinates = new Coordinates();
-								coordinates.setX0(new BigInteger(String.valueOf((int) barCodeResults[k].getX0())));
-								coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResults[k].getX1())));
-								coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResults[k].getY0())));
-								coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResults[k].getY1())));
+								coordinates.setX0(new BigInteger(String.valueOf((int) barCodeResults[k].getX0Cord())));
+								coordinates.setX1(new BigInteger(String.valueOf((int) barCodeResults[k].getX1Cord())));
+								coordinates.setY0(new BigInteger(String.valueOf((int) barCodeResults[k].getY0Cord())));
+								coordinates.setY1(new BigInteger(String.valueOf((int) barCodeResults[k].getY1Cord())));
 								CoordinatesList coordinatesList = new CoordinatesList();
 								coordinatesList.getCoordinates().add(coordinates);
 								fieldType.setCoordinatesList(coordinatesList);
@@ -249,9 +257,9 @@ public class BarcodeReader implements ICommonConstants {
 						page.setPageLevelFields(pageLevelFields);
 					} else {
 						DocField docFieldType = new DocField();
-						docFieldType.setName(barcodeName + "1");
-						docFieldType.setValue("");
-						docFieldType.setType("");
+						docFieldType.setName(barcodeName + BARCODE_FIELD_SUFFIX);
+						docFieldType.setValue(EMPTY_STRING);
+						docFieldType.setType(EMPTY_STRING);
 						docFieldType.setConfidence(Integer.valueOf(minConfidence));
 						Coordinates coordinates = new Coordinates();
 						coordinates.setX0(new BigInteger(DEFAULT_COORDINATES_VALUE));
@@ -282,9 +290,8 @@ public class BarcodeReader implements ICommonConstants {
 	public void readBarcode(final String batchInstanceIdentifier, String pluginName) throws DCMAApplicationException {
 		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, BARCODE_READER_PLUGIN,
 				BarcodeProperties.BARCODE_SWITCH);
-		if (switchValue.equalsIgnoreCase(ON)) {
+		if (switchValue.equalsIgnoreCase(SWITCH_ON)) {
 			LOGGER.info("Started Processing image at " + new Date());
-
 			// Initialize properties
 			LOGGER.info("Initializing properties...");
 			String validExt = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, BARCODE_READER_PLUGIN,
@@ -296,21 +303,17 @@ public class BarcodeReader implements ICommonConstants {
 			String minConfidence = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, BARCODE_READER_PLUGIN,
 					BarcodeProperties.MIN_CONFIDENCE);
 			LOGGER.info("Properties Initialized Successfully");
-
-			String[] validExtensions = validExt.split(";");
-			String[] appReaderTypes = readerTypes.split(";");
+			String[] validExtensions = validExt.split(SEMICOLON_DELIMITER);
+			String[] appReaderTypes = readerTypes.split(SEMICOLON_DELIMITER);
 			String actualFolderLocation = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
 			List<String> allPages = null;
-
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
-
 			try {
 				allPages = findAllPagesFromXML(batch);
 			} catch (DCMAApplicationException e1) {
 				LOGGER.error("Exception while reading from XML" + e1.getMessage());
 				throw new DCMAApplicationException(e1.getMessage(), e1);
 			}
-
 			BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
 
 			String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
@@ -321,7 +324,6 @@ public class BarcodeReader implements ICommonConstants {
 				LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
 				throw new DCMABusinessException(ioe.getMessage(), ioe);
 			}
-
 			List<BarcodeExecutor> barcodeExecutorList = new ArrayList<BarcodeExecutor>();
 			if (!allPages.isEmpty()) {
 				for (int i = 0; i < allPages.size(); i++) {
@@ -330,7 +332,8 @@ public class BarcodeReader implements ICommonConstants {
 					boolean isFileValid = false;
 					if (validExtensions != null && validExtensions.length > 0) {
 						for (int l = 0; l < validExtensions.length; l++) {
-							if (eachPage.substring(eachPage.indexOf(".") + 1).equalsIgnoreCase(validExtensions[l])) {
+							if (eachPage.substring(eachPage.indexOf(DOT_DELIMITER) + BARCODE_FIELD_SUFFIX).equalsIgnoreCase(
+									validExtensions[l])) {
 								isFileValid = true;
 								break;
 							}
@@ -378,10 +381,8 @@ public class BarcodeReader implements ICommonConstants {
 				LOGGER.error("No pages found in batch XML.");
 				throw new DCMAApplicationException("No pages found in batch XML.");
 			}
-
 			LOGGER.info("Saving the data to disk");
 			batchSchemaService.updateBatch(batch);
-
 			LOGGER.info("Processing finished at " + new Date());
 		} else {
 			LOGGER.info("Skipping barcode classification. Switch set as off.");

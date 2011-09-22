@@ -37,13 +37,13 @@ package com.ephesoft.dcma.monitor;
 
 import java.io.File;
 
-public class FolderDetail implements Comparable<FolderDetail>{
+public class FolderDetail implements Comparable<FolderDetail> {
 
-	private String parentPath;
-	private String folderName;
-	private long creationTime;
-	
-	public FolderDetail(String parentPath, String folderName) {
+	final private String parentPath;
+	final private String folderName;
+	final private long creationTime;
+
+	public FolderDetail(final String parentPath, final String folderName) {
 		this.parentPath = parentPath;
 		this.folderName = folderName;
 		this.creationTime = System.currentTimeMillis();
@@ -60,14 +60,14 @@ public class FolderDetail implements Comparable<FolderDetail>{
 	public long getCreationTime() {
 		return creationTime;
 	}
-	
+
 	public String getFullPath() {
 		return parentPath + File.separator + folderName;
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((folderName == null) ? 0 : folderName.hashCode());
 		result = prime * result + ((parentPath == null) ? 0 : parentPath.hashCode());
@@ -76,30 +76,44 @@ public class FolderDetail implements Comparable<FolderDetail>{
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FolderDetail other = (FolderDetail) obj;
-		if (folderName == null) {
-			if (other.folderName != null)
-				return false;
-		} else if (!folderName.equals(other.folderName))
-			return false;
-		if (parentPath == null) {
-			if (other.parentPath != null)
-				return false;
-		} else if (!parentPath.equals(other.parentPath))
-			return false;
-		return true;
+		boolean isEqual = false;
+		if (this == obj) {
+			isEqual = true;
+		} else if (obj == null) {
+			isEqual = false;
+		} else if (getClass() != obj.getClass()) {
+			isEqual =  false;
+		} else {
+			FolderDetail other = (FolderDetail) obj;
+			if (folderName == null) {
+				if (other.folderName != null) {
+					isEqual = false;
+				}
+			} else if (!folderName.equals(other.folderName)) {
+				isEqual = false;
+			} else if (parentPath == null) {
+				if (other.parentPath != null) {
+					isEqual = false;
+				}
+			} else if (!parentPath.equals(other.parentPath)) {
+				isEqual = false;
+			}
+			isEqual = true;
+		}
+		return isEqual;
 	}
 
 	@Override
-	public int compareTo(FolderDetail o) {
-		if(this.equals(o)) return 0;
-		if(this.getCreationTime() < o.getCreationTime()) return -1;
-		return +1;
+	public int compareTo(final FolderDetail folderDetails) {
+		int isEqual;
+		if (this.equals(folderDetails)) {
+			isEqual = 0;
+		}
+		if (this.getCreationTime() < folderDetails.getCreationTime()) {
+			isEqual = -1;
+		}
+		isEqual = +1;
+		
+		return isEqual;
 	}
 }

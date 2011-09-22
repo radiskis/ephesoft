@@ -227,10 +227,10 @@ public interface BatchInstanceService {
 	/**
 	 * This method will update the status of batch instance for input id and status.
 	 * 
-	 * @param id String
+	 * @param identifier String
 	 * @param status String
 	 */
-	void updateBatchInstanceStatusByIdentifier(String id, String status);
+	void updateBatchInstanceStatusByIdentifier(String identifier, String status);
 
 	/**
 	 * This method will create a new batch instance.
@@ -275,7 +275,7 @@ public interface BatchInstanceService {
 	 * @param batchInstanceIdentifier
 	 * @return BatchInstance
 	 */
-	public BatchInstance getBatchInstanceByIdentifier(String batchInstanceIdentifier);
+	BatchInstance getBatchInstanceByIdentifier(String batchInstanceIdentifier);
 
 	/**
 	 * API to acquire a batch on the basis of batchInstanceIdentifier and userName.
@@ -284,7 +284,7 @@ public interface BatchInstanceService {
 	 * @param userName
 	 * @return TODO
 	 */
-	public BatchInstance acquireBatchInstance(String batchInstanceIdentifier, String currentUser) throws BatchAlreadyLockedException;
+	BatchInstance acquireBatchInstance(String batchInstanceIdentifier, String currentUser) throws BatchAlreadyLockedException;
 
 	/**
 	 * Unlocks the currently acquired batch by the user (currentUser).
@@ -292,14 +292,14 @@ public interface BatchInstanceService {
 	 * @param batchInstanceIdentifier
 	 * @param currentUser
 	 */
-	public void unlockCurrentBatchInstance(String batchInstanceIdentifier);
+	void unlockCurrentBatchInstance(String batchInstanceIdentifier);
 
 	/**
 	 * Unlocks all the batches acquired by the user.
 	 * 
 	 * @param currentUser
 	 */
-	public void unlockAllBatchInstancesForCurrentUser(String currentUser);
+	void unlockAllBatchInstancesForCurrentUser(String currentUser);
 
 	/**
 	 * API to get all batch instances which are currently being executed for a specific IP Address. Output will be all batch instances
@@ -308,19 +308,31 @@ public interface BatchInstanceService {
 	 * @param serverInfo
 	 * @return List<BatchInstance>
 	 */
-	public List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner);
+	List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner);
 
 	/**
 	 * API to get a batch by applying Hibernate level optimistic locking and to set lock owner ino db.
 	 * 
-	 * @param id
+	 * @param identifier
 	 * @param lockOwner
 	 * @throws LockAcquisitionException
 	 */
-	public void lockBatch(long id, ServerRegistry lockOwner) throws LockAcquisitionException;
+	void lockBatch(long identifier, ServerRegistry lockOwner) throws LockAcquisitionException;
 
-	void updateBatchInstanceStatus(BatchInstanceID ID, BatchInstanceStatus status);
+	/**
+	 * API to update the batch instance status 
+	 * 
+	 * @param identifier
+	 * @param status
+	 */
+	void updateBatchInstanceStatus(BatchInstanceID identifier, BatchInstanceStatus status);
 
+	/**
+	 * API to acquire lock on a batch instance
+	 * 
+	 * @param batchId
+	 * @throws LockAcquisitionException
+	 */
 	void lockBatch(long batchId) throws LockAcquisitionException;
 
 	/**
@@ -343,7 +355,7 @@ public interface BatchInstanceService {
 	 * @param uncFolder
 	 * @return List<BatchInstance> - List of all unfinished batch instances.
 	 */
-	public List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder);
+	List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder);
 	
 	/**
 	 * API to merge batch instance and returning updated batch instance.
@@ -351,14 +363,14 @@ public interface BatchInstanceService {
 	 * @param batchInstance
 	 * @return BatchInstance {@link BatchInstance}
 	 */
-	public BatchInstance merge(BatchInstance batchInstance);
+	BatchInstance merge(BatchInstance batchInstance);
 	
 	/**
 	 * API to get all unfinshedRemotelyExecutedBatchInstance.
 	 * 
 	 * @return List<BatchInstance> - List of batch instances.
 	 */
-	public List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance();
+	List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance();
 
 	/**
 	 * An api to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit

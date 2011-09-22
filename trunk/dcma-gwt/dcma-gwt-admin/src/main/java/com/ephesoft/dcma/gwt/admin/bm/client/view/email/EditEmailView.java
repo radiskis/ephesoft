@@ -60,58 +60,58 @@ public class EditEmailView extends View<EditEmailPresenter> {
 	}
 
 	@UiField
-	Label userNameLabel;
+	protected Label userNameLabel;
 	@UiField
-	Label userNameStar;
+	protected Label userNameStar;
 	@UiField
-	TextBox userName;
+	protected TextBox userName;
 
 	@UiField
-	Label passwordLabel;
+	protected Label passwordLabel;
 	@UiField
-	Label passwordStar;
+	protected Label passwordStar;
 	@UiField
-	TextBox password;
+	protected TextBox password;
 
 	@UiField
-	Label serverNameLabel;
+	protected Label serverNameLabel;
 	@UiField
-	Label serverNameStar;
+	protected Label serverNameStar;
 	@UiField
-	TextBox serverName;
+	protected TextBox serverName;
 
 	@UiField
-	Label serverTypeLabel;
+	protected Label serverTypeLabel;
 	@UiField
-	Label serverTypeStar;
+	protected Label serverTypeStar;
 	@UiField
-	TextBox serverType;
+	protected TextBox serverType;
 
 	@UiField
-	Label folderNameLabel;
+	protected Label folderNameLabel;
 	@UiField
-	Label folderNameStar;
+	protected Label folderNameStar;
 	@UiField
-	TextBox folderName;
+	protected TextBox folderName;
 
 	@UiField
-	Label isSSLLabel;
+	protected Label isSSLLabel;
 	// @UiField
 	// Label isSSLStar;
 	@UiField
-	CheckBox isSSL;
+	protected CheckBox isSSL;
 
 	@UiField
-	Label portNumberLabel;
+	protected Label portNumberLabel;
 	@UiField
-	Label portNumberStar;
+	protected Label portNumberStar;
 	@UiField
-	TextBox portNumber;
+	protected TextBox portNumber;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	private ValidatableWidget<TextBox> validateUserNameTextBox;
 	private ValidatableWidget<TextBox> validatePasswordTextBox;
@@ -121,12 +121,13 @@ public class EditEmailView extends View<EditEmailPresenter> {
 	private ValidatableWidget<TextBox> validatePortNumberTextBox;
 
 	@UiField
-	VerticalPanel editEmailViewPanel;
+	protected VerticalPanel editEmailViewPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditEmailView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 
@@ -186,12 +187,12 @@ public class EditEmailView extends View<EditEmailPresenter> {
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 

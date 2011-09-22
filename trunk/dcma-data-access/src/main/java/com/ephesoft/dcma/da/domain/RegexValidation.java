@@ -59,9 +59,6 @@ public class RegexValidation extends AbstractChangeableEntity implements Seriali
 	@Column(name = "pattern", nullable = false)
 	private String pattern;
 
-	public RegexValidation() {
-	}
-
 	/**
 	 * @return the fieldType
 	 */

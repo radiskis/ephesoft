@@ -98,7 +98,7 @@ public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditV
 							Integer numberOfItemSelected = docFieldWidgets.get(index).getListBoxwidget().getItemCount();
 							for (int i = 0; i < numberOfItemSelected; i++) {
 								if (docFieldWidgets.get(index).getListBoxwidget().isItemSelected(i)) {
-									selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(";");
+									selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(';');
 								}
 							}
 							String selectedItemString = selectedItem.toString();

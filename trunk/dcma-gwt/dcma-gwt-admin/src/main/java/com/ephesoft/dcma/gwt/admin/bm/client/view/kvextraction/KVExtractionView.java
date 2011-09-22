@@ -53,28 +53,29 @@ public class KVExtractionView extends View<KVExtractionPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, KVExtractionView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	KVExtractionDetailView kvextractionDetailView;
+	protected KVExtractionDetailView kvextractionDetailView;
 
 	@UiField
-	EditKVExtractionView editKVExtractionView;
+	protected EditKVExtractionView editKVExtractionView;
 
 	@UiField
-	VerticalPanel kvExtractionTypeVerticalPanel;
+	protected VerticalPanel kvExtractionTypeVerticalPanel;
 
 	@UiField
-	VerticalPanel kvTypeConfigVerticalPanel;
+	protected VerticalPanel kvTypeConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel kvConfigurationCaptionPanel;
+	protected CaptionPanel kvConfigurationCaptionPanel;
 
 	@UiField
-	Button editKVPropertiesButton;
+	protected Button editKVPropertiesButton;
 
 	public KVExtractionView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		kvConfigurationCaptionPanel.setCaptionHTML(AdminConstants.KVEXTRACTION_DETAILS_HTML);
 
 		editKVPropertiesButton.setText(AdminConstants.EDIT_BUTTON);

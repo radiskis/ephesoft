@@ -89,13 +89,19 @@ import com.ephesoft.dcma.util.FileUtils;
 @Component
 public final class FolderImporter implements ICommonConstants {
 
+	private static final String DOT_DELIMITER = ".";
+
+	private static final String SEMICOLON_DELIMITER = ";";
+
+	private static final String SER_EXTENSION = ";ser";
+
 	private static final String IMPORT_MULTIPAGE_FILES_PLUGIN = "IMPORT_MULTIPAGE_FILES";
 
 	private static final String IMPORT_BATCH_FOLDER_PLUGIN = "IMPORT_BATCH_FOLDER";
 
 	private static final String SERIALIZATION_EXT = ".ser";
 	private static final String BCF_SER_FILE_NAME = "BCF_ASSO";
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(FolderImporter.class);
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -206,17 +212,17 @@ public final class FolderImporter implements ICommonConstants {
 		fFolderToBeMoved = new File(sFolderToBeMoved);
 
 		// Initialize properties
-		logger.info("Initializing properties...");
+		LOGGER.info("Initializing properties...");
 		String validExt = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(), IMPORT_BATCH_FOLDER_PLUGIN,
 				FolderImporterProperties.FOLDER_IMPORTER_VALID_EXTNS);
-		logger.info("Properties Initialized Successfully");
+		LOGGER.info("Properties Initialized Successfully");
 
 		// ADD extension to the serialized file in case of Batch class field association
 		if (null != validExt) {
-			validExt = validExt + ";ser";
+			validExt = validExt + SER_EXTENSION;
 		}
 
-		String[] validExtensions = validExt.split(";");
+		String[] validExtensions = validExt.split(SEMICOLON_DELIMITER);
 		if (validExtensions == null || validExtensions.length == 0) {
 			throw new DCMABusinessException("Could not find validExtensions properties in the property file");
 		}
@@ -269,7 +275,7 @@ public final class FolderImporter implements ICommonConstants {
 		List<Page> listOfPages = pages.getPage();
 		Arrays.sort(files);
 
-		logger.info("Starting rename of folder <<" + fMoveToFolder + ">>" + " total number of files=" + files.length);
+		LOGGER.info("Starting rename of folder <<" + fMoveToFolder + ">>" + " total number of files=" + files.length);
 		int pageId = 0;
 		for (String fileName : files) {
 			File movedFile = new File(fMoveToFolder.getAbsolutePath() + File.separator + fileName);
@@ -303,7 +309,7 @@ public final class FolderImporter implements ICommonConstants {
 
 		List<Document> listOfDocuments = documents.getDocument();
 		Document document = objectFactory.createDocument();
-		document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + "0");
+		document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + IFolderImporterConstants.ZERO);
 		document.setConfidence(IFolderImporterConstants.ZERO);
 		document.setType(EphesoftProperty.UNKNOWN.getProperty());
 		document.setPages(pages);
@@ -357,7 +363,7 @@ public final class FolderImporter implements ICommonConstants {
 		if (strArr.length > 2) {
 			extension = strArr[strArr.length - 1];
 		}
-		return "." + extension;
+		return DOT_DELIMITER + extension;
 	}
 
 	/**
@@ -379,33 +385,33 @@ public final class FolderImporter implements ICommonConstants {
 
 			String[] files = srcPath.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
 					FileType.TIFF.getExtension(), FileType.SER.getExtension()));
-			if (null == files || files.length == 0) {
+			if (null == files || files.length == IFolderImporterConstants.ZERO) {
 				throw new DCMABusinessException("Source directory is empty" + srcPath);
 			}
 
 			Arrays.sort(files);
-			logger.info("Starting copy of folder <<" + srcPath + ">>" + " total number of files=" + files.length);
+			LOGGER.info("Starting copy of folder <<" + srcPath + ">>" + " total number of files=" + files.length);
 			for (String fileName : files) {
-				logger.info("\tcopying file " + fileName);
+				LOGGER.info("\tcopying file " + fileName);
 				copyDirectoryWithContents(new File(srcPath, fileName), new File(dstPath, fileName));
 			}
-			logger.info("Files copied sucsessfully to folder <<" + dstPath + ">>" + " total number of files=" + files.length);
+			LOGGER.info("Files copied sucsessfully to folder <<" + dstPath + ">>" + " total number of files=" + files.length);
 
 		} else {
 			if (!srcPath.exists()) {
-				logger.error("File or directory does not exist.");
+				LOGGER.error("File or directory does not exist.");
 				throw new DCMABusinessException("Source file does not exist Path=" + srcPath);
 			} else {
-				InputStream in = new FileInputStream(srcPath);
+				InputStream inStream = new FileInputStream(srcPath);
 				OutputStream out = new FileOutputStream(dstPath);
 				// Transfer bytes from in to out
 				byte[] buf = new byte[IFolderImporterConstants.KBYTE];
 				int len;
-				while ((len = in.read(buf)) > 0) {
+				while ((len = inStream.read(buf)) > 0) {
 					out.write(buf, 0, len);
 				}
-				if (in != null) {
-					in.close();
+				if (inStream != null) {
+					inStream.close();
 				}
 				if (out != null) {
 					out.close();
@@ -424,7 +430,7 @@ public final class FolderImporter implements ICommonConstants {
 	 */
 	private boolean isFolderValid(final String sFolderToBeMoved, String[] validExtensions) {
 		boolean folderValid = true;
-		logger.info("Validating buisiness Rules for folder <<" + sFolderToBeMoved + ">>");
+		LOGGER.info("Validating buisiness Rules for folder <<" + sFolderToBeMoved + ">>");
 
 		File fFolderToBeMoved = new File(sFolderToBeMoved);
 		String[] files = fFolderToBeMoved.list();
@@ -432,7 +438,7 @@ public final class FolderImporter implements ICommonConstants {
 
 		// Do not Move if Folder Empty
 		if (files.length == 0) {
-			logger.info("\tBuisiness Rule Violation --Empty Folder--  Folder" + fFolderToBeMoved + " will not be moved");
+			LOGGER.info("\tBuisiness Rule Violation --Empty Folder--  Folder" + fFolderToBeMoved + " will not be moved");
 			folderValid = false;
 		}
 
@@ -440,7 +446,7 @@ public final class FolderImporter implements ICommonConstants {
 			File indivisualFile = new File(fFolderToBeMoved, fileName);
 
 			if (indivisualFile.isDirectory()) {
-				logger.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
+				LOGGER.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
 						+ " will not be moved");
 				folderValid = false;
 				break;
@@ -449,18 +455,18 @@ public final class FolderImporter implements ICommonConstants {
 			String nameOfFile = fileName;
 			boolean invalidFileExtension = true;
 			for (String validExt : validExtensions) {
-				if (nameOfFile.substring(nameOfFile.indexOf(".") + 1).equalsIgnoreCase(validExt)) {
+				if (nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
 					invalidFileExtension = false;
 				}
 
 			}
 			if (invalidFileExtension) {
-				logger.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions-- "
+				LOGGER.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions-- "
 						+ indivisualFile.getAbsolutePath() + " will not be moved");
 			}
 
 		}
-		logger.info("Folder <<" + sFolderToBeMoved + ">> is valid");
+		LOGGER.info("Folder <<" + sFolderToBeMoved + ">> is valid");
 		return folderValid;
 
 	}
@@ -495,25 +501,25 @@ public final class FolderImporter implements ICommonConstants {
 		Arrays.sort(listOfFiles);
 		Pages pages = new Pages();
 		List<Page> listOfPages = pages.getPage();
-		int i = 0;
+		int identifierValue = 0;
 		for (String fileName : listOfFiles) {
 			Page pageType = objectFactory.createPage();
-			pageType.setIdentifier(EphesoftProperty.PAGE.getProperty() + i);
+			pageType.setIdentifier(EphesoftProperty.PAGE.getProperty() + identifierValue);
 			pageType.setNewFileName(fileName);
 			String[] strArr = fileName.split(batchInstanceIdentifier + "_");
 			pageType.setOldFileName(strArr[1]);
 			pageType.setDirection(Direction.NORTH);
 			pageType.setIsRotated(false);
 			listOfPages.add(pageType);
-			i++;
+			identifierValue++;
 		}
 
 		Documents documents = new Documents();
 		BatchLevelFields batchLevelFields = new BatchLevelFields();
-		if (listOfFiles.length > 0) {
+		if (listOfFiles.length > IFolderImporterConstants.ZERO) {
 			List<Document> listOfDocuments = documents.getDocument();
 			Document document = objectFactory.createDocument();
-			document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + "1");
+			document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + IFolderImporterConstants.ONE);
 			document.setConfidence(IFolderImporterConstants.ZERO);
 			document.setType(EphesoftProperty.UNKNOWN.getProperty());
 			document.setPages(pages);
@@ -547,17 +553,18 @@ public final class FolderImporter implements ICommonConstants {
 			batchClassFieldList = (ArrayList<BatchClassField>) SerializationUtils.deserialize(fileInputStream);
 			// updateFile(serializedFile, serializedFilePath);
 		} catch (IOException e) {
-			logger.info("Error during reading the serialized file. ");
+			LOGGER.info("Error during reading the serialized file. ");
 		} catch (Exception e) {
-			logger.error("Error during de-serializing the properties for Database Upgrade: ", e);
+			LOGGER.error("Error during de-serializing the properties for Database Upgrade: ", e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
 			} catch (Exception e) {
-				if (serializedFile != null)
-					logger.error("Problem closing stream for file :" + serializedFile.getName());
+				if (serializedFile != null) {
+					LOGGER.error("Problem closing stream for file :" + serializedFile.getName());
+				}
 			}
 		}
 
@@ -594,75 +601,77 @@ public final class FolderImporter implements ICommonConstants {
 		BatchClass batchClass = batchInstance.getBatchClass();
 		String importMultiPage = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(),
 				IMPORT_MULTIPAGE_FILES_PLUGIN, FolderImporterProperties.FOLDER_IMPORTER_MULTI_PAGE_IMPORT);
-		if (!(importMultiPage.equalsIgnoreCase("true") || importMultiPage.equalsIgnoreCase("YES")))
+		if (!(importMultiPage.equalsIgnoreCase(IFolderImporterConstants.TRUE) || importMultiPage
+				.equalsIgnoreCase(IFolderImporterConstants.YES))) {
 			return;
-		File folder = new File(folderPath);
-		if (folder == null)
-			return;
-		String[] folderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
-				FileType.TIFF.getExtension()));
-
-		String folderIgnoreCharList = getFolderIgnoreCharList();
-		if (null == folderIgnoreCharList || getIgnoreReplaceChar() == null || folderIgnoreCharList.isEmpty()
-				|| getIgnoreReplaceChar().isEmpty() || getIgnoreReplaceChar().length() > 1) {
-			throw new DCMAException("Invalid property file configuration...");
 		}
+		File folder = new File(folderPath);
+		if (folder != null) {
+			String[] folderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
+					FileType.TIFF.getExtension()));
 
-		String fdIgList[] = folderIgnoreCharList.split(";");
-		List<File> deleteFileList = new ArrayList<File>();
+			String folderIgnoreCharList = getFolderIgnoreCharList();
+			if (null == folderIgnoreCharList || getIgnoreReplaceChar() == null || folderIgnoreCharList.isEmpty()
+					|| getIgnoreReplaceChar().isEmpty() || getIgnoreReplaceChar().length() > 1) {
+				throw new DCMAException("Invalid property file configuration...");
+			}
 
-		boolean isFound = false;
-		BatchInstanceThread threadList = new BatchInstanceThread();
+			String fdIgList[] = folderIgnoreCharList.split(SEMICOLON_DELIMITER);
+			List<File> deleteFileList = new ArrayList<File>();
 
-		if (folderList != null) {
-			for (String string : folderList) {
+			boolean isFound = false;
+			BatchInstanceThread threadList = new BatchInstanceThread();
 
-				if (string == null || string.isEmpty()) {
-					continue;
-				}
+			if (folderList != null) {
+				for (String string : folderList) {
 
-				try {
-					isFound = false;
-					File fileOriginal = new File(folderPath + File.separator + string);
-					File fileNew = null;
+					if (string == null || string.isEmpty()) {
+						continue;
+					}
 
-					for (String nameStr : fdIgList) {
-						if (string.contains(nameStr)) {
-							isFound = true;
-							string = string.replaceAll(nameStr, getIgnoreReplaceChar());
+					try {
+						isFound = false;
+						File fileOriginal = new File(folderPath + File.separator + string);
+						File fileNew = null;
+
+						for (String nameStr : fdIgList) {
+							if (string.contains(nameStr)) {
+								isFound = true;
+								string = string.replaceAll(nameStr, getIgnoreReplaceChar());
+							}
 						}
-					}
 
-					if (isFound) {
-						fileNew = new File(folderPath + File.separator + string);
-						fileOriginal.renameTo(fileNew);
+						if (isFound) {
+							fileNew = new File(folderPath + File.separator + string);
+							fileOriginal.renameTo(fileNew);
 
-						logger.info("Converting multi page file : " + fileNew.getAbsolutePath());
-						imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, threadList);
-						deleteFileList.add(fileNew);
-					} else {
-						logger.info("Converting multi page file : " + fileOriginal.getAbsolutePath());
-						imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, threadList);
-						deleteFileList.add(fileOriginal);
+							LOGGER.info("Converting multi page file : " + fileNew.getAbsolutePath());
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, threadList);
+							deleteFileList.add(fileNew);
+						} else {
+							LOGGER.info("Converting multi page file : " + fileOriginal.getAbsolutePath());
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, threadList);
+							deleteFileList.add(fileOriginal);
+						}
+					} catch (Exception e) {
+						LOGGER.error("Error in converting multi page file to single page tiff files", e);
+						throw new DCMAException("Error in breaking image to single pages " + e.getMessage(), e);
 					}
-				} catch (Exception e) {
-					logger.error("Error in converting multi page file to single page tiff files", e);
-					throw new DCMAException("Error in breaking image to single pages " + e.getMessage());
 				}
-			}
-			try {
-				logger.info("Executing conversion of multi page file using thread pool");
-				threadList.execute();
-				logger.info("Completed conversion of multi page file using thread pool");
-			} catch (DCMAApplicationException e) {
-				logger.error(e.getMessage(), e);
-				throw new DCMAException(e.getMessage(), e);
-			}
-			// Clean up operation
-			logger.info("Cleaning up the old files.");
-			for (File file : deleteFileList) {
-				boolean isDeleted = file.delete();
-				logger.debug(" File " + file.getAbsolutePath() + " deleted " + isDeleted);
+				try {
+					LOGGER.info("Executing conversion of multi page file using thread pool");
+					threadList.execute();
+					LOGGER.info("Completed conversion of multi page file using thread pool");
+				} catch (DCMAApplicationException e) {
+					LOGGER.error(e.getMessage(), e);
+					throw new DCMAException(e.getMessage(), e);
+				}
+				// Clean up operation
+				LOGGER.info("Cleaning up the old files.");
+				for (File file : deleteFileList) {
+					boolean isDeleted = file.delete();
+					LOGGER.debug(" File " + file.getAbsolutePath() + " deleted " + isDeleted);
+				}
 			}
 		}
 	}

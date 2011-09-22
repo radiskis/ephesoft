@@ -71,9 +71,6 @@ public class TableColumnsInfo extends AbstractChangeableEntity implements Serial
 	@Column(name = "is_required", columnDefinition = "bit(1) default false")
 	private boolean isRequired;
 
-	public TableColumnsInfo() {
-	}
-
 	public TableInfo getTableInfo() {
 		return tableInfo;
 	}

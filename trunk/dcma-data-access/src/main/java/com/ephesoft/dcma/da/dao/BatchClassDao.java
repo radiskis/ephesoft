@@ -73,14 +73,14 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClasses();
+	List<BatchClass> getAllBatchClasses();
 
 	/**
 	 * This API will fetch all the unlocked batch classes.
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllUnlockedBatchClasses();
+	List<BatchClass> getAllUnlockedBatchClasses();
 
 	/**
 	 * API to fetch a batch class by Identifier.
@@ -88,7 +88,7 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * @param batchClassId
 	 * @return BatchClass
 	 */
-	public BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
+	BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
 
 	/**
 	 * This method will update the existing batch class.
@@ -103,14 +103,14 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * @param currentUser
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClassesForCurrentUser(String currentUser);
+	List<BatchClass> getAllBatchClassesForCurrentUser(String currentUser);
 
 	/**
 	 * This API will fetch all the unc folder paths.
 	 * 
 	 * @return List<String>
 	 */
-	public List<String> getAllUNCFolderPaths();
+	List<String> getAllUNCFolderPaths();
 
 	/**
 	 * API to get the list of Batch Classes specifying startindex, no of results and sorting if any.
@@ -120,35 +120,35 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * @param order
 	 * @return List of batch class.
 	 */
-	public List<BatchClass> getBatchClassList(int startIndex, int maxResults, List<Order> order);
+	List<BatchClass> getBatchClassList(int startIndex, int maxResults, List<Order> order);
 
 	/**
 	 * This API will fetch all the batch classes of current user role.
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClassesByUserRoles(Set<String> userRoles);
+	List<BatchClass> getAllBatchClassesByUserRoles(Set<String> userRoles);
 
 	/**
 	 * This API will fetch the size of batchclass.
 	 * 
 	 * @return batchClass size
 	 */
-	public int getAllBatchClassCountExcludeDeleted();
+	int getAllBatchClassCountExcludeDeleted();
 
 	/**
 	 * This API will fetch the batch class list excluding the deleted batch class
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllBatchClassExcludeDeleted();
+	List<BatchClass> getAllBatchClassExcludeDeleted();
 
 	/**
 	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class
 	 * 
 	 * @return List<BatchClass>
 	 */
-	public List<BatchClass> getAllLoadedBatchClassExcludeDeleted();
+	List<BatchClass> getAllLoadedBatchClassExcludeDeleted();
 
 
 	/** API to fetch the UNC folders for a batch class name

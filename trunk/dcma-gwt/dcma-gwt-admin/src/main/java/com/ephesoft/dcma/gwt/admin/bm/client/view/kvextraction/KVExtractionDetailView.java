@@ -53,37 +53,41 @@ public class KVExtractionDetailView extends View<KVExtractionDetailPresenter> {
 	}
 
 	@UiField
-	Label keyPatternLabel;
+	protected Label keyPatternLabel;
 
 	@UiField
-	Label keyPattern;
+	protected Label keyPattern;
 
 	@UiField
-	Label valuePatternLabel;
+	protected Label valuePatternLabel;
 
 	@UiField
-	Label valuePattern;
+	protected Label valuePattern;
 
 	@UiField
-	Label locationLabel;
+	protected Label locationLabel;
 
 	@UiField
-	Label location;
-	
-	@UiField
-	Label noOfWordsLabel;
-	
-	@UiField
-	Label noOfWords;
+	protected Label location;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	@UiField
+	protected Label noOfWordsLabel;
+
+	@UiField
+	protected Label noOfWords;
+
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public KVExtractionDetailView() {
-		initWidget(binder.createAndBindUi(this));
-		keyPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KEY_PATTERN)+AdminConstants.COLON);
-		valuePatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VALUE_PATTERN)+AdminConstants.COLON);
-		locationLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION)+AdminConstants.COLON);
-		noOfWordsLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NO_OF_WORDS)+AdminConstants.COLON);
+		super();
+		initWidget(BINDER.createAndBindUi(this));
+		keyPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KEY_PATTERN)
+				+ AdminConstants.COLON);
+		valuePatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VALUE_PATTERN)
+				+ AdminConstants.COLON);
+		locationLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION) + AdminConstants.COLON);
+		noOfWordsLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NO_OF_WORDS)
+				+ AdminConstants.COLON);
 
 		keyPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		valuePatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -104,13 +108,13 @@ public class KVExtractionDetailView extends View<KVExtractionDetailPresenter> {
 	}
 
 	public void setlocation(LocationType location) {
-		if (location != null)
+		if (location != null) {
 			this.location.setText(location.name());
-		else
+		} else {
 			this.location.setText(LocationType.LEFT.name());
+		}
 	}
-	
-	
+
 	public void setNoOfWords(String noOfWords) {
 		this.noOfWords.setText(noOfWords);
 	}

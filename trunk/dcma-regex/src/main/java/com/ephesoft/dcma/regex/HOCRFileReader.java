@@ -78,11 +78,15 @@ public final class HOCRFileReader {
 	 * 
 	 * @return readerHOCRFile HOCRFileReader
 	 */
-	public static synchronized HOCRFileReader getInstance() {
+	public static HOCRFileReader getInstance() {
 
 		if (readerHOCRFile == null) {
-			readerHOCRFile = new HOCRFileReader();
-			LOGGER.debug("Create the instance HOCRFileReader.");
+			synchronized (HOCRFileReader.class) {
+				if (readerHOCRFile == null) {
+					readerHOCRFile = new HOCRFileReader();
+					LOGGER.debug("Create the instance HOCRFileReader.");
+				}
+			}
 		}
 		return readerHOCRFile;
 	}
@@ -103,7 +107,7 @@ public final class HOCRFileReader {
 		}
 
 		final StringBuffer infoHOCRFile = new StringBuffer();
-		FileInputStream fstream  = null;
+		FileInputStream fstream = null;
 		DataInputStream dataInStr = null;
 		BufferedReader bufReader = null;
 		try {
@@ -122,27 +126,26 @@ public final class HOCRFileReader {
 			// Catch exception if any
 			LOGGER.error("Error: " + e.getMessage());
 			throw new DCMAApplicationException(e.getMessage(), e);
-		}
-		finally {
-			if(fstream != null) {
+		} finally {
+			if (fstream != null) {
 				try {
 					fstream.close();
 				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage() , e);
+					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
 				}
 			}
-			if(dataInStr != null) {
+			if (dataInStr != null) {
 				try {
 					dataInStr.close();
 				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage() , e);
+					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
 				}
 			}
-			if(bufReader != null) {
+			if (bufReader != null) {
 				try {
 					bufReader.close();
 				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage() , e);
+					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
 				}
 			}
 		}

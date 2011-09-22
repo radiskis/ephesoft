@@ -92,103 +92,103 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 	}
 
 	@UiField
-	LayoutPanel tabLayoutPanel;
+	protected LayoutPanel tabLayoutPanel;
 
 	@UiField
-	BatchClassBreadCrumbView batchClassBreadCrumbView;
+	protected BatchClassBreadCrumbView batchClassBreadCrumbView;
 
 	@UiField
-	BatchClassView batchClassView;
+	protected BatchClassView batchClassView;
 
 	@UiField
-	ModuleView moduleView;
+	protected ModuleView moduleView;
 
 	@UiField
-	PluginView pluginView;
+	protected PluginView pluginView;
 
 	@UiField
-	DocumentTypeView documentTypeView;
+	protected DocumentTypeView documentTypeView;
 
 	@UiField
-	EmailView emailView;
+	protected EmailView emailView;
 
 	@UiField
-	BatchClassFieldView batchClassFieldView;
+	protected BatchClassFieldView batchClassFieldView;
 
 	@UiField
-	DockLayoutPanel mainPanel;
+	protected DockLayoutPanel mainPanel;
 
 	@UiField
-	FuzzyDBPluginView fuzzyDBPluginView;
+	protected FuzzyDBPluginView fuzzyDBPluginView;
 
 	@UiField
-	DocTypeFieldsMappingView docTypeFieldsMappingView;
+	protected DocTypeFieldsMappingView docTypeFieldsMappingView;
 
 	@UiField
-	FieldTypeView fieldTypeView;
+	protected FieldTypeView fieldTypeView;
 
 	@UiField
-	FunctionKeyView functionKeyView;
+	protected FunctionKeyView functionKeyView;
 
 	@UiField
-	TableInfoView tableInfoView;
+	protected TableInfoView tableInfoView;
 
 	@UiField
-	DocTypeMappingView docTypeMappingView;
+	protected DocTypeMappingView docTypeMappingView;
 
 	@UiField
-	KVExtractionView kvExtractionView;
+	protected KVExtractionView kvExtractionView;
 
 	@UiField
-	TableColumnInfoView tableColumnInfoView;
+	protected TableColumnInfoView tableColumnInfoView;
 
 	@UiField
-	RegexView regexView;
+	protected RegexView regexView;
 
 	@UiField
-	KV_PP_PropertiesView kvPPPropertiesView;
+	protected KV_PP_PropertiesView kvPPPropertiesView;
 
 	@UiField
-	KV_PP_AddEditListView kvPPAddEditListView;
+	protected KV_PP_AddEditListView kvPPAddEditListView;
 
 	@UiField
-	AdvancedKVExtractionView advancedKVExtractionView;
+	protected AdvancedKVExtractionView advancedKVExtractionView;
 
-	private LayoutPanel batchListPanel;
+	protected final LayoutPanel batchListPanel;
 
-	private HorizontalPanel buttonPanel;
+	private final HorizontalPanel buttonPanel;
 
-	BatchClassListView batchClassListView;
-
-	@UiField
-	HorizontalPanel bottomButtons;
+	private BatchClassListView batchClassListView;
 
 	@UiField
-	Button submit;
+	protected HorizontalPanel bottomButtons;
 
 	@UiField
-	Button cancel;
+	protected Button submit;
 
 	@UiField
-	Button sample;
+	protected Button cancel;
 
 	@UiField
-	Button learn;
+	protected Button sample;
 
 	@UiField
-	Button learnDB;
+	protected Button learn;
 
 	@UiField
-	DockLayoutPanel mainDockPanel;
+	protected Button learnDB;
 
 	@UiField
-	Button apply;
+	protected DockLayoutPanel mainDockPanel;
 
 	@UiField
-	VerticalPanel bottomPanel;
+	protected Button apply;
 
 	@UiField
-	HorizontalPanel rightButtons;
+	protected VerticalPanel bottomPanel;
+
+	@UiField
+	protected HorizontalPanel rightButtons;
 
 	private Button edit;
 	private Button copy;
@@ -197,10 +197,10 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 
 	private Button importButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public BatchClassManagementView() {
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		edit = new Button();
 		copy = new Button();

@@ -91,7 +91,7 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private String ignoreAttachmentExtensions;
+	private String supportedAttachmentExtensions;
 
 	@Override
 	public void processMails() {
@@ -152,7 +152,8 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		boolean isFileValid = true;
 		if (fileName != null && !fileName.isEmpty()) {
 			isFileValid = fileValidityCheck(fileName);
-			if (!isFileValid) {
+			if (!isFileValid || (!fileName.toLowerCase().contains(FileType.TIF.getExtension()))
+					|| !(fileName.toLowerCase().contains(FileType.PDF.getExtension()))) {
 				File errorPDFFile = new File(defaultFolderLocation + File.separator + "error.pdf");
 				try {
 					FileUtils.copyFile(errorPDFFile, new File(outputFilePath + File.separator + ZZZZZ_ATTACHMENT_PDF));
@@ -168,11 +169,10 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 			outputFilePath = file.getPath();
 			if (isFileValid) {
 				outputFilePath = FileUtils.changeFileExtension(outputFilePath, FileType.PDF.getExtension());
-			}
-			String inputFileURL = batchSchemaService.getHttpEmailFolderPath() + "/" + file.getParentFile().getName() + "/"
-					+ file.getName();
-			openOfficeConvertor.convert(inputFileURL, outputFilePath, FileType.PDF);
-			if (isFileValid) {
+				String inputFileURL = batchSchemaService.getHttpEmailFolderPath() + "/" + file.getParentFile().getName() + "/"
+						+ file.getName();
+				openOfficeConvertor.convert(inputFileURL, outputFilePath, FileType.PDF);
+
 				file.delete();
 			}
 		}
@@ -209,13 +209,13 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 	}
 
 	private boolean fileValidityCheck(String fileName) {
-		StringTokenizer tokenizer = new StringTokenizer(ignoreAttachmentExtensions, EXTENSION_SEPARATOR_CONSTANT);
+		StringTokenizer tokenizer = new StringTokenizer(supportedAttachmentExtensions, EXTENSION_SEPARATOR_CONSTANT);
 		String attachmentExtension = fileName.substring(fileName.lastIndexOf(DOT_SEPARATOR) + 1);
-		boolean isFileValid = true;
+		boolean isFileValid = false;
 		while (tokenizer.hasMoreTokens()) {
 			String inValidExtension = tokenizer.nextToken();
 			if (attachmentExtension.equalsIgnoreCase(inValidExtension)) {
-				isFileValid = false;
+				isFileValid = true;
 				break;
 			}
 		}
@@ -223,8 +223,8 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		return isFileValid;
 	}
 
-	public void setIgnoreAttachmentExtensions(String ignoreAttachmentExtensions) {
-		this.ignoreAttachmentExtensions = ignoreAttachmentExtensions;
+	public void setSupportedAttachmentExtensions(String supportedAttachmentExtensions) {
+		this.supportedAttachmentExtensions = supportedAttachmentExtensions;
 	}
 
 }

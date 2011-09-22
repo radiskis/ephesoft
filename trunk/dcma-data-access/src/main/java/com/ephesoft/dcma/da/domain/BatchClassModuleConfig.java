@@ -64,9 +64,6 @@ public class BatchClassModuleConfig extends AbstractChangeableEntity implements 
 	@JoinColumn(name = "module_config_id")
 	private ModuleConfig moduleConfig;
 
-	public BatchClassModuleConfig() {
-	}
-
 	public BatchClassModule getBatchClassModule() {
 		return batchClassModule;
 	}

@@ -76,12 +76,12 @@ public class PluginConfig extends AbstractChangeableEntity {
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "plugin_config_id")
 	private List<PluginConfigSampleValue> sampleValue;
-	
+
 	@Enumerated(EnumType.STRING)
-	@Column(name="config_datatype")
+	@Column(name = "config_datatype")
 	private DataType dataType;
-	
-	@Column(name="config_multivalue")
+
+	@Column(name = "config_multivalue")
 	private Boolean multiValue;
 
 	public Plugin getPlugin() {
@@ -110,9 +110,10 @@ public class PluginConfig extends AbstractChangeableEntity {
 
 	public List<String> getSampleValue() {
 		List<String> returnList = new ArrayList<String>();
-		if (sampleValue!=null && !sampleValue.isEmpty()) {
-		for (PluginConfigSampleValue pluginConfigSampleValue: sampleValue)
-			returnList.add(pluginConfigSampleValue.getSample_value());
+		if (sampleValue != null && !sampleValue.isEmpty()) {
+			for (PluginConfigSampleValue pluginConfigSampleValue : sampleValue) {
+				returnList.add(pluginConfigSampleValue.getSampleValue());
+			}
 		}
 		return returnList;
 	}
@@ -124,12 +125,15 @@ public class PluginConfig extends AbstractChangeableEntity {
 	public DataType getDataType() {
 		return dataType;
 	}
+
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
 	}
+
 	public Boolean isMultiValue() {
 		return multiValue;
 	}
+
 	public void setMultiValue(Boolean multiValue) {
 		this.multiValue = multiValue;
 	}

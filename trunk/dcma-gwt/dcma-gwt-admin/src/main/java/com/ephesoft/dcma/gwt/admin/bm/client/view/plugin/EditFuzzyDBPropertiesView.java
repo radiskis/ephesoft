@@ -59,31 +59,32 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 	interface Binder extends UiBinder<FlexTable, EditFuzzyDBPropertiesView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	FlexTable editTable;
+	protected FlexTable editTable;
 
 	private FlexTable flextable;
 
 	private Button cancel;
 	private Button ok;
 
-	public static int MAX_VISIBLE_ITEM_COUNT = 4;
-	
-	public static String FUZZYDB_THRESHOLD_VALUE = "fuzzydb.thresholdValue";
+	public static final int MAX_VISIBLE_ITEM_COUNT = 4;
+
+	public static final String FUZZYDB_THRESHOLD_VALUE = "fuzzydb.thresholdValue";
 
 	List<EditableWidgetStorage> docFieldWidgets;
 
 	public EditFuzzyDBPropertiesView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		cancel = new Button();
 		cancel.setText(AdminConstants.CANCEL_BUTTON);
 
 		ok = new Button();
 		ok.setText(AdminConstants.OK_BUTTON);
-		
+
 		flextable = new FlexTable();
 		flextable.setWidth("100%");
 		flextable.getColumnFormatter().setWidth(0, "40%");
@@ -97,7 +98,8 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 
 	public void setProperties(BatchClassPluginConfigDTO pluginConfigDTO, int row) {
 		EditPluginView editPluginView = presenter.getController().getMainPresenter().getView().getPluginView().getEditPluginView();
-		if (pluginConfigDTO.getSampleValue() != null && !pluginConfigDTO.getSampleValue().isEmpty()&& !pluginConfigDTO.getName().equals(FUZZYDB_THRESHOLD_VALUE)) {
+		if (pluginConfigDTO.getSampleValue() != null && !pluginConfigDTO.getSampleValue().isEmpty()
+				&& !pluginConfigDTO.getName().equals(FUZZYDB_THRESHOLD_VALUE)) {
 			if (pluginConfigDTO.getSampleValue().size() > 1) {
 				// Create a listBox
 				if (pluginConfigDTO.isMultivalue()) {
@@ -105,15 +107,15 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 					Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
 					List<String> sampleValueList = pluginConfigDTO.getSampleValue();
 					int max_visible_item_count = MAX_VISIBLE_ITEM_COUNT;
-					if (sampleValueList.size() < MAX_VISIBLE_ITEM_COUNT)
+					if (sampleValueList.size() < MAX_VISIBLE_ITEM_COUNT) {
 						max_visible_item_count = sampleValueList.size();
+					}
 					ListBox fieldValue = editPluginView.addMultipleSelectListBox(row, sampleValueList, max_visible_item_count,
 							pluginConfigDTO.getValue());
 					flextable.setWidget(row, 0, propertyName);
 					flextable.setWidget(row, 2, fieldValue);
 					docFieldWidgets.add(new EditableWidgetStorage(pluginConfigDTO, fieldValue));
-				} 
-				else {
+				} else {
 					// Create a drop down
 					Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
 					ListBox fieldValue = editPluginView.addDropDown(row, pluginConfigDTO.getSampleValue(), pluginConfigDTO.getValue());
@@ -124,21 +126,19 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 					docFieldWidgets.add(editableWidgetStorage);
 				}
 
-			} 
-			else {
+			} else {
 				// Create a read only text box
 				Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
 				TextBox fieldValue = new TextBox();
 				fieldValue.setText(pluginConfigDTO.getValue());
 				final ValidatableWidget<TextBox> validatableTextBox = editPluginView.addTextBox(row, pluginConfigDTO, Boolean.TRUE);
-				EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(pluginConfigDTO,validatableTextBox);
+				EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(pluginConfigDTO, validatableTextBox);
 				editableWidgetStorage.setValidatable(Boolean.FALSE);
 				flextable.setWidget(row, 0, propertyName);
 				flextable.setWidget(row, 2, validatableTextBox.getWidget());
 				docFieldWidgets.add(editableWidgetStorage);
 			}
-		}
-		else {
+		} else {
 			// Create a text box
 			Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
 			final ValidatableWidget<TextBox> validatableTextBox = editPluginView.addTextBox(row, pluginConfigDTO, Boolean.FALSE);
@@ -157,11 +157,11 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 
 	public static class EditableWidgetStorage {
 
-		BatchClassPluginConfigDTO data;
-		ValidatableWidget<TextBox> widget;
-		boolean isListBox;
-		ListBox listBoxwidget;
-		boolean isValidatable;
+		private BatchClassPluginConfigDTO data;
+		private ValidatableWidget<TextBox> widget;
+		private boolean isListBox;
+		private ListBox listBoxwidget;
+		private boolean isValidatable;
 
 		public EditableWidgetStorage(BatchClassPluginConfigDTO batchClassPluginConfigDTO, ValidatableWidget<TextBox> widget) {
 			this.data = batchClassPluginConfigDTO;
@@ -196,7 +196,7 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 		public void setValidatable(boolean isValidatable) {
 			this.isValidatable = isValidatable;
 		}
-		
+
 		public BatchClassPluginConfigDTO getData() {
 			return data;
 		}

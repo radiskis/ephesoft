@@ -56,6 +56,8 @@ import com.ephesoft.dcma.da.domain.ModuleConfig;
 @Service
 public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
+	private static final String BATCH_CLASS_ID = "Batch class id : ";
+
 	/**
 	 * LOGGER to print the Logging information.
 	 */
@@ -66,13 +68,13 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
 	@Override
 	public Integer countModules(String batchClassIdentifier) {
-		LOGGER.info("Batch class id : " + batchClassIdentifier);
+		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		return batchClassModuleDao.countModules(batchClassIdentifier);
 	}
 
 	@Override
 	public List<Module> getBatchClassModule(String batchClassIdentifier) {
-		LOGGER.info("Batch class id : " + batchClassIdentifier);
+		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		return batchClassModuleDao.getBatchClassModule(batchClassIdentifier);
 	}
 
@@ -83,7 +85,7 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
 	@Override
 	public BatchClassModule getBatchClassModuleByName(String batchClassIdentifier, String moduleName) {
-		LOGGER.info("Batch class id : " + batchClassIdentifier);
+		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		BatchClassModule batchClassModule = batchClassModuleDao.getModuleByName(batchClassIdentifier, moduleName);
 
 		List<BatchClassModuleConfig> modConfigs = batchClassModule.getBatchClassModuleConfig();
@@ -126,7 +128,7 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
 	@Override
 	public BatchClassModule getBatchClassModuleByWorkflowName(String batchClassIdentifier, String workflowName) {
-		LOGGER.info("Batch class id : " + batchClassIdentifier);
+		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		BatchClassModule batchClassModule = batchClassModuleDao.getModuleByWorkflowName(batchClassIdentifier, workflowName);
 
 		List<BatchClassModuleConfig> modConfigs = batchClassModule.getBatchClassModuleConfig();

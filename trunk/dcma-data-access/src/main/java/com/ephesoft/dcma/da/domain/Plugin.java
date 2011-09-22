@@ -64,9 +64,6 @@ public class Plugin extends AbstractChangeableEntity {
 	@Column(name = "workflow_name")
 	private String workflowName;
 
-	public Plugin() {
-	}
-
 	public String getPluginName() {
 		return pluginName;
 	}

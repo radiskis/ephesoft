@@ -56,7 +56,9 @@ import com.ephesoft.dcma.da.domain.ModuleConfig;
 @Repository
 public class ModuleConfigDaoImpl extends HibernateDao<ModuleConfig> implements ModuleConfigDao {
 	
-	private static final Logger logger = LoggerFactory.getLogger(ModuleConfigDaoImpl.class);
+	private static final String IS_MANDATORY = "isMandatory";
+	private static final String CHILD_KEY = "childKey";
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleConfigDaoImpl.class);
 	/**
 	 * API to get module by child name.
 	 * 
@@ -67,24 +69,24 @@ public class ModuleConfigDaoImpl extends HibernateDao<ModuleConfig> implements M
 	public List<ModuleConfig> getModuleByChildName(String childName) {
 		DetachedCriteria criteria = criteria();
 		if (childName != null) {
-			criteria.add(Restrictions.eq("childKey", childName));
+			criteria.add(Restrictions.eq(CHILD_KEY, childName));
 		} else {
-			criteria.add(Restrictions.isNull("childKey"));
+			criteria.add(Restrictions.isNull(CHILD_KEY));
 		}
 		return this.find(criteria);
 	}
 	
 	@Override
 	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory) {
-		logger.debug(moduleConfigKey);
-		logger.debug(String.valueOf(isMandatory));
+		LOGGER.debug(moduleConfigKey);
+		LOGGER.debug(String.valueOf(isMandatory));
 		DetachedCriteria criteria = criteria();
 		if (moduleConfigKey != null) {
-			criteria.add(Restrictions.eq("childKey", moduleConfigKey));
+			criteria.add(Restrictions.eq(CHILD_KEY, moduleConfigKey));
 		} else {
-			criteria.add(Restrictions.isNull("childKey"));
+			criteria.add(Restrictions.isNull(CHILD_KEY));
 		}
-		criteria.add(Restrictions.eq("isMandatory", isMandatory));
+		criteria.add(Restrictions.eq(IS_MANDATORY, isMandatory));
 		return this.findSingle(criteria);
 	}
 

@@ -67,6 +67,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -81,34 +82,34 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 	}
 
 	@UiField
-	LayoutPanel viewEditLayoutPanel;
+	protected LayoutPanel viewEditLayoutPanel;
 
 	@UiField
-	BatchClassDetailView batchClassDetailView;
+	protected BatchClassDetailView batchClassDetailView;
 
 	@UiField
-	EditBatchClassView editBatchClassView;
+	protected EditBatchClassView editBatchClassView;
 
 	@UiField
-	LayoutPanel moduleListPanel;
+	protected LayoutPanel moduleListPanel;
 
 	@UiField
-	DockLayoutPanel docTypeListPanel;
+	protected DockLayoutPanel docTypeListPanel;
 
 	@UiField
-	DockLayoutPanel moduleTypeListPanel;
+	protected DockLayoutPanel moduleTypeListPanel;
 
 	@UiField
-	Button editBatchPropertiesButton;
+	protected Button editBatchPropertiesButton;
 
 	@UiField
-	CaptionPanel batchClassConfigurationCaptionPanel;
+	protected CaptionPanel batchClassConfigurationCaptionPanel;
 
 	@UiField
-	VerticalPanel batchClassViewVerticalPanel;
+	protected VerticalPanel batchClassViewVerticalPanel;
 
 	@UiField
-	VerticalPanel batchClassConfigVerticalPanel;
+	protected VerticalPanel batchClassConfigVerticalPanel;
 
 	private final ModuleListView moduleListView;
 
@@ -117,74 +118,74 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 	private final EmailListView emailListView;
 
 	@UiField
-	LayoutPanel docTypeLayoutPanel;
+	protected LayoutPanel docTypeLayoutPanel;
 
 	@UiField
-	LayoutPanel emailLayoutPanel;
+	protected LayoutPanel emailLayoutPanel;
 
 	@UiField
-	Button addDocumentButton;
+	protected Button addDocumentButton;
 
 	@UiField
-	Button editDocumentButton;
+	protected Button editDocumentButton;
 
 	@UiField
-	Button copyDocumentButton;
+	protected Button copyDocumentButton;
 
 	@UiField
-	Button deleteDocumentButton;
+	protected Button deleteDocumentButton;
 
 	@UiField
-	Button editModuleButton;
+	protected Button editModuleButton;
 
 	@UiField
-	HorizontalPanel buttonPanel;
+	protected HorizontalPanel buttonPanel;
 
 	@UiField
-	HorizontalPanel documentButtonPanel;
+	protected HorizontalPanel documentButtonPanel;
 
 	@UiField
-	DockLayoutPanel emailListPanel;
+	protected DockLayoutPanel emailListPanel;
 
 	@UiField
-	HorizontalPanel emailButtonPanel;
+	protected HorizontalPanel emailButtonPanel;
 
 	@UiField
-	Button addEmailButton;
+	protected Button addEmailButton;
 
 	@UiField
-	Button editEmailButton;
+	protected Button editEmailButton;
 
 	@UiField
-	Button deleteEmailButton;
+	protected Button deleteEmailButton;
 
 	private final BatchClassFieldListView batchClassFieldListView;
 
 	@UiField
-	LayoutPanel batchClassFieldLayoutPanel;
+	protected LayoutPanel batchClassFieldLayoutPanel;
 
 	@UiField
-	DockLayoutPanel batchClassFieldListPanel;
+	protected DockLayoutPanel batchClassFieldListPanel;
 
 	@UiField
-	HorizontalPanel batchClassFieldButtonPanel;
+	protected HorizontalPanel batchClassFieldButtonPanel;
 
 	@UiField
-	Button addBatchClassFieldButton;
+	protected Button addBatchClassFieldButton;
 
 	@UiField
-	Button editBatchClassFieldButton;
+	protected Button editBatchClassFieldButton;
 
 	@UiField
-	Button deleteBatchClassFieldButton;
+	protected Button deleteBatchClassFieldButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private static final String TWENTY_PIXEL = "20px";
 
 	public BatchClassView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		moduleListView = new ModuleListView();
 		addDocumentButton.setText(AdminConstants.ADD_BUTTON);
@@ -311,9 +312,13 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		List<Record> recordList = new LinkedList<Record>();
 		for (final DocumentTypeDTO documentTypeDTO : documentTypeDTOs) {
 			if (!documentTypeDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE_UNKNOWN)) {
+				CheckBox isHidden = new CheckBox();
+				isHidden.setValue(documentTypeDTO.isHidden());
+				isHidden.setEnabled(false);
 				Record record = new Record(documentTypeDTO.getIdentifier());
 				record.addWidget(docTypeListView.name, new Label(documentTypeDTO.getName()));
 				record.addWidget(docTypeListView.description, new Label(documentTypeDTO.getDescription()));
+				record.addWidget(docTypeListView.isHidden, isHidden);
 				recordList.add(record);
 			}
 		}

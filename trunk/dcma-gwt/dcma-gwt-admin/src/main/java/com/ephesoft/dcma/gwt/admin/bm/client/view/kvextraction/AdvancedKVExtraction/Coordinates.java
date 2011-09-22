@@ -37,12 +37,12 @@ package com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtrac
 
 public class Coordinates {
 
-	private int x0;
-	private int y0;
-	private int x1;
-	private int y1;
+	private int xCoordinate0;
+	private int yCoordinate0;
+	private int xCoordinate1;
+	private int yCoordinate1;
 	private AdvancedKVExtractionView advancedKVExtractionView;
-	int crosshairReductionFactor = 5;
+	private static final int CROSSHAIR_REDUCTION_FACTOR = 5;
 
 	public Coordinates(AdvancedKVExtractionView advancedKVExtractionView) {
 		this.advancedKVExtractionView = advancedKVExtractionView;
@@ -52,14 +52,14 @@ public class Coordinates {
 		super();
 	}
 
-	public void setInitialCoordinates(int x0, int y0) {
-		this.x0 = x0;
-		this.y0 = y0;
+	public void setInitialCoordinates(int xCoordinate0, int yCoordinate0) {
+		this.xCoordinate0 = xCoordinate0;
+		this.yCoordinate0 = yCoordinate0;
 	}
 
-	public void setOtherCoordinates(int x1, int y1, boolean isFinal) {
-		this.x1 = x1;
-		this.y1 = y1;
+	public void setOtherCoordinates(int xCoordinate1, int yCoordinate1, boolean isFinal) {
+		this.xCoordinate1 = xCoordinate1;
+		this.yCoordinate1 = yCoordinate1;
 		if (isFinal) {
 			setCoordinates(getQuadrantValues());
 		}
@@ -67,10 +67,10 @@ public class Coordinates {
 
 	public Coordinates getQuadrantValues() {
 		Coordinates returnVal;
-		int initialX = this.x0;
-		int initialY = this.y0;
-		int finalX = this.x1;
-		int finalY = this.y1;
+		int initialX = this.xCoordinate0;
+		int initialY = this.yCoordinate0;
+		int finalX = this.xCoordinate1;
+		int finalY = this.yCoordinate1;
 		if (initialX <= finalX && initialY <= finalY) {
 			// it is in the III quadrant.
 			returnVal = getCoordinates(initialX, initialY, finalX, finalY);
@@ -82,7 +82,7 @@ public class Coordinates {
 			returnVal = getCoordinates(initialX, finalY, finalX, initialY);
 		} else if (initialX >= finalX && initialY >= finalY) {
 			// it is in I quadrant.
-			returnVal = getCoordinates(finalX+crosshairReductionFactor, finalY+crosshairReductionFactor, initialX, initialY);
+			returnVal = getCoordinates(finalX+CROSSHAIR_REDUCTION_FACTOR, finalY+CROSSHAIR_REDUCTION_FACTOR, initialX, initialY);
 		} else {
 			returnVal = getCoordinates(initialX, initialY, finalX, finalY);
 		}
@@ -96,10 +96,10 @@ public class Coordinates {
 	}
 
 	public void set(int initialX, int initialY, int finalX, int finalY) {
-		this.x0 = initialX;
-		this.x1 = finalX;
-		this.y0 = initialY;
-		this.y1 = finalY;
+		this.xCoordinate0 = initialX;
+		this.xCoordinate1 = finalX;
+		this.yCoordinate0 = initialY;
+		this.yCoordinate1 = finalY;
 	}
 
 	public void doOverlay() {
@@ -119,55 +119,55 @@ public class Coordinates {
 	}
 
 	public int getX0() {
-		return x0;
+		return xCoordinate0;
 	}
 
-	public void setX0(int x0) {
-		this.x0 = x0;
+	public void setX0(int xCoordinate0) {
+		this.xCoordinate0 = xCoordinate0;
 	}
 
 	public int getY0() {
-		return y0;
+		return yCoordinate0;
 	}
 
-	public void setY0(int y0) {
-		this.y0 = y0;
+	public void setY0(int yCoordinate0) {
+		this.yCoordinate0 = yCoordinate0;
 	}
 
 	public int getX1() {
-		return x1;
+		return xCoordinate1;
 	}
 
-	public void setX1(int x1) {
-		this.x1 = x1;
+	public void setX1(int xCoordinate1) {
+		this.xCoordinate1 = xCoordinate1;
 	}
 
 	public int getY1() {
-		return y1;
+		return yCoordinate1;
 	}
 
-	public void setY1(int y1) {
-		this.y1 = y1;
+	public void setY1(int yCoordinate1) {
+		this.yCoordinate1 = yCoordinate1;
 	}
 
 	public void setCoordinates(Coordinates valueCoordinates) {
-		this.x0 = valueCoordinates.getX0();
-		this.x1 = valueCoordinates.getX1();
-		this.y0 = valueCoordinates.getY0();
-		this.y1 = valueCoordinates.getY1();
+		this.xCoordinate0 = valueCoordinates.getX0();
+		this.xCoordinate1 = valueCoordinates.getX1();
+		this.yCoordinate0 = valueCoordinates.getY0();
+		this.yCoordinate1 = valueCoordinates.getY1();
 	}
 
 	public void clear() {
-		this.x0 = 0;
-		this.x1 = 0;
-		this.y0 = 0;
-		this.y1 = 0;
+		this.xCoordinate0 = 0;
+		this.xCoordinate1 = 0;
+		this.yCoordinate0 = 0;
+		this.yCoordinate1 = 0;
 
 	}
 
 	public boolean isEmpty() {
 		boolean returnVal = false;
-		if (this.x0 == 0 && this.x1 == 0 && this.y0 == 0 && this.y1 == 0) {
+		if (this.xCoordinate0 == 0 && this.xCoordinate1 == 0 && this.yCoordinate0 == 0 && this.yCoordinate1 == 0) {
 			returnVal = true;
 		}
 		return returnVal;

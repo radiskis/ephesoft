@@ -48,14 +48,15 @@ public class PluginData extends View<PluginDataPresenter> {
 	}
 
 	@UiField
-	FlexTable pluginDataTable;
+	protected FlexTable pluginDataTable;
 
 	// private PluginDataPresenter presenter;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public PluginData() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	public FlexTable getViewTable() {

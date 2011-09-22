@@ -37,19 +37,28 @@ package com.ephesoft.dcma.imagemagick;
 
 import java.io.File;
 
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
+import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 
+/**
+ * This class is used for creating multi page tifs and pdfs.
+ * 
+ * @author Ephesoft
+ */
 public class MultiPageExecutor {
 
 	String[] pages;
+
+	public static final String GHOSTSCRIPT_HOME = "GHOSTSCRIPT_HOME";
+
+	public static final String GHOSTSCRIPT_COMMAND = "gswin32.exe";
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
@@ -61,56 +70,79 @@ public class MultiPageExecutor {
 		batchInstanceThread.add(new ProcessExecutor(cmds, file));
 	}
 
-	public MultiPageExecutor(BatchInstanceThread batchInstanceThread, final String[] pages11) {
-		this.pages = new String[pages11.length];
-		this.pages = pages11.clone();
-		batchInstanceThread.add(new AbstractRunnable() {
-
-			@Override
-			public void run() {
-				IMOperation op = new IMOperation();
-				op.addImage(pages.length - 1);
-				op.adjoin();
-				op.addImage();
-				ConvertCmd convert = new ConvertCmd();
-				try {
-					convert.run(op, (Object[]) pages);
-				} catch (Exception e) {
-					logger.error("Error occured while running command for multipage tiff creation.");
-					setDcmaApplicationException(new DCMAApplicationException(
-							"Error occured while running command for multipage tiff creation."));
-				}
-			}
-		});
-	}
-
+	/**
+	 * This method creates multi page tifs and pdfs using ghost script command.
+	 * 
+	 * @param batchInstanceThread {@BatchInstanceThread}
+	 * @param pages11 {@link String[]}
+	 * @param pdfCompression {@link String}
+	 * @param pdfQuality {@link String}
+	 * @param coloredImage {@link String}
+	 * @param convertToTif (@link Boolean}
+	 */
 	public MultiPageExecutor(BatchInstanceThread batchInstanceThread, final String[] pages11, final String pdfCompression,
-			final String pdfQuality, final String coloredImage) {
-		this.pages = new String[pages11.length];
-		this.pages = pages11.clone();
-		batchInstanceThread.add(new AbstractRunnable() {
+			final String pdfQuality, final String coloredImage, final boolean convertToTif) {
+		if (pages11 != null && pages11.length > 0) {
+			this.pages = new String[pages11.length];
+			this.pages = pages11.clone();
+			batchInstanceThread.add(new AbstractRunnable() {
 
-			@Override
-			public void run() {
-				IMOperation op = new IMOperation();
-				op.addImage(pages.length - 1);
-				op.quality(new Double(pdfQuality));
-				op.type("optimize");
-				if (coloredImage != null && coloredImage.equalsIgnoreCase("false")) {
-					op.monochrome();
+				@Override
+				public void run() {
+					int index = 0;
+					int counter = 1;
+					String ghostScriptPath = System.getenv(GHOSTSCRIPT_HOME);
+					int noOfPages = pages.length;
+					String srcDir = pages[0].substring(0, pages[0].lastIndexOf(File.separator));
+					String tempResult = null;
+					String tempFile = null;
+					boolean isFirst = true;
+					while (index < noOfPages - 1) {
+						StringBuffer buffer = new StringBuffer();
+						int maxNoOfImages = counter * 100;
+						buffer.append("\"" + ghostScriptPath + File.separator + GHOSTSCRIPT_COMMAND + "\" ");
+						buffer.append(ImageMagicKConstants.GHOST_SCRIPT_COMMAND_PARAMETERS);
+						if (convertToTif && maxNoOfImages >= noOfPages - 2) {
+							buffer.append(ImageMagicKConstants.TIF_DEVICE + " ");
+						} else {
+							buffer.append(ImageMagicKConstants.PDF_DEVICE + " ");
+						}
+						buffer.append(ImageMagicKConstants.GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS);
+						if (maxNoOfImages >= noOfPages - 2) {
+							buffer.append("\"" + pages[noOfPages - 1] + "\" ");
+						} else {
+							tempFile = srcDir + File.separator + ImageMagicKConstants.TEMP_FILE_NAME + counter
+									+ ICommonConstants.EXTENSION_PDF;
+							buffer.append("\"" + tempFile + "\" ");
+						}
+						if (!isFirst) {
+							buffer.append("\"" + tempResult + "\" ");
+						}
+						isFirst = false;
+						if (tempFile != null) {
+							tempResult = tempFile;
+						}
+						for (; index < noOfPages - 1 && index <= maxNoOfImages; index++) {
+							buffer.append("\"" + pages[index] + "\"" + " ");
+						}
+						counter++;
+						String command = buffer.toString();
+
+						try {
+							Process process = Runtime.getRuntime().exec(command, null, new File(ghostScriptPath));
+							int exitValue = process.waitFor();
+							if (exitValue != 0) {
+								logger.error("Process exited with an invalid exit value-" + exitValue);
+							}
+						} catch (Exception e) {
+							logger.error("Error occured while running command for multipage tiff creation.", e);
+							setDcmaApplicationException(new DCMAApplicationException(
+									"Error occured while running command for multipage tiff creation."));
+						}
+					}
 				}
-				op.compress(pdfCompression);
-				op.addImage();
-				ConvertCmd convert = new ConvertCmd();
-				try {
-					convert.run(op, (Object[]) pages);
-				} catch (Exception e) {
-					logger.error("Error occured while running command for multipage tiff creation.");
-					setDcmaApplicationException(new DCMAApplicationException(
-							"Error occured while running command for multipage tiff creation."));
-				}
-			}
-		});
+			});
+		}
 	}
 
 	public String[] getPages() {

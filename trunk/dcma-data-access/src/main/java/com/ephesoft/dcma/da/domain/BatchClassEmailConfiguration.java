@@ -70,11 +70,11 @@ public class BatchClassEmailConfiguration extends AbstractChangeableEntity imple
 
 	@Column(name = "folder_name")
 	private String folderName;
-	
+
 	@Column(name = "isSSL")
 	private Boolean isSSL;
-	
-	@Column (name="portNumber")
+
+	@Column(name = "portNumber")
 	private Integer portNumber;
 
 	public String getServerType() {
@@ -124,21 +124,19 @@ public class BatchClassEmailConfiguration extends AbstractChangeableEntity imple
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
-	
-	
+
 	public void setIsSSL(Boolean isSSL) {
 		this.isSSL = isSSL;
 	}
-	
+
 	public Boolean isSSL() {
 		return isSSL;
 	}
-	
-	
+
 	public Integer getPortNumber() {
 		return portNumber;
 	}
-	
+
 	public void setPortNumber(Integer portNumber) {
 		this.portNumber = portNumber;
 	}

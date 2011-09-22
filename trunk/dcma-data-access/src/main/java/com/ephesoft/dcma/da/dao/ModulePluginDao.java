@@ -42,6 +42,6 @@ import com.ephesoft.dcma.da.domain.ModulePlugin;
 
 public interface ModulePluginDao extends CacheableDao<ModulePlugin> {
 	
-	ModulePlugin get(Serializable id);
+	ModulePlugin get(Serializable identifier);
 	
 }

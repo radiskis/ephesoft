@@ -35,8 +35,6 @@
 
 package com.ephesoft.dcma.mail.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -48,69 +46,65 @@ import com.ephesoft.dcma.mail.SendMailException;
 
 import freemarker.template.Configuration;
 
-public class MailServiceImpl implements MailService
-{
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+public class MailServiceImpl implements MailService {
+
+//	private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
 
 	private JavaMailSender mailSender;
-    private Configuration freemarkerMailConfiguration;
-    private Boolean suppressMail;
-    
+	private Configuration freemarkerMailConfiguration;
+	private Boolean suppressMail;
 
-    public void setMailSender(JavaMailSender mailSender)
-    {
-        this.mailSender = mailSender;
-    }
-    
-    public void setFreemarkerMailConfiguration(
-			Configuration freemarkerMailConfiguration) {
+	public void setMailSender(final JavaMailSender mailSender) {
+		this.mailSender = mailSender;
+	}
+
+	public void setFreemarkerMailConfiguration(final Configuration freemarkerMailConfiguration) {
 		this.freemarkerMailConfiguration = freemarkerMailConfiguration;
 	}
-    
-    public void setSuppressMail(Boolean suppressMail) {
+
+	public void setSuppressMail(final Boolean suppressMail) {
 		this.suppressMail = suppressMail;
 	}
-    
-    @Override
-    public void sendTextMail(MailMetaData mailMetaData, String text)
-    {
-    	if(suppressMail) return;
-    	SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom((new StringBuilder()).append(mailMetaData.getFromName()).append(" <").append(mailMetaData.getFromAddress()).append(">").toString());
-        mailMessage.setSubject(mailMetaData.getSubject());
-        mailMessage.setReplyTo(mailMetaData.getReplyTo());
-        if(mailMetaData.getCcAddresses() != null && mailMetaData.getCcAddresses().size() > 0)
-        {
-            mailMessage.setCc((String[])mailMetaData.getCcAddresses().toArray(new String[mailMetaData.getCcAddresses().size()]));
-        }
-        if(mailMetaData.getBccAddresses() != null && mailMetaData.getBccAddresses().size() > 0)
-        {
-            mailMessage.setBcc((String[])mailMetaData.getBccAddresses().toArray(new String[mailMetaData.getBccAddresses().size()]));
-        }
-        if(mailMetaData.getToAddresses() != null && mailMetaData.getToAddresses().size() > 0)
-        {
-            mailMessage.setTo((String[])mailMetaData.getToAddresses().toArray(new String[mailMetaData.getToAddresses().size()]));
-        }
-        mailMessage.setText(text);
-        try
-        {
-            mailSender.send(mailMessage);
-        }
-        catch(MailException e)
-        {
-            throw new SendMailException((new StringBuilder()).append("Error sending mail: ").append(mailMetaData.toString()).toString(), e);
-        }
-    }
 
-    @Override
-    public void sendTextMailWithClasspathTemplate(MailMetaData mailMetaData, String templateLocation, MailContentModel model) {
-        model.add("mailMeta", mailMetaData);
-        try {
-        	final String result = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerMailConfiguration.getTemplate(templateLocation), model.getModel());
-        	sendTextMail(mailMetaData, result);
-        } catch (Exception e) {
-        	throw new SendMailException((new StringBuilder()).append("Error sending mail: ").append(mailMetaData.toString()).toString(), e);
+	@Override
+	public void sendTextMail(final MailMetaData mailMetaData, final String text) {
+		if (suppressMail) {
+			return;
 		}
-    }
+		final SimpleMailMessage mailMessage = new SimpleMailMessage();
+		mailMessage.setFrom(new StringBuilder().append(mailMetaData.getFromName()).append(" <")
+				.append(mailMetaData.getFromAddress()).append(">").toString());
+		mailMessage.setSubject(mailMetaData.getSubject());
+		mailMessage.setReplyTo(mailMetaData.getReplyTo());
+		if (mailMetaData.getCcAddresses() != null && mailMetaData.getCcAddresses().size() > 0) {
+			mailMessage.setCc((String[]) mailMetaData.getCcAddresses().toArray(new String[mailMetaData.getCcAddresses().size()]));
+		}
+		if (mailMetaData.getBccAddresses() != null && mailMetaData.getBccAddresses().size() > 0) {
+			mailMessage.setBcc((String[]) mailMetaData.getBccAddresses().toArray(new String[mailMetaData.getBccAddresses().size()]));
+		}
+		if (mailMetaData.getToAddresses() != null && mailMetaData.getToAddresses().size() > 0) {
+			mailMessage.setTo((String[]) mailMetaData.getToAddresses().toArray(new String[mailMetaData.getToAddresses().size()]));
+		}
+		mailMessage.setText(text);
+		try {
+			mailSender.send(mailMessage);
+		} catch (MailException e) {
+			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString())
+					.toString(), e);
+		}
+	}
+
+	@Override
+	public void sendTextMailWithClasspathTemplate(final MailMetaData mailMetaData, final String templateLocation, final MailContentModel model) {
+		model.add("mailMeta", mailMetaData);
+		try {
+			final String result = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerMailConfiguration
+					.getTemplate(templateLocation), model.getModel());
+			sendTextMail(mailMetaData, result);
+		} catch (Exception e) {
+			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString())
+					.toString(), e);
+		}
+	}
 
 }

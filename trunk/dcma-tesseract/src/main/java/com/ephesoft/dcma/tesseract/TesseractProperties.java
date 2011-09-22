@@ -55,7 +55,9 @@ public enum TesseractProperties implements PluginProperty {
 	 */
 	TESSERACT_LANGUAGE("tesseract.commands_language"),
 
-	TESSERACT_COLOR_SWITCH("tesseract.color_switch");
+	TESSERACT_COLOR_SWITCH("tesseract.color_switch"),
+	
+	TESSERACT_SWITCH("tesseract.switch");
 
 	/**
 	 * Property key.

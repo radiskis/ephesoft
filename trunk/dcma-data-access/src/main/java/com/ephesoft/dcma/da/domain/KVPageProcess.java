@@ -81,9 +81,6 @@ public class KVPageProcess extends AbstractChangeableEntity implements Serializa
 	@Column(name = "page_level_field_name", nullable = false, columnDefinition = "varchar(100) default 'KV_Page_Process'")
 	private String pageLevelFieldName;
 	
-	public KVPageProcess() {
-	}
-
 	/**
 	 * @return the batchClassPluginConfig
 	 */
@@ -204,8 +201,9 @@ public class KVPageProcess extends AbstractChangeableEntity implements Serializa
 	 */
 	public void setPageLevelFieldName(String pageLevelFieldName) {
 		if(null == pageLevelFieldName){
-			pageLevelFieldName = "KV_Page_Process";
+			this.pageLevelFieldName = "KV_Page_Process";
+		} else {
+			this.pageLevelFieldName = pageLevelFieldName;
 		}
-		this.pageLevelFieldName = pageLevelFieldName;
 	}
 }

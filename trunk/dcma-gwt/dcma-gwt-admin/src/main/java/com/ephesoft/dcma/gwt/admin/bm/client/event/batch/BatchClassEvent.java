@@ -52,7 +52,7 @@ public class BatchClassEvent extends GwtEvent<BatchClassHandler> {
 	/**
 	 * Type of the batch class event.
 	 */
-	public static Type<BatchClassHandler> TYPE = new Type<BatchClassHandler>();
+	public static Type<BatchClassHandler> type = new Type<BatchClassHandler>();
 
 	/**
 	 * Action taken.
@@ -90,7 +90,7 @@ public class BatchClassEvent extends GwtEvent<BatchClassHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<BatchClassHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public BatchClassDTO getBatchClass() {

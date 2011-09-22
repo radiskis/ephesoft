@@ -89,7 +89,7 @@ public class ScriptExecutor {
 	/**
 	 * @param batchClassPluginConfigService the batchClassPluginConfigService to set
 	 */
-	public void setBatchClassPluginConfigService(BatchClassPluginConfigService batchClassPluginConfigService) {
+	public void setBatchClassPluginConfigService(final BatchClassPluginConfigService batchClassPluginConfigService) {
 		this.batchClassPluginConfigService = batchClassPluginConfigService;
 	}
 
@@ -97,20 +97,20 @@ public class ScriptExecutor {
 	 * This method will compile and execute all the scripts for input plug-in name placed at some pre defined location.
 	 * 
 	 * @param batchInstanceID String
-	 * @param nameOfPluginScript String
+	 * @param pluginScriptName String
 	 * @throws DCMAApplicationException Check for all the input parameters.
 	 */
-	public void extractFields(final String batchInstanceId, final String nameOfPluginScript, final String docIdentifier,
+	public void extractFields(final String batchInstanceId, final String pluginScriptName, final String docIdentifier,
 			final String methodName) throws DCMAApplicationException {
 
 		String errMsg = null;
-		if (null == batchInstanceId || null == nameOfPluginScript) {
+		if (null == batchInstanceId || null == pluginScriptName) {
 			errMsg = "Invalid input parameter. batchInstanceId or nameOfPluginScript is null.";
 			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		LOGGER.info("*****  batchInstanceId : " + batchInstanceId + "   *****  nameOfPluginScript : " + nameOfPluginScript);
+		LOGGER.info(" batchInstanceId : " + batchInstanceId + "  nameOfPluginScript : " + pluginScriptName);
 
 		final Batch batch = batchSchemaService.getBatch(batchInstanceId);
 
@@ -121,7 +121,7 @@ public class ScriptExecutor {
 		}
 
 		try {
-			String localFolderPath = batchSchemaService.getLocalFolderLocation();
+			final String localFolderPath = batchSchemaService.getLocalFolderLocation();
 
 			if (null == localFolderPath) {
 				errMsg = "localFolderPath is null.";
@@ -130,8 +130,8 @@ public class ScriptExecutor {
 			}
 
 			String mainFolderPath = null;
-			int index = localFolderPath.lastIndexOf("\\");
-			int srcIndex = localFolderPath.lastIndexOf("/");
+			final int index = localFolderPath.lastIndexOf('\\');
+			final int srcIndex = localFolderPath.lastIndexOf('/');
 
 			if (index == -1 && srcIndex == -1) {
 				throw new DCMAApplicationException("In valid value of local folder.");
@@ -149,17 +149,17 @@ public class ScriptExecutor {
 				throw new DCMAApplicationException(errMsg);
 			}
 
-			String pathToComplile = mainFolderPath + File.separator + batch.getBatchClassIdentifier() + File.separator
+			final String pathToComplile = mainFolderPath + File.separator + batch.getBatchClassIdentifier() + File.separator
 					+ batchSchemaService.getScriptFolderName();
-			DynamicCodeCompiler dynacode = new DynamicCodeCompiler();
+			final DynamicCodeCompiler dynacode = new DynamicCodeCompiler();
 			dynacode.addSourceDir(new File(pathToComplile));
-			IScripts iExecutor = (IScripts) dynacode.newProxyInstance(IScripts.class, nameOfPluginScript);
+			final IScripts iExecutor = (IScripts) dynacode.newProxyInstance(IScripts.class, pluginScriptName);
 			if (null == iExecutor) {
 				LOGGER.info("IScripts was returned as null.");
 			} else {
-				File batchXmlFile = new File(localFolderPath + File.separator + batchInstanceId + File.separator + batchInstanceId
-						+ "_batch.xml");
-				Document document = XMLUtil.createDocumentFrom(batchXmlFile);
+				final File batchXmlFile = new File(localFolderPath + File.separator + batchInstanceId + File.separator
+						+ batchInstanceId + "_batch.xml");
+				final Document document = XMLUtil.createDocumentFrom(batchXmlFile);
 				iExecutor.execute(document, methodName, docIdentifier);
 			}
 		} catch (Exception e) {

@@ -66,17 +66,18 @@ public class EditPluginView extends View<EditPluginPresenter> {
 	}
 
 	@UiField
-	FlexTable flexEditTable;
+	protected FlexTable flexEditTable;
 
-	FlexTable editTable;
+	private FlexTable editTable;
 
-	Button cancel;
-	Button save;
+	private Button cancel;
+	private Button save;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditPluginView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	public FlexTable getFlexEditTable() {

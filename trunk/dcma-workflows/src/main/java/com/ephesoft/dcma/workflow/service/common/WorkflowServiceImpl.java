@@ -71,7 +71,7 @@ import com.ephesoft.dcma.workflow.constant.WorkFlowConstants;
  */
 public class WorkflowServiceImpl implements WorkflowService {
 
-	private static final Logger log = LoggerFactory.getLogger(WorkflowServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
 	@Autowired
 	private ExecutionService executionService;
@@ -95,16 +95,19 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Override
 	public void startWorkflow(final BatchInstanceID batchInstanceID, String moduleName) {
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID.getID());
-
+		System.out.println("Last modified time before trying to update..."+batchInstance.getLastModified());
 		Map<String, Object> vars = new HashMap<String, Object>();
 		vars.put(JBPMVariables.BATCH_INSTANCE_ID, batchInstanceID);
 		vars.put(JBPMVariables.RESTART_WORKFLOW, moduleName);
 		vars.put(JBPMVariables.IS_MODULE_REMOTE, WorkFlowConstants.NO_STRING);
 		if (moduleName == null) {
+			//batchInstance.setStatus(BatchInstanceStatus.READY);
 			batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.READY);
 		} else {
+			//batchInstance.setStatus(BatchInstanceStatus.RUNNING);
 			batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.RUNNING);
 		}
+		//batchInstanceService.merge(batchInstance);
 		executionService.startProcessInstanceByKey(batchInstance.getBatchClass().getName(), vars, batchInstance.getIdentifier());
 
 	}
@@ -149,13 +152,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 		try {
 			batchSchemaService.updateBatch(batch);
 		} catch (Exception e) {
-			log.error("Error saving batch info", e);
+			LOGGER.error("Error saving batch info", e);
 		}
 
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batch.getBatchInstanceIdentifier());
 		BatchInstanceStatus status = batchInstance.getStatus();
 
-		BatchStatus batchStatus = null;
+		BatchStatus batchStatus = batch.getBatchStatus();
 		boolean needToSignal = false;
 
 		switch (status) {
@@ -165,7 +168,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 					needToSignal = !batchSchemaService.isReviewRequired(batch.getBatchInstanceIdentifier(), true);
 					batchInstance.setReviewUserName(userName);
 				} catch (DCMAApplicationException e) {
-					log.error(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 				break;
 
@@ -175,7 +178,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 					needToSignal = !batchSchemaService.isValidationRequired(batch.getBatchInstanceIdentifier());
 					batchInstance.setValidationUserName(userName);
 				} catch (DCMAApplicationException e) {
-					log.error(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 				break;
 

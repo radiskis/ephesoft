@@ -74,10 +74,10 @@ public final class DynamicCodeCompiler {
 
 	private ClassLoader parentClassLoader;
 
-	private List<SourceDirectory> sourceDirectories = new ArrayList<SourceDirectory>();
+	final private List<SourceDirectory> sourceDirectories = new ArrayList<SourceDirectory>();
 
 	// class name => LoadedClass
-	private Map<String, LoadedClass> loadedClasses = new HashMap<String, LoadedClass>();
+	final private Map<String, LoadedClass> loadedClasses = new HashMap<String, LoadedClass>();
 
 	/**
 	 * 
@@ -109,8 +109,9 @@ public final class DynamicCodeCompiler {
 	 * @param srcDir
 	 * @return true if the add is successful
 	 */
-	public boolean addSourceDir(File srcDir) {
-
+	public boolean addSourceDir(final File srcDirectory) {
+		File srcDir = srcDirectory;
+		boolean isSourceDirAdded = true;
 		try {
 			srcDir = srcDir.getCanonicalFile();
 		} catch (IOException e) {
@@ -123,7 +124,7 @@ public final class DynamicCodeCompiler {
 			for (int i = 0; i < sourceDirectories.size(); i++) {
 				final SourceDirectory src = (SourceDirectory) sourceDirectories.get(i);
 				if (src.srcDir.equals(srcDir)) {
-					return false;
+					isSourceDirAdded =  false;
 				}
 			}
 
@@ -134,7 +135,7 @@ public final class DynamicCodeCompiler {
 			LOGGER.info("Add source dir " + srcDir);
 		}
 
-		return true;
+		return isSourceDirAdded;
 	}
 
 	/**
@@ -184,20 +185,21 @@ public final class DynamicCodeCompiler {
 	}
 
 	private SourceDirectory locateResource(final String resource) {
+		SourceDirectory src = null;
 		for (int i = 0; i < sourceDirectories.size(); i++) {
-			final SourceDirectory src = (SourceDirectory) sourceDirectories.get(i);
+			src = (SourceDirectory) sourceDirectories.get(i);
 			if (new File(src.srcDir, resource).exists()) {
-				return src;
+				break;
 			}
 		}
-		return null;
+		return src;
 	}
 
 	private void unload(SourceDirectory src) {
 		// clear loaded classes
 		synchronized (loadedClasses) {
 			for (Iterator<LoadedClass> iter = loadedClasses.values().iterator(); iter.hasNext();) {
-				LoadedClass loadedClass = iter.next();
+				final LoadedClass loadedClass = iter.next();
 				if (loadedClass.srcDir == src) {
 					iter.remove();
 				}
@@ -215,11 +217,11 @@ public final class DynamicCodeCompiler {
 	 * @return the resource URL, or null if resource not found
 	 */
 	@SuppressWarnings("deprecation")
-	public URL getResource(String resource) {
+	public URL getResource(final String resource) {
 		try {
 
-			SourceDirectory src = locateResource(resource);
-			URL url = new File(src.srcDir, resource).toURL();
+			final SourceDirectory src = locateResource(resource);
+			final URL url = new File(src.srcDir, resource).toURL();
 			return src == null ? null : url;
 
 		} catch (MalformedURLException e) {
@@ -265,11 +267,11 @@ public final class DynamicCodeCompiler {
 
 	private class SourceDirectory {
 
-		private File srcDir;
+		final private File srcDir;
 
-		private File binDir;
+		final private File binDir;
 
-		private JavaCompiler javaCompiler;
+		final private JavaCompiler javaCompiler;
 
 		private URLClassLoader urlClassLoader;
 
@@ -288,7 +290,7 @@ public final class DynamicCodeCompiler {
 		}
 
 		@SuppressWarnings("deprecation")
-		void recreateClassLoader() {
+		final void recreateClassLoader() {
 			try {
 				urlClassLoader = new URLClassLoader(new URL[] {binDir.toURL()}, parentClassLoader);
 			} catch (MalformedURLException e) {
@@ -301,9 +303,9 @@ public final class DynamicCodeCompiler {
 
 	private static class LoadedClass {
 
-		String className;
+		final private String className;
 
-		SourceDirectory srcDir;
+		final private SourceDirectory srcDir;
 
 		File srcFile;
 
@@ -328,7 +330,7 @@ public final class DynamicCodeCompiler {
 			return srcFile.lastModified() != lastModified;
 		}
 
-		void compileAndLoadClass() {
+		final void compileAndLoadClass() {
 
 			if (clazz != null) {
 				return; // class already loaded
@@ -352,7 +354,7 @@ public final class DynamicCodeCompiler {
 				lastModified = srcFile.lastModified();
 
 			} catch (ClassNotFoundException e) {
-				throw new RuntimeException("Failed to load DynaCode class " + srcFile.getAbsolutePath());
+				throw new RuntimeException("Failed to load DynaCode class " + srcFile.getAbsolutePath(), e);
 			}
 
 			LOGGER.info("Init " + clazz);
@@ -407,12 +409,13 @@ public final class DynamicCodeCompiler {
 	/**
 	 * Extracts a classpath string from a given class loader. Recognizes only URLClassLoader.
 	 */
-	private static String extractClasspath(ClassLoader cl) {
+	private static String extractClasspath(final ClassLoader clazzParam) { 
+		ClassLoader clazz = clazzParam;
 		StringBuffer buf = new StringBuffer();
 
-		while (cl != null) {
-			if (cl instanceof URLClassLoader) {
-				URL urls[] = ((URLClassLoader) cl).getURLs();
+		while (clazz != null) {
+			if (clazz instanceof URLClassLoader) {
+				URL urls[] = ((URLClassLoader) clazz).getURLs();
 				for (int i = 0; i < urls.length; i++) {
 					if (buf.length() > 0) {
 						buf.append(File.pathSeparatorChar);
@@ -420,7 +423,7 @@ public final class DynamicCodeCompiler {
 					buf.append(urls[i].getFile().toString());
 				}
 			}
-			cl = cl.getParent();
+			clazz = clazz.getParent();
 		}
 
 		return buf.toString();

@@ -52,25 +52,25 @@ public class FuzzyDBPluginView extends View<FuzzyDBPluginPresenter> {
 	}
 
 	@UiField
-	FuzzyDBPropertiesView fuzzyDBPropertiesView;
+	protected FuzzyDBPropertiesView fuzzyDBPropertiesView;
 
 	@UiField
-	EditFuzzyDBPropertiesView editFuzzyDBPropertiesView;
+	protected EditFuzzyDBPropertiesView editFuzzyDBPropertiesView;
 
 	@UiField
-	CaptionPanel propertyDetailsPanel;
+	protected CaptionPanel propertyDetailsPanel;
 
 	@UiField
-	VerticalPanel propertyDetailsViewPanel;
+	protected VerticalPanel propertyDetailsViewPanel;
 
 	@UiField
-	VerticalPanel editPropertyDetailPanel;
+	protected VerticalPanel editPropertyDetailPanel;
 
 	@UiField
-	VerticalPanel editButtonPanel;
+	protected VerticalPanel editButtonPanel;
 
 	@UiField
-	PluginData pluginData;
+	protected PluginData pluginData;
 
 	private Button edit;
 
@@ -80,10 +80,10 @@ public class FuzzyDBPluginView extends View<FuzzyDBPluginPresenter> {
 	@UiField
 	CaptionPanel pluginDetailsPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public FuzzyDBPluginView() {
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		propertyDetailsPanel.setCaptionHTML(AdminConstants.PLUGIN_CONFIGURATION_HTML);
 		pluginDetailsPanel.setCaptionHTML(AdminConstants.PLUGIN_DETAILS_HTML);

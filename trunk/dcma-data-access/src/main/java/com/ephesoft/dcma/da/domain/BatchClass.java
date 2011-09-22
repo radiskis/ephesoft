@@ -60,6 +60,7 @@ import com.ephesoft.dcma.da.id.BatchClassID;
 public class BatchClass extends AbstractChangeableEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private static final String BATCH_CLASS_ID = "batch_class_id";
 
 	private transient BatchClassID batchClassID;
 
@@ -79,7 +80,7 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	private String version;
 
 	@Column(name = "unc_folder")
-	@NaturalId(mutable=true)
+	@NaturalId(mutable = true)
 	private String uncFolder;
 
 	@Column(name = "process_name")
@@ -96,32 +97,29 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "batch_class_id")
+	@JoinColumn(name = BATCH_CLASS_ID)
 	@javax.persistence.OrderBy("orderNumber")
 	private List<BatchClassModule> batchClassModules;
 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "batch_class_id")
+	@JoinColumn(name = BATCH_CLASS_ID)
 	private List<DocumentType> documentTypes;
 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "batch_class_id")
+	@JoinColumn(name = BATCH_CLASS_ID)
 	private List<BatchClassEmailConfiguration> emailConfigurations;
-	
+
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "batch_class_id")
+	@JoinColumn(name = BATCH_CLASS_ID)
 	private List<BatchClassField> batchClassField;
 
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "batch_class_id")
+	@JoinColumn(name = BATCH_CLASS_ID)
 	private List<BatchClassGroups> assignedGroups;
-
-	public BatchClass() {
-	}
 
 	public String getName() {
 		return name;
@@ -242,20 +240,22 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	/**
 	 * Returns the Module based on ID
 	 * 
-	 * @param id the id of the module required
+	 * @param identifier the id of the module required
 	 * @return the module corresponding to the supplied id
 	 */
-	public BatchClassModule getBatchClassModuleById(long id) {
+	public BatchClassModule getBatchClassModuleById(long identifier) {
+		BatchClassModule batchClassModule1 = null;
 		if (!(this.batchClassModules == null || this.batchClassModules.isEmpty())) {
 			for (BatchClassModule batchClassModule : this.batchClassModules) {
-				if (batchClassModule.getId() == id) {
-					return batchClassModule;
+				if (batchClassModule.getId() == identifier) {
+					batchClassModule1 = batchClassModule;
+					break;
 				}
 			}
 		}
-		return null;
+		return batchClassModule1;
 	}
-	
+
 	/**
 	 * API to return the batch class module by name.
 	 * 
@@ -263,14 +263,16 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return {@link BatchClassModule} the module corresponding to the supplied name
 	 */
 	public BatchClassModule getBatchClassModuleByName(String moduleName) {
+		BatchClassModule batchClassModule1 = null;
 		if (!(this.batchClassModules == null || this.batchClassModules.isEmpty())) {
 			for (BatchClassModule batchClassModule : this.batchClassModules) {
 				if (batchClassModule.getModule().getName().equalsIgnoreCase(moduleName)) {
-					return batchClassModule;
+					batchClassModule1 = batchClassModule;
+					break;
 				}
 			}
 		}
-		return null;
+		return batchClassModule1;
 	}
 
 	/**
@@ -280,14 +282,16 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return true if the document was found and removed else false.
 	 */
 	public boolean removeDocumentTypeByIdentifier(String identifier) {
+		boolean isRemoved = false;
 		List<DocumentType> documentTypesList = new ArrayList<DocumentType>();
 		documentTypesList.addAll(this.documentTypes);
 		for (DocumentType documentType : documentTypesList) {
 			if (identifier.equals(documentType.getIdentifier())) {
-				return documentTypes.remove(documentType);
+				isRemoved = documentTypes.remove(documentType);
+				break;
 			}
 		}
-		return false;
+		return isRemoved;
 	}
 
 	/**
@@ -297,16 +301,18 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return true if the email configuration was found and removed else false.
 	 */
 	public boolean removeEmailConfigurationByIdentifier(String identifier) {
+		boolean isRemoved = false;
 		List<BatchClassEmailConfiguration> emailBatchClassEmailConfigurationsList = new ArrayList<BatchClassEmailConfiguration>();
 		emailBatchClassEmailConfigurationsList.addAll(this.emailConfigurations);
 		for (BatchClassEmailConfiguration batchClassEmailConfiguration : emailBatchClassEmailConfigurationsList) {
 			if (identifier.equals(String.valueOf(batchClassEmailConfiguration.getId()))) {
-				return this.emailConfigurations.remove(batchClassEmailConfiguration);
+				isRemoved = this.emailConfigurations.remove(batchClassEmailConfiguration);
+				break;
 			}
 		}
-		return false;
+		return isRemoved;
 	}
-	
+
 	/**
 	 * Removes the batch class field from this batch class based on the identifier Used to delete a batch class field
 	 * 
@@ -314,14 +320,16 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return true if the batch class field was found and removed else false.
 	 */
 	public boolean removeBatchClassFieldByIdentifier(String identifier) {
+		boolean isRemoved = false;
 		List<BatchClassField> batchClassFieldList = new ArrayList<BatchClassField>();
 		batchClassFieldList.addAll(this.batchClassField);
 		for (BatchClassField batchClassField : batchClassFieldList) {
 			if (identifier.equals(batchClassField.getIdentifier())) {
-				return this.batchClassField.remove(batchClassField);
+				isRemoved = this.batchClassField.remove(batchClassField);
+				break;
 			}
 		}
-		return false;
+		return isRemoved;
 	}
 
 	/**
@@ -331,14 +339,16 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return document type if found else null
 	 */
 	public DocumentType getDocumentTypeByIdentifier(String identifier) {
+		DocumentType documentType = null;
 		if (!(this.documentTypes == null || this.documentTypes.isEmpty())) {
 			for (DocumentType documentType2 : this.documentTypes) {
 				if (documentType2.getIdentifier().equals(identifier)) {
-					return documentType2;
+					documentType = documentType2;
+					break;
 				}
 			}
 		}
-		return null;
+		return documentType;
 	}
 
 	/**
@@ -348,16 +358,18 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return email configuration if found else null
 	 */
 	public BatchClassEmailConfiguration getEmailConfigurationByIdentifier(String identifier) {
+		BatchClassEmailConfiguration batchClassEmailConfiguration1 = null;
 		if (!(this.emailConfigurations == null || this.emailConfigurations.isEmpty())) {
 			for (BatchClassEmailConfiguration batchClassEmailConfiguration : this.emailConfigurations) {
 				if (identifier.equals(String.valueOf(batchClassEmailConfiguration.getId()))) {
-					return batchClassEmailConfiguration;
+					batchClassEmailConfiguration1 = batchClassEmailConfiguration;
+					break;
 				}
 			}
 		}
-		return null;
+		return batchClassEmailConfiguration1;
 	}
-	
+
 	/**
 	 * Returns the batch class field corresponding to the identifier passed
 	 * 
@@ -365,16 +377,18 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	 * @return batch class field if found else null
 	 */
 	public BatchClassField getBatchClassFieldByIdentifier(String identifier) {
+		BatchClassField batchClassField1 = null;
 		if (!(this.batchClassField == null || this.batchClassField.isEmpty())) {
 			for (BatchClassField batchClassField : this.batchClassField) {
 				if (identifier.equals(batchClassField.getIdentifier())) {
-					return batchClassField;
+					batchClassField1 = batchClassField;
+					break;
 				}
 			}
 		}
-		return null;
+		return batchClassField1;
 	}
-	
+
 	/**
 	 * Adds a document type to this batch class
 	 * 
@@ -392,6 +406,7 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	public void addEmailConfiguration(BatchClassEmailConfiguration batchClassEmailConfiguration) {
 		this.emailConfigurations.add(batchClassEmailConfiguration);
 	}
+
 	/**
 	 * Adds a batch class field to this batch class
 	 * 
@@ -400,8 +415,7 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	public void addBatchClassField(BatchClassField batchClassField) {
 		this.batchClassField.add(batchClassField);
 	}
-	
-	
+
 	public void postPersist() {
 		this.identifier = EphesoftProperty.BATCH_CLASS.getProperty() + Long.toHexString(this.getId()).toUpperCase();
 		if (this.documentTypes != null && !this.documentTypes.isEmpty()) {
@@ -433,7 +447,7 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	}
 
 	/**
-	 * @return the isDeleted
+	 * @return the deleted
 	 */
 	public Boolean isDeleted() {
 		if (this.isDeleted == null) {
@@ -443,7 +457,7 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 	}
 
 	/**
-	 * @param isDeleted the isDeleted to set
+	 * @param deleted the deleted to set
 	 */
 	public void setDeleted(Boolean isDeleted) {
 		if (isDeleted == null) {

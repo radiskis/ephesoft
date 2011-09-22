@@ -38,7 +38,7 @@
 				<g:TextBox ui:field="confidence" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="recostarExtractionLabel"></g:Label>
@@ -48,6 +48,18 @@
 			</g:cell>
 			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
 				<g:ListBox ui:field="recostarExtraction" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="isHiddenLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+				<g:CheckBox ui:field="isHidden" />
 			</g:cell>
 		</g:HorizontalPanel>
 		

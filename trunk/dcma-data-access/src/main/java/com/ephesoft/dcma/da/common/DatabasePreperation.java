@@ -45,7 +45,7 @@ import com.ephesoft.dcma.da.dao.PluginDao;
 
 public class DatabasePreperation {
 
-	private static final Logger log = LoggerFactory.getLogger(DatabasePreperation.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatabasePreperation.class);
 	
 	@Autowired
 	private DBScriptExecuter executer;
@@ -54,17 +54,17 @@ public class DatabasePreperation {
 	private PluginDao pluginDao;
 	
 	public void init() {
-		log.info("==============Running the Database Scripts=======================");
+		LOG.info("==============Running the Database Scripts=======================");
 		try {
 			if(pluginDao.countAll() != 0) {
-				log.info("Database is already prepared. Will not execute the DB Scripts.");
+				LOG.info("Database is already prepared. Will not execute the DB Scripts.");
 				return;
 			}
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/init-master-data.sql"));
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/sample-data.sql"));
 		} catch (Exception e) {
-			log.error("Error in execution of Database scripts." ,e);
+			LOG.error("Error in execution of Database scripts." ,e);
 		}
-		log.info("==============Database Scripts executed successfully==============");
+		LOG.info("==============Database Scripts executed successfully==============");
 	}
 }

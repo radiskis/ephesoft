@@ -13,8 +13,8 @@
 	default-autowire="byName">
 
 	<context:annotation-config />
-	
-	<context:spring-configured/>
+
+	<context:spring-configured />
 
 	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
 
@@ -24,7 +24,7 @@
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
 	</context:component-scan>
-	
+
 	<bean class="com.ephesoft.dcma.core.hibernate.MappingFactoryBean">
 		<property name="sourceList">
 			<list>
@@ -35,9 +35,9 @@
 			</list>
 		</property>
 	</bean>
-	
+
 	<util:list id="workflowsDefinitionList" value-type="java.lang.String" list-class="java.util.ArrayList">
-		
+
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Automated_Regex_Validation_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CleanUp_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CMIS_Export_Plugin.jpdl.xml</value>
@@ -57,8 +57,8 @@
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Regex_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/OCROPS_Generate_HOCR_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/KV_Page_Processing_Plugin.jpdl.xml</value>
-		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Review_Document_Plugin.jpdl.xml</value>		
-		
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Review_Document_Plugin.jpdl.xml</value>
+
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Search_Classification_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Table_Doc_Fields_Extraction_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Tesseract_HOCR_Generation_Plugin.jpdl.xml</value>
@@ -66,9 +66,12 @@
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Zxing_Extract_BarCode_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Filebound_Export_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Scripting_Plugin.jpdl.xml</value>
-		
+
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/BarCode_Extraction_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/NSI_Export_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Tabbed_Pdf_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CSV_File_Creation_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/IBM_CM_Plugin.jpdl.xml</value>
 		
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Automated_Validation_Module.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Document_Assembler_Module.jpdl.xml</value>
@@ -79,10 +82,10 @@
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Tesseract_Extraction_Module.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Tesseract_Page_Process_Module.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Validate_Document_Module.jpdl.xml</value>
-		
+
 		<value>/META-INF/dcma-workflows/batch-workflows/other-workflows/Workflow_Status_Finished.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/other-workflows/Workflow_Status_Running.jpdl.xml</value>
-		
+
 		<value>/META-INF/dcma-workflows/batch-workflows/TesseractMailRoom.jpdl.xml</value>
 	</util:list>
 </beans>

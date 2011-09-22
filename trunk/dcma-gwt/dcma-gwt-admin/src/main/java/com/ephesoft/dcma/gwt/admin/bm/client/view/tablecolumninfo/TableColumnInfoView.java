@@ -35,8 +35,6 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo;
 
-
-
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tablecolumninfo.TableColumnInfoPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
@@ -55,59 +53,50 @@ public class TableColumnInfoView extends View<TableColumnInfoPresenter> {
 	interface Binder extends UiBinder<DockLayoutPanel, TableColumnInfoView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	TableColumnInfoDetailView tableColumnInfoDetailView;
+	protected TableColumnInfoDetailView tableColumnInfoDetailView;
 
 	@UiField
-	EditTableColumnInfoView editTableColumnInfoView;
+	protected EditTableColumnInfoView editTableColumnInfoView;
 
 	@UiField
-	VerticalPanel tcInfoVerticalPanel;
+	protected VerticalPanel tcInfoVerticalPanel;
 
 	@UiField
-	VerticalPanel tcInfoConfigVerticalPanel;
+	protected VerticalPanel tcInfoConfigVerticalPanel;
 
 	@UiField
-	CaptionPanel tcInfoConfigurationCaptionPanel;
+	protected CaptionPanel tcInfoConfigurationCaptionPanel;
 
 	@UiField
-	Button editTCInfoPropertiesButton;
+	protected Button editTCInfoPropertiesButton;
 
 	public TableColumnInfoView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		tcInfoConfigurationCaptionPanel.setCaptionHTML(AdminConstants.TCINFO_DETAILS_HTML);
 
 		editTCInfoPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
 		tcInfoVerticalPanel.add(editTCInfoPropertiesButton);
 	}
 
-	
-	
 	public TableColumnInfoDetailView getTableColumnInfoDetailView() {
 		return tableColumnInfoDetailView;
 	}
-
-
 
 	public VerticalPanel getTcInfoVerticalPanel() {
 		return tcInfoVerticalPanel;
 	}
 
-
-
 	public VerticalPanel getTcInfoConfigVerticalPanel() {
 		return tcInfoConfigVerticalPanel;
 	}
 
-
-
 	public CaptionPanel getTcInfoConfigurationCaptionPanel() {
 		return tcInfoConfigurationCaptionPanel;
 	}
-
-
 
 	public Button getEditTCInfoPropertiesButton() {
 		return editTCInfoPropertiesButton;
