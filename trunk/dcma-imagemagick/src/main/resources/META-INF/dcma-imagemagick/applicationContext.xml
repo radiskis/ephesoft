@@ -45,7 +45,7 @@
 		p:tiffCmds="$imagemagick{imagemagick.multi_tiff_commands}" p:pdfCmds="$imagemagick{imagemagick.multi_pdf_commands}"
 		p:unixTiffCmds="$imagemagick{imagemagick.unix_multi_tiff_commands}" p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
 		p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"
-		p:pdfCompression="$imagemagick{imagemagick.pdf_compression}"
+		p:tifCompression="$imagemagick{imagemagick.tif_compression}"
 		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}">
 	</bean>
 

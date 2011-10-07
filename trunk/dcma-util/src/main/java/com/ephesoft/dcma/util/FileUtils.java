@@ -35,7 +35,6 @@
 
 package com.ephesoft.dcma.util;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -61,8 +61,10 @@ import org.apache.tools.ant.taskdefs.Expand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileUtils {
+public class FileUtils implements IUtilCommonConstants {
 
+	private static final String BACKWARD_SLASH = "\\";
+	private static final char FORWARD_SLASH = '/';
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
 	/**
@@ -78,9 +80,9 @@ public class FileUtils {
 		boolean folderDelete = true;
 
 		if (files != null) {
-			for (int i = 0; i < files.length; i++) {
+			for (int index = 0; index < files.length; index++) {
 
-				String sFilePath = srcPath.getPath() + File.separator + files[i];
+				String sFilePath = srcPath.getPath() + File.separator + files[index];
 				File fFilePath = new File(sFilePath);
 				folderDelete = folderDelete & fFilePath.delete();
 			}
@@ -100,29 +102,34 @@ public class FileUtils {
 	public static void zipDirectory(final String dir, final String zipfile, final boolean excludeBatchXml) throws IOException,
 			IllegalArgumentException {
 		// Check that the directory is a directory, and get its contents
-		File d = new File(dir);
-		if (!d.isDirectory())
+		File directory = new File(dir);
+		if (!directory.isDirectory()) {
 			throw new IllegalArgumentException("Not a directory:  " + dir);
-		String[] entries = d.list();
+		}
+		String[] entries = directory.list();
 		byte[] buffer = new byte[4096]; // Create a buffer for copying
 		int bytesRead;
 
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipfile));
 
-		for (int i = 0; i < entries.length; i++) {
-			if (excludeBatchXml && entries[i].contains("batch.xml")) {
+		for (int index = 0; index < entries.length; index++) {
+			if (excludeBatchXml && entries[index].contains(IUtilCommonConstants.BATCH_XML)) {
 				continue;
 			}
-			File f = new File(d, entries[i]);
-			if (f.isDirectory())
+			File file = new File(directory, entries[index]);
+			if (file.isDirectory()) {
 				continue;// Ignore directory
-			FileInputStream in = new FileInputStream(f); // Stream to read file
-			ZipEntry entry = new ZipEntry(f.getName()); // Make a ZipEntry
+			}
+			FileInputStream input = new FileInputStream(file); // Stream to read file
+			ZipEntry entry = new ZipEntry(file.getName()); // Make a ZipEntry
 			out.putNextEntry(entry); // Store entry
-			while ((bytesRead = in.read(buffer)) != -1)
+			bytesRead = input.read(buffer);
+			while (bytesRead != -1) {
 				out.write(buffer, 0, bytesRead);
-			if (in != null) {
-				in.close();
+				bytesRead = input.read(buffer);
+			}
+			if (input != null) {
+				input.close();
 			}
 		}
 		if (out != null) {
@@ -146,39 +153,38 @@ public class FileUtils {
 	 * @param srcPath
 	 * @return true if successful false other wise.
 	 */
-	public static boolean deleteContents(String sSrcPath, boolean folderDelete) {
+	public static boolean deleteContents(final String sSrcPath, final boolean folderDelete) {
 		File srcPath = new File(sSrcPath);
-
+		boolean returnVal = folderDelete;
 		if (null == srcPath || !srcPath.exists()) {
-			return false;
-		}
-
-		String files[] = srcPath.list();
-		if (files != null) {
-			for (int i = 0; i < files.length; i++) {
-				String sFilePath = srcPath.getPath() + File.separator + files[i];
-				File fFilePath = new File(sFilePath);
-				folderDelete = folderDelete & fFilePath.delete();
+			returnVal = false;
+		} else {
+			String files[] = srcPath.list();
+			if (files != null) {
+				for (int index = 0; index < files.length; index++) {
+					String sFilePath = srcPath.getPath() + File.separator + files[index];
+					File fFilePath = new File(sFilePath);
+					returnVal = returnVal & fFilePath.delete();
+				}
+				returnVal = returnVal & srcPath.delete();
 			}
-			folderDelete = folderDelete & srcPath.delete();
 		}
-		return folderDelete;
+		return returnVal;
 	}
 
 	public static boolean deleteContentsOnly(String srcPath) {
 		boolean folderDelete = true;
 		File srcPathFile = new File(srcPath);
-
 		if (null == srcPathFile || !srcPathFile.exists()) {
-			return false;
-		}
-
-		String files[] = srcPathFile.list();
-		if (files != null) {
-			for (int i = 0; i < files.length; i++) {
-				String sFilePath = srcPathFile.getPath() + File.separator + files[i];
-				File fFilePath = new File(sFilePath);
-				folderDelete = folderDelete & fFilePath.delete();
+			folderDelete = false;
+		} else {
+			String files[] = srcPathFile.list();
+			if (files != null) {
+				for (int index = 0; index < files.length; index++) {
+					String sFilePath = srcPathFile.getPath() + File.separator + files[index];
+					File fFilePath = new File(sFilePath);
+					folderDelete = folderDelete & fFilePath.delete();
+				}
 			}
 		}
 		return folderDelete;
@@ -192,17 +198,18 @@ public class FileUtils {
 	 * @throws Exception
 	 */
 	public static void copyFile(File srcFile, File destFile) throws Exception {
-		InputStream in = null;
-		in = new FileInputStream(srcFile);
+		InputStream input = null;
+		input = new FileInputStream(srcFile);
 		OutputStream out = null;
 		out = new FileOutputStream(destFile);
 		byte[] buf = new byte[1024];
-		int len;
-		while ((len = in.read(buf)) > 0) {
+		int len = input.read(buf);
+		while (len > 0) {
 			out.write(buf, 0, len);
+			len = input.read(buf);
 		}
-		if (in != null) {
-			in.close();
+		if (input != null) {
+			input.close();
 		}
 		if (out != null) {
 			out.close();
@@ -228,26 +235,25 @@ public class FileUtils {
 			if (files.length > 0) {
 				Arrays.sort(files);
 
-				for (int i = 0; i < files.length; i++) {
+				for (int index = 0; index < files.length; index++) {
 
-					copyDirectoryWithContents(new File(srcPath, files[i]), new File(dstPath, files[i]));
+					copyDirectoryWithContents(new File(srcPath, files[index]), new File(dstPath, files[index]));
 				}
 			}
 
 		} else {
-			if (!srcPath.exists()) {
-
-			} else {
-				InputStream in = new FileInputStream(srcPath);
+			if (srcPath.exists()) {
+				InputStream input = new FileInputStream(srcPath);
 				OutputStream out = new FileOutputStream(dstPath);
 				// Transfer bytes from in to out
 				byte[] buf = new byte[1024];
-				int len;
-				while ((len = in.read(buf)) > 0) {
+				int len = input.read(buf);
+				while (len > 0) {
 					out.write(buf, 0, len);
+					len = input.read(buf);
 				}
-				if (in != null) {
-					in.close();
+				if (input != null) {
+					input.close();
 				}
 				if (out != null) {
 					out.close();
@@ -277,26 +283,25 @@ public class FileUtils {
 			if (files.length > 0) {
 				Arrays.sort(files);
 
-				for (int i = 0; i < files.length; i++) {
+				for (int index = 0; index < files.length; index++) {
 
-					copyDirectoryWithContents(new File(srcPath, files[i]), new File(dstPath, files[i]));
+					copyDirectoryWithContents(new File(srcPath, files[index]), new File(dstPath, files[index]));
 				}
 			}
 
 		} else {
-			if (!srcPath.exists()) {
-
-			} else {
-				InputStream in = new FileInputStream(srcPath);
+			if (srcPath.exists()) {
+				InputStream input = new FileInputStream(srcPath);
 				OutputStream out = new FileOutputStream(dstPath);
 				// Transfer bytes from in to out
 				byte[] buf = new byte[1024];
-				int len;
-				while ((len = in.read(buf)) > 0) {
+				int len = input.read(buf);
+				while (len > 0) {
 					out.write(buf, 0, len);
+					len = input.read(buf);
 				}
-				if (in != null) {
-					in.close();
+				if (input != null) {
+					input.close();
 				}
 				if (out != null) {
 					out.close();
@@ -310,9 +315,9 @@ public class FileUtils {
 		File file = new File(folderName);
 		if (file.isDirectory()) {
 			File[] allFiles = file.listFiles();
-			for (int i = 0; i < allFiles.length; i++) {
-				if (allFiles[i].getName().endsWith(".xml")) {
-					allFiles[i].delete();
+			for (int index = 0; index < allFiles.length; index++) {
+				if (allFiles[index].getName().endsWith(EXTENSION_XML)) {
+					allFiles[index].delete();
 				}
 			}
 		}
@@ -322,9 +327,9 @@ public class FileUtils {
 		File file = new File(folderName);
 		if (file.isDirectory()) {
 			File[] allFiles = file.listFiles();
-			for (int i = 0; i < allFiles.length; i++) {
-				if (allFiles[i].getName().endsWith(".html")) {
-					allFiles[i].delete();
+			for (int index = 0; index < allFiles.length; index++) {
+				if (allFiles[index].getName().endsWith(EXTENSION_HTML)) {
+					allFiles[index].delete();
 				}
 			}
 		}
@@ -334,27 +339,29 @@ public class FileUtils {
 		File inputFolder = new File(fromLoc);
 		File outputFolder = new File(toLoc);
 		File[] inputFiles = inputFolder.listFiles();
-		for (int i = 0; i < inputFiles.length; i++) {
-			if (inputFiles[i].getName().endsWith(".xml")) {
-				FileReader in;
+		for (int index = 0; index < inputFiles.length; index++) {
+			if (inputFiles[index].getName().endsWith(EXTENSION_XML)) {
+				FileReader input;
 				FileWriter out;
-				int c;
+				int character;
 				try {
-					in = new FileReader(inputFiles[i]);
-					out = new FileWriter(outputFolder + File.separator + inputFiles[i].getName());
-					while ((c = in.read()) != -1) {
-						out.write(c);
+					input = new FileReader(inputFiles[index]);
+					out = new FileWriter(outputFolder + File.separator + inputFiles[index].getName());
+					character = input.read();
+					while (character != -1) {
+						out.write(character);
+						character = input.read();
 					}
-					if (in != null) {
-						in.close();
+					if (input != null) {
+						input.close();
 					}
 					if (out != null) {
 						out.close();
 					}
 				} catch (FileNotFoundException e) {
-					System.out.println("Exception while reading files:" + e);
+					LOGGER.error("Exception while reading files:" + e);
 				} catch (IOException e) {
-					System.out.println("Exception while copying files:" + e);
+					LOGGER.error("Exception while copying files:" + e);
 				}
 			}
 		}
@@ -365,8 +372,8 @@ public class FileUtils {
 		boolean returnValue = false;
 		File folderLoc = new File(folderLocation);
 		File[] allFiles = folderLoc.listFiles();
-		for (int i = 0; i < allFiles.length; i++) {
-			if (allFiles[i].getName().endsWith(".html")) {
+		for (int index = 0; index < allFiles.length; index++) {
+			if (allFiles[index].getName().endsWith(EXTENSION_HTML)) {
 				returnValue = true;
 			}
 		}
@@ -412,11 +419,12 @@ public class FileUtils {
 	}
 
 	public static String changeFileExtension(String fileName, String extension) {
-		int indexOf = fileName.lastIndexOf(".");
-		int endIndex = fileName.length();
-		String substring = fileName.substring(indexOf + 1, endIndex);
-		fileName = fileName.replace(substring, extension);
-		return fileName;
+		String name = fileName;
+		int indexOf = name.lastIndexOf(DOT);
+		int endIndex = name.length();
+		String substring = name.substring(indexOf + 1, endIndex);
+		name = name.replace(substring, extension);
+		return name;
 	}
 
 	/**
@@ -433,26 +441,28 @@ public class FileUtils {
 		for (String fileName : fileList) {
 			File file = new File(srcDir.getParent(), fileName);
 			String zipName = fileName;
-			if (File.separatorChar != '/')
-				zipName = fileName.replace(File.separatorChar, '/');
-			zipName = zipName.substring(zipName.indexOf(dir2zipName + "\\") + 1 + (dir2zipName + "\\").length());
+			if (File.separatorChar != FORWARD_SLASH) {
+				zipName = fileName.replace(File.separatorChar, FORWARD_SLASH);
+			}
+			zipName = zipName.substring(zipName.indexOf(dir2zipName + BACKWARD_SLASH) + 1 + (dir2zipName + BACKWARD_SLASH).length());
 
-			ZipEntry ze;
+			ZipEntry zipEntry;
 			if (file.isFile()) {
-				ze = new ZipEntry(zipName);
-				ze.setTime(file.lastModified());
-				zout.putNextEntry(ze);
+				zipEntry = new ZipEntry(zipName);
+				zipEntry.setTime(file.lastModified());
+				zout.putNextEntry(zipEntry);
 				FileInputStream fin = new FileInputStream(file);
 				byte[] buffer = new byte[4096];
-				for (int n; (n = fin.read(buffer)) > 0;)
+				for (int n; (n = fin.read(buffer)) > 0;) {
 					zout.write(buffer, 0, n);
+				}
 				if (fin != null) {
 					fin.close();
 				}
 			} else {
-				ze = new ZipEntry(zipName + '/');
-				ze.setTime(file.lastModified());
-				zout.putNextEntry(ze);
+				zipEntry = new ZipEntry(zipName + FORWARD_SLASH);
+				zipEntry.setTime(file.lastModified());
+				zout.putNextEntry(zipEntry);
 			}
 		}
 		if (zout != null) {
@@ -467,32 +477,33 @@ public class FileUtils {
 
 		// If it's a file, just return itself
 		if (directory.isFile()) {
-			if (directory.canRead())
+			if (directory.canRead()) {
 				list.add(directory.getName());
-			return list;
-		}
+			}
+		} else {
 
-		// Traverse the directory in width-first manner, no-recursively
-		String root = directory.getParent();
-		stack.push(directory.getName());
-		while (!stack.empty()) {
-			String current = (String) stack.pop();
-			File curDir = new File(root, current);
-			String[] fileList = curDir.list();
-			if (fileList != null) {
-				for (String entry : fileList) {
-					File f = new File(curDir, entry);
-					if (f.isFile()) {
-						if (f.canRead()) {
+			// Traverse the directory in width-first manner, no-recursively
+			String root = directory.getParent();
+			stack.push(directory.getName());
+			while (!stack.empty()) {
+				String current = (String) stack.pop();
+				File curDir = new File(root, current);
+				String[] fileList = curDir.list();
+				if (fileList != null) {
+					for (String entry : fileList) {
+						File file = new File(curDir, entry);
+						if (file.isFile()) {
+							if (file.canRead()) {
+								list.add(current + File.separator + entry);
+							} else {
+								throw new IOException("Can't read file: " + file.getPath());
+							}
+						} else if (file.isDirectory()) {
 							list.add(current + File.separator + entry);
+							stack.push(current + File.separator + file.getName());
 						} else {
-							throw new IOException("Can't read file: " + f.getPath());
+							throw new IOException("Unknown entry: " + file.getPath());
 						}
-					} else if (f.isDirectory()) {
-						list.add(current + File.separator + entry);
-						stack.push(current + File.separator + f.getName());
-					} else {
-						throw new IOException("Unknown entry: " + f.getPath());
 					}
 				}
 			}
@@ -539,11 +550,14 @@ public class FileUtils {
 		}
 		final class Expander extends Expand {
 
+			private static final String UNZIP = "unzip";
+
 			public Expander() {
+				super();
 				setProject(new Project());
 				getProject().init();
-				setTaskType("unzip");
-				setTaskName("unzip");
+				setTaskType(UNZIP);
+				setTaskName(UNZIP);
 			}
 		}
 		Expander expander = new Expander();
@@ -553,11 +567,12 @@ public class FileUtils {
 	}
 
 	public static String getFileNameOfTypeFromFolder(String dirLocation, String fileExtOrFolderName) {
-		String fileOrFolderName = "";
+		String fileOrFolderName = EMPTY_STRING;
 		File[] listFiles = new File(dirLocation).listFiles();
 		if (listFiles != null) {
 			for (int index = 0; index < listFiles.length; index++) {
-				if (listFiles[index].getName().toLowerCase().indexOf(fileExtOrFolderName.toLowerCase()) > -1) {
+				if (listFiles[index].getName().toLowerCase(Locale.getDefault()).indexOf(
+						fileExtOrFolderName.toLowerCase(Locale.getDefault())) > -1) {
 					fileOrFolderName = listFiles[index].getPath();
 					break;
 				}
@@ -664,16 +679,12 @@ public class FileUtils {
 	 * @param destFile {@link String}
 	 * @return
 	 */
-	public static boolean mergeFilesIntoSingleFile(List<String> srcFiles, String destFile) {
+	public static boolean mergeFilesIntoSingleFile(List<String> srcFiles, String destFile) throws Exception {
 		boolean isFileMerged = false;
 		File outputFile = new File(destFile);
 		for (String string : srcFiles) {
 			File inputFile = new File(string);
-			try {
-				appendFile(inputFile, outputFile);
-			} catch (Exception e) {
-				LOGGER.error("Error in copying file" + e.getMessage(), e);
-			}
+			appendFile(inputFile, outputFile);
 		}
 		return isFileMerged;
 	}

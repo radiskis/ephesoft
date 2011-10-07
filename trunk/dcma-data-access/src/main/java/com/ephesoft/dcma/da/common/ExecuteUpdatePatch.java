@@ -106,8 +106,6 @@ public class ExecuteUpdatePatch {
 
 	private boolean patchEnabled;
 
-	
-
 	private Map<String, List<BatchClassModule>> batchClassNameVsModulesMap = new HashMap<String, List<BatchClassModule>>();
 
 	final private Map<String, List<BatchClass>> nameVsBatchClassListMap = new HashMap<String, List<BatchClass>>();
@@ -115,8 +113,6 @@ public class ExecuteUpdatePatch {
 	private Map<String, List<BatchClassPlugin>> batchClassNameVsBatchClassPluginMap = new HashMap<String, List<BatchClassPlugin>>();
 
 	private Map<String, List<BatchClass>> batchClassNameVsBatchClassMap = new HashMap<String, List<BatchClass>>();
-
-	
 
 	public void init() {
 		if (!patchEnabled) {
@@ -206,13 +202,15 @@ public class ExecuteUpdatePatch {
 					for (BatchClassModule bcmNew : newModulesToBeAdded) {
 						boolean isModulePresent = false;
 						for (BatchClassModule bcm : batchClassModules) {
-							if (bcmNew.getModule().getId() == bcm.getModule().getId()) {
+							if (bcmNew.getModule().getName().equalsIgnoreCase(bcm.getModule().getName())) {
 								isModulePresent = true;
 								break;
 							}
 						}
 
 						if (!isModulePresent) {
+							Module module = moduleDao.getModuleByName(bcmNew.getModule().getName());
+							bcmNew.setModule(module);
 							batchClass.getBatchClassModules().add(bcmNew);
 						}
 
@@ -248,33 +246,34 @@ public class ExecuteUpdatePatch {
 		for (String key : batchClassNameVsBatchClassPluginMap.keySet()) {
 			StringTokenizer pluginConfigTokens = new StringTokenizer(key, ",");
 			String batchClassName = null;
-			String moduleId = null;
+			String moduleName = null;
 			try {
 				batchClassName = pluginConfigTokens.nextToken();
-				moduleId = pluginConfigTokens.nextToken();
-				int modId = Integer.parseInt(moduleId);
-
+				moduleName = pluginConfigTokens.nextToken();
+				
 				List<BatchClass> batchClasses = nameVsBatchClassListMap.get(batchClassName);
 				List<BatchClassPlugin> newPlugins = batchClassNameVsBatchClassPluginMap.get(key);
-				for (BatchClass batchClass : batchClasses) {
-					List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
-					for (BatchClassModule bcm : batchClassModules) {
-						if (bcm.getModule().getId() == modId) {
-							for (BatchClassPlugin newPlugin : newPlugins) {
-								boolean isPluginPresent = isPluginAlreadyPresent(bcm, newPlugin.getPlugin().getPluginName());
-								if (!isPluginPresent) {
-									bcm.getBatchClassPlugins().add(newPlugin);
+				if (batchClasses != null) {
+					for (BatchClass batchClass : batchClasses) {
+						List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
+						for (BatchClassModule bcm : batchClassModules) {
+							if (bcm.getModule().getName().equals(moduleName)) {
+								for (BatchClassPlugin newPlugin : newPlugins) {
+									boolean isPluginPresent = isPluginAlreadyPresent(bcm, newPlugin.getPlugin().getPluginName());
+									if (!isPluginPresent) {
+										Plugin plugin = pluginDao.getPluginByName(newPlugin.getPlugin().getPluginName());
+										newPlugin.setPlugin(plugin);
+										bcm.getBatchClassPlugins().add(newPlugin);
+									}
 								}
 							}
 						}
 					}
+					LOG.info(UPDATING_BATCH_CLASSES);
+					for (BatchClass batchClass : batchClasses) {
+						batchClass = batchClassService.merge(batchClass);
+					}
 				}
-
-				LOG.info(UPDATING_BATCH_CLASSES);
-				for (BatchClass batchClass : batchClasses) {
-					batchClass = batchClassService.merge(batchClass);
-				}
-
 				nameVsBatchClassListMap.clear();
 				populateMap();
 
@@ -437,15 +436,15 @@ public class ExecuteUpdatePatch {
 		}
 	}
 
-	private Map<Integer, List<BatchClassPluginConfig>> readPluginConfigSerializeFile() {
+	private Map<String, List<BatchClassPluginConfig>> readPluginConfigSerializeFile() {
 		FileInputStream fileInputStream = null;
-		Map<Integer, List<BatchClassPluginConfig>> newPluginConfigsMap = null;
+		Map<String, List<BatchClassPluginConfig>> newPluginConfigsMap = null;
 		File serializedFile = null;
 		try {
 			String pluginConfigFilePath = dbPatchFolderLocation + File.separator + "PluginConfigUpdate" + SERIALIZATION_EXT;
 			serializedFile = new File(pluginConfigFilePath);
 			fileInputStream = new FileInputStream(serializedFile);
-			newPluginConfigsMap = (Map<Integer, List<BatchClassPluginConfig>>) SerializationUtils.deserialize(fileInputStream);
+			newPluginConfigsMap = (Map<String, List<BatchClassPluginConfig>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, pluginConfigFilePath);
 		} catch (IOException e) {
 			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
@@ -465,15 +464,15 @@ public class ExecuteUpdatePatch {
 		return newPluginConfigsMap;
 	}
 
-	private Map<Long, List<BatchClassModuleConfig>> readModuleConfigSerializeFile() {
+	private Map<String, List<BatchClassModuleConfig>> readModuleConfigSerializeFile() {
 		FileInputStream fileInputStream = null;
-		Map<Long, List<BatchClassModuleConfig>> newModuleConfigsMap = null;
+		Map<String, List<BatchClassModuleConfig>> newModuleConfigsMap = null;
 		File serializedFile = null;
 		try {
 			String moduleConfigFilePath = dbPatchFolderLocation + File.separator + "ModuleConfigUpdate" + SERIALIZATION_EXT;
 			serializedFile = new File(moduleConfigFilePath);
 			fileInputStream = new FileInputStream(serializedFile);
-			newModuleConfigsMap = (Map<Long, List<BatchClassModuleConfig>>) SerializationUtils.deserialize(fileInputStream);
+			newModuleConfigsMap = (Map<String, List<BatchClassModuleConfig>>) SerializationUtils.deserialize(fileInputStream);
 			updateFile(serializedFile, moduleConfigFilePath);
 		} catch (IOException e) {
 			LOG.info(ERROR_DURING_READING_THE_SERIALIZED_FILE);
@@ -494,28 +493,28 @@ public class ExecuteUpdatePatch {
 	}
 
 	public void updatePluginConfig() throws CloneNotSupportedException {
-		Map<Integer, List<BatchClassPluginConfig>> newPluginConfigMap = new HashMap<Integer, List<BatchClassPluginConfig>>();
+		Map<String, List<BatchClassPluginConfig>> newPluginConfigMap = new HashMap<String, List<BatchClassPluginConfig>>();
 		newPluginConfigMap = readPluginConfigSerializeFile();
 		if (newPluginConfigMap == null || newPluginConfigMap.isEmpty()) {
 			LOG.info("No data recovered from serialized file.");
 			return;
 		}
-		for (Integer pluginId : newPluginConfigMap.keySet()) {
-			List<BatchClassPluginConfig> pluginConfigs = newPluginConfigMap.get(pluginId);
+		for (String pluginName : newPluginConfigMap.keySet()) {
+			List<BatchClassPluginConfig> pluginConfigs = newPluginConfigMap.get(pluginName);
 			if (pluginConfigs != null && !pluginConfigs.isEmpty()) {
 				setUpdatedPluginConfigs(pluginConfigs);
 			}
 		}
 
 		List<BatchClass> batchClasses = batchClassService.getAllLoadedBatchClassExcludeDeleted();
-		for (Integer plgId : newPluginConfigMap.keySet()) {
+		for (String plgName : newPluginConfigMap.keySet()) {
 			for (BatchClass batchClass : batchClasses) {
 				List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
 				for (BatchClassModule bcm : batchClassModules) {
 					List<BatchClassPlugin> batchClassPlugins = bcm.getBatchClassPlugins();
 					for (BatchClassPlugin bcp : batchClassPlugins) {
-						if (bcp.getPlugin().getId() == plgId.longValue()) {
-							List<BatchClassPluginConfig> toBeAddedConfigs = newPluginConfigMap.get(Integer.valueOf(plgId));
+						if (bcp.getPlugin().getPluginName().equals(plgName)) {
+							List<BatchClassPluginConfig> toBeAddedConfigs = newPluginConfigMap.get(plgName);
 							for (BatchClassPluginConfig bcpc : toBeAddedConfigs) {
 								boolean isPresnt = isBatchClassPluginConfigPresent(bcpc, bcp.getBatchClassPluginConfigs());
 								if (!isPresnt) {
@@ -536,25 +535,25 @@ public class ExecuteUpdatePatch {
 	}
 
 	public void updateModuleConfigs() {
-		Map<Long, List<BatchClassModuleConfig>> moduleIdVsBatchClassModuleConfigs = new HashMap<Long, List<BatchClassModuleConfig>>();
-		moduleIdVsBatchClassModuleConfigs = readModuleConfigSerializeFile();
-		if (moduleIdVsBatchClassModuleConfigs == null || moduleIdVsBatchClassModuleConfigs.isEmpty()) {
+		Map<String, List<BatchClassModuleConfig>> moduleNameVsBatchClassModuleConfigs = new HashMap<String, List<BatchClassModuleConfig>>();
+		moduleNameVsBatchClassModuleConfigs = readModuleConfigSerializeFile();
+		if (moduleNameVsBatchClassModuleConfigs == null || moduleNameVsBatchClassModuleConfigs.isEmpty()) {
 			LOG.info("No Serialize file present for Module Configs... Returning..");
 			return;
 		}
-		for (Long pluginId : moduleIdVsBatchClassModuleConfigs.keySet()) {
-			List<BatchClassModuleConfig> moduleConfigs = moduleIdVsBatchClassModuleConfigs.get(pluginId);
+		for (String pluginName : moduleNameVsBatchClassModuleConfigs.keySet()) {
+			List<BatchClassModuleConfig> moduleConfigs = moduleNameVsBatchClassModuleConfigs.get(pluginName);
 			if (moduleConfigs != null && !moduleConfigs.isEmpty()) {
 				setUpdatedModuleConfigs(moduleConfigs);
 			}
 		}
 		List<BatchClass> batchClasses = batchClassService.getAllLoadedBatchClassExcludeDeleted();
-		for (Long modId : moduleIdVsBatchClassModuleConfigs.keySet()) {
+		for (String modName : moduleNameVsBatchClassModuleConfigs.keySet()) {
 			for (BatchClass batchClass : batchClasses) {
 				List<BatchClassModule> batchClassModules = batchClass.getBatchClassModules();
 				for (BatchClassModule bcm : batchClassModules) {
-					if (bcm.getModule().getId() == modId.longValue()) {
-						List<BatchClassModuleConfig> toBeAddedConfigs = moduleIdVsBatchClassModuleConfigs.get(Long.valueOf(modId));
+					if (bcm.getModule().getName().equals(modName)) {
+						List<BatchClassModuleConfig> toBeAddedConfigs = moduleNameVsBatchClassModuleConfigs.get(modName);
 						for (BatchClassModuleConfig bcmc : toBeAddedConfigs) {
 							boolean isPresnt = isBatchClassModuleConfigPresent(bcmc, bcm.getBatchClassModuleConfig());
 							if (!isPresnt) {
@@ -680,7 +679,7 @@ public class ExecuteUpdatePatch {
 			for (BatchClassModule batchClassModule : newModules) {
 				List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
 				for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
-					Plugin plugin = pluginDao.get(batchClassPlugin.getPlugin().getId());
+					Plugin plugin = pluginDao.getPluginByName(batchClassPlugin.getPlugin().getPluginName());
 					if (plugin != null) {
 						batchClassPlugin.setPlugin(plugin);
 					}
@@ -698,11 +697,13 @@ public class ExecuteUpdatePatch {
 				for (BatchClassModule batchClassModule : batchClassModules) {
 					List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
 					for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
-						Plugin plugin = pluginDao.get(batchClassPlugin.getPlugin().getId());
+						Plugin plugin = pluginDao.getPluginByName(batchClassPlugin.getPlugin().getPluginName());
 						if (plugin != null) {
 							batchClassPlugin.setPlugin(plugin);
 						}
 					}
+					Module module = moduleDao.getModuleByName(batchClassModule.getModule().getName());
+					batchClassModule.setModule(module);
 					updatePluginConfigsForNewConfigs(batchClassPlugins);
 				}
 			}
@@ -754,8 +755,7 @@ public class ExecuteUpdatePatch {
 							&& batchClassModuleConfig.getModuleConfig().isMandatory() == config.getModuleConfig().isMandatory()) {
 						isPresent = true;
 						break;
-					} else if (childKey == null && config.getModuleConfig() != null
-							&& null == config.getModuleConfig().getChildKey()
+					} else if (childKey == null && config.getModuleConfig() != null && null == config.getModuleConfig().getChildKey()
 							&& batchClassModuleConfig.getModuleConfig().isMandatory() == config.getModuleConfig().isMandatory()) {
 						isPresent = true;
 						break;
@@ -766,4 +766,3 @@ public class ExecuteUpdatePatch {
 		return isPresent;
 	}
 }
-

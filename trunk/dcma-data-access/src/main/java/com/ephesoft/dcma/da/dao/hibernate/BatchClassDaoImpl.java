@@ -210,6 +210,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 		for (BatchClass batchClass : batchClasses) {
 			for (BatchClassModule mod : batchClass.getBatchClassModules()) {
 				List<BatchClassPlugin> plugins = mod.getBatchClassPlugins();
+				List<BatchClassModuleConfig> batchClassModuleConfig = mod.getBatchClassModuleConfig();
 				for (BatchClassPlugin plugin : plugins) {
 					List<BatchClassPluginConfig> pluginConfigs = plugin.getBatchClassPluginConfigs();
 					List<BatchClassDynamicPluginConfig> dynamicPluginConfigs = plugin.getBatchClassDynamicPluginConfigs();
@@ -227,7 +228,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 						}
 					}
 				}
-				for (BatchClassModuleConfig bcmc : mod.getBatchClassModuleConfig()) {
+				for (BatchClassModuleConfig bcmc : batchClassModuleConfig) {
 					if (LOG.isDebugEnabled() && bcmc != null) {
 						LOG.debug(bcmc.getBatchClassModule().getModule().getName());
 					}

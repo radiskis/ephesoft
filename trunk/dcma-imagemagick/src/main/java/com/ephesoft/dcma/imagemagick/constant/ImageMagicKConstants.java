@@ -56,15 +56,23 @@ public interface ImageMagicKConstants {
 
 	String HOCR_TO_PDF_PLUGIN_NAME_CONSTANT = "HOCRtoPDF";
 
-	String GHOST_SCRIPT_COMMAND_PARAMETERS = "-dNOPAUSE -r300 -sDEVICE=";
+	String GHOST_SCRIPT_COMMAND_PARAMETERS = "-dQUIET -dNOPAUSE -r300 -sDEVICE=";
 
 	String GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS = "-dBATCH -sOutputFile=";
 
-	String TIF_DEVICE = "tiffg4";
+	String DEFAULT_TIF_DEVICE = "tiffg4";
 
 	String PDF_DEVICE = "pdfwrite";
 
 	String ON_SWITCH = "ON";
 
 	String TEMP_FILE_NAME = "tempFile";
+
+	String DOUBLE_QUOTES = "\"";
+
+	String SPACE = " ";
+
+	String GHOSTSCRIPT_HOME = "GHOSTSCRIPT_HOME";
+
+	String GHOSTSCRIPT_COMMAND = "gswin32c.exe";
 }

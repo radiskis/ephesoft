@@ -321,7 +321,7 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	public BatchClass createBatchClass(BatchClass batchClass) {
 		BatchClass batchClass1 = null;
 		batchClass1 = batchClassDao.merge(batchClass);
-		applicationContext.publishEvent(new NewBatchClassEvent(applicationContext, new BatchClassID(batchClass.getIdentifier())));
+		applicationContext.publishEvent(new NewBatchClassEvent(applicationContext, new BatchClassID(batchClass1.getIdentifier())));
 		return batchClass1;
 	}
 

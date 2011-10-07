@@ -66,12 +66,12 @@ public class CleanupComponent {
 
 		final File fFolderToBeCleaned = new File(sFolderToBeCleaned);
 		if (!fFolderToBeCleaned.exists()) {
-			LOGGER.error("Folder does not exist. Folder name : " + fFolderToBeCleaned);
-			throw new DCMAApplicationException("Folder does not exist. Folder name : " + fFolderToBeCleaned);
+			LOGGER.info("Folder does not exist. Folder name : " + fFolderToBeCleaned);
+			// throw new DCMAApplicationException("Folder does not exist. Folder name : " + fFolderToBeCleaned);
 		}
 		if (!fFolderToBeCleaned.isDirectory()) {
-			LOGGER.error("The path specified does not point to a directory path : " + fFolderToBeCleaned);
-			throw new DCMAApplicationException("The path specified does not point to a directory path : " + fFolderToBeCleaned);
+			LOGGER.info("The path specified does not point to a directory path : " + fFolderToBeCleaned);
+			// throw new DCMAApplicationException("The path specified does not point to a directory path : " + fFolderToBeCleaned);
 		}
 
 		boolean deleteFiles = FileUtils.deleteDirectoryAndContents(fFolderToBeCleaned);
@@ -79,7 +79,7 @@ public class CleanupComponent {
 			LOGGER.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
 		} else {
 			deleteFiles = FileUtils.deleteDirectoryAndContents(fFolderToBeCleaned);
-			if (deleteFiles) {
+			if (!fFolderToBeCleaned.exists()) {
 				LOGGER.info("Folder delete successfully. Folder name : " + fFolderToBeCleaned);
 			} else {
 				throw new IOException("Unable to delete Folder : " + fFolderToBeCleaned);
@@ -109,7 +109,7 @@ public class CleanupComponent {
 				LOGGER.info("File delete successfully. File name : " + file);
 			} else {
 				deleteSuccess = fileToBeDeleted.delete();
-				if (deleteSuccess) {
+				if (!fileToBeDeleted.exists()) {
 					LOGGER.info("File delete successfully. File name : " + file);
 				} else {
 					throw new IOException("Unable to delete the file. File name : " + file);

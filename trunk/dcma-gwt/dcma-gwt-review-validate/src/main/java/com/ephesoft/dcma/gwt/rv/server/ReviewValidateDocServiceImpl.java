@@ -124,6 +124,10 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	private static final String SCRIPT_TEST = "ScriptFunctionKey";
 
+	private static final String FIELD_VALUE_CHANGE_SCRIPT_NAME = "field_value_change_script_name";
+
+	private static final String DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE = "ScriptFieldValueChange";
+
 	public BatchDTO getHighestPriortyBatch() {
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
@@ -144,6 +148,11 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
 
+		String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
+
+		String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+				ValidateProperties.FUZZY_SEARCH_SWITCH);
 		switch (batchInstance.getStatus()) {
 			case READY_FOR_REVIEW:
 				batch.setBatchStatus(BatchStatus.READY_FOR_REVIEW);
@@ -155,7 +164,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				break;
 		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
-		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch);
+		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch);
 	}
 
 	@Override
@@ -227,7 +236,15 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					BatchInstancePluginPropertiesService.class);
 			String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
-			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch);
+
+			String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
+
+			String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_SWITCH);
+
+			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
+					fuzzySearchSwitch);
 
 		} catch (DCMAApplicationException e) {
 			log.error(e.getMessage(), e);
@@ -1147,6 +1164,40 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
 		return dimensionsForPopUp;
 
+	}
+
+	@Override
+	public BatchDTO executeScriptOnFieldChange(Batch batch, Document document, String fieldName) throws GWTException {
+		ScriptService scriptService = this.getSingleBeanOfType(ScriptService.class);
+
+		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
+		batchSchemaService.updateBatch(batch);
+		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
+		String nameOfPluginScript = getFieldValueChangeScriptName();
+		try {
+			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, document.getIdentifier(), fieldName);
+		} catch (DCMAException e) {
+			throw new GWTException(e.getMessage());
+		}
+		return getBatch(batch.getBatchInstanceIdentifier());
+	}
+
+	private String getFieldValueChangeScriptName() {
+
+		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
+		String scriptName = null;
+		try {
+			InputStream propertyInStream = new ClassPathResource(filePath).getInputStream();
+			Properties properties = new Properties();
+			properties.load(propertyInStream);
+			scriptName = properties.getProperty(FIELD_VALUE_CHANGE_SCRIPT_NAME);
+			if (scriptName == null) {
+				scriptName = DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE;
+			}
+		} catch (IOException e) {
+			scriptName = DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE;
+		}
+		return scriptName;
 	}
 
 }

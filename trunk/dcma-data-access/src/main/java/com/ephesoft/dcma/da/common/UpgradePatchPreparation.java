@@ -64,14 +64,22 @@ import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.FunctionKey;
 import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.domain.KVPageProcess;
+import com.ephesoft.dcma.da.domain.Module;
 import com.ephesoft.dcma.da.domain.PageType;
+import com.ephesoft.dcma.da.domain.Plugin;
 import com.ephesoft.dcma.da.domain.RegexValidation;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.da.service.ModuleService;
+import com.ephesoft.dcma.da.service.PluginService;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
 public class UpgradePatchPreparation {
+	
+	private static PluginService pluginService;
+	
+	private static ModuleService moduleService;
 
 	private static final String ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE = "Error occurred while creating the serializable file.";
 
@@ -84,13 +92,13 @@ public class UpgradePatchPreparation {
 
 	private static String upgradePatchFolderPath = null;
 
-	private static HashMap<Integer, ArrayList<BatchClassPluginConfig>> pluginIdVsBatchPluginConfigList = new HashMap<Integer, ArrayList<BatchClassPluginConfig>>();
+	private static HashMap<String, ArrayList<BatchClassPluginConfig>> pluginNameVsBatchPluginConfigList = new HashMap<String, ArrayList<BatchClassPluginConfig>>();
 
 	private static HashMap<String, ArrayList<BatchClassModule>> batchClassNameVsModulesMap = new HashMap<String, ArrayList<BatchClassModule>>();
 
 	private static HashMap<String, ArrayList<BatchClassPlugin>> batchClassNameVsPluginsMap = new HashMap<String, ArrayList<BatchClassPlugin>>();
 
-	private static HashMap<Long, ArrayList<BatchClassModuleConfig>> moduleIdVsBatchClassModuleConfigMap = new HashMap<Long, ArrayList<BatchClassModuleConfig>>();
+	private static HashMap<String, ArrayList<BatchClassModuleConfig>> moduleNameVsBatchClassModuleConfigMap = new HashMap<String, ArrayList<BatchClassModuleConfig>>();
 
 	private static HashMap<String, ArrayList<BatchClass>> batchClassNameVsBatchClassMap = new HashMap<String, ArrayList<BatchClass>>();
 
@@ -169,7 +177,8 @@ public class UpgradePatchPreparation {
 				BatchClassPlugin createdPlugin = createPatch(batchClassIdentifier, moduleId, pluginId, service);
 				if (createdPlugin != null) {
 					BatchClass batchClass = service.getBatchClassByIdentifier(batchClassIdentifier);
-					String key = batchClass.getName() + "," + moduleId;
+					Module module = moduleService.getModulePropertiesForModuleId(Long.valueOf(moduleId));
+					String key = batchClass.getName() + "," + module.getName();
 					ArrayList<BatchClassPlugin> pluginsList = batchClassNameVsPluginsMap.get(key);
 					if (pluginsList == null) {
 						pluginsList = new ArrayList<BatchClassPlugin>();
@@ -211,7 +220,7 @@ public class UpgradePatchPreparation {
 
 		try {
 			File serializedExportFile = new File(upgradePatchFolderPath + File.separator + "PluginConfigUpdate" + SERIALIZATION_EXT);
-			SerializationUtils.serialize(pluginIdVsBatchPluginConfigList, new FileOutputStream(serializedExportFile));
+			SerializationUtils.serialize(pluginNameVsBatchPluginConfigList, new FileOutputStream(serializedExportFile));
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
 			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
@@ -533,10 +542,11 @@ public class UpgradePatchPreparation {
 
 	private static void createPatch(String pluginId, String pluginConfigId, BatchClassService batchClassService) {
 		try {
-			ArrayList<BatchClassPluginConfig> newPluginConfigs = pluginIdVsBatchPluginConfigList.get(Integer.valueOf(pluginId));
+			Plugin plugin=pluginService.getPluginPropertiesForPluginId(Long.valueOf(pluginId));
+			ArrayList<BatchClassPluginConfig> newPluginConfigs = pluginNameVsBatchPluginConfigList.get(plugin.getPluginName());
 			if (newPluginConfigs == null) {
 				newPluginConfigs = new ArrayList<BatchClassPluginConfig>();
-				pluginIdVsBatchPluginConfigList.put(Integer.valueOf(pluginId), newPluginConfigs);
+				pluginNameVsBatchPluginConfigList.put(plugin.getPluginName(), newPluginConfigs);
 			}
 			int plgId = Integer.parseInt(pluginId);
 			int plgConfId = Integer.parseInt(pluginConfigId);
@@ -598,14 +608,15 @@ public class UpgradePatchPreparation {
 						bcmc.setBatchClassModule(null);
 						batchClassModuleConfigList.add(bcmc);
 					}
-					moduleIdVsBatchClassModuleConfigMap.put(Long.valueOf(bcm.getModule().getId()), batchClassModuleConfigList);
+					Module module=moduleService.getModulePropertiesForModuleId(Long.valueOf(bcm.getModule().getId()));
+					moduleNameVsBatchClassModuleConfigMap.put(module.getName(), batchClassModuleConfigList);
 				}
 			}
 
 			try {
 				File serializedExportFile = new File(upgradePatchFolderPath + File.separator + "ModuleConfigUpdate"
 						+ SERIALIZATION_EXT);
-				SerializationUtils.serialize(moduleIdVsBatchClassModuleConfigMap, new FileOutputStream(serializedExportFile));
+				SerializationUtils.serialize(moduleNameVsBatchClassModuleConfigMap, new FileOutputStream(serializedExportFile));
 			} catch (FileNotFoundException e) {
 				LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
 			}
@@ -617,6 +628,8 @@ public class UpgradePatchPreparation {
 				"classpath:/META-INF/applicationContext-data-access.xml");
 		context.start();
 		BatchClassService batchClassService = ApplicationContextUtil.getSingleBeanOfType(context, BatchClassService.class);
+		pluginService = ApplicationContextUtil.getSingleBeanOfType(context, PluginService.class);
+		moduleService = ApplicationContextUtil.getSingleBeanOfType(context, ModuleService.class);
 		createDBPatch(batchClassService);
 	}
 }

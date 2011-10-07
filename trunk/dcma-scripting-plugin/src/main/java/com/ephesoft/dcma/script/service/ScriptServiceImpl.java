@@ -74,9 +74,9 @@ public class ScriptServiceImpl implements ScriptService {
 
 	@Override
 	public void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String pluginScriptName,
-			final String docIdentifier, final String methodName) throws DCMAException {
+			final String docIdentifier, final String scriptVariableName) throws DCMAException {
 		try {
-			scriptExecutor.extractFields(batchInstanceID.getID(), pluginScriptName, docIdentifier, methodName);
+			scriptExecutor.extractFields(batchInstanceID.getID(), pluginScriptName, docIdentifier, scriptVariableName);
 		} catch (Exception e) {
 			LOGGER.error("The result of execution for ScriptsService was unsuccessful.", e.getMessage());
 			throw new DCMAException("The result of execution for ScriptsService was unsuccessful.", e);

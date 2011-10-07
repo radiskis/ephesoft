@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.util;
 
 import java.io.File;
@@ -87,8 +52,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -98,30 +61,31 @@ import org.xml.sax.InputSource;
 
 public class XMLUtil {
 
-	protected static Log log = LogFactory.getLog(XMLUtil.class);
+	private static final String ISO_ENCODING = "iso-8859-1";
+	private static final String DOC_TYPE_OMIT = "omit";
+	private static final String UTF_ENCODING = "UTF-32";
+	private static final String PROPERTY_INDENT = "indent";
+	private static final String VALUE_YES = "yes";
 
 	private static DocumentBuilder getBuilder() throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		return builder;
+		return factory.newDocumentBuilder();
 	}
 
-	public static Document createDocumentFrom(InputStream is) throws Exception {
+	public static Document createDocumentFrom(InputStream input) throws Exception {
 		DocumentBuilder builder = getBuilder();
-		Document document = builder.parse(is);
-		return document;
+		return builder.parse(input);
 	}
 
 	public static Document createDocumentFrom(File file) throws Exception {
 		DocumentBuilder builder = getBuilder();
-		Document document = builder.parse(file);
-		return document;
+		return builder.parse(file);
 	}
 
 	public static Document createDocumentFromResource(String resourceName) throws Exception {
 		ClassLoader loader = XMLUtil.class.getClassLoader();
-		InputStream is = loader.getResourceAsStream(resourceName);
-		return createDocumentFrom(is);
+		InputStream inputStream = loader.getResourceAsStream(resourceName);
+		return createDocumentFrom(inputStream);
 	}
 
 	public static Document createDocumentFromAbsoluteResource(String resourceName) throws Exception {
@@ -132,21 +96,19 @@ public class XMLUtil {
 		StringReader strReader = new StringReader(xmlString);
 		InputSource iSrc = new InputSource(strReader);
 		DocumentBuilder builder = getBuilder();
-		Document document = builder.parse(iSrc);
-		return document;
+		return builder.parse(iSrc);
 	}
 
 	public static Document createNewDocument() throws Exception {
 		DocumentBuilder builder = getBuilder();
-		Document document = builder.newDocument();
-		return document;
+		return builder.newDocument();
 	}
 
 	public static DOMSource createSourceFromFile(File file) throws Exception {
 		Document document = createDocumentFrom(file);
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
-		transformer.setOutputProperty("indent", "yes");
+		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		return new javax.xml.transform.dom.DOMSource(document);
 	}
 
@@ -156,39 +118,39 @@ public class XMLUtil {
 
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
-		transformer.setOutputProperty("indent", "yes");
+		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(document);
 		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
-		javax.xml.transform.stream.StreamResult rs = new javax.xml.transform.stream.StreamResult(writer);
-		transformer.transform(src, rs);
+		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+		transformer.transform(src, result);
 		return writer.toString();
 	}
 
 	/**
-	 * This method should eventually replace the toXMLString(Document doc) method
+	 * This method should eventually replace the toXMLString(Document doc) method.
 	 * 
 	 * @param xmlNode
 	 * @return
 	 * @throws Exception
 	 */
-	public static String XMLNode2String(Node xmlNode) throws Exception {
+	public static String xmlNode2String(Node xmlNode) throws Exception {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
-		transformer.setOutputProperty("indent", "yes");
+		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(xmlNode);
 		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
-		javax.xml.transform.stream.StreamResult rs = new javax.xml.transform.stream.StreamResult(writer);
-		transformer.transform(src, rs);
+		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+		transformer.transform(src, result);
 		return writer.toString();
 	}
 
 	public static void flushDocumentToFile(Document document, String fileName) throws FileNotFoundException, TransformerException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
-		transformer.setOutputProperty("indent", "yes");
+		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(document);
-		javax.xml.transform.stream.StreamResult rs = new javax.xml.transform.stream.StreamResult(new FileOutputStream(fileName));
-		transformer.transform(src, rs);
+		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(new FileOutputStream(fileName));
+		transformer.transform(src, result);
 
 	}
 
@@ -215,19 +177,19 @@ public class XMLUtil {
 		Transformer transformer = xsltFactory.newTransformer(inputSource);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(doc);
 		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
-		javax.xml.transform.stream.StreamResult rs = new javax.xml.transform.stream.StreamResult(writer);
-		transformer.transform(src, rs);
+		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+		transformer.transform(src, result);
 		return writer.toString();
 	}
 
 	public static byte[] applyXSLTransformation(Document xmlDocument, String stylesheetFileLocation) throws Exception {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer(new StreamSource(stylesheetFileLocation));
-		transformer.setOutputProperty("indent", "yes");
+		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(xmlDocument);
 		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
-		javax.xml.transform.stream.StreamResult rs = new javax.xml.transform.stream.StreamResult(writer);
-		transformer.transform(src, rs);
+		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
+		transformer.transform(src, result);
 		return writer.toString().getBytes();
 	}
 
@@ -241,9 +203,9 @@ public class XMLUtil {
 
 		Tidy tidy = new Tidy();
 		tidy.setXHTML(true);
-		tidy.setDocType("omit");
-		tidy.setInputEncoding("UTF-32");
-		tidy.setOutputEncoding("UTF-32");
+		tidy.setDocType(DOC_TYPE_OMIT);
+		tidy.setInputEncoding(UTF_ENCODING);
+		tidy.setOutputEncoding(UTF_ENCODING);
 		FileInputStream inputStream = null;
 		FileOutputStream outputStream = null;
 		try {
@@ -272,9 +234,9 @@ public class XMLUtil {
 
 		Tidy tidy = new Tidy();
 		tidy.setXHTML(true);
-		tidy.setDocType("omit");
-		tidy.setInputEncoding("iso-8859-1");
-		tidy.setOutputEncoding("iso-8859-1");
+		tidy.setDocType(DOC_TYPE_OMIT);
+		tidy.setInputEncoding(ISO_ENCODING);
+		tidy.setOutputEncoding(ISO_ENCODING);
 		tidy.setHideEndTags(false);
 		
 		FileInputStream inputStream = null;

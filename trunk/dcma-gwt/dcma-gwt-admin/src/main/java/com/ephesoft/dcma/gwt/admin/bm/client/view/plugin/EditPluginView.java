@@ -157,8 +157,10 @@ public class EditPluginView extends View<EditPluginPresenter> {
 							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase("imagemagick.save_output_image_parameters")
 							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL1)
 							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL2)
-							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL3) || dto
-							.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL4))) {
+							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL3)
+							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.URL4)
+							|| dto.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.FILEBOUND_DIVIVSION) || dto
+							.getPluginConfig().getFieldName().equalsIgnoreCase(PluginNameConstants.FILEBOUND_SEPARATOR))) {
 				validatableTextBox.addValidator((Validator) ValidatorFactory.getValidator(dto.getDataType(), fieldValue));
 				validatableTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 

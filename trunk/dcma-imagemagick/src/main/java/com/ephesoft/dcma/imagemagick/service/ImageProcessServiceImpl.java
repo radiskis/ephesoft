@@ -71,9 +71,13 @@ import com.ephesoft.dcma.util.CustomFileFilter;
 
 public class ImageProcessServiceImpl implements ImageProcessService {
 
+	private static final String PROBLEM_ROTATING_IMAGES = "Problem rotating images";
+
+	private static final String ERROR_IN_PNG_FILE_GENERATION = "Problem in generating PNG File";
+
 	private static final String ON = "ON";
 
-	protected final static Logger LOGGER = LoggerFactory.getLogger(ImageProcessServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImageProcessServiceImpl.class);
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -98,7 +102,7 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	private PluginPropertiesService pluginPropertiesService;
 
 	@Autowired
-	BatchClassService batchClassService;
+	private BatchClassService batchClassService;
 
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) throws DCMAApplicationException {
@@ -120,8 +124,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			thumbnailPNGCreator.generateFullFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
 					IImageMagickCommonConstants.OCR_INPUT_FILE, ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, pluginWorkflow);
 		} catch (Exception ex) {
-			LOGGER.error("Problem in generating PNG File", ex);
-			throw new DCMAException("Problem in generating PNG File", ex);
+			LOGGER.error(ERROR_IN_PNG_FILE_GENERATION, ex);
+			throw new DCMAException(ERROR_IN_PNG_FILE_GENERATION, ex);
 		}
 
 	}
@@ -207,8 +211,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			imageRotator.rotateImage(displayImageFilePath);
 			imageRotator.rotateImage(thumbnailFilePath);
 		} catch (Exception e) {
-			LOGGER.error("Problem rotating images");
-			throw new DCMAException("Problem rotating images", e);
+			LOGGER.error(PROBLEM_ROTATING_IMAGES);
+			throw new DCMAException(PROBLEM_ROTATING_IMAGES, e);
 		}
 
 	}
@@ -216,20 +220,20 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	@Override
 	public void generateThumbnailsAndPNGsForImage(final File imagePath, final String thumbnailW, final String thumbnailH)
 			throws DCMAException {
-		Runnable uploadRunnable = new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					thumbnailPNGCreator.generateThumbnailsAndPNGForImage(imagePath, thumbnailW, thumbnailH);
-				} catch (Exception e) {
-					LOGGER.error("Problem generateThumbnailsAndPNGsForImage", e);
-				}
-			}
-		};
-		Thread thread = new Thread(uploadRunnable);
-		thread.start();
-		LOGGER.info("Thread started for tumbnails and PNG creation for " + imagePath.getName());
+		// Runnable uploadRunnable = new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		try {
+			thumbnailPNGCreator.generateThumbnailsAndPNGForImage(imagePath, thumbnailW, thumbnailH);
+		} catch (Exception e) {
+			LOGGER.error("Problem generateThumbnailsAndPNGsForImage", e);
+		}
+		// }
+		// };
+		// Thread thread = new Thread(uploadRunnable);
+		// thread.start();
+		// LOGGER.info("Thread started for tumbnails and PNG creation for " + imagePath.getName());
 	}
 
 	@Override
@@ -237,8 +241,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		try {
 			imageRotator.rotateImage(imagePath);
 		} catch (Exception e) {
-			LOGGER.error("Problem rotating images");
-			throw new DCMAException("Problem rotating images", e);
+			LOGGER.error(PROBLEM_ROTATING_IMAGES);
+			throw new DCMAException(PROBLEM_ROTATING_IMAGES, e);
 		}
 	}
 
@@ -316,8 +320,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		try {
 			thumbnailPNGCreator.generatePNGForImage(imagePath);
 		} catch (Exception ex) {
-			LOGGER.error("Problem in generating PNG File", ex);
-			throw new DCMAException("Problem in generating PNG File", ex);
+			LOGGER.error(ERROR_IN_PNG_FILE_GENERATION, ex);
+			throw new DCMAException(ERROR_IN_PNG_FILE_GENERATION, ex);
 		}
 	}
 

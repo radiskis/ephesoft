@@ -95,7 +95,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Override
 	public void startWorkflow(final BatchInstanceID batchInstanceID, String moduleName) {
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID.getID());
-		System.out.println("Last modified time before trying to update..."+batchInstance.getLastModified());
 		Map<String, Object> vars = new HashMap<String, Object>();
 		vars.put(JBPMVariables.BATCH_INSTANCE_ID, batchInstanceID);
 		vars.put(JBPMVariables.RESTART_WORKFLOW, moduleName);

@@ -29,6 +29,7 @@
 
 	<bean id="folderImporter" class="com.ephesoft.dcma.imp.FolderImporter"
 		p:folderIgnoreCharList="$importFolderConfigurer{import.folder_ignore_char_list}"
+		p:invalidCharList="$importFolderConfigurer{import.invalid_char_list}"
 		p:ignoreReplaceChar="$importFolderConfigurer{import.ignore_replace_char}">
 	</bean>
 

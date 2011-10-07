@@ -41,9 +41,16 @@ import com.ephesoft.dcma.da.domain.Module;
 public interface ModuleDao extends CacheableDao<Module> {
 	
 	/**
-	 * @param configName
+	 * @param moduleName name of the module
+	 * The following function gets the properties of the module by name
 	 * @return
 	 */
-	Module getModuleByName(String moduleName); 
+	Module getModuleByName(String moduleName);
+	/**
+	*
+	*@param moduleId id of the module 
+	*The following function gets the properties of the module by id
+	*/
+	Module getModulePropertiesForModuleId(Long moduleId); 
 
 }

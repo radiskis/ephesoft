@@ -85,6 +85,7 @@ public class KeyValueExtraction {
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeyValueExtraction.class);
+	private static final String KEY_VALUE_EXTRACTION_PLUGIN = "KEY_VALUE_EXTRACTION";
 
 	/**
 	 * fieldService FieldService.
@@ -206,36 +207,44 @@ public class KeyValueExtraction {
 			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
+		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceId, KEY_VALUE_EXTRACTION_PLUGIN,
+				KVExtractionProperties.KV_EXTRACTION_SWITCH);
+		if (("ON".equalsIgnoreCase(switchValue))) {
 
-		if (null == fieldTypeService) {
-			errMsg = "Invalid intialization of FieldService.";
-			LOGGER.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
-
-		LOGGER.info("batchInstanceId : " + batchInstanceId);
-
-		final Batch batch = batchSchemaService.getBatch(batchInstanceId);
-
-		boolean isSuccessful = false;
-		try {
-
-			final List<Document> docTypeList = batch.getDocuments().getDocument();
-
-			if (null == docTypeList) {
-				LOGGER.info("In valid batch documents.");
-			} else {
-				isSuccessful = processDocPage(docTypeList, batchInstanceId, batch);
+			if (null == fieldTypeService) {
+				errMsg = "Invalid intialization of FieldService.";
+				LOGGER.error(errMsg);
+				throw new DCMAApplicationException(errMsg);
 			}
 
-		} catch (DCMAApplicationException e) {
-			LOGGER.error(e.getMessage());
-			throw new DCMAApplicationException(e.getMessage(), e);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage());
-			throw new DCMAApplicationException(e.getMessage(), e);
+			LOGGER.info("batchInstanceId : " + batchInstanceId);
+
+			final Batch batch = batchSchemaService.getBatch(batchInstanceId);
+
+			boolean isSuccessful = false;
+			try {
+
+				final List<Document> docTypeList = batch.getDocuments().getDocument();
+
+				if (null == docTypeList) {
+					LOGGER.info("In valid batch documents.");
+				} else {
+					isSuccessful = processDocPage(docTypeList, batchInstanceId, batch);
+				}
+
+			} catch (DCMAApplicationException e) {
+				LOGGER.error(e.getMessage());
+				throw new DCMAApplicationException(e.getMessage(), e);
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+				throw new DCMAApplicationException(e.getMessage(), e);
+			}
+			return isSuccessful;
+		} else {
+			LOGGER.info("Skipping KV extraction. Switch set as off.");
+			return true;
 		}
-		return isSuccessful;
+
 	}
 
 	/**
@@ -380,8 +389,9 @@ public class KeyValueExtraction {
 				List<OutputDataCarrier> valueFoundData = null;
 
 				InputDataCarrier inputDataCarrier = new InputDataCarrier(kVExtraction.getLocationType(), kVExtraction.getKeyPattern(),
-						kVExtraction.getValuePattern(), kVExtraction.getNoOfWords(),kVExtraction.getMultiplier(),kVExtraction.getFetchValue(),kVExtraction.getLength(),
-						kVExtraction.getWidth(),kVExtraction.getXoffset(),kVExtraction.getYoffset());
+						kVExtraction.getValuePattern(), kVExtraction.getNoOfWords(), kVExtraction.getMultiplier(), kVExtraction
+								.getFetchValue(), kVExtraction.getLength(), kVExtraction.getWidth(), kVExtraction.getXoffset(),
+						kVExtraction.getYoffset());
 
 				List<InputDataCarrier> inputDataCarrierList = new ArrayList<InputDataCarrier>();
 				inputDataCarrierList.add(inputDataCarrier);
@@ -458,7 +468,7 @@ public class KeyValueExtraction {
 					updtDocFdType.setType(fdType.getType());
 					updtDocFdType.setValue(fdType.getValue());
 					updtDocFdType.setFieldOrderNumber(fdType.getFieldOrderNumber());
-					
+
 					alternateValue.remove(0);
 				}
 			}
@@ -499,7 +509,7 @@ public class KeyValueExtraction {
 				coordinates.setY0(hocrCoordinates.getY0());
 				coordinates.setY1(hocrCoordinates.getY1());
 
-				CoordinatesList coordinatesList=new CoordinatesList();
+				CoordinatesList coordinatesList = new CoordinatesList();
 				coordinatesList.getCoordinates().add(coordinates);
 				updtDocFdType.setCoordinatesList(coordinatesList);
 
@@ -524,11 +534,9 @@ public class KeyValueExtraction {
 				coordinates.setY0(hocrCoordinates.getY0());
 				coordinates.setY1(hocrCoordinates.getY1());
 
-				CoordinatesList coordinatesList=new CoordinatesList();
+				CoordinatesList coordinatesList = new CoordinatesList();
 				coordinatesList.getCoordinates().add(coordinates);
 				fieldType.setCoordinatesList(coordinatesList);
-
-
 
 				alternateValue.add(fieldType);
 				updtDocFdType.setAlternateValues(alternateValues);

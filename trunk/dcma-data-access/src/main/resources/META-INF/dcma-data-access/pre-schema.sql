@@ -6,44 +6,13 @@ alter table kv_extraction modify column multiplier Float;
 
 alter table kv_page_process modify page_level_field_name varchar(100) not null default 'KV_Page_Process';
 
-delete from plugin_config_sample_value where sample_value = 'AutomaticClassification' and plugin_config_id in (select id from plugin_config where config_name='da.factory_classification');
-
-delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
-
-ALTER TABLE plugin_config_sample_value ADD UNIQUE (sample_value,plugin_config_id);
-
-INSERT INTO plugin(id, creation_date,last_modified,plugin_name,plugin_desc,plugin_version,workflow_name) VALUES (50, now(),now(),'REGULAR_REGEX_EXTRACTION','Regular Regex Extraction Plugin','1.0.0.0','Regular_Regex_Doc_Fields_Extraction_Plugin');
-
-/*ModuleUpdate*/
-
-
-/*Plugin Update*/
-
-update plugin set plugin_name='SCRIPTING_PLUGIN',plugin_desc='Scripting plugin' where id=6;
-
-update batch_class_plugin set plugin_id=6 where plugin_id=35;
-update batch_class_plugin set plugin_id=6 where plugin_id=38;
-
-update plugin set plugin_name='KEY_VALUE_EXTRACTION' where plugin_name='REGEX_EXTRACTION';
-
-/*Plugin Configs Update*/
-
-insert into batch_class_dynamic_plugin_config (id, creation_date, last_modified, config_name, config_desc, plugin_config_value, batch_class_plugin_id, parent_id) select bcpc.id,bcpc.creation_date, bcpc.last_modified, config_name, qualifier, plugin_config_value, batch_class_plugin_id, parent_id from batch_class_plugin_config bcpc, plugin_config pc where bcpc.plugin_config_id=pc.id AND bcpc.qualifier<>'null';
-
-delete from batch_class_plugin_config where qualifier<>'null' and parent_id is not null;
-delete from batch_class_plugin_config where qualifier<>'null' and parent_id is null;
-
-delete from plugin_config where config_name in ('document.type', 'field.type', 'row.id');
-
-update plugin_config set config_multivalue=0 where config_name='createMultipageTif.switch';
-
+/* delete queries */
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.query_delimiters');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.export_process');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.coloured_pdf');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.searchable_pdf');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='batch.export_to_folder_switch');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.switch');
-
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.valid_extensions');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.reader_types');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.min_confidence');
@@ -61,14 +30,33 @@ delete from batch_class_plugin_config where plugin_config_id in (select id from 
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.versions');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.confidence_score');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
+delete from batch_class_plugin_config where qualifier<>'null' and parent_id is not null;
+delete from batch_class_plugin_config where qualifier<>'null' and parent_id is null;
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='folderimporter.valid_extensions');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.valid_extensions');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='recostar.valid_extensions');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.switch');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.switch');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='imagemagick.save_output_image_parameters');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.stop_words');
 
+delete from plugin_config_sample_value where sample_value = 'AutomaticClassification' and plugin_config_id in (select id from plugin_config where config_name='da.factory_classification');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.stop_words');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='csvFileCreation.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='ibmCm.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='kvextraction.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='recostar_extraction.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tableextarction.switch');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tabbedPdf.placeholder');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.switch');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.query_delimiters');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.export_process');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.coloured_pdf');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.searchable_pdf');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='batch.export_to_folder_switch');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.switch');
-
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.valid_extensions');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.reader_types');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.min_confidence');
@@ -84,7 +72,8 @@ delete from plugin_config_sample_value where plugin_config_id in (select id from
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='NSI.switch');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='NSI.final_xml_name');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.versions');
-delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.confidence_score');
+delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
+delete from plugin_config_sample_value where sample_value = 'gif' and plugin_config_id = (select id from plugin_config where config_name='folderimporter.valid_extensions');
 
 delete from plugin_config where plugin_config.config_name='fuzzydb.query_delimiters';
 delete from plugin_config where plugin_config.config_name='createMultipageTif.export_process';
@@ -92,7 +81,6 @@ delete from plugin_config where plugin_config.config_name='createMultipageTif.co
 delete from plugin_config where plugin_config.config_name='createMultipageTif.searchable_pdf';
 delete from plugin_config where plugin_config.config_name='batch.export_to_folder_switch';
 delete from plugin_config where plugin_config.config_name='createMultipageTif.switch';
-
 delete from plugin_config where plugin_config.config_name='barcode.extraction.valid_extensions';
 delete from plugin_config where plugin_config.config_name='barcode.extraction.reader_types';
 delete from plugin_config where plugin_config.config_name='barcode.extraction.min_confidence';
@@ -110,12 +98,28 @@ delete from plugin_config where plugin_config.config_name='NSI.final_xml_name';
 delete from plugin_config where plugin_config.config_name='tesseract.versions';
 delete from plugin_config where plugin_config.config_name='regular.regex.confidence_score';
 delete from plugin_config where plugin_config.config_name='regular.regex.extraction_switch';
+delete from plugin_config where config_name in ('document.type', 'field.type', 'row.id');
 
-update kv_page_process set page_level_field_name=(select plugin_config_value from batch_class_plugin_config where batch_class_plugin_config.id=kv_page_process.batch_class_plugin_config_id);
+ALTER TABLE plugin_config_sample_value ADD UNIQUE (sample_value,plugin_config_id);
 
 
 
+
+
+
+/*Plugin Update*/
+INSERT INTO plugin(creation_date,last_modified,plugin_name,plugin_desc,plugin_version,workflow_name) VALUES (now(),now(),'REGULAR_REGEX_EXTRACTION','Regular Regex Extraction Plugin','1.0.0.0','Regular_Regex_Doc_Fields_Extraction_Plugin');
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'NSI Export Plugin', 'NSI_EXPORT', '1.0.0.0', 'NSI_Export_Plugin');
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'Barcode Extraction Plugin', 'BARCODE_EXTRACTION', '1.0.0.0', 'BarCode_Extraction_Plugin');
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'Tabbed PDF Plugin', 'TABBED_PDF', '1.0.0.0', 'Tabbed_Pdf_Plugin');
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'CSV File Creation Plugin', 'CSV_FILE_CREATION_PLUGIN', '1.0.0.0', 'CSV_File_Creation_Plugin');
+INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'XML for IBM CM Plugin', 'IBM_CM_PLUGIN', '1.0.0.0', 'IBM_CM_Plugin');
+
+
+
+/*Plugin Configs Update*/
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Barcode Extraction Switch',0,'barcode.extraction.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'External Application Switch', b'0', 'validation.external_app_switch', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Barcode Extraction Max Confidence',0,'barcode.extraction.max_confidence',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Barcode Extraction Min Confidence',0,'barcode.extraction.min_confidence',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Barcode Extraction Reader Types',1,'barcode.extraction.reader_types',null);
@@ -123,17 +127,52 @@ INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_des
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Create Multipage Tiff Switch',0,'createMultipageTif.switch',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Export To Folder Switch',0,'batch.export_to_folder_switch',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Query Delimiters',0,'fuzzydb.query_delimiters',null);
-
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Multipage File Export Process',0,'createMultipageTif.export_process',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Colored Output PDF',0,'createMultipageTif.coloured_pdf',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Searchable Output PDF',0,'createMultipageTif.searchable_pdf',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Validation Script Switch',0,'validation.validationScriptSwitch',null);
-
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','DA Merge Unknown Document Switch',0,'da.merge_unknown_document_switch',null);
-
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Regular Regex Extraction Switch',0,'regular.regex.extraction_switch',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Regular Regex Confidence Score',0,'regular.regex.confidence_score',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','FileBound Switch',0,'filebound.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract Version',0,'tesseract.versions',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'NSI Export Folder', '', 'nsi.final_export_folder', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'NSI State Switch', '', 'nsi.switch', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Final NSI XML Name', '', 'nsi.final_xml_name', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL1(Ctrl+4)', b'0', 'validation.url(Ctrl+4)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL2(Ctrl+7)', b'0', 'validation.url(Ctrl+7)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL3(Ctrl+8)', b'0', 'validation.url(Ctrl+8)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL4(Ctrl+9)', b'0', 'validation.url(Ctrl+9)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'X Dimension', b'0', 'validation.x_dimension', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Y Dimension', b'0', 'validation.y_dimension', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar color switch',0,'recostar.color_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract color switch',0,'tesseract.color_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Extarction color switch',0,'recostar_extraction.color_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Auto Rotate switch',0,'recostar.auto_rotate_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Auto Rotate switch',0,'recostar_extraction.auto_rotate_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Switch',0,'ibmCm.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Final Export Folder',0,'ibmCm.final_export_folder',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Extarction Switch',0,'recostar_extraction.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','KV Extraction switch',0,'kvextraction.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','FuzzyDB Extraction switch',0,'fuzzydb.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Table Extraction switch',0,'tableextarction.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Placeholder',0,'tabbedPdf.placeholder',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Property file',0,'tabbedPdf.property_file',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract Switch',0,'tesseract.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Switch',0,'recostar.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Export Folder',0,'tabbedPdf.final_export_folder',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Switch',0,'tabbedPdf.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound index field',0,'filebound.index_field',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound division',0,'filebound.division',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound separator',0,'filebound.separator',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Switch',0,'csvFileCreation.switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Final Export Folder',0,'csvFileCreation.final_export_folder',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','First Page Confidence Score Value',0,'lucene.first_page_conf_weightage',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Middle Page Confidence Score Value',0,'lucene.middle_page_conf_weightage',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Last Page Confidence Score Value',0,'lucene.last_page_conf_weightage',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Field Value Change Script Switch',0, 'validation.field_value_change_script_switch', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Fuzzy Search Switch',0, 'validation.fuzzy_search_switch', NULL);
+
 
 /*Plugin Config Sample Values*/
 
@@ -154,44 +193,77 @@ INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='createMultipageTif.switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='batch.export_to_folder_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='batch.export_to_folder_switch'));
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'IMAGE_MAGIC',(select id from plugin_config where config_name='createMultipageTif.export_process'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'HOCRtoPDF',(select id from plugin_config where config_name='createMultipageTif.export_process'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'TRUE',(select id from plugin_config where config_name='createMultipageTif.coloured_pdf'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'FALSE',(select id from plugin_config where config_name='createMultipageTif.coloured_pdf'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'TRUE',(select id from plugin_config where config_name='createMultipageTif.searchable_pdf'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'FALSE',(select id from plugin_config where config_name='createMultipageTif.searchable_pdf'));
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.validationScriptSwitch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.validationScriptSwitch'));
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'AutomaticClassification',(select id from plugin_config where config_name='da.factory_classification'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='da.merge_unknown_document_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='da.merge_unknown_document_switch'));
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='regular.regex.extraction_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='regular.regex.extraction_switch'));
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='filebound.switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='filebound.switch'));
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract Version',0,'tesseract.versions',null);
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'tesseract_version_3',(select id from plugin_config where config_name='tesseract.versions'));
-
-update batch_class_module, batch_class_plugin, plugin set batch_class_plugin.order_number = 55 where 
-batch_class_module.id = batch_class_plugin.batch_class_module_id and plugin.id = batch_class_plugin.plugin_id and 
-batch_class_module.workflow_name like '%Extraction%' and plugin.workflow_name = 'Scripting_Plugin';
-
-INSERT INTO plugin (id, creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (51, now(), now(), 'NSI Export Plugin', 'NSI_EXPORT', '1.0.0.0', 'NSI_Export_Plugin');
-
-INSERT INTO plugin_config (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'NSI Export Folder', '', 'nsi.final_export_folder', NULL);
-INSERT INTO plugin_config (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES ( now(), now(), 'STRING', 'NSI State Switch', '', 'nsi.switch', NULL);
-INSERT INTO plugin_config (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'Final NSI XML Name', '', 'nsi.final_xml_name', NULL);
-
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='nsi.switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='nsi.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tesseract.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tesseract.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.color_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='recostar.valid_extensions'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='tesseract.valid_extensions'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'com.microsoft.jdbc.sqlserver.SQLServerDriver',(select id from plugin_config where config_name='fuzzydb.database.driver'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'net.sourceforge.jtds.jdbc.Driver',(select id from plugin_config where config_name='fuzzydb.database.driver'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'Fpr_MultiLanguage.rsp',(select id from plugin_config where config_name='recostar.project_file'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'name',(select id from plugin_config where config_name='fuzzydb.stop_words'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'title',(select id from plugin_config where config_name='fuzzydb.stop_words'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='recostar.valid_extensions'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='tesseract.valid_extensions'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'com.microsoft.jdbc.sqlserver.SQLServerDriver',(select id from plugin_config where config_name='fuzzydb.database.driver'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'Fpr_MultiLanguage.rsp',(select id from plugin_config where config_name='recostar.project_file'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.external_app_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.external_app_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tesseract.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tesseract.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='ibmCm.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='ibmCm.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'YES',(select id from plugin_config where config_name='tabbedPdf.placeholder'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'NO',(select id from plugin_config where config_name='tabbedPdf.placeholder'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tabbedPdf.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tabbedPdf.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='kvextraction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='kvextraction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='fuzzydb.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='fuzzydb.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tableextarction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tableextarction.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='csvFileCreation.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='csvFileCreation.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.field_value_change_script_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.field_value_change_script_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.fuzzy_search_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.fuzzy_search_switch'));
 
+
+
+/*Module config update */
 INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (1, now(), now(), NULL, NULL, 0, NULL);
 INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (2, now(), now(), 'Plugin Configuration', 'PluginConfiguration', 0, NULL);
 INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (3, now(), now(), 'Email Accounts', 'EmailAccounts', 0, NULL);
@@ -212,63 +284,7 @@ INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_displa
 INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (18, now(), now(), 'Script Export', 'ScriptExport', 0, NULL);
 INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (19, now(), now(), 'Cmis Mapping', 'CmisMapping', 0, NULL);
 
-INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'Barcode Extraction Plugin', 'BARCODE_EXTRACTION', '1.0.0.0', 'BarCode_Extraction_Plugin');
 
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar color switch',0,'recostar.color_switch',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.color_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.color_switch'));
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract color switch',0,'tesseract.color_switch',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tesseract.color_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tesseract.color_switch'));
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Extarction color switch',0,'recostar_extraction.color_switch',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.color_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.color_switch'));
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Auto Rotate switch',0,'recostar.auto_rotate_switch',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.auto_rotate_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.auto_rotate_switch'));
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Auto Rotate switch',0,'recostar_extraction.auto_rotate_switch',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar_extraction.auto_rotate_switch'));
-
-delete from plugin_config_sample_value where sample_value = 'gif' and plugin_config_id = (select id from plugin_config where config_name='folderimporter.valid_extensions');
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='recostar.valid_extensions'));
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'png',(select id from plugin_config where config_name='tesseract.valid_extensions'));
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'com.microsoft.jdbc.sqlserver.SQLServerDriver',(select id from plugin_config where config_name='fuzzydb.database.driver'));
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'net.sourceforge.jtds.jdbc.Driver',(select id from plugin_config where config_name='fuzzydb.database.driver'));
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'Fpr_MultiLanguage.rsp',(select id from plugin_config where config_name='recostar.project_file'));
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='folderimporter.valid_extensions');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='tesseract.valid_extensions');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='recostar.valid_extensions');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.extraction.switch');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.switch');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='imagemagick.save_output_image_parameters');
-
-delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.stop_words');
-
-delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.stop_words');
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'name',(select id from plugin_config where config_name='fuzzydb.stop_words'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'title',(select id from plugin_config where config_name='fuzzydb.stop_words'));
 
 drop table batch_class_module_config;
 
@@ -286,49 +302,22 @@ CREATE TABLE batch_class_module_config (
 );
 
 
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL1(Ctrl+4)', b'0', 'validation.url(Ctrl+4)', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL2(Ctrl+7)', b'0', 'validation.url(Ctrl+7)', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL3(Ctrl+8)', b'0', 'validation.url(Ctrl+8)', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'URL4(Ctrl+9)', b'0', 'validation.url(Ctrl+9)', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'X Dimension', b'0', 'validation.x_dimension', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'Y Dimension', b'0', 'validation.y_dimension', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'External Application Switch', b'0', 'validation.external_app_switch', NULL);
 
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.external_app_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.external_app_switch'));
+insert into batch_class_dynamic_plugin_config (id, creation_date, last_modified, config_name, config_desc, plugin_config_value, batch_class_plugin_id, parent_id) select bcpc.id,bcpc.creation_date, bcpc.last_modified, config_name, qualifier, plugin_config_value, batch_class_plugin_id, parent_id from batch_class_plugin_config bcpc, plugin_config pc where bcpc.plugin_config_id=pc.id AND bcpc.qualifier<>'null';
 
-INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'Tabbed PDF Plugin', 'TABBED_PDF', '1.0.0.0', 'Tabbed_Pdf_Plugin');
+update plugin set plugin_name='SCRIPTING_PLUGIN',plugin_desc='Scripting plugin' where id=6;
 
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract Switch',0,'tesseract.switch',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Switch',0,'recostar.switch',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Export Folder',0,'tabbedPdf.final_export_folder',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tabbed PDF Switch',0,'tabbedPdf.switch',null);
+update batch_class_plugin set plugin_id=6 where plugin_id=35;
+update batch_class_plugin set plugin_id=6 where plugin_id=38;
 
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tesseract.switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tesseract.switch'));
+update plugin set plugin_name='KEY_VALUE_EXTRACTION' where plugin_name='REGEX_EXTRACTION';
 
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='recostar.switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='recostar.switch'));
 
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tabbedPdf.switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tabbedPdf.switch'));
+update plugin_config set config_multivalue=0 where config_name='createMultipageTif.switch';
 
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound index field',0,'filebound.index_field',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound division',0,'filebound.division',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound separator',0,'filebound.separator',null);
+update kv_page_process set page_level_field_name=(select plugin_config_value from batch_class_plugin_config where batch_class_plugin_config.id=kv_page_process.batch_class_plugin_config_id);
 
-INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'CSV File Creation Plugin', 'CSV_FILE_CREATION_PLUGIN', '1.0.0.0', 'CSV_File_Creation_Plugin');
 
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Switch',0,'csvFileCreation.switch',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','CSV Creation Final Export Folder',0,'csvFileCreation.final_export_folder',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='csvFileCreation.switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='csvFileCreation.switch'));
-
-INSERT INTO plugin (creation_date, last_modified, plugin_desc, plugin_name, plugin_version, workflow_name) VALUES (now(), now(), 'XML for IBM CM Plugin', 'IBM_CM_PLUGIN', '1.0.0.0', 'IBM_CM_Plugin');
-
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Switch',0,'ibmCm.switch',null);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','IBM CM Final Export Folder',0,'ibmCm.final_export_folder',null);
-
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='ibmCm.switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='ibmCm.switch'));
+update batch_class_module, batch_class_plugin, plugin set batch_class_plugin.order_number = 55 where 
+batch_class_module.id = batch_class_plugin.batch_class_module_id and plugin.id = batch_class_plugin.plugin_id and 
+batch_class_module.workflow_name like '%Extraction%' and plugin.workflow_name = 'Scripting_Plugin';

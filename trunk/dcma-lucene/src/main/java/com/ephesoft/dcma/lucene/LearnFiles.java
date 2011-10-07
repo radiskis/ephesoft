@@ -43,6 +43,7 @@ import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 
 /**
@@ -78,11 +79,11 @@ public class LearnFiles {
 						String[] listOfImageFiles = fPageFolder.list();
 						if (listOfImageFiles != null && listOfImageFiles.length > 0) {
 							for (String eachImageFile : listOfImageFiles) {
-								if (eachImageFile.contains(".tif")) {
+								if (eachImageFile.contains(FileType.TIF.getExtensionWithDot())) {
 									String imageAbsolutePath = pageFolderPath + File.separator + eachImageFile;
 									String targetHTMlAbsolutePath = pageFolderPath + File.separator
-											+ eachImageFile.substring(0, eachImageFile.lastIndexOf(".")) + ".html";
-
+											+ eachImageFile.substring(0, eachImageFile.lastIndexOf(".")) + FileType.HTML.getExtensionWithDot();
+									
 									InputStreamReader inputStreamReader = null;
 									BufferedReader input = null;
 									try {

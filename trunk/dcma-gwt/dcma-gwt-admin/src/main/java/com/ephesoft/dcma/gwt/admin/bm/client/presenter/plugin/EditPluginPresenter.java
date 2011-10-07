@@ -138,7 +138,9 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.URL3)
 						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.URL4)
 						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.CONVERT_INPUT_IMAGE_PARAMETERS)
-						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.CONVERT_OUTPUT_IMAGE_PARAMETERS)) {
+						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.CONVERT_OUTPUT_IMAGE_PARAMETERS)
+						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.FILEBOUND_DIVIVSION)
+						&& !batchClassPluginConfig.getName().equals(PluginNameConstants.FILEBOUND_SEPARATOR)) {
 					view.addWidgetStar(row, 1);
 				}
 				if (batchClassPluginConfig.getSampleValue() != null && !batchClassPluginConfig.getSampleValue().isEmpty()) {

@@ -81,11 +81,11 @@ public abstract class DcmaTestBase extends TestCase implements ApplicationContex
 
 	/**
 	 * @param <T> the type of the bean in question
-	 * @param c the class
+	 * @param clazz the class
 	 * @return the bean of type {@code c} with its name in a single map entry
 	 */
-	public <T> Map.Entry<String, T> getSingleBeanWithName(Class<T> c) {
-		Map<String, T> beans = applicationContext.getBeansOfType(c);
+	public <T> Map.Entry<String, T> getSingleBeanWithName(Class<T> clazz) {
+		Map<String, T> beans = applicationContext.getBeansOfType(clazz);
 		assertEquals(1, beans.size());
 		return beans.entrySet().iterator().next();
 	}
@@ -112,13 +112,13 @@ public abstract class DcmaTestBase extends TestCase implements ApplicationContex
 
 	/**
 	 * @param <T> the base type
-	 * @param c the collection
+	 * @param collection the collection
 	 * @return the only element from the collection
 	 */
-	protected <T> T getSingle(Collection<T> c) {
-		assertNotNull(c);
-		assertEquals(1, c.size());
-		return c.iterator().next();
+	protected <T> T getSingle(Collection<T> collection) {
+		assertNotNull(collection);
+		assertEquals(1, collection.size());
+		return collection.iterator().next();
 	}
 
 	/**

@@ -50,10 +50,19 @@ public class ModuleDaoImpl extends HibernateDao<Module> implements ModuleDao {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleDaoImpl.class);
 
+	@Override
 	public Module getModuleByName(String moduleName) {
 		LOGGER.debug(moduleName);
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("name", moduleName));
+		return this.findSingle(criteria);
+	}
+
+	@Override
+	public Module getModulePropertiesForModuleId(Long moduleId) {
+		LOGGER.debug("moduleId : " + moduleId);
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq("id", moduleId));
 		return this.findSingle(criteria);
 	}
 }

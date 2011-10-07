@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.imagemagick;
 
 import java.io.File;
@@ -90,6 +55,12 @@ import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.util.OSUtil;
 
 public class MultiPageToSinglePageConverter implements ICommonConstants, IImageMagickCommonConstants {
+
+	private static final String EMPTY_STRING = "";
+
+	private static final String QUOTES = "\"";
+
+	private static final String SPACE = " ";
 
 	@Autowired
 	@Qualifier("batchClassPluginPropertiesService")
@@ -128,20 +99,20 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			}
 		}
 		try {
-			String command = "";
+			String command = EMPTY_STRING;
 			ArrayList<String> commandList = new ArrayList<String>();
 			if (OSUtil.isWindows()) {
 				commandList.add("cmd ");
 				commandList.add("/c ");
 				commandList.add(repairFileUtilityPath + File.separator + "EphesoftExecutor.exe");
-				createCommandforWindows(commandList, batchClass, "\"" + System.getenv(IM4JAVA_TOOLPATH) + File.separator
-						+ "convert\"", "\"" + imageName + "\"", "\"" + outputImagePath + fileExtension + "\"");
+				createCommandforWindows(commandList, batchClass, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
+						+ "convert\"", QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
 				// commandList.add(command);
 			} else {
 				String outputImageName = outputImagePath + fileExtension; // OSUtil.escapeSpacesForUnixLinux(outputImagePath +
 				// fileExtension);
 				commandList.add("convert");
-				createCommandForLinux(commandList, batchClass, " " + imageName + " ", " " + outputImageName + " ");
+				createCommandForLinux(commandList, batchClass, SPACE + imageName + SPACE, SPACE + outputImageName + SPACE);
 				// commandList.add(command);
 			}
 			String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
@@ -149,7 +120,7 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			if (thread != null) {
 				logger.info("Adding generated command to thread pool. Command is : ");
 				for (int ind = 0; ind < cmds.length; ind++) {
-					logger.info(cmds[ind] + " ");
+					logger.info(cmds[ind] + SPACE);
 				}
 				if (OSUtil.isWindows()) {
 					thread.add(new ProcessExecutor(cmds, null));
@@ -172,38 +143,38 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		if (environment != null) {
 			commandList.add(environment);
 		}
-		StringBuffer command = new StringBuffer("");
+		StringBuffer command = new StringBuffer(EMPTY_STRING);
 		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
 				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_INPUT_IMAGE_PARAMETERS);
-		String inputParams = "";
+		String inputParams = EMPTY_STRING;
 		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
 				&& pluginConfiguration[0].getValue().length() > 0) {
 			inputParams = pluginConfiguration[0].getValue();
 		}
-		commandList.add("\"" + inputParams.trim() + "\"");
+		commandList.add(QUOTES + inputParams.trim() + QUOTES);
 		commandList.add(inputImageName.trim());
 		pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
 				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_OUTPUT_IMAGE_PARAMETERS);
-		String outputParams = "";
+		String outputParams = EMPTY_STRING;
 		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
 				&& pluginConfiguration[0].getValue().length() > 0) {
 			outputParams = pluginConfiguration[0].getValue();
 		}
-		commandList.add("\"" + outputParams.trim() + "\"");
+		commandList.add(QUOTES + outputParams.trim() + QUOTES);
 		commandList.add(outputImageName.trim());
 		return command.toString();
 	}
 
 	private String createCommandForLinux(ArrayList<String> commandList, BatchClass batchClass, String inputImageName,
 			String outputImageName) {
-		StringBuffer command = new StringBuffer("");
+		StringBuffer command = new StringBuffer(EMPTY_STRING);
 		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
 				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_INPUT_IMAGE_PARAMETERS);
 		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
 				&& pluginConfiguration[0].getValue().length() > 0) {
 			// command.append(pluginConfiguration[0].getValue() + " ");
 			String inputParams = pluginConfiguration[0].getValue();
-			String inputParamsArr[] = inputParams.split(" ");
+			String inputParamsArr[] = inputParams.split(SPACE);
 			for (String string : inputParamsArr) {
 				commandList.add(string.trim());
 			}
@@ -216,7 +187,7 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 				&& pluginConfiguration[0].getValue().length() > 0) {
 			// command.append(pluginConfiguration[0].getValue() + " ");
 			String outputParams = pluginConfiguration[0].getValue();
-			String outputParamsArr[] = outputParams.split(" ");
+			String outputParamsArr[] = outputParams.split(SPACE);
 			for (String string : outputParamsArr) {
 				commandList.add(string.trim());
 			}

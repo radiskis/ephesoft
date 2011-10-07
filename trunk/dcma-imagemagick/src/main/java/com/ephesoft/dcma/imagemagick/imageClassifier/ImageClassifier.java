@@ -114,14 +114,6 @@ public class ImageClassifier {
 	}
 
 	/**
-	 * Constructor. Accepts the base folder location.
-	 * 
-	 * @param sampleBaseFolderPath
-	 */
-	public ImageClassifier() {
-	}
-
-	/**
 	 * This method takes in the batch InstanceID and subsequently gets the parsedXMLFile. Then it fetches all the Pages from it as they
 	 * are with a document type unknown. and it classifies all the pages based on Image comparison. In the end the result is put in the
 	 * batch.xml file.
@@ -218,7 +210,7 @@ public class ImageClassifier {
 			listOfPageLevelFields.add(pageLevelField);
 
 			if (listOfConfidenceValues.size() >= 1) {
-				pageLevelField.setName(IImageMagickCommonConstants.Image_Compare_Classification);
+				pageLevelField.setName(IImageMagickCommonConstants.IMAGE_COMPARE_CLASSIFICATION);
 				pageLevelField.setValue(listOfConfidenceValues.last().getKey());
 				pageLevelField.setConfidence(formatDecimalValue(listOfConfidenceValues.last().getValue()));
 			}
@@ -233,7 +225,7 @@ public class ImageClassifier {
 			while (itr.hasNext()) {
 				CustomMapClass sampleConfidence = itr.next();
 				Field alternateValue = new Field();
-				alternateValue.setName(IImageMagickCommonConstants.Image_Compare_Classification);
+				alternateValue.setName(IImageMagickCommonConstants.IMAGE_COMPARE_CLASSIFICATION);
 				alternateValue.setValue(sampleConfidence.getKey());
 				alternateValue.setConfidence(formatDecimalValue(sampleConfidence.getValue()));
 				listOfAltValues.add(alternateValue);
@@ -367,30 +359,38 @@ public class ImageClassifier {
 	private void getPathOfPagesOfBatch(Batch parsedXmlFile, List<String> listOfUnclasifiedPages,
 			Map<String, Integer> unclassifiedPgIndexMap, String sBatchFolder) {
 		Documents documents = parsedXmlFile.getDocuments();
+		boolean valid = true;
 		if (documents == null) {
-			return;
+			valid = false;
 		}
-		List<Document> listOfDocuments = documents.getDocument();
-		if (listOfDocuments == null || listOfDocuments.isEmpty()) {
-			return;
+		List<Document> listOfDocuments = null;
+		List<Page> listOfPages = null;
+		if (valid) {
+			listOfDocuments = documents.getDocument();
+			if (listOfDocuments == null || listOfDocuments.isEmpty()) {
+				valid = false;
+			} else {
+				Document unknownDocument = listOfDocuments.get(0);
+				Pages pages = unknownDocument.getPages();
+				listOfPages = pages.getPage();
+				if (listOfPages == null || listOfPages.isEmpty()) {
+					valid = false;
+				}
+			}
 		}
-		Document unknownDocument = listOfDocuments.get(0);
-		Pages pages = unknownDocument.getPages();
-		List<Page> listOfPages = pages.getPage();
-		if (listOfPages == null || listOfPages.isEmpty()) {
-			return;
-		}
-		StringBuffer unclassifiedPgPath;
-		int index = 0;
-		for (Page page : listOfPages) {
-			unclassifiedPgPath = new StringBuffer();
-			unclassifiedPgPath.append(sBatchFolder);
-			unclassifiedPgPath.append(File.separator);
-			unclassifiedPgPath.append(page.getComparisonThumbnailFileName());
-			listOfUnclasifiedPages.add(unclassifiedPgPath.toString());
-			unclassifiedPgIndexMap.put(unclassifiedPgPath.toString(), Integer.valueOf(index));
-			index++;
+		if (valid) {
+			StringBuffer unclassifiedPgPath;
+			int index = 0;
+			for (Page page : listOfPages) {
+				unclassifiedPgPath = new StringBuffer();
+				unclassifiedPgPath.append(sBatchFolder);
+				unclassifiedPgPath.append(File.separator);
+				unclassifiedPgPath.append(page.getComparisonThumbnailFileName());
+				listOfUnclasifiedPages.add(unclassifiedPgPath.toString());
+				unclassifiedPgIndexMap.put(unclassifiedPgPath.toString(), Integer.valueOf(index));
+				index++;
 
+			}
 		}
 	}
 

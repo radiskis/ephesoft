@@ -54,6 +54,7 @@ import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
@@ -70,7 +71,15 @@ import com.ephesoft.dcma.util.FileUtils;
  */
 public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommonConstants {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final String EMPTY_STRING = "";
+
+	private static final char DOT = '.';
+
+	private static final String PROBLEM_GENERATING_THUMBNAILS = "Problem generating thumbnails";
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ThumbnailPNGCreator.class);
+
+	private static final String GRAY_COLOR = "gray";
 
 	/**
 	 * Instance of PluginPropertiesService.
@@ -98,46 +107,46 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	 */
 	public ThumbnailPNGCreator() {
 		final String envVariable = System.getenv(IMAGEMAGICK_ENV_VARIABLE);
-		logger.debug("checking if the Image Magick Enviornment variable IM4JAVA_TOOLPATH is set");
+		LOGGER.debug("checking if the Image Magick Enviornment variable IM4JAVA_TOOLPATH is set");
 		if (envVariable == null || envVariable.isEmpty()) {
-			logger.error("Enviornment Variable IM4JAVA_TOOLPATH not set");
+			LOGGER.error("Enviornment Variable IM4JAVA_TOOLPATH not set");
 			throw new DCMABusinessException("Enviornment Variable IM4JAVA_TOOLPATH not set.");
 		}
-		logger.debug("Enviornment variable IM4JAVA_TOOLPATH is set value=" + envVariable);
+		LOGGER.debug("Enviornment variable IM4JAVA_TOOLPATH is set value=" + envVariable);
 	}
 
 	public void generateThumbnailsAndPNGForImage(File imagePath, String thumbnailW, String thumbnailH) throws DCMAApplicationException {
 		ConvertCmd convertcmd = new ConvertCmd();
 		IMOperation operation = new IMOperation();
 		operation.addImage();
-		operation.colorspace("gray");
+		operation.colorspace(GRAY_COLOR);
 		operation.density(300);
 		operation.thumbnail(Integer.parseInt(thumbnailH), Integer.parseInt(thumbnailW));
 		operation.addImage();
 
 		String imageName = imagePath.getAbsolutePath();
 		// TODO remove hard coding _thumb.png, .png and .tif
-		String pngPath = imageName.substring(0, imageName.indexOf(".tif"));
+		String pngPath = imageName.substring(0, imageName.indexOf(FileType.TIF.getExtensionWithDot()));
 
 		try {
-			String[] listOfFiles = {imageName, pngPath + "_thumb.png"};
+			String[] listOfFiles = {imageName, pngPath + SUFFIX_THUMBNAIL_SAMPLE_PNG};
 			convertcmd.run(operation, (Object[]) listOfFiles);
 		} catch (Exception ex) {
-			logger.error("Problem generating thumbnails");
-			throw new DCMAApplicationException("Problem generating thumbnails", ex);
+			LOGGER.error(PROBLEM_GENERATING_THUMBNAILS);
+			throw new DCMAApplicationException(PROBLEM_GENERATING_THUMBNAILS, ex);
 		}
 
 		IMOperation operationPNG = new IMOperation();
 		operationPNG.addImage();
 		operation.density(300);
-		operation.colorspace("gray");
+		operation.colorspace(GRAY_COLOR);
 		operationPNG.addImage();
 
 		try {
-			String[] listOfFiles = {imageName, pngPath + ".png"};
+			String[] listOfFiles = {imageName, pngPath + FileType.PNG.getExtensionWithDot()};
 			convertcmd.run(operationPNG, (Object[]) listOfFiles);
 		} catch (Exception ex) {
-			logger.error("Problem generating pngs");
+			LOGGER.error("Problem generating pngs");
 			throw new DCMAApplicationException("Problem generating pngs", ex);
 		}
 	}
@@ -147,19 +156,20 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	 * 
 	 * @param sBatchFolder
 	 * @param batchInstanceIdentifier
-	 * @param pluginWorkflowName 
+	 * @param pluginWorkflowName
 	 * @throws DCMAApplicationException
 	 * @throws JAXBException
 	 */
 	public void generateThumbnail(final String sBatchFolder, final String batchInstanceIdentifier,
-			BatchSchemaService batchSchemaService, String thumbnailType, String pluginWorkflowName) throws DCMAApplicationException, JAXBException {
+			BatchSchemaService batchSchemaService, String thumbnailType, String pluginWorkflowName) throws DCMAApplicationException,
+			JAXBException {
 
 		final File fBatchFolder = new File(sBatchFolder);
-		String thumbnailH = "";
-		String thumbnailW = "";
+		String thumbnailH = EMPTY_STRING;
+		String thumbnailW = EMPTY_STRING;
 
 		// Initialize properties
-		logger.info("Initializing properties...");
+		LOGGER.info("Initializing properties...");
 		String displayThumbnailH = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 				ImageMagicKConstants.CREATE_THUMBNAILS_PLUGIN, ImageMagicProperties.CREATE_THUMBNAILS_DISP_THUMB_HEIGHT);
 		String displayThumbnailW = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
@@ -168,7 +178,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 				ImageMagicKConstants.CREATE_THUMBNAILS_PLUGIN, ImageMagicProperties.CREATE_THUMBNAILS_COMP_THUMB_HEIGHT);
 		String compareThumbnailW = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 				ImageMagicKConstants.CREATE_THUMBNAILS_PLUGIN, ImageMagicProperties.CREATE_THUMBNAILS_COMP_THUMB_WIDTH);
-		logger.info("Properties Initialized Successfully");
+		LOGGER.info("Properties Initialized Successfully");
 
 		if (thumbnailType.equals(IImageMagickCommonConstants.THUMB_TYPE_COMP)) {
 			thumbnailH = compareThumbnailH;
@@ -183,7 +193,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		if (!fBatchFolder.exists() || !fBatchFolder.isDirectory()) {
 			throw new DCMABusinessException("Improper Folder Specified folder name->" + sBatchFolder);
 		}
-		logger.info("Finding xml file for thumbnail generation in the folder--> " + fBatchFolder);
+		LOGGER.info("Finding xml file for thumbnail generation in the folder--> " + fBatchFolder);
 
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 
@@ -194,16 +204,15 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			throw new DCMAApplicationException("Problem generating list of files", e);
 
 		}
-		logger.info("Generating thumbnais");
+		LOGGER.info("Generating thumbnais");
 		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
 
 		String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
 				+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
 		try {
-			FileUtils.createThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath,
-					pluginWorkflowName);
+			FileUtils.createThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
 		} catch (IOException ioe) {
-			logger.error("Error in creating threadpool lock file" + ioe.getMessage() , ioe);
+			LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
 			throw new DCMABusinessException(ioe.getMessage(), ioe);
 		}
 		final String thumbNailH = thumbnailH;
@@ -217,7 +226,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 
 				@Override
 				public void run() {
-						logger.info("Generating thumbnail for file" + files[0]);
+						LOGGER.info("Generating thumbnail for file" + files[0]);
 						ConvertCmd convertcmd = new ConvertCmd();
 						IMOperation operation = new IMOperation();
 						operation.addImage();
@@ -225,51 +234,50 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 						// added for color pdf handling.
 						// Generate the display thumbnails as gray and compare thumbnails as per the color of input tiff.
 						if (thumbnailT.equals(IImageMagickCommonConstants.THUMB_TYPE_DISP)) {
-							operation.colorspace("gray");
+							operation.colorspace(GRAY_COLOR);
 						}
 						
 						operation.thumbnail(Integer.parseInt(thumbNailH), Integer.parseInt(thumbNailW));
 						operation.addImage();
 
-						try {
-							String[] listOfFiles = {files[0], files[1]};
-							convertcmd.run(operation, (Object[]) listOfFiles);
-						} catch (Exception ex) {
-							logger.error("Problem generating thumbnails");
-							setDcmaApplicationException(new DCMAApplicationException("Problem generating thumbnails", ex));
-						}
+					try {
+						String[] listOfFiles = {files[0], files[1]};
+						convertcmd.run(operation, (Object[]) listOfFiles);
+					} catch (Exception ex) {
+						LOGGER.error(PROBLEM_GENERATING_THUMBNAILS);
+						setDcmaApplicationException(new DCMAApplicationException(PROBLEM_GENERATING_THUMBNAILS, ex));
+					}
 				}
 			});
 		}
 		try {
-			logger.info("Executing thumbnail generation by thread pool for " + batchInstanceIdentifier);
+			LOGGER.info("Executing thumbnail generation by thread pool for " + batchInstanceIdentifier);
 			batchInstanceThread.execute();
-			logger.info("Finished thumbnail generation by thread pool for " + batchInstanceIdentifier);
+			LOGGER.info("Finished thumbnail generation by thread pool for " + batchInstanceIdentifier);
 		} catch (DCMAApplicationException dcmae) {
-			logger.error("Error in generating thumbnails");
+			LOGGER.error("Error in generating thumbnails");
 			batchInstanceThread.remove();
 			batchSchemaService.updateBatch(batch);
 
 			// Throw the exception to set the batch status to Error by Application aspect
-			logger.error("Error in generating thumbnails" + dcmae.getMessage() , dcmae);
+			LOGGER.error("Error in generating thumbnails" + dcmae.getMessage(), dcmae);
 			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
 		} finally {
 			try {
-				FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath,
-						pluginWorkflowName);
+				FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
 			} catch (IOException ioe) {
-				logger.error("Error in deleting threadpool lock file" + ioe.getMessage() , ioe);
+				LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
 				throw new DCMABusinessException(ioe.getMessage(), ioe);
 			}
 		}
 
 		for (int i = 0; i < sListOfTiffFiles.length; i++) {
 			addFileToPageSchema(batch, sListOfTiffFiles[i][2], sListOfTiffFiles[i][1], thumbnailType);
-			logger.debug("thumbnail " + sListOfTiffFiles[i][1] + " sucsesfully generated");
+			LOGGER.debug("thumbnail " + sListOfTiffFiles[i][1] + " sucsesfully generated");
 		}
-		logger.info("Persisting all thumbnail info to batch.xml file");
+		LOGGER.info("Persisting all thumbnail info to batch.xml file");
 		batchSchemaService.updateBatch(batch);
-		logger.info(sListOfTiffFiles.length + " thumbnails succesfully generated");
+		LOGGER.info(sListOfTiffFiles.length + " thumbnails succesfully generated");
 
 	}
 
@@ -278,35 +286,36 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	 * 
 	 * @param sBatchFolder
 	 * @param batchInstanceIdentifier
-	 * @param pluginWorkflowName 
+	 * @param pluginWorkflowName
 	 * @throws DCMAApplicationException
 	 * @throws JAXBException
 	 */
 	public void generateFullFiles(final String sBatchFolder, final String batchInstanceIdentifier,
-			BatchSchemaService batchSchemaService, String fileType, String pluginName, String pluginWorkflowName) throws DCMAApplicationException, JAXBException {
+			BatchSchemaService batchSchemaService, String fileType, String pluginName, String pluginWorkflowName)
+			throws DCMAApplicationException, JAXBException {
 
 		File fBatchFolder = new File(sBatchFolder);
 		String[][] sListOfTiffFiles;
 		if (!fBatchFolder.exists() || !fBatchFolder.isDirectory()) {
 			throw new DCMABusinessException("Improper Folder Specified folder name->" + sBatchFolder);
 		}
-		logger.info("Finding xml file for PNG generation in the folder--> " + fBatchFolder);
+		LOGGER.info("Finding xml file for PNG generation in the folder--> " + fBatchFolder);
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 
 		try {
-			sListOfTiffFiles = getListOfTiffFiles(fBatchFolder, batch, batchInstanceIdentifier, false, "", batchSchemaService,
+			sListOfTiffFiles = getListOfTiffFiles(fBatchFolder, batch, batchInstanceIdentifier, false, EMPTY_STRING, batchSchemaService,
 					pluginName);
 		} catch (Exception e) {
 			throw new DCMAApplicationException("Problem generating list of files", e);
 		}
-		logger.info("Generating PNG Files");
+		LOGGER.info("Generating PNG Files");
 		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
 		String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
 				+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
 		try {
 			FileUtils.createThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
 		} catch (IOException ioe) {
-			logger.error("Error in creating threadpool lock file" + ioe.getMessage() , ioe);
+			LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
 			throw new DCMABusinessException(ioe.getMessage(), ioe);
 		}
 
@@ -316,12 +325,12 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 
 				@Override
 				public void run() {
-					logger.info("Generating PNG for file" + files[0]);
+					LOGGER.info("Generating PNG for file" + files[0]);
 					ConvertCmd convertcmd = new ConvertCmd();
 					IMOperation operation = new IMOperation();
 					operation.addImage();
 					operation.density(300);
-					operation.colorspace("gray");
+					operation.colorspace(GRAY_COLOR);
 					operation.addImage();
 					try {
 						String[] listOfFiles = {files[0], files[1]};
@@ -334,11 +343,11 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 
 		}
 		try {
-			logger.info("Executing PNG generation by thread pool for " + batchInstanceIdentifier);
+			LOGGER.info("Executing PNG generation by thread pool for " + batchInstanceIdentifier);
 			batchInstanceThread.execute();
-			logger.info("Finished PNG generation by thread pool for " + batchInstanceIdentifier);
+			LOGGER.info("Finished PNG generation by thread pool for " + batchInstanceIdentifier);
 		} catch (DCMAApplicationException dcmae) {
-			logger.error("Problem generating thumbnails. Setting batch Status to error state." + dcmae.getMessage() , dcmae);
+			LOGGER.error("Problem generating thumbnails. Setting batch Status to error state." + dcmae.getMessage(), dcmae);
 			batchInstanceThread.remove();
 			batchSchemaService.updateBatch(batch);
 
@@ -346,10 +355,9 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
 		} finally {
 			try {
-				FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath,
-						pluginWorkflowName);
+				FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
 			} catch (IOException ioe) {
-				logger.error("Error in deleting threadpool lock file" + ioe.getMessage() , ioe);
+				LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
 				throw new DCMABusinessException(ioe.getMessage(), ioe);
 			}
 		}
@@ -360,11 +368,11 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			if (fileType.equals(DISPLAY_IMAGE)) {
 				addFileToPageSchema(batch, sListOfTiffFiles[i][2], sListOfTiffFiles[i][1], DISPLAY_IMAGE);
 			}
-			logger.debug("PNG file " + sListOfTiffFiles[i][1] + " sucsesfully generated");
+			LOGGER.debug("PNG file " + sListOfTiffFiles[i][1] + " sucsesfully generated");
 		}
-		logger.info("Persisting all PNG info to batch.xml file ");
+		LOGGER.info("Persisting all PNG info to batch.xml file ");
 		batchSchemaService.updateBatch(batch);
-		logger.info(sListOfTiffFiles.length + " PNG files succesfully generated");
+		LOGGER.info(sListOfTiffFiles.length + " PNG files succesfully generated");
 
 	}
 
@@ -379,7 +387,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	 */
 	private void addFileToPageSchema(final Batch parsedXmlFile, final String index, final String filePath, final String fileType) {
 		String fileName = new File(filePath).getName();
-		logger.debug("Updating xml Object for file" + fileName);
+		LOGGER.debug("Updating xml Object for file" + fileName);
 		List<Page> listOfPages = parsedXmlFile.getDocuments().getDocument().get(0).getPages().getPage();
 
 		Page page = listOfPages.get(Integer.parseInt(index));
@@ -396,7 +404,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			page.setDisplayFileName(fileName);
 		}
 
-		logger.debug("List Of Pages=" + listOfPages);
+		LOGGER.debug("List Of Pages=" + listOfPages);
 
 	}
 
@@ -413,13 +421,13 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	private String[][] getListOfTiffFiles(File fBatchFolder, Batch parsedXmlFile, String batchInstanceIdentifier,
 			boolean thumbNailGeneration, String thumbnailType, BatchSchemaService batchSchemaService, String pluginName)
 			throws DCMAApplicationException {
-		logger.info("Getting the list of tif files from the xml for batchInstanceIdentifier=" + batchInstanceIdentifier);
+		LOGGER.info("Getting the list of tif files from the xml for batchInstanceIdentifier=" + batchInstanceIdentifier);
 		FileNameFormatter formatter = null;
 
 		// Initialize properties
 		String displayThumbnailType = null;
 		String compareThumbnailType = null;
-		logger.info("Initializing properties...");
+		LOGGER.info("Initializing properties...");
 		if (pluginName.equals(ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN)) {
 			displayThumbnailType = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 					ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, ImageMagicProperties.CREATE_OCR_INPUT_DISP_THUMB_TYPE);
@@ -437,7 +445,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 					ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, ImageMagicProperties.CREATE_DISPLAY_IMAGE_COMP_THUMB_TYPE);
 		}
 
-		logger.info("Properties Initialized Successfully");
+		LOGGER.info("Properties Initialized Successfully");
 
 		try {
 			formatter = new FileNameFormatter();
@@ -461,10 +469,10 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			pageTiffFileArr[i][0] = pageTiffFilePath;
 
 			if (thumbNailGeneration) {
-				logger.info("Generating the list thumbnail files for batchInstanceIdentifier = " + batchInstanceIdentifier);
+				LOGGER.info("Generating the list thumbnail files for batchInstanceIdentifier = " + batchInstanceIdentifier);
 				sbThumbNailFileName.append(fBatchFolder.getAbsolutePath());
 				sbThumbNailFileName.append(File.separator);
-				String thumbNailFileName = "";
+				String thumbNailFileName = EMPTY_STRING;
 				try {
 					if (thumbnailType.equals(IImageMagickCommonConstants.THUMB_TYPE_DISP)) {
 						thumbNailFileName = formatter.getDisplayThumbnailFileName(batchInstanceIdentifier, pages.get(i)
@@ -477,7 +485,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 								compareThumbnailType, pages.get(i).getIdentifier());
 					}
 				} catch (Exception ex) {
-					logger.error("Problem Generating Thumbnail File Name");
+					LOGGER.error("Problem Generating Thumbnail File Name");
 					throw new DCMABusinessException("Problem Generating Thumbnail File Name", ex);
 				}
 
@@ -486,13 +494,13 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 				pageTiffFileArr[i][1] = thumbnailFilePath;
 				sbThumbNailFileName.delete(0, sbThumbNailFileName.length());
 			} else {
-				logger.info("Generating the list PNG files for batchInstanceIdentifier = " + batchInstanceIdentifier);
+				LOGGER.info("Generating the list PNG files for batchInstanceIdentifier = " + batchInstanceIdentifier);
 				sbPNGFileName.append(fBatchFolder.getAbsolutePath());
 				sbPNGFileName.append(File.separator);
 				String pngFileName = null;
 				try {
 					pngFileName = formatter.getOCRInputFileName(batchInstanceIdentifier, pages.get(i).getOldFileName(), pages.get(i)
-							.getNewFileName(), EXTENSION_PNG, pages.get(i).getIdentifier());
+							.getNewFileName(), FileType.PNG.getExtensionWithDot(), pages.get(i).getIdentifier());
 				} catch (Exception e) {
 					throw new DCMAApplicationException("Problem Getting Name from formatter", e);
 				}
@@ -508,22 +516,22 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		return pageTiffFileArr;
 
 	}
-	
+
 	public void generatePNGForImage(File imagePath) throws DCMAApplicationException {
-		
+
 		ConvertCmd convertcmd = new ConvertCmd();
 		IMOperation operationPNG = new IMOperation();
 		operationPNG.addImage();
 		operationPNG.addImage();
-		
+
 		String imageName = imagePath.getAbsolutePath();
-		// TODO remove hard coding _thumb.png, .png and .tif		
-		String pngPath = imageName.substring(0, imageName.lastIndexOf("."));
+		// TODO remove hard coding _thumb.png, .png and .tif
+		String pngPath = imageName.substring(0, imageName.lastIndexOf(DOT));
 		try {
-			String[] listOfFiles = {imageName, pngPath + ".png"};
+			String[] listOfFiles = {imageName, pngPath + FileType.PNG.getExtensionWithDot()};
 			convertcmd.run(operationPNG, (Object[]) listOfFiles);
 		} catch (Exception ex) {
-			logger.error("Problem generating png.");
+			LOGGER.error("Problem generating png.");
 			throw new DCMAApplicationException("Problem generating png.", ex);
 		}
 	}

@@ -53,6 +53,8 @@ import com.ephesoft.dcma.util.BackUpFileService;
 
 public class ImportServiceImpl implements ImportService, ICommonConstants {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportServiceImpl.class);
+
 	@Autowired
 	private BatchInstanceDao batchInstanceDao;
 
@@ -80,7 +82,9 @@ public class ImportServiceImpl implements ImportService, ICommonConstants {
 			String folderToBeMoved = batchInstance.getUncSubfolder();
 			folderImporter.copyAndMove(batchInstance, folderToBeMoved, batchInstanceIdentifier);
 		} catch (Exception ex) {
-			throw new DCMAException("Exception in import", ex);
+			String message = ex.getMessage();
+			LOGGER.error(message, ex);
+			throw new DCMAException("Exception in import. " + message, ex);
 		}
 
 	}
@@ -92,7 +96,9 @@ public class ImportServiceImpl implements ImportService, ICommonConstants {
 			String folderPath = batchInstance.getUncSubfolder();
 			folderImporter.createMultiPageTiff(batchInstance, folderPath);
 		} catch (Exception ex) {
-			throw new DCMAException("Exception in breaking multi page tiff file", ex);
+			String message = ex.getMessage();
+			LOGGER.error(message, ex);
+			throw new DCMAException("Exception in breaking multi page tiff file. " + message, ex);
 		}
 
 	}

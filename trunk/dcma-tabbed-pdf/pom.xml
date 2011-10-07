@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>com.ephesoft.dcma</groupId>
+		<artifactId>dcma-parent</artifactId>
+		<version>0.0.13-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	<artifactId>dcma-tabbed-pdf</artifactId>
+	<name>DCMA: Tabbed Pdf Plug-in</name>
+	<description>A plugin for exporting batch documents to XML export and  Tabbed PDF generation.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-batch</artifactId>
+		</dependency>
+	</dependencies>
+</project>

@@ -105,6 +105,8 @@ import com.ephesoft.dcma.util.OSUtil;
 @Component
 public class LuceneEngine implements ICommonConstants {
 
+	private static final String WORKING_DIRECTORY_FOR_LICENSE_NOT_FOUND = "Working directory for License file could not be found";
+	private static final String EXCEPTION_GENERATING_HOCR_FOR_IMAGE = "Exception while generating HOCR for image";
 	private static final String CMD_COMMAND = "cmd";
 	private static final String PROJECT_FILE_NAME_COULD_NOT_BE_FETCHED = "Project File Name could not be fetched";
 	private static final String RECOSTAR_HOCR_PLUGIN = "RECOSTAR_HOCR";
@@ -121,20 +123,6 @@ public class LuceneEngine implements ICommonConstants {
 	 */
 	public static final String RECOSTAR_BASE_PATH = "RECOSTAR_PATH";
 	/**
-	 * Constant for tif file extension.
-	 */
-	public static final String TIF_FILE_EXT = ".tif";
-
-	/**
-	 * Constant for html file extension.
-	 */
-	public static final String EXTENSION_HTML = ".html";
-
-	/**
-	 * Constant for png file extension.
-	 */
-	public static final String PNG_FILE_EXT = ".png";
-	/**
 	 * Constant for License verifier class.
 	 */
 	public static final String LICENSE_VERIFIER = "com.ephesoft.license.client.LicenseClientExecutor";
@@ -142,7 +130,6 @@ public class LuceneEngine implements ICommonConstants {
 	 * Constant for switch
 	 */
 	private static final String ON_VALUE = "ON";
-
 	/**
 	 * Constant for empty string.
 	 */
@@ -332,12 +319,44 @@ public class LuceneEngine implements ICommonConstants {
 					LuceneProperties.LUCENE_NO_OF_PAGES);
 			String max_results = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
 					LuceneProperties.LUCENE_MAX_RESULT_COUNT);
+			
+			String first_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
+					LuceneProperties.LUCENE_FIRST_PAGE_CONF_WEIGHTAGE);
+			
+			String middle_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
+					LuceneProperties.LUCENE_MIDDLE_PAGE_CONF_WEIGHTAGE);
+
+			String last_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
+					LuceneProperties.LUCENE_LAST_PAGE_CONF_WEIGHTAGE);
+
 			int max_result = 10;
 			try {
 				max_result = Integer.valueOf(max_results);
 			} catch (NumberFormatException e) {
 				LOGGER.info("Could not set max result value. Using default value of 10.");
 			}
+			Float f_100 = 100.0f;
+			float first_page_conf_weightage_float = 1f;
+			try {
+				first_page_conf_weightage_float = Integer.valueOf(first_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max first page confidence weightage value. Using default value of 100.");
+			}
+
+			float middle_page_conf_weightage_float = 0.90f;
+			try {
+				middle_page_conf_weightage_float = Integer.valueOf(middle_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max middle page confidence weightage value. Using default value of 90.");
+			}
+
+			float last_page_conf_weightage_float = 0.80f;
+			try {
+				last_page_conf_weightage_float = Integer.valueOf(last_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max last page confidence weightage value. Using default value of 80.");
+			}
+			
 			LOGGER.info("Properties Initialized Successfully");
 
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -460,7 +479,7 @@ public class LuceneEngine implements ICommonConstants {
 							LOGGER.error("Exception while generating index or updating xml" + e.getMessage(), e);
 						}
 						LOGGER.info("Started updating batch xml for : " + eachPage);
-						updateBatchXML(returnMap, batch, eachPage, allPageTypes);
+						updateBatchXML(returnMap, batch, eachPage, allPageTypes, first_page_conf_weightage_float, middle_page_conf_weightage_float, last_page_conf_weightage_float);
 						LOGGER.info("Successfully ended updating batch xml for : " + eachPage);
 					} else {
 						LOGGER.error("File " + eachPage + " has invalid extension.");
@@ -516,10 +535,13 @@ public class LuceneEngine implements ICommonConstants {
 	 * @param batch Batch
 	 * @param eachHtmlPage String
 	 * @param allPageTypes List<com.ephesoft.dcma.da.domain.PageType>
+	 * @param lastPageConfWeightage confidence score weightage of last page
+	 * @param middlePageConfWeightage confidence score weightage of middle page
+	 * @param firstPageConfWeightage confidence score weightage of first page
 	 * @throws DCMAApplicationException
 	 */
 	public void updateBatchXML(final Map<String, Float> batchDocNameScore, final Batch batch, final String eachHtmlPage,
-			final List<com.ephesoft.dcma.da.domain.PageType> allPageTypes) throws DCMAApplicationException {
+			final List<com.ephesoft.dcma.da.domain.PageType> allPageTypes, float firstPageConfWeightage, float middlePageConfWeightage, float lastPageConfWeightage) throws DCMAApplicationException {
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		float highestConfScore = fetchHighestScoreValue(batchDocNameScore);
 		for (int i = 0; i < xmlDocuments.size(); i++) {
@@ -539,8 +561,13 @@ public class LuceneEngine implements ICommonConstants {
 						docFieldType.setName(FIELD_TYPE_NAME);
 						docFieldType.setCoordinatesList(null);
 						docFieldType.setType(EMPTY_STRING);
-						docFieldType.setConfidence(calculateConfidenceScore(highestConfScore));
-						docFieldType.setValue(fetchPageValueByConfidence(batchDocNameScore, highestConfScore));
+						String pageType = fetchPageValueByConfidence(batchDocNameScore, highestConfScore);
+						docFieldType.setValue(pageType);
+
+						float confidenceScore = calculateConfidenceScore(highestConfScore);
+						confidenceScore = applyConfWeightage(confidenceScore, pageType, firstPageConfWeightage, middlePageConfWeightage, lastPageConfWeightage);
+						docFieldType.setConfidence(confidenceScore);
+						
 						for (int k = 0; k < allPageTypes.size(); k++) {
 							com.ephesoft.dcma.da.domain.PageType eachPageType = allPageTypes.get(k);
 							if (eachPageType != null && batchDocNameScore.containsKey(eachPageType.getName())) {
@@ -550,8 +577,13 @@ public class LuceneEngine implements ICommonConstants {
 								float eachScore = 0f;
 								eachScore = batchDocNameScore.get(eachPageType.getName());
 								Field fieldType = new Field();
-								fieldType.setConfidence(calculateConfidenceScore(eachScore));
-								fieldType.setValue(eachPageType.getName());
+								String alternateValuePageType = eachPageType.getName();
+								fieldType.setValue(alternateValuePageType);
+								
+								float alternateValueConfidenceScore = calculateConfidenceScore(eachScore);
+								alternateValueConfidenceScore = applyConfWeightage(alternateValueConfidenceScore, alternateValuePageType, firstPageConfWeightage, middlePageConfWeightage, lastPageConfWeightage);
+								fieldType.setConfidence(alternateValueConfidenceScore);
+								
 								fieldType.setName(FIELD_TYPE_NAME);
 								fieldType.setType(EMPTY_STRING);
 								fieldType.setCoordinatesList(null);
@@ -565,6 +597,31 @@ public class LuceneEngine implements ICommonConstants {
 				}
 			}
 		}
+	}
+
+	/** 
+	 * Method to apply the confidence score weightage to page level fields
+	 * @param confidenceScore 
+	 * 
+	 * @param pageType page value that contains the string first_page, middle_page, last_page
+	 * @param firstPageConfWeightage confidence score weightage of first page
+	 * @param middlePageConfWeightage confidence score weightage of middle page
+	 * @param lastPageConfWeightage confidence score weightage of last page
+	 * @return
+	 */
+	private float applyConfWeightage(float confidenceScore, String pageType, float firstPageConfWeightage, float middlePageConfWeightage,
+			float lastPageConfWeightage) {
+		float updatedConfScore = confidenceScore;
+		if(pageType != null) {
+			if (pageType.contains(firstPage)) {
+				updatedConfScore = confidenceScore * firstPageConfWeightage;
+			} else if(pageType.contains(lastPage)) {
+				updatedConfScore = confidenceScore * lastPageConfWeightage;
+			} else {
+				updatedConfScore = confidenceScore * middlePageConfWeightage;
+			}
+		}
+		return updatedConfScore;
 	}
 
 	/**
@@ -735,16 +792,19 @@ public class LuceneEngine implements ICommonConstants {
 										if (file.isDirectory()) {
 											continue;
 										}
-										if (file.getName().toLowerCase(Locale.getDefault()).contains(TIF_FILE_EXT)
-												&& file.getName().toLowerCase(Locale.getDefault()).contains(PNG_FILE_EXT)) {
+										if (file.getName().toLowerCase(Locale.getDefault()).contains(
+												FileType.TIF.getExtensionWithDot())
+												&& file.getName().toLowerCase(Locale.getDefault()).contains(
+														FileType.PNG.getExtensionWithDot())) {
 											file.delete();
 										}
 									}
 								}
 							}
 						} else {
-							if (documentFile.getName().toLowerCase(Locale.getDefault()).contains(TIF_FILE_EXT)
-									&& documentFile.getName().toLowerCase(Locale.getDefault()).contains(PNG_FILE_EXT)) {
+							if (documentFile.getName().toLowerCase(Locale.getDefault()).contains(FileType.TIF.getExtensionWithDot())
+									&& documentFile.getName().toLowerCase(Locale.getDefault()).contains(
+											FileType.PNG.getExtensionWithDot())) {
 								documentFile.delete();
 							}
 						}
@@ -785,8 +845,8 @@ public class LuceneEngine implements ICommonConstants {
 
 		String workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null || workingDirectory.length() == 0) {
-			LOGGER.error("Working directory for License file could not be found");
-			throw new DCMAApplicationException("Working directory for License file could not be found");
+			LOGGER.error(WORKING_DIRECTORY_FOR_LICENSE_NOT_FOUND);
+			throw new DCMAApplicationException(WORKING_DIRECTORY_FOR_LICENSE_NOT_FOUND);
 		}
 		String jarPath = getJarPath();
 		if (jarPath == null || jarPath.length() == 0) {
@@ -811,12 +871,15 @@ public class LuceneEngine implements ICommonConstants {
 						if (listOfImageFiles != null && listOfImageFiles.length > 0) {
 							for (String eachImageFile : listOfImageFiles) {
 								String imageFile = eachImageFile.toLowerCase(Locale.getDefault());
-								String hocrFileName = eachImageFile.substring(0, imageFile.lastIndexOf(TIF_FILE_EXT)) + EXTENSION_HTML;
+								String hocrFileName = eachImageFile.substring(0, imageFile.lastIndexOf(FileType.TIF
+										.getExtensionWithDot()))
+										+ FileType.HTML.getExtensionWithDot();
 								boolean hocrExists = checkHocrExists(hocrFileName, listOfHtmlFiles);
 								if (!hocrExists) {
 									String imageAbsolutePath = pageFolderPath + File.separator + eachImageFile;
 									String targetHTMlAbsolutePath = pageFolderPath + File.separator
-											+ eachImageFile.substring(0, eachImageFile.lastIndexOf(DOT)) + EXTENSION_HTML;
+											+ eachImageFile.substring(0, eachImageFile.lastIndexOf(DOT))
+											+ FileType.HTML.getExtensionWithDot();
 									try {
 										String[] cmds = new String[3];
 										cmds[0] = CMD_COMMAND;
@@ -831,8 +894,8 @@ public class LuceneEngine implements ICommonConstants {
 									} catch (Exception e) {
 										LOGGER.error("Exception occured while generating HOCR for image" + imageAbsolutePath
 												+ e.getMessage());
-										throw new DCMAApplicationException("Exception while generating HOCR for image"
-												+ imageAbsolutePath + e.getMessage(), e);
+										throw new DCMAApplicationException(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath
+												+ e.getMessage(), e);
 									}
 								} else {
 									LOGGER.info("HOCR already present for image : " + eachImageFile);
@@ -958,7 +1021,8 @@ public class LuceneEngine implements ICommonConstants {
 						targetHTMlAbsolutePath.append(imageAbsolutePath.substring(0, imagePath.indexOf(FileType.TIF
 								.getExtensionWithDot())));
 						String imageName = eachImage.getName().toLowerCase(Locale.getDefault());
-						String hocrFileName = eachImage.getName().substring(0, imageName.indexOf(TIF_FILE_EXT)) + EXTENSION_HTML;
+						String hocrFileName = eachImage.getName().substring(0, imageName.indexOf(FileType.TIF.getExtensionWithDot()))
+								+ FileType.HTML.getExtensionWithDot();
 						boolean hocrExists = checkHocrExists(hocrFileName, listOfHtmlFiles);
 						if (!hocrExists) {
 							try {
@@ -1022,13 +1086,13 @@ public class LuceneEngine implements ICommonConstants {
 									}
 								}
 							} catch (Exception e) {
-								LOGGER.error("Exception while generating HOCR for image" + imageAbsolutePath + e.getMessage());
-								throw new DCMAApplicationException("Exception while generating HOCR for image" + imageAbsolutePath
+								LOGGER.error(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage());
+								throw new DCMAApplicationException(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath
 										+ e.getMessage(), e);
 							}
 						}
 						if (isTesseractVersion3Batch || hocrExists) {
-							targetHTMlAbsolutePath.append(EXTENSION_HTML);
+							targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
 						}
 						targetHtmlPaths.add(targetHTMlAbsolutePath.toString());
 					}
@@ -1067,7 +1131,7 @@ public class LuceneEngine implements ICommonConstants {
 			}
 		} else {
 			LOGGER.info("tesseract version 2....");
-			targetHTMlAbsolutePath.append(EXTENSION_HTML);
+			targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
 			cmdList.add(CMD_COMMAND);
 			cmdList.add("/c");
 			cmdList.add(TESSERACT_CONSOLE_EXE + SPACE + BACKWARD_SLASH + imageAbsolutePath + "\" eng " + " > \""
@@ -1079,7 +1143,7 @@ public class LuceneEngine implements ICommonConstants {
 	private void generateHOCRForRecostar(final String batchClassIdentifer, StringBuffer targetHTMlAbsolutePath,
 			String imageAbsolutePath, List<String> cmdList) throws DCMAApplicationException {
 		LOGGER.info("Generating hocr from recostar....");
-		targetHTMlAbsolutePath.append(EXTENSION_HTML);
+		targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
 		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifer,
 				RECOSTAR_HOCR_PLUGIN, null);
 		String projectFileName = EMPTY_STRING;
@@ -1092,8 +1156,8 @@ public class LuceneEngine implements ICommonConstants {
 		}
 		String workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null || workingDirectory.length() == 0) {
-			LOGGER.error("Working directory for License file could not be found");
-			throw new DCMAApplicationException("Working directory for License file could not be found");
+			LOGGER.error(WORKING_DIRECTORY_FOR_LICENSE_NOT_FOUND);
+			throw new DCMAApplicationException(WORKING_DIRECTORY_FOR_LICENSE_NOT_FOUND);
 		}
 		String jarPath = getJarPath();
 		if (jarPath == null || jarPath.length() == 0) {
@@ -1153,7 +1217,9 @@ public class LuceneEngine implements ICommonConstants {
 						if (listOfImageFiles != null && listOfImageFiles.length > 0) {
 							for (String eachImageFile : listOfImageFiles) {
 								String imageFile = eachImageFile.toLowerCase(Locale.getDefault());
-								String hocrFileName = eachImageFile.substring(0, imageFile.indexOf(TIF_FILE_EXT)) + EXTENSION_HTML;
+								String hocrFileName = eachImageFile
+										.substring(0, imageFile.indexOf(FileType.TIF.getExtensionWithDot()))
+										+ FileType.HTML.getExtensionWithDot();
 								boolean hocrExists = checkHocrExists(hocrFileName, listOfHtmlFiles);
 								if (!hocrExists) {
 									String imageAbsolutePath = pageFolderPath + File.separator + eachImageFile;
@@ -1165,7 +1231,8 @@ public class LuceneEngine implements ICommonConstants {
 												+ eachImageFile.substring(0, eachImageFile.indexOf(DOT));
 									} else {
 										targetHTMlAbsolutePath = pageFolderPath + File.separator
-												+ eachImageFile.substring(0, eachImageFile.indexOf(DOT)) + EXTENSION_HTML;
+												+ eachImageFile.substring(0, eachImageFile.indexOf(DOT))
+												+ FileType.HTML.getExtensionWithDot();
 									}
 									try {
 										// Runtime runtime = Runtime.getRuntime();
@@ -1197,9 +1264,9 @@ public class LuceneEngine implements ICommonConstants {
 										batchInstanceThread.add(new ProcessExecutor(cmds, new File(tesseractBasePath)));
 										LOGGER.info("Added HOCR file : " + targetHTMlAbsolutePath);
 									} catch (Exception e) {
-										LOGGER.error("Exception while generating HOCR for image" + imageAbsolutePath + e.getMessage());
-										throw new DCMAApplicationException("Exception while generating HOCR for image"
-												+ imageAbsolutePath + e.getMessage(), e);
+										LOGGER.error(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage());
+										throw new DCMAApplicationException(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath
+												+ e.getMessage(), e);
 									}
 								} else {
 									LOGGER.info("HOCR already present for image : " + eachImageFile);

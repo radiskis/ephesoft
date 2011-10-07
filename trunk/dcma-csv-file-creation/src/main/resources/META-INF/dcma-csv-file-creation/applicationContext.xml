@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+            			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         					"
+	default-autowire="byName">
+
+	<import resource="classpath:/META-INF/applicationContext-batch.xml" />
+
+	<bean id="csvFileCreationService"
+		class="com.ephesoft.dcma.csv.service.CSVFileCreationServiceImpl" />
+
+	<bean id="csvFilecreationConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="placeholderPrefix" value="$csv{" />
+		<property name="placeholderSuffix" value="}" />
+		<property name="locations"
+			value="classpath:/META-INF/dcma-csv-file-creation/dcma-csv-file-creation.properties">
+		</property>
+	</bean>
+
+	<context:component-scan base-package="com.ephesoft.dcma.csv" />
+
+</beans>
