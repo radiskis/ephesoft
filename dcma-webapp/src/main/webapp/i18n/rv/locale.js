@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * ******************************* Default locale
  * **************************************************
  */
@@ -182,7 +182,8 @@ var rvMessages = {
 	exit_manual_extracion : "Are you sure you want to exit the Manual Extraction for {0}?",
 	invalid_table : "Invalid data in {0}",
 	unable_to_fetch_batch_xml : "Unable to fetch updated batch.xml for the current batch.",
-	unable_to_fetch_external_app_info : "Unable to fetch information for the configuration of external applications."
+	unable_to_fetch_external_app_info : "Unable to fetch information for the configuration of external applications.",
+	unable_to_retrieve_field_value_script_switch_state : "Unable to fetch field value script switch state."
 };
 
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -361,5 +362,6 @@ var rvMessages_tk = {
 	exit_manual_extracion : "{0} Manuel Ekstraksiyon çıkmak istediğinizden emin misiniz?",
 	invalid_table : "Geçersiz veri {0}",
 	unable_to_fetch_batch_xml : "Mevcut toplu güncellenen batch.xml alınamıyor.",
-	unable_to_fetch_external_app_info : "Harici uygulamaların, yapılandırma için bilgi alınamıyor."
+	unable_to_fetch_external_app_info : "Harici uygulamaların, yapılandırma için bilgi alınamıyor.",
+	unable_to_retrieve_field_value_script_switch_state : "Alan değeri komut dosyası anahtarı devlet alınamıyor."
 };

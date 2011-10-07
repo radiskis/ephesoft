@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.regexvalidation;
 
 import java.util.List;
@@ -200,7 +165,7 @@ public class RegexAutomatedValidation {
 			List<DocField> documentLevelField = documentLevelFields.getDocumentLevelField();
 
 			if (null == documentLevelField || documentLevelField.isEmpty()) {
-				LOGGER.error("Document level field is null or empty.");
+				LOGGER.info("Document level field is null or empty.");
 				document.setValid(true);
 				continue;
 			}
@@ -210,7 +175,7 @@ public class RegexAutomatedValidation {
 
 			if (null == allFdTypes || allFdTypes.isEmpty()) {
 				errMsg = "No FieldType data found from data base for document type : " + docTypeName;
-				LOGGER.error(errMsg);
+				LOGGER.info(errMsg);
 				document.setValid(true);
 				continue;
 			}
@@ -223,7 +188,7 @@ public class RegexAutomatedValidation {
 				final String name = docField.getName();
 
 				if (name == null) {
-					LOGGER.error("Name is null for document level field.");
+					LOGGER.info("Name is null for document level field.");
 					continue;
 				}
 
@@ -240,14 +205,14 @@ public class RegexAutomatedValidation {
 				for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
 
 					if (null == fdType) {
-						LOGGER.error("field is null for database field type.");
+						LOGGER.info("field is null for database field type.");
 						continue;
 					}
 
 					final String dbFdName = fdType.getName();
 
 					if (null == dbFdName) {
-						LOGGER.error("field name is null for database field type.");
+						LOGGER.info("field name is null for database field type.");
 						continue;
 					}
 
@@ -255,14 +220,14 @@ public class RegexAutomatedValidation {
 						final List<RegexValidation> regexValidationList = fdType.getRegexValidation();
 
 						if (null == regexValidationList || regexValidationList.isEmpty()) {
-							LOGGER.error("Regex validation list is empty.");
+							LOGGER.info("Regex validation list is empty.");
 							document.setValid(true);
 							break;
 						}
 
 						for (RegexValidation regexValidation : regexValidationList) {
 							if (null == regexValidation) {
-								LOGGER.error("Regex validation is null.");
+								LOGGER.info("Regex validation is null.");
 								document.setValid(true);
 								continue;
 							}

@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.ArrayList;
@@ -93,6 +58,7 @@ import com.ephesoft.dcma.gwt.core.client.event.AnimationCompleteEvent;
 import com.ephesoft.dcma.gwt.core.client.event.AnimationCompleteEventHandler;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.ui.SuggestionBox;
 import com.ephesoft.dcma.gwt.core.client.util.GWTListBoxControl;
 import com.ephesoft.dcma.gwt.core.client.util.GWTValidatableControl;
 import com.ephesoft.dcma.gwt.core.client.util.ReverseIterable;
@@ -127,6 +93,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -144,7 +115,6 @@ import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
@@ -168,13 +138,13 @@ public class ValidatePanel extends RVBasePanel {
 	private final ValidatableWidget<TextBox> fuzzySearchTextBox;
 
 	@UiField
-	FlexTable validationTable;
+	DockLayoutPanel validateDockLayoutPanel;
 
-	@UiField
-	ScrollPanel scrollPanel;
+	private FlexTable validationTable = new FlexTable();
 
-	@UiField
-	FlexTable fuzzySearchTable;
+	private ScrollPanel scrollPanel = new ScrollPanel();
+
+	private FlexTable fuzzySearchTable = new FlexTable();
 
 	private Boolean showErrorField = Boolean.TRUE;
 
@@ -188,10 +158,15 @@ public class ValidatePanel extends RVBasePanel {
 
 	private final String enableSwitchScriptValidation = ENABLE_SCRIPT_VALIDATION;
 
+	private boolean fieldAlreadySelected = false;
+
+	private boolean currentFieldSet = true;
+
 	public ValidatePanel() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		scrollPanel.addStyleName(ReviewValidateConstants.OVERFLOW_SCROLL);
+		scrollPanel.add(validationTable);
 		fuzzySearchBtn = new Button();
 		showTableViewBtn = new Button();
 		showTableViewBtn.setStyleName("tableViewButton");
@@ -378,43 +353,63 @@ public class ValidatePanel extends RVBasePanel {
 	private void setFocus1() {
 		// Boolean focusSet = Boolean.FALSE;
 		boolean focusWasSet = false;
-		if (isPrevious) {
-			if (showErrorField) {
-				ReverseIterable<DocFieldWidget> iterator = new ReverseIterable<DocFieldWidget>(docFieldWidgets);
-				for (DocFieldWidget docFieldWid : iterator) {
-					if (docFieldWid.widget != null && !docFieldWid.widget.validate()) {
-						docFieldWid.widget.getWidget().setFocus(true);
-						focusWasSet = true;
-						docFieldWid.setCurrent(true);
-						// focusSet = Boolean.TRUE;
-						break;
-					} else if (docFieldWid.lWidget != null && !validateListBoxSelection(docFieldWid.lWidget)) {
-						docFieldWid.lWidget.setFocus(true);
-						focusWasSet = true;
-						docFieldWid.setCurrent(true);
-						// focusSet = Boolean.TRUE;
-						break;
-					}
-				}
-			}
-		} else {
-			if (showErrorField) {
-				for (DocFieldWidget docFieldWidget : docFieldWidgets) {
-					if (docFieldWidget.widget != null && !docFieldWidget.widget.validate()) {
-						docFieldWidget.widget.getWidget().setFocus(true);
-						docFieldWidget.setCurrent(true);
-						focusWasSet = true;
-						// focusSet = Boolean.TRUE;
-						break;
-					} else if (docFieldWidget.lWidget != null && !validateListBoxSelection(docFieldWidget.lWidget)) {
-						docFieldWidget.lWidget.setFocus(true);
-						docFieldWidget.setCurrent(true);
-						focusWasSet = true;
-						// focusSet = Boolean.TRUE;
-						break;
-					}
-				}
+		if (fieldAlreadySelected) {
+			setFieldAlreadySelected(false);
+			setCurrentDocFieldWidget(presenter.getCurrentFieldName());
+			if (getCurrentDocFieldWidget().widget != null) {
+				getCurrentDocFieldWidget().widget.getWidget().setFocus(true);
+				focusWasSet = true;
+				getCurrentDocFieldWidget().setCurrent(true);
+				getCurrentDocFieldWidget().widget.getWidget().getTextBox().selectAll();
+				// focusSet = Boolean.TRUE;
 
+			} else if (getCurrentDocFieldWidget().lWidget != null) {
+				getCurrentDocFieldWidget().lWidget.setFocus(true);
+				focusWasSet = true;
+				getCurrentDocFieldWidget().setCurrent(true);
+				getCurrentDocFieldWidget().widget.getWidget().getTextBox().selectAll();
+				// focusSet = Boolean.TRUE;
+			}
+		}
+		if (!focusWasSet) {
+			if (isPrevious) {
+				if (showErrorField) {
+					ReverseIterable<DocFieldWidget> iterator = new ReverseIterable<DocFieldWidget>(docFieldWidgets);
+					for (DocFieldWidget docFieldWid : iterator) {
+						if (docFieldWid.widget != null && !docFieldWid.widget.validate()) {
+							docFieldWid.widget.getWidget().setFocus(true);
+							focusWasSet = true;
+							docFieldWid.setCurrent(true);
+							// focusSet = Boolean.TRUE;
+							break;
+						} else if (docFieldWid.lWidget != null && !validateListBoxSelection(docFieldWid.lWidget)) {
+							docFieldWid.lWidget.setFocus(true);
+							focusWasSet = true;
+							docFieldWid.setCurrent(true);
+							// focusSet = Boolean.TRUE;
+							break;
+						}
+					}
+				}
+			} else {
+				if (showErrorField) {
+					for (DocFieldWidget docFieldWidget : docFieldWidgets) {
+						if (docFieldWidget.widget != null && !docFieldWidget.widget.validate()) {
+							docFieldWidget.widget.getWidget().setFocus(true);
+							docFieldWidget.setCurrent(true);
+							focusWasSet = true;
+							// focusSet = Boolean.TRUE;
+							break;
+						} else if (docFieldWidget.lWidget != null && !validateListBoxSelection(docFieldWidget.lWidget)) {
+							docFieldWidget.lWidget.setFocus(true);
+							docFieldWidget.setCurrent(true);
+							focusWasSet = true;
+							// focusSet = Boolean.TRUE;
+							break;
+						}
+					}
+
+				}
 			}
 		}
 		if (!focusWasSet && docFieldWidgets != null && !docFieldWidgets.isEmpty() && docFieldWidgets.get(0) != null) {
@@ -535,7 +530,7 @@ public class ValidatePanel extends RVBasePanel {
 				String sampleVString = "";
 				String fieldTypeDescription = null;
 				List<String> values = new ArrayList<String>();
-				ValidatableWidget<SuggestBox> tempVWidget = null;
+				ValidatableWidget<SuggestionBox> tempVWidget = null;
 				boolean isShowListBox = false;
 				ListBox tempListBox = null;
 				for (FieldTypeDTO fieldTypeDTO : fieldTypeDTOs) {
@@ -598,6 +593,10 @@ public class ValidatePanel extends RVBasePanel {
 
 							@Override
 							public void onFocus(FocusEvent event) {
+								if (!currentFieldSet) {
+									currentFieldSet = true;
+									presenter.setCurrentFieldName(field.getName());
+								}
 								setCurrentDocFieldWidget(field.getName());
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field, false));
 
@@ -629,16 +628,50 @@ public class ValidatePanel extends RVBasePanel {
 							tempVWidget = GWTValidatableControl
 									.createGWTControl(field.getType(), field.getValue(), alternateValuesSet);
 						}
-						final ValidatableWidget<SuggestBox> vWidget = tempVWidget;
+						final ValidatableWidget<SuggestionBox> vWidget = tempVWidget;
 						vWidget.getWidget().addStyleName("validatePanelListBox");
 						for (int k = 0; k < alternateValuesSet.size(); k++) {
 							vWidget.getWidget().setTitle(field.getName());
 						}
+						vWidget.getWidget().getTextBox().addKeyUpHandler(new KeyUpHandler() {
 
+							@Override
+							public void onKeyUp(KeyUpEvent arg0) {
+								if (arg0.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+									arg0.preventDefault();
+									vWidget.getWidget().hideSuggestionList();
+								}
+							}
+						});
+						vWidget.getWidget().getTextBox().addKeyDownHandler(new KeyDownHandler() {
+
+							@Override
+							public void onKeyDown(KeyDownEvent arg0) {
+								if (arg0.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+									arg0.preventDefault();
+									vWidget.getWidget().hideSuggestionList();
+								}
+
+							}
+						});
+						vWidget.getWidget().getTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+							@Override
+							public void onValueChange(ValueChangeEvent<String> arg0) {
+								if (presenter.batchDTO.getFieldValueChangeScriptSwitchState().equalsIgnoreCase("ON")) {
+									presenter.executeScriptOnFieldChange(field.getName());
+								}
+							}
+
+						});
 						vWidget.getWidget().getTextBox().addFocusHandler(new FocusHandler() {
 
 							@Override
 							public void onFocus(FocusEvent event) {
+								if (!currentFieldSet) {
+									currentFieldSet = true;
+									presenter.setCurrentFieldName(field.getName());
+								}
 								setCurrentDocFieldWidget(field.getName());
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field));
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(vWidget.validate(), sampleValueString,
@@ -665,6 +698,13 @@ public class ValidatePanel extends RVBasePanel {
 				}
 			}
 		}
+		if (presenter.batchDTO.getFuzzySearchSwitchState().equals("ON")) {
+			validateDockLayoutPanel.addNorth(fuzzySearchTable, 20);
+		} else {
+			fuzzySearchTable.clear();
+			validateDockLayoutPanel.addNorth(showTableViewBtn, 10);
+		}
+		validateDockLayoutPanel.add(scrollPanel);
 	}
 
 	public void updateDocument(CoordinatesList coordinatesList, String changedWidgetName) {
@@ -740,6 +780,7 @@ public class ValidatePanel extends RVBasePanel {
 
 			@Override
 			public void onExpand(DocExpandEvent event) {
+				validateDockLayoutPanel.clear();
 				refreshPanel(event.getDocument());
 			}
 		});
@@ -875,7 +916,7 @@ public class ValidatePanel extends RVBasePanel {
 			public void refresh(TreeRefreshEvent treeRefreshEvent) {
 				// If any of the following entities is null... this means there is no page or document left in the batch.
 				// Set the validate panel visibility to false.
-				Batch batch = treeRefreshEvent.getBatchDTO().getBatch(); 
+				Batch batch = treeRefreshEvent.getBatchDTO().getBatch();
 				if (batch == null || batch.getDocuments() == null || batch.getDocuments().getDocument() == null
 						|| batch.getDocuments().getDocument().size() < 1) {
 					setVisible(Boolean.FALSE);
@@ -951,11 +992,11 @@ public class ValidatePanel extends RVBasePanel {
 	private static class DocFieldWidget {
 
 		Field field;
-		ValidatableWidget<SuggestBox> widget;
+		ValidatableWidget<SuggestionBox> widget;
 		ListBox lWidget;
 		boolean isCurrent = false;
 
-		public DocFieldWidget(Field field, ValidatableWidget<SuggestBox> widget) {
+		public DocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
 			this.field = field;
 			this.widget = widget;
 		}
@@ -982,7 +1023,7 @@ public class ValidatePanel extends RVBasePanel {
 
 	private final LinkedList<DocFieldWidget> docFieldWidgets = new LinkedList<DocFieldWidget>();
 
-	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestBox> widget) {
+	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
 		docFieldWidgets.add(new DocFieldWidget(field, widget));
 	}
 
@@ -1024,10 +1065,12 @@ public class ValidatePanel extends RVBasePanel {
 		DocFieldWidget docFieldWidget = getCurrentDocFieldWidget();
 		if (docFieldWidget.widget != null) {
 			// docFieldWidget.widget.getWidget().setText(value);
-			docFieldWidget.widget.getWidget().setValue(value);
-			ValueChangeEvent.fire(docFieldWidget.widget.getWidget(), value);
+			// docFieldWidget.widget.getWidget().getTextBox().setValue(value,true);
 			docFieldWidget.field.setCoordinatesList(coordinatesList);
 			docFieldWidget.field.setPage(pageid);
+			docFieldWidget.field.setValue(value);
+			docFieldWidget.widget.getWidget().setValue(value, true);
+			// ValueChangeEvent.fire(docFieldWidget.widget.getWidget(), value);
 			docFieldWidget.widget.getWidget().setFocus(true);
 		} else {
 			for (int i = 0; i < docFieldWidget.lWidget.getItemCount(); i++) {
@@ -1092,6 +1135,10 @@ public class ValidatePanel extends RVBasePanel {
 		return currentDocFieldWidget;
 	}
 
+	public String getCurrentDocFieldWidgetName() {
+		return getCurrentDocFieldWidget().field.getName();
+	}
+
 	// private void setCurrentDocFieldWidget(DocFieldWidget dfWidget) {
 	// setCurrentDocFieldWidget(dfWidget.field.getName());
 	// }
@@ -1126,14 +1173,15 @@ public class ValidatePanel extends RVBasePanel {
 	private void setFuzzySerachValue(String fieldName, String fieldValue) {
 		for (DocFieldWidget docFieldWidget : docFieldWidgets) {
 			if (docFieldWidget.field.getName().equals(fieldName)) {
-				docFieldWidget.field.setValue(fieldValue);
 				docFieldWidget.widget.getWidget().setValue(fieldValue);
+				docFieldWidget.field.setValue(fieldValue);
+				docFieldWidget.widget.getWidget().getTextBox().setText(fieldValue);
 				docFieldWidget.widget.toggleValidDateBox();
 			}
 		}
 	}
 
-	private void setSuggestBoxEvents(DocField field, String inputString, ValidatableWidget<SuggestBox> vWidget) {
+	private void setSuggestBoxEvents(DocField field, String inputString, ValidatableWidget<SuggestionBox> vWidget) {
 
 		int pos = inputString.lastIndexOf(SEPERATOR);
 		int index = 0;
@@ -1143,6 +1191,7 @@ public class ValidatePanel extends RVBasePanel {
 					.length()));
 			inputString = inputString.substring(0, pos);
 		}
+		vWidget.getWidget().getTextBox().setText(inputString);
 		vWidget.getWidget().setValue(inputString);
 		vWidget.toggleValidDateBox();
 		CoordinatesList coordinatesList = field.getCoordinatesList();
@@ -1191,7 +1240,7 @@ public class ValidatePanel extends RVBasePanel {
 	public void openNextDocument() {
 		Document previousDoc = presenter.document;
 		presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, showErrorField);
-		if (enableSwitchScriptValidation.equalsIgnoreCase(presenter.batchDTO.getIsScriptEnabled())) {
+		if (enableSwitchScriptValidation.equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
 			executeScript(previousDoc);
 
 		} else {
@@ -1205,7 +1254,7 @@ public class ValidatePanel extends RVBasePanel {
 		if (presenter.document == null) {
 			presenter.document = previousDoc;
 		}
-		if (enableSwitchScriptValidation.equalsIgnoreCase(presenter.batchDTO.getIsScriptEnabled())) {
+		if (enableSwitchScriptValidation.equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
 			executeScript(previousDoc);
 		} else {
 			ValidatePanel.this.fireEvent(new TreeRefreshEvent(presenter.batchDTO, presenter.document, null));
@@ -1285,5 +1334,21 @@ public class ValidatePanel extends RVBasePanel {
 
 	private void setFieldValues(Document previousDocument, Document selectedDocument) {
 		selectedDocument.setDocumentLevelFields(previousDocument.getDocumentLevelFields());
+	}
+
+	public boolean isFieldAlreadySelected() {
+		return fieldAlreadySelected;
+	}
+
+	public void setFieldAlreadySelected(boolean fieldAlreadySelected) {
+		this.fieldAlreadySelected = fieldAlreadySelected;
+	}
+
+	public void setCurrentFieldSet(boolean currentFieldSet) {
+		this.currentFieldSet = currentFieldSet;
+	}
+
+	public boolean isCurrentFieldSet() {
+		return currentFieldSet;
 	}
 }

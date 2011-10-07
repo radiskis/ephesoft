@@ -60,7 +60,11 @@ import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
  */
 public class ImageComparisonUtil {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final String QUOTES = "\"";
+
+	private static final char SPACE = ' ';
+
+	protected final static Logger LOGGER = LoggerFactory.getLogger(ImageComparisonUtil.class);
 
 	/**
 	 * Instance of PluginPropertiesService.
@@ -140,15 +144,15 @@ public class ImageComparisonUtil {
 		double similarity = 0;
 
 		// Initialize properties
-		logger.info("Initializing properties...");
+		LOGGER.info("Initializing properties...");
 		String imMetric = pluginPropertiesService.getPropertyValue(batchInstanceID, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
 				ImageMagicProperties.CLASSIFY_IMAGES_COMP_METRIC);
 		String imFuzz = pluginPropertiesService.getPropertyValue(batchInstanceID, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
 				ImageMagicProperties.CLASSIFY_IMAGES_FUZZ_PERCNT);
-		logger.info("Properties Initialized Successfully");
+		LOGGER.info("Properties Initialized Successfully");
 
-		logger.info("imMetric = " + imMetric);
-		logger.info("imFuzz = " + imFuzz);
+		LOGGER.info("imMetric = " + imMetric);
+		LOGGER.info("imFuzz = " + imFuzz);
 
 		if (!(imMetric != null && imMetric.length() > 0)) {
 			imMetric = IImageMagickCommonConstants.DEFAULT_IM_COMP_METRIC;
@@ -165,37 +169,37 @@ public class ImageComparisonUtil {
 			compareCommand.append(System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE) + File.separator + "compare");
 			compareCommand.append(' ');
 			compareCommand.append("-dissimilarity-threshold");
-			compareCommand.append(" ");
+			compareCommand.append(SPACE);
 			compareCommand.append("100%");
-			compareCommand.append(" ");
+			compareCommand.append(SPACE);
 			compareCommand.append("-metric");
-			compareCommand.append(" ");
+			compareCommand.append(SPACE);
 			compareCommand.append(imMetric);
-			compareCommand.append(" ");
+			compareCommand.append(SPACE);
 			compareCommand.append("-fuzz");
-			compareCommand.append(" ");
+			compareCommand.append(SPACE);
 			compareCommand.append(imFuzz);
-			compareCommand.append("%");
-			compareCommand.append(" ");
-			compareCommand.append("\"" + path1 + "\"");
-			compareCommand.append(" ");
-			compareCommand.append("\"" + path2 + "\"");
-			compareCommand.append(" ");
+			compareCommand.append('%');
+			compareCommand.append(SPACE);
+			compareCommand.append(QUOTES + path1 + QUOTES);
+			compareCommand.append(SPACE);
+			compareCommand.append(QUOTES + path2 + QUOTES);
+			compareCommand.append(SPACE);
 			compareCommand.append("null");
 			String compareString = compareCommand.toString();
-			logger.info("Compare command = " + compareString);
-			Process pr = runtime.exec(compareString);
+			LOGGER.info("Compare command = " + compareString);
+			Process proc = runtime.exec(compareString);
 
 			String cmdOutput = "";
 			InputStreamReader inputStreamReader = null;
 			BufferedReader sysErr = null;
 			try {
-				inputStreamReader = new InputStreamReader(pr.getErrorStream());
+				inputStreamReader = new InputStreamReader(proc.getErrorStream());
 				sysErr = new BufferedReader(inputStreamReader);
 				cmdOutput = sysErr.readLine();
-				logger.info("cmdOutput = " + cmdOutput);
+				LOGGER.info("cmdOutput = " + cmdOutput);
 			} catch (IOException ioe) {
-				logger.error("Exception while reading the buffer : " + ioe.getMessage(), ioe);
+				LOGGER.error("Exception while reading the buffer : " + ioe.getMessage(), ioe);
 			} finally {
 				if (null != sysErr) {
 					sysErr.close();
@@ -204,30 +208,30 @@ public class ImageComparisonUtil {
 					inputStreamReader.close();
 				}
 			}
-			logger.info("cmdOutput = " + cmdOutput);
+			LOGGER.info("cmdOutput = " + cmdOutput);
 			int openingBraces = cmdOutput.indexOf('(');
 			int closingBraces = cmdOutput.indexOf(')');
 
-			logger.info("openingBraces = " + openingBraces);
-			logger.info("closingBraces = " + closingBraces);
+			LOGGER.info("openingBraces = " + openingBraces);
+			LOGGER.info("closingBraces = " + closingBraces);
 
-			if ( openingBraces != -1 && closingBraces != -1 ){
+			if (openingBraces != -1 && closingBraces != -1) {
 				String strDisimilarity = cmdOutput.substring(openingBraces + 1, closingBraces);
-				logger.info("strDisimilarity = " + strDisimilarity);
+				LOGGER.info("strDisimilarity = " + strDisimilarity);
 
 				double disimilarity = 0;
 				try {
 					disimilarity = Double.parseDouble(strDisimilarity);
 				} catch (NumberFormatException nfe) {
-					logger.error("Exception while conversion from string to double : " + nfe.getMessage(), nfe);
+					LOGGER.error("Exception while conversion from string to double : " + nfe.getMessage(), nfe);
 				}
-				logger.info("disimilarity = " + disimilarity);
+				LOGGER.info("disimilarity = " + disimilarity);
 
 				similarity = (1 - disimilarity) * 100;
-				logger.info("Similarity = " + similarity);	 
+				LOGGER.info("Similarity = " + similarity);
 			}
 		} catch (Exception e) {
-			logger.error("Exception while executing the compare command : " + e.getMessage(), e);
+			LOGGER.error("Exception while executing the compare command : " + e.getMessage(), e);
 			throw new DCMABusinessException("Unable to Compare Images ", e);
 		}
 		return similarity;

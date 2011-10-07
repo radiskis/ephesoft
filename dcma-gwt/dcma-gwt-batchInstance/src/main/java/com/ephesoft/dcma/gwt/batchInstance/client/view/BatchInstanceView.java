@@ -67,7 +67,6 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -80,6 +79,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class BatchInstanceView extends View<BatchInstancePresenter> {
+
+	private static final char SPACE = ' ';
+
+	private static final char UNDER_SCORE = '_';
 
 	@UiField
 	HorizontalPanel filterAndSearchPanel;
@@ -312,17 +315,20 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 								BatchInstanceMessages.MSG_NON_RESTARTABLE));
 					} else {
 						String identifier = batchInstanceListView.listView.getSelectedRowIndex();
-						if (restartOptions.getItemText(restartOptions.getSelectedIndex()).equalsIgnoreCase(
+						int selectedOptionIndex = restartOptions.getSelectedIndex();
+						if (restartOptions.getItemText(selectedOptionIndex).equalsIgnoreCase(
 								LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SELECT))) {
 							BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifier);
 							if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
-								showRestartConfirmationDialog(identifier, batchInstanceDTO.getRemoteBatchInstanceDTO()
-										.getSourceModule());
+								String remoteModuleName = batchInstanceDTO.getRemoteBatchInstanceDTO().getSourceModule();
+								showRestartConfirmationDialog(identifier, remoteModuleName, remoteModuleName.replace(UNDER_SCORE,
+										SPACE));
 							} else {
-								showRestartConfirmationDialog(identifier, null);
+								showRestartConfirmationDialog(identifier, null, null);
 							}
 						} else {
-							showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()));
+							showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()),
+									restartOptions.getItemText(selectedOptionIndex));
 						}
 					}
 				}
@@ -525,14 +531,14 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		return recordList;
 	}
 
-	private void showRestartConfirmationDialog(final String identifier, final String moduleName) {
+	private void showRestartConfirmationDialog(final String identifier, final String moduleName, final String moduleDesc) {
 		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		if (moduleName == null) {
+		if (moduleDesc == null) {
 			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_FROM_MODULE_NAME) + " "
-					+ BatchInstanceConstants.FOLDER_IMPORT_MODULE);
+					+ BatchInstanceConstants.FOLDER_IMPORT_MODULE.replace(UNDER_SCORE, SPACE));
 		} else {
 			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_FROM_MODULE_NAME) + " "
-					+ moduleName);
+					+ moduleDesc);
 		}
 		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.RESTART_TITLE));
 		confirmationDialog.addDialogListener(new DialogListener() {
@@ -602,8 +608,10 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		boolean rowValid = true;
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				/*ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_NO_RECORD));*/
+				/*
+				 * ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+				 * BatchInstanceMessages.MSG_NO_RECORD));
+				 */
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_NONE_SELECTED_WARNING));

@@ -39,16 +39,17 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CustomFileFilter implements FilenameFilter {
 
-	List<String> subStringList = new ArrayList<String>();
-	boolean excluded;
+	private final List<String> subStringList = new ArrayList<String>();
+	private final boolean excluded;
 
 	public CustomFileFilter(boolean excluded, String... subString) {
 		super();
-		for (int i = 0; i < subString.length; i++) {
-			subStringList.add(subString[i]);
+		for (int index = 0; index < subString.length; index++) {
+			subStringList.add(subString[index]);
 		}
 		this.excluded = excluded;
 	}
@@ -57,7 +58,7 @@ public class CustomFileFilter implements FilenameFilter {
 	public boolean accept(File dir, String name) {
 		Boolean accepted = excluded;
 		for (String item : subStringList) {
-			boolean isContained = name.toLowerCase().endsWith(item.toLowerCase());
+			boolean isContained = name.toLowerCase().endsWith(item.toLowerCase(Locale.getDefault()));
 			if (excluded) {
 				accepted = (accepted && !isContained);
 			} else

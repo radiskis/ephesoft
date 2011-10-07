@@ -2,14 +2,14 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:HorizontalPanel width="100%" ui:field="breadCrumbPanel">
-		<g:cell width="70%">
+		<g:cell width="80%">
 			<g:Label ui:field="breadCrumbs" />
 		</g:cell>
-		<g:cell width="25%" horizontalAlignment='ALIGN_RIGHT'>
+		<g:cell width="15%" horizontalAlignment='ALIGN_RIGHT'>
 			<g:Button ui:field="previousButton" />
 		</g:cell>
 		<g:cell width="5%">
-		<g:Label></g:Label>
+			<g:Label></g:Label>
 		</g:cell>
 	</g:HorizontalPanel>
 

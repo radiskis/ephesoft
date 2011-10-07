@@ -98,10 +98,11 @@ public class ScriptExecutor {
 	 * 
 	 * @param batchInstanceID String
 	 * @param pluginScriptName String
+	 * @param scriptVariableName
 	 * @throws DCMAApplicationException Check for all the input parameters.
 	 */
 	public void extractFields(final String batchInstanceId, final String pluginScriptName, final String docIdentifier,
-			final String methodName) throws DCMAApplicationException {
+			final String scriptVariableName) throws DCMAApplicationException {
 
 		String errMsg = null;
 		if (null == batchInstanceId || null == pluginScriptName) {
@@ -160,7 +161,7 @@ public class ScriptExecutor {
 				final File batchXmlFile = new File(localFolderPath + File.separator + batchInstanceId + File.separator
 						+ batchInstanceId + "_batch.xml");
 				final Document document = XMLUtil.createDocumentFrom(batchXmlFile);
-				iExecutor.execute(document, methodName, docIdentifier);
+				iExecutor.execute(document, scriptVariableName, docIdentifier);
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);

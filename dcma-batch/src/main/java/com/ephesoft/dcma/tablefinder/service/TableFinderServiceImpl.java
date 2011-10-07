@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tablefinder.service;
 
 import java.math.BigInteger;
@@ -99,7 +64,6 @@ import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
-import com.ephesoft.dcma.kvfinder.KVFinderConstants;
 import com.ephesoft.dcma.tablefinder.constants.TableExtractionConstants;
 import com.ephesoft.dcma.tablefinder.data.DataCarrier;
 import com.ephesoft.dcma.tablefinder.data.LineDataCarrier;
@@ -318,6 +282,12 @@ public class TableFinderServiceImpl implements TableFinderService {
 					Set<String> alternateValueSet = new HashSet<String>();
 					boolean isFound = false;
 					outerLoop: for (String output : outputList) {
+						if (output == null) {
+							if (!isFound) {
+								column.setValue(TableExtractionConstants.EMPTY);
+							}
+							continue;
+						}
 						if (!isFound) {
 							column.setValue(output);
 						}
@@ -336,7 +306,7 @@ public class TableFinderServiceImpl implements TableFinderService {
 							alternateValueSet.add(output);
 							// for (Integer currentIndex : indexList) {
 							for (Integer currentIndex = 0; currentIndex < outputIndexList.size(); currentIndex = currentIndex
-									+ output.split(KVFinderConstants.SPACE).length) {
+									+ output.split(TableExtractionConstants.SPACE).length) {
 								int localIndex = currentIndex;
 								Field alternateValue = new Field();
 								alternateValue.setValue(output);
@@ -345,7 +315,7 @@ public class TableFinderServiceImpl implements TableFinderService {
 								alternateValue.setPage(pageID);
 								CoordinatesList coordinatesList = new CoordinatesList();
 								alternateValue.setCoordinatesList(coordinatesList);
-								while (localIndex < currentIndex + output.split(KVFinderConstants.SPACE).length
+								while (localIndex < currentIndex + output.split(TableExtractionConstants.SPACE).length
 										&& localIndex < outputIndexList.size()) {
 									Span currentSpan = lineDataCarrier.getCurrentSpan(outputIndexList.get(localIndex));
 									if (null != currentSpan) {
@@ -371,10 +341,10 @@ public class TableFinderServiceImpl implements TableFinderService {
 						if (betweenLeft != null && !betweenLeft.isEmpty()) {
 							if (betweenRight != null && !betweenRight.isEmpty()) {
 								for (Integer currentIndex = 0; currentIndex < outputIndexList.size(); currentIndex = currentIndex
-										+ output.split(KVFinderConstants.SPACE).length) {
+										+ output.split(TableExtractionConstants.SPACE).length) {
 									Integer localIndex = currentIndex;
 									column.getCoordinatesList().getCoordinates().clear();
-									while (localIndex < currentIndex + output.split(KVFinderConstants.SPACE).length
+									while (localIndex < currentIndex + output.split(TableExtractionConstants.SPACE).length
 											&& localIndex < outputIndexList.size()) {
 										column.setValue(output);
 										Span currentSpan = lineDataCarrier.getCurrentSpan(outputIndexList.get(localIndex));
@@ -405,11 +375,11 @@ public class TableFinderServiceImpl implements TableFinderService {
 								}
 							} else {
 								for (Integer currentIndex = 0; currentIndex < outputIndexList.size(); currentIndex = currentIndex
-										+ output.split(KVFinderConstants.SPACE).length) {
+										+ output.split(TableExtractionConstants.SPACE).length) {
 									Integer localIndex = currentIndex;
 									column.setValue(output);
 									column.getCoordinatesList().getCoordinates().clear();
-									while (localIndex < currentIndex + output.split(KVFinderConstants.SPACE).length
+									while (localIndex < currentIndex + output.split(TableExtractionConstants.SPACE).length
 											&& localIndex < outputIndexList.size()) {
 										column.setValue(output);
 										Span currentSpan = lineDataCarrier.getCurrentSpan(outputIndexList.get(localIndex));
@@ -435,11 +405,11 @@ public class TableFinderServiceImpl implements TableFinderService {
 						} else {
 							if (betweenRight != null && !betweenRight.isEmpty()) {
 								for (Integer currentIndex = 0; currentIndex < outputIndexList.size(); currentIndex = currentIndex
-										+ output.split(KVFinderConstants.SPACE).length) {
+										+ output.split(TableExtractionConstants.SPACE).length) {
 									Integer localIndex = currentIndex;
 									column.setValue(output);
 									column.getCoordinatesList().getCoordinates().clear();
-									while (localIndex < currentIndex + output.split(KVFinderConstants.SPACE).length
+									while (localIndex < currentIndex + output.split(TableExtractionConstants.SPACE).length
 											&& localIndex < outputIndexList.size()) {
 										column.setValue(output);
 										Span currentSpan = lineDataCarrier.getCurrentSpan(outputIndexList.get(localIndex));
@@ -502,7 +472,7 @@ public class TableFinderServiceImpl implements TableFinderService {
 	 * @return
 	 */
 	private List<Integer> getIndexList(final String output, final LineDataCarrier lineDataCarrier) {
-		String[] foundValArr = output.split(KVFinderConstants.SPACE);
+		String[] foundValArr = output.split(TableExtractionConstants.SPACE);
 		List<Coordinates> coordinateList = new ArrayList<Coordinates>();
 		List<Integer> outputIndexList = new ArrayList<Integer>();
 		if (null != foundValArr && foundValArr.length >= 0) {
@@ -770,18 +740,21 @@ public class TableFinderServiceImpl implements TableFinderService {
 				for (int i = 0; i <= matcher.groupCount(); i++) {
 					final String groupStr = matcher.group(i);
 					isFound = false;
-					if (patternStr.contains(TableExtractionConstants.NOT_SPACE)) {
-						if (groupStr.contains(TableExtractionConstants.FULL_STOP)) {
+					if (groupStr != null) {
+						if (patternStr.contains(TableExtractionConstants.NOT_SPACE)) {
+							if (groupStr.contains(TableExtractionConstants.FULL_STOP)) {
+								isFound = true;
+							}
+						} else {
 							isFound = true;
 						}
-					} else {
-						isFound = true;
 					}
 
 					if (isFound) {
 						if (null == outputList) {
 							outputList = new ArrayList<String>();
 						}
+
 						outputList.add(groupStr);
 						LOGGER.info(groupStr);
 					}
@@ -823,11 +796,11 @@ public class TableFinderServiceImpl implements TableFinderService {
 		});
 
 		set.addAll(spanList);
-		if(set != null ) {
+		if (set != null) {
 			for (Span span : set) {
 				LOGGER.info(span.getValue());
 			}
-		}	
+		}
 		final List<Span> linkedList = new LinkedList<Span>();
 		linkedList.addAll(set);
 

@@ -49,9 +49,17 @@ public interface ModuleService {
 	/**
 	 * API to get the module by name.
 	 * 
-	 * @param configName
+	 * @param moduleName is the name of the module
 	 * @return
 	 */
 	Module getModuleByName(String moduleName);
+	/**
+	 * API to get the module by id.
+	 * 
+	 * @param moduleId
+	 * @return
+	 */
+
+	Module getModulePropertiesForModuleId(Long moduleId);
 
 }

@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ephesoft.dcma.batch.schema.Batch;
+import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
@@ -71,7 +73,8 @@ public class DCMAExceptionAspect {
 	public void afterThrowing(JoinPoint joinPoint, DCMAException e) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		if (args[0] instanceof BatchInstanceID) {
-			final BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(args[0].toString());
+			String batchInstanceIdentifier = args[0].toString();
+			final BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
 			if (batchInstance == null) {
 				throw new Exception("Batch Instance can not be null to handle this aspect.");
 			}
@@ -82,6 +85,15 @@ public class DCMAExceptionAspect {
 
 					@Override
 					public void run() {
+
+						try {
+							// update the batch instance status to ERROR in batch xml file
+							Batch batch = batchSchemaService.getBatch(batchInstance.getIdentifier());
+							batch.setBatchStatus(BatchStatus.ERROR);
+							batchSchemaService.updateBatch(batch);
+						} catch (Exception e) {
+							LOGGER.error("Error while updating the batch xml status to ERROR status. " + e.getMessage(), e);
+						}
 						batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(),
 								BatchInstanceStatus.ERROR);
 					}
@@ -89,17 +101,23 @@ public class DCMAExceptionAspect {
 
 				Thread thread = new Thread(runnable);
 				thread.start();
-
 				try {
 					// RESTART BATCH functionality changes.
-					// Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING					
+					// Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING
+					LOGGER.info("Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING.");
 					String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator
 							+ batchInstance.getIdentifier() + File.separator + batchSchemaService.getThreadpoolLockFolderName();
 					File threadPoolLockFolder = new File(threadPoolLockFolderPath);
-					if(threadPoolLockFolder != null && threadPoolLockFolder.isDirectory()) {
+					if (threadPoolLockFolder != null && threadPoolLockFolder.isDirectory()) {
 						boolean deleteSrcDir = false;
 						FileUtils.deleteDirectoryAndContentsRecursive(threadPoolLockFolder, deleteSrcDir);
-					}	
+						String[] fileList = threadPoolLockFolder.list();
+						if (fileList.length == 0) {
+							LOGGER.info("Successfully deleted all the locked file from the system path location : " + threadPoolLockFolderPath);
+						} else {
+							LOGGER.info("No able to deleted all the locked file from the system path location : " + threadPoolLockFolderPath);
+						}
+					}
 					workflowService.mailOnError(batchInstance);
 				} catch (Exception mailExp) {
 					LOGGER.error("Some internal error occured during sending the mail. Check the mail configuration.", mailExp);

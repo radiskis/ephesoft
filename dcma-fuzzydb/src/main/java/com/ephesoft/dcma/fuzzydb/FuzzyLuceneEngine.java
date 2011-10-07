@@ -442,7 +442,8 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					LOGGER.info(COLUMN_NAME_ERROR_MSG);
 					throw new DCMAApplicationException(COLUMN_NAME_ERROR_MSG);
 				}
-				dbQuery.append(new StringBuffer(" from ")).append(tableName).append(new StringBuffer(" where ")).append(retrunFieldName).append(new StringBuffer(" = ")).append(rowId);
+				dbQuery.append(new StringBuffer(" from ")).append(tableName).append(new StringBuffer(" where ")).append(
+						retrunFieldName).append(new StringBuffer(" = ")).append(rowId);
 				SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 				List<Object[]> dataList = query.list();
 
@@ -521,7 +522,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 				} catch (SQLException e) {
 					LOGGER.info("Could not find Column names from table : " + tableName);
 				}
-				StringBuffer dbQuery = new  StringBuffer("select ");
+				StringBuffer dbQuery = new StringBuffer("select ");
 				int count = 0;
 				List<Integer> dateColIndex = new ArrayList<Integer>();
 				for (BatchDynamicPluginConfiguration eachColumn : allColumnNames) {
@@ -550,7 +551,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					}
 					for (Object[] eachRecord : dataList) {
 						indexCount = 0;
-						dbRow = new  StringBuffer("");
+						dbRow = new StringBuffer("");
 						for (Object eachElement : eachRecord) {
 							indexCount++;
 							if (eachElement != null) {
@@ -567,10 +568,10 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					}
 				} else {
 					LOGGER.info("Unable to fetch data for query : " + dbQuery);
-					
+
 				}
 				dynamicHibernateDao.closeSession();
-				
+
 			} else {
 				LOGGER.info("No column names configured for table name : " + eachConfig.getValue());
 			}
@@ -623,214 +624,222 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	 */
 	public boolean extractDataBaseFields(final String batchInstanceIdentifier) throws DCMAApplicationException {
 		LOGGER.info("Initializing properties...");
+		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_SWITCH);
+		if (("ON".equalsIgnoreCase(switchValue))) {
+			String indexFields = INDEX_FIELD;
+			String stopWords = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_STOP_WORDS);
+			String minTermFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
+			String minDocFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
+			String minWordLength = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
+			String maxQueryTerms = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
 
-		String indexFields = INDEX_FIELD;
-		String stopWords = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_STOP_WORDS);
-		String minTermFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
-		String minDocFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
-		String minWordLength = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
-		String maxQueryTerms = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
+			String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
 
-		String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
+			String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_DB_DRIVER);
+			String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
+			String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
+			String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
+			String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
+			String includePages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+					FuzzyDBProperties.FUZZYDB_INCLUDE_PAGES);
+			String dbName = "";
+			if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
+				dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
+			}
+			LOGGER.info("Properties Initialized Successfully");
 
-		String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_DRIVER);
-		String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
-		String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
-		String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
-		String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
-		String includePages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_INCLUDE_PAGES);
-		String dbName = "";
-		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
-		}
-		LOGGER.info("Properties Initialized Successfully");
+			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
+			String batchClassIdentifier = batch.getBatchClassIdentifier();
+			String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
 
-		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
-		String batchClassIdentifier = batch.getBatchClassIdentifier();
-		String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
-		
-		if (dbName.length() <= 0) {
-			LOGGER.info("Wrong DB name found");
-			return false;
-		}
+			if (dbName.length() <= 0) {
+				LOGGER.info("Wrong DB name found");
+				return false;
+			}
 
-		File baseFuzzyDbIndexFolder = new File(indexFolder);
-		if (baseFuzzyDbIndexFolder != null && !baseFuzzyDbIndexFolder.exists()) {
-			LOGGER.info("The base fuzzy db index folder does not exist. So cannot extract database fields.");
-			return false;
-		}
+			File baseFuzzyDbIndexFolder = new File(indexFolder);
+			if (baseFuzzyDbIndexFolder != null && !baseFuzzyDbIndexFolder.exists()) {
+				LOGGER.info("The base fuzzy db index folder does not exist. So cannot extract database fields.");
+				return false;
+			}
 
-		String[] allIndexFields = indexFields.split(";");
-		String[] allStopWords = stopWords.split(";");
-		IndexReader reader = null;
-		Query query = null;
-		Map<String, Float> returnMap = new HashMap<String, Float>();
+			String[] allIndexFields = indexFields.split(";");
+			String[] allStopWords = stopWords.split(";");
+			IndexReader reader = null;
+			Query query = null;
+			Map<String, Float> returnMap = new HashMap<String, Float>();
 
-		// List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pageTypeService.getPageTypesByBatchInstanceID(batchInstanceID);
-		List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pluginPropertiesService.getPageTypes(batchInstanceIdentifier);
-		if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
-			LOGGER.info("Page Types not configured in Database");
-			return false;
-		}
+			// List<com.ephesoft.dcma.da.domain.PageType> allPageTypes =
+			// pageTypeService.getPageTypesByBatchInstanceID(batchInstanceID);
+			List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pluginPropertiesService.getPageTypes(batchInstanceIdentifier);
+			if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
+				LOGGER.info("Page Types not configured in Database");
+				return false;
+			}
 
-		BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(
-				batchInstanceIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
-		if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
-			for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
-				String tableName = eachConfig.getValue();
-				String fuzzyIndexFolder = indexFolder + File.separator + dbName + File.separator + tableName;
-				File indexFolderDirectory = new File(fuzzyIndexFolder);
-				if (indexFolderDirectory != null && indexFolderDirectory.exists()) {
-					String[] indexFiles = indexFolderDirectory.list();
-					if (indexFiles == null || indexFiles.length <= 0) {
-						LOGGER.info("No index files exist inside folder : " + indexFolderDirectory);
+			BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(
+					batchInstanceIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+			if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
+				for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
+					String tableName = eachConfig.getValue();
+					String fuzzyIndexFolder = indexFolder + File.separator + dbName + File.separator + tableName;
+					File indexFolderDirectory = new File(fuzzyIndexFolder);
+					if (indexFolderDirectory != null && indexFolderDirectory.exists()) {
+						String[] indexFiles = indexFolderDirectory.list();
+						if (indexFiles == null || indexFiles.length <= 0) {
+							LOGGER.info("No index files exist inside folder : " + indexFolderDirectory);
+							continue;
+						}
+						try {
+							reader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
+						} catch (CorruptIndexException e) {
+							LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
+							cleanUpResource(reader);
+							return false;
+						} catch (IOException e) {
+							LOGGER.error("IOException while reading Index" + e.getMessage(), e);
+							cleanUpResource(reader);
+							return false;
+						}
+					} else {
+						LOGGER.info("No index created for : " + eachConfig.getKey());
 						continue;
 					}
-					try {
-						reader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
-					} catch (CorruptIndexException e) {
-						LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
-						cleanUpResource(reader);
-						return false;
-					} catch (IOException e) {
-						LOGGER.error("IOException while reading Index" + e.getMessage(), e);
-						cleanUpResource(reader);
-						return false;
+					MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
+					moreLikeThis.setFieldNames(allIndexFields);
+					moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
+					moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
+					moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
+					moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
+					if (allStopWords != null && allStopWords.length > 0) {
+						Set<String> stopWordsTemp = new HashSet<String>();
+						for (int i = 0; i < allStopWords.length; i++) {
+							stopWordsTemp.add(allStopWords[i]);
+						}
+						moreLikeThis.setStopWords(stopWordsTemp);
 					}
-				} else {
-					LOGGER.info("No index created for : " + eachConfig.getKey());
-					continue;
-				}
-				MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
-				moreLikeThis.setFieldNames(allIndexFields);
-				moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
-				moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
-				moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
-				moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
-				if (allStopWords != null && allStopWords.length > 0) {
-					Set<String> stopWordsTemp = new HashSet<String>();
-					for (int i = 0; i < allStopWords.length; i++) {
-						stopWordsTemp.add(allStopWords[i]);
-					}
-					moreLikeThis.setStopWords(stopWordsTemp);
-				}
 
-				Map<String, String> docHocrContent = new HashMap<String, String>();
+					Map<String, String> docHocrContent = new HashMap<String, String>();
 
-				if (includePages != null && includePages.equalsIgnoreCase(ALLPAGES)) {
-					List<Document> xmlDocuments = batch.getDocuments().getDocument();
-					for (Document eachDocType : xmlDocuments) {
-						StringBuilder hocrContent = new StringBuilder();
-						List<Page> pages = eachDocType.getPages().getPage();
-						for (Page eachPage : pages) {
-							String pageId = eachPage.getIdentifier();
+					if (includePages != null && includePages.equalsIgnoreCase(ALLPAGES)) {
+						List<Document> xmlDocuments = batch.getDocuments().getDocument();
+						for (Document eachDocType : xmlDocuments) {
+							StringBuilder hocrContent = new StringBuilder();
+							List<Page> pages = eachDocType.getPages().getPage();
+							for (Page eachPage : pages) {
+								String pageId = eachPage.getIdentifier();
+								HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
+								List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+								HocrPage hocrPage = hocrPageList.get(0);
+								if (hocrPage.getPageID().equals(eachPage.getIdentifier())) {
+									hocrContent.append(hocrPage.getHocrContent());
+								}
+								hocrContent.append(SPACE_DELIMITER);
+							}
+							docHocrContent.put(eachDocType.getIdentifier(), hocrContent.toString());
+						}
+					} else if (includePages != null && includePages.equalsIgnoreCase(FIRSTPAGE)) {
+						List<Document> xmlDocuments = batch.getDocuments().getDocument();
+						for (Document eachDocType : xmlDocuments) {
+							String hocrContent = "";
+							List<Page> pages = eachDocType.getPages().getPage();
+							String pageId = pages.get(0).getIdentifier();
 							HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
 							List<HocrPage> hocrPageList = hocrPages.getHocrPage();
 							HocrPage hocrPage = hocrPageList.get(0);
-							if (hocrPage.getPageID().equals(eachPage.getIdentifier())) {
-								hocrContent.append(hocrPage.getHocrContent());
-							}
-							hocrContent.append(SPACE_DELIMITER);
+							hocrContent = hocrPage.getHocrContent();
+							docHocrContent.put(eachDocType.getIdentifier(), hocrContent);
 						}
-						docHocrContent.put(eachDocType.getIdentifier(), hocrContent.toString());
 					}
-				} else if (includePages != null && includePages.equalsIgnoreCase(FIRSTPAGE)) {
-					List<Document> xmlDocuments = batch.getDocuments().getDocument();
-					for (Document eachDocType : xmlDocuments) {
-						String hocrContent = "";
-						List<Page> pages = eachDocType.getPages().getPage();
-						String pageId = pages.get(0).getIdentifier();
-						HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
-						List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-						HocrPage hocrPage = hocrPageList.get(0);
-						hocrContent = hocrPage.getHocrContent();
-						docHocrContent.put(eachDocType.getIdentifier(), hocrContent);
-					}
-				}
 
-				if (docHocrContent.size() > 0) {
-					Set<String> docIds = docHocrContent.keySet();
-					for (String eachDoc : docIds) {
-						String docTypeForID = getDocTypeByID(eachDoc, batch);
-						if (eachConfig.getDescription().equalsIgnoreCase(docTypeForID)) {
-							LOGGER.info("Generating query for Document: " + eachDoc);
-							String docHocr = docHocrContent.get(eachDoc);
-							if (null != docHocr) {
-								InputStream inputStream = null;
-								try {
-									inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
-									query = moreLikeThis.like(inputStream);
-								} catch (UnsupportedEncodingException e) {
-									LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
-									continue;
-								} catch (IOException e) {
-									LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
-									continue;
-								} finally {
-									if (inputStream != null) {
-										try {
-											inputStream.close();
-										} catch (IOException e) {
-											LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
+					if (docHocrContent.size() > 0) {
+						Set<String> docIds = docHocrContent.keySet();
+						for (String eachDoc : docIds) {
+							String docTypeForID = getDocTypeByID(eachDoc, batch);
+							if (eachConfig.getDescription().equalsIgnoreCase(docTypeForID)) {
+								LOGGER.info("Generating query for Document: " + eachDoc);
+								String docHocr = docHocrContent.get(eachDoc);
+								if (null != docHocr) {
+									InputStream inputStream = null;
+									try {
+										inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
+										query = moreLikeThis.like(inputStream);
+									} catch (UnsupportedEncodingException e) {
+										LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
+										continue;
+									} catch (IOException e) {
+										LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
+										continue;
+									} finally {
+										if (inputStream != null) {
+											try {
+												inputStream.close();
+											} catch (IOException e) {
+												LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
+											}
+
 										}
-
 									}
-								}
-							} else {
-								LOGGER.info("Empty HOCR content found for Document :  " + eachDoc);
-								continue;
-							}
-							if (query != null && query.toString() != null && query.toString().length() > 0) {
-								LOGGER.info("Generating confidence score for Document: " + eachDoc);
-								try {
-									returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD,
-											Integer.valueOf(numOfPages));
-								} catch (NumberFormatException e) {
-									LOGGER.error(CONFIDENCE_ERROR_MSG+ eachDoc, e);
-									continue;
-								} catch (Exception e) {
-									LOGGER.error(CONFIDENCE_ERROR_MSG+ eachDoc, e);
-									continue;
-								}
-								LOGGER.info("Return Map is : " + returnMap);
-								int highestScoreDoc = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
-								if (highestScoreDoc != 0) {
-									List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName, dbConnectionURL,
-											dbName, dbDriver, dbUserName, dbPassword, eachConfig);
-									LOGGER.info("Extracted data is : " + extractedData);
-									LOGGER.info("Updating XML....");
-									updateBatchXML(batch, extractedData, eachDoc, batchInstanceIdentifier, eachConfig);
 								} else {
-									LOGGER.info("No document found with confidence score greater than threshold value : "
-											+ thresholdValue);
+									LOGGER.info("Empty HOCR content found for Document :  " + eachDoc);
+									continue;
 								}
-							} else {
-								LOGGER.info("Empty query generated for Document : " + eachDoc);
+								if (query != null && query.toString() != null && query.toString().length() > 0) {
+									LOGGER.info("Generating confidence score for Document: " + eachDoc);
+									try {
+										returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD,
+												Integer.valueOf(numOfPages));
+									} catch (NumberFormatException e) {
+										LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
+										continue;
+									} catch (Exception e) {
+										LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
+										continue;
+									}
+									LOGGER.info("Return Map is : " + returnMap);
+									int highestScoreDoc = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
+									if (highestScoreDoc != 0) {
+										List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName, dbConnectionURL,
+												dbName, dbDriver, dbUserName, dbPassword, eachConfig);
+										LOGGER.info("Extracted data is : " + extractedData);
+										LOGGER.info("Updating XML....");
+										updateBatchXML(batch, extractedData, eachDoc, batchInstanceIdentifier, eachConfig);
+									} else {
+										LOGGER.info("No document found with confidence score greater than threshold value : "
+												+ thresholdValue);
+									}
+								} else {
+									LOGGER.info("Empty query generated for Document : " + eachDoc);
+								}
 							}
 						}
 					}
-				}
 
+				}
+			} else {
+				LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
 			}
+			cleanUpResource(reader);
+			batchSchemaService.updateBatch(batch);
+			LOGGER.info("updateBatchXML done.");
+			return false;
 		} else {
-			LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
+			LOGGER.info("Skipping FuzzyDB extraction. Switch set as off.");
+			return false;
+
 		}
-		cleanUpResource(reader);
-		batchSchemaService.updateBatch(batch);
-		LOGGER.info("updateBatchXML done.");
-		return false;
 	}
 
 	public void cleanUpResource(IndexReader reader) {

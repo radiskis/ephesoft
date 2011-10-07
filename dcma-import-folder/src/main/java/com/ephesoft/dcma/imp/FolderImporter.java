@@ -126,6 +126,11 @@ public final class FolderImporter implements ICommonConstants {
 	private String ignoreReplaceChar;
 
 	/**
+	 * Reference of invalidCharList.
+	 */
+	private String invalidCharList;
+
+	/**
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -182,6 +187,24 @@ public final class FolderImporter implements ICommonConstants {
 	}
 
 	/**
+	 * invalidCharList.
+	 * 
+	 * @return {@link String} invalidCharList.
+	 */
+	public final String getInvalidCharList() {
+		return invalidCharList;
+	}
+
+	/**
+	 * invalidCharList.
+	 * 
+	 * @param invalidCharList {@link String}
+	 */
+	public final void setInvalidCharList(final String invalidCharList) {
+		this.invalidCharList = invalidCharList;
+	}
+
+	/**
 	 * This constructor takes the moveToFolder as an argument since the move to folder is going to be predefined we are storing it as a
 	 * instance variable so that while calling copyAndMove method we need to specify the full path of the folder to be moved.
 	 * 
@@ -211,11 +234,22 @@ public final class FolderImporter implements ICommonConstants {
 		boolean isCopySuccesful = false;
 		fFolderToBeMoved = new File(sFolderToBeMoved);
 
+		if (null == this.getInvalidCharList()) {
+			throw new DCMAApplicationException("Unable to initialize in valid character list from properties file.");
+		}
+
+		String[] invalidCharList = this.getInvalidCharList().split(SEMICOLON_DELIMITER);
 		// Initialize properties
 		LOGGER.info("Initializing properties...");
 		String validExt = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(), IMPORT_BATCH_FOLDER_PLUGIN,
 				FolderImporterProperties.FOLDER_IMPORTER_VALID_EXTNS);
 		LOGGER.info("Properties Initialized Successfully");
+		// If folder name contains invalid character throw batch to error.
+		for (String inValidChar : invalidCharList) {
+			if (inValidChar != null && !inValidChar.trim().isEmpty() && sFolderToBeMoved.contains(inValidChar)) {
+				throw new DCMAApplicationException("Invalid characters present in folder name. Charater is " + inValidChar);
+			}
+		}
 
 		// ADD extension to the serialized file in case of Batch class field association
 		if (null != validExt) {
@@ -227,8 +261,8 @@ public final class FolderImporter implements ICommonConstants {
 			throw new DCMABusinessException("Could not find validExtensions properties in the property file");
 		}
 
-		if (!isFolderValid(sFolderToBeMoved, validExtensions)) {
-			throw new DCMABusinessException("Folder Invlaid Folder name=" + sFolderToBeMoved);
+		if (!isFolderValid(sFolderToBeMoved, validExtensions, invalidCharList)) {
+			throw new DCMABusinessException("Folder Invalid Folder name = " + sFolderToBeMoved);
 
 		}
 		sMoveToFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
@@ -422,13 +456,13 @@ public final class FolderImporter implements ICommonConstants {
 	}
 
 	/**
-	 * Validates Business rules for folder validity. A folder is valid if it contins files with valid extensions a folder is invalid if
-	 * 1. It is empty. 2. It contains subfolders. 3. It contains files with extensions other than the valid extensions.
+	 * Validates Business rules for folder validity. A folder is valid if it contains files with valid extensions a folder is invalid
+	 * if 1. It is empty. 2. It contains sub folders. 3. It contains files with extensions other than the valid extensions.
 	 * 
 	 * @param sFolderToBeMoved
 	 * @return boolean
 	 */
-	private boolean isFolderValid(final String sFolderToBeMoved, String[] validExtensions) {
+	private boolean isFolderValid(final String sFolderToBeMoved, final String[] validExtensions, final String[] invalidCharList) {
 		boolean folderValid = true;
 		LOGGER.info("Validating buisiness Rules for folder <<" + sFolderToBeMoved + ">>");
 
@@ -443,29 +477,42 @@ public final class FolderImporter implements ICommonConstants {
 		}
 
 		for (String fileName : files) {
-			File indivisualFile = new File(fFolderToBeMoved, fileName);
-
-			if (indivisualFile.isDirectory()) {
-				LOGGER.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
-						+ " will not be moved");
-				folderValid = false;
-				break;
+			// if any of file name contains invalid character move batch to error.
+			for (String inValidChar : invalidCharList) {
+				if (inValidChar != null && !inValidChar.trim().isEmpty() && fileName.contains(inValidChar)) {
+					folderValid = false;
+					LOGGER.error("In valid characters present in the file name. File name is " + fileName + ". Charater is "
+							+ inValidChar);
+					break;
+				}
 			}
+			
+			if (folderValid) {
+				File indivisualFile = new File(fFolderToBeMoved, fileName);
 
-			String nameOfFile = fileName;
-			boolean invalidFileExtension = true;
-			for (String validExt : validExtensions) {
-				if (nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
-					invalidFileExtension = false;
+				if (indivisualFile.isDirectory()) {
+					LOGGER.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
+							+ " will not be moved");
+					folderValid = false;
+					break;
+				}
+
+				String nameOfFile = fileName;
+				boolean invalidFileExtension = true;
+				for (String validExt : validExtensions) {
+					if (nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
+						invalidFileExtension = false;
+					}
+
+				}
+				if (invalidFileExtension) {
+					LOGGER.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions-- "
+							+ indivisualFile.getAbsolutePath() + " will not be moved");
 				}
 
 			}
-			if (invalidFileExtension) {
-				LOGGER.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions-- "
-						+ indivisualFile.getAbsolutePath() + " will not be moved");
-			}
-
 		}
+
 		LOGGER.info("Folder <<" + sFolderToBeMoved + ">> is valid");
 		return folderValid;
 

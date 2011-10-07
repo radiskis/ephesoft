@@ -18,7 +18,7 @@
 	<sub-process continue="async" g="361,16,252,59"
 		name="Image_Process_CreateMultiPage_Files_Plugin" sub-process-key="Image_Process_CreateMultiPage_Files_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="IBM_CM_Plugin" />
+		<transition to="Tabbed_Pdf_Plugin" />
 	</sub-process>
 
 	<sub-process continue="async" g="645,16,176,59" name="CSV_File_Creation_Plugin"
@@ -26,15 +26,15 @@
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="Scripting_Plugin" />
 	</sub-process>
-	
-	<sub-process continue="async" g="645,16,176,59" name="IBM_CM_Plugin"
-		sub-process-key="IBM_CM_Plugin">
-		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="Tabbed_Pdf_Plugin" />
-	</sub-process>
 
 	<sub-process continue="async" g="645,16,176,59" name="Tabbed_Pdf_Plugin"
 		sub-process-key="Tabbed_Pdf_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="IBM_CM_Plugin" />
+	</sub-process>
+	
+	<sub-process continue="async" g="645,16,176,59" name="IBM_CM_Plugin"
+		sub-process-key="IBM_CM_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="Copy_Batch_XML_Files_Plugin" />
 	</sub-process>

@@ -1002,6 +1002,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 							}
 						} catch (Exception e) {
 							log.info("Error while overriding, reverting the changes." + e, e);
+							isSuccess = false;
 							importBatchClass.setDeleted(true);
 							importBatchClass = batchClassService.merge(importBatchClass, true);
 
@@ -1013,12 +1014,14 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 						new File(dummyUncFolder).mkdirs();
 
 					} catch (Exception e) {
+						isSuccess = false;
 						log.info("Error while overriding, reverting the changes" + e, e);
 						existingBatchClass.setUncFolder(existingUncFolder);
 						existingBatchClass = batchClassService.merge(existingBatchClass);
 					}
 
 				} catch (Exception e) {
+					isSuccess = false;
 					log.info("Error while overriding, reverting the changes" + e, e);
 					importBatchClass.setDeleted(true);
 					importBatchClass = batchClassService.merge(importBatchClass, true);

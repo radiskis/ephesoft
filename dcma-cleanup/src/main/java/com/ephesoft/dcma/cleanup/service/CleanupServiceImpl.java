@@ -76,11 +76,10 @@ public class CleanupServiceImpl implements CleanupService, ICommonConstants {
 		// throw new DCMAException("********Explicit exception thrown************");
 		final BatchInstance batchInstance = batchInstanceDao.getBatchInstancesForIdentifier(batchInstanceID.getID());
 		boolean isRemoteBatchInstance = false;
-		String delUncFolder = null;
 		final String sBatchFolder = batchInstance.getLocalFolder() + File.separator + batchInstance.getIdentifier();
 		final CleanupComponent cleanUpComponet = new CleanupComponent();
 		final RemoteBatchInstance remoteBatchInstance = batchInstance.getRemoteBatchInstance();
-		delUncFolder = batchInstance.getUncSubfolder();
+		String delUncFolder = batchInstance.getUncSubfolder();
 		if (remoteBatchInstance != null
 				&& (remoteBatchInstance.getRemoteURL() != null || remoteBatchInstance.getPreviousRemoteURL() != null)
 				&& delUncFolder == null) {

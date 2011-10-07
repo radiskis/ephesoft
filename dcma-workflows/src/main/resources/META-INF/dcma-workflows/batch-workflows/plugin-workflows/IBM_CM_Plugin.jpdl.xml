@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="IBM_CM_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="92,19,80,40">
+		<transition to="export-ibm-cm-files"/>
+	</start>
+
+	<java continue="async" expr="#{ibmCMService}" g="27,98,177,59" method="ibmCMExport" name="export-ibm-cm-files">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="IBM_CM_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="93,190,80,40" name="end"/>
+</process>

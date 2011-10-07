@@ -202,21 +202,21 @@ public class ReviewPanel extends RVBasePanel {
 								}
 								documentTypes.setVisible(true);
 								if(documentTypeSuggestBox!=null) {
-									documentTypeSuggestBox.getSuggestBox().hideSuggestionList();
+									documentTypeSuggestBox.hideSuggestionList();
 
 								}
 								MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-								documentTypeSuggestBox = new SuggestionBox(new SuggestBox(oracle));
-								documentTypeSuggestBox.getSuggestBox().hideSuggestionList();
-								documentTypeSuggestBox.getSuggestBox().addStyleName(ReviewValidateConstants.INPUTBOX_STYLE);
+								documentTypeSuggestBox = new SuggestionBox(oracle);
+								documentTypeSuggestBox.hideSuggestionList();
+								documentTypeSuggestBox.addStyleName(ReviewValidateConstants.INPUTBOX_STYLE);
 
-								setHandlerForSuggestBox(documentTypeSuggestBox.getSuggestBox());
+								setHandlerForSuggestBox(documentTypeSuggestBox);
 								actualValue = null == actualValue ? "" : actualValue;
 								oracle.add(actualValue);
 								for (int i = 0; i < documentTypes.getItemCount(); i++) {
 									oracle.add(documentTypes.getItemText(i));
 								}
-								documentTypeSuggestBox.getSuggestBox().setValue(actualValue, true);
+								documentTypeSuggestBox.setValue(actualValue, true);
 								if (currentDocTypeView == null) {
 									presenter.rpcService.getDefaultDocTypeView(new AsyncCallback<String>() {
 
@@ -398,15 +398,15 @@ public class ReviewPanel extends RVBasePanel {
 	public void setFocus() {
 		if (documentTypes.isVisible()) {
 			documentTypes.setFocus(true);
-		} else if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
-			documentTypeSuggestBox.getSuggestBox().setFocus(true);
+		} else if (documentTypeSuggestBox.isVisible()) {
+			documentTypeSuggestBox.setFocus(true);
 		}
 	}
 
 	private void setFocus(boolean isSuggestBox) {
 		if (isSuggestBox) {
 
-			documentTypeSuggestBox.getSuggestBox().setFocus(true);
+			documentTypeSuggestBox.setFocus(true);
 		} else {
 
 			documentTypes.setFocus(true);
@@ -415,12 +415,12 @@ public class ReviewPanel extends RVBasePanel {
 
 	private void enableSuggestBox() {
 		documentTypePanel.clear();
-		documentTypePanel.add(documentTypeSuggestBox.getSuggestBox());
-		documentTypeSuggestBox.getSuggestBox().setVisible(true);
-		documentTypeSuggestBox.getSuggestBox().setText(documentTypes.getItemText(documentTypes.getSelectedIndex()));
+		documentTypePanel.add(documentTypeSuggestBox);
+		documentTypeSuggestBox.setVisible(true);
+		documentTypeSuggestBox.setText(documentTypes.getItemText(documentTypes.getSelectedIndex()));
 		documentTypes.setVisible(false);
 		currentDocTypeView = SUGGEST_BOX_VIEW;
-		documentTypeSuggestBox.getSuggestBox().getTextBox().selectAll();
+		documentTypeSuggestBox.getTextBox().selectAll();
 		setFocus(true);		
 	}
 
@@ -429,7 +429,7 @@ public class ReviewPanel extends RVBasePanel {
 		documentTypePanel.clear();
 		documentTypePanel.add(documentTypes);
 		documentTypes.setVisible(true);
-		documentTypeSuggestBox.getSuggestBox().setVisible(false);
+		documentTypeSuggestBox.setVisible(false);
 		currentDocTypeView = LIST_VIEW;
 		setFocus(false);
 	}
@@ -437,7 +437,7 @@ public class ReviewPanel extends RVBasePanel {
 	private void toggleView() {
 		if (documentTypes.isVisible()) {
 			enableSuggestBox();
-		} else if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
+		} else if (documentTypeSuggestBox.isVisible()) {
 			enableListBox();
 		}
 	}
@@ -514,7 +514,7 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	public boolean isSuggestBoxValid() {
-		if (documentTypeSuggestBox.getSuggestBox().isVisible()) {
+		if (documentTypeSuggestBox.isVisible()) {
 			return validatableSuggestBox.validate();
 		}
 		return true;
