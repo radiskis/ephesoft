@@ -153,6 +153,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.FUZZY_SEARCH_SWITCH);
+
+		String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+				ValidateProperties.SUGGESTION_BOX_SWITCH);
 		switch (batchInstance.getStatus()) {
 			case READY_FOR_REVIEW:
 				batch.setBatchStatus(BatchStatus.READY_FOR_REVIEW);
@@ -164,7 +167,8 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				break;
 		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
-		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch);
+		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
+				suggestionBoxSwitchState);
 	}
 
 	@Override
@@ -242,9 +246,11 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 			String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_SWITCH);
+			String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.SUGGESTION_BOX_SWITCH);
 
 			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
-					fuzzySearchSwitch);
+					fuzzySearchSwitch, suggestionBoxSwitchState);
 
 		} catch (DCMAApplicationException e) {
 			log.error(e.getMessage(), e);
@@ -280,6 +286,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			dDocFieldType.setType(fieldType.getDataType().name());
 			dDocFieldType.setValue(null);
 			dDocFieldType.setFieldOrderNumber(fieldType.getFieldOrderNumber());
+			dDocFieldType.setFieldValueOptionList(fieldType.getFieldOptionValueList());
 			documentLevelField.add(dDocFieldType);
 		}
 		documentType.setDocumentLevelFields(documentLevelFields);

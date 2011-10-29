@@ -125,7 +125,10 @@ public class TabbedPdfExporter implements ICommonConstants {
 					TabbedPdfProperties.TABBED_PDF_EXPORT_FOLDER);
 			String placeHolder = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
 					TabbedPdfProperties.TABBED_PDF_PLACEHOLDER);
-
+			String pdfCreationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
+					TabbedPdfProperties.TABBED_PDF_CREATION_PARAMETERS);
+			String pdfOptimizationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
+					TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_PARAMETERS);
 			String propertyFile = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
 					TabbedPdfProperties.TABBED_PDF_PROPERTY_FILE);
 			this.batchSchemaService = batchSchemaService;
@@ -198,11 +201,10 @@ public class TabbedPdfExporter implements ICommonConstants {
 				List<TabbedPDFExecutor> tabbedPDFExecutors = new ArrayList<TabbedPDFExecutor>();
 
 				String tabbedPDFName = batch.getBatchName() + "_" + batchInstanceIdentifier + ".pdf";
-				String tabbedPDFLocalPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
-						+ File.separator + tabbedPDFName;
-
-				tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, sFolderToBeExported, documentPDFPaths, localPdfMarksSample
-						.getAbsolutePath(), batchInstanceThread));
+				String tabbedPDFTempFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
+				String tabbedPDFLocalPath = tabbedPDFTempFolder + File.separator + tabbedPDFName;
+				tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths, localPdfMarksSample
+						.getAbsolutePath(), batchInstanceThread, pdfCreationParam));
 
 				try {
 					LOGGER.info("Executing commands for creation of tabbed pdf using thread pool.");
@@ -221,15 +223,41 @@ public class TabbedPdfExporter implements ICommonConstants {
 						throw new DCMABusinessException(ioe.getMessage(), ioe);
 					}
 				}
-				
+				batchInstanceThread = new BatchInstanceThread();
+				List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
+
+				tabbedPdfOptimier.add(new TabbedPdfOptimizer(sFolderToBeExported, tabbedPDFTempFolder, batchInstanceThread,
+						tabbedPDFName, pdfOptimizationParam));
+				try {
+					LOGGER.info("Executing commands for optimizing tabbed pdf using thread pool.");
+					batchInstanceThread.execute();
+					LOGGER.info("Tabebd pdf creation ends.");
+				} catch (DCMAApplicationException dcmae) {
+					LOGGER.error("Error in executing command for optimizing tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
+					batchInstanceThread.remove();
+					// Throw the exception to set the batch status to Error by Application aspect
+					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+				} finally {
+					try {
+						FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginName);
+					} catch (IOException ioe) {
+						LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
+						throw new DCMABusinessException(ioe.getMessage(), ioe);
+					}
+				}
+				File destFile = new File(tabbedPDFLocalPath);
+				if (destFile.exists()) {
+					destFile.delete();
+				}
+
 				// copying file to ephesoft system folder
 				LOGGER.info("Started copying multipage pdf file in ephesoft system folder.");
 				File srcFile = new File(sFolderToBeExported + File.separator + tabbedPDFName);
-				File destFile = new File(tabbedPDFLocalPath);
+				destFile = new File(tabbedPDFLocalPath);
 				FileUtils.copyFile(srcFile, destFile);
 				LOGGER.info("Completed copying multipage pdf file in ephesoft system folder.");
 
-				mergeBatchXmlDocs(batchSchemaService, batch, documentNames, documentPDFMap, tabbedPDFName, sFolderToBeExported);
+				mergeBatchXmlDocs(batchSchemaService, batch, documentNames, documentPDFMap, tabbedPDFName);
 			} catch (Exception e) {
 				LOGGER.error("Error in writing pdfMarks file" + e.getMessage(), e);
 				throw new DCMAApplicationException("Error in writing pdfMarks file." + e.getMessage(), e);
@@ -253,7 +281,7 @@ public class TabbedPdfExporter implements ICommonConstants {
 	 * @param exportFolderPath
 	 */
 	private void mergeBatchXmlDocs(BatchSchemaService batchSchemaService, Batch batch, Set<String> documentNames,
-			LinkedHashMap<String, List<String>> documentPDFMap, String tabbedPDFName, String exportFolderPath) {
+			LinkedHashMap<String, List<String>> documentPDFMap, String tabbedPDFName) {
 		boolean isFirstDocInXML = true;
 		String documentIdInt;
 
@@ -373,10 +401,10 @@ public class TabbedPdfExporter implements ICommonConstants {
 			}
 		}
 		List<String> sortedDocumentList = new ArrayList<String>();
-		Map<String, String> propMap = fetchDocNameMapping(propertyFile);
+		Map<String, Integer> propMap = fetchDocNameMapping(propertyFile);
 		List<String> mapKeys = new ArrayList<String>(propMap.keySet());
-		List<String> mapValues = new ArrayList<String>(propMap.values());
-		TreeSet<String> sortedSet = new TreeSet<String>(mapValues);
+		List<Integer> mapValues = new ArrayList<Integer>(propMap.values());
+		TreeSet<Integer> sortedSet = new TreeSet<Integer>(mapValues);
 		if (sortedSet.size() != propMap.size()) {
 			LOGGER.error("Same priority is defined for more than one document type. Invalid scenario.");
 			throw new DCMAApplicationException("Property file for documents not valid");
@@ -512,9 +540,9 @@ public class TabbedPdfExporter implements ICommonConstants {
 
 	}
 
-	private Map<String, String> fetchDocNameMapping(String propertyFilePath) throws DCMAApplicationException {
+	private Map<String, Integer> fetchDocNameMapping(String propertyFilePath) throws DCMAApplicationException {
 		final String filePath = propertyFilePath;
-		HashMap<String, String> propertyMap = new HashMap<String, String>();
+		HashMap<String, Integer> propertyMap = new HashMap<String, Integer>();
 		FileInputStream fileInputStream = null;
 		BufferedReader bufferReader = null;
 		try {
@@ -525,7 +553,8 @@ public class TabbedPdfExporter implements ICommonConstants {
 				if (eachLine.length() > 0) {
 					final String[] keyValue = eachLine.split(MAPPING_SEPERATOR);
 					if (keyValue != null && keyValue.length == 2) {
-						propertyMap.put(keyValue[0], keyValue[1]);
+						propertyMap.put(keyValue[0], Integer.parseInt(keyValue[1]));
+
 					}
 				}
 				eachLine = bufferReader.readLine();

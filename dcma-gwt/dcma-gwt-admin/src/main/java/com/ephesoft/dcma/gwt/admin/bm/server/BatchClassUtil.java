@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.admin.bm.server;
 
 import java.io.File;
@@ -147,6 +112,9 @@ import com.ephesoft.dcma.util.FileUtils;
 
 public class BatchClassUtil {
 
+	private static final String SEMI_COLON = ";";
+	private static final String ROLES = "Roles";
+	private static final String EMPTY_STRING = "";
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassUtil.class);
 	private static final String FIRST_PAGE = "_First_Page";
 	private static final String MIDDLE_PAGE = "_Middle_Page";
@@ -1145,12 +1113,17 @@ public class BatchClassUtil {
 		batchClassPluginConfig.setKvPageProcesses(newKvPageProcessList);
 	}
 
-	/*
-	 * private static void copyBatchClassPluginConfigsChild(BatchClassPluginConfig batchClassPluginConfig) {
-	 * List<BatchClassPluginConfig> children = batchClassPluginConfig.getChildren(); List<BatchClassPluginConfig> newChildrenList = new
-	 * ArrayList<BatchClassPluginConfig>(); for (BatchClassPluginConfig child : children) { child.setId(0); newChildrenList.add(child);
-	 * child.setBatchClassPlugin(null); child.setParent(null); } batchClassPluginConfig.setChildren(newChildrenList); }
-	 */
+	/*private static void copyBatchClassPluginConfigsChild(BatchClassPluginConfig batchClassPluginConfig) {
+		List<BatchClassPluginConfig> children = batchClassPluginConfig.getChildren();
+		List<BatchClassPluginConfig> newChildrenList = new ArrayList<BatchClassPluginConfig>();
+		for (BatchClassPluginConfig child : children) {
+			child.setId(0);
+			newChildrenList.add(child);
+			child.setBatchClassPlugin(null);
+			child.setParent(null);
+		}
+		batchClassPluginConfig.setChildren(newChildrenList);
+	}*/
 
 	private static void copyBatchClassDynamicPluginConfigsChild(BatchClassDynamicPluginConfig batchClassDynamicPluginConfig) {
 		List<BatchClassDynamicPluginConfig> children = batchClassDynamicPluginConfig.getChildren();
@@ -1407,15 +1380,20 @@ public class BatchClassUtil {
 
 	/**
 	 * Utility Method to synchronize the serializable file Batch class with the current System Batch Class. In case the exported batch
-	 * class contains any additional plugins,modules or plugin Config , they are imported as well.
+	 * class contains any additional plugins,modules,plugin Config or plugin config sample values, they are imported as well.
 	 * 
+	 * @param dbBatchClass
+	 * @param moduleConfigService
 	 * @param moduleService
 	 * @param pluginService
 	 * @param pluginConfigService
+	 * @param batchClassService
+	 * @param batchSchemaService
 	 * @param serializedBatchClass
 	 */
-	public static void updateSerializableBatchClass(ModuleConfigService moduleConfigService, ModuleService moduleService,
-			PluginService pluginService, PluginConfigService pluginConfigService, BatchClass serializedBatchClass) {
+	public static void updateSerializableBatchClass(BatchClass dbBatchClass, ModuleConfigService moduleConfigService,
+			ModuleService moduleService, PluginService pluginService, PluginConfigService pluginConfigService,
+			BatchClassService batchClassService, BatchSchemaService batchSchemaService, BatchClass serializedBatchClass) {
 		// fix for "Not Mapped yet." issue while importing old batch classes.
 		List<DocumentType> documentTypes = serializedBatchClass.getDocumentTypes();
 		if (documentTypes != null) {
@@ -1431,10 +1409,10 @@ public class BatchClassUtil {
 		for (BatchClassModule batchClassModule : batchClassModules) {
 			Module currentModule = moduleService.getModuleByName(batchClassModule.getModule().getName());
 			if (currentModule == null) {
-				currentModule = batchClassModule.getModule();
+				continue;
+			} else {
+				batchClassModule.setModule(currentModule);
 			}
-			batchClassModule.setModule(currentModule);
-
 			List<BatchClassModuleConfig> batchClassModConfigs = batchClassModule.getBatchClassModuleConfig();
 			boolean isClearBatchClassModuleConfig = false;
 			if (batchClassModConfigs != null) {
@@ -1445,9 +1423,10 @@ public class BatchClassUtil {
 									batchClassModConfig.getModuleConfig().getChildKey(), batchClassModConfig.getModuleConfig()
 											.isMandatory());
 							if (currentModuleConfig == null) {
-								currentModuleConfig = batchClassModConfig.getModuleConfig();
+								continue;
+							} else {
+								batchClassModConfig.setModuleConfig(currentModuleConfig);
 							}
-							batchClassModConfig.setModuleConfig(currentModuleConfig);
 						} else if (!isClearBatchClassModuleConfig) {
 							isClearBatchClassModuleConfig = true;
 						}
@@ -1465,10 +1444,10 @@ public class BatchClassUtil {
 			for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
 				Plugin currentPlugin = pluginService.getPluginPropertiesForPluginName(batchClassPlugin.getPlugin().getPluginName());
 				if (currentPlugin == null) {
-					currentPlugin = batchClassPlugin.getPlugin();
+					continue;
+				} else {
+					batchClassPlugin.setPlugin(currentPlugin);
 				}
-				batchClassPlugin.setPlugin(currentPlugin);
-
 				List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPlugin.getBatchClassPluginConfigs();
 				Iterator<BatchClassPluginConfig> iter = batchClassPluginConfigs.iterator();
 				while (iter.hasNext()) {
@@ -1477,15 +1456,193 @@ public class BatchClassUtil {
 							.getPluginConfig().getName());
 
 					if (currentPluginConfig == null) {
-						currentPluginConfig = batchClassPluginConfig.getPluginConfig();
-						if (currentPluginConfig != null) {
-							currentPluginConfig.setId(0L);
-						}
+						continue;
+					} else {
+						batchClassPluginConfig.setPluginConfig(currentPluginConfig);
 					}
-					batchClassPluginConfig.setPluginConfig(currentPluginConfig);
 				}
 			}
 		}
+		updateBatchClassModules(pluginConfigService, batchSchemaService, dbBatchClass, batchClassModules);
+	}
+
+	/**
+	 * This method synchronizes the zip batch class modules with the system batch class modules.
+	 * 
+	 * @param pluginConfigService
+	 * @param batchSchemaService
+	 * @param dbBatchClass
+	 * @param zipBatchClassModules
+	 */
+	private static void updateBatchClassModules(PluginConfigService pluginConfigService, BatchSchemaService batchSchemaService,
+			BatchClass dbBatchClass, List<BatchClassModule> zipBatchClassModules) {
+		List<BatchClassModule> dbBatchClassModules = dbBatchClass.getBatchClassModules();
+		List<BatchClassModule> validBatchClassModules = new ArrayList<BatchClassModule>();
+		if (dbBatchClassModules != null) {
+			BatchClassModule bcModule = null;
+			for (BatchClassModule dbBatchClassModule : dbBatchClassModules) {
+				boolean isPresent = false;
+				for (BatchClassModule zipBatchClassModule : zipBatchClassModules) {
+					if (zipBatchClassModule.getModule().getName().equalsIgnoreCase(dbBatchClassModule.getModule().getName())) {
+						isPresent = true;
+						validBatchClassModules.add(zipBatchClassModule);
+						bcModule = zipBatchClassModule;
+						break;
+					}
+				}
+				if (isPresent) {
+					updateBatchClassPlugins(pluginConfigService, batchSchemaService.getDetachedBatchClassModuleByName(dbBatchClass
+							.getIdentifier(), bcModule.getModule().getName()), bcModule.getBatchClassPlugins());
+				} else {
+					validBatchClassModules.add(batchSchemaService.getDetachedBatchClassModuleByName(dbBatchClass.getIdentifier(),
+							dbBatchClassModule.getModule().getName()));
+				}
+			}
+		}
+		if (validBatchClassModules != null) {
+			zipBatchClassModules.clear();
+			zipBatchClassModules.addAll(validBatchClassModules);
+		}
+	}
+
+	/**
+	 * This method synchronizes the zip batch class plugins of specific batch class module with batch class plugins of corresponding
+	 * batch class module of system batch class.
+	 * 
+	 * @param pluginConfigService
+	 * @param dbBatchClassModule
+	 * @param zipBatchClassPlugins
+	 */
+	private static void updateBatchClassPlugins(PluginConfigService pluginConfigService, BatchClassModule dbBatchClassModule,
+			List<BatchClassPlugin> zipBatchClassPlugins) {
+		List<BatchClassPlugin> dbBatchClassPlugins = dbBatchClassModule.getBatchClassPlugins();
+		List<BatchClassPlugin> validBatchClassPlugins = new ArrayList<BatchClassPlugin>();
+		if (dbBatchClassPlugins != null) {
+			BatchClassPlugin bcPlugin = null;
+			for (BatchClassPlugin dbBatchClassPlugin : dbBatchClassPlugins) {
+				boolean isPresent = false;
+				for (BatchClassPlugin zipBatchClassPlugin : zipBatchClassPlugins) {
+					if (zipBatchClassPlugin.getPlugin().getPluginName().equalsIgnoreCase(
+							dbBatchClassPlugin.getPlugin().getPluginName())) {
+						isPresent = true;
+						validBatchClassPlugins.add(zipBatchClassPlugin);
+						bcPlugin = zipBatchClassPlugin;
+						break;
+					}
+				}
+				if (isPresent) {
+					updateBatchClassPluginConfigs(pluginConfigService, dbBatchClassPlugin, bcPlugin.getBatchClassPluginConfigs());
+				} else {
+					validBatchClassPlugins.add(dbBatchClassPlugin);
+				}
+			}
+		}
+		if (validBatchClassPlugins != null) {
+			zipBatchClassPlugins.clear();
+			zipBatchClassPlugins.addAll(validBatchClassPlugins);
+		}
+	}
+
+	/**
+	 * This method synchronizes the zip batch class plugin configs of specific batch class plugin with the corresponding batch class
+	 * plugin config in system batch class.
+	 * 
+	 * @param pluginConfigService
+	 * @param dbBatchClassPlugin
+	 * @param zipBatchClassPluginConfigs
+	 */
+	private static void updateBatchClassPluginConfigs(PluginConfigService pluginConfigService, BatchClassPlugin dbBatchClassPlugin,
+			List<BatchClassPluginConfig> zipBatchClassPluginConfigs) {
+		if (dbBatchClassPlugin != null) {
+			List<BatchClassPluginConfig> dbBatchClassPluginConfigs = dbBatchClassPlugin.getBatchClassPluginConfigs();
+			List<BatchClassPluginConfig> validBCPluginConfigs = new ArrayList<BatchClassPluginConfig>();
+			BatchClassPluginConfig bcPluginConfig = null;
+			if (dbBatchClassPluginConfigs != null) {
+				for (BatchClassPluginConfig dbBatchClassPluginConfig : dbBatchClassPluginConfigs) {
+					boolean isPresent = false;
+					for (BatchClassPluginConfig zipBatchClassPluginConfig : zipBatchClassPluginConfigs) {
+						if (zipBatchClassPluginConfig.getPluginConfig().getName().equalsIgnoreCase(
+								dbBatchClassPluginConfig.getPluginConfig().getName())) {
+							isPresent = true;
+							bcPluginConfig = zipBatchClassPluginConfig;
+							validBCPluginConfigs.add(zipBatchClassPluginConfig);
+							break;
+						}
+					}
+					if (isPresent) {
+						// update batch class plugin config value.
+						updateBatchClassPluginConfigValue(pluginConfigService, bcPluginConfig, dbBatchClassPluginConfig);
+					} else {
+						// add new batch class plugin config to imported batch class.
+						validBCPluginConfigs.add(dbBatchClassPluginConfig);
+					}
+				}
+			}
+			if (validBCPluginConfigs != null) {
+				zipBatchClassPluginConfigs.clear();
+				zipBatchClassPluginConfigs.addAll(validBCPluginConfigs);
+			}
+		}
+	}
+
+	/**
+	 * This method sychronizes the zip batch class plugin config value with the value in plugin config sample value.
+	 * 
+	 * @param pluginConfigService
+	 * @param zipBatchClassPluginConfig
+	 * @param dbBatchClassPluginConfig
+	 */
+	private static void updateBatchClassPluginConfigValue(PluginConfigService pluginConfigService,
+			BatchClassPluginConfig zipBatchClassPluginConfig, BatchClassPluginConfig dbBatchClassPluginConfig) {
+		PluginConfig pluginConfig = dbBatchClassPluginConfig.getPluginConfig();
+		if (pluginConfig != null) {
+			pluginConfig = pluginConfigService.getPluginConfigByName(pluginConfig.getName());
+			// get sample values for that plugin config.
+			List<String> pcSampleValue = pluginConfig.getSampleValue();
+			// get batch class plugin config value in zip.
+			String bcpcValue = zipBatchClassPluginConfig.getValue();
+			// Check if batch class plugin config value is valid or not.
+			if (pcSampleValue != null && !pcSampleValue.isEmpty() && !isBcpcValueExistsInDB(pcSampleValue, bcpcValue)) {
+				// update imported batch class plugin value with plugin config value for system batch class.
+				zipBatchClassPluginConfig.setValue(dbBatchClassPluginConfig.getValue());
+			}
+		}
+	}
+
+	/**
+	 * This method returns true or false depending on whether zip batch class plugin config value exists in its sample values in
+	 * database.
+	 * 
+	 * @param dbBatchClassPluginConfig
+	 * @param zipBcpcValue
+	 * @return
+	 */
+	private static boolean isBcpcValueExistsInDB(List<String> dbBatchClassPluginConfig, String zipBcpcValue) {
+		boolean isPresent = false;
+		if (zipBcpcValue != null) {
+			String[] valueArray = zipBcpcValue.split(SEMI_COLON);
+			for (int index = 0; index < valueArray.length; index++) {
+				String eachValue = valueArray[index];
+				for (String sampleValue : dbBatchClassPluginConfig) {
+					// Check if BCPC value exists in database.
+					if (sampleValue.equalsIgnoreCase(eachValue)) {
+						isPresent = true;
+						break;
+					}
+				}
+				if (!isPresent) {
+					// Value not present in sample values. Return false.
+					break;
+				} else if (index == valueArray.length - 1) {
+					// Reached end of array. Each BCPC value present. Return true.
+					break;
+				} else {
+					// BCPC value present. Continue with next value in array.
+					isPresent = false;
+				}
+			}
+		}
+		return isPresent;
 	}
 
 	public static List<TableInfo> mapTableInputFromDTO(TableInfoDTO tableInfoDTO) {
@@ -1532,7 +1689,7 @@ public class BatchClassUtil {
 		if (!(moduleList == null || moduleList.isEmpty())) {
 			Node node = new Node();
 			Label lRole = node.getLabel();
-			lRole.setDisplayName("Roles");
+			lRole.setDisplayName(ROLES);
 			lRole.setKey(BatchClassManagementServiceImpl.ROLES);
 			lRole.setMandatory(true);
 			uiConfig.getChildren().add(node);
@@ -1673,37 +1830,43 @@ public class BatchClassUtil {
 	public static void updateScriptsFiles(String tempOutputUnZipDir, BatchSchemaService batchSchemaService, List<String> scriptsList,
 			Node node, String moduleName, BatchClass importBatchClass, BatchClass existingBatchClass) throws Exception {
 		String scriptFileName = node.getLabel().getKey();
-		String existingScriptFilePath = "";
-		String zipScriptFilePath = "";
+		String existingScriptFilePath = EMPTY_STRING;
+		String zipScriptFilePath = EMPTY_STRING;
+		String scriptsFolderName = batchSchemaService.getScriptFolderName();
 		BatchClassModule existingBatchClassModule = batchSchemaService.getDetachedBatchClassModuleByName(existingBatchClass
 				.getIdentifier(), moduleName);
 		BatchClassModule importBatchClassModule = importBatchClass.getBatchClassModuleByName(moduleName);
 
 		List<BatchClassModuleConfig> existingModConfigs = existingBatchClassModule.getBatchClassModuleConfig();
-		for (BatchClassModuleConfig existingBatchClassModuleConfig : existingModConfigs) {
-			ModuleConfig existingModConfig = existingBatchClassModuleConfig.getModuleConfig();
-			if (existingModConfig != null && existingModConfig.getChildKey() != null
-					&& existingModConfig.getChildKey().equalsIgnoreCase(scriptFileName)) {
-				existingScriptFilePath = FileUtils.getFileNameOfTypeFromFolder(batchSchemaService.getAbsolutePath(existingBatchClass
-						.getIdentifier(), batchSchemaService.getScriptFolderName(), false), scriptFileName);
-				break;
+		if (existingModConfigs != null && !existingModConfigs.isEmpty()) {
+			for (BatchClassModuleConfig existingBatchClassModuleConfig : existingModConfigs) {
+				ModuleConfig existingModConfig = existingBatchClassModuleConfig.getModuleConfig();
+				if (existingModConfig != null && existingModConfig.getChildKey() != null
+						&& existingModConfig.getChildKey().equalsIgnoreCase(scriptFileName)) {
+					existingScriptFilePath = FileUtils.getFileNameOfTypeFromFolder(batchSchemaService.getAbsolutePath(
+							existingBatchClass.getIdentifier(), scriptsFolderName, false), scriptFileName);
+					break;
+				}
 			}
+		} else {
+			existingScriptFilePath = FileUtils.getFileNameOfTypeFromFolder(batchSchemaService.getAbsolutePath(existingBatchClass
+					.getIdentifier(), scriptsFolderName, false), scriptFileName);
 		}
 
 		List<BatchClassModuleConfig> importModConfigs = importBatchClassModule.getBatchClassModuleConfig();
-		if (importModConfigs != null) {
+		if (importModConfigs != null && !importModConfigs.isEmpty()) {
 			for (BatchClassModuleConfig importBatchClassModConfig : importModConfigs) {
 				ModuleConfig importModConfig = importBatchClassModConfig.getModuleConfig();
 				if (importModConfig != null && importModConfig.getChildKey() != null
 						&& importModConfig.getChildKey().equalsIgnoreCase(scriptFileName)) {
 					zipScriptFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir + File.separator
-							+ batchSchemaService.getScriptFolderName(), scriptFileName);
+							+ scriptsFolderName, scriptFileName);
 					break;
 				}
 			}
 		} else {
 			zipScriptFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir + File.separator
-					+ batchSchemaService.getScriptFolderName(), scriptFileName);
+					+ scriptsFolderName, scriptFileName);
 		}
 
 		File zipScriptFile = null;
@@ -1722,7 +1885,7 @@ public class BatchClassUtil {
 			}
 			if (existingScriptFile != null && existingScriptFile.exists()) {
 				if (zipScriptFile == null) {
-					zipScriptFile = new File(tempOutputUnZipDir + File.separator + batchSchemaService.getScriptFolderName()
+					zipScriptFile = new File(tempOutputUnZipDir + File.separator + scriptsFolderName
 							+ File.separator + existingScriptFile.getName());
 				}
 				FileUtils.copyFile(existingScriptFile, zipScriptFile);

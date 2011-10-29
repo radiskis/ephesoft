@@ -3,7 +3,7 @@
 <process name="Export_Module" xmlns="http://jbpm.org/4.3/jpdl">
 
 	<start g="16,25,80,40">
-		<transition to="CSV_File_Creation_Plugin" />
+		<transition to="Scripting_Plugin" />
 	</start>
 
 	<sub-process continue="async" g="128,16,201,59" name="Scripting_Plugin"
@@ -18,13 +18,13 @@
 	<sub-process continue="async" g="361,16,252,59"
 		name="Image_Process_CreateMultiPage_Files_Plugin" sub-process-key="Image_Process_CreateMultiPage_Files_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="Tabbed_Pdf_Plugin" />
+		<transition to="CSV_File_Creation_Plugin" />
 	</sub-process>
 
 	<sub-process continue="async" g="645,16,176,59" name="CSV_File_Creation_Plugin"
 		sub-process-key="CSV_File_Creation_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="Scripting_Plugin" />
+		<transition to="Tabbed_Pdf_Plugin" />
 	</sub-process>
 
 	<sub-process continue="async" g="645,16,176,59" name="Tabbed_Pdf_Plugin"

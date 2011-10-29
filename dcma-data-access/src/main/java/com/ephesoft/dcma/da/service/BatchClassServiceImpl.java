@@ -488,4 +488,13 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 		batchClass1 = batchClassDao.merge(batchClass);
 		return batchClass1;
 	}
+
+	@Override
+	@Transactional
+	public BatchClass getLoadedBatchClassByNameIncludingDeleted(String batchClassName) {
+		BatchClass batchClass = null;
+		batchClass = batchClassDao.getBatchClassByNameIncludingDeleted(batchClassName);
+		loadBatchClass(batchClass);
+		return batchClass;
+	}
 }

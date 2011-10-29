@@ -37,7 +37,8 @@
 		p:msActiveDirectoryDomainName="$user{user.msactivedirectory_domain_component_name}"
 		p:msActiveDirectoryDomainOrganization="$user{user.msactivedirectory_domain_component_organization}"
 		p:msActiveDirectoryUserName="$user{user.msactivedirectory_user_name}"
-		p:msActiveDirectoryPassword="$user{user.msactivedirectory_password}">
+		p:msActiveDirectoryPassword="$user{user.msactivedirectory_password}"
+		p:msActiveDirectoryGroupSearchFilter="$user{user.msactivedirectory_group_search_filter}">
 	</bean>
 
 	<bean id="factory"

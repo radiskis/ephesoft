@@ -116,8 +116,8 @@ public class CleanupComponent {
 				}
 			}
 		} else {
-			LOGGER.error("File does not exist file name : " + file);
-			throw new DCMAApplicationException("File does not exist file name : " + file);
+			LOGGER.info("File does not exist file name : " + file);
+			//throw new DCMAApplicationException("File does not exist file name : " + file);
 		}
 	}
 

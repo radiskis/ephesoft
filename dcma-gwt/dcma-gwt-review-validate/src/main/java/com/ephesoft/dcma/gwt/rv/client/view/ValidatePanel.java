@@ -110,6 +110,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.Label;
@@ -128,6 +129,10 @@ public class ValidatePanel extends RVBasePanel {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
+
+	private final FocusPanel fuzzySearchTablefocusPanel = new FocusPanel();
+
+	private final FocusPanel scrollValidationTableFocusPanel = new FocusPanel();
 
 	private final Button fuzzySearchBtn;
 
@@ -166,7 +171,11 @@ public class ValidatePanel extends RVBasePanel {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		scrollPanel.addStyleName(ReviewValidateConstants.OVERFLOW_SCROLL);
-		scrollPanel.add(validationTable);
+		scrollValidationTableFocusPanel.add(validationTable);
+		scrollValidationTableFocusPanel.setHeight("98%");
+		scrollValidationTableFocusPanel.setWidth("99%");
+		scrollPanel.setHeight("100%");
+		scrollPanel.add(scrollValidationTableFocusPanel);
 		fuzzySearchBtn = new Button();
 		showTableViewBtn = new Button();
 		showTableViewBtn.setStyleName("tableViewButton");
@@ -328,7 +337,11 @@ public class ValidatePanel extends RVBasePanel {
 
 	}
 
-	public void refreshPanel(Document document) {
+	public void refreshPanel(final Document document) {
+		refreshPanel(document, false);
+	}
+
+	public void refreshPanel(final Document document, final boolean isDocumentTypeChange) {
 		this.presenter.document = document;
 		this.validationTable.clear();
 		presenter.rpcService.getFieldTypeDTOs(document.getType(), presenter.batchDTO.getBatch().getBatchInstanceIdentifier(),
@@ -343,7 +356,7 @@ public class ValidatePanel extends RVBasePanel {
 
 					@Override
 					public void onSuccess(List<FieldTypeDTO> arg0) {
-						setView(arg0);
+						setView(arg0, isDocumentTypeChange);
 						presenter.setFocus();
 					}
 				});
@@ -356,19 +369,22 @@ public class ValidatePanel extends RVBasePanel {
 		if (fieldAlreadySelected) {
 			setFieldAlreadySelected(false);
 			setCurrentDocFieldWidget(presenter.getCurrentFieldName());
-			if (getCurrentDocFieldWidget().widget != null) {
-				getCurrentDocFieldWidget().widget.getWidget().setFocus(true);
-				focusWasSet = true;
-				getCurrentDocFieldWidget().setCurrent(true);
-				getCurrentDocFieldWidget().widget.getWidget().getTextBox().selectAll();
-				// focusSet = Boolean.TRUE;
-
-			} else if (getCurrentDocFieldWidget().lWidget != null) {
-				getCurrentDocFieldWidget().lWidget.setFocus(true);
-				focusWasSet = true;
-				getCurrentDocFieldWidget().setCurrent(true);
-				getCurrentDocFieldWidget().widget.getWidget().getTextBox().selectAll();
-				// focusSet = Boolean.TRUE;
+			DocFieldWidget currentDocFieldWidget = getCurrentDocFieldWidget();
+			if (currentDocFieldWidget != null) {
+				ValidatableWidget<SuggestionBox> vWidget = currentDocFieldWidget.widget;
+				if (vWidget != null) {
+					SuggestionBox sWidget = vWidget.getWidget();
+					if (sWidget != null) {
+						sWidget.setFocus(true);
+						focusWasSet = true;
+						currentDocFieldWidget.setCurrent(true);
+						sWidget.getTextBox().selectAll();
+					}
+				} else if (currentDocFieldWidget.lWidget != null) {
+					currentDocFieldWidget.lWidget.setFocus(true);
+					focusWasSet = true;
+					currentDocFieldWidget.setCurrent(true);
+				}
 			}
 		}
 		if (!focusWasSet) {
@@ -420,6 +436,10 @@ public class ValidatePanel extends RVBasePanel {
 				docFieldWidgets.get(0).lWidget.setFocus(true);
 			}
 		}
+		scrollPanel.ensureVisible(getCurrentDocFieldWidget().getFieldLabel());
+		if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
+			getCurrentDocFieldWidget().widget.getWidget().hideSuggestionList();
+		}
 	}
 
 	public boolean setFocusAfterConformationDialog() {
@@ -452,7 +472,7 @@ public class ValidatePanel extends RVBasePanel {
 		this.fuzzySearchTable.setVisible(false);
 	}
 
-	public void setView(List<FieldTypeDTO> fieldTypeDTOs) {
+	public void setView(List<FieldTypeDTO> fieldTypeDTOs, final boolean isDocumentTypeChange) {
 		// This field is used to hide document level field on validate panel
 
 		boolean isFieldHidden = false;
@@ -472,6 +492,7 @@ public class ValidatePanel extends RVBasePanel {
 		fuzzySearchTable.setWidget(1, 2, showTableViewBtn);
 		fuzzySearchTable.getCellFormatter().setWidth(1, 1, "20%");
 		fuzzySearchTable.getCellFormatter().setWidth(1, 2, "80%");
+		fuzzySearchTable.setWidth("99%");
 		Label seperator = new Label(".");
 		seperator.addStyleName("fuzzy-seperator");
 		// fuzzySearchTable.setWidget(2, 0, seperator);
@@ -501,7 +522,6 @@ public class ValidatePanel extends RVBasePanel {
 			for (final DocField field : documentLevelFields) {
 
 				Map<String, Integer> alternateValues = new HashMap<String, Integer>();
-				field.getName();
 				if (field.getAlternateValues() != null) {
 					for (Field alternateField : field.getAlternateValues().getAlternateValue()) {
 						if (alternateValues.containsKey(alternateField.getValue())) {
@@ -537,12 +557,16 @@ public class ValidatePanel extends RVBasePanel {
 					if (!fieldTypeDTO.isHidden()) {
 						if (fieldTypeDTO.getName().equals(field.getName())) {
 							isFieldHidden = false;
-							String fieldOptionValueList = fieldTypeDTO.getFieldOptionValueList();
-
+							String fieldOptionValueList = null;
+							if (isDocumentTypeChange) {
+								fieldOptionValueList = fieldTypeDTO.getFieldOptionValueList();
+							} else {
+								fieldOptionValueList = field.getFieldValueOptionList();
+							}
 							if (fieldOptionValueList != null && !fieldOptionValueList.isEmpty()
 									&& !fieldOptionValueList.matches("^[ ;]{1,}")) {
 								isShowListBox = true;
-								values = Arrays.asList(fieldTypeDTO.getFieldOptionValueList().split(";"));
+								values = Arrays.asList(fieldOptionValueList.split(";"));
 								tempListBox = GWTListBoxControl.createGWTListControl(field.getType(), field.getValue(), field
 										.getName(), values);
 								tempFieldName = field.getName();
@@ -611,16 +635,21 @@ public class ValidatePanel extends RVBasePanel {
 							public void onChange(ChangeEvent arg0) {
 								validateListBoxSelection(vWidget);
 								updateDocument(null, field.getName());
+								if (presenter.batchDTO.getFieldValueChangeScriptSwitchState().equalsIgnoreCase("ON")) {
+									presenter.executeScriptOnFieldChange(field.getName());
+								}
 							}
 						});
-
+						Label fieldName = null;
 						if (fieldTypeDescription != null && !fieldTypeDescription.isEmpty()) {
-							validationTable.setWidget(index++, 0, new Label(fieldTypeDescription));
+							fieldName = new Label(fieldTypeDescription);
+							validationTable.setWidget(index++, 0, fieldName);
 						} else {
-							validationTable.setWidget(index++, 0, new Label(field.getName()));
+							fieldName = new Label(field.getName());
+							validationTable.setWidget(index++, 0, fieldName);
 						}
 						validationTable.setWidget(index++, 0, vWidget);
-						addDocFieldWidget(field, vWidget);
+						addDocFieldWidget(fieldName, field, vWidget);
 					}
 				} else {
 					if (!isFieldHidden) {
@@ -673,6 +702,9 @@ public class ValidatePanel extends RVBasePanel {
 									presenter.setCurrentFieldName(field.getName());
 								}
 								setCurrentDocFieldWidget(field.getName());
+								if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
+									vWidget.getWidget().hideSuggestionList();
+								}
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field));
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(vWidget.validate(), sampleValueString,
 										fieldNameString));
@@ -687,23 +719,32 @@ public class ValidatePanel extends RVBasePanel {
 								setSuggestBoxEvents(field, inputString, vWidget);
 							}
 						});
+						Label fieldLabel = null;
 						if (fieldTypeDescription != null && !fieldTypeDescription.isEmpty()) {
-							validationTable.setWidget(index++, 0, new Label(fieldTypeDescription));
+							fieldLabel = new Label(fieldTypeDescription);
+							validationTable.setWidget(index++, 0, fieldLabel);
 						} else {
-							validationTable.setWidget(index++, 0, new Label(field.getName()));
+							fieldLabel = new Label(field.getName());
+							validationTable.setWidget(index++, 0, fieldLabel);
 						}
 						validationTable.setWidget(index++, 0, vWidget.getWidget());
-						addDocFieldWidget(field, vWidget);
+						addDocFieldWidget(fieldLabel, field, vWidget);
 					}
 				}
 			}
 		}
+		validateDockLayoutPanel.clear();
 		if (presenter.batchDTO.getFuzzySearchSwitchState().equals("ON")) {
-			validateDockLayoutPanel.addNorth(fuzzySearchTable, 20);
+			fuzzySearchTablefocusPanel.clear();
+			fuzzySearchTablefocusPanel.add(fuzzySearchTable);
+			validateDockLayoutPanel.addNorth(fuzzySearchTablefocusPanel, 20);
 		} else {
+			fuzzySearchTablefocusPanel.clear();
 			fuzzySearchTable.clear();
 			validateDockLayoutPanel.addNorth(showTableViewBtn, 10);
 		}
+		scrollPanel.clear();
+		scrollPanel.add(scrollValidationTableFocusPanel);
 		validateDockLayoutPanel.add(scrollPanel);
 	}
 
@@ -789,7 +830,7 @@ public class ValidatePanel extends RVBasePanel {
 
 			@Override
 			public void onDocumentTypeChange(DocTypeChangeEvent event) {
-				refreshPanel(event.getDocumentType());
+				refreshPanel(event.getDocumentType(), true);
 			}
 		});
 
@@ -995,13 +1036,26 @@ public class ValidatePanel extends RVBasePanel {
 		ValidatableWidget<SuggestionBox> widget;
 		ListBox lWidget;
 		boolean isCurrent = false;
+		Label fieldLabel;
 
 		public DocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
 			this.field = field;
 			this.widget = widget;
 		}
+		
+		public DocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget) {
+			this.fieldLabel = fieldLabel;
+			this.field = field;
+			this.widget = widget;
+		}
 
 		public DocFieldWidget(Field field, ListBox lWidget) {
+			this.field = field;
+			this.lWidget = lWidget;
+		}
+		
+		public DocFieldWidget(Label fieldLabel, Field field, ListBox lWidget) {
+			this.fieldLabel = fieldLabel;
 			this.field = field;
 			this.lWidget = lWidget;
 		}
@@ -1019,6 +1073,10 @@ public class ValidatePanel extends RVBasePanel {
 		public void setCurrent(boolean isCurrent) {
 			this.isCurrent = isCurrent;
 		}
+		
+		public Label getFieldLabel() {
+			return fieldLabel;
+		}
 	}
 
 	private final LinkedList<DocFieldWidget> docFieldWidgets = new LinkedList<DocFieldWidget>();
@@ -1026,9 +1084,17 @@ public class ValidatePanel extends RVBasePanel {
 	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
 		docFieldWidgets.add(new DocFieldWidget(field, widget));
 	}
+	
+	private void addDocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget) {
+		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, widget));
+	}
 
 	private void addDocFieldWidget(Field field, ListBox lWidget) {
 		docFieldWidgets.add(new DocFieldWidget(field, lWidget));
+	}
+	
+	private void addDocFieldWidget(Label fieldLabel, Field field, ListBox lWidget) {
+		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, lWidget));
 	}
 
 	private DocFieldWidget getNextDocFieldWidget(boolean isError) {

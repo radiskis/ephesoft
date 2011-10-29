@@ -54,32 +54,39 @@ public class TabbedPDFExecutor {
 	private final String pdfMarkPath;
 	private final BatchInstanceThread thread;
 	private final String tabbedPDFName;
-	
+	private final String pdfCreationParam;
+
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TabbedPDFExecutor.class);
 
 	public TabbedPDFExecutor(String tabbedPDFName, String outputFolderPath, List<String> documentPDFPaths, String pdfMarkPath,
-			BatchInstanceThread thread) throws DCMAApplicationException {
+			BatchInstanceThread thread, String pdfCreationParam) throws DCMAApplicationException {
 		this.tabbedPDFName = tabbedPDFName;
 		this.outputFolderPath = outputFolderPath;
 		this.documentPDFPaths = documentPDFPaths;
 		this.pdfMarkPath = pdfMarkPath;
 		this.thread = thread;
+		this.pdfCreationParam = pdfCreationParam;
 		run();
 	}
 
 	public void run() throws DCMAApplicationException {
 		try {
+			String pdfCreationParams[] = pdfCreationParam.split(" ");
 			ArrayList<String> commandList = new ArrayList<String>();
 			commandList.add("cmd");
 			commandList.add("/c");
 			commandList.add("gswin32c");
-			commandList.add("-q");
-			commandList.add("-dBATCH");
-			commandList.add("-dNOPAUSE");
-			commandList.add("-sDEVICE=pdfwrite");
+			for (String param : pdfCreationParams) {
+				commandList.add(param);
+			}
+			// //commandList.add(pdfCreationParam);
+			// commandList.add("-q");
+			// commandList.add("-dBATCH");
+			// commandList.add("-dNOPAUSE");
+			// commandList.add("-sDEVICE=pdfwrite");
 			commandList.add("\"-sOutputFile=" + outputFolderPath + File.separator + tabbedPDFName + "\"");
 
 			for (String documentPDFPath : documentPDFPaths) {
@@ -109,7 +116,7 @@ public class TabbedPDFExecutor {
 			LOGGER.info("command formed Ends.");
 
 			thread.add(new ProcessExecutor(cmds, new File(System.getenv(TabbedPdfConstant.GHOSTSCRIPT_HOME))));
-			
+
 		} catch (Exception e) {
 			LOGGER.error("Exception while generating Tabbed PDF. " + e.getMessage());
 			throw new DCMAApplicationException("Exception while generating Tabbed PDF." + e.getMessage(), e);

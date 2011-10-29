@@ -31,8 +31,11 @@
 
 
 	<bean id="ibmCMExporter" class="com.ephesoft.dcma.ibm.IBMCMExporter"
-		p:cmodAppGroup="$ibm{ibm.cmod_app_group}" p:cmodApp="$ibm{ibm.cmod_app}"
-		p:userName="$ibm{ibm.user_name}" p:email="$ibm{ibm.email}" >
+		p:cmodAppGroup="$ibm{ibm.cmod_app_group}" 
+		p:cmodApp="$ibm{ibm.cmod_app}"
+		p:userName="$ibm{ibm.user_name}" 
+		p:email="$ibm{ibm.email}" 
+		p:supplyingSystem="$ibm{ibm.supplying_system}" >
 		<property name="xslResource">
 	<ref bean="ibmCMXSLResource" />
 		</property>

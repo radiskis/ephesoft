@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.ephesoft.dcma.batch.schema.Batch;
@@ -49,7 +50,9 @@ import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
+import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.RegexValidation;
 import com.ephesoft.dcma.da.service.FieldTypeService;
 import com.ephesoft.dcma.regexvalidation.constant.RegexValidationConstants;
@@ -83,6 +86,13 @@ public class RegexAutomatedValidation {
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
+
+	/**
+	 * Instance of PluginPropertiesService.
+	 */
+	@Autowired
+	@Qualifier("batchInstancePluginPropertiesService")
+	private PluginPropertiesService pluginPropertiesService;
 
 	/**
 	 * The <code>validateDLFields</code> method is used to validate the document level fields of document for whole batch. It will
@@ -122,6 +132,10 @@ public class RegexAutomatedValidation {
 			} else {
 				validateDLFields(docTypeList, batchInstanceIdentifier);
 
+				// START.. add field option list if any....
+				setFieldValueOptionList(docTypeList, batchInstanceIdentifier);
+				// END...
+
 				// now write the state of the object to the xml file.
 				batchSchemaService.updateBatch(batch);
 				LOGGER.info("Updated the batch xml file with valid/invalid document state.");
@@ -138,6 +152,56 @@ public class RegexAutomatedValidation {
 		}
 
 		return isSuccessful;
+	}
+
+	/**
+	 * This method is responsible for setting the field option list for document level fields.
+	 * 
+	 * @param docTypeList List<Document>
+	 * @param batchInstanceIdentifier {@link String}
+	 */
+	private void setFieldValueOptionList(final List<Document> docTypeList, final String batchInstanceIdentifier) {
+		for (Document document : docTypeList) {
+			if (null != document) {
+				DocumentLevelFields documentLevelFields = document.getDocumentLevelFields();
+				if (documentLevelFields != null) {
+					List<DocField> docFieldList = documentLevelFields.getDocumentLevelField();
+					List<FieldType> fieldTypeList = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier, document.getType());
+					if (fieldTypeList != null) {
+
+						// if (docFieldList.isEmpty()) {
+						// for (FieldType fieldType : fieldTypeList) {
+						// if (null != fieldType) {
+						// DocField docField = new DocField();
+						// docField.setName(fieldType.getName());
+						// docField.setFieldOrderNumber(fieldType.getFieldOrderNumber());
+						// docField.setFieldValueOptionList(fieldType.getFieldOptionValueList());
+						// docField.setConfidence(0f);
+						// docField.setType(fieldType.getDataType().name());
+						// docField.setValue("");
+						// docFieldList.add(docField);
+						// }
+						// }
+						// }
+
+						for (DocField docField : docFieldList) {
+							for (FieldType fieldType : fieldTypeList) {
+								if (docField != null && fieldType != null) {
+									String docFieldName = docField.getName();
+									String fieldTypeName = fieldType.getName();
+									if (null != docFieldName && docFieldName.equals(fieldTypeName)) {
+										String fieldOptionValueList = fieldType.getFieldOptionValueList();
+										if (fieldOptionValueList != null) {
+											docField.setFieldValueOptionList(fieldOptionValueList);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

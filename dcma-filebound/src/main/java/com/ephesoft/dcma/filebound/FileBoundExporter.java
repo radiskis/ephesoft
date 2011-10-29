@@ -63,6 +63,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.DocumentType;
@@ -217,6 +218,10 @@ public class FileBoundExporter implements ICommonConstants {
 					FileBoundProperties.FILEBOUND_PASSWORD);
 			final String projectName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FILEBOUND_EXPORT_PLUGIN,
 					FileBoundProperties.FILEBOUND_PROJECT_NAME);
+			final String exportFormat = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FILEBOUND_EXPORT_PLUGIN,
+					FileBoundProperties.FILEBOUND_EXPORT_FORMAT);
+
+			LOGGER.info("Filebound properties initialised successfully...");
 			boolean divisionPresent = false;
 			boolean seperatorPresent = false;
 			checkInformation(connectionURL, userName, password, projectName, indexField, division, seperator);
@@ -257,6 +262,7 @@ public class FileBoundExporter implements ICommonConstants {
 					}
 					if (dlfName.equalsIgnoreCase(indexField)) {
 						indexFieldVal = dlfValue;
+						continue;
 					}
 					count++;
 					if (!skipDlfNames.contains(docField.getName())) {
@@ -279,14 +285,16 @@ public class FileBoundExporter implements ICommonConstants {
 			if (indexFieldName.isEmpty()) {
 				indexFieldName = indexField;
 			}
+			docFieldValues.insert(0, indexFieldName + "="+ indexFieldVal+";;");
+			
 			String divider = "";
-			if (divisionPresent) {
-				divider = fetchDividerValues(xmlDocuments, division);
-			}
+
+			divider = fetchDividerValues(xmlDocuments, division, divisionPresent);
+
 			String seperatorVal = "";
-			if (seperatorPresent) {
-				seperatorVal = fetchSeperatorValues(xmlDocuments, seperator);
-			}
+
+			seperatorVal = fetchSeperatorValues(xmlDocuments, seperator, seperatorPresent);
+
 			// Over-riding the divider value from the value configured in filebound-mapping.properties
 			final String docName = document.getType();
 			final String dividerMapping = fetchDocNameMapping(docName, batch.getBatchClassIdentifier());
@@ -303,7 +311,7 @@ public class FileBoundExporter implements ICommonConstants {
 			// ----------------------end-----------------------\\
 
 			final String exportFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
-			final String docNamePathValues = getDocNamePathValues(xmlDocuments, exportFolder, batchInstanceIdentifier);
+			final String docNamePathValues = getDocNamePathValues(xmlDocuments, exportFolder, batchInstanceIdentifier, exportFormat);
 			final File fileboundParameterFile = new File(exportFolder + File.separator + PARAMETERS_FILE_NAME);
 			writeParametersToFile(batch, fileboundParameterFile, divider, docNamePathValues, seperatorVal, batchInstanceIdentifier);
 			executeCommand(cmdList, connectionURL, userName, password, docFieldValues.toString(), indexFieldVal, projectName,
@@ -342,7 +350,7 @@ public class FileBoundExporter implements ICommonConstants {
 			boolean dividerPresent, final String seperatorVal, boolean seperatorPresent) throws DCMAApplicationException {
 		if (loanNumber == null || loanNumber.length() <= 0) {
 			LOGGER.error("Cannot upload to File bound repository as Index field is null or empty");
-			throw new DCMAApplicationException("Loan number is null, so cannot upload documents for batch instance :"
+			throw new DCMAApplicationException("Index Field is null, so cannot upload documents for batch instance :"
 					+ batchInstanceIdentifier);
 		}
 
@@ -386,11 +394,11 @@ public class FileBoundExporter implements ICommonConstants {
 			throw new DCMAApplicationException("Index field must not be null");
 		}
 
-		if (division == null ) {
+		if (division == null) {
 			LOGGER.error("Division must not be null");
 			throw new DCMAApplicationException("Division must not be null");
 		}
-		if (seperator == null ) {
+		if (seperator == null) {
 			LOGGER.error("Seperator must not be null");
 			throw new DCMAApplicationException("Seperator must not be null");
 		}
@@ -426,24 +434,32 @@ public class FileBoundExporter implements ICommonConstants {
 	 * This method fetches the seperator values for all the document types seperated by ";;".
 	 * 
 	 * @param xmlDocuments
+	 * @param seperatorPresent
 	 * @return
 	 */
-	private String fetchSeperatorValues(final List<Document> xmlDocuments, String seperator) {
+	private String fetchSeperatorValues(final List<Document> xmlDocuments, String seperator, boolean seperatorPresent) {
 		final StringBuffer returnValue = new StringBuffer();
 		if (xmlDocuments != null) {
 			int count = 0;
 			for (Document document : xmlDocuments) {
 				count++;
-				final List<DocField> docLevelFields = document.getDocumentLevelFields().getDocumentLevelField();
-				if (docLevelFields != null && !docLevelFields.isEmpty()) {
-					for (DocField docField : docLevelFields) {
-						final String dlfName = docField.getName();
-						if (dlfName != null && dlfName.equalsIgnoreCase(seperator)) {
-							returnValue.append(docField.getValue());
-							if (count < xmlDocuments.size()) {
-								returnValue.append(";;");
+				if (seperatorPresent) {
+					final List<DocField> docLevelFields = document.getDocumentLevelFields().getDocumentLevelField();
+					if (docLevelFields != null && !docLevelFields.isEmpty()) {
+						for (DocField docField : docLevelFields) {
+							final String dlfName = docField.getName();
+							if (dlfName != null && dlfName.equalsIgnoreCase(seperator)) {
+								returnValue.append(docField.getValue());
+								if (count < xmlDocuments.size()) {
+									returnValue.append(";;");
+								}
 							}
 						}
+					}
+				} else {
+					returnValue.append(" ");
+					if (count < xmlDocuments.size()) {
+						returnValue.append(";;");
 					}
 				}
 			}
@@ -455,24 +471,32 @@ public class FileBoundExporter implements ICommonConstants {
 	 * This method fetches the divider values for all the document types seperated by ";;".
 	 * 
 	 * @param xmlDocuments
+	 * @param divisionPresent
 	 * @return
 	 */
-	private String fetchDividerValues(final List<Document> xmlDocuments, String division) {
+	private String fetchDividerValues(final List<Document> xmlDocuments, String division, boolean divisionPresent) {
 		final StringBuffer returnValue = new StringBuffer();
 		if (xmlDocuments != null) {
 			int count = 0;
 			for (Document document : xmlDocuments) {
 				count++;
-				final List<DocField> docLevelFields = document.getDocumentLevelFields().getDocumentLevelField();
-				if (docLevelFields != null && !docLevelFields.isEmpty()) {
-					for (DocField docField : docLevelFields) {
-						final String dlfName = docField.getName();
-						if (dlfName != null && dlfName.equalsIgnoreCase(division)) {
-							returnValue.append(docField.getValue());
-							if (count < xmlDocuments.size()) {
-								returnValue.append(";;");
+				if (divisionPresent) {
+					final List<DocField> docLevelFields = document.getDocumentLevelFields().getDocumentLevelField();
+					if (docLevelFields != null && !docLevelFields.isEmpty()) {
+						for (DocField docField : docLevelFields) {
+							final String dlfName = docField.getName();
+							if (dlfName != null && dlfName.equalsIgnoreCase(division)) {
+								returnValue.append(docField.getValue());
+								if (count < xmlDocuments.size()) {
+									returnValue.append(";;");
+								}
 							}
 						}
+					}
+				} else {
+					returnValue.append(" ");
+					if (count < xmlDocuments.size()) {
+						returnValue.append(";;");
 					}
 				}
 			}
@@ -487,11 +511,14 @@ public class FileBoundExporter implements ICommonConstants {
 	 * @param xmlDocuments
 	 * @param exportFolder
 	 * @return
+	 * @throws DCMAApplicationException
 	 */
-	private String getDocNamePathValues(final List<Document> xmlDocuments, final String exportFolder, final String batchInstanceID) {
+	private String getDocNamePathValues(final List<Document> xmlDocuments, final String exportFolder, final String batchInstanceID,
+			final String exportFormat) throws DCMAApplicationException {
 		final StringBuffer returnValue = new StringBuffer();
 		if (xmlDocuments != null) {
 			int count = 0;
+
 			for (Document document : xmlDocuments) {
 				count++;
 				final String docName = document.getType();
@@ -512,7 +539,26 @@ public class FileBoundExporter implements ICommonConstants {
 				returnValue.append(";;");
 				returnValue.append(exportFolder);
 				returnValue.append(File.separator);
-				returnValue.append(document.getMultiPagePdfFile());
+				String exportFileName = "";
+				if (exportFormat.endsWith(FileType.PDF.getExtension())) {
+					if (document.getMultiPagePdfFile() != null) {
+						exportFileName = document.getMultiPagePdfFile();
+					} else {
+						LOGGER.error("Cannot upload to File bound repository as export format specified is 'pdf' and multipagepdffile attribute is not set.");
+						throw new DCMAApplicationException("multipagepdffile is null, so cannot upload documents for batch instance :"
+								+ batchInstanceID);
+					}
+				} else if (exportFormat.endsWith(FileType.TIF.getExtension())) {
+					if (document.getMultiPageTiffFile() != null) {
+						exportFileName = document.getMultiPageTiffFile();
+					} else {
+						LOGGER.error("Cannot upload to File bound repository as export format specified is 'tif' and multipagetiffile attribute is not set.");
+						throw new DCMAApplicationException("multipagetiffile is null, so cannot upload documents for batch instance :"
+								+ batchInstanceID);
+					}
+				}
+
+				returnValue.append(exportFileName);
 				if (count < xmlDocuments.size()) {
 					returnValue.append(";;;;");
 				}

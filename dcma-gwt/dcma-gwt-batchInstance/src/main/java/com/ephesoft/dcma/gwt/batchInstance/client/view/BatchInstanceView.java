@@ -298,7 +298,14 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_NON_DELETABLE));
 					} else {
-						showConfirmationDialog(true, batchInstanceListView.listView.getSelectedRowIndex());
+						BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(batchInstanceListView.listView
+								.getSelectedRowIndex());
+						if (batchInstanceDTO.getCurrentUser() != null && !batchInstanceDTO.getCurrentUser().isEmpty()) {
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									BatchInstanceMessages.MSG_LOCKED_BATCH));
+						} else {
+							showConfirmationDialog(true, batchInstanceListView.listView.getSelectedRowIndex());
+						}
 					}
 				}
 
@@ -314,21 +321,28 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_NON_RESTARTABLE));
 					} else {
-						String identifier = batchInstanceListView.listView.getSelectedRowIndex();
-						int selectedOptionIndex = restartOptions.getSelectedIndex();
-						if (restartOptions.getItemText(selectedOptionIndex).equalsIgnoreCase(
-								LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SELECT))) {
-							BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifier);
-							if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
-								String remoteModuleName = batchInstanceDTO.getRemoteBatchInstanceDTO().getSourceModule();
-								showRestartConfirmationDialog(identifier, remoteModuleName, remoteModuleName.replace(UNDER_SCORE,
-										SPACE));
-							} else {
-								showRestartConfirmationDialog(identifier, null, null);
-							}
+						BatchInstanceDTO batchInstanceDTO1 = batchInstanceDTOMap.get(batchInstanceListView.listView
+								.getSelectedRowIndex());
+						if (batchInstanceDTO1.getCurrentUser() != null && !batchInstanceDTO1.getCurrentUser().isEmpty()) {
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									BatchInstanceMessages.MSG_LOCKED_BATCH));
 						} else {
-							showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()),
-									restartOptions.getItemText(selectedOptionIndex));
+							String identifier = batchInstanceListView.listView.getSelectedRowIndex();
+							int selectedOptionIndex = restartOptions.getSelectedIndex();
+							if (restartOptions.getItemText(selectedOptionIndex).equalsIgnoreCase(
+									LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SELECT))) {
+								BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifier);
+								if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
+									String remoteModuleName = batchInstanceDTO.getRemoteBatchInstanceDTO().getSourceModule();
+									showRestartConfirmationDialog(identifier, remoteModuleName, remoteModuleName.replace(UNDER_SCORE,
+											SPACE));
+								} else {
+									showRestartConfirmationDialog(identifier, null, null);
+								}
+							} else {
+								showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()),
+										restartOptions.getItemText(selectedOptionIndex));
+							}
 						}
 					}
 				}

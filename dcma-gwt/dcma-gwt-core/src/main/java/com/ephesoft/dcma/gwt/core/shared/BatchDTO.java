@@ -53,6 +53,7 @@ public class BatchDTO implements IsSerializable {
 	private String isValidationScriptEnabled = "OFF";
 	private String fieldValueChangeScriptSwitchState = "OFF";
 	private String fuzzySearchSwitchState = "ON";
+	private String suggestionBoxSwitchState = "OFF";
 
 	public BatchDTO() {
 	}
@@ -63,12 +64,21 @@ public class BatchDTO implements IsSerializable {
 	}
 
 	public BatchDTO(Batch batch, String baseHTTPUrl, String isValidationScriptEnabled, String isFieldValueChangeScriptEnabled,
-			String isFuzzySearchEnabled) {
+			String isFuzzySearchEnabled, String suggestionBoxSwitchState) {
 		this.batch = batch;
 		this.baseHTTPUrl = baseHTTPUrl;
-		setIsValidationScriptEnabled(isValidationScriptEnabled);
-		setFuzzySearchSwitchState(isFuzzySearchEnabled);
-		setFieldValueChangeScriptSwitchState(isFieldValueChangeScriptEnabled);
+		if (null != isValidationScriptEnabled) {
+			setIsValidationScriptEnabled(isValidationScriptEnabled);
+		}
+		if (null != fuzzySearchSwitchState) {
+			setFuzzySearchSwitchState(isFuzzySearchEnabled);
+		}
+		if (null != fieldValueChangeScriptSwitchState) {
+			setFieldValueChangeScriptSwitchState(isFieldValueChangeScriptEnabled);
+		}
+		if (null != suggestionBoxSwitchState) {
+			setSuggestionBoxSwitchState(suggestionBoxSwitchState);
+		}
 	}
 
 	public Batch getBatch() {
@@ -223,6 +233,14 @@ public class BatchDTO implements IsSerializable {
 
 	public String getFieldValueChangeScriptSwitchState() {
 		return fieldValueChangeScriptSwitchState;
+	}
+
+	public String getSuggestionBoxSwitchState() {
+		return this.suggestionBoxSwitchState;
+	}
+
+	public void setSuggestionBoxSwitchState(String suggestionBoxSwitchState) {
+		this.suggestionBoxSwitchState = suggestionBoxSwitchState;
 	}
 
 }

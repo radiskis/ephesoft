@@ -98,12 +98,12 @@ public enum CSVFileCreationConstant {
 	/**
 	 * CSV header for BookmarkCreated.
 	 */
-	BOOKMARK_CREATED("BookmarkCreated"),
+	CREATE_TAB("Create Tab"),
 
 	/**
 	 * CSV header for PgCount.
 	 */
-	PG_COUNT("PgCount"),
+	NUMBER_OF_IMAGES("Num_Images"),
 
 	/**
 	 * CSV header for Suffix.
@@ -113,7 +113,7 @@ public enum CSVFileCreationConstant {
 	/**
 	 * CSV header for BookmarkValue.
 	 */
-	BOOKMARK_VALUE("BookmarkValue"),
+	TAB_NAME("TABNAME"),
 
 	/**
 	 * CSV header for Prefix.
@@ -148,7 +148,7 @@ public enum CSVFileCreationConstant {
 	/**
 	 * CSV header for CurrentDate.
 	 */
-	CURRENT_DATE("CurrentDate"),
+	PROCESS_DATE("Process_Date"),
 
 	/**
 	 * CSV header for BatchCreationDateTime.
@@ -193,8 +193,13 @@ public enum CSVFileCreationConstant {
 	/**
 	 * Value for BatchClassName.
 	 */
-	BATCH_CLASS_NAME("BatchClassName");
+	BATCH_CLASS_NAME("BatchClassName"),
 	
+	FILE_PROCESS_NAME("File_Process_Name"),
+	
+	SUBPOENA("Subpoena"),
+	
+	LOAN_NUMBER("LoanNumber");
 
 	/**
 	 * Used for returning as a string data.

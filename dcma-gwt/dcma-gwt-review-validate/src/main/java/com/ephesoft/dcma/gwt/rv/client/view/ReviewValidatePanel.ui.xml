@@ -3,13 +3,40 @@
 	xmlns:sliding-panel='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
 
 	<g:DockLayoutPanel unit="PCT">
-		<g:north size="13">
+		<g:north size="10">
 			<g:DockLayoutPanel unit="PCT">
-				<g:north size="30">
-					<g:HorizontalPanel>
-						<g:Label ui:field="functionKeyLabel" />
-					</g:HorizontalPanel>
+				<g:north size="45">
+					<g:DockLayoutPanel unit="PCT">
+						<g:north size="20">
+							<g:HorizontalPanel>
+								<g:cell width="10%">
+									<g:Label />
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:west size="2">
+							<g:HorizontalPanel>
+								<g:cell>
+									<g:Label />
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:west>
+						<g:center>
+							<g:HorizontalPanel>
+								<g:cell width="90%">
+									<g:Label ui:field="functionKeyLabel" />
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:center>
+					</g:DockLayoutPanel>
 				</g:north>
+				<g:west size="2">
+					<g:HorizontalPanel>
+						<g:cell>
+							<g:Label />
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:west>
 				<g:center size="30">
 					<sliding-panel:SlidingPanel ui:field="slidingPanel">
 						<g:DockLayoutPanel unit="PCT">
@@ -24,22 +51,18 @@
 						</g:DockLayoutPanel>
 					</sliding-panel:SlidingPanel>
 				</g:center>
-				<g:south size="2">
-					<g:Label />
-				</g:south>
-
 			</g:DockLayoutPanel>
 		</g:north>
 		<g:center>
 			<g:DockLayoutPanel unit="PCT">
-				<g:north size="24">
+				<g:north size="21.75">
 					<g:FocusPanel width='100%' height='100%'>
 						<g:VerticalPanel width='100%'>
 							<rv:ReviewPanel ui:field="reviewPanel" />
 						</g:VerticalPanel>
 					</g:FocusPanel>
 				</g:north>
-				<g:south size="58">
+				<g:south size="61">
 					<g:LayoutPanel ui:field="layoutPanel">
 						<g:layer>
 							<rv:ValidatePanel ui:field="validatePanel" />

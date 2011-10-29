@@ -68,7 +68,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.ephesoft.dcma.batch.schema.Batch;
+import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.EphesoftContext;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
@@ -185,6 +187,30 @@ public class IBMCMExporter implements ICommonConstants {
 	 * Variable for email.
 	 */
 	private String email;
+
+	/**
+	 * Varibale for supplyingSystem.
+	 */
+	private String supplyingSystem;
+
+	/**
+	 * Getter for supplyingSystem.
+	 * 
+	 * @return {@link String}
+	 */
+
+	public final String getSupplyingSystem() {
+		return supplyingSystem;
+	}
+
+	/**
+	 * Setter for supplyingSystem.
+	 * 
+	 * @param supplyingSystem
+	 */
+	public final void setSupplyingSystem(final String supplyingSystem) {
+		this.supplyingSystem = supplyingSystem;
+	}
 
 	/**
 	 * @param cmodAppGroup the cmodAppGroup to set
@@ -348,13 +374,46 @@ public class IBMCMExporter implements ICommonConstants {
 					TransformerFactory tFactory = TransformerFactory.newInstance();
 					Transformer transformer = tFactory.newTransformer(new StreamSource(xslStream));
 					if (transformer != null) {
+						String prefixSubpoenaValue = "";
+						List<Document> listDocuments = batch.getDocuments().getDocument();
+						outer: for (Document doc : listDocuments) {
+							DocumentLevelFields documentLevelFields = doc.getDocumentLevelFields();
+							if (null == documentLevelFields) {
+								LOGGER.info("DocumentLevelFields is null.");
+							} else {
+								List<DocField> documentLevelField = documentLevelFields.getDocumentLevelField();
+								for (DocField docField : documentLevelField) {
+									String name = docField.getName();
+									if (null != name && name.equalsIgnoreCase("DRCi_Instance")) {
+										prefixSubpoenaValue = docField.getValue();
+										break outer;
+									}
+								}
+							}
+						}
+
+						String cmodAppGroupLocal = "";
+						String cmodAppLocal = "";
+
+						if (prefixSubpoenaValue.equalsIgnoreCase("FRE")) {
+							cmodAppLocal = "FreddieMac_Loans_PDF";
+							cmodAppGroupLocal = "FreddieMac_Loans";
+						} else if (prefixSubpoenaValue.equalsIgnoreCase("FNM")) {
+							cmodAppLocal = "FannieMae_Loans_PDF";
+							cmodAppGroupLocal = "FannieMae_Loans";
+						} else {
+							cmodAppGroupLocal = this.cmodAppGroup;
+							cmodAppLocal = this.cmodApp;
+						}
+
 						// Parsing parameter to XML
-						parsingParamterToXML(batchInstanceID, transformer);
+						parsingParamterToXML(batchInstanceID, transformer, cmodAppGroupLocal, cmodAppLocal);
 						// Setting parameter for total document size for updating its value in XML
 						transformer.setParameter(IBMCMConstant.TOTAL_DOCUMENT_SIZE.getId(), totalDocSize);
 						String datFile = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId());
 						// Setting parameter for DAT file name for updating its value in XML.
 						transformer.setParameter(IBMCMConstant.DAT_FILE_NAME.getId(), new File(datFile).getName());
+						transformer.setParameter(IBMCMConstant.SUPLLYING_SYSTEM.getId(), this.getSupplyingSystem());
 						transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
 								targetXmlPath)));
 						updateDocumentOffsetValue(batchInstanceID, targetXmlPath);
@@ -388,7 +447,8 @@ public class IBMCMExporter implements ICommonConstants {
 	 * @param batchInstanceID {@link String}
 	 * @param transformer {@link Transformer}
 	 */
-	private void parsingParamterToXML(final String batchInstanceID, final Transformer transformer) {
+	private void parsingParamterToXML(final String batchInstanceID, final Transformer transformer, final String cmodAppGroupLocal,
+			final String cmodAppLocal) {
 		LOGGER.info("Parsing infomation to transformer");
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID);
 		if (batchInstance != null && batchInstance.getCreationDate() != null) {
@@ -405,9 +465,11 @@ public class IBMCMExporter implements ICommonConstants {
 			LOGGER.info("Time parsing to transfomer is :" + batchCreationTime);
 			transformer.setParameter(IBMCMConstant.BATCH_CREATION_TIME.getId(), batchCreationTime);
 			// Setting parameter cmod app group for updating its value in XML.
-			transformer.setParameter(IBMCMConstant.CMOD_APP_GROUP.getId(), this.cmodAppGroup);
+			transformer.setParameter(IBMCMConstant.CMOD_APP_GROUP.getId(), cmodAppGroupLocal);
+
 			// Setting parameter cmod app for updating its value in XML.
-			transformer.setParameter(IBMCMConstant.CMOD_APP.getId(), this.cmodApp);
+			transformer.setParameter(IBMCMConstant.CMOD_APP.getId(), cmodAppLocal);
+
 			// Setting parameter user name for updating its value in XML.
 			transformer.setParameter(IBMCMConstant.USER_NAME.getId(), this.userName);
 			// Setting parameter email for updating its value in XML.
@@ -484,7 +546,7 @@ public class IBMCMExporter implements ICommonConstants {
 	 * @param batchInstanceID {@link String}
 	 * @return totalDocSize
 	 */
-	private List<String> getDocumentFileList(final String batchInstanceID) {
+	private List<String> getDocumentFileList(final String batchInstanceID) throws DCMAApplicationException {
 		LOGGER.info("Retrieving file list of multipage document");
 		List<String> multiPageDocument = new ArrayList<String>();
 		Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -493,10 +555,14 @@ public class IBMCMExporter implements ICommonConstants {
 			multipagePdfPath.append(File.separator);
 			multipagePdfPath.append(batchInstanceID);
 			multipagePdfPath.append(File.separator);
-			
+
 			List<Document> documentList = batch.getDocuments().getDocument();
 			for (Document document : documentList) {
-				multiPageDocument.add(multipagePdfPath.toString() + File.separator + document.getMultiPagePdfFile());
+				String multiPagePdfFile = document.getMultiPagePdfFile();
+				if (multiPagePdfFile == null) {
+					throw new DCMAApplicationException("Multi Page PDF file name is null for " + document.getIdentifier());
+				}
+				multiPageDocument.add(multipagePdfPath.toString() + File.separator + multiPagePdfFile);
 			}
 		}
 		return multiPageDocument;
@@ -653,4 +719,5 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 		return offset;
 	}
+
 }

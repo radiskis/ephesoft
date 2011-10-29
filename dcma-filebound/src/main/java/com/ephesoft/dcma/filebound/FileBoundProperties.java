@@ -54,7 +54,8 @@ public enum FileBoundProperties implements PluginProperty {
 	FILEBOUND_PASSWORD("filebound.password"),
 	FILEBOUND_INDEX_FIELD("filebound.index_field"),
 	FILEBOUND_DIVISION("filebound.division"),
-	FILEBOUND_SEPERATOR("filebound.separator");
+	FILEBOUND_SEPERATOR("filebound.separator"),
+	FILEBOUND_EXPORT_FORMAT("filebound.exportformat");
 	
 	String key;
 	

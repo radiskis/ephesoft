@@ -159,10 +159,12 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_COLOURED_PDF);
 		String checkSearchablePDF = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_SEARCHABLE_PDF);
+		String ghosyscriptPdfParameters = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
+				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GHOSTSCRIPT_COMMAND_PDF_PARAMETERS);
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
 			multipageTiffPdfCreator.createMultiPageFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF, pluginWorkflow);
+					multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF,ghosyscriptPdfParameters, pluginWorkflow);
 
 		} catch (Exception ex) {
 			LOGGER.error("Problem generating overlayed Images exception->" + ex.getMessage());

@@ -33,47 +33,13 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.mail.service;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
@@ -92,16 +58,11 @@ import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 import com.ephesoft.dcma.da.service.BatchClassEmailConfigService;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
+import com.ephesoft.dcma.mail.constants.MailConstants;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileUtils;
 
 public class EmailImporterServiceImpl implements EmailImporterService {
-
-	private static final String ZZZZZ_ATTACHMENT_PDF = "zzzzz-attachment.pdf";
-	private static final String TEMP_FILE_NAME = "!!!!mail";
-	private static final String DOT_SEPARATOR = ".";
-
-	private static final String EXTENSION_SEPARATOR_CONSTANT = ";";
 
 	@Autowired
 	private BatchClassEmailConfigService batConfigService;
@@ -166,7 +127,7 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 				FilenameFilter filter = new FilenameFilter() {
 
 					public boolean accept(File dir, String name) {
-						return !name.equals(TEMP_FILE_NAME + DOT_SEPARATOR + FileType.PDF.getExtension());
+						return !name.equals(MailConstants.TEMP_FILE_NAME + MailConstants.DOT_SEPARATOR + FileType.PDF.getExtension());
 					}
 				};
 				String wantedAttachments[] = file.list(filter);
@@ -187,19 +148,22 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		boolean isFileValid = true;
 		if (fileName != null && !fileName.isEmpty()) {
 			isFileValid = fileValidityCheck(fileName);
-			if (!isFileValid || (!fileName.toLowerCase().contains(FileType.TIF.getExtension()))
-					|| !(fileName.toLowerCase().contains(FileType.PDF.getExtension()))) {
-				File errorPDFFile = new File(defaultFolderLocation + File.separator + "error.pdf");
+			if (!isFileValid
+					&& (!fileName.toLowerCase(Locale.getDefault()).contains(FileType.TIF.getExtension()))
+					&& !(fileName.toLowerCase(Locale.getDefault()).contains(FileType.PDF.getExtension()))
+					&& !(fileName.toLowerCase(Locale.getDefault()).equalsIgnoreCase(MailConstants.TEMP_FILE_NAME
+							+ FileType.TXT.getExtensionWithDot()))) {
+				File errorPDFFile = new File(defaultFolderLocation + File.separator + MailConstants.ERROR_FILE);
 				try {
-					FileUtils.copyFile(errorPDFFile, new File(outputFilePath + File.separator + ZZZZZ_ATTACHMENT_PDF));
+					FileUtils.copyFile(errorPDFFile, new File(outputFilePath + File.separator + MailConstants.ZZZZZ_ATTACHMENT_PDF));
 				} catch (Exception e) {
 					logger.error("Unable to copy file.", e);
 				}
 			}
 		}
 		File file = new File(outputFilePath + File.separator + fileName);
-		if (!(fileName.toLowerCase().contains(FileType.TIFF.getExtension())
-				|| fileName.toLowerCase().contains(FileType.TIF.getExtension()) || fileName.toLowerCase().contains(
+		if (!(fileName.toLowerCase(Locale.getDefault()).contains(FileType.TIFF.getExtension())
+				|| fileName.toLowerCase(Locale.getDefault()).contains(FileType.TIF.getExtension()) || fileName.toLowerCase().contains(
 				FileType.PDF.getExtension()))) {
 			outputFilePath = file.getPath();
 			if (isFileValid) {
@@ -207,8 +171,8 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 				String inputFileURL = batchSchemaService.getHttpEmailFolderPath() + "/" + file.getParentFile().getName() + "/"
 						+ file.getName();
 				openOfficeConvertor.convert(inputFileURL, outputFilePath, FileType.PDF);
-
-				file.delete();
+				// Uncomment following line to delete the file after converting to 'pdf'.
+				// file.delete();
 			}
 		}
 	}
@@ -244,8 +208,8 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 	}
 
 	private boolean fileValidityCheck(String fileName) {
-		StringTokenizer tokenizer = new StringTokenizer(supportedAttachmentExtensions, EXTENSION_SEPARATOR_CONSTANT);
-		String attachmentExtension = fileName.substring(fileName.lastIndexOf(DOT_SEPARATOR) + 1);
+		StringTokenizer tokenizer = new StringTokenizer(supportedAttachmentExtensions, MailConstants.EXTENSION_SEPARATOR_CONSTANT);
+		String attachmentExtension = fileName.substring(fileName.lastIndexOf(MailConstants.DOT_SEPARATOR) + 1);
 		boolean isFileValid = false;
 		while (tokenizer.hasMoreTokens()) {
 			String inValidExtension = tokenizer.nextToken();
