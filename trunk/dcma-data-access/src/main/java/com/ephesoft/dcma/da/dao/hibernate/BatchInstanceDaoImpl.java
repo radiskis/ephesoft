@@ -80,6 +80,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	private static final String PRIORITY = "priority";
 	private static final String STATUS = "status";
 	private static final String BATCH_CLASS = "batchClass";
+	private static final String EXECUTING_SERVER = "executingServer";
 
 	/**
 	 * An api to fetch all batch instance by batch class.
@@ -199,7 +200,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		if (null != statusList) {
 			criteria.add(Restrictions.in(STATUS, statusList));
-			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+			//criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
 		}
 
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
@@ -691,5 +692,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		}
 
 		return batchInstances;
+	}
+
+	@Override
+	public List<BatchInstance> getExecutingJobByServerIP(String serverIP) {
+		EphesoftCriteria criteria = criteria();
+		if (null != serverIP) {
+			criteria.add(Restrictions.eq(EXECUTING_SERVER, serverIP));
+			criteria.add(Restrictions.eq(STATUS, BatchInstanceStatus.RUNNING));
+		}
+		return find(criteria);
 	}
 }

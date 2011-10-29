@@ -39,11 +39,9 @@ import com.ephesoft.dcma.core.common.PluginProperty;
 
 public enum TabbedPdfProperties implements PluginProperty {
 
-	TABBED_PDF_EXPORT_FOLDER("tabbedPdf.final_export_folder"),
-	TABBED_PDF_SWITCH("tabbedPdf.switch"),
-	TABBED_PDF_PLACEHOLDER("tabbedPdf.placeholder"),
-	TABBED_PDF_PROPERTY_FILE("tabbedPdf.property_file");
-
+	TABBED_PDF_EXPORT_FOLDER("tabbedPdf.final_export_folder"), TABBED_PDF_SWITCH("tabbedPdf.switch"), TABBED_PDF_PLACEHOLDER(
+			"tabbedPdf.placeholder"), TABBED_PDF_PROPERTY_FILE("tabbedPdf.property_file"), TABBED_PDF_CREATION_PARAMETERS(
+			"tabbedPdf.creation_parameters"), TABBED_PDF_OPTIMIZATION_PARAMETERS("tabbedPdf.optimization_parameters");
 
 	String key;
 

@@ -59,6 +59,7 @@ import com.ephesoft.dcma.batch.service.BatchClassPluginPropertiesService;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
@@ -116,6 +117,14 @@ import com.ephesoft.dcma.util.FileUtils;
 
 public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet implements BatchClassManagementService {
 
+	private static final String PLUGIN_CONFIGURATION = "PluginConfiguration";
+	private static final String EMAIL_ACCOUNTS = "EmailAccounts";
+	private static final String FUZZY_DB_INDEX = "Fuzzy-DBIndex";
+	private static final String CMIS_MAPPING = "CmisMapping";
+	private static final String IMAGE_SAMPLE = "ImageSample";
+	private static final String LUCENE_SAMPLE = "LuceneSample";
+	private static final String RECOSTAR_EXTRACTION = "RecostarExtraction";
+	private static final String LEARN_INDEX = "LearnIndex";
 	public static final String BATCH_CLASS_DEF = "BatchClassDefinition";
 	public static final String ROLES = "Roles";
 
@@ -677,7 +686,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 
 		String tempOutputUnZipDir = userOptions.getZipFileName();
 		File originalFolder = new File(tempOutputUnZipDir);
-		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, ".ser");
+		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, FileType.SER.getExtensionWithDot());
 
 		InputStream serializableFileStream = null;
 		boolean isSuccess = true;
@@ -693,11 +702,12 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 
 			if (userOptions.isImportExisting()) {
 				isSuccess = overrideExistingBatchClass(userOptions, batchClassService, batchSchemaService, moduleService,
-						pluginService, pluginConfigService, moduleConfigService, batchInstanceService, tempOutputUnZipDir, originalFolder, isSuccess,
-						importBatchClass);
+						pluginService, pluginConfigService, moduleConfigService, batchInstanceService, tempOutputUnZipDir,
+						originalFolder, isSuccess, importBatchClass);
 			} else {
 				isSuccess = importNewBatchClass(userOptions, batchClassService, batchSchemaService, moduleService, pluginService,
-						pluginConfigService, moduleConfigService, tempOutputUnZipDir, originalFolder, serializableFileStream, importBatchClass, isSuccess);
+						pluginConfigService, moduleConfigService, tempOutputUnZipDir, originalFolder, serializableFileStream,
+						importBatchClass, isSuccess);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error while importing" + e, e);
@@ -708,8 +718,9 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 
 	private boolean importNewBatchClass(ImportBatchClassUserOptionDTO userOptions, BatchClassService batchClassService,
 			BatchSchemaService batchSchemaService, ModuleService moduleService, PluginService pluginService,
-			PluginConfigService pluginConfigService, ModuleConfigService moduleConfigService,String tempOutputUnZipDir, File originalFolder,
-			InputStream serializableFileStream, BatchClass importBatchClass, boolean isSuccess) throws IOException {
+			PluginConfigService pluginConfigService, ModuleConfigService moduleConfigService, String tempOutputUnZipDir,
+			File originalFolder, InputStream serializableFileStream, BatchClass importBatchClass, boolean isSuccess)
+			throws IOException {
 		// create a new batch class from zip file
 		try {
 			importBatchClass.setId(0L);
@@ -725,7 +736,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 						}
 					} else {
 						if (node != null && node.getLabel() != null) {
-							if (node.getLabel().getKey().equalsIgnoreCase("ImageSample")) {
+							if (node.getLabel().getKey().equalsIgnoreCase(IMAGE_SAMPLE)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// do not import the image samples
 									String imagemagickBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -733,7 +744,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 									FileUtils.deleteDirectoryAndContentsRecursive(new File(imagemagickBaseFolder));
 								}
 							}
-							if (node.getLabel().getKey().equalsIgnoreCase("LuceneSample")) {
+							if (node.getLabel().getKey().equalsIgnoreCase(LUCENE_SAMPLE)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// do not import the lucene samples
 									String searchSampleFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -754,7 +765,10 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 			new File(userOptions.getUncFolder()).mkdirs();
 			importBatchClass.setUncFolder(userOptions.getUncFolder());
 			try {
-				BatchClassUtil.updateSerializableBatchClass(moduleConfigService, moduleService, pluginService, pluginConfigService, importBatchClass);
+				BatchClass dbBatchClass = batchClassService.getLoadedBatchClassByNameIncludingDeleted(userOptions.getName());
+				batchClassService.evict(dbBatchClass);
+				BatchClassUtil.updateSerializableBatchClass(dbBatchClass, moduleConfigService, moduleService, pluginService,
+						pluginConfigService, batchClassService, batchSchemaService, importBatchClass);
 				batchClassService.evict(importBatchClass);
 				importBatchClass = batchClassService.createBatchClass(importBatchClass);
 			} catch (Exception exception) {
@@ -786,8 +800,9 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 
 	private boolean overrideExistingBatchClass(ImportBatchClassUserOptionDTO userOptions, BatchClassService batchClassService,
 			BatchSchemaService batchSchemaService, ModuleService moduleService, PluginService pluginService,
-			PluginConfigService pluginConfigService, ModuleConfigService moduleConfigService,  BatchInstanceService batchInstanceService, String tempOutputUnZipDir,
-			File originalFolder, boolean isSuccess, BatchClass importBatchClass) throws Exception {
+			PluginConfigService pluginConfigService, ModuleConfigService moduleConfigService,
+			BatchInstanceService batchInstanceService, String tempOutputUnZipDir, File originalFolder, boolean isSuccess,
+			BatchClass importBatchClass) throws Exception {
 		// overriding a batch class
 		BatchClass existingBatchClass = batchClassService.getLoadedBatchClassByUNC(userOptions.getUncFolder());
 		batchClassService.evict(existingBatchClass);
@@ -821,7 +836,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								continue;
 							}
 
-							if (nodeName.equalsIgnoreCase("PluginConfiguration")) {
+							if (nodeName.equalsIgnoreCase(PLUGIN_CONFIGURATION)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the plug-in configuration for the module from database
 									BatchClassModule existingBatchClassModule = batchSchemaService.getDetachedBatchClassModuleByName(
@@ -834,14 +849,14 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								continue;
 							}
 
-							if (nodeName.equalsIgnoreCase("EmailAccounts")) {
+							if (nodeName.equalsIgnoreCase(EMAIL_ACCOUNTS)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the email accounts for the module from database
 									BatchClassUtil.updateEmailConfigurations(importBatchClass, existingBatchClass, Boolean.TRUE);
 								}
 								continue;
 							}
-							if (nodeName.equalsIgnoreCase("Fuzzy-DBIndex")) {
+							if (nodeName.equalsIgnoreCase(FUZZY_DB_INDEX)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the fuzzy DB samples from database
 									String fuzzyDbBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -857,7 +872,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								continue;
 							}
 
-							if (nodeName.equalsIgnoreCase("CmisMapping")) {
+							if (nodeName.equalsIgnoreCase(CMIS_MAPPING)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the fuzzy DB samples from database
 									String cmisBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -890,7 +905,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								continue;
 							}*/
 
-							if (nodeName.equalsIgnoreCase("ImageSample")) {
+							if (nodeName.equalsIgnoreCase(IMAGE_SAMPLE)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the image samples from database
 									String imagemagickBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -907,7 +922,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								}
 								continue;
 							}
-							if (nodeName.equalsIgnoreCase("LuceneSample")) {
+							if (nodeName.equalsIgnoreCase(LUCENE_SAMPLE)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the lucene samples from database
 									String searchSampleFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -924,7 +939,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								}
 								continue;
 							}
-							if (nodeName.equalsIgnoreCase("RecostarExtraction")) {
+							if (nodeName.equalsIgnoreCase(RECOSTAR_EXTRACTION)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the image samples from database
 									String recostarBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -940,7 +955,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								}
 								continue;
 							}
-							if (nodeName.equalsIgnoreCase("LearnIndex")) {
+							if (nodeName.equalsIgnoreCase(LEARN_INDEX)) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the image samples from database
 									String learnIndexBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -973,7 +988,8 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 					importBatchClass.setPriority(Integer.parseInt(userOptions.getPriority()));
 				}
 
-				BatchClassUtil.updateSerializableBatchClass(moduleConfigService, moduleService, pluginService, pluginConfigService, importBatchClass);
+				BatchClassUtil.updateSerializableBatchClass(existingBatchClass, moduleConfigService, moduleService, pluginService,
+						pluginConfigService, batchClassService, batchSchemaService, importBatchClass);
 				importBatchClass = batchClassService.createBatchClassWithoutWatch(importBatchClass);
 
 				try {

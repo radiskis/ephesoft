@@ -24,9 +24,9 @@ var rvConstants = {
 	title_delete : "Delete Page",
 	title_split : "Split Document Confirmation",
 	title_split_doc : "Split Document",
-	title_topPanel_batchId : "Batch Id",
+	title_topPanel_batchId : "BatchId",
 	title_topPanel_workflow : "Workflow",
-	title_topPanel_batch_status : "Batch Status",
+	title_topPanel_batch_status : "BatchStatus",
 	title_topPanel_back : "Back to Batch List",
 	title_topPanel_next : "Next Batch",
 	title_topPanel_info : "Shortcuts",
@@ -120,7 +120,8 @@ var rvConstants = {
 	name_of_app_shortcut_ctrl_8 : "App3",
 	name_of_app_shortcut_ctrl_9 : "App4",
 	modal_window_shortcuts : "Modal Window Shortcuts",
-	function_key_shortcuts : "Function Key Shortcuts"
+	function_key_shortcuts : "Function Key Shortcuts",
+	title_topPanel_batchName : "BatchName"
 };
 
 var rvMessages = {
@@ -209,9 +210,9 @@ var rvConstants_tk = {
 	title_delete : "Sayfayı Sil",
 	title_split : "Döküman Bölme Onayı",
 	title_split_doc : "Döküman Bölme",
-	title_topPanel_batchId : "İş No",
+	title_topPanel_batchId : "İşNo",
 	title_topPanel_workflow : "İş Akışı",
-	title_topPanel_batch_status : "İş Durum",
+	title_topPanel_batch_status : "İşDurum",
 	title_reviewPanel_docType : "Döküman Tipi",
 	title_reviewPanel_mergeDocWith : "Döküman Birleştirme",
 	title_topPanel_back : "Geri Toplu Listesine",
@@ -302,7 +303,8 @@ var rvConstants_tk = {
 	name_of_app_shortcut_ctrl_8 : "App3",
 	name_of_app_shortcut_ctrl_9 : "App4",
 	modal_window_shortcuts : "Kalıcı Window Kısayolları",
-	function_key_shortcuts : "İşlev Tuşu Kısayolları"
+	function_key_shortcuts : "İşlev Tuşu Kısayolları",
+	title_topPanel_batchName : "Toplu iş adı"
 };
 
 var rvMessages_tk = {

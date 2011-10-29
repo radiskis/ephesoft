@@ -22,6 +22,7 @@
 	<xsl:param name="email"></xsl:param>
 	<xsl:param name="batchCreationStationID"></xsl:param>
 	<xsl:param name="stationID"></xsl:param>
+	<xsl:param name="supplyingSystem"></xsl:param>
 
 
 	<!--
@@ -31,6 +32,7 @@
 	<xsl:template match="/">
 		<xsl:element name="Batch">
 			<xsl:element name="SupplyingSystem">
+				<xsl:value-of select="$supplyingSystem" />
 			</xsl:element>
 			<xsl:element name="BatchId">
 				<xsl:value-of select="Batch/BatchInstanceIdentifier" />
@@ -172,20 +174,22 @@
 						</xsl:element>
 						<xsl:element name="Fields">
 							<xsl:for-each select="DocumentLevelFields/DocumentLevelField">
-								<xsl:element name="Field">
-									<xsl:element name="FieldName">
-										<xsl:value-of select="Name" />
+								<xsl:if test="not(Name='DRCi_Instance')">
+									<xsl:element name="Field">
+										<xsl:element name="FieldName">
+											<xsl:value-of select="Name" />
+										</xsl:element>
+										<xsl:element name="FieldValue">
+											<xsl:value-of select="Value" />
+										</xsl:element>
 									</xsl:element>
-									<xsl:element name="FieldValue">
-										<xsl:value-of select="Value" />
-									</xsl:element>
-								</xsl:element>
+								</xsl:if>
 							</xsl:for-each>
 						</xsl:element>
 					</xsl:element>
 				</xsl:for-each>
 			</xsl:element>
-			<xsl:element name="Noitfy">
+			<xsl:element name="Notify">
 				<xsl:element name="Email">
 					<xsl:value-of select="$email" />
 				</xsl:element>

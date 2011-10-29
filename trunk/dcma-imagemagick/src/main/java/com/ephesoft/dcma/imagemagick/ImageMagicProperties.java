@@ -65,7 +65,9 @@ public enum ImageMagicProperties implements PluginProperty {
 	CREATE_MULTIPAGE_TIFF_SWITCH("createMultipageTif.switch"),
 	CHECK_PDF_EXPORT_PROCESS("createMultipageTif.export_process"),
 	CHECK_COLOURED_PDF("createMultipageTif.coloured_pdf"),
-	CHECK_SEARCHABLE_PDF("createMultipageTif.searchable_pdf");
+	CHECK_SEARCHABLE_PDF("createMultipageTif.searchable_pdf"),
+	GHOSTSCRIPT_COMMAND_PDF_PARAMETERS("createMultipageTif.ghostscript_pdf_parameters");
+	
 	
 	String key;
 

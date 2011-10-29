@@ -53,7 +53,7 @@ public class SuggestionBox extends SuggestBox implements FocusListener, Keyboard
 
 	@Override
 	public void onFocus(Widget arg0) {
-
+		super.setAutoSelectEnabled(false);
 		super.showSuggestionList();
 
 	}

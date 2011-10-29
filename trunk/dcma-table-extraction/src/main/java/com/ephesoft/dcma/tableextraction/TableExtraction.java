@@ -57,6 +57,7 @@ import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Column;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.DataTable;
+import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.HeaderRow;
@@ -65,6 +66,7 @@ import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
 import com.ephesoft.dcma.batch.schema.DataTable.Rows;
 import com.ephesoft.dcma.batch.schema.Document.DataTables;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans;
@@ -241,6 +243,8 @@ public class TableExtraction {
 		DataCarrier startDataCarrier = null;
 		List<LineDataCarrier> lineDataCarrierList = null;
 		for (Document document : xmlDocuments) {
+			// Create doc level fields for document.
+			createDocLevelFields(document, batchInstanceIdentifier);
 
 			startDataCarrier = null;
 			if (null == document) {
@@ -987,4 +991,41 @@ public class TableExtraction {
 
 	}
 
+	/**
+	 * This method creates new document level fields for document if they haven't been created by previous plugins.
+	 * 
+	 * @param eachDocType
+	 * @param batchInstanceIdentifier
+	 */
+	private void createDocLevelFields(Document eachDocType, String batchInstanceIdentifier) {
+		DocumentLevelFields documentLevelFields = eachDocType.getDocumentLevelFields();
+		if (documentLevelFields == null) {
+			documentLevelFields = new DocumentLevelFields();
+			eachDocType.setDocumentLevelFields(documentLevelFields);
+		}
+		List<DocField> docLevelFields = documentLevelFields.getDocumentLevelField();
+		if (docLevelFields == null || docLevelFields.isEmpty()) {
+			LOGGER.info("Getting document level fields for document type : " + eachDocType.getType());
+			List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier,
+					eachDocType.getType());
+			if (allFdTypes != null) {
+				for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
+					// Create new document level field
+					LOGGER.info("Creating new document level field");
+					DocField docLevelField = new DocField();
+					docLevelField.setName(fdType.getName());
+					docLevelField.setFieldOrderNumber(fdType.getFieldOrderNumber());
+					docLevelField.setType(fdType.getDataType().name());
+					// Object newValue = getValueForDocField(fdType.getName(), allColumnNames, extractedData);
+					// docLevelField.setValue(newValue.toString());
+
+					// Add new document level field to document.
+					docLevelFields.add(docLevelField);
+					LOGGER.info("New doc level field added : " + docLevelField.getName());
+				}
+			} else {
+				LOGGER.info("No field types could be found for document type :" + eachDocType.getType());				
+			}
+		}
+	}
 }

@@ -737,9 +737,7 @@ public class ReviewValidatePresenter implements Presenter {
 
 										@Override
 										public void onClick(final ClickEvent arg0) {
-											if (document.isReviewed()) {
 												executeScript(functionKeyDTO.getShortcutKeyName());
-											}
 										}
 									});
 									button.setVisible(true);
@@ -982,6 +980,7 @@ public class ReviewValidatePresenter implements Presenter {
 						if (!doc.isValid()) {
 							eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
 						} else {
+							view.getRvPanel().getValidatePanel().setFieldAlreadySelected(false);
 							eventBus.fireEvent(new DocumentRefreshEvent(document));
 						}
 						break;

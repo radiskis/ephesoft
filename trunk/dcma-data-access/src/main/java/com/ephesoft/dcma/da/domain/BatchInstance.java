@@ -107,6 +107,9 @@ public class BatchInstance extends AbstractChangeableEntity {
 	
 	@Column(name = "server_ip")
 	private String serverIP;
+	
+	@Column(name = "executing_server")
+	private String executingServer;
 
 	@ManyToOne
 	@JoinColumn(name = "lock_owner")
@@ -252,5 +255,13 @@ public class BatchInstance extends AbstractChangeableEntity {
 	
 	public void setServerIP(String serverIP) {
 		this.serverIP = serverIP;
+	}
+	
+	public String getExecutingServer() {
+		return executingServer;
+	}
+	
+	public void setExecutingServer(String executingServer) {
+		this.executingServer = executingServer;
 	}
 }

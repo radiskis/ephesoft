@@ -99,10 +99,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		vars.put(JBPMVariables.BATCH_INSTANCE_ID, batchInstanceID);
 		vars.put(JBPMVariables.RESTART_WORKFLOW, moduleName);
 		vars.put(JBPMVariables.IS_MODULE_REMOTE, WorkFlowConstants.NO_STRING);
-		if (moduleName == null) {
-			//batchInstance.setStatus(BatchInstanceStatus.READY);
-			batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.READY);
-		} else {
+		if (moduleName != null) {
 			//batchInstance.setStatus(BatchInstanceStatus.RUNNING);
 			batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.RUNNING);
 		}

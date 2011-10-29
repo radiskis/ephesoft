@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchLevelField;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
@@ -80,6 +79,8 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	 * Variable for ON.
 	 */
 	private static final String ON_STRING = "ON";
+
+	private static final String PDF_EXT = ".pdf";
 
 	/**
 	 * Instance of Logger.
@@ -130,42 +131,22 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	 */
 	private void addHeaderColumns(final List<String> headerColumns) {
 		LOGGER.info("Start adding header column type in csv");
-		headerColumns.add(CSVFileCreationConstant.BATCH_CLASS_NAME.getId());
-		LOGGER.info("Add 1st header column type in csv :" + CSVFileCreationConstant.BATCH_CLASS_NAME.getId());
-		headerColumns.add(CSVFileCreationConstant.BATCH_NAME.getId());
-		LOGGER.info("Add 2nd header column type in csv :" + CSVFileCreationConstant.BATCH_NAME.getId());
-		headerColumns.add(CSVFileCreationConstant.BATCH_ID.getId());
-		LOGGER.info("Add 3rd header column type in csv :" + CSVFileCreationConstant.BATCH_ID.getId());
-		headerColumns.add(CSVFileCreationConstant.BATCH_CREATION_DATE_TIME.getId());
-		LOGGER.info("Add 4th header column type in csv :" + CSVFileCreationConstant.BATCH_CREATION_DATE_TIME.getId());
-		headerColumns.add(CSVFileCreationConstant.CURRENT_DATE.getId());
-		LOGGER.info("Add 5th header column type in csv :" + CSVFileCreationConstant.CURRENT_DATE.getId());
-		headerColumns.add(CSVFileCreationConstant.CURRENT_TIME.getId());
-		LOGGER.info("Add 6th header column type in csv :" + CSVFileCreationConstant.CURRENT_DATE.getId());
-		headerColumns.add(CSVFileCreationConstant.REC_ID.getId());
-		LOGGER.info("Add 7th header column type in csv :" + CSVFileCreationConstant.REC_ID.getId());
-		headerColumns.add(CSVFileCreationConstant.DOC_ID.getId());
-		LOGGER.info("Add 8th header column type in csv :" + CSVFileCreationConstant.DOC_ID.getId());
-		headerColumns.add(CSVFileCreationConstant.TRIGGER_TYPE.getId());
-		LOGGER.info("Add 9th header column type in csv :" + CSVFileCreationConstant.TRIGGER_TYPE.getId());
-		headerColumns.add(CSVFileCreationConstant.TRIGGER.getId());
-		LOGGER.info("Add 10th header column type in csv :" + CSVFileCreationConstant.TRIGGER.getId());
-		headerColumns.add(CSVFileCreationConstant.BOOKMARK_LEVEL.getId());
-		LOGGER.info("Add 11th header column type in csv :" + CSVFileCreationConstant.BOOKMARK_LEVEL.getId());
-		headerColumns.add(CSVFileCreationConstant.PREFIX.getId());
-		LOGGER.info("Add 12th header column type in csv :" + CSVFileCreationConstant.PREFIX.getId());
-		headerColumns.add(CSVFileCreationConstant.BOOKMARK_VALUE.getId());
-		LOGGER.info("Add 13th header column type in csv :" + CSVFileCreationConstant.BOOKMARK_VALUE.getId());
-		headerColumns.add(CSVFileCreationConstant.SUFFIX.getId());
-		LOGGER.info("Add 14th header column type in csv :" + CSVFileCreationConstant.SUFFIX.getId());
-		headerColumns.add(CSVFileCreationConstant.PG_COUNT.getId());
-		LOGGER.info("Add 15th header column type in csv :" + CSVFileCreationConstant.PG_COUNT.getId());
-		headerColumns.add(CSVFileCreationConstant.BOOKMARK_CREATED.getId());
-		LOGGER.info("Add 16th header column type in csv :" + CSVFileCreationConstant.BOOKMARK_CREATED.getId());
+		headerColumns.add(CSVFileCreationConstant.FILE_PROCESS_NAME.getId());
+		LOGGER.info("Add 1st header column type in csv :" + CSVFileCreationConstant.FILE_PROCESS_NAME.getId());
+		headerColumns.add(CSVFileCreationConstant.SUBPOENA.getId());
+		LOGGER.info("Add 2nd header column type in csv :" + CSVFileCreationConstant.SUBPOENA.getId());
+		headerColumns.add(CSVFileCreationConstant.LOAN_NUMBER.getId());
+		LOGGER.info("Add 3rd header column type in csv :" + CSVFileCreationConstant.LOAN_NUMBER.getId());
+		headerColumns.add(CSVFileCreationConstant.PROCESS_DATE.getId());
+		LOGGER.info("Add 4th header column type in csv :" + CSVFileCreationConstant.PROCESS_DATE.getId());
+		headerColumns.add(CSVFileCreationConstant.TAB_NAME.getId());
+		LOGGER.info("Add 5th header column type in csv :" + CSVFileCreationConstant.TAB_NAME.getId());
+		headerColumns.add(CSVFileCreationConstant.CREATE_TAB.getId());
+		LOGGER.info("Add 6th header column type in csv :" + CSVFileCreationConstant.CREATE_TAB.getId());
 		headerColumns.add(CSVFileCreationConstant.PLACEHOLDER.getId());
-		LOGGER.info("Add 17th header column type in csv :" + CSVFileCreationConstant.PLACEHOLDER.getId());
-		headerColumns.add(CSVFileCreationConstant.BATCH_FIELDS.getId());
-		LOGGER.info("Add 18th header column type in csv :" + CSVFileCreationConstant.BATCH_FIELDS.getId());
+		LOGGER.info("Add 7th header column type in csv :" + CSVFileCreationConstant.PLACEHOLDER.getId());
+		headerColumns.add(CSVFileCreationConstant.NUMBER_OF_IMAGES.getId());
+		LOGGER.info("Add 8th header column type in csv :" + CSVFileCreationConstant.NUMBER_OF_IMAGES.getId());
 		LOGGER.info("Finished adding header column type in csv");
 	}
 
@@ -216,29 +197,22 @@ public class CSVFileCreationExporter implements ICommonConstants {
 			String batchClassId = batch.getBatchClassIdentifier();
 			BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
 			List<DocumentType> batchDocumentList = batchClass.getDocumentTypes();
-
+			List<DocumentType> batchClassMajorDocumentType = new ArrayList<DocumentType>();
+			
 			if (batchDocumentList == null || batchDocumentList.isEmpty()) {
 				LOGGER.error("batchDocumentList is null or empty.");
 				throw new DCMAApplicationException("batchDocumentList is null or empty.");
 			}
-
-			String recID = "";
-			for (Document document : documentList) {
-				recID = "";
-				List<DocField> docFields = document.getDocumentLevelFields().getDocumentLevelField();
-				for (DocField docField : docFields) {
-					if (docField.getName().equals(CSVFileCreationConstant.REC_ID.getId())) {
-						recID = docField.getValue();
-						break;
-					}
+			for(DocumentType docType: batchDocumentList) {
+				if(!docType.isHidden()&& !docType.getName().equals("Unknown")){
+					batchClassMajorDocumentType.add(docType);
 				}
-
-				checkRecID(batch, recID);
-
-				for (DocField docField : docFields) {
-					List<String> addDataToList = addDataToList(batch, document, docField, batchInstance, recID, batchDocumentList);
-					dataList.add(addDataToList);
-				}
+			}
+			
+			for (DocumentType document : batchClassMajorDocumentType) {
+				List<String> addDataToList = addDataToList(batch, document, batchInstance, documentList);
+				dataList.add(addDataToList);
+			
 			}
 
 			// Getting export CSV file path
@@ -258,21 +232,6 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API check the recID if recID is null or empty throw {@link DCMAApplicationException}.
-	 * 
-	 * @param batch
-	 * @param recID {@link String}
-	 * @throws DCMAApplicationException if recID is null or empty.
-	 */
-	private void checkRecID(final Batch batch, final String recID) throws DCMAApplicationException {
-		// TODO : remove loan document process check after discussion with ike.
-		if (!batch.getBatchClassName().equalsIgnoreCase("LoanDocumentProcess")) {
-			if (recID == null || recID.isEmpty()) {
-				throw new DCMAApplicationException("RecID is null or empty");
-			}
-		}
-	}
 
 	/**
 	 * This API added data into list.
@@ -283,77 +242,57 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	 * @param batchInstance {@link BatchInstance}
 	 * 
 	 */
-	private List<String> addDataToList(final Batch batch, final Document document, final DocField docField,
-			final BatchInstance batchInstance, final String recID, final List<DocumentType> batchDocumentList) {
+	private List<String> addDataToList(final Batch batch, final DocumentType document, final BatchInstance batchInstance,
+			final List<Document> batchDocumentList) {
+		Document batchDocumtent = null;
+		boolean placeholderSet = false;
 		List<String> list = new ArrayList<String>();
-		// Adding information for batch class name
-		list.add(batch.getBatchClassName());
-		// Adding information for batch name
-		list.add(batch.getBatchName());
-		// Adding information for batch instance
-		list.add(batch.getBatchInstanceIdentifier());
-		String dateTimePattern = CSVFileCreationConstant.MM_DD_YYYY_HH_MM_SS.getId();
-		SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat(dateTimePattern, Locale.getDefault());
-		String batchCreationDateTime = simpleDateTimeFormat.format(batchInstance.getCreationDate());
-		// Adding information for BatchCreationDateTime column
-		list.add(batchCreationDateTime);
-		// Adding information for CurrentDate column
+		String subpoenaNumberValue = "";
+		String batchName = batch.getBatchName();
+		String[] split = batchName.split(CSVFileCreationConstant.UNDERSCORE.getId());
+		String loanNumber = split[split.length - 1];
+		int endIndex = batchName.length() - loanNumber.length() - 1;
+		if (endIndex > 3) {
+			subpoenaNumberValue = batchName.substring(0, endIndex);
+		}
+		String file_process_name = batch.getBatchName() + CSVFileCreationConstant.UNDERSCORE.getId()
+				+ batch.getBatchInstanceIdentifier() + PDF_EXT;
+		list.add(file_process_name);
+		list.add(subpoenaNumberValue);
+		list.add(loanNumber);
 		String datePattern = CSVFileCreationConstant.MM_DD_YYYY.getId();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
 		String batchCreationDate = simpleDateFormat.format(new Date());
 		list.add(batchCreationDate);
-		// Adding information for CurrentTime column
-		String timePattern = CSVFileCreationConstant.HH_MM_SS.getId();
-		SimpleDateFormat simpleTimeFormat = new SimpleDateFormat(timePattern, Locale.getDefault());
-		String batchCreationTime = simpleTimeFormat.format(new Date());
-		list.add(batchCreationTime);
-		// Adding information for recID
-		list.add(recID);
-		// Adding information for DocID column
-		list.add(document.getIdentifier());
-		// Adding information for TriggerType column
-		list.add(docField.getType());
-		// Adding information for Trigger column
-		list.add(docField.getName());
-		// Adding information for BookmarkLevel column
-		list.add(CSVFileCreationConstant.ONE_VALUE.getId());
-		// Adding information for Prefix column
-		list.add(CSVFileCreationConstant.EMPTY_STRING.getId());
 		// Adding information for BookmarkValue column
-		list.add(document.getType());
-		// Adding information for Suffix column
-		list.add(CSVFileCreationConstant.EMPTY_STRING.getId());
-		// Adding information for PgCount column
-		list.add(String.valueOf(document.getPages().getPage().size()));
-		// Adding information for BookmarkCreated column
-		list.add(CSVFileCreationConstant.YES.getId());
+		list.add(document.getName());
+
 		// Adding information for Place holder column
-		for (DocumentType docType : batchDocumentList) {
+		for (Document docType : batchDocumentList) {
 			if (docType != null) {
-				String name = docType.getName();
-				if (document.getType().equals(name)) {
-					boolean isHidden = docType.isHidden();
-					if (isHidden) {
-						list.add(CSVFileCreationConstant.NO_STRING.getId());
-					} else {
-						list.add(CSVFileCreationConstant.YES.getId());
-					}
+				String name = docType.getType();
+				if (document.getName().equals(name)) {
+					// Adding information for BookmarkCreated column
+					list.add(CSVFileCreationConstant.YES.getId());
+					list.add(CSVFileCreationConstant.NO_STRING.getId());
+					placeholderSet = true;
+					batchDocumtent =  docType;
 					break;
 				}
 			}
 		}
-
-		// Adding information for BatchFields column
-		if (batch.getBatchLevelFields() != null) {
-			StringBuffer batchLevelFieldString = new StringBuffer(CSVFileCreationConstant.EMPTY_STRING.getId());
-			for (BatchLevelField batchLevelField : batch.getBatchLevelFields().getBatchLevelField()) {
-				batchLevelFieldString.append(batchLevelField.getName());
-				batchLevelFieldString.append(CSVFileCreationConstant.COMMA.getId());
-			}
-			list.add(batchLevelFieldString.toString().substring(0, batchLevelFieldString.toString().length() - 1));
+		if(!placeholderSet) {
+			// Adding information for BookmarkCreated column
+			list.add(CSVFileCreationConstant.NO_STRING.getId());
+			list.add(CSVFileCreationConstant.YES.getId());
+			// Adding information for PgCount column
+			list.add("0");
 		} else {
-			list.add(CSVFileCreationConstant.EMPTY_STRING.getId());
+			// Adding information for PgCount column
+			list.add(String.valueOf(batchDocumtent.getPages().getPage().size()));
 		}
+		
+		
 		return list;
 	}
 
@@ -391,4 +330,6 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		LOGGER.info("File path to be exported is :" + targetFilePath);
 		return targetFilePath;
 	}
+	
+
 }

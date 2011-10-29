@@ -81,7 +81,7 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 	 * @param convertToTif (@link Boolean}
 	 */
 	public MultiPageExecutor(BatchInstanceThread batchInstanceThread, final String[] pages11, final String pdfCompression,
-			final String pdfQuality, final String multipageTifDevice, final boolean convertToTif) {
+			final String pdfQuality, final String multipageTifDevice, final boolean convertToTif,final String gsCmdParam) {
 		if (pages11 != null && pages11.length > 0) {
 			this.pages = new String[pages11.length];
 			this.pages = pages11.clone();
@@ -109,8 +109,8 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 							int maxNoOfPages = counter * ITERATOR_COUNT;
 							string = DOUBLE_QUOTES + ghostScriptPath + File.separator + GHOSTSCRIPT_COMMAND + DOUBLE_QUOTES + SPACE;
 							buffer.append(string);
-							buffer.append(GHOST_SCRIPT_COMMAND_PARAMETERS);
-							string = PDF_DEVICE + SPACE;
+							buffer.append(gsCmdParam);
+							string = SPACE;
 							buffer.append(string);
 							buffer.append(GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS);
 							if (maxNoOfPages >= noOfPages - 1) {

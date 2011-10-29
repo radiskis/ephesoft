@@ -172,6 +172,11 @@ INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_des
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Last Page Confidence Score Value',0,'lucene.last_page_conf_weightage',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Field Value Change Script Switch',0, 'validation.field_value_change_script_switch', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Fuzzy Search Switch',0, 'validation.fuzzy_search_switch', NULL);
+INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'Suggestion box Switch', b'0', 'validation.suggestion_box_switch', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound Export Format',0,'filebound.exportformat',null);
+
+
+
 
 
 /*Plugin Config Sample Values*/
@@ -260,6 +265,10 @@ INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.field_value_change_script_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.fuzzy_search_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.fuzzy_search_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='validation.suggestion_box_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='validation.suggestion_box_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'tif',(select id from plugin_config where config_name='filebound.exportformat'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'pdf',(select id from plugin_config where config_name='filebound.exportformat'));
 
 
 

@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import com.ephesoft.dcma.batch.schema.BatchStatus;
@@ -108,6 +73,10 @@ public class TopPanel extends RVBasePanel {
 	@UiField
 	protected Label batchId;
 	@UiField
+	protected Label batchNameText;
+	@UiField
+	protected Label batchName;
+	@UiField
 	protected Label batchClassNameText;
 	@UiField
 	protected Label batchClassName;
@@ -128,21 +97,23 @@ public class TopPanel extends RVBasePanel {
 	public TopPanel() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-		batchIdText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchId) + " :");
-		batchIdText.setStyleName("bold_text");
-		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_workflow) + " :");
-		batchClassNameText.setStyleName("bold_text");
-		batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) + " :");
-		batchStatusText.setStyleName("bold_text");
-		pipe.setText(".");
-		pipe.setStyleName("pipe");
-		secondPipe.setText(".");
-		secondPipe.setStyleName("pipe");
+		batchIdText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchId) + ReviewValidateConstants.COLON);
+		batchIdText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		batchNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_TOPANEL_BATCHNAME) + ReviewValidateConstants.COLON);
+		batchNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_workflow) + ReviewValidateConstants.COLON);
+		batchClassNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) + ReviewValidateConstants.COLON);
+		batchStatusText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		pipe.setText(ReviewValidateConstants.FULL_STOP);
+		pipe.setStyleName(ReviewValidateConstants.PIPE);
+		secondPipe.setText(ReviewValidateConstants.FULL_STOP);
+		secondPipe.setStyleName(ReviewValidateConstants.PIPE);
 		nextBatch.setVisible(Boolean.FALSE);
-		nextBatch.setStyleName("font_blue");
+		nextBatch.setStyleName(ReviewValidateConstants.FONT_BLUE);
 		info.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_info));
 		info.setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_info));
-		info.setStyleName("font_blue");
+		info.setStyleName(ReviewValidateConstants.FONT_BLUE);
 		ScreenMaskUtility.maskScreen();
 
 		nextBatch.addClickHandler(new ClickHandler() {
@@ -188,12 +159,14 @@ public class TopPanel extends RVBasePanel {
 	@Override
 	public void initializeWidget() {
 		batchId.setText(presenter.batchDTO.getBatch().getBatchInstanceIdentifier());
-		batchId.setStyleName("batchAlertText");
-		batchClassName.setText(presenter.batchDTO.getBatch().getBatchClassName());
-		batchClassName.setStyleName("batchAlertText");
+		batchId.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
+		batchName.setText(presenter.batchDTO.getBatch().getBatchName());
+		batchName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
+		batchClassName.setText(presenter.batchDTO.getBatch().getBatchClassDescription());
+		batchClassName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
 		BatchStatus batchStatusType = presenter.batchDTO.getBatch().getBatchStatus();
 		batchStatus.setText(fetchBatchStatus(batchStatusType));
-		batchStatus.setStyleName("batchAlertText");
+		batchStatus.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
 		nextBatch.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_next) + " >");
 		presenter.rpcService.getRowsCount(new AsyncCallback<Integer>() {
 
@@ -247,7 +220,7 @@ public class TopPanel extends RVBasePanel {
 					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_validated));
 					break;
 				default:
-					returnStatus.append("");
+					returnStatus.append(ReviewValidateConstants.EMPTY_STRING);
 					break;
 			}
 		}
@@ -366,7 +339,8 @@ public class TopPanel extends RVBasePanel {
 					@Override
 					public void onFailure(Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_ok_failure,
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								ReviewValidateMessages.error_topPanel_ok_failure,
 								presenter.batchDTO.getBatch().getBatchInstanceIdentifier(), arg0.getMessage()));
 					}
 
@@ -397,8 +371,8 @@ public class TopPanel extends RVBasePanel {
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_ok_success,
-						presenter.batchDTO.getBatch().getBatchInstanceIdentifier()));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.error_topPanel_ok_success, presenter.batchDTO.getBatch().getBatchInstanceIdentifier()));
 			}
 
 			@Override
@@ -408,7 +382,8 @@ public class TopPanel extends RVBasePanel {
 					@Override
 					public void onSuccess(final BatchDTO batchDTO) {
 						if (batchDTO == null) {
-							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_noMoreBatches));
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									ReviewValidateMessages.error_topPanel_noMoreBatches));
 						}
 						final String batchID2 = batchDTO.getBatch().getBatchInstanceIdentifier();
 						presenter.rpcService.acquireLock(batchID2, new AsyncCallback<Void>() {
@@ -436,7 +411,8 @@ public class TopPanel extends RVBasePanel {
 
 					@Override
 					public void onFailure(Throwable arg0) {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_ret_next_batch));
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								ReviewValidateMessages.error_ret_next_batch));
 					}
 				});
 			}

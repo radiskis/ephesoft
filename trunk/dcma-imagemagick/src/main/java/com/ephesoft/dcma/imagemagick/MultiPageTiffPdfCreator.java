@@ -267,7 +267,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	 */
 	public void createMultiPageFiles(String sFolderToBeExported, String batchInstanceIdentifier,
 			BatchSchemaService batchSchemaService, String multipageTifSwitch, String checkPDFExportProcess, String checkColouredPDF,
-			String checkSearchablePDF, String pluginName) throws DCMAApplicationException {
+			String checkSearchablePDF,String gsCmdParam, String pluginName) throws DCMAApplicationException {
 		this.batchSchemaService = batchSchemaService;
 		LOGGER.info("Inside method createMultiPageFiles...");
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
@@ -289,7 +289,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 		try {
 			createMultiPageTiffAndPDF(documentPageMap, fFolderToBeExported, batch, batchInstanceIdentifier, multipageTifSwitch,
-					checkPDFExportProcess, checkColouredPDF, checkSearchablePDF, pluginName);
+					checkPDFExportProcess, checkColouredPDF, checkSearchablePDF,gsCmdParam, pluginName);
 		} catch (Exception e) {
 			LOGGER.error("Error in creating multi page tiff and pdf. "+e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
@@ -349,17 +349,13 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	 */
 	private void createMultiPageTiffAndPDF(Map<String, List<File>> documentPageMap, File exportToFolder, Batch pasrsedXMLFile,
 			String batchInstanceIdentifier, String multipageTifSwitch, String checkPDFExportProcess, String checkColouredPDF,
-			String checkSearchablePDF, String pluginName) throws DCMAApplicationException {
-		String imageMagickEnvVariable = System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE);
+			String checkSearchablePDF,String gsCmdParam, String pluginName) throws DCMAApplicationException {
 		String ghostScriptEnvVariable = System.getenv(IImageMagickCommonConstants.GHOSTSCRIPT_ENV_VARIABLE);
 		if (ghostScriptEnvVariable == null || ghostScriptEnvVariable.isEmpty()) {
 			LOGGER.info("ghostScriptEnvVariable is null or empty.");
 			throw new DCMABusinessException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
 		}
-		if (imageMagickEnvVariable == null || imageMagickEnvVariable.isEmpty()) {
-			LOGGER.info("imageMagickEnvVariable is null or empty.");
-			throw new DCMABusinessException("Enviornment Variable IM4JAVA_TOOLPATH not set.");
-		}
+	
 		Set<String> documentNames;
 		documentNames = documentPageMap.keySet();
 		Iterator<String> iterator = documentNames.iterator();
@@ -454,7 +450,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			if (checkPDFExportProcess != null
 					&& checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGIC_PLUGIN_NAME_CONSTANT)) {
 				createPDFUsingGhostScript(pasrsedXMLFile, batchInstanceIdentifier, exportToFolder.getAbsolutePath(), pdfPages,
-						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
+						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt, gsCmdParam);
 			}
 			// use this method to create pdf using hocrtopdf.jar
 			else if (checkPDFExportProcess != null
@@ -465,7 +461,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			// use this default method to create pdf using image-magick convert command
 			else {
 				createPDFUsingGhostScript(pasrsedXMLFile, batchInstanceIdentifier, exportToFolder.getAbsolutePath(), pdfPages,
-						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
+						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt, gsCmdParam);
 			}
 		}
 		try {
@@ -522,10 +518,10 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	}
 
 	public void createPDFUsingGhostScript(Batch batchXML, String batchInstanceID, String localFolder, String[] pages,
-			BatchInstanceThread batchInstanceThread, List<MultiPageExecutor> multiPageExecutors, String documentIdInt)
+			BatchInstanceThread batchInstanceThread, List<MultiPageExecutor> multiPageExecutors, String documentIdInt,String gsCmdParam)
 			throws DCMAApplicationException {
 		LOGGER.info("Adding command for multi page pdf execution");
-		multiPageExecutors.add(new MultiPageExecutor(batchInstanceThread, pages, tifCompression, pdfQuality, null, false));
+		multiPageExecutors.add(new MultiPageExecutor(batchInstanceThread, pages, tifCompression, pdfQuality, null, false,gsCmdParam));
 	}
 
 	public boolean createPDFFromHOCR(Batch batchXML, String batchInstanceID, String localFolder, String[] pages,
