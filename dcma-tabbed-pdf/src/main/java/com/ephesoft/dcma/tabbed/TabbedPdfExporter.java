@@ -59,9 +59,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.ephesoft.dcma.batch.schema.Batch;
+import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Batch.Documents;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
@@ -199,8 +201,16 @@ public class TabbedPdfExporter implements ICommonConstants {
 				}
 
 				List<TabbedPDFExecutor> tabbedPDFExecutors = new ArrayList<TabbedPDFExecutor>();
-
-				String tabbedPDFName = batch.getBatchName() + "_" + batchInstanceIdentifier + ".pdf";
+				String batchName = "";
+				Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
+				if (subPoenaLoanMap.size() == 2) {
+					batchName = subPoenaLoanMap.get(TabbedPdfConstant.SUBPOENA) + TabbedPdfConstant.UNDERSCORE
+							+ subPoenaLoanMap.get(TabbedPdfConstant.LOAN_NUMBER);
+				}
+				if(batchName == null || batchName.isEmpty()) {
+					batchName = batch.getBatchName();
+				}
+				String tabbedPDFName = batchName + "_" + batchInstanceIdentifier + ".pdf";
 				String tabbedPDFTempFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
 				String tabbedPDFLocalPath = tabbedPDFTempFolder + File.separator + tabbedPDFName;
 				tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths, localPdfMarksSample
@@ -215,14 +225,8 @@ public class TabbedPdfExporter implements ICommonConstants {
 					batchInstanceThread.remove();
 					// Throw the exception to set the batch status to Error by Application aspect
 					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-				} finally {
-					try {
-						FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginName);
-					} catch (IOException ioe) {
-						LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
-						throw new DCMABusinessException(ioe.getMessage(), ioe);
-					}
-				}
+				} 
+				
 				batchInstanceThread = new BatchInstanceThread();
 				List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
 
@@ -411,7 +415,7 @@ public class TabbedPdfExporter implements ICommonConstants {
 		} else {
 			Object[] sortedArray = sortedSet.toArray();
 			int size = sortedArray.length;
-			for (int i = size - 1; (i > 0 || i == 0); i--) {
+			for (int i = 0; i < size; i++) {
 				String documentType = (String) mapKeys.get(mapValues.indexOf(sortedArray[i]));
 				for (int documentIndex = 0; documentIndex < batchDocumentTypeNameList.size(); documentIndex++) {
 					if (documentType.equals(batchDocumentTypeNameList.get(documentIndex))) {
@@ -574,5 +578,23 @@ public class TabbedPdfExporter implements ICommonConstants {
 			}
 		}
 		return propertyMap;
+	}
+
+	private Map<String, String> getSubPoenaLoanNumber(List<Document> documentList) {
+		HashMap<String, String> resultMap = new HashMap<String, String>();
+		for (Document document : documentList) {
+			if (resultMap.size() == 2) {
+				break;
+			}
+			DocumentLevelFields docFields = document.getDocumentLevelFields();
+			List<DocField> docFieldList = docFields.getDocumentLevelField();
+			for (DocField docField : docFieldList) {
+				if ((docField.getName().equals(TabbedPdfConstant.SUBPOENA))
+						|| (docField.getName().equals(TabbedPdfConstant.LOAN_NUMBER))) {
+					resultMap.put(docField.getName(), docField.getValue());
+				}
+			}
+		}
+		return resultMap;
 	}
 }

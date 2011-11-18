@@ -445,6 +445,7 @@ public class BatchClassUtil {
 				batchClassPluginConfig = new BatchClassPluginConfig();
 				PluginConfig pluginConfig = new PluginConfig();
 				pluginConfig.setMultiValue(false);
+				pluginConfig.setMandatory(true);
 				pluginConfig.setDataType(DataType.STRING);
 				batchClassPluginConfig.setPluginConfig(pluginConfig);
 			}
@@ -903,6 +904,7 @@ public class BatchClassUtil {
 
 		if (batchClassPluginConfig.getPluginConfig() != null) {
 			batchClassPluginConfigDTO.setMultivalue(batchClassPluginConfig.getPluginConfig().isMultiValue());
+			batchClassPluginConfigDTO.setMandatory(batchClassPluginConfig.getPluginConfig().isMandatory());
 			batchClassPluginConfigDTO.setDataType(batchClassPluginConfig.getPluginConfig().getDataType());
 			pluginConfigurationDTO.setFieldName(batchClassPluginConfig.getPluginConfig().getName());
 			pluginConfigurationDTO.setFieldValue(batchClassPluginConfig.getValue());

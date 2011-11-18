@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Key_Value_Learning_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="74,16,80,40">
+		<transition to="key_value_learning"/>
+	</start>
+	
+	<java continue="async" expr="#{kvFieldCreatorService}" g="16,88,163,59" method="createKeyValueField" name="key_value_learning">
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Key_Value_Learning_Plugin" />
+		</arg>
+		<transition to="end"/>
+	</java>
+
+	<end g="75,179,80,40" name="end"/>
+</process>

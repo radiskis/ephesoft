@@ -199,7 +199,7 @@ public enum CSVFileCreationConstant {
 	
 	SUBPOENA("Subpoena"),
 	
-	LOAN_NUMBER("LoanNumber");
+	LOAN_NUMBER("LoanPerf");
 
 	/**
 	 * Used for returning as a string data.

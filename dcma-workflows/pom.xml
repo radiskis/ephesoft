@@ -138,5 +138,10 @@
 			<artifactId>dcma-ibm-cm</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-key-value-learning</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

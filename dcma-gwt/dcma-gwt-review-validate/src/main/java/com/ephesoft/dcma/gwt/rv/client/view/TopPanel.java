@@ -80,10 +80,10 @@ public class TopPanel extends RVBasePanel {
 	protected Label batchClassNameText;
 	@UiField
 	protected Label batchClassName;
-	@UiField
+	/*@UiField
 	protected Label batchStatusText;
 	@UiField
-	protected Label batchStatus;
+	protected Label batchStatus;*/
 	@UiField
 	protected Label pipe;
 	@UiField
@@ -101,10 +101,12 @@ public class TopPanel extends RVBasePanel {
 		batchIdText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
 		batchNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_TOPANEL_BATCHNAME) + ReviewValidateConstants.COLON);
 		batchNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
-		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_workflow) + ReviewValidateConstants.COLON);
+		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchClass) + ReviewValidateConstants.COLON);
+		//batchClassNameText.setText("name;");
 		batchClassNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
-		batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) + ReviewValidateConstants.COLON);
-		batchStatusText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		/*batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) + ReviewValidateConstants.COLON);
+		batchStatusText.setStyleName(ReviewValidateConstants.BOLD_TEXT);*/
+	  
 		pipe.setText(ReviewValidateConstants.FULL_STOP);
 		pipe.setStyleName(ReviewValidateConstants.PIPE);
 		secondPipe.setText(ReviewValidateConstants.FULL_STOP);
@@ -162,11 +164,14 @@ public class TopPanel extends RVBasePanel {
 		batchId.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
 		batchName.setText(presenter.batchDTO.getBatch().getBatchName());
 		batchName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
+		//changes to be made here 
+		
 		batchClassName.setText(presenter.batchDTO.getBatch().getBatchClassDescription());
 		batchClassName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-		BatchStatus batchStatusType = presenter.batchDTO.getBatch().getBatchStatus();
-		batchStatus.setText(fetchBatchStatus(batchStatusType));
-		batchStatus.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
+		//BatchStatus batchStatusType = presenter.batchDTO.getBatch().getBatchStatus();
+//		batchStatus.setText(fetchBatchStatus(batchStatusType));
+//		batchStatus.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
+		
 		nextBatch.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_next) + " >");
 		presenter.rpcService.getRowsCount(new AsyncCallback<Integer>() {
 
@@ -509,7 +514,9 @@ public class TopPanel extends RVBasePanel {
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.FUNCTION_KEY_SHORTCUTS)
 				+ "</td><td>F1 to F11[except F5]" +"<tr><td>37 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.MODAL_WINDOW_SHORTCUTS)
-				+ "</td><td>CTRL + [4/7/8/9]</td></tr>" + "</table>";
+				+ "</td><td>CTRL + [4/7/8/9]</td></tr>" + "<tr><td>38 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DISCLOSURE_PANEL_SHORCUT)
+				+ "</td><td>CTRL + g or G</td></tr>" + "</table>";
 		return keyBoardShortcuts;
 	}
 }

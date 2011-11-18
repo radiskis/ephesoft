@@ -43,8 +43,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Result;
@@ -355,8 +357,15 @@ public class IBMCMExporter implements ICommonConstants {
 			String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + IBMCMConstant.BATCH_XML.getId();
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
 			String targetXmlPath = null;
-			if (batch != null && batch.getBatchName() != null && !batch.getBatchName().isEmpty()) {
-				targetXmlPath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.XML_EXTENSION.getId());
+			String batchName = "";
+			Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
+			if (subPoenaLoanMap.size() == 2) {
+				batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
+						+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+			}
+			if ((batch != null && batch.getBatchName() != null && !batch.getBatchName().isEmpty())
+					|| (batchName != null && !batchName.isEmpty())) {
+				targetXmlPath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.XML_EXTENSION.getId(), batchName);
 			}
 
 			InputStream xslStream = null;
@@ -410,7 +419,8 @@ public class IBMCMExporter implements ICommonConstants {
 						parsingParamterToXML(batchInstanceID, transformer, cmodAppGroupLocal, cmodAppLocal);
 						// Setting parameter for total document size for updating its value in XML
 						transformer.setParameter(IBMCMConstant.TOTAL_DOCUMENT_SIZE.getId(), totalDocSize);
-						String datFile = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId());
+						String datFile = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId(),
+								batchName);
 						// Setting parameter for DAT file name for updating its value in XML.
 						transformer.setParameter(IBMCMConstant.DAT_FILE_NAME.getId(), new File(datFile).getName());
 						transformer.setParameter(IBMCMConstant.SUPLLYING_SYSTEM.getId(), this.getSupplyingSystem());
@@ -514,11 +524,13 @@ public class IBMCMExporter implements ICommonConstants {
 	 * @return targetXmlPath {@link String}
 	 */
 	private String getTargetFilePath(final String batchInstanceID, final String exportFolder, final Batch batch,
-			final String fileExtension) {
+			final String fileExtension, String batchName) {
 		LOGGER.info("Generating file path to be exported");
 		String targetFilePath = null;
 		String filePath = "";
-		String batchName = batch.getBatchName();
+		if (batchName == null || batchName.isEmpty()) {
+			batchName = batch.getBatchName();
+		}
 		if (batchName.length() > 3) {
 			String subpoenaPrefix = batchName.substring(0, 3);
 			filePath = exportFolder + File.separator + subpoenaPrefix + File.separator + batchInstanceID;
@@ -579,8 +591,14 @@ public class IBMCMExporter implements ICommonConstants {
 			throws DCMAApplicationException {
 		LOGGER.info("Generating DAT file");
 		List<String> documentFileList = getDocumentFileList(batchInstanceID);
+		String batchName = "";
+		Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
+		if (subPoenaLoanMap.size() == 2) {
+			batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
+					+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+		}
 		// Output DAT file path
-		String outputFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId());
+		String outputFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId(), batchName);
 
 		if (null == outputFilePath || outputFilePath.isEmpty()) {
 			String msg = "Unable to create batch instance folder inside exportFolder. outputFilePath is null or empty.";
@@ -628,8 +646,15 @@ public class IBMCMExporter implements ICommonConstants {
 	private void generateCTLFile(final String batchInstanceID, final String exportFolder, final Batch batch)
 			throws DCMAApplicationException {
 		LOGGER.info("Generating CTL file");
+		String batchName = "";
+		Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
+		if (subPoenaLoanMap.size() == 2) {
+			batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
+					+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+		}
 		// Output CTL file path
-		String outputCTLFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.CTL_EXTENSION.getId());
+		String outputCTLFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.CTL_EXTENSION.getId(),
+				batchName);
 		File file = new File(outputCTLFilePath);
 		boolean isFileCreated = false;
 		try {
@@ -720,4 +745,27 @@ public class IBMCMExporter implements ICommonConstants {
 		return offset;
 	}
 
+	private Map<String, String> getSubPoenaLoanNumber(List<Document> documentList) {
+		Map<String, String> resultMap = new HashMap<String, String>();
+		for (Document document : documentList) {
+			if (resultMap.size() == 2) {
+				break;
+			}
+			DocumentLevelFields docFields = document.getDocumentLevelFields();
+			if (docFields == null) {
+				continue;
+			}
+			List<DocField> docFieldList = docFields.getDocumentLevelField();
+			for (DocField docField : docFieldList) {
+				if ((docField.getName().equals(IBMCMConstant.SUBPOENA.getId()))
+						|| (docField.getName().equals(IBMCMConstant.LOAN_NUMBER.getId()))) {
+					String value = docField.getValue();
+					if (null != value && !value.isEmpty()) {
+						resultMap.put(docField.getName(), value);
+					}
+				}
+			}
+		}
+		return resultMap;
+	}
 }

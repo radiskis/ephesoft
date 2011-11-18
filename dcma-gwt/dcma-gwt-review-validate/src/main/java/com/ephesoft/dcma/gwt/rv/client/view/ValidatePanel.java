@@ -666,6 +666,9 @@ public class ValidatePanel extends RVBasePanel {
 
 							@Override
 							public void onKeyUp(KeyUpEvent arg0) {
+								if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
+									vWidget.getWidget().hideSuggestionList();
+								}
 								if (arg0.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 									arg0.preventDefault();
 									vWidget.getWidget().hideSuggestionList();
@@ -737,11 +740,11 @@ public class ValidatePanel extends RVBasePanel {
 		if (presenter.batchDTO.getFuzzySearchSwitchState().equals("ON")) {
 			fuzzySearchTablefocusPanel.clear();
 			fuzzySearchTablefocusPanel.add(fuzzySearchTable);
-			validateDockLayoutPanel.addNorth(fuzzySearchTablefocusPanel, 20);
+			validateDockLayoutPanel.addNorth(fuzzySearchTablefocusPanel, 46);
 		} else {
 			fuzzySearchTablefocusPanel.clear();
 			fuzzySearchTable.clear();
-			validateDockLayoutPanel.addNorth(showTableViewBtn, 10);
+			validateDockLayoutPanel.addNorth(showTableViewBtn, 20);
 		}
 		scrollPanel.clear();
 		scrollPanel.add(scrollValidationTableFocusPanel);

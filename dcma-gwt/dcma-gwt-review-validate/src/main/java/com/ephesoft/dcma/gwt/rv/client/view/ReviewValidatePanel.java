@@ -33,111 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.HashMap;
@@ -159,16 +54,23 @@ import com.ephesoft.dcma.gwt.rv.client.event.ValidationFieldChangeEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateMessages;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DisclosureEvent;
+import com.google.gwt.user.client.ui.DisclosureHandler;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ReviewValidatePanel extends RVBasePanel {
 
@@ -182,30 +84,37 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private final String URL_CTRL_8 = "validation.url(Ctrl+8)";
 
 	private final String URL_CTRL_9 = "validation.url(Ctrl+9)";
-	@UiField
-	HorizontalPanel urlButtonPanel;
+
+	HorizontalPanel urlButtonPanel = new HorizontalPanel();
 	@UiField
 	Label functionKeyLabel;
 	@UiField
 	SlidingPanel slidingPanel;
-	@UiField
-	ReviewPanel reviewPanel;
-	@UiField
-	ValidatePanel validatePanel;
-	@UiField
-	Label seperator;
-	@UiField
-	LayoutPanel pageImageLayoutPanel;
+	ReviewPanel reviewPanel = new ReviewPanel();
+	ValidatePanel validatePanel = new ValidatePanel();
+	Label seperator = new Label();
+	LayoutPanel pageImageLayoutPanel = new LayoutPanel();
 	@UiField
 	HorizontalPanel firstShortcutsPanel;
 	@UiField
 	HorizontalPanel lastShortcutsPanel;
 
+	@UiField
+	DockLayoutPanel reviewValidatePanel;
+
+	DockLayoutPanel tempPanel;
+
+	DisclosurePanel reviewDisclosurePanel = new DisclosurePanel(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.REVIEW_PANEL), true);
+
+	FocusPanel reviewFocusPanel = new FocusPanel();
+	VerticalPanel reviewVerticalPanel = new VerticalPanel();
 	PageImagePanel pageImagePanel = new PageImagePanel();
 
-	@UiField
-	LayoutPanel layoutPanel;
+	LayoutPanel layoutPanel = new LayoutPanel();
 
+	VerticalPanel centerPanel = new VerticalPanel();
+	
+	FocusPanel focusPanel = new FocusPanel();
 	private static final Binder binder = GWT.create(Binder.class);
 
 	private Boolean isDocumentError = false;
@@ -242,9 +151,31 @@ public class ReviewValidatePanel extends RVBasePanel {
 		functionKeyLabel.setText(ReviewValidateConstants.FUNCTION_KEYS + ":");
 		functionKeyLabel.addStyleName(ReviewValidateConstants.BOLD_TEXT);
 		slidingPanel.setWidget(firstShortcutsPanel);
+		reviewDisclosurePanel.setWidth("100%");
+		reviewDisclosurePanel.addEventHandler(new DisclosureHandler() {
+
+			public void onClose(DisclosureEvent event) {
+				reviewDisclosurePanel.setOpen(false);
+				setVisibility();
+				presenter.setCustomizedShortcutPanels();
+				focusPanel.setFocus(true);
+			}
+
+			public void onOpen(DisclosureEvent event) {
+				reviewDisclosurePanel.setOpen(true);
+				setVisibility();
+				presenter.setCustomizedShortcutPanels();
+				focusPanel.setFocus(true);
+			}
+		});
+
 		setUrlAndApplicationMap();
 		setVisibility();
 		slidingPanel.setEventBus(eventBus);
+
+		tempPanel = new DockLayoutPanel(Unit.PCT);
+		
+		focusPanel.add(reviewDisclosurePanel);
 
 	}
 
@@ -290,7 +221,6 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 			@Override
 			public void onExpand(DocExpandEvent event) {
-				presenter.getAllUrlShortcuts();
 				if (event.getDocument().getErrorMessage() != null && !event.getDocument().getErrorMessage().isEmpty()) {
 					isDocumentError = true;
 					setErrorText(event.getDocument().getErrorMessage());
@@ -379,8 +309,8 @@ public class ReviewValidatePanel extends RVBasePanel {
 	public void setVisibility() {
 		switch (presenter.batchDTO.getBatch().getBatchStatus()) {
 			case READY_FOR_REVIEW:
-				reviewPanel.clearPanel();
-				validatePanel.clearPanel();
+				// reviewPanel.clearPanel();
+				// validatePanel.clearPanel();
 				setErrorText("");
 				urlButtonPanel.setVisible(false);
 				slidingPanel.setVisible(false);
@@ -391,10 +321,26 @@ public class ReviewValidatePanel extends RVBasePanel {
 				pageImageLayoutPanel.clear();
 				pageImageLayoutPanel.add(pageImagePanel);
 				layoutPanel.add(pageImageLayoutPanel);
+				centerPanel.add(urlButtonPanel);
+				centerPanel.add(seperator);
+				reviewValidatePanel.clear();
+				reviewFocusPanel.setHeight("100%");
+				reviewFocusPanel.setWidth("100%");
+				reviewVerticalPanel.setWidth("100%");
+				reviewDisclosurePanel.setWidth("100%");
+				reviewVerticalPanel.add(reviewPanel);
+				reviewDisclosurePanel.add(reviewPanel);
+				if (reviewDisclosurePanel.isOpen()) {
+					reviewValidatePanel.addNorth(focusPanel, 30);
+				} else {
+					reviewValidatePanel.addNorth(focusPanel, 7);
+				}
+				reviewValidatePanel.addSouth(layoutPanel, 55);
+				reviewValidatePanel.add(centerPanel);
 				break;
 			case READY_FOR_VALIDATION:
-				reviewPanel.clearPanel();
-				validatePanel.clearPanel();
+				// reviewPanel.clearPanel();
+				// validatePanel.clearPanel();
 				urlButtonPanel.setVisible(true);
 				setErrorText("");
 				slidingPanel.setVisible(false);
@@ -403,7 +349,34 @@ public class ReviewValidatePanel extends RVBasePanel {
 				pageImagePanel.setVisible(false);
 				layoutPanel.clear();
 				layoutPanel.add(validatePanel);
-				;
+				reviewValidatePanel.clear();
+				reviewFocusPanel.setHeight("100%");
+				reviewFocusPanel.setWidth("100%");
+				reviewVerticalPanel.setWidth("100%");
+				reviewVerticalPanel.add(reviewPanel);
+				reviewDisclosurePanel.setWidth("100%");
+				reviewDisclosurePanel.add(reviewPanel);
+				if (reviewDisclosurePanel.isOpen()) {
+					reviewValidatePanel.addNorth(focusPanel, 31);
+					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+						setButtonsForUrls();
+						reviewValidatePanel.addSouth(layoutPanel, 52);
+						centerPanel.add(urlButtonPanel);
+					} else {
+						reviewValidatePanel.addSouth(layoutPanel, 60);
+					}
+					centerPanel.add(seperator);
+					reviewValidatePanel.add(centerPanel);
+				} else {
+					reviewValidatePanel.addNorth(focusPanel, 8.5);
+					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+						reviewValidatePanel.addSouth(layoutPanel, 74.5);
+						centerPanel.add(urlButtonPanel);
+					} else {
+						reviewValidatePanel.addSouth(layoutPanel, 83.5);
+					}
+					reviewValidatePanel.add(centerPanel);
+				}
 				break;
 			default:
 				GWT.log("Unknown Status for validate Panel.");
@@ -445,10 +418,11 @@ public class ReviewValidatePanel extends RVBasePanel {
 		return functionKeyLabel;
 	}
 
-	public void setButtonsForUrls(Map<String, String> shortcutUrlMap) {
+	public void setButtonsForUrls() {
 		urlButtonPanel.clear();
-		urlAndShortcutMap = shortcutUrlMap;
+		urlAndShortcutMap = presenter.batchDTO.getUrlAndShortcutMap();
 		if (null != urlAndShortcutMap && !urlAndShortcutMap.isEmpty()) {
+
 			Set<String> urlList = urlAndShortcutMap.keySet();
 			for (final String url : urlList) {
 				if (urlAndShortcutMap.get(url) != null && !urlAndShortcutMap.get(url).isEmpty()) {
@@ -471,5 +445,9 @@ public class ReviewValidatePanel extends RVBasePanel {
 			}
 
 		}
+	}
+	
+	public DisclosurePanel getReviewDisclosurePanel() {
+		return reviewDisclosurePanel;
 	}
 }

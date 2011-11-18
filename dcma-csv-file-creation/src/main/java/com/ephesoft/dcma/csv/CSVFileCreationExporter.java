@@ -40,9 +40,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -55,6 +57,7 @@ import org.springframework.stereotype.Component;
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.component.ICommonConstants;
@@ -198,25 +201,30 @@ public class CSVFileCreationExporter implements ICommonConstants {
 			BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
 			List<DocumentType> batchDocumentList = batchClass.getDocumentTypes();
 			List<DocumentType> batchClassMajorDocumentType = new ArrayList<DocumentType>();
-			
+
 			if (batchDocumentList == null || batchDocumentList.isEmpty()) {
 				LOGGER.error("batchDocumentList is null or empty.");
 				throw new DCMAApplicationException("batchDocumentList is null or empty.");
 			}
-			for(DocumentType docType: batchDocumentList) {
-				if(!docType.isHidden()&& !docType.getName().equals("Unknown")){
+			for (DocumentType docType : batchDocumentList) {
+				if (!docType.isHidden() && !docType.getName().equals("Unknown")) {
 					batchClassMajorDocumentType.add(docType);
 				}
 			}
-			
+			String batchName = "";
+			Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(documentList);
+			if (subPoenaLoanMap.size() == 2) {
+				batchName = subPoenaLoanMap.get(CSVFileCreationConstant.SUBPOENA.getId()) + CSVFileCreationConstant.UNDERSCORE.getId()
+						+ subPoenaLoanMap.get(CSVFileCreationConstant.LOAN_NUMBER.getId());
+			}
 			for (DocumentType document : batchClassMajorDocumentType) {
-				List<String> addDataToList = addDataToList(batch, document, batchInstance, documentList);
+				List<String> addDataToList = addDataToList(batch, document, batchInstance, documentList, batchName);
 				dataList.add(addDataToList);
-			
+
 			}
 
 			// Getting export CSV file path
-			String fileName = getTargetFilePath(batchInstanceID, exportFolder, batch, CSVFileCreationConstant.CSV_EXTENSION.getId());
+			String fileName = getTargetFilePath(batchInstanceID, exportFolder, batch, CSVFileCreationConstant.CSV_EXTENSION.getId(),batchName);
 
 			if (isExportFoderCreated && fileName != null && batch != null && batchInstance != null) {
 				this.addHeaderColumns(headerColumns);
@@ -232,7 +240,6 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		}
 	}
 
-
 	/**
 	 * This API added data into list.
 	 * 
@@ -243,19 +250,21 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	 * 
 	 */
 	private List<String> addDataToList(final Batch batch, final DocumentType document, final BatchInstance batchInstance,
-			final List<Document> batchDocumentList) {
+			final List<Document> batchDocumentList, String batchName) {
 		Document batchDocumtent = null;
 		boolean placeholderSet = false;
 		List<String> list = new ArrayList<String>();
 		String subpoenaNumberValue = "";
-		String batchName = batch.getBatchName();
+		if (batchName == null || batchName.isEmpty()) {
+			batchName = batch.getBatchName();
+		}
 		String[] split = batchName.split(CSVFileCreationConstant.UNDERSCORE.getId());
 		String loanNumber = split[split.length - 1];
 		int endIndex = batchName.length() - loanNumber.length() - 1;
 		if (endIndex > 3) {
 			subpoenaNumberValue = batchName.substring(0, endIndex);
 		}
-		String file_process_name = batch.getBatchName() + CSVFileCreationConstant.UNDERSCORE.getId()
+		String file_process_name = batchName + CSVFileCreationConstant.UNDERSCORE.getId()
 				+ batch.getBatchInstanceIdentifier() + PDF_EXT;
 		list.add(file_process_name);
 		list.add(subpoenaNumberValue);
@@ -276,12 +285,12 @@ public class CSVFileCreationExporter implements ICommonConstants {
 					list.add(CSVFileCreationConstant.YES.getId());
 					list.add(CSVFileCreationConstant.NO_STRING.getId());
 					placeholderSet = true;
-					batchDocumtent =  docType;
+					batchDocumtent = docType;
 					break;
 				}
 			}
 		}
-		if(!placeholderSet) {
+		if (!placeholderSet) {
 			// Adding information for BookmarkCreated column
 			list.add(CSVFileCreationConstant.NO_STRING.getId());
 			list.add(CSVFileCreationConstant.YES.getId());
@@ -291,8 +300,7 @@ public class CSVFileCreationExporter implements ICommonConstants {
 			// Adding information for PgCount column
 			list.add(String.valueOf(batchDocumtent.getPages().getPage().size()));
 		}
-		
-		
+
 		return list;
 	}
 
@@ -323,13 +331,41 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	 * @return targetFilePath
 	 */
 	private String getTargetFilePath(final String batchInstanceID, final String exportFolder, final Batch batch,
-			final String fileExtension) {
+			final String fileExtension, String batchName) {
 		LOGGER.info("Generating file path to be exported");
-		String targetFilePath = exportFolder + File.separator + batch.getBatchName() + CSVFileCreationConstant.UNDERSCORE.getId()
+		if(batchName == null || batchName.isEmpty()) {
+			batchName = batch.getBatchName();
+		}
+		String targetFilePath = exportFolder + File.separator + batchName + CSVFileCreationConstant.UNDERSCORE.getId()
 				+ batchInstanceID + fileExtension.toLowerCase(Locale.getDefault());
 		LOGGER.info("File path to be exported is :" + targetFilePath);
 		return targetFilePath;
 	}
-	
 
+	private Map<String, String> getSubPoenaLoanNumber(List<Document> documentList) {
+		Map<String, String> resultMap = new HashMap<String, String>();
+		for (Document document : documentList) {
+			if (resultMap.size() == 2) {
+				break;
+			}
+			
+			DocumentLevelFields docFields = document.getDocumentLevelFields();
+			if(docFields == null){
+				continue;
+			}
+			
+			List<DocField> docFieldList = docFields.getDocumentLevelField();
+			for (DocField docField : docFieldList) {
+				String name = docField.getName();
+				if ((name.equals(CSVFileCreationConstant.SUBPOENA.getId()))
+						|| (name.equals(CSVFileCreationConstant.LOAN_NUMBER.getId()))) {
+					String value = docField.getValue();
+					if (null != value && !value.isEmpty()) {
+						resultMap.put(docField.getName(), value);
+					}
+				}
+			}
+		}
+		return resultMap;
+	}
 }

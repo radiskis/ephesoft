@@ -1,0 +1,105 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:ws='urn:import:com.ephesoft.dcma.gwt.uploadbatch.client'>
+
+	<g:VerticalPanel width="100%" ui:field="uploadBatchViewPanel">
+		<g:DockLayoutPanel unit='PCT' height="35em" ui:field="mainDockPanel">
+			<g:west size="55" width='100'>
+				<g:VerticalPanel width="100%" height="100%">
+					<g:CaptionPanel ui:field="fileUploadCaptionPanel"
+						width="90%" height="6em">
+						<g:ScrollPanel width="100%" height="100%">
+							<g:VerticalPanel width="100%" height="100%">
+								<g:FormPanel ui:field="uploadBatchFilePanel">
+									<g:HorizontalPanel width="100%">
+										<g:cell width="30%" horizontalAlignment="ALIGN_LEFT">
+											<g:Label ui:field="uploadLabel"></g:Label>
+										</g:cell>
+										<g:cell width="6%">
+											<g:Label ui:field="uploadStar"></g:Label>
+										</g:cell>
+										<g:cell horizontalAlignment="ALIGN_LEFT" >
+											<g:Label ui:field="uploadFilePlaceholder"></g:Label>
+										</g:cell>
+										<g:cell width="50%" horizontalAlignment="ALIGN_CENTER">
+											<g:Button ui:field="uploadButton"></g:Button>
+										</g:cell>
+									</g:HorizontalPanel>
+								</g:FormPanel>
+							</g:VerticalPanel>
+						</g:ScrollPanel>
+					</g:CaptionPanel>
+					<g:cell width="2%" height="5" horizontalAlignment="ALIGN_LEFT">
+						<g:Label></g:Label>
+					</g:cell>
+
+					<g:CaptionPanel ui:field="batchClassCaptionPanel"
+						width="90%" height="8em">
+
+						<g:VerticalPanel width="100%" height="50px">
+							<g:HorizontalPanel ui:field="batchClassPanel"
+								height="15px">
+								<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+									<g:Label>Batch Class</g:Label>
+								</g:cell>
+								<g:cell width="28%" horizontalAlignment="ALIGN_LEFT">
+									<g:ListBox width="20em" ui:field="batchClassNameListBox"></g:ListBox>
+								</g:cell>
+							</g:HorizontalPanel>
+							<g:HorizontalPanel ui:field="buttonPanel1"
+								height="15px">
+								<g:cell width="11%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="addBCFButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+					</g:CaptionPanel>
+
+					<g:cell width="2%" height="5" horizontalAlignment="ALIGN_LEFT">
+						<g:Label></g:Label>
+					</g:cell>
+
+					<g:CaptionPanel ui:field="actionCaptionPanel" width="90%"
+						height="6em">
+						<g:VerticalPanel ui:field="labelPanel" width="100%"
+							height="50px">
+							<g:HorizontalPanel>
+								<g:cell width="5%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="resetButton"></g:Button>
+								</g:cell>
+								<g:cell width="20%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="finishButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:VerticalPanel>
+					</g:CaptionPanel>
+
+
+				</g:VerticalPanel>
+
+			</g:west>
+
+			<g:east size="40" width="100" horizontalAlignment="ALIGN_LEFT">
+				<g:CaptionPanel ui:field="deleteCaptionPanel" width="90%"
+					height="30.5em">
+					<g:VerticalPanel width="100%" height="50px">
+						<g:HorizontalPanel width="100%" ui:field="selectAllCell">
+						</g:HorizontalPanel>
+
+						<g:ScrollPanel ui:field="fileListPanel" height="25em">
+							<g:FlexTable ui:field="fileListTable" width="100%"
+								height="100%">
+							</g:FlexTable>
+						</g:ScrollPanel>
+						<g:cell width="2%" height="10" horizontalAlignment="ALIGN_LEFT">
+							<g:Label></g:Label>
+						</g:cell>
+						<g:cell width="2%" horizontalAlignment="ALIGN_LEFT">
+							<g:Button ui:field="deleteButton"></g:Button>
+						</g:cell>
+
+					</g:VerticalPanel>
+				</g:CaptionPanel>
+			</g:east>
+		</g:DockLayoutPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>

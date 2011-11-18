@@ -1,0 +1,48 @@
+.font_red {
+	color: red;
+}
+
+.padding {
+	padding: 15px 5px;
+}
+
+.paddingTop {
+	padding: 10px 0px;
+}
+
+.marginTop {
+	margin: 10px 0px;
+}
+
+.marginLocal {
+	margin: 5px;
+}
+
+.paddingSelectAllLabel {
+	padding: 5px 6px;
+}
+
+.paddingSelectAll {
+	padding: 5px 0;
+}
+
+.deleteTable {
+	border: 1px solid #92C1F0 !important;
+}
+
+.bold_text {
+	font-weight: bold !important;;
+}
+
+.panel_bg {
+	background: none repeat scroll 0 0 #E7E9E9 !important;
+	border: 1px solid #6FA6C4 !important;
+}
+
+.gwt-Label {
+	font-weight: normal;
+}
+
+.gwt-TabBarItem .gwt-Label {
+	font-weight: bold;
+}

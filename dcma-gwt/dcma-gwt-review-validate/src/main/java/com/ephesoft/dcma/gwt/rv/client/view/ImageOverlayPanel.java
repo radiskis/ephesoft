@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.ArrayList;
@@ -112,6 +77,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -169,6 +135,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 	private Integer clickCount = 0;
 	private boolean shiftKeyPressed = false;
 	private boolean ctrlKeyPressed = false;
+	private boolean rightMouseFirstClickDone = false;
 	private double xFactor = 0.443;
 	private double yFactor = 0.243;
 	private List<PointCoordinate> pointCoordinates;
@@ -228,10 +195,10 @@ public class ImageOverlayPanel extends RVBasePanel {
 		pageImage.addMouseUpHandler(new MouseUpHandler() {
 
 			@Override
-			public void onMouseUp(MouseUpEvent mouseDown) {
+			public void onMouseUp(MouseUpEvent mouseUp) {
 				double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
-				int xCoordinate = (int) Math.round(mouseDown.getX() / aspectRatio);
-				int yCoordinate = (int) Math.round(mouseDown.getY() / aspectRatio);
+				int xCoordinate = (int) Math.round(mouseUp.getX() / aspectRatio);
+				int yCoordinate = (int) Math.round(mouseUp.getY() / aspectRatio);
 				if (presenter.isTableView() && presenter.isManualTableExtraction()) {
 					if (isFirstClick) {
 						pageImage.setStyleName("pointer");
@@ -259,33 +226,64 @@ public class ImageOverlayPanel extends RVBasePanel {
 						isFirstClick = true;
 					}
 				} else if (!presenter.isManualTableExtraction()) {
-					if (shiftKeyPressed) {
-						if (clickCount == 0) {
+					if (mouseUp.getNativeButton() == Event.BUTTON_RIGHT) {
+						clickCount = 0;
+						ctrlKeyPressed = false;
+						shiftKeyPressed = false;
+						if (!rightMouseFirstClickDone) {
+							pageImage.addStyleName("pointer");
 							pointCoordinate1.setxCoordinate(xCoordinate);
 							pointCoordinate1.setyCoordinate(yCoordinate);
-							clickCount = 1;
+							rightMouseFirstClickDone = true;
 						} else {
+							if (xCoordinate < pointCoordinate1.getxCoordinate()) {
+								int temp = pointCoordinate1.getxCoordinate();
+								pointCoordinate1.setxCoordinate(xCoordinate);
+								xCoordinate = temp;
+							}
+							if (yCoordinate < pointCoordinate1.getyCoordinate()) {
+								int temp = pointCoordinate1.getyCoordinate();
+								pointCoordinate1.setyCoordinate(yCoordinate);
+								yCoordinate = temp;
+							}
+							pageImage.removeStyleName("pointer");
 							pointCoordinate2.setxCoordinate(xCoordinate);
 							pointCoordinate2.setyCoordinate(yCoordinate);
-							presenter.getHOCRContent(pointCoordinate1, pointCoordinate2);
+							rightMouseFirstClickDone = false;
+							presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, true);
 						}
-					} else if (ctrlKeyPressed) {
-						if (clickCount == 0 || pointCoordinates == null) {
-							pointCoordinates = new ArrayList<PointCoordinate>();
+					}
+
+					else {
+						rightMouseFirstClickDone = false;
+						if (shiftKeyPressed) {
+							if (clickCount == 0) {
+								pointCoordinate1.setxCoordinate(xCoordinate);
+								pointCoordinate1.setyCoordinate(yCoordinate);
+								clickCount = 1;
+							} else {
+								pointCoordinate2.setxCoordinate(xCoordinate);
+								pointCoordinate2.setyCoordinate(yCoordinate);
+								presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, false);
+							}
+						} else if (ctrlKeyPressed) {
+							if (clickCount == 0 || pointCoordinates == null) {
+								pointCoordinates = new ArrayList<PointCoordinate>();
+							}
+							PointCoordinate pointCoordinate = new PointCoordinate();
+							pointCoordinate.setxCoordinate(xCoordinate);
+							pointCoordinate.setyCoordinate(yCoordinate);
+							pointCoordinates.add(pointCoordinate);
+							presenter.getHOCRContent(pointCoordinates);
+							clickCount++;
+						} else {
+							pointCoordinates = new ArrayList<PointCoordinate>(1);
+							PointCoordinate pointCoordinate = new PointCoordinate();
+							pointCoordinate.setxCoordinate(xCoordinate);
+							pointCoordinate.setyCoordinate(yCoordinate);
+							pointCoordinates.add(pointCoordinate);
+							presenter.getHOCRContent(pointCoordinates);
 						}
-						PointCoordinate pointCoordinate = new PointCoordinate();
-						pointCoordinate.setxCoordinate(xCoordinate);
-						pointCoordinate.setyCoordinate(yCoordinate);
-						pointCoordinates.add(pointCoordinate);
-						presenter.getHOCRContent(pointCoordinates);
-						clickCount++;
-					} else {
-						pointCoordinates = new ArrayList<PointCoordinate>(1);
-						PointCoordinate pointCoordinate = new PointCoordinate();
-						pointCoordinate.setxCoordinate(xCoordinate);
-						pointCoordinate.setyCoordinate(yCoordinate);
-						pointCoordinates.add(pointCoordinate);
-						presenter.getHOCRContent(pointCoordinates);
 					}
 				}
 			}
@@ -313,7 +311,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 				zoomout.setEnabled(true);
 				rotate.setEnabled(true);
 				fitToPage.setEnabled(true);
-			
+
 				loadImage();
 				pageImage.setVisible(true);
 			}
@@ -334,19 +332,21 @@ public class ImageOverlayPanel extends RVBasePanel {
 
 			@Override
 			public void onMouseMove(final MouseMoveEvent paramMouseMoveEvent) {
-				if (presenter.isManualTableExtraction()) {
+				if (presenter.isManualTableExtraction() || (!presenter.isManualTableExtraction() && rightMouseFirstClickDone)) {
 					double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
 					int xCoordinate = (int) Math.round(paramMouseMoveEvent.getX() / aspectRatio);
 					int yCoordinate = (int) Math.round(paramMouseMoveEvent.getY() / aspectRatio);
 					pointCoordinate2.setxCoordinate(xCoordinate);
 					pointCoordinate2.setyCoordinate(yCoordinate);
-					if (!isFirstClick) {
+					if ((presenter.isManualTableExtraction() && !isFirstClick)
+							|| (rightMouseFirstClickDone && !presenter.isManualTableExtraction())) {
 						// pageImage.addStyleName("pointer");
 						doOverlay(pointCoordinate1, pointCoordinate2);
-					} else {
-						// pageImage.removeStyleName("pointer");
 					}
+				} else {
+					pageImage.removeStyleName("pointer");
 				}
+
 			}
 		});
 	}
@@ -387,19 +387,27 @@ public class ImageOverlayPanel extends RVBasePanel {
 			x1 = (double) (x1 * aspectRatio) + (double) (xFactor * getViewPortWidth());
 			y0 = (double) (y0 * aspectRatio) + (double) (yFactor * getViewPortHeight());
 			y1 = (double) (y1 * aspectRatio) + (double) (yFactor * getViewPortHeight());
-			if (yScrollPosition > (y1 - (0.255 * getViewPortHeight())) || xScrollPosition > (x0 - (0.443 * getViewPortWidth()))
-					|| x1 - xScrollPosition > getViewPortWidth() || y1 - yScrollPosition > getViewPortHeight()) {
+			if (xScrollPosition > (x0 - (0.443 * getViewPortWidth())) || x1 - xScrollPosition > getViewPortWidth()) {
 				removeOverlayById(coordinateIdentifier.toString());
 				return;
 			}
-			if (xScrollPosition == 0 && yScrollPosition == 0 && zoomFactor == 1) {
-				removeOverlayById(coordinateIdentifier.toString());
-				doOverlay(coordinateIdentifier.toString(), x0, x1, y0, y1, zoomFactor);
-			} else if (xScrollPosition <= x1 && yScrollPosition <= y1) {
+			if (xScrollPosition <= x1 && yScrollPosition <= y1) {
 				x0 -= xScrollPosition;
 				x1 -= xScrollPosition;
-				y0 -= yScrollPosition;
-				y1 -= yScrollPosition;
+				if (yScrollPosition > (y0 - (0.24 * getViewPortHeight()))) {
+					y0 = (0.24 * getViewPortHeight());
+				} else if (y0 - yScrollPosition > (0.96 * getViewPortHeight())) {
+					y0 = 0.96 * getViewPortHeight();
+				} else {
+					y0 -= yScrollPosition;
+				}
+				if (yScrollPosition > (y1 - (0.24 * getViewPortHeight()))) {
+					y1 = (0.24 * getViewPortHeight());
+				} else if (y1 - yScrollPosition > (0.96 * getViewPortHeight())) {
+					y1 = 0.96 * getViewPortHeight();
+				} else {
+					y1 -= yScrollPosition;
+				}
 				removeOverlayById(coordinateIdentifier.toString());
 				doOverlay(coordinateIdentifier.toString(), x0, x1, y0, y1, zoomFactor);
 			} else {
@@ -976,10 +984,11 @@ public class ImageOverlayPanel extends RVBasePanel {
 			@Override
 			public void onKeyDown(RVKeyDownEvent event) {
 				if (event.getEvent().isShiftKeyDown()) {
+					rightMouseFirstClickDone = false;
 					shiftKeyPressed = true;
-					// clickCount = 0;
 				}
 				if (event.getEvent().isControlKeyDown()) {
+					rightMouseFirstClickDone = false;
 					ctrlKeyPressed = true;
 
 					switch (event.getEvent().getNativeEvent().getKeyCode()) {
@@ -1210,17 +1219,27 @@ public class ImageOverlayPanel extends RVBasePanel {
 		x1 = (double) (x1Coord * aspectRatio) + (double) (xFactor * getViewPortWidth());
 		y0 = (double) (y0Coord * aspectRatio) + (double) (yFactor * getViewPortHeight());
 		y1 = (double) (y1Coord * aspectRatio) + (double) (yFactor * getViewPortHeight());
-		if (yScrollPosition > (y1 - (yFactor * getViewPortHeight())) || xScrollPosition > (x0 - (xFactor * getViewPortWidth()))
-				|| x1 - xScrollPosition > getViewPortWidth() || y1 - yScrollPosition > getViewPortHeight()) {
+		if (xScrollPosition > (x0 - (xFactor * getViewPortWidth())) || x1 - xScrollPosition > getViewPortWidth()) {
 			return;
 		}
-		if (xScrollPosition == 0 && yScrollPosition == 0 && zoomFactor == 1) {
-			doOverlay(x0, x1, y0, y1, zoomFactor);
-		} else if (xScrollPosition <= x1 && yScrollPosition <= y1) {
+		if (xScrollPosition <= x1 && yScrollPosition <= y1) {
 			x0 -= xScrollPosition;
 			x1 -= xScrollPosition;
-			y0 -= yScrollPosition;
-			y1 -= yScrollPosition;
+			if (yScrollPosition > (y0 - (0.24 * getViewPortHeight()))) {
+				y0 = (0.24 * getViewPortHeight());
+			} else if (y0 - yScrollPosition > (0.96 * getViewPortHeight())) {
+				y0 = 0.96 * getViewPortHeight();
+			} else {
+				y0 -= yScrollPosition;
+			}
+			if (yScrollPosition > (y1 - (0.24 * getViewPortHeight()))) {
+				y1 = (0.24 * getViewPortHeight());
+			} else if (y1 - yScrollPosition > (0.96 * getViewPortHeight())) {
+				y1 = 0.96 * getViewPortHeight();
+			} else {
+				y1 -= yScrollPosition;
+			}
+			removeOverlay();
 			doOverlay(x0, x1, y0, y1, zoomFactor);
 		}
 	}
@@ -1240,6 +1259,10 @@ public class ImageOverlayPanel extends RVBasePanel {
 		double finalY = finalYCoor;
 		if (initialX <= finalX && initialY <= finalY) {
 			// it is in the III quadrant.
+			if (zoomCount == 1) {
+				finalX = finalXCoor - crosshairReductionFactor;
+				finalY = finalY - crosshairReductionFactor - 7;
+			}
 			if (zoomCount == 2) {
 				finalX = finalXCoor - crosshairReductionFactor - 8;
 			} else if (zoomCount == 3) {

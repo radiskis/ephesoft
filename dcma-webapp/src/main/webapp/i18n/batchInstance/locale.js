@@ -70,7 +70,7 @@ var batchInstanceMessages = {
 		restart_option_failure : "Failed to retrieve restart options for batch instance {0}",
 		select_restart_option : "Please select a valid restart point.",
 		restart_from_module_name: "This will restart the batch from",
-		locked_batch: "Batch is locked by another user for editing.Unable to perform the operation."
+		locked_batch: "Batch is locked by a user for editing.Unable to perform the operation."
 };
 /** ************************** Turkish locale (suffix: _tk)****************** */
 var batchInstanceConstants_tk = {
@@ -139,5 +139,5 @@ var batchInstanceMessages_tk = {
 		restart_option_failure : "Failed to retrieve restart options for batch instance {0}",
 		select_restart_option : "Please select a valid restart point.",
 		restart_from_module_name: "This will restart the batch from",
-		locked_batch: "Batch is locked by another user for editing.Unable to perform the operation."
+		locked_batch: "Batch is locked by a user for editing.Unable to perform the operation."
 };
