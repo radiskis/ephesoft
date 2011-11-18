@@ -54,7 +54,7 @@
 	<sub-process continue="async" g="853,16,176,59" name="NSI_Export_Plugin"
 		sub-process-key="NSI_Export_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="CleanUp_Plugin" />
+		<transition to="Key_Value_Learning_Plugin" />
 	</sub-process>
 
 	<sub-process continue="async" g="1061,16,176,59" name="CMIS_Export_Plugin"
@@ -68,12 +68,18 @@
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="NSI_Export_Plugin" />
 	</sub-process>
-
+	
+	<sub-process continue="async" g="1269,16,176,59" name="Key_Value_Learning_Plugin"
+		sub-process-key="Key_Value_Learning_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="CleanUp_Plugin" />
+	</sub-process>
+	
 	<sub-process continue="async" g="1477,16,176,59" name="CleanUp_Plugin"
 		sub-process-key="CleanUp_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="end" />
 	</sub-process>
-
+	
 	<end g="1685,25,80,40" name="end" />
 </process>

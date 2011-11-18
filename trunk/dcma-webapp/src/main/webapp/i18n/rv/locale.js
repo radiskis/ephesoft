@@ -1,4 +1,6 @@
-﻿﻿/**
+﻿﻿
+
+/**
  * ******************************* Default locale
  * **************************************************
  */
@@ -7,6 +9,7 @@ var rvConstants = {
 	tabLabel_home : "Home",
 	tabLabel_batch_detail : "Batch Detail",
 	tabLabel_web_scanner : "Web Scanner",
+	tabLabel_upload_batch: "Upload Batch",
 	title_revVal_backButton : "Save and Show Batch List",
 	title_revVal_nextButton : "Save and Show Next Batch",
 	title_document : "DOCUMENT-",
@@ -25,8 +28,8 @@ var rvConstants = {
 	title_split : "Split Document Confirmation",
 	title_split_doc : "Split Document",
 	title_topPanel_batchId : "BatchId",
-	title_topPanel_workflow : "Workflow",
-	title_topPanel_batch_status : "BatchStatus",
+	title_topPanel_batchClass : "BatchClass",
+//	title_topPanel_batch_status : "BatchStatus",
 	title_topPanel_back : "Back to Batch List",
 	title_topPanel_next : "Next Batch",
 	title_topPanel_info : "Shortcuts",
@@ -42,7 +45,7 @@ var rvConstants = {
 	title_movePanel_move_page : "Move Page",
 	title_movePanel_cancel_button : "Cancel",
 	title_movePanel_document : "Document",
-	batch_status_locked : "Locked",
+	/*batch_status_locked : "Locked",
 	batch_status_ready : "Ready",
 	batch_status_running : "Running",
 	batch_status_readyForReview : "Ready For Review",
@@ -50,7 +53,8 @@ var rvConstants = {
 	batch_status_readyForValidation : "Ready For Validation",
 	batch_status_validated : "Validated",
 	batch_status_error : "Error",
-	batch_status_finished : "Finished",
+	batch_status_finished : "Finished",*/
+	title_topPanel_batchClass : "BatchClass",
 	info_save_document : "Save Document",
 	info_split_document : "Split Document",
 	info_zoom_in : "Zoom-in",
@@ -121,7 +125,9 @@ var rvConstants = {
 	name_of_app_shortcut_ctrl_9 : "App4",
 	modal_window_shortcuts : "Modal Window Shortcuts",
 	function_key_shortcuts : "Function Key Shortcuts",
-	title_topPanel_batchName : "BatchName"
+	title_topPanel_batchName : "BatchName",
+	disclosure_panel_shortcut : "Review Panel Open or Close",
+	review_panel : "Review Panel"
 };
 
 var rvMessages = {
@@ -193,6 +199,7 @@ var rvConstants_tk = {
 	tabLabel_home : "Ev",
 	tabLabel_batch_detail : "İş Detayı",
 	tabLabel_web_scanner : "Web Tarayıcı",
+	tabLabel_upload_batch: "Toplu Yükle",
 	title_revVal_backButton : "Kaydet ve İş Listesini Göster",
 	title_revVal_nextButton : "Kaydet ve Baska İş Göster",
 	title_document : "Döküman-",
@@ -211,8 +218,8 @@ var rvConstants_tk = {
 	title_split : "Döküman Bölme Onayı",
 	title_split_doc : "Döküman Bölme",
 	title_topPanel_batchId : "İşNo",
-	title_topPanel_workflow : "İş Akışı",
-	title_topPanel_batch_status : "İşDurum",
+	title_topPanel_batchClass : "İş Akışı",
+//	title_topPanel_batch_status : "İşDurum",
 	title_reviewPanel_docType : "Döküman Tipi",
 	title_reviewPanel_mergeDocWith : "Döküman Birleştirme",
 	title_topPanel_back : "Geri Toplu Listesine",
@@ -228,7 +235,7 @@ var rvConstants_tk = {
 	title_movePanel_move_page : "Sayfa Taşı",
 	title_movePanel_cancel_button : "Iptal",
 	title_movePanel_document : "Belge",
-	batch_status_locked : "Kilitli",
+	/*batch_status_locked : "Kilitli",
 	batch_status_ready : "Hazır",
 	batch_status_running : "Koşma",
 	batch_status_readyForReview : "Gözden Geçirme İçin Hazır",
@@ -236,7 +243,7 @@ var rvConstants_tk = {
 	batch_status_readyForValidation : "Doğrulama İçin Hazır",
 	batch_status_validated : "Valide",
 	batch_status_error : "Hata",
-	batch_status_finished : "Bitmiş",
+	batch_status_finished : "Bitmiş",*/
 	info_save_document : "Kaydet Belge",
 	info_split_document : "Split Belge",
 	info_zoom_in : "Yakınlaştırmak",
@@ -304,7 +311,9 @@ var rvConstants_tk = {
 	name_of_app_shortcut_ctrl_9 : "App4",
 	modal_window_shortcuts : "Kalıcı Window Kısayolları",
 	function_key_shortcuts : "İşlev Tuşu Kısayolları",
-	title_topPanel_batchName : "Toplu iş adı"
+	title_topPanel_batchName : "Toplu iş adı",
+	disclosure_panel_shortcut : "Gözden Geçirme Paneli Aç veya Kapat",
+	review_panel :	"Gözden Geçirme Paneli"
 };
 
 var rvMessages_tk = {

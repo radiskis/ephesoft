@@ -332,7 +332,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		String[] attributeFilter = {UserConnectivityConstant.COMMON_NAME};
 		searchControl.setReturningAttributes(attributeFilter);
 		searchControl.setSearchScope(SearchControls.SUBTREE_SCOPE);
-		String filter = "";
+		String filter = UserConnectivityConstant.EMPTY_STRING;
 		if (name == UserConnectivityConstant.MSACTIVEDIRECTORY_GROUP && msActiveDirectoryGroupSearchFilter != null && !msActiveDirectoryGroupSearchFilter.isEmpty()) {
 			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_AMP_SYMBOL);

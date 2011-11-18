@@ -45,11 +45,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 import com.ephesoft.dcma.barcodeextraction.BarcodeExtractionReader.BarcodeReaderTypes;
 import com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchPlugin;
@@ -127,6 +129,9 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 	private static final String LEARN_INDEX = "LearnIndex";
 	public static final String BATCH_CLASS_DEF = "BatchClassDefinition";
 	public static final String ROLES = "Roles";
+	private static final String PROPERTY_FILE_NAME = "application.properties";
+	private static final String META_INF = "META-INF";
+	private static final String ROW_COUNT = "row_count";
 
 	private static final long serialVersionUID = 1L;
 
@@ -888,7 +893,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 								continue;
 							}
 
-							/*if (nodeName.equalsIgnoreCase("FileboundMapping")) {
+								/*if (nodeName.equalsIgnoreCase("FileboundMapping")) {
 								if (!BatchClassUtil.isChecked(node)) {
 									// import the fuzzy DB samples from database
 									String fileboundBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir,
@@ -1076,5 +1081,20 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 		keyList = dao.getPrimaryKeysForTable(table, tableType);
 		dao.closeSession();
 		return keyList;
+	}
+
+	@Override
+	public String getBatchClassRowCount() throws GWTException {
+		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
+		String rowCount = null;
+		try {
+			InputStream propertyInStream = new ClassPathResource(filePath).getInputStream();
+			Properties properties = new Properties();
+			properties.load(propertyInStream);
+			rowCount = properties.getProperty(ROW_COUNT);
+		} catch (IOException e) {
+			rowCount = null;
+		}
+		return rowCount;
 	}
 }

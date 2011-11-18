@@ -195,7 +195,19 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		}
 		return isReportingEnabled;
 	}
-
+	
+	@Override
+	public Boolean isUploadBatchEnabled() {
+		ApplicationConfigProperties configProperties = new ApplicationConfigProperties();
+		boolean isUploadBatchEnabled = false;
+		try {
+			isUploadBatchEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.uploadBatch"));
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+			isUploadBatchEnabled = false;
+		}
+		return isUploadBatchEnabled;
+	}
 	@SuppressWarnings("unchecked")
 	public Set<String> getAllGroups() {
 		Object allGroups = this.getThreadLocalRequest().getSession().getAttribute(ALL_GROUPS);

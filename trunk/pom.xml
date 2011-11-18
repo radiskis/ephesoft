@@ -57,6 +57,7 @@
 		<module>dcma-tabbed-pdf</module>
 		<module>dcma-csv-file-creation</module>
 		<module>dcma-ibm-cm</module>
+		<module>dcma-key-value-learning</module>
 	</modules>
 
 	<build>
@@ -311,6 +312,11 @@
 			<dependency>
 				<groupId>com.ephesoft.dcma</groupId>
 				<artifactId>dcma-imload-script</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-key-value-learnings</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

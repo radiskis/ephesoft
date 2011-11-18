@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.core.shared;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.BatchStatus;
@@ -54,6 +55,9 @@ public class BatchDTO implements IsSerializable {
 	private String fieldValueChangeScriptSwitchState = "OFF";
 	private String fuzzySearchSwitchState = "ON";
 	private String suggestionBoxSwitchState = "OFF";
+	private String externalApplicationSwitchState = "OFF";
+	private Map<String, String> urlAndShortcutMap = null;
+	private Map<String, String> dimensionsForPopUp = null;
 
 	public BatchDTO() {
 	}
@@ -64,7 +68,8 @@ public class BatchDTO implements IsSerializable {
 	}
 
 	public BatchDTO(Batch batch, String baseHTTPUrl, String isValidationScriptEnabled, String isFieldValueChangeScriptEnabled,
-			String isFuzzySearchEnabled, String suggestionBoxSwitchState) {
+			String isFuzzySearchEnabled, String suggestionBoxSwitchState, String externalApplicationSwitchState,
+			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp) {
 		this.batch = batch;
 		this.baseHTTPUrl = baseHTTPUrl;
 		if (null != isValidationScriptEnabled) {
@@ -79,6 +84,12 @@ public class BatchDTO implements IsSerializable {
 		if (null != suggestionBoxSwitchState) {
 			setSuggestionBoxSwitchState(suggestionBoxSwitchState);
 		}
+
+		if (null != externalApplicationSwitchState) {
+			setExternalApplicationSwitchState(externalApplicationSwitchState);
+		}
+		setUrlAndShortcutMap(urlAndShortcutMap);
+		setDimensionsForPopUp(dimensionsForPopUp);
 	}
 
 	public Batch getBatch() {
@@ -241,6 +252,30 @@ public class BatchDTO implements IsSerializable {
 
 	public void setSuggestionBoxSwitchState(String suggestionBoxSwitchState) {
 		this.suggestionBoxSwitchState = suggestionBoxSwitchState;
+	}
+
+	public void setExternalApplicationSwitchState(String externalApplicationSwitchState) {
+		this.externalApplicationSwitchState = externalApplicationSwitchState;
+	}
+
+	public String getExternalApplicationSwitchState() {
+		return externalApplicationSwitchState;
+	}
+
+	public void setUrlAndShortcutMap(Map<String, String> urlAndShortcutMap) {
+		this.urlAndShortcutMap = urlAndShortcutMap;
+	}
+
+	public Map<String, String> getUrlAndShortcutMap() {
+		return urlAndShortcutMap;
+	}
+
+	public void setDimensionsForPopUp(Map<String, String> dimensionsForPopUp) {
+		this.dimensionsForPopUp = dimensionsForPopUp;
+	}
+
+	public Map<String, String> getDimensionsForPopUp() {
+		return dimensionsForPopUp;
 	}
 
 }

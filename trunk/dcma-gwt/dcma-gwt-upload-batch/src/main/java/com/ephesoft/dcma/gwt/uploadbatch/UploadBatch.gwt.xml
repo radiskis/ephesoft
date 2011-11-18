@@ -1,0 +1,9 @@
+<module rename-to="uploadbatch">
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
+	<inherits name='org.swfupload.SWFUpload'/> 
+	
+	<entry-point class='com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatch' />
+
+	<source path='client' />
+</module>

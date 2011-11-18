@@ -9,10 +9,10 @@
 	<g:FocusPanel width='99.4%' height='100%'>
 		<g:HorizontalPanel ui:field="topHorizontalPanel"
 			width="100%" height="100%" spacing="3">
-			<g:cell width="8%" horizontalAlignment='ALIGN_RIGHT'>
+			<g:cell width="4%" horizontalAlignment='ALIGN_CENTER'>
 				<g:Label ui:field="batchIdText"></g:Label>
 			</g:cell>
-			<g:cell width="2%" horizontalAlignment='ALIGN_LEFT'>
+			<g:cell width="4%" horizontalAlignment='ALIGN_LEFT'>
 				<g:Label ui:field="batchId"></g:Label>
 			</g:cell>
 			<g:cell width="11%" horizontalAlignment='ALIGN_LEFT'>
@@ -32,12 +32,6 @@
 			</g:cell>
 			<g:cell width="18%" horizontalAlignment='ALIGN_LEFT'>
 				<g:Label ui:field="batchClassName"></g:Label>
-			</g:cell>
-			<g:cell width="10%" horizontalAlignment='ALIGN_RIGHT'>
-				<g:Label ui:field="batchStatusText"></g:Label>
-			</g:cell>
-			<g:cell width="25%" horizontalAlignment='ALIGN_LEFT'>
-				<g:Label ui:field="batchStatus"></g:Label>
 			</g:cell>
 			<g:cell width="1%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="pipe"></g:Label>

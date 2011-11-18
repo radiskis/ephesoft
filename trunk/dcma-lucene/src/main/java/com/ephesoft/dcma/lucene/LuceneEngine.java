@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.lucene;
 
 import java.io.BufferedReader;
@@ -354,12 +319,12 @@ public class LuceneEngine implements ICommonConstants {
 					LuceneProperties.LUCENE_NO_OF_PAGES);
 			String max_results = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
 					LuceneProperties.LUCENE_MAX_RESULT_COUNT);
-			
+
 			String first_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
 					LuceneProperties.LUCENE_FIRST_PAGE_CONF_WEIGHTAGE);
-			
-			String middle_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
-					LuceneProperties.LUCENE_MIDDLE_PAGE_CONF_WEIGHTAGE);
+
+			String middle_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID,
+					SEARCH_CLASSIFICATION_PLUGIN, LuceneProperties.LUCENE_MIDDLE_PAGE_CONF_WEIGHTAGE);
 
 			String last_page_conf_weightage = pluginPropertiesService.getPropertyValue(batchInstanceID, SEARCH_CLASSIFICATION_PLUGIN,
 					LuceneProperties.LUCENE_LAST_PAGE_CONF_WEIGHTAGE);
@@ -391,7 +356,7 @@ public class LuceneEngine implements ICommonConstants {
 			} catch (NumberFormatException e) {
 				LOGGER.info("Could not set max last page confidence weightage value. Using default value of 80.");
 			}
-			
+
 			LOGGER.info("Properties Initialized Successfully");
 
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -514,7 +479,8 @@ public class LuceneEngine implements ICommonConstants {
 							LOGGER.error("Exception while generating index or updating xml" + e.getMessage(), e);
 						}
 						LOGGER.info("Started updating batch xml for : " + eachPage);
-						updateBatchXML(returnMap, batch, eachPage, allPageTypes, first_page_conf_weightage_float, middle_page_conf_weightage_float, last_page_conf_weightage_float);
+						updateBatchXML(returnMap, batch, eachPage, allPageTypes, first_page_conf_weightage_float,
+								middle_page_conf_weightage_float, last_page_conf_weightage_float);
 						LOGGER.info("Successfully ended updating batch xml for : " + eachPage);
 					} else {
 						LOGGER.error("File " + eachPage + " has invalid extension.");
@@ -576,7 +542,8 @@ public class LuceneEngine implements ICommonConstants {
 	 * @throws DCMAApplicationException
 	 */
 	public void updateBatchXML(final Map<String, Float> batchDocNameScore, final Batch batch, final String eachHtmlPage,
-			final List<com.ephesoft.dcma.da.domain.PageType> allPageTypes, float firstPageConfWeightage, float middlePageConfWeightage, float lastPageConfWeightage) throws DCMAApplicationException {
+			final List<com.ephesoft.dcma.da.domain.PageType> allPageTypes, float firstPageConfWeightage,
+			float middlePageConfWeightage, float lastPageConfWeightage) throws DCMAApplicationException {
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		float highestConfScore = fetchHighestScoreValue(batchDocNameScore);
 		for (int i = 0; i < xmlDocuments.size(); i++) {
@@ -600,9 +567,10 @@ public class LuceneEngine implements ICommonConstants {
 						docFieldType.setValue(pageType);
 
 						float confidenceScore = calculateConfidenceScore(highestConfScore);
-						confidenceScore = applyConfWeightage(confidenceScore, pageType, firstPageConfWeightage, middlePageConfWeightage, lastPageConfWeightage);
+						confidenceScore = applyConfWeightage(confidenceScore, pageType, firstPageConfWeightage,
+								middlePageConfWeightage, lastPageConfWeightage);
 						docFieldType.setConfidence(confidenceScore);
-						
+
 						for (int k = 0; k < allPageTypes.size(); k++) {
 							com.ephesoft.dcma.da.domain.PageType eachPageType = allPageTypes.get(k);
 							if (eachPageType != null && batchDocNameScore.containsKey(eachPageType.getName())) {
@@ -614,11 +582,12 @@ public class LuceneEngine implements ICommonConstants {
 								Field fieldType = new Field();
 								String alternateValuePageType = eachPageType.getName();
 								fieldType.setValue(alternateValuePageType);
-								
+
 								float alternateValueConfidenceScore = calculateConfidenceScore(eachScore);
-								alternateValueConfidenceScore = applyConfWeightage(alternateValueConfidenceScore, alternateValuePageType, firstPageConfWeightage, middlePageConfWeightage, lastPageConfWeightage);
+								alternateValueConfidenceScore = applyConfWeightage(alternateValueConfidenceScore,
+										alternateValuePageType, firstPageConfWeightage, middlePageConfWeightage, lastPageConfWeightage);
 								fieldType.setConfidence(alternateValueConfidenceScore);
-								
+
 								fieldType.setName(FIELD_TYPE_NAME);
 								fieldType.setType(EMPTY_STRING);
 								fieldType.setCoordinatesList(null);
@@ -634,9 +603,10 @@ public class LuceneEngine implements ICommonConstants {
 		}
 	}
 
-	/** 
+	/**
 	 * Method to apply the confidence score weightage to page level fields
-	 * @param confidenceScore 
+	 * 
+	 * @param confidenceScore
 	 * 
 	 * @param pageType page value that contains the string first_page, middle_page, last_page
 	 * @param firstPageConfWeightage confidence score weightage of first page
@@ -644,13 +614,13 @@ public class LuceneEngine implements ICommonConstants {
 	 * @param lastPageConfWeightage confidence score weightage of last page
 	 * @return
 	 */
-	private float applyConfWeightage(float confidenceScore, String pageType, float firstPageConfWeightage, float middlePageConfWeightage,
-			float lastPageConfWeightage) {
+	private float applyConfWeightage(float confidenceScore, String pageType, float firstPageConfWeightage,
+			float middlePageConfWeightage, float lastPageConfWeightage) {
 		float updatedConfScore = confidenceScore;
-		if(pageType != null) {
+		if (pageType != null) {
 			if (pageType.contains(firstPage)) {
 				updatedConfScore = confidenceScore * firstPageConfWeightage;
-			} else if(pageType.contains(lastPage)) {
+			} else if (pageType.contains(lastPage)) {
 				updatedConfScore = confidenceScore * lastPageConfWeightage;
 			} else {
 				updatedConfScore = confidenceScore * middlePageConfWeightage;
@@ -1130,6 +1100,7 @@ public class LuceneEngine implements ICommonConstants {
 							targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
 						}
 						targetHtmlPaths.add(targetHTMlAbsolutePath.toString());
+						targetHTMlAbsolutePath = new StringBuffer();
 					}
 				}
 			} else {

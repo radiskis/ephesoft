@@ -46,6 +46,8 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 	String tabLabel_batch_detail = "tabLabel_batch_detail";
 
 	String tabLabel_web_scanner = "tabLabel_web_scanner";
+	
+	String tabLabel_upload_batch = "tabLabel_upload_batch";
 
 	String title_revVal_backButton = "title_revVal_backButton";
 
@@ -83,9 +85,9 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 
 	String title_topPanel_batchId = "title_topPanel_batchId";
 
-	String title_topPanel_workflow = "title_topPanel_workflow";
+	String title_topPanel_batchClass = "title_topPanel_batchClass";
 
-	String title_topPanel_batch_status = "title_topPanel_batch_status";
+//	String title_topPanel_batch_status = "title_topPanel_batch_status";
 
 	String title_topPanel_back = "title_topPanel_back";
 
@@ -314,4 +316,8 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 	String FULL_STOP = ".";
 	
 	String EMPTY_STRING = "";
+	
+	String DISCLOSURE_PANEL_SHORCUT ="disclosure_panel_shortcut";
+	
+	String REVIEW_PANEL = "review_panel";
 }

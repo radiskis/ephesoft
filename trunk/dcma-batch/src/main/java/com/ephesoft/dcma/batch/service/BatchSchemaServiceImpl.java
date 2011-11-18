@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.batch.service;
 
 import java.io.File;
@@ -2258,7 +2188,8 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		hocrPage.setPageID(pageName);
 		FileInputStream inputStream = null;
 		try {
-			if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+			if (isTesseractHocrPlugin(batchClassIdentifier)
+					&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 				String actualFolderLocation = new File(outputFilePath).getParent();
 				OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation);
@@ -2344,6 +2275,31 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		return hocrPage;
 	}
 
+	private boolean isTesseractHocrPlugin(String batchClassIdentifier) {
+		boolean isTesseractBatch = false;
+		if (batchClassIdentifier != null && !batchClassIdentifier.isEmpty()) {
+			BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByName(batchClassIdentifier,
+					IUtilCommonConstants.PAGE_PROCESS_MODULE_NAME);
+			List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
+			if (batchClassPlugins != null) {
+				String pluginName = null;
+				for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
+					if (batchClassPlugin != null) {
+						pluginName = batchClassPlugin.getPlugin().getPluginName();
+					}
+					if (IUtilCommonConstants.TESSERACT_HOCR_PLUGIN.equals(pluginName)) {
+						isTesseractBatch = true;
+						break;
+					} else if (IUtilCommonConstants.RECOSTAR_HOCR_PLUGIN.equals(pluginName)) {
+						isTesseractBatch = false;
+						break;
+					}
+				}
+			}
+		}
+		return isTesseractBatch;
+	}
+
 	@Override
 	public String getWebScannerScannedImagesURL() {
 		return getBaseHttpURL() + "/" + batchSchemaDao.getJAXB2Template().getWebScannerScannedImagesFolderPath();
@@ -2371,10 +2327,12 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public void copyFolder(String sourcePath, String folderName, String batchClassID) throws DCMAApplicationException {
 		String scannedImagesPath = sourcePath + File.separator + folderName;
 		File scannedImagesDirectory = new File(scannedImagesPath);
+		CustomFileFilter fileFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+				.getExtensionWithDot(), FileType.SER.getExtensionWithDot());
 		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
 		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
-			for (File file : getFilesToBeDeleted(scannedImagesPath)) {
+			for (File file : getFilesToBeDeleted(scannedImagesPath, fileFilter)) {
 				try {
 					FileUtils.forceDelete(file);
 					logger.info("Deleting File : " + file.getAbsolutePath());
@@ -2392,12 +2350,39 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 	}
 
-	private List<File> getFilesToBeDeleted(String scannedImagesPath) throws IOException {
-		File scannedImageDir = new File(scannedImagesPath);
+	@Override
+	public void copyFolderWithFileFilter(String sourcePath, String folderName, String batchClassID, CustomFileFilter fileFilter)
+			throws DCMAApplicationException {
+		String scannedImagesPath = sourcePath + File.separator + folderName;
+		File scannedImagesDirectory = new File(scannedImagesPath);
+		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
+		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
+		try {
+			for (File file : getFilesToBeDeleted(scannedImagesPath, fileFilter)) {
+				try {
+					FileUtils.forceDelete(file);
+					logger.info("Deleting File : " + file.getAbsolutePath());
+				} catch (Exception e) {
+					logger.error("Unable to delete file : " + file.getAbsolutePath());
+				}
+			}
+			FileUtils.copyDirectory(scannedImagesDirectory, uncFolder);
+			logger.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
+			FileUtils.forceDelete(scannedImagesDirectory);
+			logger.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new DCMAApplicationException(e.getMessage(), e);
+		}
+	}
+
+	private List<File> getFilesToBeDeleted(String srcPath, CustomFileFilter fileFilter) throws IOException {
+		File srcDir = new File(srcPath);
 		List<File> fileList = new ArrayList<File>();
-		for (String imagename : scannedImageDir.list(new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
-				.getExtensionWithDot(), FileType.SER.getExtensionWithDot()))) {
-			fileList.add(new File(scannedImagesPath + File.separator + imagename));
+		if (srcDir != null && srcDir.list(fileFilter) != null) {
+			for (String imagename : srcDir.list(fileFilter)) {
+				fileList.add(new File(srcPath + File.separator + imagename));
+			}
 		}
 		return fileList;
 	}
@@ -2672,6 +2657,11 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 		detachedBatchClassModule.setBatchClassPlugins(newBatchClassPluginsList);
 		return detachedBatchClassModule;
+	}
+
+	@Override
+	public String getUploadBatchFolder() {
+		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getUploadBatchFolder();
 	}
 
 }

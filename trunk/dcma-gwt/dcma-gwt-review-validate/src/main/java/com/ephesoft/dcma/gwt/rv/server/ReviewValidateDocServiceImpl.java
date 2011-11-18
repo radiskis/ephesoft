@@ -156,6 +156,42 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.SUGGESTION_BOX_SWITCH);
+
+		String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
+		Map<String, String> propertyNameVsValueMap = null;
+		Map<String, String> dimensionsForPopUp = null;
+		if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
+			dimensionsForPopUp = new HashMap<String, String>();
+			propertyNameVsValueMap = new LinkedHashMap<String, String>();
+			String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_X_DIMENSION);
+			String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
+			dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
+			dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
+			String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_URL1);
+			String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_URL2);
+			String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_URL3);
+			String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+					ValidateProperties.EXTERNAL_APP_URL4);
+			if (null != url1 && !url1.isEmpty()) {
+				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
+			}
+			if (null != url2 && !url2.isEmpty()) {
+				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
+			}
+			if (null != url3 && !url3.isEmpty()) {
+				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
+			}
+			if (null != url4 && !url4.isEmpty()) {
+				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
+			}
+		}
+
 		switch (batchInstance.getStatus()) {
 			case READY_FOR_REVIEW:
 				batch.setBatchStatus(BatchStatus.READY_FOR_REVIEW);
@@ -168,7 +204,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
-				suggestionBoxSwitchState);
+				suggestionBoxSwitchState, externalApplicationSwitchState, propertyNameVsValueMap, dimensionsForPopUp);
 	}
 
 	@Override
@@ -238,19 +274,56 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			URL batchURL = batchSchemaService.getBatchContextURL(rtbatch.getBatchInstanceIdentifier());
 			PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
 					BatchInstancePluginPropertiesService.class);
-			String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
+			String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
+			String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+					ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
 
-			String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
+			String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
 
-			String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_SWITCH);
-			String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batch.getBatchInstanceIdentifier(),
+			String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+					ValidateProperties.FUZZY_SEARCH_SWITCH);
+			String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.SUGGESTION_BOX_SWITCH);
+			String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
+			Map<String, String> propertyNameVsValueMap = null;
+
+			Map<String, String> dimensionsForPopUp = null;
+			if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
+				dimensionsForPopUp = new HashMap<String, String>();
+				propertyNameVsValueMap = new LinkedHashMap<String, String>();
+				String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_X_DIMENSION);
+				String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
+				dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
+				dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
+				String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_URL1);
+				String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_URL2);
+				String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_URL3);
+				String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+						ValidateProperties.EXTERNAL_APP_URL4);
+				if (null != url1 && !url1.isEmpty()) {
+					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
+				}
+				if (null != url2 && !url2.isEmpty()) {
+					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
+				}
+				if (null != url3 && !url3.isEmpty()) {
+					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
+				}
+				if (null != url4 && !url4.isEmpty()) {
+					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
+				}
+			}
 
 			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
-					fuzzySearchSwitch, suggestionBoxSwitchState);
+					fuzzySearchSwitch, suggestionBoxSwitchState, externalApplicationSwitchState, propertyNameVsValueMap,
+					dimensionsForPopUp);
 
 		} catch (DCMAApplicationException e) {
 			log.error(e.getMessage(), e);
@@ -601,7 +674,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	@Override
 	public List<Span> getHOCRContent(PointCoordinate pointCoordinate1, PointCoordinate pointCoordinate2,
-			String batchInstanceIdentifier, String pageID) {
+			String batchInstanceIdentifier, String pageID, boolean rectangularCoordinateSet) {
 		List<Span> spanSelectedList = null;
 		boolean valid = true;
 		if (batchInstanceIdentifier == null) {
@@ -621,7 +694,6 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					if (hocrPage.getSpans() != null) {
 						spanList = hocrPage.getSpans().getSpan();
 					}
-					List<Span> spanSortedList = getSortedList(spanList);
 					Integer firstSpanIndex = null;
 					Integer lastSpanIndex = null;
 
@@ -629,38 +701,93 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					Integer y0Coordinate = pointCoordinate1.getyCoordinate();
 					Integer x1Coordinate = pointCoordinate2.getxCoordinate();
 					Integer y1Coordinate = pointCoordinate2.getyCoordinate();
+					List<Span> spanSortedList = getSortedList(spanList);
+					if (!rectangularCoordinateSet) {
 
-					int counter = 0;
+						int counter = 0;
 
-					for (Span span : spanSortedList) {
-						long spanX0 = span.getCoordinates().getX0().longValue();
-						long spanY0 = span.getCoordinates().getY0().longValue();
-						long spanX1 = span.getCoordinates().getX1().longValue();
-						long spanY1 = span.getCoordinates().getY1().longValue();
-						if (spanX0 < x0Coordinate && spanX1 > x0Coordinate && spanY0 < y0Coordinate && spanY1 > y0Coordinate) {
-							firstSpanIndex = counter;
-						}
-						if (spanX0 < x1Coordinate && spanX1 > x1Coordinate && spanY0 < y1Coordinate && spanY1 > y1Coordinate) {
-							lastSpanIndex = counter;
-						}
-						if (firstSpanIndex != null && lastSpanIndex != null) {
-							break;
-						}
-						counter++;
-					}
-
-					if (firstSpanIndex != null && lastSpanIndex != null) {
-						counter = 0;
 						for (Span span : spanSortedList) {
-							if ((counter >= firstSpanIndex && counter <= lastSpanIndex)
-									|| (counter <= firstSpanIndex && counter >= lastSpanIndex)) {
-								if (spanSelectedList == null) {
-									spanSelectedList = new ArrayList<Span>();
-								}
-								spanSelectedList.add(span);
+							long spanX0 = span.getCoordinates().getX0().longValue();
+							long spanY0 = span.getCoordinates().getY0().longValue();
+							long spanX1 = span.getCoordinates().getX1().longValue();
+							long spanY1 = span.getCoordinates().getY1().longValue();
+							if (spanX0 < x0Coordinate && spanX1 > x0Coordinate && spanY0 < y0Coordinate && spanY1 > y0Coordinate) {
+								firstSpanIndex = counter;
+							}
+							if (spanX0 < x1Coordinate && spanX1 > x1Coordinate && spanY0 < y1Coordinate && spanY1 > y1Coordinate) {
+								lastSpanIndex = counter;
+							}
+							if (firstSpanIndex != null && lastSpanIndex != null) {
+								break;
 							}
 							counter++;
 						}
+						if (firstSpanIndex != null && lastSpanIndex != null) {
+							counter = 0;
+							for (Span span : spanSortedList) {
+								if ((counter >= firstSpanIndex && counter <= lastSpanIndex)
+										|| (counter <= firstSpanIndex && counter >= lastSpanIndex)) {
+									if (spanSelectedList == null) {
+										spanSelectedList = new ArrayList<Span>();
+									}
+									spanSelectedList.add(span);
+								}
+								counter++;
+							}
+						}
+					} else {
+						boolean isValidSpan = false;
+						int defaultvalue = 20;
+						int counter = 0;
+						StringBuffer valueStringBuffer = new StringBuffer();
+						long currentYCoor = spanSortedList.get(0).getCoordinates().getY1().longValue();
+						for (Span span : spanSortedList) {
+							isValidSpan = false;
+							long spanX0 = span.getCoordinates().getX0().longValue();
+							long spanY0 = span.getCoordinates().getY0().longValue();
+							long spanX1 = span.getCoordinates().getX1().longValue();
+							long spanY1 = span.getCoordinates().getY1().longValue();
+							if ((spanY1 - currentYCoor) > defaultvalue) {
+								currentYCoor = spanY1;
+								if (spanSelectedList != null && spanSelectedList.size() > 0) {
+									break;
+								}
+							}
+							if (((spanX1 >= x0Coordinate && spanX1 <= x1Coordinate) || (spanX0 >= x0Coordinate && spanX0 <= x1Coordinate))
+									&& ((spanY1 <= y1Coordinate && spanY1 >= y0Coordinate) || (spanY0 <= y1Coordinate && spanY0 >= y0Coordinate))) {
+								isValidSpan = true;
+							} else if (((x0Coordinate <= spanX0 && x1Coordinate >= spanX0) || (x0Coordinate >= spanX1 && x1Coordinate <= spanX1))
+									&& ((y0Coordinate >= spanY0 && y0Coordinate <= spanY1) || (y1Coordinate >= spanY0 && y1Coordinate <= spanY1))
+									|| ((y0Coordinate <= spanY0 && y1Coordinate >= spanY0) || (y0Coordinate >= spanY1 && y1Coordinate <= spanY1))
+									&& ((x0Coordinate >= spanX0 && x0Coordinate <= spanX1) || (x1Coordinate >= spanX0 && x1Coordinate <= spanX1))) {
+								isValidSpan = true;
+							} else {
+								if (((x0Coordinate > spanX0 && x0Coordinate < spanX1) || (x1Coordinate > spanX0 && x1Coordinate < spanX1))
+										&& ((y0Coordinate > spanY0 && y0Coordinate < spanY1) || (y1Coordinate > spanY0 && y1Coordinate < spanY1))) {
+									isValidSpan = true;
+								}
+							}
+							if (isValidSpan) {
+								if (counter != 0) {
+									valueStringBuffer.append(' ');
+								}
+								valueStringBuffer.append(span.getValue());
+								counter++;
+							}
+
+						}
+						if (spanSelectedList == null) {
+							spanSelectedList = new ArrayList<Span>();
+						}
+						Span span = new Span();
+						Coordinates coordinates = new Coordinates();
+						coordinates.setX0(BigInteger.valueOf(x0Coordinate));
+						coordinates.setX1(BigInteger.valueOf(x1Coordinate));
+						coordinates.setY0(BigInteger.valueOf(y0Coordinate));
+						coordinates.setY1(BigInteger.valueOf(y1Coordinate));
+						span.setCoordinates(coordinates);
+						span.setValue(valueStringBuffer.toString());
+						spanSelectedList.add(span);
 
 					}
 				}
@@ -1123,54 +1250,6 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			columnRowList.add(column);
 		}
 		return row;
-	}
-
-	@Override
-	public Map<String, String> getUrlsOfExternalAppByShortcuts(String batchInstanceIdentifier) {
-		Map<String, String> propertyNameVsValueMap = null;
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
-				BatchInstancePluginPropertiesService.class);
-		String urlSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-				ValidateProperties.EXTERNAL_APP_SWITCH);
-		if (null != urlSwitch && urlSwitch.equals("ON")) {
-			propertyNameVsValueMap = new LinkedHashMap<String, String>();
-			String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL1);
-			String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL2);
-			String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL3);
-			String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL4);
-			if (null != url1 && !url1.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
-			}
-			if (null != url2 && !url2.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
-			}
-			if (null != url3 && !url3.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
-			}
-			if (null != url4 && !url4.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
-			}
-		}
-		return propertyNameVsValueMap;
-	}
-
-	@Override
-	public Map<String, String> getDimensionsForPopUp(String batchInstanceIdentifier) {
-		Map<String, String> dimensionsForPopUp = new HashMap<String, String>();
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
-				BatchInstancePluginPropertiesService.class);
-		String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-				ValidateProperties.EXTERNAL_APP_X_DIMENSION);
-		String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-				ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
-		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
-		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
-		return dimensionsForPopUp;
-
 	}
 
 	@Override

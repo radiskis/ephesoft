@@ -96,6 +96,8 @@ public class ReviewValidatePresenter implements Presenter {
 
 	private String currentFieldName;
 
+	private boolean isControlSorQPressed;
+
 	public ReviewValidatePresenter(ReviewValidateDocServiceAsync rpcService, HandlerManager eventBus) {
 		this.rpcService = rpcService;
 		this.eventBus = eventBus;
@@ -218,6 +220,10 @@ public class ReviewValidatePresenter implements Presenter {
 						case 'S':
 							event.getEvent().getNativeEvent().preventDefault();
 							break;
+						case 'g':
+						case 'G':
+							event.getEvent().getNativeEvent().preventDefault();
+							break;
 						default:
 							break;
 					}
@@ -251,6 +257,7 @@ public class ReviewValidatePresenter implements Presenter {
 					switch (event.getEvent().getNativeEvent().getKeyCode()) {
 						case 's':
 						case 'S':
+							setControlSorQPressed(true);
 							event.getEvent().getNativeEvent().preventDefault();
 							ScreenMaskUtility.maskScreen("Please wait...");
 							if (checkDocumentType()) {
@@ -278,8 +285,10 @@ public class ReviewValidatePresenter implements Presenter {
 													if (!doc.isValid()) {
 														eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages()
 																.getPage().get(0)));
+
 													} else {
 														eventBus.fireEvent(new DocumentRefreshEvent(document));
+
 													}
 													break;
 												}
@@ -296,8 +305,10 @@ public class ReviewValidatePresenter implements Presenter {
 											if (!doc.isValid()) {
 												eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, document.getPages()
 														.getPage().get(0)));
+
 											} else {
 												eventBus.fireEvent(new DocumentRefreshEvent(document));
+
 											}
 											break;
 										}
@@ -315,6 +326,7 @@ public class ReviewValidatePresenter implements Presenter {
 							break;
 						case 'q':
 						case 'Q':
+							setControlSorQPressed(true);
 							event.getEvent().getNativeEvent().preventDefault();
 							ScreenMaskUtility.maskScreen("Please wait...");
 							// if document is unknown then set review to false else use below condition.
@@ -361,7 +373,17 @@ public class ReviewValidatePresenter implements Presenter {
 							} else {
 								errorMessage();
 							}
+							setControlSorQPressed(false);
 							setFocus();
+							break;
+						case 'g':
+						case 'G':
+							event.getEvent().preventDefault();
+							if (view.getRvPanel().getReviewDisclosurePanel().isOpen()) {
+								view.getRvPanel().getReviewDisclosurePanel().setOpen(false);
+							} else {
+								view.getRvPanel().getReviewDisclosurePanel().setOpen(true);
+							}
 							break;
 
 						default:
@@ -471,15 +493,14 @@ public class ReviewValidatePresenter implements Presenter {
 				for (final Document doc : documents) {
 					if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 						document = doc;
-						if (!doc.isValid()) {
-							eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
-						} else {
-							eventBus.fireEvent(new DocumentRefreshEvent(document));
+						if (doc.isValid()) {
+							document = batchDTO.getNextDocumentTo(doc, true);
 						}
-						break;
+						eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
 					}
 				}
 				ScreenMaskUtility.unmaskScreen();
+				updateBatch(batchDTO.getBatch());
 				setFocus();
 			}
 		});
@@ -650,12 +671,13 @@ public class ReviewValidatePresenter implements Presenter {
 		return value.toString();
 	}
 
-	public void getHOCRContent(PointCoordinate pointCoordinate1, PointCoordinate pointCoordinate2) {
+	public void getHOCRContent(final PointCoordinate pointCoordinate1, final PointCoordinate pointCoordinate2,
+			final boolean rectangularCoordinateSet) {
 
 		String batchInstanceIdentifier = batchDTO.getBatch().getBatchInstanceIdentifier();
 		ScreenMaskUtility.maskScreen();
 		rpcService.getHOCRContent(pointCoordinate1, pointCoordinate2, batchInstanceIdentifier, this.page.getIdentifier(),
-				new AsyncCallback<List<Span>>() {
+				rectangularCoordinateSet, new AsyncCallback<List<Span>>() {
 
 					@Override
 					public void onFailure(Throwable paramThrowable) {
@@ -737,7 +759,7 @@ public class ReviewValidatePresenter implements Presenter {
 
 										@Override
 										public void onClick(final ClickEvent arg0) {
-												executeScript(functionKeyDTO.getShortcutKeyName());
+											executeScript(functionKeyDTO.getShortcutKeyName());
 										}
 									});
 									button.setVisible(true);
@@ -863,74 +885,39 @@ public class ReviewValidatePresenter implements Presenter {
 				});
 	}
 
-	public void getAllUrlShortcuts() {
-		ScreenMaskUtility.maskScreen();
-		rpcService.getUrlsOfExternalAppByShortcuts(batchDTO.getBatch().getBatchInstanceIdentifier(),
-				new AsyncCallback<Map<String, String>>() {
-
-					@Override
-					public void onFailure(Throwable arg0) {
-						ScreenMaskUtility.unmaskScreen();
-						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.UNABLE_TO_FETCH_EXTERNAL_APP_INFO), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
-
-					}
-
-					@Override
-					public void onSuccess(Map<String, String> shortcutUrlMap) {
-						ScreenMaskUtility.unmaskScreen();
-						view.getRvPanel().setButtonsForUrls(shortcutUrlMap);
-
-					}
-
-				});
-	}
-
 	public void displayExternalApp(final String htmlPattern) {
 		if (htmlPattern != null && !htmlPattern.isEmpty()) {
-			rpcService.getDimensionsForPopUp(batchDTO.getBatch().getBatchInstanceIdentifier(),
-					new AsyncCallback<Map<String, String>>() {
+			Map<String, String> dimensionsOfPopUpMap = batchDTO.getDimensionsForPopUp();
+			StringBuffer newUrl = new StringBuffer();
+			StringBuffer pathOfBatchXml = new StringBuffer();
+			Batch batch = batchDTO.getBatch();
+			pathOfBatchXml.append(batch.getBatchLocalPath()).append("\\").append(
+					batch.getBatchInstanceIdentifier() + "\\" + batch.getBatchInstanceIdentifier() + "_batch.xml");
+			String documentId = document.getIdentifier();
+			newUrl.append(htmlPattern);
+			if (htmlPattern.contains("?")) {
+				newUrl.append("&document_id=").append(documentId);
+			} else {
+				newUrl.append("?document_id=").append(documentId);
+			}
+			newUrl.append("&batch_xml_path=").append(pathOfBatchXml);
+
+			final ExternalAppDialogBox externalAppDialogBox = new ExternalAppDialogBox(newUrl.toString(), dimensionsOfPopUpMap);
+			externalAppDialogBox.setDialogTitle(htmlPattern);
+			externalAppDialogBox
+					.addDialogBoxListener(new com.ephesoft.dcma.gwt.rv.client.view.ExternalAppDialogBox.DialogBoxListener() {
 
 						@Override
-						public void onFailure(Throwable arg0) {
-							ScreenMaskUtility.unmaskScreen();
-							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.UNABLE_TO_FETCH_EXTERNAL_APP_INFO), LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.ERROR_MESSAGE));
+						public void onOkClick() {
+							externalAppDialogBox.hide();
+							getUpdatedBatchDTO();
+							setFocus();
 						}
 
 						@Override
-						public void onSuccess(Map<String, String> dimensionsOfPopUpMap) {
-							StringBuffer newUrl = new StringBuffer();
-							StringBuffer pathOfBatchXml = new StringBuffer();
-							Batch batch = batchDTO.getBatch();
-							pathOfBatchXml.append(batch.getBatchLocalPath()).append("\\").append(
-									batch.getBatchInstanceIdentifier() + "\\" + batch.getBatchInstanceIdentifier() + "_batch.xml");
-							String documentId = document.getIdentifier();
-							newUrl.append(htmlPattern);
-							newUrl.append("?document_id=").append(documentId);
-							newUrl.append("&batch_xml_path=").append(pathOfBatchXml);
-
-							final ExternalAppDialogBox externalAppDialogBox = new ExternalAppDialogBox(newUrl.toString(),
-									dimensionsOfPopUpMap);
-							externalAppDialogBox.setDialogTitle(htmlPattern);
-							externalAppDialogBox
-									.addDialogBoxListener(new com.ephesoft.dcma.gwt.rv.client.view.ExternalAppDialogBox.DialogBoxListener() {
-
-										@Override
-										public void onOkClick() {
-											externalAppDialogBox.hide();
-											getUpdatedBatchDTO();
-											setFocus();
-										}
-
-										@Override
-										public void onCloseClick() {
-											externalAppDialogBox.hide();
-											setFocus();
-										}
-									});
+						public void onCloseClick() {
+							externalAppDialogBox.hide();
+							setFocus();
 						}
 					});
 		}
@@ -962,34 +949,39 @@ public class ReviewValidatePresenter implements Presenter {
 	public void executeScriptOnFieldChange(String fieldName) {
 		ScreenMaskUtility.maskScreen("Executing Script....");
 		view.getRvPanel().getValidatePanel().setCurrentFieldSet(false);
-		rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
 
-			@Override
-			public void onFailure(Throwable arg0) {
-				ScreenMaskUtility.unmaskScreen();
-			}
+		if (!isControlSorQPressed()) {
+			rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
 
-			@Override
-			public void onSuccess(final BatchDTO arg0) {
-				batchDTO = arg0;
-				List<Document> documents = arg0.getBatch().getDocuments().getDocument();
-				for (final Document doc : documents) {
-					if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
-						document = doc;
-						view.getRvPanel().getValidatePanel().setFieldAlreadySelected(true);
-						if (!doc.isValid()) {
-							eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
-						} else {
-							view.getRvPanel().getValidatePanel().setFieldAlreadySelected(false);
-							eventBus.fireEvent(new DocumentRefreshEvent(document));
-						}
-						break;
-					}
+				@Override
+				public void onFailure(Throwable arg0) {
+					ScreenMaskUtility.unmaskScreen();
+					setControlSorQPressed(false);
 				}
-				ScreenMaskUtility.unmaskScreen();
-			}
-		});
 
+				@Override
+				public void onSuccess(final BatchDTO arg0) {
+					batchDTO = arg0;
+					List<Document> documents = arg0.getBatch().getDocuments().getDocument();
+					for (final Document doc : documents) {
+						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
+							document = doc;
+							view.getRvPanel().getValidatePanel().setFieldAlreadySelected(true);
+							if (doc.isValid()) {
+								view.getRvPanel().getValidatePanel().setFieldAlreadySelected(false);
+								document = batchDTO.getNextDocumentTo(doc, true);
+							}
+							eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
+						}
+					}
+					ScreenMaskUtility.unmaskScreen();
+					updateBatch(batchDTO.getBatch());
+					setControlSorQPressed(false);
+				}
+			});
+		} else {
+			setControlSorQPressed(false);
+		}
 	}
 
 	public void setCurrentFieldName(String currentFieldName) {
@@ -998,5 +990,13 @@ public class ReviewValidatePresenter implements Presenter {
 
 	public String getCurrentFieldName() {
 		return currentFieldName;
+	}
+
+	public boolean isControlSorQPressed() {
+		return isControlSorQPressed;
+	}
+
+	public void setControlSorQPressed(boolean isControlSorQPressed) {
+		this.isControlSorQPressed = isControlSorQPressed;
 	}
 }

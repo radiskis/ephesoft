@@ -50,7 +50,7 @@
 			value="$batch{batch.fuzzydb_index_folder_name}" />
 		<constructor-arg type="java.lang.String"
 			value="$batch{batch.webscanner_local_folder}" />
-		<constructor-arg type="java.lang.String" value="$batch{batch.emial_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.email_folder}" />
 		<constructor-arg type="java.lang.String"
 			value="$batch{batch.project_files_base_folder}" />
 		<constructor-arg type="java.lang.String"
@@ -68,7 +68,8 @@
 		<constructor-arg type="java.lang.String" value="$batch{batch.threadpool_lock_folder}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.add_new_table_script}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.test_folder}" />	
-		<constructor-arg type="java.lang.String" value="$batch{batch.script_properties_folder}" />	
+		<constructor-arg type="java.lang.String" value="$batch{batch.script_properties_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.upload_batch_folder}" />
 	</bean>
 
 	<bean id="hocrJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">

@@ -134,12 +134,15 @@ public enum IBMCMConstant {
 	 * Station id for IBM xml file.
 	 */
 	STATION_ID("stationID"),
-	
+
 	/**
 	 * Supplying System for IBM xml file.
 	 */
-	SUPLLYING_SYSTEM("supplyingSystem");
-	
+	SUPLLYING_SYSTEM("supplyingSystem"),
+
+	SUBPOENA("Subpoena"),
+
+	LOAN_NUMBER("LoanPerf");
 
 	/**
 	 * Identifier for content.

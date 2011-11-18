@@ -147,5 +147,10 @@ public interface UserConnectivityConstant {
 	 * Variable for ms active directory ampersand symbol.
 	 */
 	String MSACTIVEDIRECTORY_AMP_SYMBOL = "&";
+	
+	/**
+	 * Variable for empty string.
+	 */
+	String EMPTY_STRING = "";
 
 }

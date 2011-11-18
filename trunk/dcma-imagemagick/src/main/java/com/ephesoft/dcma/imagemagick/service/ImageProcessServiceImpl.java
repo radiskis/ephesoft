@@ -164,7 +164,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
 			multipageTiffPdfCreator.createMultiPageFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF,ghosyscriptPdfParameters, pluginWorkflow);
+					multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF, ghosyscriptPdfParameters,
+					pluginWorkflow);
 
 		} catch (Exception ex) {
 			LOGGER.error("Problem generating overlayed Images exception->" + ex.getMessage());
@@ -285,7 +286,7 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		String[] xmlFiles = folder.list(new CustomFileFilter(false, FileType.XML.getExtensionWithDot()));
 		for (String fileName : imageNames) {
 			boolean htmlFilesGenerated = false;
-			boolean xmlFilesGenerated = false;
+			// boolean xmlFilesGenerated = false;
 			for (String htmlFile : htmlFiles) {
 				if (htmlFile.substring(0, htmlFile.lastIndexOf("."))
 						.equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
@@ -295,11 +296,11 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			}
 			for (String xmlFile : xmlFiles) {
 				if (xmlFile.substring(0, xmlFile.lastIndexOf(".")).equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
-					xmlFilesGenerated = true;
+					// xmlFilesGenerated = true;
 					break;
 				}
 			}
-			if (!(htmlFilesGenerated && xmlFilesGenerated)) {
+			if (!(htmlFilesGenerated)) {
 				File file = new File(testKvExtractionFolderPath + File.separator + fileName);
 				allImageFiles.add(file);
 			}

@@ -14,14 +14,14 @@ function doOverlay(x0, x1, y0, y1, zoomFactor) {
 	d.style.height = Math.abs(height) + 'px';
 	document.getElementsByTagName('body')[0].appendChild(d);
 }
-function doOverlayById(overlayDivId,x0, x1, y0, y1, zoomFactor) {
+function doOverlayById(overlayDivId, x0, x1, y0, y1, zoomFactor) {
 	posx = x1;
 	posy = y1;
 	initx = x0;
 	inity = y0;
 	d = document.createElement('div');
 	d.setAttribute('name', 'overlaydiv');
-	d.setAttribute('id',overlayDivId);
+	d.setAttribute('id', overlayDivId);
 	d.className = 'square';
 	d.style.left = initx + 'px';
 	d.style.top = inity + 'px';
@@ -31,7 +31,6 @@ function doOverlayById(overlayDivId,x0, x1, y0, y1, zoomFactor) {
 	d.style.height = Math.abs(height) + 'px';
 	document.getElementsByTagName('body')[0].appendChild(d);
 }
-
 
 function doOverlayForKey(x0, x1, y0, y1, zoomFactor) {
 
@@ -91,68 +90,49 @@ function removeOverlayById(overlayDivId) {
 	var di = document.getElementById(overlayDivId);
 	if (di) {
 		di.parentNode.removeChild(di);
-	}	
+	}
 }
-
 
 function removeOverlay() {
-	/*var di = document.getElementsByName('overlaydiv');
-	i = 0;
-	if (di) {
-		if (di.length > 0) {
-			while (i < di.length) {
-				document.getElementsByTagName('body')[0].removeChild(di[i]);
-				i++;
-			}
-		}
-	}*/
-	
-	var inputs = document.getElementsByTagName( 'div' );
-	for(var i=0;i<inputs.length;i++){
-	  if(inputs.item(i).getAttribute( 'name' ) == 'overlaydiv' ){
-		  document.getElementsByTagName('body')[0].removeChild(inputs[i]);
-	  }
-	  
-	}
-	
-	var inputs = document.getElementsByTagName( 'div' );
-	for(var i=0;i<inputs.length;i++){
-	  if(inputs.item(i).getAttribute( 'name' ) == 'overlaydivkey' ){
-		  document.getElementsByTagName('body')[0].removeChild(inputs[i]);
-	  }
-	  
-	}
-	
-	var inputs = document.getElementsByTagName( 'div' );
-	for(var i=0;i<inputs.length;i++){
-	  if(inputs.item(i).getAttribute( 'name' ) == 'overlaydivvalue' ){
-		  document.getElementsByTagName('body')[0].removeChild(inputs[i]);
-	  }
-	  
-	}
-	
-	/*var di = document.getElementsByName('overlaydivkey');
-	i = 0;
-	if (di) {
-		if (di.length > 0) {
-			while (i < di.length) {
-				document.getElementsByTagName('body')[0].removeChild(di[i]);
-				i++;
-			}
-		}
-	}
-	var di = document.getElementsByName('overlaydivvalue');
-	i = 0;
-	if (di) {
-		if (di.length > 0) {
-			while (i < di.length) {
-				document.getElementsByTagName('body')[0].removeChild(di[i]);
-				i++;
-			}
-		}
-	}*/
-}
+	/*
+	 * var di = document.getElementsByName('overlaydiv'); i = 0; if (di) { if
+	 * (di.length > 0) { while (i < di.length) {
+	 * document.getElementsByTagName('body')[0].removeChild(di[i]); i++; } } }
+	 */
 
+	var inputs = document.getElementsByTagName('div');
+	for ( var i = 0; i < inputs.length; i++) {
+		if (inputs.item(i).getAttribute('name') == 'overlaydiv') {
+			document.getElementsByTagName('body')[0].removeChild(inputs[i]);
+		}
+
+	}
+
+	var inputs = document.getElementsByTagName('div');
+	for ( var i = 0; i < inputs.length; i++) {
+		if (inputs.item(i).getAttribute('name') == 'overlaydivkey') {
+			document.getElementsByTagName('body')[0].removeChild(inputs[i]);
+		}
+
+	}
+
+	var inputs = document.getElementsByTagName('div');
+	for ( var i = 0; i < inputs.length; i++) {
+		if (inputs.item(i).getAttribute('name') == 'overlaydivvalue') {
+			document.getElementsByTagName('body')[0].removeChild(inputs[i]);
+		}
+
+	}
+
+	/*
+	 * var di = document.getElementsByName('overlaydivkey'); i = 0; if (di) { if
+	 * (di.length > 0) { while (i < di.length) {
+	 * document.getElementsByTagName('body')[0].removeChild(di[i]); i++; } } }
+	 * var di = document.getElementsByName('overlaydivvalue'); i = 0; if (di) {
+	 * if (di.length > 0) { while (i < di.length) {
+	 * document.getElementsByTagName('body')[0].removeChild(di[i]); i++; } } }
+	 */
+}
 
 function getViewPortHeight() {
 	viewportheight = window.innerHeight;
@@ -175,4 +155,23 @@ function getViewPortWidth() {
 window.onbeforeunload = function() {
 	onCloseWindow();
 	return;
+}
+
+var onmessage = function(e) {
+	var document = window.top.document;
+	var element;
+	if (e.data == "Save") {
+		element = document.getElementById("okButtonElement");
+	} else if (e.data == "Cancel") {
+		element = document.getElementById("closeButtonElement");
+	}
+	if (element != null) {
+		element.click();
+	}
+}
+
+if (typeof window.addEventListener != 'undefined') {
+	window.addEventListener('message', onmessage, false);
+} else if (typeof window.attachEvent != 'undefined') {
+	window.attachEvent('onmessage', onmessage);
 }
