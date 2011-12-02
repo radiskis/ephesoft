@@ -26,7 +26,18 @@
 	<bean id="cmisExporter" class="com.ephesoft.dcma.cmis.CMISExporter"
 		p:pluginMappingFileName="$cmis{cmis.plugin_mapping_file_name}"
 		p:documentVersioningState="$cmis{cmis.document_versioning_state}"
-		p:dateFormat="$cmis{cmis.date_format}">
+		p:dateFormat="$cmis{cmis.date_format}"
+		p:securityMode="$cmis{cmis.security.mode}"
+		p:urlAclService="$cmis{cmis.url.acl_service}"
+		p:urlDiscoveryService="$cmis{cmis.url.discovery_service}"
+		p:urlMultifilingService="$cmis{cmis.url.multifiling_service}"
+		p:urlNavigationService="$cmis{cmis.url.navigation_service}"
+		p:urlObjectService="$cmis{cmis.url.object_service}"
+		p:urlPolicyService="$cmis{cmis.url.policy_service}"
+		p:urlRelationshipService="$cmis{cmis.url.relationship_service}"
+		p:urlRepositoryService="$cmis{cmis.url.repository_service}"
+		p:urlVersioningService="$cmis{cmis.url.versioning_service}"
+		p:repoCreateBatchFolder="$cmis{cmis.repo.create_batch_subfolders}">
 	</bean>
 
 	<bean id="cmisExportService" class="com.ephesoft.dcma.cmis.service.CMISExportServiceImpl" />

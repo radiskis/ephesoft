@@ -1,4 +1,4 @@
-﻿﻿
+﻿
 
 /**
  * ******************************* Default locale
@@ -29,7 +29,7 @@ var rvConstants = {
 	title_split_doc : "Split Document",
 	title_topPanel_batchId : "BatchId",
 	title_topPanel_batchClass : "BatchClass",
-//	title_topPanel_batch_status : "BatchStatus",
+// title_topPanel_batch_status : "BatchStatus",
 	title_topPanel_back : "Back to Batch List",
 	title_topPanel_next : "Next Batch",
 	title_topPanel_info : "Shortcuts",
@@ -45,15 +45,14 @@ var rvConstants = {
 	title_movePanel_move_page : "Move Page",
 	title_movePanel_cancel_button : "Cancel",
 	title_movePanel_document : "Document",
-	/*batch_status_locked : "Locked",
-	batch_status_ready : "Ready",
-	batch_status_running : "Running",
-	batch_status_readyForReview : "Ready For Review",
-	batch_status_reviewed : "Reviewed",
-	batch_status_readyForValidation : "Ready For Validation",
-	batch_status_validated : "Validated",
-	batch_status_error : "Error",
-	batch_status_finished : "Finished",*/
+	/*
+	 * batch_status_locked : "Locked", batch_status_ready : "Ready",
+	 * batch_status_running : "Running", batch_status_readyForReview : "Ready
+	 * For Review", batch_status_reviewed : "Reviewed",
+	 * batch_status_readyForValidation : "Ready For Validation",
+	 * batch_status_validated : "Validated", batch_status_error : "Error",
+	 * batch_status_finished : "Finished",
+	 */
 	title_topPanel_batchClass : "BatchClass",
 	info_save_document : "Save Document",
 	info_split_document : "Split Document",
@@ -190,7 +189,9 @@ var rvMessages = {
 	invalid_table : "Invalid data in {0}",
 	unable_to_fetch_batch_xml : "Unable to fetch updated batch.xml for the current batch.",
 	unable_to_fetch_external_app_info : "Unable to fetch information for the configuration of external applications.",
-	unable_to_retrieve_field_value_script_switch_state : "Unable to fetch field value script switch state."
+	unable_to_retrieve_field_value_script_switch_state : "Unable to fetch field value script switch state.",
+	unable_to_display_external_application : "Unable to display external application.",
+	unable_to_create_authentication_for_external_application : "Unable to create authentication mechanism for external application."
 };
 
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -219,7 +220,7 @@ var rvConstants_tk = {
 	title_split_doc : "Döküman Bölme",
 	title_topPanel_batchId : "İşNo",
 	title_topPanel_batchClass : "İş Akışı",
-//	title_topPanel_batch_status : "İşDurum",
+// title_topPanel_batch_status : "İşDurum",
 	title_reviewPanel_docType : "Döküman Tipi",
 	title_reviewPanel_mergeDocWith : "Döküman Birleştirme",
 	title_topPanel_back : "Geri Toplu Listesine",
@@ -235,15 +236,14 @@ var rvConstants_tk = {
 	title_movePanel_move_page : "Sayfa Taşı",
 	title_movePanel_cancel_button : "Iptal",
 	title_movePanel_document : "Belge",
-	/*batch_status_locked : "Kilitli",
-	batch_status_ready : "Hazır",
-	batch_status_running : "Koşma",
-	batch_status_readyForReview : "Gözden Geçirme İçin Hazır",
-	batch_status_reviewed : "İncelendi",
-	batch_status_readyForValidation : "Doğrulama İçin Hazır",
-	batch_status_validated : "Valide",
-	batch_status_error : "Hata",
-	batch_status_finished : "Bitmiş",*/
+	/*
+	 * batch_status_locked : "Kilitli", batch_status_ready : "Hazır",
+	 * batch_status_running : "Koşma", batch_status_readyForReview : "Gözden
+	 * Geçirme İçin Hazır", batch_status_reviewed : "İncelendi",
+	 * batch_status_readyForValidation : "Doğrulama İçin Hazır",
+	 * batch_status_validated : "Valide", batch_status_error : "Hata",
+	 * batch_status_finished : "Bitmiş",
+	 */
 	info_save_document : "Kaydet Belge",
 	info_split_document : "Split Belge",
 	info_zoom_in : "Yakınlaştırmak",
@@ -374,5 +374,7 @@ var rvMessages_tk = {
 	invalid_table : "Geçersiz veri {0}",
 	unable_to_fetch_batch_xml : "Mevcut toplu güncellenen batch.xml alınamıyor.",
 	unable_to_fetch_external_app_info : "Harici uygulamaların, yapılandırma için bilgi alınamıyor.",
-	unable_to_retrieve_field_value_script_switch_state : "Alan değeri komut dosyası anahtarı devlet alınamıyor."
+	unable_to_retrieve_field_value_script_switch_state : "Alan değeri komut dosyası anahtarı devlet alınamıyor.",
+	unable_to_display_external_application : "Dış uygulama görüntülemek için açılamıyor.",
+	unable_to_create_authentication_for_external_application : "Dış uygulama için kimlik doğrulama mekanizması oluşturulamadı."
 };

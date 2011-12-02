@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.HashMap;
@@ -41,6 +76,7 @@ import java.util.Set;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.view.SlidingPanel;
+import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.gwt.rv.client.event.DocExpandEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.DocExpandEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.DocTypeChangeEvent;
@@ -60,7 +96,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DisclosureEvent;
 import com.google.gwt.user.client.ui.DisclosureHandler;
@@ -77,13 +112,13 @@ public class ReviewValidatePanel extends RVBasePanel {
 	interface Binder extends UiBinder<DockLayoutPanel, ReviewValidatePanel> {
 	}
 
-	private final String URL_CTRL_4 = "validation.url(Ctrl+4)";
+	private final String URL_CTRL_4 = ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey();
 
-	private final String URL_CTRL_7 = "validation.url(Ctrl+7)";
+	private final String URL_CTRL_7 = ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey();
 
-	private final String URL_CTRL_8 = "validation.url(Ctrl+8)";
+	private final String URL_CTRL_8 = ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey();
 
-	private final String URL_CTRL_9 = "validation.url(Ctrl+9)";
+	private final String URL_CTRL_9 = ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey();
 
 	HorizontalPanel urlButtonPanel = new HorizontalPanel();
 	@UiField
@@ -120,6 +155,8 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private Boolean isDocumentError = false;
 
 	private Map<String, String> urlAndShortcutMap;
+
+	private Map<String, String> urlAndTitleMap;
 
 	private Map<String, String> urlAndApplicationMap;
 
@@ -273,31 +310,30 @@ public class ReviewValidatePanel extends RVBasePanel {
 			public void onKeyUp(RVKeyUpEvent event) {
 				if (!presenter.isTableView()) {
 					if (event.getEvent().isControlKeyDown()) {
+						String urlToFire = null;
 						switch (event.getEvent().getNativeKeyCode()) {
 							case '4':
 								event.getEvent().preventDefault();
-								if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(URL_CTRL_4)) {
-									presenter.displayExternalApp(urlAndShortcutMap.get(URL_CTRL_4));
-								}
+								urlToFire = URL_CTRL_4;
 								break;
 							case '7':
 								event.getEvent().preventDefault();
-								if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(URL_CTRL_7)) {
-									presenter.displayExternalApp(urlAndShortcutMap.get(URL_CTRL_7));
-								}
+								urlToFire = URL_CTRL_7;
 								break;
 							case '8':
 								event.getEvent().preventDefault();
-								if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(URL_CTRL_8)) {
-									presenter.displayExternalApp(urlAndShortcutMap.get(URL_CTRL_8));
-								}
+								urlToFire = URL_CTRL_8;
 								break;
 							case '9':
 								event.getEvent().preventDefault();
-								if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(URL_CTRL_9)) {
-									presenter.displayExternalApp(urlAndShortcutMap.get(URL_CTRL_9));
-								}
+								urlToFire = URL_CTRL_9;
 								break;
+						}
+						if (urlToFire != null) {
+							if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(urlToFire)) {
+								presenter.showExternalAppForHtmlPattern(urlAndShortcutMap.get(urlToFire), urlAndTitleMap
+										.get(urlToFire));
+							}
 						}
 					}
 				}
@@ -421,6 +457,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 	public void setButtonsForUrls() {
 		urlButtonPanel.clear();
 		urlAndShortcutMap = presenter.batchDTO.getUrlAndShortcutMap();
+		urlAndTitleMap = presenter.batchDTO.getUrlAndTitleMap();
 		if (null != urlAndShortcutMap && !urlAndShortcutMap.isEmpty()) {
 
 			Set<String> urlList = urlAndShortcutMap.keySet();
@@ -432,7 +469,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 						@Override
 						public void onClick(ClickEvent arg0) {
-							presenter.displayExternalApp(urlAndShortcutMap.get(url));
+							presenter.showExternalAppForHtmlPattern(urlAndShortcutMap.get(url), urlAndTitleMap.get(url));
 						}
 					});
 					button.setWidth("55px");

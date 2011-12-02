@@ -24,7 +24,7 @@
 	</bean>
 	
 	<bean id="tesseractReader" class="com.ephesoft.dcma.tesseract.TesseractReader" 
-		 p:mandatorycmds="$tess{tesseract.commands_mandatory}" p:unixMandatorycmds="$tess{tesseract.unix_commands_mandatory}">
+		 p:windowsCmd="$tess{tesseract.windows_command}" p:unixCmd="$tess{tesseract.unix_command}" p:overwriteHOCR="$tess{tesseract.overwrite_hocr}">
 	</bean>
 	
 	<bean id="tesseractService" class="com.ephesoft.dcma.tesseract.service.TesseractServiceImpl"/>

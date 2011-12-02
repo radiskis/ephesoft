@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.kvfieldcreation;
 
 import java.io.BufferedReader;
@@ -192,7 +227,9 @@ public class KVFieldCreator implements ICommonConstants {
 		setToleranceThresholdInt(toleranceThresholdInt);
 	}
 
-	private List<String> propertyList = null;
+	private List<String> keyRegexList = null;
+
+	private List<String> valueRegexList = null;
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -238,9 +275,13 @@ public class KVFieldCreator implements ICommonConstants {
 				KVFieldCreatorProperties.LEARNING_KEY_VALUE_SWTICH);
 		LOGGER.info("KV creation plugin switch value  : " + kvFieldCreatorSwitch);
 		if (KVFieldCreatorConstants.SWITCH_ON.equalsIgnoreCase(kvFieldCreatorSwitch)) {
-			if (null == propertyList) {
-				propertyList = new ArrayList<String>();
-				readRegexPropertyFile();
+			if (null == keyRegexList) {
+				keyRegexList = new ArrayList<String>();
+				readRegexPropertyFile(KVFieldCreatorConstants.KEY_REGEX_FILE_PATH, keyRegexList);
+			}
+			if (null == valueRegexList) {
+				valueRegexList = new ArrayList<String>();
+				readRegexPropertyFile(KVFieldCreatorConstants.VALUE_REGEX_FILE_PATH, valueRegexList);
 			}
 			Float multiplierFloat = getMultiplierFloat();
 			KVFetchValue kvFetchValue = getKVFetchValue();
@@ -362,13 +403,12 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 	}
 
-	private void readRegexPropertyFile() {
+	private void readRegexPropertyFile(String filePath, List<String> regexList) {
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(
-					KVFieldCreatorConstants.REGEX_FILE_PATH)));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(filePath)));
 			String pattern = reader.readLine();
 			while (pattern != null) {
-				propertyList.add(pattern);
+				regexList.add(pattern);
 				pattern = reader.readLine();
 			}
 		} catch (FileNotFoundException fnfe) {
@@ -388,7 +428,7 @@ public class KVFieldCreator implements ICommonConstants {
 			final DocField docLevelField) throws DCMAApplicationException {
 		CoordinatesList coordinates = docLevelField.getCoordinatesList();
 		boolean valueFound = false;
-		boolean keyFound = true;
+		boolean keyFound = false;
 		if (coordinates != null) {
 			List<Coordinates> coordinatesList = coordinates.getCoordinates();
 			Coordinates recCoordinates = getRectangleCoordinates(coordinatesList);
@@ -402,7 +442,7 @@ public class KVFieldCreator implements ICommonConstants {
 								if (null != span) {
 									String value = span.getValue();
 									if (value != null && docLevelFieldValue.contains(value) && matchCoordinates(span, coordinatesList)) {
-										String valuePattern = getRegexPattern(span.getValue());
+										String valuePattern = getRegexPattern(span.getValue(), valueRegexList);
 										kvExtractionField.setValuePattern(valuePattern);
 										keyFound = searchKey(kvExtractionField, recCoordinates, span, lineDataCarrier,
 												lineDataCarrierList);
@@ -525,20 +565,18 @@ public class KVFieldCreator implements ICommonConstants {
 				kvExtractionField.setLocationType(LocationType.BOTTOM_LEFT);
 				break;
 			case TOP:
-				xOffset = 0;
-				yOffset = valueY0 - keyY1;
-				// xOffset = valueX0 - keyX1;
+				yOffset = 0;
+				xOffset = keyX0 - valueX1;
 				kvExtractionField.setLocationType(LocationType.BOTTOM);
 				break;
 			case LEFT:
-				xOffset = keyX0 - valueX1;
 				yOffset = 0;
-				// yOffset = keyY0 - valueY1;
+				xOffset = valueX0 - keyX1;
 				kvExtractionField.setLocationType(LocationType.RIGHT);
 				break;
 			case RIGHT:
-				yOffset = 0;
-				xOffset = keyX0 - valueX1;
+				xOffset = 0;
+				yOffset = keyY0 - valueY1;
 				kvExtractionField.setLocationType(LocationType.LEFT);
 				break;
 			case BOTTOM_LEFT:
@@ -560,6 +598,7 @@ public class KVFieldCreator implements ICommonConstants {
 			default:
 				break;
 		}
+
 		int xOffsetInInt = (int) Math.round(xOffset);
 		int yOffsetInInt = (int) Math.round(yOffset);
 
@@ -605,7 +644,7 @@ public class KVFieldCreator implements ICommonConstants {
 				if (key != null && !key.trim().isEmpty() && !KVFieldCreatorConstants.KEY_VALUE_SEPARATORS.contains(key)
 						&& isValidKey(recCoordinates, spanCoordinates, location)) {
 					LOGGER.info("Key '" + key + "' found at location " + location);
-					String keyPattern = getRegexPattern(key);
+					String keyPattern = getRegexPattern(key, keyRegexList);
 					kvExtractionField.setKeyPattern(keyPattern);
 					LOGGER.info("Key Pattern Created : " + keyPattern);
 					setKeyCoordinates(keyCoordinates, span);
@@ -653,7 +692,7 @@ public class KVFieldCreator implements ICommonConstants {
 				if (key != null && !key.trim().isEmpty() && !KVFieldCreatorConstants.KEY_VALUE_SEPARATORS.contains(key)
 						&& isValidKey(recCoordinates, spanCoordinates, location)) {
 					LOGGER.info("Key '" + key + "' found at location " + location);
-					String keyPattern = getRegexPattern(key);
+					String keyPattern = getRegexPattern(key, keyRegexList);
 					kvExtractionField.setKeyPattern(keyPattern);
 					LOGGER.info("Key Pattern Created : " + keyPattern);
 					setKeyCoordinates(keyCoordinates, span);
@@ -697,7 +736,7 @@ public class KVFieldCreator implements ICommonConstants {
 			if (key != null && !key.trim().isEmpty() && !KVFieldCreatorConstants.KEY_VALUE_SEPARATORS.contains(key)
 					&& isValidKey(recCoordinates, leftSpan.getCoordinates(), location)) {
 				LOGGER.info("Key '" + key + "' found at location " + location);
-				String keyPattern = getRegexPattern(key);
+				String keyPattern = getRegexPattern(key, keyRegexList);
 				kvExtractionField.setKeyPattern(keyPattern);
 				setKeyCoordinates(keyCoordinates, leftSpan);
 				LOGGER.info("Key Pattern Created : " + keyPattern);
@@ -735,7 +774,7 @@ public class KVFieldCreator implements ICommonConstants {
 			String key = rightSpan.getValue();
 			if (key != null && !key.trim().isEmpty() && isValidKey(recCoordinates, rightSpan.getCoordinates(), location)) {
 				LOGGER.info("Key '" + key + "' found at location " + location);
-				String keyPattern = getRegexPattern(key);
+				String keyPattern = getRegexPattern(key, keyRegexList);
 				kvExtractionField.setKeyPattern(keyPattern);
 				setKeyCoordinates(keyCoordinates, rightSpan);
 				LOGGER.info("Key Pattern Created : " + keyPattern);
@@ -966,22 +1005,13 @@ public class KVFieldCreator implements ICommonConstants {
 		return pageID;
 	}
 
-	public static void main(String[] args) throws DCMAException {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"classpath:/META-INF/applicationContext-kv-creation.xml");
-		context.start();
-		KVFieldCreatorService kvFIeldCreatorService = ApplicationContextUtil.getSingleBeanOfType(context, KVFieldCreatorService.class);
-		BatchInstanceID batchInstanceID = new BatchInstanceID("BIA");
-		kvFIeldCreatorService.createKeyValueField(batchInstanceID, "abc");
-	}
-
 	/**
 	 * This method gets the matched regex pattern for input string.
 	 * 
 	 * @param inputString
 	 * @return
 	 */
-	private String getRegexPattern(String inputString) {
+	private String getRegexPattern(String inputString, List<String> regexList) {
 		String matchedPattern = null;
 		int confidenceInt = 100;
 		Pattern pattern = null;
@@ -989,7 +1019,7 @@ public class KVFieldCreator implements ICommonConstants {
 		boolean isFound = false;
 		float previousMatchedConfidence = 0;
 		String dlfValue = inputString.split(KVFieldCreatorConstants.SPACE)[0];
-		for (String regex : propertyList) {
+		for (String regex : regexList) {
 			pattern = Pattern.compile(regex);
 			matcher = pattern.matcher(dlfValue);
 			while (matcher.find()) {

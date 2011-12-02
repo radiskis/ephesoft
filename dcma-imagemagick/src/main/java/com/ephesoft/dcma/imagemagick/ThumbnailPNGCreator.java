@@ -33,10 +33,46 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.imagemagick;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -59,9 +95,11 @@ import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.util.FileNameFormatter;
 import com.ephesoft.dcma.util.FileUtils;
+import com.ephesoft.dcma.util.OSUtil;
 
 /**
  * This class has methods using which we can generate thumbnails and PNG for a given tif file.
@@ -80,6 +118,10 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThumbnailPNGCreator.class);
 
 	private static final String GRAY_COLOR = "gray";
+
+	private static final String QUOTES = "\"";
+
+	private static final String SPACE = " ";
 
 	/**
 	 * Instance of PluginPropertiesService.
@@ -205,7 +247,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 
 		}
 		LOGGER.info("Generating thumbnais");
-		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
+		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 
 		String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
 				+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
@@ -217,28 +259,27 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		}
 		final String thumbNailH = thumbnailH;
 		final String thumbNailW = thumbnailW;
-		final String thumbnailT =  thumbnailType;
-		
-		
+		final String thumbnailT = thumbnailType;
+
 		for (int i = 0; i < sListOfTiffFiles.length; i++) {
 			final String[] files = sListOfTiffFiles[i];
 			batchInstanceThread.add(new AbstractRunnable() {
 
 				@Override
 				public void run() {
-						LOGGER.info("Generating thumbnail for file" + files[0]);
-						ConvertCmd convertcmd = new ConvertCmd();
-						IMOperation operation = new IMOperation();
-						operation.addImage();
-						
-						// added for color pdf handling.
-						// Generate the display thumbnails as gray and compare thumbnails as per the color of input tiff.
-						if (thumbnailT.equals(IImageMagickCommonConstants.THUMB_TYPE_DISP)) {
-							operation.colorspace(GRAY_COLOR);
-						}
-						
-						operation.thumbnail(Integer.parseInt(thumbNailH), Integer.parseInt(thumbNailW));
-						operation.addImage();
+					LOGGER.info("Generating thumbnail for file" + files[0]);
+					ConvertCmd convertcmd = new ConvertCmd();
+					IMOperation operation = new IMOperation();
+					operation.addImage();
+
+					// added for color pdf handling.
+					// Generate the display thumbnails as gray and compare thumbnails as per the color of input tiff.
+					if (thumbnailT.equals(IImageMagickCommonConstants.THUMB_TYPE_DISP)) {
+						operation.colorspace(GRAY_COLOR);
+					}
+
+					operation.thumbnail(Integer.parseInt(thumbNailH), Integer.parseInt(thumbNailW));
+					operation.addImage();
 
 					try {
 						String[] listOfFiles = {files[0], files[1]};
@@ -291,8 +332,15 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	 * @throws JAXBException
 	 */
 	public void generateFullFiles(final String sBatchFolder, final String batchInstanceIdentifier,
-			BatchSchemaService batchSchemaService, String fileType, String pluginName, String pluginWorkflowName)
-			throws DCMAApplicationException, JAXBException {
+			BatchSchemaService batchSchemaService, String fileType, String pluginName, String pluginWorkflowName,
+			String generateDisplayPng, String inputParameters, String outputParameters) throws DCMAApplicationException, JAXBException {
+		String repairImageMagickFileUtilityPath = System.getenv(REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE);
+		boolean isGenerateDisplayPng = true;
+		if (fileType.equals(DISPLAY_IMAGE)) {
+			if (generateDisplayPng == null || generateDisplayPng.equalsIgnoreCase("OFF")) {
+				isGenerateDisplayPng = false;
+			}
+		}
 
 		File fBatchFolder = new File(sBatchFolder);
 		String[][] sListOfTiffFiles;
@@ -303,64 +351,84 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 
 		try {
-			sListOfTiffFiles = getListOfTiffFiles(fBatchFolder, batch, batchInstanceIdentifier, false, EMPTY_STRING, batchSchemaService,
-					pluginName);
+			sListOfTiffFiles = getListOfTiffFiles(fBatchFolder, batch, batchInstanceIdentifier, false, EMPTY_STRING,
+					batchSchemaService, pluginName);
 		} catch (Exception e) {
 			throw new DCMAApplicationException("Problem generating list of files", e);
 		}
-		LOGGER.info("Generating PNG Files");
-		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
-		String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
-				+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
-		try {
-			FileUtils.createThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
-		} catch (IOException ioe) {
-			LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
-			throw new DCMABusinessException(ioe.getMessage(), ioe);
-		}
-
-		for (int i = 0; i < sListOfTiffFiles.length; i++) {
-			final String[] files = sListOfTiffFiles[i];
-			batchInstanceThread.add(new AbstractRunnable() {
-
-				@Override
-				public void run() {
-					LOGGER.info("Generating PNG for file" + files[0]);
-					ConvertCmd convertcmd = new ConvertCmd();
-					IMOperation operation = new IMOperation();
-					operation.addImage();
-					operation.density(300);
-					operation.colorspace(GRAY_COLOR);
-					operation.alpha("off");
-					operation.addImage();
-					try {
-						String[] listOfFiles = {files[0], files[1]};
-						convertcmd.run(operation, (Object[]) listOfFiles);
-					} catch (Exception ex) {
-						setDcmaApplicationException(new DCMAApplicationException("Problem generating PNG", ex));
-					}
-				}
-			});
-
-		}
-		try {
-			LOGGER.info("Executing PNG generation by thread pool for " + batchInstanceIdentifier);
-			batchInstanceThread.execute();
-			LOGGER.info("Finished PNG generation by thread pool for " + batchInstanceIdentifier);
-		} catch (DCMAApplicationException dcmae) {
-			LOGGER.error("Problem generating thumbnails. Setting batch Status to error state." + dcmae.getMessage(), dcmae);
-			batchInstanceThread.remove();
-			batchSchemaService.updateBatch(batch);
-
-			// Throw the exception to set the batch status to Error by Application aspect
-			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-		} finally {
+		if (isGenerateDisplayPng) {
+			LOGGER.info("Create Display PNG is ON");
+			LOGGER.info("Generating PNG Files");
+			BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+			String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
+					+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
 			try {
-				FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
+				FileUtils.createThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
 			} catch (IOException ioe) {
-				LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
+				LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
 				throw new DCMABusinessException(ioe.getMessage(), ioe);
 			}
+
+			for (int i = 0; i < sListOfTiffFiles.length; i++) {
+				final String[] files = sListOfTiffFiles[i];
+				try {
+					String command = EMPTY_STRING;
+					ArrayList<String> commandList = new ArrayList<String>();
+					if (OSUtil.isWindows()) {
+
+						commandList.add(repairImageMagickFileUtilityPath + File.separator + "EphesoftImageMagickExecutor.exe");
+						createCommandforWindows(commandList, inputParameters, outputParameters, QUOTES
+								+ System.getenv(IMAGEMAGICK_ENV_VARIABLE) + File.separator + "convert\"", QUOTES + files[0] + QUOTES,
+								QUOTES + files[1] + QUOTES);
+					} else {
+						commandList.add("convert");
+						createCommandForLinux(commandList, inputParameters, outputParameters, SPACE + files[0] + SPACE, SPACE
+								+ files[1] + SPACE);
+					}
+					String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
+					if (batchInstanceThread != null) {
+
+						LOGGER.info("Generating PNG for file" + files[0]);
+						LOGGER.info("Adding generated command to thread pool. Command is : ");
+						for (int ind = 0; ind < cmds.length; ind++) {
+							LOGGER.info(cmds[ind] + SPACE);
+						}
+						if (OSUtil.isWindows()) {
+							batchInstanceThread.add(new ProcessExecutor(cmds, null));
+						} else {
+							batchInstanceThread.add(new ProcessExecutor(cmds, new File(System.getenv(IMAGEMAGICK_ENV_VARIABLE))));
+						}
+					} else {
+						LOGGER.error("Command " + command + " cannot be run");
+						throw new DCMAApplicationException("Command " + command + " cannot be run");
+					}
+				} catch (Exception ex) {
+					LOGGER.error("Problem generating PNG");
+					throw new DCMAApplicationException("Problem generating PNG", ex);
+				}
+
+			}
+			try {
+				LOGGER.info("Executing PNG generation by thread pool for " + batchInstanceIdentifier);
+				batchInstanceThread.execute();
+				LOGGER.info("Finished PNG generation by thread pool for " + batchInstanceIdentifier);
+			} catch (DCMAApplicationException dcmae) {
+				LOGGER.error("Problem generating thumbnails. Setting batch Status to error state." + dcmae.getMessage(), dcmae);
+				batchInstanceThread.remove();
+				batchSchemaService.updateBatch(batch);
+
+				// Throw the exception to set the batch status to Error by Application aspect
+				throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+			} finally {
+				try {
+					FileUtils.deleteThreadPoolLockFile(batchInstanceIdentifier, threadPoolLockFolderPath, pluginWorkflowName);
+				} catch (IOException ioe) {
+					LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
+					throw new DCMABusinessException(ioe.getMessage(), ioe);
+				}
+			}
+		} else {
+			LOGGER.info("Create Display PNG is OFF");
 		}
 		for (int i = 0; i < sListOfTiffFiles.length; i++) {
 			if (fileType.equals(OCR_INPUT_FILE)) {
@@ -535,5 +603,34 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			LOGGER.error("Problem generating png.");
 			throw new DCMAApplicationException("Problem generating png.", ex);
 		}
+	}
+
+	private String createCommandforWindows(ArrayList<String> commandList, String inputParams, String outputParams, String environment,
+			String inputImageName, String outputImageName) {
+		if (environment != null) {
+			commandList.add(environment);
+		}
+		StringBuffer command = new StringBuffer(EMPTY_STRING);
+		commandList.add(QUOTES + inputParams.trim() + QUOTES);
+		commandList.add(inputImageName.trim());
+		commandList.add(QUOTES + outputParams.trim() + QUOTES);
+		commandList.add(outputImageName.trim());
+		return command.toString();
+	}
+
+	private String createCommandForLinux(ArrayList<String> commandList, String inputParams, String outputParams,
+			String inputImageName, String outputImageName) {
+		StringBuffer command = new StringBuffer(EMPTY_STRING);
+		String inputParamsArr[] = inputParams.split(SPACE);
+		for (String string : inputParamsArr) {
+			commandList.add(string.trim());
+		}
+		commandList.add(inputImageName.trim());
+		String outputParamsArr[] = outputParams.split(SPACE);
+		for (String string : outputParamsArr) {
+			commandList.add(string.trim());
+		}
+		commandList.add(outputImageName.trim());
+		return command.toString();
 	}
 }

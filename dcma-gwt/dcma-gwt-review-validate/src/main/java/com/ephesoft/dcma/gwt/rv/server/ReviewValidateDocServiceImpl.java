@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.gwt.rv.server;
 
 import java.io.File;
@@ -89,6 +124,7 @@ import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.da.service.TableColumnsInfoService;
 import com.ephesoft.dcma.da.service.TableInfoService;
+import com.ephesoft.dcma.encryption.security.SecurityTokenHandler;
 import com.ephesoft.dcma.fuzzydb.service.FuzzyDBSearchService;
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassBean;
@@ -159,37 +195,15 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
-		Map<String, String> propertyNameVsValueMap = null;
+		Map<String, String> urlAndShortcutMap = null;
 		Map<String, String> dimensionsForPopUp = null;
+		Map<String, String> urlAndTitleMap = null;
 		if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
 			dimensionsForPopUp = new HashMap<String, String>();
-			propertyNameVsValueMap = new LinkedHashMap<String, String>();
-			String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_X_DIMENSION);
-			String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
-			dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
-			dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
-			String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL1);
-			String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL2);
-			String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL3);
-			String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-					ValidateProperties.EXTERNAL_APP_URL4);
-			if (null != url1 && !url1.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
-			}
-			if (null != url2 && !url2.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
-			}
-			if (null != url3 && !url3.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
-			}
-			if (null != url4 && !url4.isEmpty()) {
-				propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
-			}
+			urlAndShortcutMap = new LinkedHashMap<String, String>();
+			urlAndTitleMap = new LinkedHashMap<String, String>();
+			getPropertiesOfExternalApplication(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
+					dimensionsForPopUp, urlAndTitleMap);
 		}
 
 		switch (batchInstance.getStatus()) {
@@ -204,7 +218,62 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
-				suggestionBoxSwitchState, externalApplicationSwitchState, propertyNameVsValueMap, dimensionsForPopUp);
+				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap);
+	}
+
+	private void getPropertiesOfExternalApplication(PluginPropertiesService pluginPropertiesService, String batchInstanceIdentifier,
+			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp, Map<String, String> urlAndTitleMap) {
+		String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_X_DIMENSION);
+		String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
+
+		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
+		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
+
+		String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_URL1);
+		String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_URL2);
+		String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_URL3);
+		String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.EXTERNAL_APP_URL4);
+
+		String titleForUrl1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.TITLE_EXTERNAL_APP_URL1);
+		String titleForUrl2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.TITLE_EXTERNAL_APP_URL2);
+		String titleForUrl3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.TITLE_EXTERNAL_APP_URL3);
+		String titleForUrl4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+				ValidateProperties.TITLE_EXTERNAL_APP_URL4);
+
+		if (null != url1 && !url1.isEmpty()) {
+			urlAndShortcutMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
+		}
+		if (null != url2 && !url2.isEmpty()) {
+			urlAndShortcutMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
+		}
+		if (null != url3 && !url3.isEmpty()) {
+			urlAndShortcutMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
+		}
+		if (null != url4 && !url4.isEmpty()) {
+			urlAndShortcutMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
+		}
+
+		if (null != titleForUrl1 && !titleForUrl1.isEmpty()) {
+			urlAndTitleMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), titleForUrl1);
+		}
+		if (null != titleForUrl2 && !titleForUrl2.isEmpty()) {
+			urlAndTitleMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), titleForUrl2);
+		}
+		if (null != titleForUrl3 && !titleForUrl3.isEmpty()) {
+			urlAndTitleMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), titleForUrl3);
+		}
+		if (null != titleForUrl4 && !titleForUrl4.isEmpty()) {
+			urlAndTitleMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), titleForUrl4);
+		}
 	}
 
 	@Override
@@ -287,43 +356,17 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.SUGGESTION_BOX_SWITCH);
 			String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
-			Map<String, String> propertyNameVsValueMap = null;
-
+			Map<String, String> urlAndShortcutMap = null;
 			Map<String, String> dimensionsForPopUp = null;
+			Map<String, String> urlAndTitleMap = null;
 			if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
-				dimensionsForPopUp = new HashMap<String, String>();
-				propertyNameVsValueMap = new LinkedHashMap<String, String>();
-				String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_X_DIMENSION);
-				String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
-				dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
-				dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
-				String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_URL1);
-				String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_URL2);
-				String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_URL3);
-				String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
-						ValidateProperties.EXTERNAL_APP_URL4);
-				if (null != url1 && !url1.isEmpty()) {
-					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
-				}
-				if (null != url2 && !url2.isEmpty()) {
-					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
-				}
-				if (null != url3 && !url3.isEmpty()) {
-					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
-				}
-				if (null != url4 && !url4.isEmpty()) {
-					propertyNameVsValueMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
-				}
+				getPropertiesOfExternalApplication(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
+						dimensionsForPopUp, urlAndTitleMap);
 			}
 
 			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
-					fuzzySearchSwitch, suggestionBoxSwitchState, externalApplicationSwitchState, propertyNameVsValueMap,
-					dimensionsForPopUp);
+					fuzzySearchSwitch, suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap,
+					dimensionsForPopUp, urlAndTitleMap);
 
 		} catch (DCMAApplicationException e) {
 			log.error(e.getMessage(), e);
@@ -1286,4 +1329,13 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		return scriptName;
 	}
 
+	@Override
+	public String getGeneratedSecurityTokenForExternalApp() {
+		return SecurityTokenHandler.generateToken();
+	}
+
+	@Override
+	public String getEncodedString(String toEncodeString) {
+		return SecurityTokenHandler.getEncodedString(toEncodeString);
+	}
 }

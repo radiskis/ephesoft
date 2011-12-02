@@ -90,6 +90,8 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.core.threadpool.ThreadPool;
 import com.ephesoft.dcma.da.dao.hibernate.BatchClassGroupsDaoImpl;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
@@ -295,6 +297,10 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			jbpmService.deleteProcessInstance(batchInstance.getProcessInstanceKey());
 			batchInstance.setStatus(BatchInstanceStatus.DELETED);
 			batchInstanceService.updateBatchInstance(batchInstance);
+			BatchInstanceThread batchInstanceThread = ThreadPool.getBatchInstanceThreadList(identifier);
+			if (batchInstanceThread != null) {
+				batchInstanceThread.remove();
+			}
 			removeFolders(batchInstance);
 		} catch (Exception e) {
 			deleteResult = Results.FAILURE;
@@ -334,7 +340,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			log.error("Error in updating batch instance status" + e.getMessage(), e);
 			throw new GWTException(e.getMessage());
 		}
-		
+
 		return result;
 	}
 
@@ -353,29 +359,12 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 
 				result = Results.SUCCESSFUL;
 				try {
-					String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + identifier
-							+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
-					File threadPoolLockFolder = new File(threadPoolLockFolderPath);
-					if(threadPoolLockFolder.exists() && threadPoolLockFolder.isDirectory()) {
-						while (true) {
-							String fileNameList[] = threadPoolLockFolder.list();
-							if (fileNameList != null && fileNameList.length == 0) {
-								break;
-							}
-							try {
-								Thread.sleep(5000);
-							} catch (InterruptedException ie) {
-								log.error("Error in restarting batch instance " + ie.getMessage(), ie);
-								result = Results.FAILURE;
-								throw new GWTException(ie.getMessage());
-							}
-						}
-						
-					}
-					
 					jbpmService = this.getSingleBeanOfType(JbpmService.class);
 					jbpmService.deleteProcessInstance(batchInstance.getProcessInstanceKey());
-					
+					BatchInstanceThread batchInstanceThread = ThreadPool.getBatchInstanceThreadList(identifier);
+					if (batchInstanceThread != null) {
+						batchInstanceThread.remove();
+					}
 					if (moduleName == null) {
 						if (batchInstance.getRemoteBatchInstance() != null) {
 							moduleName = batchInstance.getRemoteBatchInstance().getSourceModule();
@@ -388,7 +377,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 						deleteBatchFolder(batchInstance);
 						moduleName = BatchInstanceConstants.FOLDER_IMPORT_MODULE;
 					}
-					
+
 					WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
 					String activeModule = workflowService.getActiveModule(batchInstance);
 					String executedModules = "";
@@ -418,10 +407,9 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 					} else {
 						executedModules = "";
 					}
-					
+
 					batchInstance = batchInstanceService.getBatchInstanceByIdentifier(identifier);
 					batchInstance.setExecutedModules(executedModules);
-					//log.error("****Explicit message for StaleException Check:*******" + identifier);
 					batchInstance = batchInstanceService.merge(batchInstance);
 
 					if (activeModule != null && activeModule.contains(BatchInstanceConstants.WORKFLOW_CONTINUE_CHECK)) {
@@ -433,12 +421,13 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 				} catch (Exception e) {
 					result = Results.FAILURE;
 					log.error("Error in restarting batch instance " + e.getMessage(), e);
-					
+
 					// update the batch instance to ERROR state.
-					if(jbpmService != null) {
+					if (jbpmService != null) {
 						jbpmService.deleteProcessInstance(batchInstance.getProcessInstanceKey());
 					}
-					batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.ERROR);
+					batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(),
+							BatchInstanceStatus.ERROR);
 					throw new GWTException(e.getMessage());
 				}
 			}

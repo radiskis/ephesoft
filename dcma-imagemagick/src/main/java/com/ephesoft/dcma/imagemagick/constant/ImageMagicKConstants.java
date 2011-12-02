@@ -95,13 +95,15 @@ public interface ImageMagicKConstants {
 
 	String GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS = "-dBATCH -sOutputFile=";
 
+	String GHOSTSCRIPT_PLUGIN_NAME_CONSTANT = "GHOSTSCRIPT";
+
 	String DEFAULT_TIF_DEVICE = "tiffg4";
 
 	String PDF_DEVICE = "pdfwrite";
 
 	String ON_SWITCH = "ON";
 
-	String TEMP_FILE_NAME = "tempFile";
+	String TEMP_FILE_NAME = "tempfile";
 
 	String DOUBLE_QUOTES = "\"";
 

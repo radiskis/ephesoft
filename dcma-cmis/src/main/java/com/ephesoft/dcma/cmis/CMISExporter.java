@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.cmis;
 
 import java.io.ByteArrayInputStream;
@@ -173,6 +208,108 @@ public class CMISExporter implements ICommonConstants {
 	 */
 	private String documentVersioningState;
 
+	private String securityMode;
+
+	private String repoCreateBatchFolder;
+
+	public String getSecurityMode() {
+		return securityMode;
+	}
+
+	public void setSecurityMode(String securityMode) {
+		this.securityMode = securityMode;
+	}
+
+	public String getUrlAclService() {
+		return urlAclService;
+	}
+
+	public void setUrlAclService(String urlAclService) {
+		this.urlAclService = urlAclService;
+	}
+
+	public String getUrlDiscoveryService() {
+		return urlDiscoveryService;
+	}
+
+	public void setUrlDiscoveryService(String urlDiscoveryService) {
+		this.urlDiscoveryService = urlDiscoveryService;
+	}
+
+	public String getUrlMultifilingService() {
+		return urlMultifilingService;
+	}
+
+	public void setUrlMultifilingService(String urlMultifilingService) {
+		this.urlMultifilingService = urlMultifilingService;
+	}
+
+	public String getUrlNavigationService() {
+		return urlNavigationService;
+	}
+
+	public void setUrlNavigationService(String urlNavigationService) {
+		this.urlNavigationService = urlNavigationService;
+	}
+
+	public String getUrlObjectService() {
+		return urlObjectService;
+	}
+
+	public void setUrlObjectService(String urlObjectService) {
+		this.urlObjectService = urlObjectService;
+	}
+
+	public String getUrlPolicyService() {
+		return urlPolicyService;
+	}
+
+	public void setUrlPolicyService(String urlPolicyService) {
+		this.urlPolicyService = urlPolicyService;
+	}
+
+	public String getUrlRelationshipService() {
+		return urlRelationshipService;
+	}
+
+	public void setUrlRelationshipService(String urlRelationshipService) {
+		this.urlRelationshipService = urlRelationshipService;
+	}
+
+	public String getUrlRepositoryService() {
+		return urlRepositoryService;
+	}
+
+	public void setUrlRepositoryService(String urlRepositoryService) {
+		this.urlRepositoryService = urlRepositoryService;
+	}
+
+	public String getUrlVersioningService() {
+		return urlVersioningService;
+	}
+
+	public void setUrlVersioningService(String urlVersioningService) {
+		this.urlVersioningService = urlVersioningService;
+	}
+
+	public String getRepoCreateBatchFolder() {
+		return repoCreateBatchFolder;
+	}
+
+	public void setRepoCreateBatchFolder(String repoCreateBatchFolder) {
+		this.repoCreateBatchFolder = repoCreateBatchFolder;
+	}
+
+	private String urlAclService;
+	private String urlDiscoveryService;
+	private String urlMultifilingService;
+	private String urlNavigationService;
+	private String urlObjectService;
+	private String urlPolicyService;
+	private String urlRelationshipService;
+	private String urlRepositoryService;
+	private String urlVersioningService;
+
 	/**
 	 * @return the pluginMappingFileName
 	 */
@@ -283,24 +420,56 @@ public class CMISExporter implements ICommonConstants {
 			session = sessionFactory.createSession(sessionParameters);
 
 			// test
+			// ****************************************************************************************
+			// BEGIN: Zia Consulting Enhancement
+			// ****************************************************************************************
+			// Get a handle to the repository root folder.
 			Folder root = session.getRootFolder();
-			ObjectId parentId = session.createObjectId(root.getId());
 
-			Folder mainFolder = checkMainFolder(root, rootFolder);
+			// Split the specified repository folder path into its individual parts using "/" as the
+			// delimeter.
+			String[] folderPathList = rootFolder.split("/");
 
-			if (null == mainFolder) {
-				ObjectId mainFolderID = createMainFolder(session, parentId, rootFolder);
-				// get an object
-				CmisObject object = session.getObject(mainFolderID);
-				if (object instanceof Folder) {
-					mainFolder = (Folder) object;
-					LOGGER.info("main folder : " + mainFolder);
-					LOGGER.info("main folder ID : " + mainFolderID);
-				}
+			// Determine if there is an empty string in the first index of the folder path list.
+			// This happens because split inserts an empty string if the first character is "/".
+			// In older Ephesoft world, however, one doesn't specified a leading "/" because
+			// the connector couldn't write to a nested folder. Therefore, we have to handle
+			// both new and old scenarios.
+			int startIndex = 0;
+			if (folderPathList[0].length() == 0) {
+				startIndex += 1;
 			}
 
-			Folder batchInstanceFolder = checkBatchInstanceFolder(mainFolder, batchInstanceIdentifier);
+			// Get a handle to the target folder. If it doesn't exist, then it will be created.
+			Folder mainFolder = checkCreateFolder(session, root, "/", startIndex, folderPathList);
 
+			// Determine if a batch specific folder should be created within the main folder.
+			Folder batchInstanceFolder = null;
+			if (this.isBatchInSubfolder()) {
+				// The batch files are to be placed within a subfolder. See if this folder exists, or otherwise create it.
+				String[] batchFolderPathList = (rootFolder + "/" + batchInstanceIdentifier).split("/");
+				batchInstanceFolder = this.checkCreateFolder(session, mainFolder, rootFolder, batchFolderPathList.length - 1,
+						batchFolderPathList);
+			} else {
+				// The batch files are not to be placed within a subfolder. Therefore, the main folder
+				// is the batch instance folder.
+				batchInstanceFolder = mainFolder;
+			}
+			// ****************************************************************************************
+			// END: Zia Consulting Enhancement
+			// ****************************************************************************************
+			/*
+			if (null == batchInstanceFolder) {
+				ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder, batchInstanceIdentifier);
+				// get an object
+				CmisObject object = session.getObject(batchInstanceFolderID);
+				if (object instanceof Folder) {
+					batchInstanceFolder = (Folder) object;
+					LOGGER.info("batchInstance folder : " + batchInstanceFolder);
+					LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
+				}
+			}
+			*/
 			if (null == batchInstanceFolder) {
 				ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder, batchInstanceIdentifier);
 				// get an object
@@ -394,17 +563,228 @@ public class CMISExporter implements ICommonConstants {
 
 		Map<String, String> sessionParameters = new HashMap<String, String>();
 
-		// sessionParameters.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/alfresco/service/cmis");
-		// sessionParameters.put(SessionParameter.ATOMPUB_URL, "http://cmis.alfresco.com/service/cmis");
-		// sessionParameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-		// sessionParameters.put(SessionParameter.USER, "admin");
-		// sessionParameters.put(SessionParameter.PASSWORD, "admin");
-		// sessionParameters.put(SessionParameter.SESSION_TYPE, "persistent");
-
-		sessionParameters.put(SessionParameter.ATOMPUB_URL, serverURL);
-		sessionParameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+		// ****************************************************************************************
+		// BEGIN: Zia Consulting Enhancement
+		// ****************************************************************************************
+		// Set the values of the properties that are used for all security modes.
 		sessionParameters.put(SessionParameter.USER, serverUserName);
 		sessionParameters.put(SessionParameter.PASSWORD, serverPassword);
+
+		// By default, we'll perform HTTP basic security which is what is done today.
+		boolean basicSecurity = true;
+
+		String aclServiceURL = null;
+		String discoverServiceURL = null;
+		String multifilingServiceURL = null;
+		String navigationServiceURL = null;
+		String objectServiceURL = null;
+		String policyServiceURL = null;
+		String relationshipServiceURL = null;
+		String repositoryServiceURL = null;
+		String versioningServiceURL = null;
+
+		try {
+				// Determine if a security mode property was specified in the file.
+				String securityMode = getSecurityMode();
+
+				if ((securityMode != null) && (securityMode.trim().length() > 0)) {
+
+					if (securityMode.trim().equalsIgnoreCase("wssecurity")) {
+						// We will be using WS-Security.
+						basicSecurity = false;
+
+						// Get the URL's for each of the services.
+						aclServiceURL = getUrlAclService(); //bundle.getString("cmis.url.acl_service");
+						if ((aclServiceURL == null) || (aclServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS ACL Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.acl_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							aclServiceURL = aclServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (aclServiceURL.contains("{serverURL}")) {
+								aclServiceURL = aclServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						discoverServiceURL = getUrlDiscoveryService(); //bundle.getString("cmis.url.discovery_service");
+						if ((discoverServiceURL == null) || (discoverServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Discovery Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.discovery_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							discoverServiceURL = discoverServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (discoverServiceURL.contains("{serverURL}")) {
+								discoverServiceURL = discoverServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						multifilingServiceURL = getUrlMultifilingService(); //bundle.getString("cmis.url.multifiling_service");
+						if ((multifilingServiceURL == null) || (multifilingServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Multi-Filing Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.multifiling_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							multifilingServiceURL = multifilingServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (multifilingServiceURL.contains("{serverURL}")) {
+								multifilingServiceURL = multifilingServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						navigationServiceURL = getUrlNavigationService(); //bundle.getString("cmis.url.navigation_service");
+						if ((navigationServiceURL == null) || (navigationServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Navigation Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.navigation_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							navigationServiceURL = navigationServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (navigationServiceURL.contains("{serverURL}")) {
+								navigationServiceURL = navigationServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						objectServiceURL = getUrlObjectService(); //bundle.getString("cmis.url.object_service");
+						if ((objectServiceURL == null) || (objectServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Object Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.object_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							objectServiceURL = objectServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (objectServiceURL.contains("{serverURL}")) {
+								objectServiceURL = objectServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						policyServiceURL = getUrlPolicyService(); //bundle.getString("cmis.url.policy_service");
+						if ((policyServiceURL == null) || (policyServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Policy Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.policy_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							policyServiceURL = policyServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (policyServiceURL.contains("{serverURL}")) {
+								policyServiceURL = policyServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						relationshipServiceURL = getUrlRelationshipService(); //bundle.getString("cmis.url.relationship_service");
+						if ((relationshipServiceURL == null) || (relationshipServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Relationship Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.relationship_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							relationshipServiceURL = relationshipServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (relationshipServiceURL.contains("{serverURL}")) {
+								relationshipServiceURL = relationshipServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						repositoryServiceURL = getUrlRepositoryService(); //bundle.getString("cmis.url.repository_service");
+						if ((repositoryServiceURL == null) || (repositoryServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Repository Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.repository_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							repositoryServiceURL = repositoryServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (repositoryServiceURL.contains("{serverURL}")) {
+								repositoryServiceURL = repositoryServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+						versioningServiceURL = getUrlVersioningService();//bundle.getString("cmis.url.versioning_service");
+						if ((versioningServiceURL == null) || (versioningServiceURL.trim().length() <= 0)) {
+							throw new Exception(
+									"The WSDL URL of the CMIS Versioning Service must be specified as the value of the \"dcma-cmis.properties\" "
+											+ "configuration file property \"cmis.url.versioning_service\" when WS-Security is specified as the CMIS security mode. "
+											+ "HTTP Basic Authentication will be used by default.");
+						} else {
+							// Make sure that it's tidy.
+							versioningServiceURL = versioningServiceURL.trim();
+
+							// Determine if a part of the specified URL needs to be replaced with the server URL
+							// configured in the batch classe.
+							if (versioningServiceURL.contains("{serverURL}")) {
+								versioningServiceURL = versioningServiceURL.replace("{serverURL}", serverURL);
+							}
+						}
+
+					} else if (!securityMode.trim().equalsIgnoreCase("basic")) {
+						// This security mode isn't recognized.
+						LOGGER.warn("CMIS CONFIGURATION WARNING: \"cmis.security.mode\" property value \"" + securityMode.trim()
+								+ "\" isn't supported. HTTP Basic Authentication will be used by default.");
+					}
+				}
+		} catch (Exception configEx) {
+			LOGGER.error("CMIS CONFIGURATION ERROR: An error occurred while attempting to obtain configuration properties from the "
+					+ "configuraiton file. The error was: " + configEx.getMessage());
+		}
+
+		// Set the remaining parameters based on the selected security mode.
+		if (basicSecurity) {
+			LOGGER.info("CMIS: HTTP Basic Authentication will be used for CMIS messaging.");
+			sessionParameters.put(SessionParameter.ATOMPUB_URL, "http://localhost:8181/alfresco/service/cmis");
+			sessionParameters.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+		} else {
+			LOGGER.info("CMIS: WS-Security will be used for CMIS messaging.");
+
+			// Configure Open Chemistry for WS-Security.
+			sessionParameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
+			sessionParameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
+			sessionParameters.put(SessionParameter.AUTH_HTTP_BASIC, "false");
+
+			sessionParameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, aclServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, discoverServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_MULTIFILING_SERVICE, multifilingServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_NAVIGATION_SERVICE, navigationServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_OBJECT_SERVICE, objectServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_POLICY_SERVICE, policyServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_RELATIONSHIP_SERVICE, relationshipServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_REPOSITORY_SERVICE, repositoryServiceURL);
+			sessionParameters.put(SessionParameter.WEBSERVICES_VERSIONING_SERVICE, versioningServiceURL);
+		}
+
+		// ****************************************************************************************
+		// END: Zia Consulting Enhancement
+		// ****************************************************************************************
 
 		if (null != repositoryID && !repositoryID.isEmpty()) {
 			sessionParameters.put(SessionParameter.REPOSITORY_ID, repositoryID);
@@ -419,14 +799,13 @@ public class CMISExporter implements ICommonConstants {
 	 * @param rootFolder String
 	 * @return ObjectId
 	 */
-	private ObjectId createMainFolder(Session session, ObjectId parentId, String rootFolder) {
-
+	private ObjectId createFolder(Session session, ObjectId parentId, String folderName) {
 		ObjectId mainFolderID = null;
 
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(PropertyIds.OBJECT_TYPE_ID, BaseTypeId.CMIS_FOLDER.value());
 
-		properties.put(PropertyIds.NAME, rootFolder);
+		properties.put(PropertyIds.NAME, folderName);
 
 		List<Ace> addAces = new LinkedList<Ace>();
 		List<Ace> removeAces = new LinkedList<Ace>();
@@ -444,29 +823,68 @@ public class CMISExporter implements ICommonConstants {
 	 * @param rootFolder String
 	 * @return Folder
 	 */
-	private Folder checkMainFolder(Folder root, String rootFolder) {
-		String folderId = null;
-		CmisObject folderObj = null;
-		LOGGER.info("Name of the main folder : " + rootFolder);
-		for (CmisObject childrens : root.getChildren()) {
-			if (childrens.getName().equals(rootFolder)) {
+	private Folder checkCreateFolder(Session session, Folder parentFolder, String parentFolderPath, int currentFolderIndex,
+			String[] folderPathList) {
+		// ****************************************************************************************
+		// BEGIN: Zia Consulting Enhancement
+		// Modified to support a nested folder structure within the repository rather than simply
+		// a root level folder. Recursion is employed in order to walk the folder tree.
+		// ****************************************************************************************
+		Folder targetFolder = null;
+
+		// Get the name of the folder at the current index in the path.
+		String currentFolderName = folderPathList[currentFolderIndex];
+
+		LOGGER.info("Determining if the target folder \"" + currentFolderName + "\" exists within the repository folder \""
+				+ parentFolderPath + "\".");
+
+		// Iterate through the child nodes of the parent node until we find the specified child folder.
+		for (CmisObject childNode : parentFolder.getChildren()) {
+			if (childNode.getName().equals(currentFolderName) && (childNode instanceof Folder)) {
+				targetFolder = (Folder) childNode;
 				LOGGER.info("Folder already present");
-				folderId = childrens.getId();
-				folderObj = childrens;
-				LOGGER.info("folderId : " + folderId);
+				LOGGER.info("Found the child folder. Its folder ID is " + childNode.getId() + ".");
 				break;
 			}
 		}
 
-		Folder folder = null;
+		if (targetFolder == null) {
+			LOGGER.info("The folder doesn't exist. Creating it...");
 
-		if (folderObj instanceof Folder) {
-			folder = (Folder) folderObj;
+			try {
+				// Have the folder created.
+				ObjectId newFolderID = this.createFolder(session, session.createObjectId(parentFolder.getId()), currentFolderName);
+
+				// Convert the object ID to a folder reference.
+				targetFolder = (Folder) session.getObject(newFolderID);
+			} catch (Exception createEx) {
+				LOGGER.error("An error occurred while attempting to create the folder node \"" + currentFolderName
+						+ "\" within the parent folder node \"" + currentFolderName + "\". The error was: " + createEx.getMessage());
+				return null;
+			}
 		}
 
-		return folder;
+		if (targetFolder != null) {
+			// The folder does exist, but we need to determine if we are at the end of the chain.
+			int newFolderIndex = currentFolderIndex + 1;
+			if (newFolderIndex < folderPathList.length) {
+				String subfolderPath = parentFolderPath;
+				if (!parentFolderPath.equals("/")) {
+					subfolderPath += "/";
+				}
+				subfolderPath += currentFolderName;
 
-	}
+				// We are not at the end of the tree. Iterate to the next node in the path.
+				targetFolder = this.checkCreateFolder(session, targetFolder, subfolderPath, newFolderIndex, folderPathList);
+			}
+			// Else this is the end of the line.
+		}
+		// ****************************************************************************************
+		// END: Zia Consulting Enhancement
+		// ****************************************************************************************
+
+		return targetFolder;
+	} // End checkCreateFolder
 
 	/**
 	 * @param mainFolder Folder
@@ -742,27 +1160,27 @@ public class CMISExporter implements ICommonConstants {
 			case STRING:
 				LOGGER.info(CONVERTING + property + " to dataType String");
 				returnValue = (Object) value;
-				break;				
+				break;
 			case BOOLEAN:
 				LOGGER.info(CONVERTING + property + " to dataType Boolean");
 				String valueToConvert = value;
-				
+
 				if (value.equalsIgnoreCase("yes")) {
 					valueToConvert = "true";
-				} else{
+				} else {
 					try {
 						int valueInt = Integer.parseInt(valueToConvert);
-						if(valueInt != 0) {
+						if (valueInt != 0) {
 							valueToConvert = "true";
 						} else {
-							valueToConvert = "false";	
+							valueToConvert = "false";
 						}
 					} catch (NumberFormatException nfe) {
 						valueToConvert = "false";
 						LOGGER.info("Found non integer value in boolean field.");
 					}
 				}
-				
+
 				returnValue = new Boolean(valueToConvert);
 				break;
 			default:
@@ -790,6 +1208,32 @@ public class CMISExporter implements ICommonConstants {
 			return this.uploadFileExt;
 		}
 	}
+
+	/**
+	 * Called to determine if at batch folder should be created in the repository for each set of batch documents that are exported to
+	 * CMIS. The configuration file property cmis.repo.create_batch_subfolders specifies a value of "false" in order to override the
+	 * default behavior, which is to create a batch sub-folder.
+	 * 
+	 * @return A boolean value indicating whether batch documents should be exported to their own sub-folders.
+	 */
+	private boolean isBatchInSubfolder() {
+		boolean batchInSubfolder = true;
+
+		try {
+			// Get the value of the configuration property.
+			String batchInSubfolderString = getRepoCreateBatchFolder();
+
+			if ((batchInSubfolderString != null) && (batchInSubfolderString.trim().length() > 0)
+					&& (batchInSubfolderString.trim().equalsIgnoreCase("false"))) {
+				// Batches do not get their own subfolders.
+				batchInSubfolder = false;
+			}
+		} catch (Exception configEx) {
+			// Ignore exceptions related to this feature, as this is not a required behavior.
+		}
+
+		return batchInSubfolder;
+	} // End isBatchInSubfolder
 
 	/**
 	 * This method deletes the file for a batch folder whose extension is set in property of batch.
@@ -832,14 +1276,51 @@ public class CMISExporter implements ICommonConstants {
 
 			session = sessionFactory.createSession(sessionParameters);
 
-			// test
+			// ****************************************************************************************
+			// BEGIN: Zia Consulting Enhancement
+			// ****************************************************************************************
+			// Get a handle to the repository root folder.
 			Folder root = session.getRootFolder();
 
-			Folder mainFolder = checkMainFolder(root, rootFolder);
-			Folder batchInstanceFolder = checkBatchInstanceFolder(mainFolder, batchInstanceIdentifier);
+			// Split the specified repository folder path into its individual parts using "/" as the
+			// delimeter.
+			String[] folderPathList = rootFolder.split("/");
+
+			// Determine if there is an empty string in the first index of the folder path list.
+			// This happens because split inserts an empty string if the first character is "/".
+			// In older Ephesoft world, however, one doesn't specified a leading "/" because
+			// the connector couldn't write to a nested folder. Therefore, we have to handle
+			// both new and old scenarios.
+			int startIndex = 0;
+			if (folderPathList[0].length() == 0) {
+				startIndex += 1;
+			}
+
+			// Get a handle to the target folder. If it doesn't exist, then it will be created.
+			// We start at index 1, because split inserts and empty string into index 0.
+			Folder mainFolder = checkCreateFolder(session, root, "/", startIndex, folderPathList);
+
+			// Determine if the batch file was placed within a batch sub-folder
+			Folder batchInstanceFolder = null;
+			if (this.isBatchInSubfolder()) {
+				// Batch files are to be placed within a sub-folder. Get a handle to that folder.
+				batchInstanceFolder = checkBatchInstanceFolder(mainFolder, batchInstanceIdentifier);
+
+				if (batchInstanceFolder == null) {
+					throw new Exception("Unable to locate the batch folder \"" + rootFolder + "/" + batchInstanceIdentifier
+							+ "\" within the repository.");
+				}
+			} else {
+				// Batch files are not to be written to sub-folder. Therefore, the configured root folder
+				// is the target folder.
+				batchInstanceFolder = mainFolder;
+			}
+			// ****************************************************************************************
+			// END: Zia Consulting Enhancement
+			// ****************************************************************************************
 
 			for (CmisObject childrens : batchInstanceFolder.getChildren()) {
-				if (childrens.getName().contains(uploadFileTypeExt)){
+				if (childrens.getName().contains(uploadFileTypeExt)) {
 					LOGGER.debug(childrens.getName());
 				}
 				childrens.delete(true);
@@ -850,5 +1331,4 @@ public class CMISExporter implements ICommonConstants {
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 	}
-
 }

@@ -79,8 +79,6 @@
 			report.START_TIME &gt;= :start_time	
 		GROUP BY 
 			report.WORKFLOW_NAME
-		ORDER BY
-			:order_property :order
 		LIMIT 
 			:start_index , :range
 		
@@ -110,8 +108,7 @@
 			report.START_TIME &gt;= :start_time	
 		GROUP BY 
 			report.WORKFLOW_NAME
-		ORDER BY
-			:order_property :order
+		
 		LIMIT 
 			:start_index , :range
 		
@@ -141,8 +138,7 @@
 			report.START_TIME &gt;= :start_time	
 		GROUP BY 
 			report.WORKFLOW_NAME
-		ORDER BY
-			:order_property :order
+		
 		LIMIT 
 			:start_index , :range
 		

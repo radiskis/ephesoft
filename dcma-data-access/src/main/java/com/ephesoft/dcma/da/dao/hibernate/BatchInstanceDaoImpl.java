@@ -627,6 +627,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		statusList.add(BatchInstanceStatus.RUNNING);
 		statusList.add(BatchInstanceStatus.READY);
 		statusList.add(BatchInstanceStatus.RESTART_IN_PROGRESS);
+		statusList.add(BatchInstanceStatus.LOCKED);
 		criteria.add(Restrictions.in(STATUS, statusList));
 
 		return find(criteria);
@@ -657,7 +658,6 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		statusList.add(BatchInstanceStatus.RUNNING);
 		statusList.add(BatchInstanceStatus.TRANSFERRED);
 		statusList.add(BatchInstanceStatus.READY);
-
 		criteria.add(Restrictions.in(STATUS, statusList));
 		return find(criteria);
 

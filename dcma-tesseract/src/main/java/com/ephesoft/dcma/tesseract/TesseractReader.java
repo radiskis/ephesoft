@@ -68,76 +68,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tesseract;
 
 import java.io.File;
@@ -145,7 +75,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +93,6 @@ import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.util.FileUtils;
-import com.ephesoft.dcma.util.OSUtil;
 
 /**
  * This class reads the image files from batch xml, generates HOCR file for each one of them and writes the name of each HOCR file in
@@ -209,30 +137,6 @@ public class TesseractReader implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractReader.class);
 
 	/**
-	 * List of all tesseract commands Separated by ";".
-	 */
-	private transient String mandatorycmds;
-
-	/**
-	 * List of all tesseract commands Separated by ";" for unix/linux support.
-	 */
-	private transient String unixMandatorycmds;
-
-	/**
-	 * @param unixMandatorycmds
-	 */
-	public void setUnixMandatorycmds(String unixMandatorycmds) {
-		this.unixMandatorycmds = unixMandatorycmds;
-	}
-
-	/**
-	 * @param mandatorycmds
-	 */
-	public void setMandatorycmds(final String mandatorycmds) {
-		this.mandatorycmds = mandatorycmds;
-	}
-
-	/**
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -261,23 +165,46 @@ public class TesseractReader implements ICommonConstants {
 	}
 
 	/**
-	 * This method populates the list of commands from ";" seperated String of commands.
-	 * 
-	 * @return List<String>
+	 * Tesseract command for windows.
 	 */
-	public List<String> populateCommandsList() {
-		List<String> cmdList = new ArrayList<String>();
-		StringTokenizer token = null;
-		if (OSUtil.isWindows()) {
-			token = new StringTokenizer(mandatorycmds, ";");
-		} else {
-			token = new StringTokenizer(unixMandatorycmds, ";");
-		}
-		while (token.hasMoreTokens()) {
-			String eachCmd = token.nextToken();
-			cmdList.add(eachCmd);
-		}
-		return cmdList;
+	private transient String windowsCmd;
+
+	/**
+	 * Tesseract command for unix/linux support.
+	 */
+	private transient String unixCmd;
+
+	/**
+	 * Tesseract command for overwriteHOCR.
+	 */
+	private transient String overwriteHOCR;
+
+	/**
+	 * @return the overwriteHOCR
+	 */
+	public String getOverwriteHOCR() {
+		return overwriteHOCR;
+	}
+
+	/**
+	 * @param overwriteHOCR the overwriteHOCR to set
+	 */
+	public void setOverwriteHOCR(String overwriteHOCR) {
+		this.overwriteHOCR = overwriteHOCR;
+	}
+
+	/**
+	 * @param windowsCmd the windowsCmd to set
+	 */
+	public void setWindowsCmd(String windowsCmd) {
+		this.windowsCmd = windowsCmd;
+	}
+
+	/**
+	 * @param unixCmd the unixCmd to set
+	 */
+	public void setUnixCmd(String unixCmd) {
+		this.unixCmd = unixCmd;
 	}
 
 	/**
@@ -326,7 +253,6 @@ public class TesseractReader implements ICommonConstants {
 			LOGGER.info("Properties Initialized Successfully");
 
 			String[] validExtensions = validExt.split(";");
-			List<String> cmdList = populateCommandsList();
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
 			List<String> allPages = null;
 			try {
@@ -335,15 +261,8 @@ public class TesseractReader implements ICommonConstants {
 				LOGGER.error("Exception while reading from XML" + e1.getMessage());
 				throw new DCMAApplicationException(e1.getMessage(), e1);
 			}
-			BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
-			String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID
-					+ File.separator + batchSchemaService.getThreadpoolLockFolderName();
-			try {
-				FileUtils.createThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
-			} catch (IOException ioe) {
-				LOGGER.error("Error in creating threadpool lock file" + ioe.getMessage(), ioe);
-				throw new DCMABusinessException(ioe.getMessage(), ioe);
-			}
+			BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceID);
+
 			List<TesseractProcessExecutor> tesseractProcessExecutors = new ArrayList<TesseractProcessExecutor>();
 			if (!allPages.isEmpty()) {
 				for (int i = 0; i < allPages.size(); i++) {
@@ -364,8 +283,9 @@ public class TesseractReader implements ICommonConstants {
 					if (isFileValid) {
 						try {
 							LOGGER.info("Adding to thread pool");
-							tesseractProcessExecutors.add(new TesseractProcessExecutor(eachPage, batch, batchInstanceID, cmdList,
-									actualFolderLocation, cmdLanguage, batchInstanceThread, tesseractVersion, colorSwitch));
+							tesseractProcessExecutors.add(new TesseractProcessExecutor(eachPage, batch, batchInstanceID,
+									actualFolderLocation, cmdLanguage, batchInstanceThread, tesseractVersion, colorSwitch, windowsCmd,
+									unixCmd, overwriteHOCR));
 						} catch (DCMAApplicationException e) {
 							LOGGER.error("Image Processing or XML updation failed for image: " + actualFolderLocation + File.separator
 									+ eachPage);
@@ -386,13 +306,6 @@ public class TesseractReader implements ICommonConstants {
 					batchSchemaService.updateBatch(batch);
 					// Throw the exception to set the batch status to Error by Application aspect
 					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-				} finally {
-					try {
-						FileUtils.deleteThreadPoolLockFile(batchInstanceID, threadPoolLockFolderPath, pluginName);
-					} catch (IOException ioe) {
-						LOGGER.error("Error in deleting threadpool lock file" + ioe.getMessage(), ioe);
-						throw new DCMABusinessException(ioe.getMessage(), ioe);
-					}
 				}
 				for (TesseractProcessExecutor tesseractProcessExecutor : tesseractProcessExecutors) {
 					LOGGER.info("Started Updating batch XML");

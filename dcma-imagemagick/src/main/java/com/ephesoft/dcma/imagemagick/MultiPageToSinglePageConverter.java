@@ -68,41 +68,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.imagemagick;
 
 import java.io.File;
@@ -126,11 +91,15 @@ import com.ephesoft.dcma.util.OSUtil;
 
 public class MultiPageToSinglePageConverter implements ICommonConstants, IImageMagickCommonConstants {
 
+	private static final String MULTIPAGE_COMMAND_PARAMETER = "-%04d";
+
 	private static final String EMPTY_STRING = "";
 
 	private static final String QUOTES = "\"";
 
 	private static final String SPACE = " ";
+	private static final String GHOSTSCRIPT_EXECUTOR = "EphesoftExecutor.exe";
+	private static final String IMAGEMAGICK_EXECUTOR = "EphesoftImageMagickExecutor.exe";
 
 	@Autowired
 	@Qualifier("batchClassPluginPropertiesService")
@@ -145,23 +114,24 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 	 * 
 	 * @param imagePath
 	 */
-	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, File outputFilePath, BatchInstanceThread thread)
-			throws DCMAApplicationException {
-		String repairFileUtilityPath = System.getenv(REPAIR_FILES_ENV_VARIABLE);
+	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, File outputFilePath,
+			BatchInstanceThread thread, Boolean allowPdfConversion) throws DCMAApplicationException {
+		String repairImageMagickFileUtilityPath = System.getenv(REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE);
 		String imageName = imagePath.getAbsolutePath();
-		int indexOf = imageName.toLowerCase().indexOf(FileType.PDF.getExtensionWithDot());
+		int indexOf = imageName.toLowerCase().indexOf(FileType.TIF.getExtensionWithDot());
 		if (indexOf == -1) {
-			indexOf = imageName.toLowerCase().indexOf(FileType.TIF.getExtensionWithDot());
-			if (indexOf == -1) {
-				indexOf = imageName.toLowerCase().indexOf(FileType.TIFF.getExtensionWithDot());
-			}
+			indexOf = imageName.toLowerCase().indexOf(FileType.TIFF.getExtensionWithDot());
+			if (indexOf == -1)
+				if (allowPdfConversion) {
+					indexOf = imageName.toLowerCase().indexOf(FileType.PDF.getExtensionWithDot());
+				}
 		}
 		if (indexOf == -1) {
 			logger.error("Unsupported file format");
 			return;
 		}
 		String outputImagePath = imageName.substring(0, indexOf);
-		String fileExtension = "-%04d" + FileType.TIF.getExtensionWithDot();
+		String fileExtension = MULTIPAGE_COMMAND_PARAMETER + FileType.TIF.getExtensionWithDot();
 		if (outputFilePath != null) {
 			outputImagePath = outputFilePath.getAbsolutePath();
 			if (outputImagePath.endsWith("\\") || outputImagePath.endsWith("/")) {
@@ -172,12 +142,10 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			String command = EMPTY_STRING;
 			ArrayList<String> commandList = new ArrayList<String>();
 			if (OSUtil.isWindows()) {
-				commandList.add("cmd ");
-				commandList.add("/c ");
-				commandList.add(repairFileUtilityPath + File.separator + "EphesoftExecutor.exe");
-				createCommandforWindows(commandList, batchClass, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
+				commandList.add(repairImageMagickFileUtilityPath + File.separator + IMAGEMAGICK_EXECUTOR);
+				createImageMagickCommandforWindows(commandList, batchClass, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
 						+ "convert\"", QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
-				// commandList.add(command);
+
 			} else {
 				String outputImageName = outputImagePath + fileExtension; // OSUtil.escapeSpacesForUnixLinux(outputImagePath +
 				// fileExtension);
@@ -208,7 +176,7 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		}
 	}
 
-	private String createCommandforWindows(ArrayList<String> commandList, BatchClass batchClass, String environment,
+	private String createImageMagickCommandforWindows(ArrayList<String> commandList, BatchClass batchClass, String environment,
 			String inputImageName, String outputImageName) {
 		if (environment != null) {
 			commandList.add(environment);
@@ -232,6 +200,38 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		}
 		commandList.add(QUOTES + outputParams.trim() + QUOTES);
 		commandList.add(outputImageName.trim());
+		return command.toString();
+	}
+
+	private String createGhostScriptCommandforWindows(ArrayList<String> commandList, BatchClass batchClass, String environment,
+			String inputImageName, String outputImageName) {
+
+		StringBuffer command = new StringBuffer(EMPTY_STRING);
+		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
+				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GS_IMAGE_PARAMETERS);
+		String imageParams = EMPTY_STRING;
+		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
+				&& pluginConfiguration[0].getValue().length() > 0) {
+			imageParams = pluginConfiguration[0].getValue();
+			if (imageParams != null) {
+				imageParams = imageParams.trim();
+			}
+		}
+		String splitParams[] = imageParams.split(" ");
+		StringBuffer inputParameterBuffer = new StringBuffer();
+		for (int i = 0; i < splitParams.length; i++) {
+			if (i == 0) {
+				if (environment != null) {
+					commandList.add(QUOTES + environment + splitParams[0] + QUOTES);
+				}
+			} else {
+				inputParameterBuffer.append(splitParams[i] + " ");
+			}
+		}
+		commandList.add(inputParameterBuffer.toString().trim());
+		commandList.add("-sOutputFile=");
+		commandList.add(outputImageName);
+		commandList.add(inputImageName);
 		return command.toString();
 	}
 
@@ -265,6 +265,63 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		commandList.add(outputImageName.trim());
 		// command.append(outputImageName);
 		return command.toString();
+	}
+
+	public void convertPdfToSinglePageTiffs(BatchClass batchClass, File imagePath, File outputFilePath, BatchInstanceThread thread)
+			throws DCMAApplicationException {
+		String repairGhostScriptFileUtilityPath = System.getenv(REPAIR_FILES_THROUGH_GHOSTSCIPT_ENV_VARIABLE);
+		String imageName = imagePath.getAbsolutePath();
+		int indexOf = imageName.toLowerCase().indexOf(FileType.PDF.getExtensionWithDot());
+		if (indexOf == -1) {
+			logger.info("No Pdf file format found");
+			return;
+		}
+
+		String outputImagePath = imageName.substring(0, indexOf);
+		String fileExtension = MULTIPAGE_COMMAND_PARAMETER + FileType.TIF.getExtensionWithDot();
+		if (outputFilePath != null) {
+			outputImagePath = outputFilePath.getAbsolutePath();
+			if (outputImagePath.endsWith("\\") || outputImagePath.endsWith("/")) {
+				fileExtension = "image" + fileExtension;
+			}
+		}
+		try {
+			String command = EMPTY_STRING;
+			ArrayList<String> commandList = new ArrayList<String>();
+			if (OSUtil.isWindows()) {
+				commandList.add(repairGhostScriptFileUtilityPath + File.separator + GHOSTSCRIPT_EXECUTOR);
+				createGhostScriptCommandforWindows(commandList, batchClass, System.getenv(GHOSTSCRIPT_ENV_VARIABLE) + File.separator,
+						QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
+
+			} else {
+				String outputImageName = outputImagePath + fileExtension; // OSUtil.escapeSpacesForUnixLinux(outputImagePath +
+				// fileExtension);
+				commandList.add("convert");
+				createCommandForLinux(commandList, batchClass, SPACE + imageName + SPACE, SPACE + outputImageName + SPACE);
+				// commandList.add(command);
+			}
+			String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
+
+			if (thread != null) {
+				logger.info("Adding generated command to thread pool. Command is : ");
+				for (int ind = 0; ind < cmds.length; ind++) {
+					logger.info(cmds[ind] + SPACE);
+				}
+				if (OSUtil.isWindows()) {
+					thread.add(new ProcessExecutor(cmds, null));
+				} else {
+					thread.add(new ProcessExecutor(cmds, new File(System.getenv(IM4JAVA_TOOLPATH))));
+				}
+			} else {
+				logger.error("Command " + command + " cannot be run");
+				throw new DCMAApplicationException("Command " + command + " cannot be run");
+			}
+
+		} catch (Exception ex) {
+			logger.error("Problem generating tiffs from Pdfs");
+			throw new DCMAApplicationException("Problem generating tiffs from Pdfs", ex);
+		}
+
 	}
 
 }
