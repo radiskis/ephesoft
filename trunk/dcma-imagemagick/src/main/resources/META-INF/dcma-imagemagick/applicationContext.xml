@@ -46,7 +46,10 @@
 		p:unixTiffCmds="$imagemagick{imagemagick.unix_multi_tiff_commands}" p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
 		p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"
 		p:tifCompression="$imagemagick{imagemagick.tif_compression}"
-		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}">
+		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}"
+		p:generateDisplayPng="$imagemagick{imagemagick.generate_display_png}"
+		p:inputParameters="$imagemagick{imagemagick.display_image_input_parameters}"
+		p:outputParameters="$imagemagick{imagemagick.display_image_output_parameters}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.imagemagick" />

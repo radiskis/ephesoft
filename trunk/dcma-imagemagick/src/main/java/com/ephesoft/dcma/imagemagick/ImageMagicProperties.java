@@ -75,6 +75,7 @@ import com.ephesoft.dcma.core.common.PluginProperty;
 
 public enum ImageMagicProperties implements PluginProperty {
 	
+	GS_IMAGE_PARAMETERS("ghostscript.image_parameters"),
 	IM_CONVERT_INPUT_IMAGE_PARAMETERS("imagemagick.open_input_image_parameters"),
 	IM_CONVERT_OUTPUT_IMAGE_PARAMETERS("imagemagick.save_output_image_parameters"),
 	
@@ -101,7 +102,8 @@ public enum ImageMagicProperties implements PluginProperty {
 	CHECK_PDF_EXPORT_PROCESS("createMultipageTif.export_process"),
 	CHECK_COLOURED_PDF("createMultipageTif.coloured_pdf"),
 	CHECK_SEARCHABLE_PDF("createMultipageTif.searchable_pdf"),
-	GHOSTSCRIPT_COMMAND_PDF_PARAMETERS("createMultipageTif.ghostscript_pdf_parameters");
+	GHOSTSCRIPT_COMMAND_PDF_PARAMETERS("createMultipageTif.ghostscript_pdf_parameters"),
+	PDF_OPTIMIZATION_PARAMETERS("createMultipageTif.optimization_parameters");
 	
 	
 	String key;

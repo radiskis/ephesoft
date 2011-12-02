@@ -68,41 +68,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.imp;
 
 import java.io.File;
@@ -556,7 +521,7 @@ public final class FolderImporter implements ICommonConstants {
 					break;
 				}
 			}
-			
+
 			if (folderValid) {
 				File indivisualFile = new File(fFolderToBeMoved, fileName);
 
@@ -724,9 +689,7 @@ public final class FolderImporter implements ICommonConstants {
 		}
 		File folder = new File(folderPath);
 		if (folder != null) {
-			String[] folderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
-					FileType.TIFF.getExtension()));
-
+			String[] pdfFolderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension()));
 			String folderIgnoreCharList = getFolderIgnoreCharList();
 			if (null == folderIgnoreCharList || getIgnoreReplaceChar() == null || folderIgnoreCharList.isEmpty()
 					|| getIgnoreReplaceChar().isEmpty() || getIgnoreReplaceChar().length() > 1) {
@@ -737,10 +700,10 @@ public final class FolderImporter implements ICommonConstants {
 			List<File> deleteFileList = new ArrayList<File>();
 
 			boolean isFound = false;
-			BatchInstanceThread threadList = new BatchInstanceThread();
+			BatchInstanceThread threadList = new BatchInstanceThread(batchInstance.getIdentifier());
 
-			if (folderList != null) {
-				for (String string : folderList) {
+			if (pdfFolderList != null) {
+				for (String string : pdfFolderList) {
 
 					if (string == null || string.isEmpty()) {
 						continue;
@@ -762,29 +725,85 @@ public final class FolderImporter implements ICommonConstants {
 							fileNew = new File(folderPath + File.separator + string);
 							fileOriginal.renameTo(fileNew);
 
-							LOGGER.info("Converting multi page file : " + fileNew.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, threadList);
+							LOGGER.info("Converting multi page pdf file : " + fileNew.getAbsolutePath());
+							imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileNew, threadList);
 							deleteFileList.add(fileNew);
 						} else {
-							LOGGER.info("Converting multi page file : " + fileOriginal.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, threadList);
+							LOGGER.info("Converting multi page pdf file : " + fileOriginal.getAbsolutePath());
+							imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileOriginal, threadList);
 							deleteFileList.add(fileOriginal);
 						}
 					} catch (Exception e) {
-						LOGGER.error("Error in converting multi page file to single page tiff files", e);
-						throw new DCMAException("Error in breaking image to single pages " + e.getMessage(), e);
+						LOGGER.error("Error in converting multi page pdf file to mutli page tiff file", e);
+						throw new DCMAException("Error in converting pdf file to multi page tiff file" + e.getMessage(), e);
 					}
 				}
 				try {
-					LOGGER.info("Executing conversion of multi page file using thread pool");
+					LOGGER.info("Executing conversion of multi page pdf file using thread pool");
 					threadList.execute();
-					LOGGER.info("Completed conversion of multi page file using thread pool");
+					LOGGER.info("Completed conversion of multi page pdf file using thread pool");
 				} catch (DCMAApplicationException e) {
 					LOGGER.error(e.getMessage(), e);
 					throw new DCMAException(e.getMessage(), e);
 				}
-				// Clean up operation
-				LOGGER.info("Cleaning up the old files.");
+			}
+
+			String[] tiffFolderList = folder.list(new CustomFileFilter(false, FileType.TIF.getExtension(), FileType.TIFF
+					.getExtension()));
+			isFound = false;
+			threadList = new BatchInstanceThread(batchInstance.getIdentifier());
+
+			if (tiffFolderList != null) {
+				if (deleteFileList == null) {
+					deleteFileList = new ArrayList<File>();
+				}
+				for (String string : tiffFolderList) {
+
+					if (string == null || string.isEmpty()) {
+						continue;
+					}
+
+					try {
+						isFound = false;
+						File fileOriginal = new File(folderPath + File.separator + string);
+						File fileNew = null;
+
+						for (String nameStr : fdIgList) {
+							if (string.contains(nameStr)) {
+								isFound = true;
+								string = string.replaceAll(nameStr, getIgnoreReplaceChar());
+							}
+						}
+
+						if (isFound) {
+							fileNew = new File(folderPath + File.separator + string);
+							fileOriginal.renameTo(fileNew);
+
+							LOGGER.info("Converting multi page tiff file : " + fileNew.getAbsolutePath());
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, threadList, false);
+							deleteFileList.add(fileNew);
+						} else {
+							LOGGER.info("Converting multi page tiff file : " + fileOriginal.getAbsolutePath());
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, threadList, false);
+							deleteFileList.add(fileOriginal);
+						}
+					} catch (Exception e) {
+						LOGGER.error("Error in converting multi page tiff file to single page tiff files", e);
+						throw new DCMAException("Error in breaking image to single pages " + e.getMessage(), e);
+					}
+				}
+				try {
+					LOGGER.info("Executing conversion of multi page tiff file using thread pool");
+					threadList.execute();
+					LOGGER.info("Completed conversion of multi page tiff file using thread pool");
+				} catch (DCMAApplicationException e) {
+					LOGGER.error(e.getMessage(), e);
+					throw new DCMAException(e.getMessage(), e);
+				}
+			}
+			// Clean up operation
+			if (deleteFileList != null) {
+				LOGGER.info("Cleaning up the old pdf and tiff files.");
 				for (File file : deleteFileList) {
 					boolean isDeleted = file.delete();
 					LOGGER.debug(" File " + file.getAbsolutePath() + " deleted " + isDeleted);

@@ -81,7 +81,9 @@ public enum ValidateProperties implements PluginProperty {
 			"validation.url(Ctrl+9)"), EXTERNAL_APP_X_DIMENSION("validation.x_dimension"), EXTERNAL_APP_Y_DIMENSION(
 			"validation.y_dimension"), EXTERNAL_APP_SWITCH("validation.external_app_switch"), FIELD_VALUE_CHANGE_SCRIPT_SWITCH(
 			"validation.field_value_change_script_switch"), FUZZY_SEARCH_SWITCH("validation.fuzzy_search_switch"),
-	SUGGESTION_BOX_SWITCH("validation.suggestion_box_switch");
+	SUGGESTION_BOX_SWITCH("validation.suggestion_box_switch"), TITLE_EXTERNAL_APP_URL1("validation.url1_title"),
+	TITLE_EXTERNAL_APP_URL2("validation.url2_title"), TITLE_EXTERNAL_APP_URL3("validation.url3_title"), TITLE_EXTERNAL_APP_URL4(
+			"validation.url4_title");
 
 	/**
 	 * Property key.

@@ -68,111 +68,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.core.threadpool;
 
 import java.util.Iterator;
@@ -193,6 +88,11 @@ public class BatchInstanceThread {
 	private long waitThreadSleepTime;
 
 	/**
+	 * String constant for batch instance identifier.
+	 */
+	private String batchInstanceId;
+
+	/**
 	 * List of all tasks associated with a batch instance.
 	 */
 	private List<AbstractRunnable> taskList = new LinkedList<AbstractRunnable>();
@@ -202,8 +102,21 @@ public class BatchInstanceThread {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(BatchInstanceThread.class);
 
+	public String getBatchInstanceId() {
+		return batchInstanceId;
+	}
+
+	public void setBatchInstanceId(String batchInstanceId) {
+		this.batchInstanceId = batchInstanceId;
+	}
+
 	public BatchInstanceThread() {
 		this.waitThreadSleepTime = 5000;
+	}
+
+	public BatchInstanceThread(String batchInstanceId) {
+		this.waitThreadSleepTime = 5000;
+		this.batchInstanceId = batchInstanceId;
 	}
 
 	public BatchInstanceThread(long waitTime) {
@@ -231,6 +144,9 @@ public class BatchInstanceThread {
 	 * @throws DCMAApplicationException
 	 */
 	public synchronized void execute() throws DCMAApplicationException {
+		if (batchInstanceId != null) {
+			ThreadPool.getInstance().putBatchInstanceThreadMap(batchInstanceId, this);
+		}
 		for (AbstractRunnable r : taskList) {
 			try {
 				ThreadPool.getInstance().addTask(r);
@@ -241,17 +157,23 @@ public class BatchInstanceThread {
 			}
 		}
 		wait(taskList);
+		if (batchInstanceId != null) {
+			ThreadPool.getInstance().removeBatchInstanceThreadMap(batchInstanceId);
+		}
 	}
 
 	public synchronized void remove() throws DCMAApplicationException {
 		for (Iterator<AbstractRunnable> iterator = taskList.iterator(); iterator.hasNext();) {
 			AbstractRunnable r = (AbstractRunnable) iterator.next();
-			if (!(r.isStarted() || r.isCompleted())) {
+			if (!r.isStarted() || r.isCompleted()) {
 				ThreadPool.getInstance().removeTask(r);
 				iterator.remove();
-			} 
+			}
 		}
 		waitForCompletion(taskList);
+		if (batchInstanceId != null) {
+			ThreadPool.getInstance().removeBatchInstanceThreadMap(batchInstanceId);
+		}
 	}
 
 	/**
@@ -278,7 +200,7 @@ public class BatchInstanceThread {
 			}
 		}
 	}
-	
+
 	/**
 	 * Waits for all the threads in the provided list to complete execution.
 	 * 

@@ -221,7 +221,7 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		BatchInstanceThread batchInstanceThread = new BatchInstanceThread();
 		for (int counter = 0; counter < filelist.length; counter++) {
 			File imagePath = new File(folderPath + File.separator + filelist[counter]);
-			imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, batchInstanceThread);
+			imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, batchInstanceThread, true);
 			deleteFileList.add(imagePath);
 		}
 		try {

@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.lucene;
 
 import java.io.BufferedReader;
@@ -114,6 +149,7 @@ public class LuceneEngine implements ICommonConstants {
 	private static final String TESSERACT_HOCR_PLUGIN = "TESSERACT_HOCR";
 	private static final String TESSERACT_BASE_PATH_NOT_CONFIGURED = "Tesseract Base path not configured.";
 	private static final String JAR_PATH_FOR_LICENSE_NOT_FOUND = "Jar Path for License file could not be found";
+	private static final String TESSERACT_EXECUTOR_PATH = System.getenv("TESSERACT_EXECUTOR_PATH");
 	/**
 	 * Constant for file type name.
 	 */
@@ -1036,14 +1072,16 @@ public class LuceneEngine implements ICommonConstants {
 
 								if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
 									isTesseractVersion3Batch = generateHOCRForTesseract(targetHTMlAbsolutePath, tesseractVersion,
-											isTesseractVersion3Batch, imageAbsolutePath, cmdList);
+											isTesseractVersion3Batch, imageAbsolutePath, cmdList, tesseractBasePath);
 								} else {
 									generateHOCRForRecostar(batchClassIdentifer, targetHTMlAbsolutePath, imageAbsolutePath, cmdList);
 								}
 								File envFile = null;
 
 								if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
-									envFile = new File(tesseractBasePath);
+									if (OSUtil.isUnix()) {
+										envFile = new File(tesseractBasePath);
+									}
 								} else {
 									envFile = new File(System.getenv(RECOSTAR_BASE_PATH));
 								}
@@ -1113,17 +1151,20 @@ public class LuceneEngine implements ICommonConstants {
 	}
 
 	private boolean generateHOCRForTesseract(StringBuffer targetHTMlAbsolutePath, String tesseractVersion,
-			boolean isTesseractVersion3Batch, String imageAbsolutePath, List<String> cmdList) {
+			boolean isTesseractVersion3Batch, String imageAbsolutePath, List<String> cmdList, String tesseractBasePath) {
 		LOGGER.info("Generating hocr from tesseract....");
 		boolean isTesseractVersion3 = isTesseractVersion3Batch;
 		if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 			isTesseractVersion3 = true;
 			LOGGER.info("tesseract version 3....");
 			if (OSUtil.isWindows()) {
-				cmdList.add(CMD_COMMAND);
-				cmdList.add("/c");
-				cmdList.add(TESSERACT_CONSOLE_EXE + SPACE + BACKWARD_SLASH + imageAbsolutePath + BACKWARD_SLASH + SPACE
-						+ BACKWARD_SLASH + targetHTMlAbsolutePath + "\" -l " + " eng +hocr.txt");
+				cmdList.add(BACKWARD_SLASH + TESSERACT_EXECUTOR_PATH + File.separator + "TesseractExecutor.exe" + BACKWARD_SLASH);
+				cmdList.add(BACKWARD_SLASH + tesseractBasePath + File.separator + TESSERACT_CONSOLE_EXE + BACKWARD_SLASH);
+				cmdList.add(BACKWARD_SLASH + imageAbsolutePath + BACKWARD_SLASH);
+				cmdList.add(BACKWARD_SLASH + targetHTMlAbsolutePath + BACKWARD_SLASH);
+				cmdList.add("-l");
+				cmdList.add("eng");
+				cmdList.add("+" + BACKWARD_SLASH + tesseractBasePath + File.separator + "hocr.txt" + BACKWARD_SLASH);
 			} else {
 				// cmdList.add("tesseract " + imageAbsolutePath + " " + targetHTMlAbsolutePath + " -l "
 				// + " eng +hocr.txt");
@@ -1138,10 +1179,11 @@ public class LuceneEngine implements ICommonConstants {
 		} else {
 			LOGGER.info("tesseract version 2....");
 			targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
-			cmdList.add(CMD_COMMAND);
-			cmdList.add("/c");
-			cmdList.add(TESSERACT_CONSOLE_EXE + SPACE + BACKWARD_SLASH + imageAbsolutePath + "\" eng " + " > \""
-					+ targetHTMlAbsolutePath + BACKWARD_SLASH);
+			cmdList.add(BACKWARD_SLASH + TESSERACT_EXECUTOR_PATH + File.separator + "TesseractExecutor.exe\" ");
+			cmdList.add(BACKWARD_SLASH + tesseractBasePath + File.separator + TESSERACT_CONSOLE_EXE + BACKWARD_SLASH);
+			cmdList.add(BACKWARD_SLASH + imageAbsolutePath + BACKWARD_SLASH);
+			cmdList.add("eng > ");
+			cmdList.add(BACKWARD_SLASH + targetHTMlAbsolutePath + BACKWARD_SLASH);
 		}
 		return isTesseractVersion3;
 	}
@@ -1242,15 +1284,20 @@ public class LuceneEngine implements ICommonConstants {
 									}
 									try {
 										// Runtime runtime = Runtime.getRuntime();
-										String[] cmds = new String[6];
+										String[] cmds = new String[8];
 										if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3
 												.getPropertyKey())) {
 											if (OSUtil.isWindows()) {
-												cmds[0] = CMD_COMMAND;
-												cmds[1] = "/c";
-												cmds[2] = TESSERACT_CONSOLE_EXE + SPACE + BACKWARD_SLASH + imageAbsolutePath
-														+ BACKWARD_SLASH + SPACE + BACKWARD_SLASH + targetHTMlAbsolutePath + "\" -l "
-														+ " eng +hocr.txt";
+												cmds[0] = BACKWARD_SLASH + TESSERACT_EXECUTOR_PATH + File.separator
+														+ "TesseractExecutor.exe" + BACKWARD_SLASH;
+												cmds[1] = BACKWARD_SLASH + tesseractBasePath + File.separator + TESSERACT_CONSOLE_EXE
+														+ BACKWARD_SLASH;
+												cmds[2] = BACKWARD_SLASH + imageAbsolutePath + BACKWARD_SLASH;
+												cmds[3] = BACKWARD_SLASH + targetHTMlAbsolutePath + BACKWARD_SLASH;
+												cmds[4] = "-l eng";
+												cmds[5] = "+" + BACKWARD_SLASH + tesseractBasePath + File.separator + "hocr.txt"
+														+ BACKWARD_SLASH;
+
 											} else {
 												// cmds[0] = "tesseract " + imageAbsolutePath + " " + targetHTMlAbsolutePath + " -l "
 												// + " eng +hocr.txt";
@@ -1262,12 +1309,19 @@ public class LuceneEngine implements ICommonConstants {
 												cmds[5] = "+hocr.txt";
 											}
 										} else {
-											cmds[0] = CMD_COMMAND;
-											cmds[1] = "/c";
-											cmds[2] = TESSERACT_CONSOLE_EXE + SPACE + BACKWARD_SLASH + imageAbsolutePath + "\" eng "
-													+ " > \"" + targetHTMlAbsolutePath + BACKWARD_SLASH;
+											cmds[0] = BACKWARD_SLASH + TESSERACT_EXECUTOR_PATH + File.separator
+													+ "TesseractExecutor.exe" + BACKWARD_SLASH;
+											cmds[1] = BACKWARD_SLASH + tesseractBasePath + File.separator + TESSERACT_CONSOLE_EXE
+													+ BACKWARD_SLASH;
+											cmds[2] = BACKWARD_SLASH + imageAbsolutePath + BACKWARD_SLASH;
+											cmds[3] = "eng " + " > ";
+											cmds[4] = BACKWARD_SLASH + targetHTMlAbsolutePath + BACKWARD_SLASH;
 										}
-										batchInstanceThread.add(new ProcessExecutor(cmds, new File(tesseractBasePath)));
+										if (OSUtil.isUnix()) {
+											batchInstanceThread.add(new ProcessExecutor(cmds, new File(tesseractBasePath)));
+										} else if (OSUtil.isWindows()) {
+											batchInstanceThread.add(new ProcessExecutor(cmds, null));
+										}
 										LOGGER.info("Added HOCR file : " + targetHTMlAbsolutePath);
 									} catch (Exception e) {
 										LOGGER.error(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage());

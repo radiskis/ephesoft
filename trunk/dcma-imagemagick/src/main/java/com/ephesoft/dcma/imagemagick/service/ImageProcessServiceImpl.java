@@ -33,6 +33,41 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
+
 package com.ephesoft.dcma.imagemagick.service;
 
 import java.io.File;
@@ -121,8 +156,11 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			throws DCMAException {
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+			String generateDisplayPng = multipageTiffPdfCreator.getGenerateDisplayPng();
+			String inputParameters = multipageTiffPdfCreator.getInputParameters();
+			String outputParameters = multipageTiffPdfCreator.getOutputParameters();
 			thumbnailPNGCreator.generateFullFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					IImageMagickCommonConstants.OCR_INPUT_FILE, ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, pluginWorkflow);
+					IImageMagickCommonConstants.OCR_INPUT_FILE, ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, pluginWorkflow, generateDisplayPng, inputParameters, outputParameters);
 		} catch (Exception ex) {
 			LOGGER.error(ERROR_IN_PNG_FILE_GENERATION, ex);
 			throw new DCMAException(ERROR_IN_PNG_FILE_GENERATION, ex);
@@ -159,13 +197,15 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_COLOURED_PDF);
 		String checkSearchablePDF = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_SEARCHABLE_PDF);
-		String ghosyscriptPdfParameters = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
+		String ghostscriptPdfParameters = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GHOSTSCRIPT_COMMAND_PDF_PARAMETERS);
+		String pdfOptimizationParams = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
+				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.PDF_OPTIMIZATION_PARAMETERS);
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
 			multipageTiffPdfCreator.createMultiPageFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF, ghosyscriptPdfParameters,
-					pluginWorkflow);
+					pdfOptimizationParams, multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF,
+					ghostscriptPdfParameters, pluginWorkflow);
 
 		} catch (Exception ex) {
 			LOGGER.error("Problem generating overlayed Images exception->" + ex.getMessage());
@@ -178,8 +218,11 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	public void createDisplayImages(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+			String generateDisplayPng = multipageTiffPdfCreator.getGenerateDisplayPng();
+			String inputParameters = multipageTiffPdfCreator.getInputParameters();
+			String outputParameters = multipageTiffPdfCreator.getOutputParameters();
 			thumbnailPNGCreator.generateFullFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					IImageMagickCommonConstants.DISPLAY_IMAGE, ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, pluginWorkflow);
+					IImageMagickCommonConstants.DISPLAY_IMAGE, ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, pluginWorkflow, generateDisplayPng, inputParameters, outputParameters);
 		} catch (Exception ex) {
 			LOGGER.error("Problem in generating Display File");
 			throw new DCMAException("Problem in generating Display File", ex);
@@ -250,10 +293,10 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	}
 
 	@Override
-	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, BatchInstanceThread thread)
-			throws DCMAException {
+	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, BatchInstanceThread thread,
+			Boolean allowPdfConversion) throws DCMAException {
 		try {
-			multiPageToSinglePageConverter.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, null, thread);
+			multiPageToSinglePageConverter.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, null, thread, allowPdfConversion);
 		} catch (DCMAApplicationException e) {
 			throw new DCMAException(e.getMessage());
 		}
@@ -272,7 +315,7 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		BatchClass batchClass = batchClassService.get(batchClassID.getID());
 		List<File> allImageFiles = getAllImagesPathInFolder(folderPath);
 		for (File imageFile : allImageFiles) {
-			convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, thread);
+			convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, thread, true);
 		}
 		return allImageFiles;
 	}
@@ -326,6 +369,16 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			LOGGER.error(ERROR_IN_PNG_FILE_GENERATION, ex);
 			throw new DCMAException(ERROR_IN_PNG_FILE_GENERATION, ex);
 		}
+	}
+
+	@Override
+	public void convertPdfToSinglePageTiffs(BatchClass batchClass, File imagePath, BatchInstanceThread thread) throws DCMAException {
+		try {
+			multiPageToSinglePageConverter.convertPdfToSinglePageTiffs(batchClass, imagePath, null, thread);
+		} catch (DCMAApplicationException e) {
+			throw new DCMAException(e.getMessage());
+		}
+
 	}
 
 }
