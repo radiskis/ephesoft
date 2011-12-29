@@ -32,14 +32,19 @@ var batchListConstants = {
 		review_tab_shortcut: "Review (Ctrl + j)",
 		validate_tab_shortcut: "Validate (Ctrl + k)",
 		label_table_remote: "Remote Batches",
-		remote_tab_shortcut: "Remote (Ctrl + l)"
+		remote_tab_shortcut: "Remote (Ctrl + l)",
+		label_refresh_button : "Refresh",
+		search_batch_button : "Go",
+		search_batch_label : "Batch Name"
 };
 
 var batchListMessages = {
 		msg_table_batches_list: "Showing 1-{0} batches",
 		msg_table_batches_list_default: "Showing 0-0 batches",
 		msg_table_no_data: "There is no data to display",
-		msg_table_batches_two: "Showing {0}-{1} batches"
+		msg_table_batches_two: "Showing {0}-{1} batches",
+		search_failure : "No such batch found.",
+		search_error : "Unable to perform Search {0}"
 };
 
 /**************************** Turkish locale (suffix: _tk)*******************/
@@ -76,12 +81,17 @@ var batchListConstants_tk = {
 		review_tab_shortcut: "Inceleme (Ctrl + j)",
 		validate_tab_shortcut: "Doğrulamak (Ctrl + k)",
 		label_table_remote: "Remote Batches",
-		remote_tab_shortcut: "Remote (Ctrl + l)"	
+		remote_tab_shortcut: "Remote (Ctrl + l)",
+		label_refresh_button : "Yenile",
+		search_batch_button : "gitmek",
+		search_batch_label : "Toplu is adi"
 };
 
 var batchListMessages_tk = {
 		msg_table_batches_list: "1-{0} Isleri Gösterilmektedir",
 		msg_table_batches_list_default: "0-0 Isleri Gösterilmektedir",
 		msg_table_no_data: "Görüntülenecek veri bulunamamistir",
-		msg_table_batches_two: "{0}-{1} Isleri"
+		msg_table_batches_two: "{0}-{1} Isleri",
+		search_failure : "B�yle toplu bulundu.",
+		search_error : "Arama yapmak i�in {0}"
 };

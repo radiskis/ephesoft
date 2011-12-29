@@ -156,8 +156,6 @@ INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_val
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (129,now(),now(),'ON',111);
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (130,now(),now(),'BarcodeClassification',13);
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (131,now(),now(),'ImageClassification',13);
-INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (133,now(),now(),'name',83);
-INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (134,now(),now(),'title',83);
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (136,now(),now(),'FIRSTPAGE',96);
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (137,now(),now(),'OFF',111);
 INSERT INTO plugin_config_sample_value(id,creation_date,last_modified,sample_value,plugin_config_id) VALUES (138,now(),now(),'tif',99);

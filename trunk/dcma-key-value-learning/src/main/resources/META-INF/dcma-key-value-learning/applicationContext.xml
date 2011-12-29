@@ -30,7 +30,8 @@
 		p:maxNumberRecordPerDlf="$kvcreation{key_value.max_number_record}"
 		p:toleranceThreshold="$kvcreation{key_value.tolerance_threshold}"
 		p:multiplier="$kvcreation{key_value.multiplier}"
-		p:fetchValue="$kvcreation{key_value.fetch_value}">
+		p:fetchValue="$kvcreation{key_value.fetch_value}"
+		p:minKeyCharCount="$kvcreation{key_value.min_key_char_count}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.kvfieldcreation" />

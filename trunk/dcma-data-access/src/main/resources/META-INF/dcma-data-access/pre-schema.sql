@@ -33,6 +33,19 @@ delete from batch_class_plugin_config where plugin_config_id in (select id from 
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='barcode.switch');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='imagemagick.save_output_image_parameters');
 delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='fuzzydb.stop_words');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='createMultipageTif.optimization_parameters');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url(Ctrl+4)');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url1_title');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url(Ctrl+7)');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url2_title');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url(Ctrl+8)');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url3_title');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url(Ctrl+9)');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.url4_title');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.x_dimension');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='validation.y_dimension');
+delete from batch_class_plugin_config where plugin_config_id in (select id from plugin_config where plugin_config.config_name='ghostscript.image_parameters');
+delete from batch_class_plugin_config where batch_class_plugin_config.batch_class_plugin_id in (select batch_class_plugin.id from batch_class_plugin where batch_class_plugin.batch_class_module_id in (select batch_class_module.id from batch_class_module where workflow_name = 'Page_Process_Module_BC4') and plugin_id in(select plugin.id from plugin where plugin.plugin_name = 'CREATE_DISPLAY_IMAGE' or plugin.plugin_name ='CREATE_THUMBNAILS'));
 
 delete from plugin_config_sample_value where sample_value = 'AutomaticClassification' and plugin_config_id in (select id from plugin_config where config_name='da.factory_classification');
 delete from plugin_config_sample_value where plugin_config_id in (select id from plugin_config where plugin_config.config_name='regular.regex.extraction_switch');
@@ -81,6 +94,19 @@ delete from plugin_config where plugin_config.config_name='tesseract.versions';
 delete from plugin_config where plugin_config.config_name='regular.regex.confidence_score';
 delete from plugin_config where plugin_config.config_name='regular.regex.extraction_switch';
 delete from plugin_config where config_name in ('document.type', 'field.type', 'row.id');
+delete from plugin_config where plugin_config.config_name='validation.url(Ctrl+4)';
+delete from plugin_config where plugin_config.config_name='validation.url1_title';
+delete from plugin_config where plugin_config.config_name='validation.url(Ctrl+7)';
+delete from plugin_config where plugin_config.config_name='validation.url2_title';
+delete from plugin_config where plugin_config.config_name='validation.url(Ctrl+8)';
+delete from plugin_config where plugin_config.config_name='validation.url3_title';
+delete from plugin_config where plugin_config.config_name='validation.url(Ctrl+9)';
+delete from plugin_config where plugin_config.config_name='validation.url4_title';
+delete from plugin_config where plugin_config.config_name='validation.x_dimension';
+delete from plugin_config where plugin_config.config_name='validation.y_dimension';
+
+
+delete from batch_class_plugin where batch_class_plugin.batch_class_module_id in (select batch_class_module.id from batch_class_module where workflow_name = 'Page_Process_Module_BC4') and plugin_id in(select plugin.id from plugin where plugin.plugin_name = 'CREATE_DISPLAY_IMAGE' or plugin.plugin_name ='CREATE_THUMBNAILS');
 
 ALTER TABLE plugin_config_sample_value ADD UNIQUE (sample_value,plugin_config_id);
 
@@ -122,12 +148,16 @@ INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_des
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'NSI Export Folder', '', 'nsi.final_export_folder', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'NSI State Switch', '', 'nsi.switch', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Final NSI XML Name', '', 'nsi.final_xml_name', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL1(Ctrl+4)', b'0', 'validation.url(Ctrl+4)', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL2(Ctrl+7)', b'0', 'validation.url(Ctrl+7)', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL3(Ctrl+8)', b'0', 'validation.url(Ctrl+8)', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL4(Ctrl+9)', b'0', 'validation.url(Ctrl+9)', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'X Dimension', b'0', 'validation.x_dimension', NULL);
-INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Y Dimension', b'0', 'validation.y_dimension', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL1(Ctrl+4)', 0, 'validation.url(Ctrl+4)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL1 Title', 0, 'validation.url1_title', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL2(Ctrl+7)', 0, 'validation.url(Ctrl+7)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL2 Title', 0, 'validation.url2_title', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL3(Ctrl+8)', 0, 'validation.url(Ctrl+8)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL3 Title', 0, 'validation.url3_title', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL4(Ctrl+9)',0, 'validation.url(Ctrl+9)', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'URL4 Title', 0, 'validation.url4_title', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'X Dimension', 0, 'validation.x_dimension', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Y Dimension', 0, 'validation.y_dimension', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar color switch',0,'recostar.color_switch',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Tesseract color switch',0,'tesseract.color_switch',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar Extarction color switch',0,'recostar_extraction.color_switch',null);
@@ -155,12 +185,17 @@ INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_des
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'INTEGER','Last Page Confidence Score Value',0,'lucene.last_page_conf_weightage',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Field Value Change Script Switch',0, 'validation.field_value_change_script_switch', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING', 'Fuzzy Search Switch',0, 'validation.fuzzy_search_switch', NULL);
-INSERT INTO `plugin_config` (`creation_date`, `last_modified`, `config_datatype`, `config_desc`, `config_multivalue`, `config_name`, `plugin_id`) VALUES (now(), now(), 'STRING', 'Suggestion box Switch', b'0', 'validation.suggestion_box_switch', NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(), now(), 'STRING', 'Suggestion box Switch', b'0', 'validation.suggestion_box_switch', NULL);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Filebound Export Format',0,'filebound.exportformat',null);
 INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Key Value Learning Switch',0,'keyValueLearning.switch',null);
-
-
-
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,is_mandatory,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','PDF Optimization Parameters',1,'','createMultipageTif.optimization_parameters',NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Recostar color switch',0,'recostar.color_switch',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','GhostScript Image Parameters',0,'ghostscript.image_parameters',null);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','PDF Optimization switch',0,'createMultipageTif.pdf_optimization_switch',NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','PDF Optimization switch',0,'tabbedPdf.pdf_optimization_switch',NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Create Thumbnails Output Image Parameters',0,'createThumbnails.output_image_parameters',NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Fuzzy Pop Up X Dimension(in px)',0,'validation.fuzzy_search_pop_up_x_dimension',NULL);
+INSERT INTO plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) VALUES (now(),now(),'STRING','Fuzzy Pop Up Y Dimension(in px)',0,'validation.fuzzy_search_pop_up_y_dimension',NULL);
 
 
 /*Plugin Config Sample Values*/
@@ -182,8 +217,9 @@ INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='createMultipageTif.switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='batch.export_to_folder_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='batch.export_to_folder_switch'));
-INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'IMAGE_MAGIC',(select id from plugin_config where config_name='createMultipageTif.export_process'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'IMAGE_MAGICK',(select id from plugin_config where config_name='createMultipageTif.export_process'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'HOCRtoPDF',(select id from plugin_config where config_name='createMultipageTif.export_process'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'GHOSTSCRIPT',(select id from plugin_config where config_name='createMultipageTif.export_process'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'TRUE',(select id from plugin_config where config_name='createMultipageTif.coloured_pdf'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'FALSE',(select id from plugin_config where config_name='createMultipageTif.coloured_pdf'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'TRUE',(select id from plugin_config where config_name='createMultipageTif.searchable_pdf'));
@@ -255,29 +291,33 @@ INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'pdf',(select id from plugin_config where config_name='filebound.exportformat'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='keyValueLearning.switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='keyValueLearning.switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='tabbedPdf.pdf_optimization_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tabbedPdf.pdf_optimization_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='createMultipageTif.pdf_optimization_switch'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='createMultipageTif.pdf_optimization_switch'));
 
 
 
 /*Module config update */
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (1, now(), now(), NULL, NULL, 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (2, now(), now(), 'Plugin Configuration', 'PluginConfiguration', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (3, now(), now(), 'Email Accounts', 'EmailAccounts', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (4, now(), now(), NULL, NULL, 1, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (5, now(), now(), 'Script Page Processing', 'ScriptPageProcessing', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (6, now(), now(), 'Learn Index', 'LearnIndex', '', NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (7, now(), now(), 'Lucene Sample', 'LuceneSample', 1, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (8, now(), now(), 'Image Sample', 'ImageSample', 1, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (9, now(), now(), 'Script Document Assembler', 'ScriptDocumentAssembler', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (10, now(), now(), 'Script Review', 'ScriptReview', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (11, now(), now(), 'Script Extraction', 'ScriptExtraction', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (12, now(), now(), 'Fuzzy-DB Index', 'Fuzzy-DBIndex', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (13, now(), now(), 'Recostar Extraction', 'RecostarExtraction', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (14, now(), now(), 'Script Automatic Validation', 'ScriptAutomaticValidation', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (15, now(), now(), 'Script Validation', 'ScriptValidation', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (16, now(), now(), 'Script Add New Table', 'ScriptAddNewTable', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (17, now(), now(), 'Script FunctionKey', 'ScriptFunctionKey', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (18, now(), now(), 'Script Export', 'ScriptExport', 0, NULL);
-INSERT INTO module_config (`id`, `creation_date`, `last_modified`, `child_display_name`, `child_key`, `is_mandatory`, `module_id`) VALUES (19, now(), now(), 'Cmis Mapping', 'CmisMapping', 0, NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (1,now(),now(),NULL,NULL,0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (2,now(),now(),'Plugin Configuration','PluginConfiguration',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (3,now(),now(),'Email Accounts','EmailAccounts',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (4,now(),now(),NULL,NULL,1,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (5,now(),now(),'Script Page Processing','ScriptPageProcessing',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (6,now(),now(),'Learn Index','LearnIndex','',NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (7,now(),now(),'Lucene Sample','LuceneSample',1,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (8,now(),now(),'Image Sample','ImageSample',1,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (9,now(),now(),'Script Document Assembler','ScriptDocumentAssembler',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (10,now(),now(),'Script Review','ScriptReview',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (11,now(),now(),'Script Extraction','ScriptExtraction',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (12,now(),now(),'Fuzzy-DB Index','Fuzzy-DBIndex',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (13,now(),now(),'Recostar Extraction','RecostarExtraction',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (14,now(),now(),'Script Automatic Validation','ScriptAutomaticValidation',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (15,now(),now(),'Script Validation','ScriptValidation',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (16,now(),now(),'Script Add New Table','ScriptAddNewTable',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (17,now(),now(),'Script FunctionKey','ScriptFunctionKey',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (18,now(),now(),'Script Export','ScriptExport',0,NULL);
+INSERT INTO module_config (id,creation_date,last_modified,child_display_name,child_key,is_mandatory,module_id) VALUES (19,now(),now(),'Cmis Mapping','CmisMapping',0,NULL);
 
 
 
@@ -318,11 +358,9 @@ batch_class_module.id = batch_class_plugin.batch_class_module_id and plugin.id =
 batch_class_module.workflow_name like '%Extraction%' and plugin.workflow_name = 'Scripting_Plugin';
 
 
-update plugin_config_sample_value set sample_value = 'GHOSTSCRIPT' where sample_value = 'IMAGE_MAGIC'; 
-insert into `plugin_config`(`creation_date`,`last_modified`,`config_datatype`,`config_desc`,`config_multivalue`,`config_name`,`plugin_id`) values ('2011-09-14 12:13:32','2011-09-14 12:13:32','STRING','PDF Creation Parameters',0,'createMultipageTif.ghostscript_pdf_parameters',null);
-
-insert into `plugin_config`(`creation_date`,`last_modified`,`config_datatype`,`config_desc`,`config_multivalue`,`config_name`,`plugin_id`) values ('2011-09-14 12:13:32','2011-09-14 12:13:32','STRING','Tabbed PDF Creation Parameters',0,'tabbedPdf.creation_parameters',null);
-insert into `plugin_config`(`creation_date`,`last_modified`,`config_datatype`,`config_desc`,`config_multivalue`,`config_name`,`plugin_id`) values ('2011-09-14 12:13:32','2011-09-14 12:13:32','STRING','Tabbed PDF Optimization Parameters',0,'tabbedPdf.optimization_parameters',null);
+insert into plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) values (now(),now(),'STRING','PDF Creation Parameters',0,'createMultipageTif.ghostscript_pdf_parameters',null);
+insert into plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) values (now(),now(),'STRING','Tabbed PDF Creation Parameters',0,'tabbedPdf.creation_parameters',null);
+insert into plugin_config(creation_date,last_modified,config_datatype,config_desc,config_multivalue,config_name,plugin_id) values (now(),now(),'STRING','Tabbed PDF Optimization Parameters',0,'tabbedPdf.optimization_parameters',null);
 
 update plugin set plugin_desc = 'Key Value Extraction Plugin' where plugin_name = 'KEY_VALUE_EXTRACTION';
 
@@ -330,5 +368,5 @@ update plugin_config set config_desc = 'Recostar Extraction color switch' where 
 
 update plugin_config set config_desc = 'Recostar Extraction Switch' where config_name = 'recostar_extraction.switch';
 
-update plugin_config set is_mandatory = 1 where is_mandatory = null;
+update plugin_config set is_mandatory=1 where is_mandatory is null ;
 

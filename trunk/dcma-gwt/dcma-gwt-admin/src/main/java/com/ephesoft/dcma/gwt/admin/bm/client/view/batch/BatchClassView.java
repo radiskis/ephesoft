@@ -33,181 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.admin.bm.client.view.batch;
 
 import java.util.Collection;
@@ -218,7 +43,11 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.BatchClassViewPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batchclassfield.BatchClassFieldListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.CopyDocumentTypePresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.DocumentTypeListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.email.EmailListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ModuleListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield.BatchClassFieldListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.CopyDocumentView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.DocumentTypeListView;
@@ -336,6 +165,11 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	private final BatchClassFieldListView batchClassFieldListView;
 
+	private BatchClassFieldListPresenter batchClassFieldListPresenter;
+
+	private ModuleListPresenter moduleListPresenter;
+
+	private EmailListPresenter emailListPresenter;
 	@UiField
 	protected LayoutPanel batchClassFieldLayoutPanel;
 
@@ -353,6 +187,8 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	@UiField
 	protected Button deleteBatchClassFieldButton;
+
+	private DocumentTypeListPresenter documentTypeListPresenter;
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
@@ -403,15 +239,23 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		batchClassFieldButtonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		batchClassFieldButtonPanel.addStyleName(AdminConstants.PADDING_STYLE_TOPPADD);
 		batchClassFieldListView = new BatchClassFieldListView();
+		batchClassFieldListPresenter = null;
+		documentTypeListPresenter = null;
+		moduleListPresenter = null;
+		emailListPresenter = null;
+
 		batchClassFieldLayoutPanel.add(batchClassFieldListView.listView);
 	}
 
 	public void createModuleList(Collection<BatchClassModuleDTO> modules) {
 		List<Record> recordList = setModuleList(modules);
-		moduleListView.listView.initTable(recordList.size(), recordList, true);
+		moduleListPresenter = new ModuleListPresenter(presenter.getController(), moduleListView);
+		moduleListPresenter.setModuleDTOList(modules);
+
+		moduleListView.listView.initTable(recordList.size(), moduleListPresenter, recordList, true, false);
 	}
 
-	private List<Record> setModuleList(Collection<BatchClassModuleDTO> modules) {
+	public List<Record> setModuleList(Collection<BatchClassModuleDTO> modules) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final BatchClassModuleDTO batchClassModuleDTO : modules) {
@@ -425,10 +269,12 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	public void createEmailList(Collection<EmailConfigurationDTO> emailConfigurationDTOs) {
 		List<Record> recordList = setEmailList(emailConfigurationDTOs);
-		emailListView.listView.initTable(recordList.size(), recordList, true);
+		emailListPresenter = new EmailListPresenter(presenter.getController(), emailListView);
+		emailListPresenter.setEmailConfigurationDTOList(emailConfigurationDTOs);
+		emailListView.listView.initTable(recordList.size(), emailListPresenter, recordList, true, false);
 	}
 
-	private List<Record> setEmailList(Collection<EmailConfigurationDTO> emailConfigurationDTOs) {
+	public List<Record> setEmailList(Collection<EmailConfigurationDTO> emailConfigurationDTOs) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final EmailConfigurationDTO emailConfigurationDTO : emailConfigurationDTOs) {
@@ -457,11 +303,14 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 	}
 
 	public void createBatchClassFieldList(Collection<BatchClassFieldDTO> batchClassFieldDTOs) {
+
 		List<Record> recordList = setBatchClassFieldList(batchClassFieldDTOs);
-		batchClassFieldListView.listView.initTable(recordList.size(), recordList, true);
+		batchClassFieldListPresenter = new BatchClassFieldListPresenter(presenter.getController(), batchClassFieldListView);
+		batchClassFieldListPresenter.setBatchClassFieldDTOList(batchClassFieldDTOs);
+		batchClassFieldListView.listView.initTable(recordList.size(), batchClassFieldListPresenter, recordList, true, false);
 	}
 
-	private List<Record> setBatchClassFieldList(Collection<BatchClassFieldDTO> batchClassFieldDTOs) {
+	public List<Record> setBatchClassFieldList(Collection<BatchClassFieldDTO> batchClassFieldDTOs) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final BatchClassFieldDTO batchClassFieldDTO : batchClassFieldDTOs) {
@@ -479,10 +328,12 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	public void createDocumentTypeList(Collection<DocumentTypeDTO> documentTypeDTOs) {
 		List<Record> recordList = setDocumentTypeList(documentTypeDTOs);
-		docTypeListView.listView.initTable(recordList.size(), recordList, true);
+		documentTypeListPresenter = new DocumentTypeListPresenter(presenter.getController(), docTypeListView);
+		documentTypeListPresenter.setDocumentTypeDTOList(documentTypeDTOs);
+		docTypeListView.listView.initTable(recordList.size(), documentTypeListPresenter, recordList, true, false);
 	}
 
-	private List<Record> setDocumentTypeList(Collection<DocumentTypeDTO> documentTypeDTOs) {
+	public List<Record> setDocumentTypeList(Collection<DocumentTypeDTO> documentTypeDTOs) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final DocumentTypeDTO documentTypeDTO : documentTypeDTOs) {
@@ -643,7 +494,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		BatchClassModuleDTO batchClassModuleDTO = presenter.getController().getBatchClass().getModuleByIdentifier(identifier);
 		/*
 		 * if (batchClassModuleDTO.getModule().getName().contains( AdminConstants.REVIEW_DOCUMENT)) {
-		 * ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+		 * ConfirmationDialogUtil.showConfirmationDialog (LocaleDictionary.get().getMessageValue(
 		 * BatchClassManagementMessages.NOT_EDITABLE_WARNING), LocaleDictionary.get().getConstantValue(
 		 * BatchClassManagementConstants.EDIT_MODULE_TITLE)); return; }
 		 */
@@ -808,4 +659,10 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		this.batchClassFieldLayoutPanel = batchClassFieldLayoutPanel;
 	}
 
+	public BatchClassFieldListView getBatchClassFieldListView() {
+		return batchClassFieldListView;
+	}
+	/*
+	 * public BatchClassFieldListPresenter getBatchClassFieldListPresenter() { return batchClassFieldListPresenter; }
+	 */
 }

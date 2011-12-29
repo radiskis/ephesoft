@@ -1,6 +1,4 @@
-﻿
-
-/**
+﻿﻿﻿/**
  * ******************************* Default locale
  * **************************************************
  */
@@ -108,7 +106,7 @@ var rvConstants = {
 	prev_doc_type : "Previous Document",
 	next_page_type : "Next Page Within Same Document",
 	prev_page_type : "Previous Page Within Same Document",
-	unable_to_found : "Unable to find",
+	unable_to_find : "Unable to find",
 	delete_all_row_button : "Delete All",
 	add_new_table_button : "Add New Table",
 	add_new_table : "Add New Table",
@@ -173,8 +171,8 @@ var rvMessages = {
 	zoom_unlock_success : "Scroll unlocked successfully",
 	default_doc_type_view_failure : "Failed to retrieve default document type view",
 	document_type_error : "No such document type exists",
-	error_batch_status : "The batch {0} is of status {1}. Cannot open this batch. Retrieving highest priority batch.",
-	none_selected : "-- None --",
+	error_batch_status : "The batch {0} is of status {1}. Cannot open this batch.",
+	none_selected : "",
 	error_value : "Error",
 	delete_all_row_confirmation : "Are you sure you want to delete all rows of selected table.",
 	delete_all_row_title : "Delete all rows",
@@ -191,7 +189,9 @@ var rvMessages = {
 	unable_to_fetch_external_app_info : "Unable to fetch information for the configuration of external applications.",
 	unable_to_retrieve_field_value_script_switch_state : "Unable to fetch field value script switch state.",
 	unable_to_display_external_application : "Unable to display external application.",
-	unable_to_create_authentication_for_external_application : "Unable to create authentication mechanism for external application."
+	unable_to_create_authentication_for_external_application : "Unable to create authentication mechanism for external application.",
+	unable_to_execute_script_and_save : "Unable to save changes due to  failure of script execution on field value change."
+
 };
 
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -295,7 +295,7 @@ var rvConstants_tk = {
 	prev_doc_type : "Önceki Belge",
 	next_page_type : "Sonraki Sayfa Aynı belge içinde",
 	prev_page_type : "Önceki Sayfa Aynı belge içinde",
-	unable_to_found : "Kurulamıyor bulundu",
+	unable_to_find : "Kurulamıyor bulundu",
 	delete_all_row_button : "Tümünü Sil",
 	add_new_table_button : "Yeni Tablo Ekle",
 	add_new_table : "Eklemek Yeni Tablo",
@@ -313,7 +313,10 @@ var rvConstants_tk = {
 	function_key_shortcuts : "İşlev Tuşu Kısayolları",
 	title_topPanel_batchName : "Toplu iş adı",
 	disclosure_panel_shortcut : "Gözden Geçirme Paneli Aç veya Kapat",
-	review_panel :	"Gözden Geçirme Paneli"
+	review_panel :	"Gözden Geçirme Paneli",
+	image_zoom_lock : "Kilitleme / Kilidini zum",
+	zoom_locked : "Yakınlaştırma Kilitli",
+	zoom_unlocked : "Yakınlaştırma kilidi"
 };
 
 var rvMessages_tk = {
@@ -358,8 +361,8 @@ var rvMessages_tk = {
 	regex_pattern_compliant : "desen ile uyumlu olmalÄ±dÄ±r",
 	default_doc_type_view_failure : "VarsayÄ±lan belge tÃ¼rÃ¼nÃ¼ gÃ¶rÃ¼ntÃ¼lemek alÄ±namadÄ±",
 	document_type_error : "BÃ¶yle bir belge tÃ¼rÃ¼ var",
-	error_batch_status : "toplu iÅŸ {0} {1} durum olduÄŸunu. Bu toplu aÃ§Ä±lamÄ±yor. YÃ¼ksek Ã¶nceliÄŸe toplu alÄ±nÄ±yor.",
-	none_selected : "-- HiÃ§biri --",
+	error_batch_status : "Toplu durumu {1} {0}. Bu toplu iş açılamıyor.",
+	none_selected : "",
 	error_value : "Hata",
 	delete_all_row_confirmation : "Seçtiğiniz tablonun tüm satırları silmek istediğinizden emin misiniz.",
 	delete_all_row_title : "Silmek tüm satırları",
@@ -376,5 +379,6 @@ var rvMessages_tk = {
 	unable_to_fetch_external_app_info : "Harici uygulamaların, yapılandırma için bilgi alınamıyor.",
 	unable_to_retrieve_field_value_script_switch_state : "Alan değeri komut dosyası anahtarı devlet alınamıyor.",
 	unable_to_display_external_application : "Dış uygulama görüntülemek için açılamıyor.",
-	unable_to_create_authentication_for_external_application : "Dış uygulama için kimlik doğrulama mekanizması oluşturulamadı."
+	unable_to_create_authentication_for_external_application : "Dış uygulama için kimlik doğrulama mekanizması oluşturulamadı.",
+	unable_to_execute_script_and_save : "Alan değerini değiştirmek betik çalıştırma hatası nedeniyle değişiklikler kaydedilemiyor."
 };

@@ -273,266 +273,266 @@ var batchClassManagementMessages = {
 /** ************************** Turkish locale (suffix: _tk)****************** */
 var batchClassManagementConstants_tk = {
 
-	delete_document_title : "Delete Document",
+	delete_document_title : "Belge sil",
 
-	delete_field_title : "Delete Field",
+	delete_field_title : "alan silme",
 
-	delete_function_key : "Delete Function Key",
+	delete_function_key : "İşlev Tuşu sil",
 	
-	edit_function_key : "Edit Function Key",
+	edit_function_key : "İşlev Tuşu Düzenle",
 
-	delete_page_title : "Delete Page",
+	delete_page_title : "Sayfayı Sil",
 
-	delete_kv_title : "Delete Key Value",
+	delete_kv_title : "Anahtar Değer sil",
 
-	delete_regex_title : "Delete Regex",
+	delete_regex_title : "Sil Regex",
 
-	name : "Name",
+	name : "isim",
 
-	key_name : "Key",
+	key_name : "anahtar",
 
-	method_name : "Method Name",
+	method_name : "Metod Adı",
 
-	description : "Description",
+	description : "tanım",
 
-	minimum_confidence_threshold : "Minimum Confidence Threshold",
+	minimum_confidence_threshold : "Minimum Güven Eşik",
 
-	recostar_project_file : "Form Processing Project File",
+	recostar_project_file : "Form İşleme Proje Dosyası",
 
-	priority : "Priority",
+	priority : "öncelik",
 
-	data_type : "Data Type",
+	data_type : "Veri Türü",
 
-	pattern : "Pattern",
+	pattern : "kalıp",
 
-	key_pattern : "Key Pattern",
+	key_pattern : "Anahtar Desen",
 
-	value_pattern : "Value Pattern",
+	value_pattern : "Değer Desen",
 
-	location : "Location",
+	location : "yer",
 
-	unc_folder : "UNC Folder",
+	unc_folder : "UNC Klasör",
 
-	version : "Version",
+	version : "versiyon",
 
-	priority_label : "Priority Label",
+	priority_label : "Öncelik Etiket",
 
-	sequence_number : "Sequence Number",
+	sequence_number : "Sıra Numarası",
 
-	type : "Type",
+	type : "tip",
 
-	document_name : "Document Name",
+	document_name : "Doküman Adı",
 
-	mapped_to : "Mapped To",
+	mapped_to : "için eşlenen",
 
-	select_option : "Select",
+	select_option : "seçmek",
 
-	username : "Username",
+	username : "Kullanıcı Adı",
 
-	password : "Password",
+	password : "parola",
 
-	server_name : "Server Name",
+	server_name : "sunucu Adı",
 
-	server_type : "Server Type",
+	server_type : "sunucu Türü",
 
-	folder_name : "Folder Name",
+	folder_name : "Klasör Adı",
 
-	delete_email_configuration_title : "Delete email configuration",
+	delete_email_configuration_title : "E-posta yapılandırma sil",
 
-	value : "Value",
+	value : "değer",
 
-	confidence : "Confidence Score",
+	confidence : "Güven Puan",
 
-	coordinates : "Coordinates",
+	coordinates : "Koordinatlar",
 
-	page_name : "Page Name",
+	page_name : "Sayfa Adı",
 
-	sample_value : "Sample Value",
+	sample_value : "Örnek Değer",
 
-	field_option_value_list : "Field Option Value List",
+	field_option_value_list : "Alan Seçenek Değer Listesi",
 
-	role : "Role",
+	role : "rol",
 
-	no_of_words : "No of words",
+	no_of_words : "Kelime",
 
-	barcode_type : "Barcode Type",
+	barcode_type : "Barkod Tipi",
 
-	start_pattern : "Start Pattern",
+	start_pattern : "Yıldız Desen",
 
-	end_pattern : "End Pattern",
+	end_pattern : "Sona Desen",
 
-	between_left : "Between Left",
+	between_left : "Sol arasında",
 
-	between_right : "Between Right",
+	between_right : "sağ Arasında",
 
-	column_name : "Column Name",
+	column_name : "Sütun Adı",
 
-	column_pattern : "Column Pattern",
+	column_pattern : "Sütun deseni",
 
-	delete_table_title : "Delete Table Info",
+	delete_table_title : "Masa Bilgisi Sil",
 
-	delete_table_column_info_title : "Delete Table Column Info",
+	delete_table_column_info_title : "Tablo Sütunu Bilgisi Sil",
 
-	delete_batch_class_title : "Delete batch class",
+	delete_batch_class_title : "Toplu sınıf sil",
 
-	fetch_value : "Fetch Value",
+	fetch_value : "Değer getir",
 
-	length_label : "Length",
+	length_label : "uzunluk",
 
-	width_label : "Width",
+	width_label : "genişlik",
 
-	xoffset_label : "X-Offset",
+	xoffset_label : "X-Ofset",
 
-	yoffset_label : "Y-Offset",
+	yoffset_label : "Y-Ofset",
 
-	multiplier_label : "Multiplier",
+	multiplier_label : "çarpan",
 
-	capture_key_button : "Capture Key",
+	capture_key_button : "Anahtar yakalayın",
 
-	capture_value_button : "Capture Button",
+	capture_value_button : "Düğme Yakalama",
 
-	clear_button : "Clear",
+	clear_button : "açık",
 
-	continue_conformation : "Continue",
+	continue_conformation : "devam etmek",
 
-	name : "Name",
+	name : "isim",
 
-	description : "Description",
+	description : "tanım",
 
-	type : "Type",
+	type : "tip",
 
-	field_order : "Field Order",
+	field_order : "Alan sırası",
 
-	sample_value : "Sample Value",
+	sample_value : "Örnek Değer",
 
-	validation_pattern : "Validation Pattern",
+	validation_pattern : "Doğrulama Desen",
 
-	option_value_list : "Field Option Value List",
+	option_value_list : "Alan Seçenek Değer Listesi",
 
-	edit_document_title : "Edit Document Type",
+	edit_document_title : "Belge Türü Düzenle",
 
-	copy_document_title : "Copy Document Type",
+	copy_document_title : "Kopyalama Belge Türü",
 
-	edit_module_title : "Edit Module Type",
+	edit_module_title : "Modül Tipi Düzenle",
 
-	edit_email_configuration_title : "Edit Email Configuration",
+	edit_email_configuration_title : "E-posta Konfigürasyon Düzenle",
 
-	edit_batch_class_field_title : "Edit Batch Class Field",
+	edit_batch_class_field_title : "Düzen Toplu Sınıf Alan",
 
-	add_batch_class_field_title : "Add Batch Class Field",
+	add_batch_class_field_title : "Toplu Sınıf Alan Ekleyin",
 
-	delete_batch_class_field_title : "Delete Batch Class Field",
+	delete_batch_class_field_title : "Toplu Sınıf Alan Sil",
 
-	kv_page_level_field_name : "Field Name",
+	kv_page_level_field_name : "Alan Adı",
 
-	is_ssl : "Is SSL",
+	is_ssl : "SSL",
 
-	port_number : "Port Number",
+	port_number : "port Numarası",
 
-	add_email_configuration : "Add Email Configuration",
+	add_email_configuration : "E-posta Konfigürasyon ekle",
 
-	is_required : "Required",
+	is_required : "gereken",
 	
-	is_hidden : "Hidden",
+	is_hidden : "gizli",
 	
-	key_warning : "  Press key F1 to F11 (except F5)",
+	key_warning : "F11 (F5 dışında F1 tuşuna basın.)",
 	
-	delete_regex_validation : "Delete Regex Validation",
+	delete_regex_validation : "Regex Doğrulama Sil",
 		
-	add_regex_validation : "Add Regex Validation",
+	add_regex_validation : "Regex Doğrulama ekle",
 	
-	remote_url : "Remote URL",
+	remote_url : "uzaktan URL",
 		
-	remote_bc_identifier : "Remote Batch Class Identifier"
+	remote_bc_identifier : "Uzaktan Toplu Sınıfı Tanımlayıcı"
 
 };
 
 var batchClassManagementMessages_tk = {
 
-	delete_document_type_conformation : "Are you sure you want to delete this document type?",
+	delete_document_type_conformation : "Eğer bu belge türünü silmek istediğiniz emin misiniz?",
 
-	delete_field_type_conformation : "Are you sure you want to delete this field type?",
+	delete_field_type_conformation : "Eğer bu alan türü silmek istediğiniz emin misiniz?",
 
-	delete_function_key_conformation : "Are you sure you want to delete this function key?",
+	delete_function_key_conformation : "Bu fonksiyon tuşu Silmek istediğiniz emin misiniz?",
 
-	delete_page_type_conformation : "Are you sure you want to delete this page type?",
+	delete_page_type_conformation : "Bu sayfa türünü silmek istediğinizden emin misiniz?",
 
-	delete_kv_type_conformation : "Are you sure you want to delete this key value pair?",
+	delete_kv_type_conformation : "Bu anahtar değer çiftini silmek istediğinizden emin misiniz?",
 
-	delete_regex_type_conformation : "Are you sure you want to delete this Regex Validation?",
+	delete_regex_type_conformation : "Bu Regex Doğrulama silmek istediğinizden emin mısınız?",
 
-	blank_error : "Mandatory fields cannot be blank.",
+	blank_error : "Zorunlu alanlar boş bırakılamaz.",
 
-	integer_error : "Integer expected at",
+	integer_error : "Tamsayı beklenen",
 
-	float_error : "Float Expected at",
+	float_error : "Beklenen Float",
 
-	number_error : "Number Expected at",
+	number_error : "Number Beklenen",
 
-	field_order_duplicate_error : "Field order {0} already exists.",
+	field_order_duplicate_error : "Alan sırası {0} zaten var.",
 
-	name_common_error : "Name cannot be same.",
+	name_common_error : "Adı aynı olamaz.",
 
-	add_field_type : "Add Field Type First.",
+	add_field_type : "Öncelikle Alan Türü ekleyin.",
 
-	add_document_type : "Add Document Type First.",
+	add_document_type : "Öncelikle Belge Türü ekleyin.",
 
-	no_record_found : "No Record Found.",
+	no_record_found : "Kayıt bulunamadı.",
 
-	none_selected_warning : "Select a row first.",
+	none_selected_warning : "Önce bir satır seçin.",
 
-	not_editable_warning : "Row is not editable.",
+	not_editable_warning : "Satır düzenlenebilir değildir.",
 
-	not_mapped : "Not Mapped yet.",
+	not_mapped : "Henüz eşlenen değil.",
 
-	no_record_to_delete : "No record to delete.",
+	no_record_to_delete : "Hiçbir kayıt silmek için.",
 
-	no_record_to_edit : "No record to edit.",
+	no_record_to_edit : "Hiçbir kayıt düzenlemek için.",
 	
-	no_table_to_test : "No table to test.",
+	no_table_to_test : "Yok masa testi.",
 
-	delete_email_configuration_conformation : "Are you sure you want to delete this email configuration?",
+	delete_email_configuration_conformation : "Bu e-posta yapılandırma silmek istediğinizden emin misiniz?",
 
-	already_exists_error : "Entered value already exists.",
+	already_exists_error : "Girilen değeri zaten var.",
 
-	apply_successful : "Changes applied succesfully.",
+	apply_successful : "Değişiklikler başarıyla uygulandı.",
 
-	save_sucessful : "Changes saved succesfully.",
+	save_sucessful : "Değişiklikler başarıyla kaydedildi.",
 
-	success : "Successful",
+	success : "başarılı",
 
-	delete_table_info_conformation : "Are you sure you want to delete this table info configuration?",
+	delete_table_info_conformation : "Bu tablo bilgileri yapılandırmasını silmek istediğinizden emin mısınız?",
 
-	add_table_info : "Add table Info First.",
+	add_table_info : "İlk tablo Ekle.",
 
-	delete_table_column_info_conformation : "Are you sure you want to delete this table column info configuration?",
+	delete_table_column_info_conformation : "Bu tablo sütunu bilgi yapılandırmasını silmek istediğinizden emin mısınız?",
 
-	delete_batch_class_conformation : "Are you sure you want to delete this batch class?",
+	delete_batch_class_conformation : "Bu toplu iş sınıfı silmek istediğiniz emin misiniz?",
 
-	delete_success_title : "Delete Successful",
+	delete_success_title : "Başarılı Sil",
 
-	delete_success_message : "Batch class deleted sucessfully",
+	delete_success_message : "Toplu sınıfı başarıyla silindi",
 
-	error_retrieving_path : "Error occured while retrieving path. Check settings and try again",
+	error_retrieving_path : "Yol alınırken hata oluştu. Ayarlarını kontrol edin ve tekrar deneyin",
 
-	mouse_not_click_error : "Please click again to finalize the area. Then only will it be captured.",
+	mouse_not_click_error : "Alan sonuçlandırmak için tekrar tıklayınız. Sonra sadece Çekilecek.",
 
-	key_not_final_error : "Key not finalized. Finalize key first.",
+	key_not_final_error : "Key sonuçlandırılır. Ilk önemli Finalize.",
 
-	multiplier_error : "Multiplier should be between 0 and 1",
+	multiplier_error : "Çarpan 0 ve 1 arasında olmalıdır",
 
-	data_loss : "Proceeding may lead in data loss. Are you sure you want to proceed?",
+	data_loss : "Bildiri veri kaybına yol açabilir. Devam etmek istediğiniz emin misiniz?",
 
-	advanced_kv_error : "Please select an image and capture the key and value areas. Click cancel to exit.",
+	advanced_kv_error : "Lütfen bir görüntü seçin ve anahtar ve değer alanları yakalamak. Çıkmak için iptal tıklayın.",
 
-	delete_batch_class_field_conformation : "Are you sure you want to delete this batch class field?",
+	delete_batch_class_field_conformation : "Bu toplu sınıf alan silmek istediğiniz emin misiniz?",
 
-	no_record_to_copy : "no record to copy.",
+	no_record_to_copy : "hiçbir kayıt kopyalamak için.",
 
-	error_upload_image : "Error uploading image.Please try again.",
+	error_upload_image : "Hata yükleme image.Please tekrar deneyin.",
 	
-	delete_regex_validation_confirmation : "Making field type hidden will delete Regex Validation for document level field. Are you sure you want to proceed?",
+	delete_regex_validation_confirmation : "Alan türü gizli belge düzeyinde alan için Regex Doğrulama silecektir. Devam etmek istediğiniz emin misiniz?",
 	
-	add_regex_failure : "Regex Validation cannot be added to hidden document level field."	
+	add_regex_failure : "Regex Doğrulama gizli belge düzeyinde alanına eklenemez."	
 
 };

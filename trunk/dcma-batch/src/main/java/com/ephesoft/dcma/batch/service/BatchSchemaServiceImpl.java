@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.batch.service;
 
 import java.io.File;
@@ -134,8 +64,10 @@ import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.batch.schema.Page;
+import com.ephesoft.dcma.batch.schema.DocField.AlternateValues;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
@@ -148,6 +80,8 @@ import com.ephesoft.dcma.core.TesseractVersionProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
+import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
@@ -599,12 +533,28 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		File file = null;
 		String pathName = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator + fileName;
 		file = new File(pathName);
-
-		if (!file.exists()) {
-			errMsg = "File name does not exists at the specified path location.";
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			errMsg = "File name does not exists at the specified path location. file : " + file.getName() + " , filepath : "
+					+ file.getAbsolutePath();
 			logger.error(errMsg);
-			throw new DCMABusinessException(errMsg);
+			throw new DCMABusinessException(errMsg + e.getMessage(), e);
+		} finally {
+			if (fileInputStream != null) {
+				try {
+					fileInputStream.close();
+				} catch (IOException e) {
+					logger.error("could not cloose the fileInputStream . file + " + file.getAbsolutePath() + e.getMessage(), e);
+				}
+			}
 		}
+
+		/*
+		 * if (!file.exists()) { errMsg = "File name does not exists at the specified path location."; logger.error(errMsg); throw new
+		 * DCMABusinessException(errMsg); }
+		 */
 
 		return file;
 	}
@@ -1081,7 +1031,6 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		newDocType.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + newDocID);
 		newDocType.setType(docType.getType());
 		newDocType.setConfidence(docType.getConfidence());
-		newDocType.setDocumentLevelFields(docType.getDocumentLevelFields());
 		newDocType.setMultiPagePdfFile(docType.getMultiPagePdfFile());
 		newDocType.setMultiPageTiffFile(docType.getMultiPageTiffFile());
 		newDocType.setValid(docType.isValid());
@@ -1090,11 +1039,12 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		Pages newPages = new Pages();
 		List<Page> listOfNewPages = newPages.getPage();
-
+		List<String> listOfNewPageIdentifiers = new ArrayList<String>();
 		// create the new document for split pages.
 		for (int index = pageIndex; index < pageTypeList.size(); index++) {
 			Page pgType = pageTypeList.get(index);
 			listOfNewPages.add(pgType);
+			listOfNewPageIdentifiers.add(pgType.getIdentifier());
 		}
 
 		newDocType.setPages(newPages);
@@ -1104,6 +1054,79 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			pageTypeList.remove(index);
 		}
 
+		DocumentLevelFields documentLevelFields = docType.getDocumentLevelFields();
+		if (documentLevelFields != null) {
+			List<DocField> docFields = documentLevelFields.getDocumentLevelField();
+			DocumentLevelFields documentLevelFieldsForNewDoc = new DocumentLevelFields();
+			List<DocField> docFieldsForNewDoc = documentLevelFieldsForNewDoc.getDocumentLevelField();
+			if (docFields != null) {
+				for (DocField docField : docFields) {
+					DocField docFieldForNewDoc = new DocField();
+					docFieldForNewDoc.setConfidence(docField.getConfidence());
+					docFieldForNewDoc.setFieldOrderNumber(docField.getFieldOrderNumber());
+					docFieldForNewDoc.setFieldValueOptionList(docField.getFieldValueOptionList());
+					docFieldForNewDoc.setName(docField.getName());
+					docFieldForNewDoc.setType(docField.getType());
+					docFieldForNewDoc.setValue(docField.getValue());
+					if (listOfNewPageIdentifiers.contains(docField.getPage())) {
+						docFieldForNewDoc.setCoordinatesList(docField.getCoordinatesList());
+						docFieldForNewDoc.setOverlayedImageFileName(docField.getOverlayedImageFileName());
+						docFieldForNewDoc.setPage(docField.getPage());
+						docField.setPage(pageTypeList.get(0).getIdentifier());
+						docField.setCoordinatesList(null);
+						docField.setOverlayedImageFileName(null);
+					} else {
+						docFieldForNewDoc.setCoordinatesList(null);
+						docFieldForNewDoc.setOverlayedImageFileName(null);
+						if (docField.getPage() != null && !docField.getPage().isEmpty()) {
+							docFieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
+						} else {
+							docFieldForNewDoc.setPage(docField.getPage());
+						}
+					}
+					AlternateValues alternateValuesForNewDoc = new AlternateValues();
+					List<Field> fieldsForNewDoc = alternateValuesForNewDoc.getAlternateValue();
+					AlternateValues alternateValues = docField.getAlternateValues();
+					if (alternateValues != null) {
+						List<Field> alternateValueFields = alternateValues.getAlternateValue();
+						if (alternateValueFields != null) {
+							for (Field field : alternateValueFields) {
+								Field fieldForNewDoc = new Field();
+								fieldForNewDoc.setConfidence(field.getConfidence());
+								fieldForNewDoc.setFieldOrderNumber(field.getFieldOrderNumber());
+								fieldForNewDoc.setFieldValueOptionList(field.getFieldValueOptionList());
+								fieldForNewDoc.setName(field.getName());
+								fieldForNewDoc.setType(field.getType());
+								fieldForNewDoc.setValue(field.getValue());
+								if (listOfNewPageIdentifiers.contains(field.getPage())) {
+									fieldForNewDoc.setCoordinatesList(field.getCoordinatesList());
+									fieldForNewDoc.setOverlayedImageFileName(field.getOverlayedImageFileName());
+									fieldForNewDoc.setPage(field.getPage());
+									field.setCoordinatesList(null);
+									field.setOverlayedImageFileName(null);
+									field.setPage(pageTypeList.get(0).getIdentifier());
+								} else {
+									fieldForNewDoc.setCoordinatesList(null);
+									fieldForNewDoc.setOverlayedImageFileName(null);
+									if (field.getPage() != null && !field.getPage().isEmpty()) {
+										fieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
+									} else {
+										fieldForNewDoc.setPage(field.getPage());
+									}
+								}
+								fieldsForNewDoc.add(fieldForNewDoc);
+							}
+						}
+					}
+					docFieldForNewDoc.setAlternateValues(alternateValuesForNewDoc);
+					docFieldsForNewDoc.add(docFieldForNewDoc);
+				}
+			}
+
+			newDocType.setDocumentLevelFields(documentLevelFieldsForNewDoc);
+		} else {
+			newDocType.setDocumentLevelFields(null);
+		}
 		docTypesList.add(docIndex + 1, newDocType);
 
 		batchSchemaDao.update(batch, batchInstanceIdentifier);
@@ -2102,12 +2125,8 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		String actualFolderLocation = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator;
 
 		Batch batch = getBatch(batchInstanceIdentifier);
-		String pageID = null;
-		String hocrFileName = null;
 		String outputFileName = "tempFile";
-		String pathOfHOCRFile = null;
 		String outputFilePath = null;
-		FileInputStream inputStream = null;
 		boolean isTesseractBatch = false;
 		if (batch.getBatchClassName().contains(IUtilCommonConstants.TESSERACT_MAIL_ROOM_NAME)) {
 			isTesseractBatch = true;
@@ -2115,7 +2134,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TESSERACT_HOCR_PLUGIN,
 				TesseractVersionProperty.TESSERACT_VERSIONS);
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
-
+		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		outputFilePath = actualFolderLocation + outputFileName;
 
 		if (null != xmlDocuments) {
@@ -2123,106 +2142,20 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				List<Page> listOfPages = document.getPages().getPage();
 				if (null != listOfPages) {
 					for (Page page : listOfPages) {
-
-						HocrPages hocrPages = new HocrPages();
-						List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-
-						HocrPage hocrPage = new HocrPage();
-						pageID = page.getIdentifier();
-						hocrPage.setPageID(pageID);
-						hocrPageList.add(hocrPage);
-						hocrFileName = page.getHocrFileName();
-						pathOfHOCRFile = actualFolderLocation + hocrFileName;
-						try {
-							if (isTesseractBatch
-									&& tesseractVersion
-											.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
-								XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-								OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation);
-							} else {
-								XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-							}
-							inputStream = new FileInputStream(outputFilePath);
-							org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
-							NodeList titleNodeList = doc.getElementsByTagName("title");
-							if (null != titleNodeList) {
-								for (int index = 0; index < titleNodeList.getLength(); index++) {
-									Node node = titleNodeList.item(index);
-									NodeList childNodeList = node.getChildNodes();
-									Node n = childNodeList.item(0);
-									if (null != n) {
-										String value = n.getNodeValue();
-										if (value != null) {
-											hocrPage.setTitle(value);
-											break;
-										}
-									}
-								}
-							}
-
-							NodeList spanNodeList = doc.getElementsByTagName("span");
-							Spans spans = new Spans();
-							hocrPage.setSpans(spans);
-							List<Span> spanList = spans.getSpan();
-							if (null != spanNodeList) {
-								StringBuilder hocrContent = new StringBuilder();
-								for (int index = 0; index < spanNodeList.getLength(); index++) {
-									Node node = spanNodeList.item(index);
-									NodeList childNodeList = node.getChildNodes();
-									Node n = childNodeList.item(0);
-									Span span = new Span();
-									if (null != n) {
-										String value = n.getNodeValue();
-										span.setValue(value);
-										hocrContent.append(value);
-										hocrContent.append(" ");
-									}
-									spanList.add(span);
-									NamedNodeMap map = node.getAttributes();
-									Node nMap = map.getNamedItem("title");
-									Coordinates hocrCoordinates = null;
-									try {
-										String coordinates = nMap.getNodeValue();
-										String[] arr = coordinates.split(" ");
-										if (null != arr && arr.length >= 4) {
-											hocrCoordinates = new Coordinates();
-											hocrCoordinates.setX0(new BigInteger(arr[1]));
-											hocrCoordinates.setX1(new BigInteger(arr[3]));
-											hocrCoordinates.setY0(new BigInteger(arr[2]));
-											hocrCoordinates.setY1(new BigInteger(arr[4]));
-										}
-									} catch (Exception e) {
-										logger.error(e.getMessage(), e);
-									}
-									if (null == hocrCoordinates) {
-										hocrCoordinates = new Coordinates();
-										hocrCoordinates.setX0(BigInteger.ZERO);
-										hocrCoordinates.setX1(BigInteger.ZERO);
-										hocrCoordinates.setY0(BigInteger.ZERO);
-										hocrCoordinates.setY1(BigInteger.ZERO);
-									}
-									span.setCoordinates(hocrCoordinates);
-								}
-								hocrPage.setHocrContent(hocrContent.toString());
-							}
-						} catch (IOException e) {
-							logger.error(e.getMessage(), e);
-						} catch (Exception e) {
-							logger.error(e.getMessage(), e);
-						} finally {
-							try {
-								if (inputStream != null) {
-									inputStream.close();
-								}
-							} catch (IOException e) {
-								logger.error(e.getMessage(), e);
-							}
-						}
-
-						createHocr(hocrPages, batchInstanceIdentifier, pageID);
-
+						hOCRGenerationUsingThreadpool(batchInstanceThread, batchInstanceIdentifier, actualFolderLocation, outputFilePath,
+								isTesseractBatch, tesseractVersion, page);
 					}
 				}
+			}
+			try {
+				logger.info("Creating HOCR for all pages using threadpool.");
+				batchInstanceThread.execute();
+				logger.info("HOCRgenerated succussfully for all pages.");
+			} catch (DCMAApplicationException dcmae) {
+				logger.error("Error while genmerating xml from html using threadpool");
+				batchInstanceThread.remove();
+				throw new DCMAApplicationException("Error while genmerating xml from html using threadpool ." + dcmae.getMessage(),
+						dcmae);
 			}
 		}
 
@@ -2231,6 +2164,116 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		} catch (IOException e) {
 			logger.info("Deleting the temp file." + e.getMessage());
 		}
+	}
+
+	private void hOCRGenerationUsingThreadpool(final BatchInstanceThread batchInstanceThread, final String batchInstanceIdentifier,
+			final String actualFolderLocation, final String outputFilePath, final boolean isTesseractBatch,
+			final String tesseractVersion, final Page page) {
+		batchInstanceThread.add(new AbstractRunnable() {
+
+			@Override
+			public void run() {
+				String pageID;
+				String hocrFileName;
+				String pathOfHOCRFile;
+				FileInputStream inputStream = null;
+				HocrPages hocrPages = new HocrPages();
+				List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+
+				HocrPage hocrPage = new HocrPage();
+				pageID = page.getIdentifier();
+				hocrPage.setPageID(pageID);
+				hocrPageList.add(hocrPage);
+				hocrFileName = page.getHocrFileName();
+				pathOfHOCRFile = actualFolderLocation + hocrFileName;
+				try {
+					if (isTesseractBatch
+							&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+						XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+						OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation);
+					} else {
+						XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+					}
+					inputStream = new FileInputStream(outputFilePath);
+					org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
+					NodeList titleNodeList = doc.getElementsByTagName("title");
+					if (null != titleNodeList) {
+						for (int index = 0; index < titleNodeList.getLength(); index++) {
+							Node node = titleNodeList.item(index);
+							NodeList childNodeList = node.getChildNodes();
+							Node n = childNodeList.item(0);
+							if (null != n) {
+								String value = n.getNodeValue();
+								if (value != null) {
+									hocrPage.setTitle(value);
+									break;
+								}
+							}
+						}
+					}
+
+					NodeList spanNodeList = doc.getElementsByTagName("span");
+					Spans spans = new Spans();
+					hocrPage.setSpans(spans);
+					List<Span> spanList = spans.getSpan();
+					if (null != spanNodeList) {
+						StringBuilder hocrContent = new StringBuilder();
+						for (int index = 0; index < spanNodeList.getLength(); index++) {
+							Node node = spanNodeList.item(index);
+							NodeList childNodeList = node.getChildNodes();
+							Node n = childNodeList.item(0);
+							Span span = new Span();
+							if (null != n) {
+								String value = n.getNodeValue();
+								span.setValue(value);
+								hocrContent.append(value);
+								hocrContent.append(" ");
+							}
+							spanList.add(span);
+							NamedNodeMap map = node.getAttributes();
+							Node nMap = map.getNamedItem("title");
+							Coordinates hocrCoordinates = null;
+							try {
+								String coordinates = nMap.getNodeValue();
+								String[] arr = coordinates.split(" ");
+								if (null != arr && arr.length >= 4) {
+									hocrCoordinates = new Coordinates();
+									hocrCoordinates.setX0(new BigInteger(arr[1]));
+									hocrCoordinates.setX1(new BigInteger(arr[3]));
+									hocrCoordinates.setY0(new BigInteger(arr[2]));
+									hocrCoordinates.setY1(new BigInteger(arr[4]));
+								}
+							} catch (Exception e) {
+								logger.error(e.getMessage(), e);
+							}
+							if (null == hocrCoordinates) {
+								hocrCoordinates = new Coordinates();
+								hocrCoordinates.setX0(BigInteger.ZERO);
+								hocrCoordinates.setX1(BigInteger.ZERO);
+								hocrCoordinates.setY0(BigInteger.ZERO);
+								hocrCoordinates.setY1(BigInteger.ZERO);
+							}
+							span.setCoordinates(hocrCoordinates);
+						}
+						hocrPage.setHocrContent(hocrContent.toString());
+					}
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				} finally {
+					try {
+						if (inputStream != null) {
+							inputStream.close();
+						}
+					} catch (IOException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+
+				createHocr(hocrPages, batchInstanceIdentifier, pageID);
+			}
+		});
 	}
 
 	/**

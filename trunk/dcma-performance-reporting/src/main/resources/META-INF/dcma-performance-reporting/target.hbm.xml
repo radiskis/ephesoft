@@ -64,9 +64,9 @@
 		
 		SELECT 
 			report.WORKFLOW_NAME as entityName,			 
-		    (Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+		    (Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 		FROM
 			report_data report
 		WHERE 
@@ -93,9 +93,9 @@
 		
 		SELECT 
 			report.WORKFLOW_NAME as entityName,
-			(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 		FROM
 			report_data report
 		WHERE 
@@ -123,9 +123,9 @@
 		
 		SELECT 
 			report.WORKFLOW_NAME as entityName,
-			(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 		FROM
 			report_data report
 		WHERE
@@ -151,9 +151,9 @@
 		SELECT COUNT(*) as totalRowCount FROM (
 			SELECT 
 				report.WORKFLOW_NAME as entityName,
-			    (Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+			    (Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 			FROM
 				report_data report
 			WHERE 
@@ -176,9 +176,9 @@
 		SELECT COUNT(*) as totalRowCount FROM (
 			SELECT 
 				report.WORKFLOW_NAME as entityName,
-				(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+				(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 			FROM
 				report_data report
 			WHERE 
@@ -201,9 +201,9 @@
 		SELECT COUNT(*) as totalRowCount FROM (
 			SELECT 
 				report.WORKFLOW_NAME as entityName,
-				(Count(Distinct report.Batch_Instance_Id)/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)/SUM(report.DURATION))*1000 as pages 
+				(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
+				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
+				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
 			FROM
 				report_data report
 			WHERE

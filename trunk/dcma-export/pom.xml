@@ -17,7 +17,7 @@
 			<artifactId>dcma-data-access</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>im4java</groupId>
+			<groupId>org.im4java</groupId>
 			<artifactId>im4java</artifactId>
 		</dependency>
 		<dependency>

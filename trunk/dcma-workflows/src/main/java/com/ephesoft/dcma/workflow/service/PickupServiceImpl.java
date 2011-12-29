@@ -49,6 +49,9 @@ import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
 public class PickupServiceImpl implements PickupService {
 
+	private int maxCapacity;
+	private int pickCapacity;
+
 	private static final Logger log = LoggerFactory.getLogger(PickupServiceImpl.class);
 
 	@Autowired BatchInstanceService batchInstanceService;
@@ -66,5 +69,18 @@ public class PickupServiceImpl implements PickupService {
 				log.trace("Batch instance -" + newBatchInstance.getIdentifier() + " is already locked.");
 			}
 		}
+	}
+
+	public void setMaxCapacity(int maxCapacity) {
+		this.maxCapacity = maxCapacity;
+	}
+
+	public void setPickCapacity(int pickCapacity) {
+		this.pickCapacity = pickCapacity;
+	}
+
+	@Override
+	public int getMaxCapacity() {
+		return maxCapacity;
 	}
 }

@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tabbed;
 
 import java.io.BufferedReader;
@@ -112,6 +77,7 @@ import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.tabbed.constant.TabbedPdfConstant;
 import com.ephesoft.dcma.util.FileUtils;
+import com.ephesoft.dcma.util.OSUtil;
 
 @Component
 public class TabbedPdfExporter implements ICommonConstants {
@@ -122,6 +88,25 @@ public class TabbedPdfExporter implements ICommonConstants {
 	private static final String MAPPING_SEPERATOR = "===";
 	private static final String YES = "YES";
 	private static final String DOCUMENT_IDENTIFIER = "DOC ";
+
+	private String ghostScriptCommand;
+	private String unixGhostScriptCommand;
+
+	public String getGhostScriptCommand() {
+		return ghostScriptCommand;
+	}
+
+	public void setGhostScriptCommand(String ghostScriptCommand) {
+		this.ghostScriptCommand = ghostScriptCommand;
+	}
+
+	public String getUnixGhostScriptCommand() {
+		return unixGhostScriptCommand;
+	}
+
+	public void setUnixGhostScriptCommand(String unixGhostScriptCommand) {
+		this.unixGhostScriptCommand = unixGhostScriptCommand;
+	}
 
 	/**
 	 * Instance of BatchSchemaService.
@@ -168,6 +153,8 @@ public class TabbedPdfExporter implements ICommonConstants {
 					TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_PARAMETERS);
 			String propertyFile = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
 					TabbedPdfProperties.TABBED_PDF_PROPERTY_FILE);
+			String pdfOptimizationSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
+					TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_SWITCH);
 			this.batchSchemaService = batchSchemaService;
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 			boolean exportFolderExistes = isExportFolderAlreadyCreated(sFolderToBeExported);
@@ -192,6 +179,12 @@ public class TabbedPdfExporter implements ICommonConstants {
 			String envVariable = System.getenv(TabbedPdfConstant.GHOSTSCRIPT_HOME);
 			if (envVariable == null || envVariable.isEmpty()) {
 				throw new DCMAApplicationException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
+			}
+			String gsCommand = getGSCommand();
+			if (gsCommand == null) {
+				LOGGER.info("No ghostcript command specifeid in properties file.  ghostcript command = " + gsCommand);
+				throw new DCMAApplicationException("No ghostcript command specifeid in properties file.  ghostcript command = "
+						+ gsCommand);
 			}
 			String pdfMarkTemplatePath = batchSchemaService.getAbsolutePath(batch.getBatchClassIdentifier(), batchSchemaService
 					.getScriptConfigFolderName(), true);
@@ -239,8 +232,13 @@ public class TabbedPdfExporter implements ICommonConstants {
 				String tabbedPDFName = batchName + "_" + batchInstanceIdentifier + ".pdf";
 				String tabbedPDFTempFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
 				String tabbedPDFLocalPath = tabbedPDFTempFolder + File.separator + tabbedPDFName;
-				tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths, localPdfMarksSample
-						.getAbsolutePath(), batchInstanceThread, pdfCreationParam));
+				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase("ON")) {
+					tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths,
+							localPdfMarksSample.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
+				} else {
+					tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, sFolderToBeExported, documentPDFPaths,
+							localPdfMarksSample.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
+				}
 
 				try {
 					LOGGER.info("Executing commands for creation of tabbed pdf using thread pool.");
@@ -252,21 +250,22 @@ public class TabbedPdfExporter implements ICommonConstants {
 					// Throw the exception to set the batch status to Error by Application aspect
 					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
 				}
-
-				batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
-				List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
-
-				tabbedPdfOptimier.add(new TabbedPdfOptimizer(sFolderToBeExported, tabbedPDFTempFolder, batchInstanceThread,
-						tabbedPDFName, pdfOptimizationParam));
-				try {
-					LOGGER.info("Executing commands for optimizing tabbed pdf using thread pool.");
-					batchInstanceThread.execute();
-					LOGGER.info("Tabebd pdf creation ends.");
-				} catch (DCMAApplicationException dcmae) {
-					LOGGER.error("Error in executing command for optimizing tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
-					batchInstanceThread.remove();
-					// Throw the exception to set the batch status to Error by Application aspect
-					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+				if(pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase("ON")) {
+					batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+					List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
+					
+					tabbedPdfOptimier.add(new TabbedPdfOptimizer(sFolderToBeExported, tabbedPDFTempFolder, batchInstanceThread,
+							tabbedPDFName, pdfOptimizationParam, gsCommand));
+					try {
+						LOGGER.info("Executing commands for optimizing tabbed pdf using thread pool.");
+						batchInstanceThread.execute();
+						LOGGER.info("Tabebd pdf creation ends.");
+					} catch (DCMAApplicationException dcmae) {
+						LOGGER.error("Error in executing command for optimizing tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
+						batchInstanceThread.remove();
+						// Throw the exception to set the batch status to Error by Application aspect
+						throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+					}
 				}
 
 				File destFile = new File(tabbedPDFLocalPath);
@@ -291,6 +290,16 @@ public class TabbedPdfExporter implements ICommonConstants {
 		} else {
 			LOGGER.info("Skipping tabbed pdf plugin. Switch set as OFF");
 		}
+	}
+
+	private String getGSCommand() {
+		String gsCommand = null;
+		if (OSUtil.isWindows() && ghostScriptCommand != null) {
+			gsCommand = ghostScriptCommand;
+		} else if (OSUtil.isUnix() && unixGhostScriptCommand != null) {
+			gsCommand = unixGhostScriptCommand;
+		}
+		return gsCommand;
 	}
 
 	/**

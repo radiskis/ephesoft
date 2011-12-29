@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tesseract;
 
 import java.io.File;
@@ -108,6 +73,7 @@ public class TesseractProcessExecutor {
 	final private String unixCmd;
 	final private String windowsCmd;
 	final private String overwriteHOCR;
+	final private String cmdParams;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractProcessExecutor.class);
 
@@ -126,12 +92,13 @@ public class TesseractProcessExecutor {
 		this.windowsCmd = windowsCmd;
 		this.unixCmd = unixCmd;
 		this.overwriteHOCR = "true";
+		this.cmdParams = "";
 		run();
 	}
 
 	public TesseractProcessExecutor(String fileName, Batch batch, String batchInstanceID, String actualFolderLocation,
 			String cmdLanguage, BatchInstanceThread thread, String tesseractVersion, String colorSwitch, String windowsCmd,
-			String unixCmd, String overwriteHOCR) throws DCMAApplicationException {
+			String unixCmd, String overwriteHOCR, String cmdParams) throws DCMAApplicationException {
 		this.fileName = fileName;
 		this.batch = batch;
 		this.batchInstanceID = batchInstanceID;
@@ -144,6 +111,7 @@ public class TesseractProcessExecutor {
 		this.windowsCmd = windowsCmd;
 		this.unixCmd = unixCmd;
 		this.overwriteHOCR = overwriteHOCR;
+		this.cmdParams = cmdParams;
 		run();
 	}
 
@@ -221,7 +189,7 @@ public class TesseractProcessExecutor {
 		if (!isHOCRExists) {
 			try {
 				if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
-					creatingTesseractVersion3Command(cmdListLocal, targetHOCR);
+					creatingTesseractVersion3Command(cmdListLocal, targetHOCR, cmdParams);
 				} else {
 					creatingTesseractVersion2Command(cmdListLocal, targetHOCR);
 				}
@@ -259,6 +227,7 @@ public class TesseractProcessExecutor {
 		} else {
 			this.targetHOCR = targetHOCR;
 		}
+		
 	}
 
 	private void creatingTesseractVersion2Command(List<String> cmdListLocal, String targetHOCR) throws DCMAApplicationException {
@@ -270,14 +239,22 @@ public class TesseractProcessExecutor {
 		cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
 	}
 
-	private void creatingTesseractVersion3Command(List<String> cmdListLocal, String targetHOCR) throws DCMAApplicationException {
+	private void creatingTesseractVersion3Command(List<String> cmdListLocal, String targetHOCR, String cmdParams)
+			throws DCMAApplicationException {
 		if (OSUtil.isWindows()) {
 			cmdListLocal.add("\"" + System.getenv(TESSERACT_EXECUTOR_PATH) + File.separator + "TesseractExecutor.exe" + "\"");
 			cmdListLocal.add("\"" + getTesseractBasePath() + File.separator + windowsCmd + "\"");
 			cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
 			cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
-			cmdListLocal.add("-l");
+			cmdListLocal.add("\"-l");
 			cmdListLocal.add(cmdLanguage);
+			if (cmdParams != null && !cmdParams.trim().isEmpty()) {
+				String cmdParamsArray[] = cmdParams.split(" ");
+				for (String param : cmdParamsArray) {
+					cmdListLocal.add(param);
+				}
+			}
+			cmdListLocal.add("\"");
 			cmdListLocal.add("+" + "\"" + getTesseractBasePath() + File.separator + "hocr.txt\"");
 		} else {
 			cmdListLocal.add(unixCmd);
@@ -285,6 +262,12 @@ public class TesseractProcessExecutor {
 			cmdListLocal.add(actualFolderLocation + File.separator + targetHOCR);
 			cmdListLocal.add("-l");
 			cmdListLocal.add(cmdLanguage);
+			if (cmdParams != null && !cmdParams.trim().isEmpty()) {
+				String cmdParamsArray[] = cmdParams.split(" ");
+				for (String param : cmdParamsArray) {
+					cmdListLocal.add(param);
+				}
+			}
 			cmdListLocal.add("+hocr.txt");
 		}
 	}

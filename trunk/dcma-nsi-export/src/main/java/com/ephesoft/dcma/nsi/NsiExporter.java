@@ -33,181 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.nsi;
 
 import java.io.File;
@@ -347,63 +172,78 @@ public class NsiExporter implements ICommonConstants {
 			if (xslStream != null) {
 				try {
 					TransformerFactory tFactory = TransformerFactory.newInstance();
-					// NOTE, this needs to be fixed to use the InputStream xslStream object, not a hardcoded path to the file.
-					Transformer transformer = tFactory.newTransformer(new StreamSource(xslStream));
-					DateTimeZone zone = DateTimeZone.forID(NSIExportConstant.TIME_ZONE_ID);
-					DateTime dateTime = new DateTime(zone);
-					String date = Integer.toString(dateTime.getYear()) + NSIExportConstant.HYPEN
-							+ Integer.toString(dateTime.getMonthOfYear()) + NSIExportConstant.HYPEN
-							+ Integer.toString(dateTime.getDayOfMonth());
-					String time = Integer.toString(dateTime.getHourOfDay()) + NSIExportConstant.COLON
-							+ Integer.toString(dateTime.getMinuteOfHour()) + NSIExportConstant.COLON
-							+ Integer.toString(dateTime.getSecondOfMinute());
-					transformer.setParameter(NSIExportConstant.DATE, date);
-					transformer.setParameter(NSIExportConstant.HOURS, time);
-					transformer.setParameter(NSIExportConstant.BASE_DOC_FOLDER_PATH, baseDocsFolder + File.separator);
-					transformer.setParameter(NSIExportConstant.EXPORT_FOLDER_PATH, exportFolder + File.separator);
-					File file = new File(exportFolder);
-					boolean isFileCreated = false;
-					if (!file.exists()) {
-						isFileCreated = file.mkdir();
-					} else {
-						isFileCreated = true;
-					}
-					if (isFileCreated) {
-						String imageFolderPath = exportFolder + File.separator + NSIExportConstant.IMAGE_FOLDER_NAME;
-						File imageFolder = new File(imageFolderPath);
-						boolean isImageFolderCreated = false;
-						if (!imageFolder.exists()) {
-							isImageFolderCreated = imageFolder.mkdir();
-						} else {
-							isImageFolderCreated = true;
+					Transformer transformer = null;
+					try {
+						// NOTE, this needs to be fixed to use the InputStream xslStream object, not a hardcoded path to the file.
+						transformer = tFactory.newTransformer(new StreamSource(xslStream));
+					} finally {
+						if(xslStream!= null) {
+							try {
+								xslStream.close();
+							} catch (IOException e) {
+								LOGGER.info("Error closing input stream for :" + xslResource.toString());
+							}
 						}
-						if (isImageFolderCreated) {
-							LOGGER.info(exportFolder + " folder created");
-							Batch batch = batchSchemaService.getBatch(batchInstanceID);
-							List<Document> documentList = batch.getDocuments().getDocument();
-							transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
-									targetXmlPath)));
-							File baseDocFolder = new File(baseDocsFolder);
-							for (Document document : documentList) {
-								if (document != null && document.getMultiPageTiffFile() != null
-										&& !document.getMultiPageTiffFile().isEmpty()) {
-									String multipageTiffName = document.getMultiPageTiffFile();
-									String filePath = baseDocFolder.getAbsolutePath() + File.separator + multipageTiffName;
-									String exportFileName = multipageTiffName.replace(NSIExportConstant.TIF_WITH_DOT_EXTENSION,
-											NSIExportConstant.DAT_WITH_DOT_EXTENSION);
-									String exportFilePath = imageFolderPath + File.separator + exportFileName;
-									File oldFile = new File(filePath);
-									File newFile = new File(exportFilePath);
-									try {
-										FileUtils.copyFile(oldFile, newFile);
-									} catch (Exception e) {
-										LOGGER.error("Error creating in file: " + newFile + "is" + e.getMessage(), e);
+					}
+					if (transformer != null) {
+						DateTimeZone zone = DateTimeZone.forID(NSIExportConstant.TIME_ZONE_ID);
+						DateTime dateTime = new DateTime(zone);
+						String date = Integer.toString(dateTime.getYear()) + NSIExportConstant.HYPEN
+						+ Integer.toString(dateTime.getMonthOfYear()) + NSIExportConstant.HYPEN
+						+ Integer.toString(dateTime.getDayOfMonth());
+						String time = Integer.toString(dateTime.getHourOfDay()) + NSIExportConstant.COLON
+						+ Integer.toString(dateTime.getMinuteOfHour()) + NSIExportConstant.COLON
+						+ Integer.toString(dateTime.getSecondOfMinute());
+						transformer.setParameter(NSIExportConstant.DATE, date);
+						transformer.setParameter(NSIExportConstant.HOURS, time);
+						transformer.setParameter(NSIExportConstant.BASE_DOC_FOLDER_PATH, baseDocsFolder + File.separator);
+						transformer.setParameter(NSIExportConstant.EXPORT_FOLDER_PATH, exportFolder + File.separator);
+						File file = new File(exportFolder);
+						boolean isFileCreated = false;
+						if (!file.exists()) {
+							isFileCreated = file.mkdir();
+						} else {
+							isFileCreated = true;
+						}
+						if (isFileCreated) {
+							String imageFolderPath = exportFolder + File.separator + NSIExportConstant.IMAGE_FOLDER_NAME;
+							File imageFolder = new File(imageFolderPath);
+							boolean isImageFolderCreated = false;
+							if (!imageFolder.exists()) {
+								isImageFolderCreated = imageFolder.mkdir();
+							} else {
+								isImageFolderCreated = true;
+							}
+							if (isImageFolderCreated) {
+								LOGGER.info(exportFolder + " folder created");
+								Batch batch = batchSchemaService.getBatch(batchInstanceID);
+								List<Document> documentList = batch.getDocuments().getDocument();
+								transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
+										targetXmlPath)));
+								File baseDocFolder = new File(baseDocsFolder);
+								for (Document document : documentList) {
+									if (document != null && document.getMultiPageTiffFile() != null
+											&& !document.getMultiPageTiffFile().isEmpty()) {
+										String multipageTiffName = document.getMultiPageTiffFile();
+										String filePath = baseDocFolder.getAbsolutePath() + File.separator + multipageTiffName;
+										String exportFileName = multipageTiffName.replace(NSIExportConstant.TIF_WITH_DOT_EXTENSION,
+												NSIExportConstant.DAT_WITH_DOT_EXTENSION);
+										String exportFilePath = imageFolderPath + File.separator + exportFileName;
+										File oldFile = new File(filePath);
+										File newFile = new File(exportFilePath);
+										try {
+											FileUtils.copyFile(oldFile, newFile);
+										} catch (Exception e) {
+											LOGGER.error("Error creating in file: " + newFile + "is" + e.getMessage(), e);
+										}
 									}
 								}
 							}
+						} else {
+							LOGGER.error("Access is denied for creating: " + file.getName());
 						}
 					} else {
-						LOGGER.error("Access is denied for creating: " + file.getName());
+						LOGGER.error("Transformer is null due to Invalid xsl file.");
 					}
 				} catch (FileNotFoundException e1) {
 					LOGGER.error("Could not find NSITransform.xsl file : " + e1.getMessage(), e1);
@@ -411,7 +251,7 @@ public class NsiExporter implements ICommonConstants {
 				} catch (TransformerException e1) {
 					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + e1.getMessage(), e1);
 					throw new DCMAApplicationException("Could not find nsiTransform.xsl file : ", e1);
-				}
+				} 
 			} else {
 				LOGGER.info("Invalid input stream for :" + xslResource.toString());
 			}

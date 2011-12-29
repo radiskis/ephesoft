@@ -58,6 +58,7 @@
 		<module>dcma-csv-file-creation</module>
 		<module>dcma-ibm-cm</module>
 		<module>dcma-key-value-learning</module>
+		<module>dcma-xml-to-database</module>
 	</modules>
 
 	<build>
@@ -266,6 +267,11 @@
 			<dependency>
 				<groupId>com.ephesoft.dcma</groupId>
 				<artifactId>dcma-encryption</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-xml-to-database</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Dependencies for using Maven Javadoc Plugin -->
