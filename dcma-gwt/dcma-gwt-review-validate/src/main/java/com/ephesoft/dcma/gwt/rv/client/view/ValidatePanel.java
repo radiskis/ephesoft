@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.ArrayList;
@@ -378,19 +308,16 @@ public class ValidatePanel extends RVBasePanel {
 										fuzzyDataCarrier = arg0;
 
 										final DialogBox dialogBox = new DialogBox();
-										dialogBox.addStyleName("overflow_scroll");
-										HorizontalPanel panel = new HorizontalPanel();
-										panel.setWidth("100%");
-										panel.setHeight("100%");
+										dialogBox.addStyleName(ReviewValidateConstants.CONFIGURED_DIMENSIONS_DIALOG);
 										final FuzzySearchResultView fuzzySearchResultView = new FuzzySearchResultView(arg0.get(0),
-												presenter);
+												presenter, presenter.batchDTO.getFuzzySearchPopUpXDimension(), presenter.batchDTO
+														.getFuzzySearchPopUpYDimension());
 										fuzzySearchResultView.setEventBus(eventBus);
-										dialogBox.setWidth("100%");
-										dialogBox.setHeight("100%");
-										panel.add(fuzzySearchResultView);
-										dialogBox.setWidget(panel);
+										dialogBox.setWidget(fuzzySearchResultView);
 										fuzzySearchResultView.setDialogBox(dialogBox);
 										fuzzySearchResultView.createBatchList(arg0);
+
+										fuzzySearchResultView.setWidth(presenter.batchDTO.getFuzzySearchPopUpYDimension());
 										dialogBox.center();
 										dialogBox.setText(LocaleDictionary.get().getConstantValue(
 												ReviewValidateConstants.fuzzy_search_title));
@@ -451,7 +378,7 @@ public class ValidatePanel extends RVBasePanel {
 						sWidget.getTextBox().selectAll();
 					}
 				} else if (currentDocFieldWidget.lWidget != null) {
-					currentDocFieldWidget.lWidget.setFocus(true);
+					currentDocFieldWidget.lWidget.getWidget().setFocus(true);
 					focusWasSet = true;
 					currentDocFieldWidget.setCurrent(true);
 				}
@@ -469,7 +396,7 @@ public class ValidatePanel extends RVBasePanel {
 							// focusSet = Boolean.TRUE;
 							break;
 						} else if (docFieldWid.lWidget != null && !validateListBoxSelection(docFieldWid.lWidget)) {
-							docFieldWid.lWidget.setFocus(true);
+							docFieldWid.lWidget.getWidget().setFocus(true);
 							focusWasSet = true;
 							docFieldWid.setCurrent(true);
 							// focusSet = Boolean.TRUE;
@@ -487,7 +414,7 @@ public class ValidatePanel extends RVBasePanel {
 							// focusSet = Boolean.TRUE;
 							break;
 						} else if (docFieldWidget.lWidget != null && !validateListBoxSelection(docFieldWidget.lWidget)) {
-							docFieldWidget.lWidget.setFocus(true);
+							docFieldWidget.lWidget.getWidget().setFocus(true);
 							docFieldWidget.setCurrent(true);
 							focusWasSet = true;
 							// focusSet = Boolean.TRUE;
@@ -503,12 +430,22 @@ public class ValidatePanel extends RVBasePanel {
 			if (docFieldWidgets.get(0).widget != null) {
 				docFieldWidgets.get(0).widget.getWidget().setFocus(true);
 			} else {
-				docFieldWidgets.get(0).lWidget.setFocus(true);
+				docFieldWidgets.get(0).lWidget.getWidget().setFocus(true);
 			}
 		}
-		scrollPanel.ensureVisible(getCurrentDocFieldWidget().getFieldLabel());
-		if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
-			getCurrentDocFieldWidget().widget.getWidget().hideSuggestionList();
+		DocFieldWidget currentDocFieldWidget = getCurrentDocFieldWidget();
+		if (currentDocFieldWidget != null) {
+			scrollPanel.ensureVisible(getCurrentDocFieldWidget().getFieldLabel());
+			if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
+				ValidatableWidget<SuggestionBox> vWidget = currentDocFieldWidget.widget;
+				if (vWidget != null) {
+					SuggestionBox suggestionBoxWidget = vWidget.getWidget();
+					if (suggestionBoxWidget != null) {
+						suggestionBoxWidget.hideSuggestionList();
+					}
+				}
+
+			}
 		}
 	}
 
@@ -622,12 +559,13 @@ public class ValidatePanel extends RVBasePanel {
 				List<String> values = new ArrayList<String>();
 				ValidatableWidget<SuggestionBox> tempVWidget = null;
 				boolean isShowListBox = false;
-				ListBox tempListBox = null;
+				ValidatableWidget<ListBox> tempListBox = null;
 				for (FieldTypeDTO fieldTypeDTO : fieldTypeDTOs) {
 					if (!fieldTypeDTO.isHidden()) {
 						if (fieldTypeDTO.getName().equals(field.getName())) {
 							isFieldHidden = false;
 							String fieldOptionValueList = null;
+							List<String> regexPatternList = fieldTypeDTO.getRegexPatternList();
 							if (isDocumentTypeChange) {
 								fieldOptionValueList = fieldTypeDTO.getFieldOptionValueList();
 							} else {
@@ -638,15 +576,14 @@ public class ValidatePanel extends RVBasePanel {
 								isShowListBox = true;
 								values = Arrays.asList(fieldOptionValueList.split(";"));
 								tempListBox = GWTListBoxControl.createGWTListControl(field.getType(), field.getValue(), field
-										.getName(), values);
+										.getName(), regexPatternList, values);
 								tempFieldName = field.getName();
 								sampleVString = fieldTypeDTO.getSampleValue();
 								fieldTypeDescription = fieldTypeDTO.getDescription();
 								break;
 							} else {
 								tempVWidget = GWTValidatableControl.createGWTControl(field.getType(), field.getValue(), field
-										.getName(), alternateValuesSet, fieldTypeDTO.getRegexPatternList(), fieldTypeDTO
-										.getSampleValue());
+										.getName(), alternateValuesSet, regexPatternList, fieldTypeDTO.getSampleValue());
 								tempFieldName = field.getName();
 								sampleVString = fieldTypeDTO.getSampleValue();
 								fieldTypeDescription = fieldTypeDTO.getDescription();
@@ -659,13 +596,21 @@ public class ValidatePanel extends RVBasePanel {
 				}
 				final String fieldNameString = tempFieldName;
 				final String sampleValueString = sampleVString;
+				List<String> regexPatternList = null;
 				if (isShowListBox) {
+					for (FieldTypeDTO fieldTypeDTO : fieldTypeDTOs) {
+						if (!fieldTypeDTO.isHidden() && fieldTypeDTO.getName().equals(field.getName())) {
+							regexPatternList = fieldTypeDTO.getRegexPatternList();
+						}
+					}
 					if (!isFieldHidden) {
 						if (tempListBox == null) {
-							tempListBox = GWTListBoxControl.createGWTListControl(field.getType(), field.getValue(), values);
+							tempListBox = GWTListBoxControl.createGWTListControl(field.getType(), field.getValue(), regexPatternList,
+									values);
 						}
-						tempListBox.addStyleName(ReviewValidateConstants.DROPBOX_STYLE);
-						final ListBox vWidget = tempListBox;
+						final ValidatableWidget<ListBox> listBoxWidget = tempListBox;
+						listBoxWidget.getWidget().addStyleName(ReviewValidateConstants.DROPBOX_STYLE);
+						final ListBox vWidget = listBoxWidget.getWidget();
 						vWidget.setTitle(field.getName());
 						final String isActualValueFound = vWidget.getElement().getAttribute("isActualValueFound");
 
@@ -677,7 +622,7 @@ public class ValidatePanel extends RVBasePanel {
 							vWidget.setSelectedIndex(0);
 						}
 
-						validateListBoxSelection(vWidget);
+						validateListBoxSelection(listBoxWidget);
 						// vWidget.getWidget().addStyleName("validatePanelListBox");
 						/*
 						 * for (int k = 0; k < alternateValuesSet.size(); k++) { vWidget.getWidget().setTitle(field.getName()); }
@@ -703,7 +648,7 @@ public class ValidatePanel extends RVBasePanel {
 
 							@Override
 							public void onChange(ChangeEvent arg0) {
-								validateListBoxSelection(vWidget);
+								validateListBoxSelection(listBoxWidget);
 								updateDocument(null, field.getName());
 								if (presenter.batchDTO.getFieldValueChangeScriptSwitchState().equalsIgnoreCase("ON")) {
 									presenter.executeScriptOnFieldChange(field.getName());
@@ -719,7 +664,7 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldName);
 						}
 						validationTable.setWidget(index++, 0, vWidget);
-						addDocFieldWidget(fieldName, field, vWidget);
+						addDocFieldWidget(fieldName, field, null, tempListBox);
 					}
 				} else {
 					if (!isFieldHidden) {
@@ -801,7 +746,7 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldLabel);
 						}
 						validationTable.setWidget(index++, 0, vWidget.getWidget());
-						addDocFieldWidget(fieldLabel, field, vWidget);
+						addDocFieldWidget(fieldLabel, field, vWidget, null);
 					}
 				}
 			}
@@ -833,11 +778,14 @@ public class ValidatePanel extends RVBasePanel {
 			} else {
 				// Check for the drop down if they have none selected
 				if (docFieldWidget.lWidget != null) {
-					if (docFieldWidget.lWidget.getSelectedIndex() == 0) {
-						isValidDoc = Boolean.FALSE;
+					if (docFieldWidget.lWidget.getWidget().getSelectedIndex() == 0) {
 						docFieldWidget.field.setValue("");
 					} else {
-						docFieldWidget.field.setValue(docFieldWidget.lWidget.getItemText(docFieldWidget.lWidget.getSelectedIndex()));
+						docFieldWidget.field.setValue(docFieldWidget.lWidget.getWidget().getItemText(
+								docFieldWidget.lWidget.getWidget().getSelectedIndex()));
+					}
+					if (!docFieldWidget.lWidget.validate()) {
+						isValidDoc = Boolean.FALSE;
 					}
 				}
 			}
@@ -955,7 +903,7 @@ public class ValidatePanel extends RVBasePanel {
 									if (docFieldWidget.widget != null) {
 										docFieldWidget.widget.getWidget().setFocus(true);
 									} else {
-										docFieldWidget.lWidget.setFocus(true);
+										docFieldWidget.lWidget.getWidget().setFocus(true);
 									}
 								} else {
 									openNextDocument();
@@ -973,7 +921,7 @@ public class ValidatePanel extends RVBasePanel {
 									if (docFieldWidget.widget != null) {
 										docFieldWidget.widget.getWidget().setFocus(true);
 									} else {
-										docFieldWidget.lWidget.setFocus(true);
+										docFieldWidget.lWidget.getWidget().setFocus(true);
 									}
 								} else {
 									openPreviousDocument();
@@ -1107,31 +1055,30 @@ public class ValidatePanel extends RVBasePanel {
 
 		Field field;
 		ValidatableWidget<SuggestionBox> widget;
-		ListBox lWidget;
+		ValidatableWidget<ListBox> lWidget;
 		boolean isCurrent = false;
 		Label fieldLabel;
 
-		public DocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
+		public DocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget, ValidatableWidget<ListBox> lWidget) {
 			this.field = field;
 			this.widget = widget;
-		}
-		
-		public DocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget) {
-			this.fieldLabel = fieldLabel;
-			this.field = field;
-			this.widget = widget;
+			this.lWidget = lWidget;
 		}
 
-		public DocFieldWidget(Field field, ListBox lWidget) {
-			this.field = field;
-			this.lWidget = lWidget;
-		}
-		
-		public DocFieldWidget(Label fieldLabel, Field field, ListBox lWidget) {
+		public DocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
+				ValidatableWidget<ListBox> lWidget) {
 			this.fieldLabel = fieldLabel;
 			this.field = field;
+			this.widget = widget;
 			this.lWidget = lWidget;
 		}
+
+		/*
+		 * public DocFieldWidget(Field field, ListBox lWidget) { this.field = field; this.lWidget = lWidget; }
+		 * 
+		 * public DocFieldWidget(Label fieldLabel, Field field, ListBox lWidget) { this.fieldLabel = fieldLabel; this.field = field;
+		 * this.lWidget = lWidget; }
+		 */
 
 		@Override
 		public int hashCode() {
@@ -1146,7 +1093,7 @@ public class ValidatePanel extends RVBasePanel {
 		public void setCurrent(boolean isCurrent) {
 			this.isCurrent = isCurrent;
 		}
-		
+
 		public Label getFieldLabel() {
 			return fieldLabel;
 		}
@@ -1154,21 +1101,22 @@ public class ValidatePanel extends RVBasePanel {
 
 	private final LinkedList<DocFieldWidget> docFieldWidgets = new LinkedList<DocFieldWidget>();
 
-	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget) {
-		docFieldWidgets.add(new DocFieldWidget(field, widget));
-	}
-	
-	private void addDocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget) {
-		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, widget));
+	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget, ValidatableWidget<ListBox> lWidget) {
+		docFieldWidgets.add(new DocFieldWidget(field, widget, lWidget));
 	}
 
-	private void addDocFieldWidget(Field field, ListBox lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(field, lWidget));
+	private void addDocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
+			ValidatableWidget<ListBox> lWidget) {
+		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, widget, lWidget));
 	}
-	
-	private void addDocFieldWidget(Label fieldLabel, Field field, ListBox lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, lWidget));
-	}
+
+	/*
+	 * private void addDocFieldWidget(Field field, ValidatableWidget<ListBox> lWidget) { docFieldWidgets.add(new DocFieldWidget(field,
+	 * null, lWidget)); }
+	 * 
+	 * private void addDocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<ListBox> lWidget) { docFieldWidgets.add(new
+	 * DocFieldWidget(fieldLabel, field, null, lWidget)); }
+	 */
 
 	private DocFieldWidget getNextDocFieldWidget(boolean isError) {
 		Boolean reachedToCurrent = Boolean.FALSE;
@@ -1212,15 +1160,16 @@ public class ValidatePanel extends RVBasePanel {
 			// ValueChangeEvent.fire(docFieldWidget.widget.getWidget(), value);
 			docFieldWidget.widget.getWidget().setFocus(true);
 		} else {
-			for (int i = 0; i < docFieldWidget.lWidget.getItemCount(); i++) {
-				if (docFieldWidget.lWidget.getItemText(i).equalsIgnoreCase(value)) {
-					docFieldWidget.lWidget.setSelectedIndex(i);
+			ListBox widget = docFieldWidget.lWidget.getWidget();
+			for (int i = 0; i < widget.getItemCount(); i++) {
+				if (widget.getItemText(i).equalsIgnoreCase(value)) {
+					widget.setSelectedIndex(i);
 					isAdded = true;
 				}
 			}
 			if (!isAdded) {
-				docFieldWidget.lWidget.addItem(value);
-				docFieldWidget.lWidget.setSelectedIndex(docFieldWidget.lWidget.getItemCount() - 1);
+				widget.addItem(value);
+				widget.setSelectedIndex(widget.getItemCount() - 1);
 			}
 		}
 	}
@@ -1298,7 +1247,7 @@ public class ValidatePanel extends RVBasePanel {
 		if (dfWidget.widget != null) {
 			dfWidget.widget.getWidget().setFocus(true);
 		} else {
-			dfWidget.lWidget.setFocus(true);
+			dfWidget.lWidget.getWidget().setFocus(true);
 		}
 	}
 
@@ -1364,15 +1313,10 @@ public class ValidatePanel extends RVBasePanel {
 		return showTableViewBtn;
 	}
 
-	private boolean validateListBoxSelection(ListBox listbox) {
+	private boolean validateListBoxSelection(ValidatableWidget<ListBox> listboxWidget) {
 		boolean isValid = true;
-		if (listbox.getSelectedIndex() == 0) {
-			listbox.addStyleName("dateBoxFormatError");
-			isValid = false;
-		} else {
-			listbox.removeStyleName("dateBoxFormatError");
-			isValid = true;
-		}
+		listboxWidget.toggleValidDateBox();
+		isValid = listboxWidget.validate();
 		return isValid;
 	}
 

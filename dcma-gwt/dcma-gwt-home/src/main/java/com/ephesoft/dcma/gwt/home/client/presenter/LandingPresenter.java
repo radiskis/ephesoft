@@ -33,221 +33,13 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.home.client.presenter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -263,14 +55,18 @@ import com.ephesoft.dcma.gwt.home.client.TableModelServiceAsync;
 import com.ephesoft.dcma.gwt.home.client.event.BatchListKeyDownEvent;
 import com.ephesoft.dcma.gwt.home.client.event.BatchListKeyDownEventHandler;
 import com.ephesoft.dcma.gwt.home.client.i18n.BatchListConstants;
+import com.ephesoft.dcma.gwt.home.client.i18n.BatchListMessages;
 import com.ephesoft.dcma.gwt.home.client.view.LandingView;
 import com.ephesoft.dcma.gwt.home.client.view.ReviewTable.ReviewValidateTable;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * The presenter for the view the user gets on reaching batch list page..
@@ -326,11 +122,30 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	public void bind() {
 		reviewTable = view.getReviewTable();
 		validateTable = view.getValidateTable();
+		final ListBox reviewTableListBox = reviewTable.getPriorityListBox();
+		final ListBox validateTableListBox = validateTable.getPriorityListBox();
+		service.getBatchListPriorityFilter(new AsyncCallback<Map<BatchStatus, Integer>>() {
+
+			public void onFailure(final Throwable caught) {
+				ScreenMaskUtility.unmaskScreen();
+			}
+
+			public void onSuccess(final Map<BatchStatus, Integer> priorityFilter) {
+				if (priorityFilter != null && !priorityFilter.isEmpty()) {
+					Integer reviewBatchListPriority = priorityFilter.get(BatchStatus.READY_FOR_REVIEW);
+					Integer validateBatchListPriority = priorityFilter.get(BatchStatus.READY_FOR_VALIDATION);
+					reviewTableListBox.setSelectedIndex(reviewBatchListPriority);
+					validateTableListBox.setSelectedIndex(validateBatchListPriority);
+				}
+			}
+		});
 		loadDefaultData();
 		reviewTable.getPriorityListBox().addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(final ChangeEvent arg0) {
+				persistPriorityFilter(reviewTable.getPriorityListBox().getSelectedIndex(), validateTable.getPriorityListBox()
+						.getSelectedIndex());
 				updateTableData(reviewTable);
 
 			}
@@ -340,8 +155,91 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onChange(final ChangeEvent arg0) {
+				persistPriorityFilter(reviewTable.getPriorityListBox().getSelectedIndex(), validateTable.getPriorityListBox()
+						.getSelectedIndex());
 				updateTableData(validateTable);
+			}
+		});
+		reviewTable.getRefreshButton().addClickHandler(new ClickHandler() {
 
+			@Override
+			public void onClick(ClickEvent arg0) {
+				loadDefaultData();
+			}
+		});
+		validateTable.getRefreshButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				loadDefaultData();
+			}
+		});
+		reviewTable.getSearchBatchButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if (checkTextEntered(reviewTable.getSearchBatchTextBox())) {
+					onSearchButtonClicked(reviewTable.getSearchBatchTextBox().getText(), reviewTable);
+				}
+			}
+		});
+		validateTable.getSearchBatchButton().addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if (checkTextEntered(validateTable.getSearchBatchTextBox())) {
+					onSearchButtonClicked(validateTable.getSearchBatchTextBox().getText(), validateTable);
+				}
+			}
+		});
+	}
+
+	private boolean checkTextEntered(TextBox searchBatchTextBox) {
+		boolean check = true;
+		if (searchBatchTextBox == null || searchBatchTextBox.getText().isEmpty()) {
+			check = false;
+		}
+		return check;
+	}
+
+	private void onSearchButtonClicked(final String searchText, final ReviewValidateTable selectedTable) {
+		ScreenMaskUtility.maskScreen();
+		populateFilters(selectedTable);
+		service.getBatchInstanceDTOs(searchText, filters, new AsyncCallback<List<BatchInstanceDTO>>() {
+
+			@Override
+			public void onSuccess(List<BatchInstanceDTO> batchInstanceDTOs) {
+				selectedTable.getPriorityListBox().setSelectedIndex(0);
+				if (batchInstanceDTOs == null || batchInstanceDTOs.isEmpty()) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchListMessages.MSG_SEARCH_FAILURE));
+				} else {
+					updateTable(batchInstanceDTOs, 0, selectedTable, batchInstanceDTOs.size());
+				}
+				ScreenMaskUtility.unmaskScreen();
+			}
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchListMessages.MSG_SEARCH_ERROR));
+				ScreenMaskUtility.unmaskScreen();
+			}
+
+		});
+
+	}
+
+	private void persistPriorityFilter(final int reviewBatchListPriority, final int validateBatchListPriority) {
+		service.setBatchListPriorityFilter(reviewBatchListPriority, validateBatchListPriority, new AsyncCallback<Void>() {
+
+			public void onFailure(final Throwable caught) {
+				// Priority filter cannot be saved in HTTP session.
+				ConfirmationDialogUtil.showConfirmationDialogError("Error while retaining the batch list priority");
+			}
+
+			public void onSuccess(Void result) {
+				// Priority filter saved in HTTP session.
 			}
 		});
 	}

@@ -141,6 +141,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+	<servlet-name>uploadBatchService</servlet-name>
+		<servlet-class>com.ephesoft.dcma.gwt.uploadbatch.server.UploadBatchServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>uploadBatchService</servlet-name>
+		<url-pattern>/uploadbatch/uploadBatchService</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>importBatchClassUploadServlet</servlet-name>
 		<servlet-class>com.ephesoft.dcma.gwt.admin.bm.server.ImportBatchClassUploadServlet</servlet-class>
 	</servlet>
@@ -159,6 +168,17 @@
 		<servlet-name>uploadImageFileServlet</servlet-name>
 		<url-pattern>/dcma-gwt-admin/uploadImageFile</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>uploadBatchImageServlet</servlet-name>
+		<servlet-class>com.ephesoft.dcma.gwt.uploadbatch.server.UploadBatchImageServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>uploadBatchImageServlet</servlet-name>
+		<url-pattern>/dcma-gwt-upload-batch/uploadBatch</url-pattern>
+	</servlet-mapping>
+	
 
 	<servlet>
 		<servlet-name>exportBatchClassDownload</servlet-name>
@@ -251,6 +271,17 @@
 		</auth-constraint>
 	</security-constraint>
 
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>upload batch</web-resource-name>
+			<url-pattern>/UploadBatch.html</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>*</role-name>
+		</auth-constraint>
+	</security-constraint>
 
 	<login-config>
 		<auth-method>FORM</auth-method>

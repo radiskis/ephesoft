@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.user.connectivity.impl;
 
 import java.util.ArrayList;
@@ -377,7 +307,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	 * @param directory
 	 * @return
 	 */
-	private DirContext createDirectoryConnection(Hashtable<Object, Object> environment) { // NOPMD 
+	private DirContext createDirectoryConnection(Hashtable<Object, Object> environment) { // NOPMD
 		// Hashtable for Active Directory
 		DirContext directory = null;
 		try {
@@ -403,29 +333,18 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		searchControl.setReturningAttributes(attributeFilter);
 		searchControl.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		String filter = UserConnectivityConstant.EMPTY_STRING;
-		if (name == UserConnectivityConstant.MSACTIVEDIRECTORY_GROUP && msActiveDirectoryGroupSearchFilter != null && !msActiveDirectoryGroupSearchFilter.isEmpty()) {
-			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_AMP_SYMBOL);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
-			filterBuffer.append(name);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
-			filterBuffer.append(msActiveDirectoryGroupSearchFilter);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
-			filter = filterBuffer.toString();
-		} else {
-			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
-			filterBuffer.append(name);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
-			filter = filterBuffer.toString();
-		}
 		LOG.info("Added filter to Active Directory :" + filter);
 		List<NamingEnumeration<?>> results = new ArrayList<NamingEnumeration<?>>();
 		String[] msActiveDirectoryContextPathName = msActiveDirectoryContextPath.split(DOUBLE_SEMICOLON_DELIMITER);
-		for (String msActiveDirectoryFullPath : msActiveDirectoryContextPathName) {
+		String[] msActiveDirectoryGroupFilter = msActiveDirectoryGroupSearchFilter.split(DOUBLE_SEMICOLON_DELIMITER);
+		for (int index = 0; index < msActiveDirectoryContextPathName.length; index++) {
+			String msActiveDirectoryFullPath = msActiveDirectoryContextPathName[index];
+			String filterData = UserConnectivityConstant.EMPTY_STRING;
+			if (index < msActiveDirectoryGroupFilter.length) {
+				filterData = msActiveDirectoryGroupFilter[index];
+			}
+			filter = getGroupFilter(name, filterData);
+			LOG.info("Filter added for "+ msActiveDirectoryFullPath+ " is:" + filter);
 			String paramName = null;
 			try {
 				StringBuffer stringBuffer = new StringBuffer(msActiveDirectoryFullPath);
@@ -447,6 +366,36 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 			}
 		}
 		return results;
+	}
+	
+	/**
+	 * This method provides the group filter to be added.
+	 * @param name
+	 * @param filterString {@link String} filter String to be added. 
+	 * @return {@link String} filter added for group.
+	 */
+	private String getGroupFilter(final String name, final String filterString) {
+		String filter;
+		if (name == UserConnectivityConstant.MSACTIVEDIRECTORY_GROUP && filterString != null && !filterString.trim().isEmpty()) {
+			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_AMP_SYMBOL);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
+			filterBuffer.append(name);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
+			filterBuffer.append(filterString);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
+			filter = filterBuffer.toString();
+		} else {
+			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
+			filterBuffer.append(name);
+			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
+			filter = filterBuffer.toString();
+		}
+		return filter;
 	}
 
 	/**

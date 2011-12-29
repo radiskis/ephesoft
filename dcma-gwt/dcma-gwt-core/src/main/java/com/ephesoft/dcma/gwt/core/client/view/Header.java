@@ -94,6 +94,10 @@ public class Header extends DCMAComplexPanel {
 
 	private String dialogMessage;
 
+	private String saveButtonText = null;
+
+	private String discardButtonText = null;
+
 	private Map<Integer, String> tabs = new HashMap<Integer, String>();
 
 	private static final Binder binder = GWT.create(Binder.class);
@@ -207,5 +211,9 @@ public class Header extends DCMAComplexPanel {
 	public void setDialogMessage(String dialogMessage) {
 		this.dialogMessage = dialogMessage;
 	}
-
+	
+	public void setButtonText(String saveButtonText, String discardButtonText){
+		this.saveButtonText = saveButtonText;
+		this.discardButtonText = discardButtonText;
+	}
 }

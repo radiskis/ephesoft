@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.rv.server;
 
 import java.io.File;
@@ -164,6 +129,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	private static final String DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE = "ScriptFieldValueChange";
 
+	@Override
 	public BatchDTO getHighestPriortyBatch() {
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
@@ -171,6 +137,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		return getBatch(batch.getIdentifier());
 	}
 
+	@Override
 	public BatchDTO getBatch(String batchInstanceIdentifier) {
 
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
@@ -198,6 +165,10 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		Map<String, String> urlAndShortcutMap = null;
 		Map<String, String> dimensionsForPopUp = null;
 		Map<String, String> urlAndTitleMap = null;
+		String fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
+		String fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
 		if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
 			dimensionsForPopUp = new HashMap<String, String>();
 			urlAndShortcutMap = new LinkedHashMap<String, String>();
@@ -213,12 +184,16 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			case READY_FOR_VALIDATION:
 				batch.setBatchStatus(BatchStatus.READY_FOR_VALIDATION);
 				break;
+			case RUNNING:
+				batch.setBatchStatus(BatchStatus.RUNNING);
+				break;
 			default:
 				break;
 		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
-				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap);
+				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap,
+				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension);
 	}
 
 	private void getPropertiesOfExternalApplication(PluginPropertiesService pluginPropertiesService, String batchInstanceIdentifier,
@@ -359,14 +334,21 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			Map<String, String> urlAndShortcutMap = null;
 			Map<String, String> dimensionsForPopUp = null;
 			Map<String, String> urlAndTitleMap = null;
+			String fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
+			String fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
 			if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
+				dimensionsForPopUp = new HashMap<String, String>();
+				urlAndShortcutMap = new LinkedHashMap<String, String>();
+				urlAndTitleMap = new LinkedHashMap<String, String>();
 				getPropertiesOfExternalApplication(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
 						dimensionsForPopUp, urlAndTitleMap);
 			}
 
 			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
 					fuzzySearchSwitch, suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap,
-					dimensionsForPopUp, urlAndTitleMap);
+					dimensionsForPopUp, urlAndTitleMap, fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension);
 
 		} catch (DCMAApplicationException e) {
 			log.error(e.getMessage(), e);
@@ -683,8 +665,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	public String getDefaultDocTypeView() {
 		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
 		String default_view = null;
+		InputStream propertyInStream = null;
 		try {
-			InputStream propertyInStream = new ClassPathResource(filePath).getInputStream();
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
 			Properties properties = new Properties();
 			properties.load(propertyInStream);
 			String docView = properties.getProperty(DOCUMENT_DEFAULT_VIEW_PROPERTY_KEY);
@@ -696,6 +679,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		} catch (IOException e) {
 			default_view = LIST_VIEW;
+		} finally {
+			try {
+				if (propertyInStream != null) {
+					propertyInStream.close();
+				}
+			} catch (IOException ioe) {
+
+			}
 		}
 		return default_view;
 	}
@@ -973,8 +964,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	private String getDynamicFunctionKeyScriptName() {
 		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
 		String scriptName = null;
+		InputStream propertyInStream = null;
 		try {
-			InputStream propertyInStream = new ClassPathResource(filePath).getInputStream();
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
 			Properties properties = new Properties();
 			properties.load(propertyInStream);
 			scriptName = properties.getProperty(DYNAMIC_FUNCTION_KEY_SCRIPT_NAME);
@@ -983,6 +975,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			}
 		} catch (IOException e) {
 			scriptName = SCRIPT_TEST;
+		} finally {
+			try {
+				if (propertyInStream != null) {
+					propertyInStream.close();
+				}
+			} catch (IOException ioe) {
+
+			}
 		}
 		return scriptName;
 	}
@@ -1315,8 +1315,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
 		String scriptName = null;
+		InputStream propertyInStream = null;
 		try {
-			InputStream propertyInStream = new ClassPathResource(filePath).getInputStream();
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
 			Properties properties = new Properties();
 			properties.load(propertyInStream);
 			scriptName = properties.getProperty(FIELD_VALUE_CHANGE_SCRIPT_NAME);
@@ -1325,6 +1326,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			}
 		} catch (IOException e) {
 			scriptName = DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE;
+		} finally {
+			try {
+				if (propertyInStream != null) {
+					propertyInStream.close();
+				}
+			} catch (IOException ioe) {
+
+			}
 		}
 		return scriptName;
 	}

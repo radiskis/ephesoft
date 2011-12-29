@@ -24,6 +24,10 @@
 		</property>
 	</bean>
 
+	<bean id="tabbedPdfExporter" class="com.ephesoft.dcma.tabbed.TabbedPdfExporter"
+		p:ghostScriptCommand="$tabbedPdf{tabbed_pdf.ghost_script_command}"
+		p:unixGhostScriptCommand="$tabbedPdf{tabbed_pdf.unix_ghost_script_command}">
+	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.tabbed" />
 

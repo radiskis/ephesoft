@@ -127,7 +127,7 @@ INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,p
 INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (116,now(),now(),null,'KV_Page_Process',58,114);
 
 INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (139,now(),now(),null,'ON',58,122);
-INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (140,now(),now(),null,'10',58,null,123);
+INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (140,now(),now(),null,'10',58,123);
 
 INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (125,now(),now(),null,null,59,115);
 INSERT INTO batch_class_plugin_config(id,creation_date,last_modified,qualifier,plugin_config_value,batch_class_plugin_id,plugin_config_id) VALUES (126,now(),now(),null,'-compress LZW -density 300',59,116);

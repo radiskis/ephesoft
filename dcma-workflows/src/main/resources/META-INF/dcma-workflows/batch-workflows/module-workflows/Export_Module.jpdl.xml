@@ -72,6 +72,12 @@
 	<sub-process continue="async" g="1269,16,176,59" name="Key_Value_Learning_Plugin"
 		sub-process-key="Key_Value_Learning_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="XML_to_Database_Plugin" />
+	</sub-process>
+	
+	<sub-process continue="async" g="1269,16,176,59" name="XML_to_Database_Plugin"
+		sub-process-key="XML_to_Database_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="CleanUp_Plugin" />
 	</sub-process>
 	

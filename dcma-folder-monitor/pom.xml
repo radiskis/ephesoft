@@ -15,7 +15,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>jnotify</groupId>
+			<groupId>contentobjects</groupId>
 			<artifactId>jnotify</artifactId>
 		</dependency>
 		<dependency>

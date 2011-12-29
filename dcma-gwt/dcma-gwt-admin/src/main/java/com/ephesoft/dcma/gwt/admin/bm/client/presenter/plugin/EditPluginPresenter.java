@@ -33,41 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin;
 
 import java.util.ArrayList;
@@ -160,6 +125,8 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 
 	public void setProperties() {
 		ListBox hocrToPdfListBox = null;
+		ListBox createMultipagePdfOptimizationSwitchListBox = null;
+		ListBox tabbedPdfOptimizationSwitchListBox = null;
 		docFieldWidgets = new ArrayList<EditableWidgetStorage>();
 		int row = 0;
 		Collection<BatchClassPluginConfigDTO> values = controller.getSelectedPlugin().getBatchClassPluginConfigs();
@@ -202,6 +169,32 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 								});
 
 							}
+							if (batchClassPluginConfig.getPluginConfig().getFieldName().equalsIgnoreCase(
+									PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_SWITCH)) {
+								createMultipagePdfOptimizationSwitchListBox = fieldValue;
+								fieldValue.addChangeHandler(new ChangeHandler() {
+
+									@Override
+									public void onChange(ChangeEvent arg0) {
+										enableCreateMultipageOptimizationProps(fieldValue);
+									}
+								});
+
+							}
+							
+							if (batchClassPluginConfig.getPluginConfig().getFieldName().equalsIgnoreCase(
+									PluginNameConstants.TABBED_PDF_OPTIMIZATION_SWITCH)) {
+								createMultipagePdfOptimizationSwitchListBox = fieldValue;
+								fieldValue.addChangeHandler(new ChangeHandler() {
+
+									@Override
+									public void onChange(ChangeEvent arg0) {
+										enableTabbedPdfOptimizationProps(fieldValue);
+									}
+								});
+
+							}
+							
 							view.addWidget(row, 2, fieldValue);
 							EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(fieldValue);
 							editableWidgetStorage.setValidatable(Boolean.FALSE);
@@ -228,6 +221,8 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 			view.addButtons(row);
 		}
 		enableHocrToPdfProps(hocrToPdfListBox);
+		enableCreateMultipageOptimizationProps(createMultipagePdfOptimizationSwitchListBox);
+		enableTabbedPdfOptimizationProps(tabbedPdfOptimizationSwitchListBox);
 	}
 
 	private static class EditableWidgetStorage {
@@ -282,6 +277,58 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 	public void injectEvents(HandlerManager eventBus) {
 		// to be used in case of event handling
 	}
+	
+	private void enableCreateMultipageOptimizationProps(final ListBox fieldValue) {
+		if (fieldValue != null) {
+			for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
+				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(
+						PluginNameConstants.ON_STRING)) {
+					if (editableWidgetStorage != null
+							&& editableWidgetStorage.getTextBoxWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
+									.equals(PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
+						editableWidgetStorage.widget.getWidget().setEnabled(true);
+					}
+				} else {
+					if (editableWidgetStorage != null
+							&& editableWidgetStorage.getTextBoxWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
+									.equals(PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
+						editableWidgetStorage.widget.getWidget().setEnabled(false);
+					}
+				}
+			}
+		}
+		
+	}
+	
+	private void enableTabbedPdfOptimizationProps(final ListBox fieldValue) {
+		if (fieldValue != null) {
+			for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
+				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(
+						PluginNameConstants.ON_STRING)) {
+					if (editableWidgetStorage != null
+							&& editableWidgetStorage.getTextBoxWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
+									.equals(PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
+						editableWidgetStorage.widget.getWidget().setEnabled(true);
+					}
+				} else {
+					if (editableWidgetStorage != null
+							&& editableWidgetStorage.getTextBoxWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
+									.equals(PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
+						editableWidgetStorage.widget.getWidget().setEnabled(false);
+					}
+				}
+			}
+		}
+		
+	}
 
 	private void enableHocrToPdfProps(final ListBox fieldValue) {
 		if (fieldValue != null) {
@@ -309,13 +356,6 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 									PluginNameConstants.GHOSTSCRIPT_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(true);
 					}
-					if (editableWidgetStorage != null
-							&& editableWidgetStorage.getTextBoxWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
-									PluginNameConstants.PDF_OPTIMIZATION_PARAMETERS)) {
-						editableWidgetStorage.widget.getWidget().setEnabled(true);
-					}
 				} else {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getListBoxwidget() != null
@@ -336,13 +376,6 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName() != null
 							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
 									PluginNameConstants.GHOSTSCRIPT_PARAMETERS)) {
-						editableWidgetStorage.widget.getWidget().setEnabled(false);
-					}
-					if (editableWidgetStorage != null
-							&& editableWidgetStorage.getTextBoxWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
-									PluginNameConstants.PDF_OPTIMIZATION_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(false);
 					}
 				}

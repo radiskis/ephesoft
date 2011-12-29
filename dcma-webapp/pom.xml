@@ -51,6 +51,10 @@
 			<groupId>com.ephesoft.dcma</groupId>
 			<artifactId>dcma-gwt-reporting</artifactId>
 		</dependency>		
+<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-gwt-upload-batch</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -92,6 +96,7 @@
 								<module>com.ephesoft.dcma.gwt.rv.ReviewValidate</module>
 								<module>com.ephesoft.dcma.gwt.batchInstance.BatchInstance</module>
 								<module>com.ephesoft.dcma.gwt.reporting.Report</module>
+								<module>com.ephesoft.dcma.gwt.uploadbatch.UploadBatch</module>
 							</modules>
 							<localWorkers>2</localWorkers>
 							<extraJvmArgs>-Xmx768m</extraJvmArgs>

@@ -24,7 +24,10 @@
 	</bean>
 	
 	<bean id="tesseractReader" class="com.ephesoft.dcma.tesseract.TesseractReader" 
-		 p:windowsCmd="$tess{tesseract.windows_command}" p:unixCmd="$tess{tesseract.unix_command}" p:overwriteHOCR="$tess{tesseract.overwrite_hocr}">
+		 p:windowsCmd="$tess{tesseract.windows_command}" p:unixCmd="$tess{tesseract.unix_command}" p:overwriteHOCR="$tess{tesseract.overwrite_hocr}"
+		 p:cmdParams="$tess{tesseract.command_parameters}"
+		 p:defaultHocrfileFolder="$tess{tesseract.default_hocrfile_folder}"
+		 p:defaultHocrfileName="$tess{tesseract.default_hocrfile_name}">
 	</bean>
 	
 	<bean id="tesseractService" class="com.ephesoft.dcma.tesseract.service.TesseractServiceImpl"/>

@@ -33,45 +33,9 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tesseract;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -89,9 +53,11 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.TesseractVersionProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileUtils;
 
 /**
@@ -178,14 +144,68 @@ public class TesseractReader implements ICommonConstants {
 	 * Tesseract command for overwriteHOCR.
 	 */
 	private transient String overwriteHOCR;
+	/**
+	 * Tesseract command parameters
+	 */
+	private transient String cmdParams;
 
+	/**
+	 * hocr folder name
+	 */
+	private transient String defaultHocrfileFolder;
+
+	/**
+	 * hocr file name for error handling
+	 */
+	private transient String defaultHocrfileName;
+
+	/**
+	 * @return
+	 */
+	public String getDefaultHocrfileName() {
+		return defaultHocrfileName;
+	}
+
+	/**
+	 * @param defaultHocrfileName
+	 */
+	public void setDefaultHocrfileName(String defaultHocrfileName) {
+		this.defaultHocrfileName = defaultHocrfileName;
+	}
+
+	/**
+	 * @param defaultHocrfileFolder
+	 */
+	public void setDefaultHocrfileFolder(String defaultHocrfileFolder) {
+		this.defaultHocrfileFolder = defaultHocrfileFolder;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getDefaultHocrfileFolder() {
+		return defaultHocrfileFolder;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getCmdParams() {
+		return cmdParams;
+	}
+
+	/**
+	 * @param cmdParams
+	 */
+	public void setCmdParams(String cmdParams) {
+			this.cmdParams = cmdParams;
+	}
 	/**
 	 * @return the overwriteHOCR
 	 */
 	public String getOverwriteHOCR() {
 		return overwriteHOCR;
 	}
-
 	/**
 	 * @param overwriteHOCR the overwriteHOCR to set
 	 */
@@ -262,7 +282,7 @@ public class TesseractReader implements ICommonConstants {
 				throw new DCMAApplicationException(e1.getMessage(), e1);
 			}
 			BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceID);
-
+			String defaultHocrFilePath = batchSchemaService.getBaseFolderLocation() + File.separator + defaultHocrfileFolder;
 			List<TesseractProcessExecutor> tesseractProcessExecutors = new ArrayList<TesseractProcessExecutor>();
 			if (!allPages.isEmpty()) {
 				for (int i = 0; i < allPages.size(); i++) {
@@ -285,7 +305,7 @@ public class TesseractReader implements ICommonConstants {
 							LOGGER.info("Adding to thread pool");
 							tesseractProcessExecutors.add(new TesseractProcessExecutor(eachPage, batch, batchInstanceID,
 									actualFolderLocation, cmdLanguage, batchInstanceThread, tesseractVersion, colorSwitch, windowsCmd,
-									unixCmd, overwriteHOCR));
+									unixCmd, overwriteHOCR, cmdParams));
 						} catch (DCMAApplicationException e) {
 							LOGGER.error("Image Processing or XML updation failed for image: " + actualFolderLocation + File.separator
 									+ eachPage);
@@ -319,6 +339,28 @@ public class TesseractReader implements ICommonConstants {
 				LOGGER.error("No pages found in batch XML.");
 				throw new DCMAApplicationException("No pages found in batch XML.");
 			}
+			// Start Changes for :Error handling for those cases where html file is not formed and batch proceeds further
+			File fPageFolder = new File(actualFolderLocation);
+			String[] listOfHtmlFiles = fPageFolder.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
+
+			for (TesseractProcessExecutor tesseractProcessExecutor : tesseractProcessExecutors) {
+				boolean isHOCRCreated = checkHocrExists(tesseractProcessExecutor.getTargetHOCR(), listOfHtmlFiles);
+
+				if(!isHOCRCreated) {
+					LOGGER.info("HOCR file is not generated by tesseract.Target hocr file name "+ tesseractProcessExecutor.getTargetHOCR() +".Trying to copy the template hocr file.");
+					try {
+						// Error handling for those cases where html file is not formed and batch proceeds further
+						FileUtils.copyFile(new File(defaultHocrFilePath + File.separator + defaultHocrfileName), new File(actualFolderLocation + File.separator + tesseractProcessExecutor.getTargetHOCR()));
+					} catch (Exception e1) {
+						LOGGER.error("Exception copying the HOCR file" + e1.getMessage(), e1);
+						throw new DCMAApplicationException("Exception copying the HOCR file" + e1.getMessage(), e1);
+					}
+				} else {
+					LOGGER.info("HOCR file is generated successfully by tesseract.Target hocr file name "+ tesseractProcessExecutor.getTargetHOCR() +".Skipping to copy the template hocr file.");
+				}
+				// END Changes for :Error handling for those cases where html file is not formed and batch proceeds further
+			}
+
 			LOGGER.info("Started Updating batch XML");
 			batchSchemaService.updateBatch(batch);
 			LOGGER.info("Finished Updating batch XML");
@@ -385,5 +427,17 @@ public class TesseractReader implements ICommonConstants {
 				}
 			}
 		}
+	}
+	private boolean checkHocrExists(String hocrName, final String[] listOfFiles) {
+		boolean returnValue = false;
+		String localHOCRFileName = hocrName;
+		if (listOfFiles != null && listOfFiles.length > 0 && localHOCRFileName != null) {
+			for (String eachFile : listOfFiles) {
+				if (eachFile.equalsIgnoreCase(localHOCRFileName)) {
+					returnValue = true;
+				}
+			}
+		}
+		return returnValue;
 	}
 }

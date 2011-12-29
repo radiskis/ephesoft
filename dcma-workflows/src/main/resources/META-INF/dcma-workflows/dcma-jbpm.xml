@@ -72,6 +72,7 @@
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Tabbed_Pdf_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CSV_File_Creation_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/IBM_CM_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/XML_To_Database_Plugin.jpdl.xml</value>
 		
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Automated_Validation_Module.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Document_Assembler_Module.jpdl.xml</value>

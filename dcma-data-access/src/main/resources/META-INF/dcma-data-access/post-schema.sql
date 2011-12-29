@@ -30,6 +30,14 @@ update plugin_config set is_mandatory = 0 where config_name = 'validation.url(Ct
 
 update plugin_config set is_mandatory = 0 where config_name = 'validation.url(Ctrl+9)';
 
+update plugin_config set is_mandatory = 0 where config_name = 'validation.url1_title';
+
+update plugin_config set is_mandatory = 0 where config_name = 'validation.url2_title';
+
+update plugin_config set is_mandatory = 0 where config_name = 'validation.url3_title';
+
+update plugin_config set is_mandatory = 0 where config_name = 'validation.url4_title';
+
 update plugin_config set is_mandatory = 0 where config_name = 'imagemagick.open_input_image_parameters';
 
 update plugin_config set is_mandatory = 0 where config_name = 'imagemagick.save_output_image_parameters';
@@ -37,3 +45,5 @@ update plugin_config set is_mandatory = 0 where config_name = 'imagemagick.save_
 update plugin_config set is_mandatory = 0 where config_name = 'filebound.separator';
 
 update plugin_config set is_mandatory = 0 where config_name = 'filebound.division';
+
+update batch_class_plugin_config set plugin_config_value='HOCRtoPDF' where batch_class_plugin_id = (select id from batch_class_plugin where batch_class_module_id = (select id from batch_class_module where batch_class_id = (select id from batch_class where batch_class_name='SearchablePDFGenerator') and module_id=(select id from module where module_name = 'Export')) and plugin_id =(select id from plugin where plugin_name='CREATEMULTIPAGE_FILES')) and plugin_config_id = (select id from plugin_config where config_name = 'createMultipageTif.export_process')

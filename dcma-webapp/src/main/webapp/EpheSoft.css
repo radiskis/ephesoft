@@ -731,3 +731,16 @@ select,input[type="text"] {
 .enabled {
 	background: #0061A5 none repeat scroll 0 0 !important;
 }
+
+.batchListGroupPanelLayout {
+	background-color: #C8E0F8;
+	height: 40px;
+	vertical-align: middle;
+}
+
+.batchListCompositePanelLayout {
+	height: 50px;
+	border: 1px #E0F5FF solid;
+	background-color: #E0F5FF;
+	vertical-align: middle;
+}

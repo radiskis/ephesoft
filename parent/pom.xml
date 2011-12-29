@@ -335,9 +335,9 @@
 				<version>${junit.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>jnotify</groupId>
+				<groupId>contentobjects</groupId>
 				<artifactId>jnotify</artifactId>
-				<version>0.9.3</version>
+				<version>0.93</version>
 			</dependency>
 			<dependency>
 				<groupId>org.aspectj</groupId>
@@ -345,9 +345,9 @@
 				<version>1.6.2</version>
 			</dependency>
 			<dependency>
-				<groupId>im4java</groupId>
+				<groupId>org.im4java</groupId>
 				<artifactId>im4java</artifactId>
-				<version>1.0.0</version>
+    			<version>1.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>zxing</groupId>
@@ -426,9 +426,9 @@
 				<version>1.8.3</version>
 			</dependency>
 			<dependency>
-				<groupId>bouncycastle</groupId>
+				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk16</artifactId>
-				<version>145</version>
+				<version>1.45</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openoffice</groupId>
@@ -476,18 +476,38 @@
 	</dependencyManagement>
 
 	<!-- Repositories -->
-	<!--  <repositories>
+	<repositories>
 		<repository>
-			<snapshots>
-				<updatePolicy>never</updatePolicy>
-				<checksumPolicy>ignore</checksumPolicy>
-			</snapshots>
-			<id>ephesoft-repo</id>
-			<url>http://172.16.1.106/repo/</url>
+			<id>mvn-repo</id>
+			<url>http://mvnrepository.com/</url>
 		</repository>
-	</repositories> 
+		<repository>
+			<id>jboss-repo</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/</url>
+		</repository>
+		<repository>
+			<id>mvn2-repo</id>
+			<url>http://repo2.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>nuxeo-repo</id>
+			<url>https://maven.nuxeo.org/nexus/content/repositories/public/</url>
+		</repository>
+		<repository>
+			<id>jnotify-repo</id>
+			<url>http://como.cheng.cam.ac.uk/maven2/net/</url>
+		</repository>
+		<repository>
+			<id>cedar-repo</id>
+			<url>http://maven.cedarsoft.com/content/repositories/thirdparty/</url>
+		</repository>
+		<!-- <repository>
+			<id>zxing-repo</id>
+			<url>http://opensaga.org/maven/content/repositories/</url>
+		</repository> -->
+	</repositories>
 
-	<pluginRepositories>
+	<!-- <pluginRepositories>
 		<pluginRepository>
 			<id>mirrorRepo</id>
 			<url>http://172.16.1.106/repo</url>

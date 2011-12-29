@@ -26,6 +26,7 @@
 		<module>dcma-gwt-admin</module>
 		<module>dcma-gwt-batchInstance</module>
 		<module>dcma-gwt-reporting</module>
+		<module>dcma-gwt-upload-batch</module>
 	</modules>
 
 	<dependencies>
@@ -107,6 +108,11 @@
 				<artifactId>dcma-gwt-reporting</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.ephesoft.dcma</groupId>
+				<artifactId>dcma-gwt-upload-batch</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	
@@ -115,6 +121,15 @@
 			<id>mvp4g</id>
 			<url>http://mvp4g.googlecode.com/svn/maven2/releases</url>
 		</repository>
+		<repository>
+			<id>swfupload-gwt</id>
+			<name>SWFUpload-GWT snapshot releases</name>
+			<url>http://swfupload-gwt.googlecode.com/svn/maven/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
 	</repositories>
 
 	<build>
