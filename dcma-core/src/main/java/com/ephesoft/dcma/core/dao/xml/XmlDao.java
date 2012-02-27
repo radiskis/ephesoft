@@ -33,257 +33,15 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.core.dao.xml;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 
@@ -291,10 +49,15 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 
 import org.hibernate.criterion.DetachedCriteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.core.common.DCMABusinessException;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.component.JAXB2Template;
 import com.ephesoft.dcma.core.dao.Dao;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
+import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.util.XMLUtil;
 
 /**
@@ -305,12 +68,20 @@ import com.ephesoft.dcma.util.XMLUtil;
  */
 public abstract class XmlDao<T> implements Dao<T> {
 
-	public void create(T object, Serializable identifier) {
-		create(object, identifier, null, "_batch.xml");
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(XmlDao.class);
+	private static final String OPERATION_NOT_SUPPORTED = "Operation not supported.";
+
+	public void create(T object, Serializable identifier, boolean isZipSwitchOn) {
+		create(object, identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn, false);
 	}
 
-	public void create(T object, Serializable identifier, String pageId, String fileName) {
-		FileOutputStream stream = null;
+	public void create(T object, Serializable identifier, String pageId, String fileName, boolean isZipSwitchOn,
+			boolean isFirstTimeUpdate) {
+		LOGGER.info("Entering create method.");
+		OutputStream stream = null;
 		try {
 			String filePath = null;
 			if (null == pageId) {
@@ -320,31 +91,66 @@ public abstract class XmlDao<T> implements Dao<T> {
 				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
 						+ "_" + pageId + fileName;
 			}
-			stream = new FileOutputStream(new File(filePath));
+			File xmlFile = new File(filePath);
+			boolean isZip = false;
+
+			if (isZipSwitchOn) {
+				if (isFirstTimeUpdate && !xmlFile.exists()) {
+					isZip = true;
+				} else if (FileUtils.isZipFileExists(filePath)) {
+					isZip = true;
+				}
+			} else if (isFirstTimeUpdate && FileUtils.isZipFileExists(filePath)) {
+				isZip = true;
+			}
+
+			if (isZip) {
+				stream = FileUtils.getOutputStreamFromZip(filePath, identifier + fileName);
+			} else {
+				stream = new FileOutputStream(xmlFile);
+			}
+
 			StreamResult result = new StreamResult(stream);
 			getJAXB2Template().getJaxb2Marshaller().marshal(object, result);
 		} catch (FileNotFoundException e) {
+			throw new DCMABusinessException(e.getMessage(), e);
+		} catch (Exception e) {
 			throw new DCMABusinessException(e.getMessage(), e);
 		} finally {
 			if (stream != null) {
 				try {
 					stream.close();
 				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 		}
+		LOGGER.info("Exiting create method.");
+
 	}
 
 	@Override
 	public T get(Serializable identifier) {
-		return get(identifier, null, "_batch.xml");
+		boolean isZipSwitchOn = true;
+		try {
+			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			isZipSwitchOn = Boolean.parseBoolean(prop.getProperty(ICommonConstants.ZIP_SWITCH));
+		} catch (IOException ioe) {
+			LOGGER.error("Unable to read the zip switch value. Taking default value as true.Exception thrown is:" + ioe.getMessage(),
+					ioe);
+		}
+		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
+	}
+
+	public T get(Serializable identifier, boolean isZipSwitchOn) {
+		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
 	}
 
 	@SuppressWarnings("unchecked")
-	public T get(Serializable identifier, String pageId, String fileName) {
+	public T get(Serializable identifier, String pageId, String fileName, boolean isZipSwitchOn) {
+		LOGGER.info("Entering get method.");
+		InputStream inputStream = null;
+		String filePath = null;
 		try {
-			String filePath = null;
 
 			if (null == pageId) {
 				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
@@ -353,23 +159,54 @@ public abstract class XmlDao<T> implements Dao<T> {
 				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
 						+ "_" + pageId + fileName;
 			}
-
 			File xmlFile = new File(filePath);
-			Source source = XMLUtil.createSourceFromFile(xmlFile);
+			LOGGER.info("FilePath in get batch object is : " + filePath);
+			LOGGER.info("Zip switch in get batch object is : " + isZipSwitchOn);
+
+			boolean isZip = false;
+
+			if (isZipSwitchOn) {
+				if (FileUtils.isZipFileExists(filePath)) {
+					isZip = true;
+				}
+			} else {
+				if (xmlFile.exists()) {
+					isZip = false;
+				} else if (FileUtils.isZipFileExists(filePath)) {
+					isZip = true;
+				}
+			}
+
+			if (isZip) {
+				inputStream = FileUtils.getInputStreamFromZip(filePath, identifier + fileName);
+			} else {
+				inputStream = new FileInputStream(xmlFile);
+			}
+
+			Source source = XMLUtil.createSourceFromStream(inputStream);
 			return (T) getJAXB2Template().getJaxb2Marshaller().unmarshal(source);
 		} catch (Exception e) {
 			throw new DCMABusinessException(e.getMessage(), e);
+		} finally {
+			try {
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			} catch (IOException ioe) {
+				LOGGER.info("Exception in closing inputstream in xml dao. Filename is:" + filePath);
+			}
+			LOGGER.info("Exiting get method.");
 		}
 	}
 
 	@Override
 	public List<T> getAll() {
-		throw new UnsupportedOperationException("Operation not supported.");
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
 	@Override
 	public T merge(T object) {
-		throw new UnsupportedOperationException("Operation not supported.");
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
 	@Override
@@ -379,36 +216,80 @@ public abstract class XmlDao<T> implements Dao<T> {
 
 	@Override
 	public void saveOrUpdate(T object) {
-		throw new UnsupportedOperationException("Operation not supported.");
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
 	@Override
 	public void create(T object) {
-		throw new UnsupportedOperationException("Operation not supported.");
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
 	@Override
 	public void evict(Object object) {
-		throw new UnsupportedOperationException("Operation not supported.");
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
-	public void update(T object, Serializable identifier, String fileName) {
-		FileOutputStream stream = null;
+	public void update(T object, Serializable identifier, String fileName, boolean isZipSwitchOn, boolean isFirstTimeUpdate) {
+		update(object, identifier, fileName, null, isZipSwitchOn, isFirstTimeUpdate);
+	}
+
+	public void update(T object, Serializable identifier, String fileName, String pageId, boolean isZipSwitchOn,
+			boolean isFirstTimeUpdate) {
+		LOGGER.info("Entering update method.");
+		OutputStream stream = null;
 		try {
-			stream = new FileOutputStream(new File(getJAXB2Template().getLocalFolderLocation() + File.separator + identifier
-					+ File.separator + identifier + fileName));
+			String filePath = null;
+			if (pageId == null) {
+				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
+						+ fileName;
+			} else {
+				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
+						+ "_" + pageId + fileName;
+			}
+			File xmlFile = new File(filePath);
+			boolean isZip = false;
+			if (isZipSwitchOn) {
+				if (isFirstTimeUpdate && !xmlFile.exists()) {
+					isZip = true;
+				} else if (FileUtils.isZipFileExists(filePath)) {
+					isZip = true;
+				}
+			} else {
+				if (isFirstTimeUpdate && !FileUtils.isZipFileExists(filePath)) {
+					isZip = false;
+				} else if (xmlFile.exists()) {
+					isZip = false;
+				} else {
+					isZip = true;
+				}
+			}
+
+			if (isZip) {
+				stream = FileUtils.getOutputStreamFromZip(filePath, identifier + fileName);
+			} else {
+				stream = new FileOutputStream(xmlFile);
+			}
+
 			StreamResult result = new StreamResult(stream);
 			getJAXB2Template().getJaxb2Marshaller().marshal(object, result);
 		} catch (FileNotFoundException e) {
+			throw new DCMABusinessException(e.getMessage(), e);
+		} catch (Exception e) {
 			throw new DCMABusinessException(e.getMessage(), e);
 		} finally {
 			if (stream != null) {
 				try {
 					stream.close();
 				} catch (IOException e) {
+					LOGGER.info("Exception in closing outputstream in xml dao. Filename is:" + fileName);
 				}
 			}
 		}
+		LOGGER.info("Exiting update method.");
+	}
+
+	public void update(T object, Serializable identifier, String fileName, boolean isZipSwitchOn) {
+		update(object, identifier, fileName, isZipSwitchOn, false);
 	}
 
 	@Override
@@ -421,8 +302,12 @@ public abstract class XmlDao<T> implements Dao<T> {
 		return 0;
 	}
 
-	public void update(T object, Serializable identifier) {
-		update(object, identifier, "_batch.xml");
+	public void update(T object, Serializable identifier, boolean isZipSwitchOn) {
+		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
+	}
+
+	public void update(T object, Serializable identifier, boolean isZipSwitchOn, boolean isFirstTimeUpdate) {
+		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn, isFirstTimeUpdate);
 	}
 
 	public abstract JAXB2Template getJAXB2Template();

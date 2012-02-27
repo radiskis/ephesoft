@@ -42,11 +42,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.Page;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.ui.RotatableImage;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
@@ -56,6 +56,8 @@ import com.ephesoft.dcma.gwt.rv.client.event.DocTypeChangeEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.DocTypeChangeEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.DocumentRefreshEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.DocumentRefreshHandler;
+import com.ephesoft.dcma.gwt.rv.client.event.IconRefreshEvent;
+import com.ephesoft.dcma.gwt.rv.client.event.IconRefreshEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.PageChangeEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.PageChangeEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEvent;
@@ -76,6 +78,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -88,7 +91,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DocumentTree extends RVBasePanel {
 
-	interface Binder extends UiBinder<ScrollPanel, DocumentTree> {
+	interface Binder extends UiBinder<DockLayoutPanel, DocumentTree> {
 	}
 
 	@UiField
@@ -98,12 +101,18 @@ public class DocumentTree extends RVBasePanel {
 	RotatableImage selectedImage;
 	@UiField
 	ScrollPanel scrollPanel;
+	@UiField
+	RotatableImage tempImage;
 
 	private static final Binder binder = GWT.create(Binder.class);
 
 	public DocumentTree() {
 		initWidget(binder.createAndBindUi(this));
+		tempImage.setVisible(false);
+	}
 
+	public RotatableImage getTempImage() {
+		return tempImage;
 	}
 
 	private void setDocumentSelected(final TreeItem item) {
@@ -188,6 +197,8 @@ public class DocumentTree extends RVBasePanel {
 
 		int counter = 0;
 		TreeItem item = null;
+		boolean isThumbNailLoaded = false;
+		boolean isFirstThumbNail = false;
 		for (final Document docBean : docBeans) {
 
 			HorizontalPanel docTitlePanel = new HorizontalPanel();
@@ -199,19 +210,6 @@ public class DocumentTree extends RVBasePanel {
 			Label icon = new Label();
 			icon.setStyleName("no_error_icon");
 
-			// adding Ctrl+s functionality on icon click
-
-			icon.addClickHandler(new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent event) {
-					presenter.setControlSorQPressed(true);
-					// event.getNativeEvent().preventDefault();
-					presenter.performOperationsOnCtrlSPress();
-				}
-			}
-
-			);
 			docTitlePanel.add(icon);
 
 			final TreeItem docItem = docTree.addItem(docTitlePanel);
@@ -235,6 +233,7 @@ public class DocumentTree extends RVBasePanel {
 			});
 
 			if (presenter.batchDTO.isErrorContained(docBean)) {
+				isThumbNailLoaded = true;
 				icon.setStyleName("error_icon");
 				if (counter == 0) {
 					item = docItem;
@@ -249,14 +248,19 @@ public class DocumentTree extends RVBasePanel {
 					if (iter.hasNext()) {
 						final Page pageTypeBean = iter.next();
 						final RotatableImage image = new RotatableImage();
-						if (!pageTypeBean.isIsRotated()) {
-							image.setUrl(presenter.batchDTO.getAbsoluteURLFor(pageTypeBean.getThumbnailFileName()), pageTypeBean
-									.getDirection());
-						} else {
-							image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(pageTypeBean.getThumbnailFileName(),
-									pageTypeBean.getDirection().toString()), pageTypeBean.getDirection());
+						if (isThumbNailLoaded && !isFirstThumbNail) {
+							isThumbNailLoaded = false;
+							isFirstThumbNail = true;
+							if (!pageTypeBean.isIsRotated()) {
+								image.setUrl(presenter.batchDTO.getAbsoluteURLFor(pageTypeBean.getThumbnailFileName()), pageTypeBean
+										.getDirection());
+							} else {
+								image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(pageTypeBean.getThumbnailFileName(),
+										pageTypeBean.getDirection().toString()), pageTypeBean.getDirection());
+							}
 						}
 						image.addStyleName("thumbnailDefault");
+
 						image.addClickHandler(new ClickHandler() {
 
 							@Override
@@ -450,6 +454,10 @@ public class DocumentTree extends RVBasePanel {
 			this.pageTitle = this.page.getIdentifier();
 		}
 
+		public RotatableImage getImage() {
+			return image;
+		}
+
 		@Override
 		public int hashCode() {
 			return Integer.parseInt(page.getIdentifier());
@@ -526,6 +534,19 @@ public class DocumentTree extends RVBasePanel {
 				presenter.document = getdocTreeItemByTitle(arg0.getTarget().getTitle()).document;
 				setDocumentSelected(arg0.getTarget());
 
+				List<Page> pageList = presenter.document.getPages().getPage();
+				for (Page page : pageList) {
+					String identifier = page.getIdentifier();
+					PageImage pageImage = pageImageMap.get(identifier);
+					RotatableImage image = pageImage.getImage();
+					if (!page.isIsRotated()) {
+						image.setUrl(presenter.batchDTO.getAbsoluteURLFor(page.getThumbnailFileName()), page.getDirection());
+					} else {
+						image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(page.getThumbnailFileName(), page.getDirection()
+								.toString()), page.getDirection());
+					}
+				}
+
 				presenter.page = presenter.document.getPages().getPage().get(0);
 
 				setPageSelected(getPageImageById(presenter.page.getIdentifier()).image, false);
@@ -561,6 +582,22 @@ public class DocumentTree extends RVBasePanel {
 			}
 		});
 
+		eventBus.addHandler(IconRefreshEvent.TYPE, new IconRefreshEventHandler() {
+
+			@Override
+			public void refresh(IconRefreshEvent iconRefreshEvent) {
+				TreeItem item = getdocTreeItemById(iconRefreshEvent.getDocument().getIdentifier()).treeItem;
+				selectedDocItem = item;
+				selectedDocItem.setState(true);
+				selectedDocItem.setSelected(true);
+				DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
+				selectedDocItem.addStyleName("document-style");
+				treeItem.icon.setStyleName("no_error_icon");
+				if (presenter.batchDTO.isErrorContained(presenter.document)) {
+					treeItem.icon.setStyleName("error_icon");
+				}
+			}
+		});
 		eventBus.addHandler(PageChangeEvent.TYPE, new PageChangeEventHandler() {
 
 			@Override
@@ -591,7 +628,7 @@ public class DocumentTree extends RVBasePanel {
 				setDocumentSelected(getdocTreeItemById(event.getDocument().getIdentifier()).treeItem);
 				if (presenter.batchDTO.isErrorContained(presenter.document))
 					return;
-				if (presenter.batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
+				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
 					for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
 						if (!doc.isValid()) {
 							presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
@@ -599,7 +636,7 @@ public class DocumentTree extends RVBasePanel {
 						}
 					}
 				}
-				if (presenter.batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_REVIEW)) {
+				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
 					for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
 						if (!doc.isReviewed()) {
 							presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
@@ -648,7 +685,7 @@ public class DocumentTree extends RVBasePanel {
 								if (!event.getEvent().isShiftKeyDown()) {
 									final DocumentTreeItem nextDocTreeItem = getNextDocTreeItem();
 									event.getEvent().getNativeEvent().preventDefault();
-									if (presenter.batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)
+									if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
 											&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
 										Batch batch = presenter.batchDTO.getBatch();
 										ScreenMaskUtility.maskScreen("Executing Script.....");
@@ -689,7 +726,7 @@ public class DocumentTree extends RVBasePanel {
 									}
 								} else {
 									event.getEvent().getNativeEvent().preventDefault();
-									if (presenter.batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)
+									if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
 											&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
 										Batch batch = presenter.batchDTO.getBatch();
 										ScreenMaskUtility.maskScreen("Executing Script.....");
@@ -778,6 +815,12 @@ public class DocumentTree extends RVBasePanel {
 		presenter.page = presenter.document.getPages().getPage().get(0);
 		setPageSelected(getPageImageById(presenter.page.getIdentifier()).image, false);
 		DocumentTree.this.fireEvent(new DocExpandEvent(presenter.document));
+	}
+
+	public void createDocumentNode(Document document) {
+		DocumentTreeItem docTreeItem = getdocTreeItemById(document.getIdentifier());
+		List<Page> pageList = docTreeItem.document.getPages().getPage();
+
 	}
 
 	private void openNextPage() {

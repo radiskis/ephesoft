@@ -18,6 +18,9 @@
 			<g:cell width="11%" horizontalAlignment='ALIGN_LEFT'>
 				<g:Anchor href='javascript:;' ui:field='nextBatch'></g:Anchor>
 			</g:cell>
+			<g:cell width="11%" horizontalAlignment='ALIGN_RIGHT'>
+				<g:Anchor href='javascript:;' ui:field='saveBatch'></g:Anchor>
+			</g:cell>
 			<g:cell width="1%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="secondPipe"></g:Label>
 			</g:cell>

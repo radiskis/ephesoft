@@ -48,10 +48,10 @@
 	
 	<sub-process continue="async" g="40,798,219,54" name="KV_Page_Processing_Plugin" sub-process-key="KV_Page_Processing_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Scripting_Plugin"/>
+		<transition to="Page_Process_Scripting_Plugin"/>
 	</sub-process>
 	
-	<sub-process continue="async" g="81,340,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+	<sub-process continue="async" g="81,340,201,59" name="Page_Process_Scripting_Plugin" sub-process-key="Page_Process_Scripting_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
 		<parameter-in subvar="backUpFileName" expr="Tesseract_Page_Process_Module_Scripting_Plugin"/>
 		<parameter-in subvar="scriptName" expr="ScriptPageProcessing"/>

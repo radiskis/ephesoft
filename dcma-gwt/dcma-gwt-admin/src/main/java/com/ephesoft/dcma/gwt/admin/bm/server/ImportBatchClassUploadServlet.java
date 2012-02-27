@@ -57,6 +57,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.util.FileUtils;
@@ -68,7 +69,7 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String SERIALIZATION_EXT = ".ser";
+	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 
 	@Override
 	public final void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

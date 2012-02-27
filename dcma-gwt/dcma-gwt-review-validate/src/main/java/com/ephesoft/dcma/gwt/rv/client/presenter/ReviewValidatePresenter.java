@@ -35,18 +35,24 @@
 
 package com.ephesoft.dcma.gwt.rv.client.presenter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.DataTable;
+import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
+import com.ephesoft.dcma.batch.schema.DocField.AlternateValues;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
+import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.event.TabSelectionEvent;
 import com.ephesoft.dcma.gwt.core.client.event.TabSelectionEventHandler;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
@@ -57,7 +63,7 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PointCoordinate;
 import com.ephesoft.dcma.gwt.rv.client.ReviewValidateDocServiceAsync;
-import com.ephesoft.dcma.gwt.rv.client.event.DocumentRefreshEvent;
+import com.ephesoft.dcma.gwt.rv.client.event.IconRefreshEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyUpEvent;
@@ -77,9 +83,13 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ReviewValidatePresenter implements Presenter {
 
+	private static final String UNKNOWN_DOC_TYPE = "Unknown";
+	private static final int RADIX_BASE = 10;
+	private static final String DOCUMENT = "DOC";
 	public BatchDTO batchDTO;
 	public Document document;
 	public Page page;
+	private Integer realUpdateInterval;
 
 	public final ReviewValidateDocServiceAsync rpcService;
 	public final HandlerManager eventBus;
@@ -98,6 +108,14 @@ public class ReviewValidatePresenter implements Presenter {
 
 	private boolean isControlSorQPressed;
 
+	private PreImageLoadingPresenter preImageLoadingPresenter = null;
+
+	private Integer virtualUpdateCounter = 0;
+	
+	public Integer getVirtualUpdateCounter() {
+		return virtualUpdateCounter++;
+	}
+
 	public ReviewValidatePresenter(ReviewValidateDocServiceAsync rpcService, HandlerManager eventBus) {
 		this.rpcService = rpcService;
 		this.eventBus = eventBus;
@@ -105,6 +123,7 @@ public class ReviewValidatePresenter implements Presenter {
 		this.batchDTO = new BatchDTO();
 		this.view = new ReviewValidateView();
 		this.view.setPresenter(this);
+		preImageLoadingPresenter = new PreImageLoadingPresenter(rpcService, eventBus, this);
 	}
 
 	public void setFocus() {
@@ -127,11 +146,11 @@ public class ReviewValidatePresenter implements Presenter {
 
 				@Override
 				public void onSuccess(final BatchDTO batchDTO) {
-
-					if (!(batchDTO.getBatch().getBatchStatus().name().equalsIgnoreCase(BatchStatus.READY_FOR_REVIEW.name()) || batchDTO
-							.getBatch().getBatchStatus().name().equalsIgnoreCase(BatchStatus.READY_FOR_VALIDATION.name()))) {
-						ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.error_batch_status, batchId, batchDTO.getBatch().getBatchStatus()));
+					final BatchInstanceStatus batchInstanceStatus = batchDTO.getBatchInstanceStatus();
+					if (!(batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_REVIEW) || batchInstanceStatus
+							.equals(BatchInstanceStatus.READY_FOR_VALIDATION))) {
+						ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary
+								.get().getMessageValue(ReviewValidateMessages.error_batch_status, batchId, batchInstanceStatus));
 						confirmationDialog.okButton.addClickHandler(new ClickHandler() {
 
 							@Override
@@ -140,9 +159,9 @@ public class ReviewValidatePresenter implements Presenter {
 								moveToLandingPage();
 							}
 						});
-						//return;
+						// return;
 					}
-
+					
 					final String batchID2 = batchDTO.getBatch().getBatchInstanceIdentifier();
 					rpcService.acquireLock(batchID2, new AsyncCallback<Void>() {
 
@@ -163,11 +182,19 @@ public class ReviewValidatePresenter implements Presenter {
 						public void onSuccess(Void arg0) {
 							ReviewValidatePresenter.this.batchDTO = batchDTO;
 							ReviewValidatePresenter.this.view.initializeWidget();
+							realUpdateInterval = batchDTO.getRealUpdateInterval();
+							int preloadedImageCount = batchDTO.getPreloadedImageCount();
+							// pre loading images
+							if (preImageLoadingPresenter != null) {
+								preImageLoadingPresenter.loadInvalidDocuments(batchId, preloadedImageCount);
+							}
 							ScreenMaskUtility.unmaskScreen();
 
 						}
 
 					});
+					
+					
 				}
 
 				@Override
@@ -201,7 +228,6 @@ public class ReviewValidatePresenter implements Presenter {
 						ReviewValidatePresenter.this.batchDTO = batchDTO;
 						ReviewValidatePresenter.this.view.initializeWidget();
 						ScreenMaskUtility.unmaskScreen();
-
 					}
 				});
 			}
@@ -305,8 +331,8 @@ public class ReviewValidatePresenter implements Presenter {
 							break;
 					}// end Switch
 				} else {
-					if (batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
-					
+					if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+
 						switch (event.getEvent().getNativeKeyCode()) {
 							case 112:
 								event.getEvent().getNativeEvent().preventDefault();
@@ -361,7 +387,7 @@ public class ReviewValidatePresenter implements Presenter {
 
 			@Override
 			public void onTabSelection(final TabSelectionEvent event) {
-				rpcService.updateBatch(batchDTO.getBatch(), new AsyncCallback<BatchStatus>() {
+				rpcService.saveBatch(batchDTO.getBatch(), new AsyncCallback<Void>() {
 
 					@Override
 					public void onFailure(Throwable arg0) {
@@ -371,7 +397,7 @@ public class ReviewValidatePresenter implements Presenter {
 					}
 
 					@Override
-					public void onSuccess(BatchStatus arg0) {
+					public void onSuccess(Void arg0) {
 						rpcService.cleanup(new AsyncCallback<Void>() {
 
 							@Override
@@ -394,7 +420,7 @@ public class ReviewValidatePresenter implements Presenter {
 	}
 
 	private void executeScript(String shortcutKeyName) {
-		if (document.getType().equals("Unknown")) {
+		if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
 			document.setReviewed(false);
 		} else {
 			document.setReviewed(true);
@@ -414,137 +440,18 @@ public class ReviewValidatePresenter implements Presenter {
 				for (final Document doc : documents) {
 					if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 						document = doc;
-						if (doc.isValid()) {
-							document = batchDTO.getNextDocumentTo(doc, true);
-						}
-						eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
+						break;
 					}
 				}
-				ScreenMaskUtility.unmaskScreen();
-				updateBatch(batchDTO.getBatch());
+				if (!checkAndSignalWorkflow(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), true)) {
+					refreshDocumentChanges();
+					ScreenMaskUtility.unmaskScreen();
+					setControlSorQPressed(false);
+				}
 				setFocus();
 			}
 		});
 
-	}
-
-	public ConfirmationDialog updateBatch(final Batch batch) {
-		confirmationDialog = null;
-		rpcService.updateBatch(batch, new AsyncCallback<BatchStatus>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-				setControlSorQPressed(false);
-				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier()));
-			}
-
-			@Override
-			public void onSuccess(BatchStatus arg0) {
-				if (null != arg0) {
-					confirmationDialog = new ConfirmationDialog();
-					confirmationDialog.addDialogListener(new com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener() {
-
-						@Override
-						public void onOkClick() {
-							rpcService.signalWorkflow(batch, new AsyncCallback<BatchStatus>() {
-
-								@Override
-								public void onFailure(Throwable paramThrowable) {
-									setControlSorQPressed(false);
-									ScreenMaskUtility.unmaskScreen();
-									ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-											ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
-											+ paramThrowable.getMessage());
-								}
-
-								@Override
-								public void onSuccess(BatchStatus batchStatus) {
-									setControlSorQPressed(false);
-									ScreenMaskUtility.unmaskScreen();
-									String href = Window.Location.getHref();
-									String baseUrl = href.substring(0, href.lastIndexOf('/'));
-									if (!batchSelected) {
-										Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
-												+ ReviewValidateConstants.BATCH_LIST_HTML);
-									} else {
-										Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
-												+ ReviewValidateConstants.REVIEW_VALIDATE_HTML);
-									}
-
-								}
-							});
-						}
-
-						@Override
-						public void onCancelClick() {
-							setControlSorQPressed(false);
-							confirmationDialog.hide();
-							ScreenMaskUtility.unmaskScreen();
-							setFocus();
-							eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, page));
-						}
-
-					});
-					switch (arg0) {
-						case REVIEWED:
-							confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-									(ReviewValidateConstants.title_review_done)));
-							confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.msg_review_confirm));
-							confirmationDialog.show();
-							confirmationDialog.center();
-							confirmationDialog.okButton.setFocus(true);
-							break;
-						case VALIDATED:
-							confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-									(ReviewValidateConstants.title_validation_done)));
-							confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.msg_validation_confirm));
-							confirmationDialog.show();
-							confirmationDialog.center();
-							confirmationDialog.okButton.setFocus(true);
-							break;
-						default:
-							ScreenMaskUtility.unmaskScreen();
-							setControlSorQPressed(false);
-							break;
-					}
-				} else {
-					setControlSorQPressed(false);
-					ScreenMaskUtility.unmaskScreen();
-				}
-			}
-		});
-		return confirmationDialog;
-	}
-
-	private boolean checkIfManualStageCompleted(Document selectedDoc) {
-		Batch batch = batchDTO.getBatch();
-		boolean returnStatus = true;
-		if (batch.getBatchStatus().name().equalsIgnoreCase(BatchStatus.READY_FOR_REVIEW.name())) {
-			for (Document doc : batch.getDocuments().getDocument()) {
-				if (doc.getIdentifier().equals(selectedDoc.getIdentifier())) {
-					if (!doc.isReviewed()) {
-						document = doc;
-						returnStatus = false;
-						break;
-					}
-				}
-			}
-		} else {
-			for (Document doc : batch.getDocuments().getDocument()) {
-				if (doc.getIdentifier().equals(selectedDoc.getIdentifier())) {
-					if (!doc.isValid()) {
-						document = doc;
-						returnStatus = false;
-						break;
-					}
-				}
-			}
-		}
-		return returnStatus;
 	}
 
 	private void moveToTab(String htmlPattern) {
@@ -664,8 +571,8 @@ public class ReviewValidatePresenter implements Presenter {
 	}
 
 	public void setCustomizedShortcutPanels() {
-		if (batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_REVIEW)
-				|| batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
+		if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)
+				|| batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
 			ScreenMaskUtility.maskScreen();
 			rpcService.getFunctionKeyDTOs(document.getType(), batchDTO.getBatch().getBatchInstanceIdentifier(),
 					new AsyncCallback<List<FunctionKeyDTO>>() {
@@ -766,7 +673,7 @@ public class ReviewValidatePresenter implements Presenter {
 
 	public void performOperationsOnCtrlSPress() {
 		if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)
-				&& batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
+				&& batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
 			ScreenMaskUtility.maskScreen("Executing Script and Saving....");
 			String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
 			rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
@@ -774,6 +681,7 @@ public class ReviewValidatePresenter implements Presenter {
 				@Override
 				public void onFailure(Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
+					setControlSorQPressed(false);
 					ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
 							ReviewValidateMessages.UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE), LocaleDictionary.get().getMessageValue(
 							ReviewValidateMessages.ERROR_MESSAGE));
@@ -786,20 +694,21 @@ public class ReviewValidatePresenter implements Presenter {
 					for (final Document doc : documents) {
 						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 							document = doc;
+							break;
 						}
 					}
-					validateBatch();
+					validateBatch(true);
 				}
 			});
 		} else {
 			ScreenMaskUtility.maskScreen("Saving...");
-			validateBatch();
+			validateBatch(false);
 		}
 	}
 
 	public void performOperationsOnCtrlQPress() {
 		if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)
-				&& batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
+				&& batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
 			ScreenMaskUtility.maskScreen("Executing Script and Saving....");
 			String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
 			rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
@@ -819,14 +728,15 @@ public class ReviewValidatePresenter implements Presenter {
 					for (final Document doc : documents) {
 						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 							document = doc;
+							break;
 						}
 					}
-					reviewBatch();
+					reviewBatch(true);
 				}
 			});
 		} else {
 			ScreenMaskUtility.maskScreen("Saving...");
-			reviewBatch();
+			reviewBatch(false);
 		}
 	}
 
@@ -915,8 +825,8 @@ public class ReviewValidatePresenter implements Presenter {
 		Batch batch = batchDTO.getBatch();
 		StringBuffer pathOfBatchXmlStringBuffer = new StringBuffer();
 		pathOfBatchXmlStringBuffer.append(batch.getBatchLocalPath()).append("\\").append(
-				batch.getBatchInstanceIdentifier() + "\\" + batch.getBatchInstanceIdentifier() + "_batch.xml");
-		rpcService.getEncodedString(pathOfBatchXmlStringBuffer.toString(), new AsyncCallback<String>() {
+				batch.getBatchInstanceIdentifier() + "\\" + batch.getBatchInstanceIdentifier());
+		rpcService.getEncodedStringForXMLPath(pathOfBatchXmlStringBuffer.toString(), new AsyncCallback<String>() {
 
 			@Override
 			public void onFailure(Throwable arg0) {
@@ -927,7 +837,6 @@ public class ReviewValidatePresenter implements Presenter {
 
 			@Override
 			public void onSuccess(final String pathOfBatchXml) {
-
 				rpcService.getGeneratedSecurityTokenForExternalApp(new AsyncCallback<String>() {
 
 					@Override
@@ -990,7 +899,7 @@ public class ReviewValidatePresenter implements Presenter {
 	public void executeScriptOnFieldChange(String fieldName) {
 
 		if (!isControlSorQPressed()) {
-			if (document.getType().equals("Unknown")) {
+			if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
 				document.setReviewed(false);
 			} else {
 				document.setReviewed(true);
@@ -1012,14 +921,17 @@ public class ReviewValidatePresenter implements Presenter {
 						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 							document = doc;
 							view.getRvPanel().getValidatePanel().setFieldAlreadySelected(true);
-							if (doc.isValid()) {
+							if (!batchDTO.isErrorContained(document)) {
 								view.getRvPanel().getValidatePanel().setFieldAlreadySelected(false);
-								document = batchDTO.getNextDocumentTo(doc, true);
 							}
-							eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
+							break;
 						}
 					}
-					updateBatch(batchDTO.getBatch());
+					if (!checkAndSignalWorkflow(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), true)) {
+						refreshDocumentChanges();
+						ScreenMaskUtility.unmaskScreen();
+						setControlSorQPressed(false);
+					}
 				}
 			});
 		}
@@ -1041,14 +953,14 @@ public class ReviewValidatePresenter implements Presenter {
 		this.isControlSorQPressed = isControlSorQPressed;
 	}
 
-	public void validateBatch() {
+	public void validateBatch(boolean isFieldChangeScriptExecuted) {
 		if (checkDocumentType()) {
-			if (document.getType().equals("Unknown")) {
+			if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
 				document.setReviewed(false);
 			} else {
 				document.setReviewed(true);
 			}
-			if (batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)
+			if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
 					&& ReviewValidateConstants.ON.equalsIgnoreCase(batchDTO.getIsValidationScriptEnabled())) {
 				rpcService.executeScript(batchDTO.getBatch(), new AsyncCallback<BatchDTO>() {
 
@@ -1065,48 +977,40 @@ public class ReviewValidatePresenter implements Presenter {
 						for (final Document doc : documents) {
 							if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 								document = doc;
-								if (doc.isValid()) {
-									document = batchDTO.getNextDocumentTo(doc, true);
-								}
-								eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
 								break;
 							}
 						}
-						updateBatch(batchDTO.getBatch());
+						if (!checkAndSignalWorkflow(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), true)) {
+							refreshDocumentChanges();
+							ScreenMaskUtility.unmaskScreen();
+							setControlSorQPressed(false);
+						}
 					}
 				});
-			} else if (batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)) {
-				List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
-				for (final Document doc : documents) {
-					if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
-						document = doc;
-						if (doc.isValid()) {
-							document = batchDTO.getNextDocumentTo(doc, true);
-						}
-						eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, document.getPages().getPage().get(0)));
-						break;
-					}
-				}
-				updateBatch(batchDTO.getBatch());
 			} else {
-				eventBus.fireEvent(new DocumentRefreshEvent(document));
-				updateBatch(batchDTO.getBatch());
+				performUpdateOperations(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), isFieldChangeScriptExecuted, false);
 			}
 		} else {
 			errorMessage();
-			updateBatch(batchDTO.getBatch());
+			performUpdateOperations(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), isFieldChangeScriptExecuted, false);
 		}
-		setFocus();
 	}
 
-	public void reviewBatch() {
+	private void refreshDocumentChanges() {
+		if (!batchDTO.isErrorContained(document)) {
+			document = batchDTO.getNextDocumentTo(document, true);
+		}
+		eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, document.getPages().getPage().get(0)));
+	}
+
+	public void reviewBatch(boolean isFieldChangeScriptExecuted) {
 		if (checkDocumentType()) {
-			if (document.getType().equals("Unknown")) {
+			if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
 				document.setReviewed(false);
 			} else {
 				document.setReviewed(true);
 			}
-			if (batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)
+			if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
 					&& ReviewValidateConstants.ON.equalsIgnoreCase(batchDTO.getIsValidationScriptEnabled())) {
 
 				rpcService.executeScript(batchDTO.getBatch(), new AsyncCallback<BatchDTO>() {
@@ -1124,24 +1028,407 @@ public class ReviewValidatePresenter implements Presenter {
 						for (final Document doc : documents) {
 							if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
 								document = doc;
-								if (checkIfManualStageCompleted(document)) {
-									document = batchDTO.getNextDocumentTo(doc, true);
-								}
-								eventBus.fireEvent(new TreeRefreshEvent(arg0, document, document.getPages().getPage().get(0)));
 								break;
 							}
 						}
-						updateBatch(batchDTO.getBatch());
+						if (!checkAndSignalWorkflow(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), true)) {
+							refreshDocumentChanges();
+							ScreenMaskUtility.unmaskScreen();
+							setControlSorQPressed(false);
+						}
 					}
 				});
 			} else {
-				eventBus.fireEvent(new DocumentRefreshEvent(document));
-				updateBatch(batchDTO.getBatch());
+				performUpdateOperations(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), isFieldChangeScriptExecuted, true);
 			}
 		} else {
 			errorMessage();
-			updateBatch(batchDTO.getBatch());
+			performUpdateOperations(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), isFieldChangeScriptExecuted, true);
 		}
-		setFocus();
+	}
+
+	private void performUpdateOperations(Batch batch, BatchInstanceStatus batchInstanceStatus, Boolean isFieldChangeScriptExecuted,
+			boolean ctrlQPressed) {
+		if (!checkAndSignalWorkflow(batch, batchInstanceStatus, isFieldChangeScriptExecuted)) {
+			refreshDocumentChanges();
+			if (!isFieldChangeScriptExecuted) {
+				if (ctrlQPressed) {
+					updateBatchVirtually(batch);
+				} else {
+					updateBatch(batch);
+				}
+			} else {
+				ScreenMaskUtility.unmaskScreen();
+				setControlSorQPressed(false);
+			}
+		}
+	}
+
+	private void updateBatchVirtually(Batch batch) {
+		if (getVirtualUpdateCounter() >= realUpdateInterval) {
+			updateBatch(batch);
+			resetVirtualUpdateCounter();
+		} else {
+			ScreenMaskUtility.unmaskScreen();
+			setControlSorQPressed(false);
+		}
+	}
+
+	private void resetVirtualUpdateCounter() {
+		virtualUpdateCounter = 0;
+	}
+
+	private Boolean checkAndSignalWorkflow(Batch batch, BatchInstanceStatus batchInstanceStatus, Boolean isAnyScriptExecuted) {
+		Boolean workflowSignalled = Boolean.FALSE;
+		switch (batchInstanceStatus) {
+			case READY_FOR_REVIEW: {
+				if (checkIfAllDocumentsReviewed()) {
+					workflowSignalled = Boolean.TRUE;
+					signalWorkflow(batch, batchInstanceStatus, isAnyScriptExecuted);
+				}
+				break;
+			}
+			case READY_FOR_VALIDATION:
+				if (checkIfAllDocumentsValidated()) {
+					workflowSignalled = Boolean.TRUE;
+					signalWorkflow(batch, batchInstanceStatus, isAnyScriptExecuted);
+				}
+				break;
+			default:
+				break;
+		}
+		return workflowSignalled;
+
+	}
+
+	private void updateBatch(Batch batch) {
+		updateBatch(batch, false);
+	}
+
+	private void updateBatch(final Batch batch, final boolean refreshDocument) {
+		rpcService.saveBatch(batch, new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable paramThrowable) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
+						+ paramThrowable.getMessage());
+				ScreenMaskUtility.unmaskScreen();
+				setControlSorQPressed(false);
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+				ScreenMaskUtility.unmaskScreen();
+				setControlSorQPressed(false);
+				if (refreshDocument) {
+					setFocus();
+					eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, page));
+				}
+			}
+		});
+
+	}
+
+	private void signalWorkflow(final Batch batch, BatchInstanceStatus batchInstanceStatus, final Boolean isAnyScriptExecuted) {
+		Boolean showConfirmationDialog = Boolean.TRUE;
+		refreshDocumentIcon();
+		switch (batchInstanceStatus) {
+			case READY_FOR_REVIEW:
+				confirmationDialog = new ConfirmationDialog();
+				confirmationDialog
+						.setDialogTitle(LocaleDictionary.get().getConstantValue((ReviewValidateConstants.title_review_done)));
+				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_review_confirm));
+				break;
+			case READY_FOR_VALIDATION:
+				confirmationDialog = new ConfirmationDialog();
+				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
+						(ReviewValidateConstants.title_validation_done)));
+				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_validation_confirm));
+				break;
+			default:
+				showConfirmationDialog = Boolean.FALSE;
+				confirmationDialog = null;
+				ScreenMaskUtility.unmaskScreen();
+				setControlSorQPressed(false);
+				break;
+		}
+		if (showConfirmationDialog) {
+			confirmationDialog.setPerformCancelOnEscape(true);
+			confirmationDialog.show();
+			confirmationDialog.center();
+			confirmationDialog.okButton.setFocus(true);
+			confirmationDialog.addDialogListener(new com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener() {
+
+				@Override
+				public void onOkClick() {
+					rpcService.signalWorkflow(batch, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable paramThrowable) {
+							ScreenMaskUtility.unmaskScreen();
+							setControlSorQPressed(false);
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
+									+ paramThrowable.getMessage());
+						}
+
+						@Override
+						public void onSuccess(Void arg0) {
+							ScreenMaskUtility.unmaskScreen();
+							setControlSorQPressed(false);
+							String href = Window.Location.getHref();
+							String baseUrl = href.substring(0, href.lastIndexOf('/'));
+							if (!batchSelected) {
+								Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
+										+ ReviewValidateConstants.BATCH_LIST_HTML);
+							} else {
+								Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
+										+ ReviewValidateConstants.REVIEW_VALIDATE_HTML);
+							}
+						}
+					});
+				}
+
+				@Override
+				public void onCancelClick() {
+					if (isAnyScriptExecuted) {
+						setControlSorQPressed(false);
+						confirmationDialog.hide();
+						ScreenMaskUtility.unmaskScreen();
+						setFocus();
+						eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, page));
+					} else {
+						updateBatch(batch, true);
+					}
+
+				}
+			});
+		}
+	}
+
+	private void refreshDocumentIcon() {
+		eventBus.fireEvent(new IconRefreshEvent(batchDTO, document, page));
+	}
+
+	private boolean checkIfAllDocumentsReviewed() {
+		Boolean isBatchReviewed = Boolean.TRUE;
+		List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
+		for (Document document : documents) {
+			if (!document.isReviewed()) {
+				isBatchReviewed = Boolean.FALSE;
+				break;
+			}
+		}
+		return isBatchReviewed;
+	}
+
+	private boolean checkIfAllDocumentsValidated() {
+		Boolean isBatchValidated = Boolean.TRUE;
+		List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
+		for (Document document : documents) {
+			if (!document.isValid() || !document.isReviewed()) {
+				isBatchValidated = Boolean.FALSE;
+				break;
+			}
+		}
+		return isBatchValidated;
+	}
+
+	private String getNewDocumentTypeID(List<Document> docTypesList) {
+		Long maxDocumentTypeID = 1L;
+		for (Document docType : docTypesList) {
+			String curDocID = docType.getIdentifier();
+			curDocID = curDocID.replaceAll(DOCUMENT, ReviewValidateConstants.EMPTY_STRING);
+			Long curPageIDLg = Long.parseLong(curDocID, RADIX_BASE);
+			if (curPageIDLg > maxDocumentTypeID) {
+				maxDocumentTypeID = curPageIDLg;
+			}
+		}
+		String maxDocStr = Long.toString(maxDocumentTypeID + 1L);
+		return maxDocStr;
+	}
+
+	public void mergeDocument(Batch batch, String docIDOne, String mergeDocID) {
+		List<Document> docTypesList = batch.getDocuments().getDocument();
+		Integer mergeDocIndexOne = getDocumentTypeIndex(docTypesList, docIDOne);
+		Integer mergeDocIndexTwo = getDocumentTypeIndex(docTypesList, mergeDocID);
+		Document mergeDocTypeOne = docTypesList.get(mergeDocIndexOne);
+		Pages mergePagesOne = mergeDocTypeOne.getPages();
+		List<Page> mergePageTypeListOne = mergePagesOne.getPage();
+		Document mergeDocTypeTwo = docTypesList.get(mergeDocIndexTwo);
+		Pages mergePagesTwo = mergeDocTypeTwo.getPages();
+		List<Page> pageTypeListTwo = mergePagesTwo.getPage();
+		mergePageTypeListOne.addAll(pageTypeListTwo);
+		docTypesList.remove(mergeDocTypeTwo);
+		document = batchDTO.getDocumentById(docIDOne);
+	}
+
+	private int getDocumentTypeIndex(List<Document> docTypesList, String docID) {
+		int docIndex = 0;
+		for (Document docType : docTypesList) {
+			String curDocID = docType.getIdentifier();
+			if (curDocID.equals(docID)) {
+				break;
+			}
+			docIndex++;
+		}
+		return docIndex;
+	}
+
+	private int getPageTypeIndex(List<Document> docTypesList, int docIndex, String pageID) {
+		Pages pages = docTypesList.get(docIndex).getPages();
+		List<Page> pageTypeList = pages.getPage();
+		int pageIndex = 0;
+		for (Page pageType : pageTypeList) {
+			String curPageID = pageType.getIdentifier();
+			if (curPageID.equals(pageID)) {
+				break;
+			}
+			pageIndex++;
+		}
+		return pageIndex;
+	}
+
+	public void splitDocument(Batch batch, String docID, String pageID) {
+		List<Document> docTypesList = batch.getDocuments().getDocument();
+		Integer docIndex = getDocumentTypeIndex(docTypesList, docID);
+		Integer pageIndex = getPageTypeIndex(docTypesList, docIndex, pageID);
+		Document docType = docTypesList.get(docIndex);
+		Pages pages = docType.getPages();
+		List<Page> pageTypeList = pages.getPage();
+		// create new document.
+		String newDocID = getNewDocumentTypeID(docTypesList);
+		Document newDocType = new Document();
+		newDocType.setIdentifier(DOCUMENT + newDocID);
+		newDocType.setType(docType.getType());
+		newDocType.setConfidence(docType.getConfidence());
+		newDocType.setMultiPagePdfFile(docType.getMultiPagePdfFile());
+		newDocType.setMultiPageTiffFile(docType.getMultiPageTiffFile());
+		newDocType.setValid(docType.isValid());
+		newDocType.setReviewed(docType.isReviewed());
+		newDocType.setErrorMessage(ReviewValidateConstants.EMPTY_STRING);
+
+		Pages newPages = new Pages();
+		List<Page> listOfNewPages = newPages.getPage();
+		List<String> listOfNewPageIdentifiers = new ArrayList<String>();
+		// create the new document for split pages.
+		for (int index = pageIndex; index < pageTypeList.size(); index++) {
+			Page pgType = pageTypeList.get(index);
+			listOfNewPages.add(pgType);
+			listOfNewPageIdentifiers.add(pgType.getIdentifier());
+		}
+		newDocType.setPages(newPages);
+		// remove the pages from the older document.
+		for (int index = pageTypeList.size() - 1; index >= pageIndex; index--) {
+			pageTypeList.remove(index);
+		}
+		DocumentLevelFields documentLevelFields = docType.getDocumentLevelFields();
+		if (documentLevelFields != null) {
+			List<DocField> docFields = documentLevelFields.getDocumentLevelField();
+			DocumentLevelFields documentLevelFieldsForNewDoc = new DocumentLevelFields();
+			List<DocField> docFieldsForNewDoc = documentLevelFieldsForNewDoc.getDocumentLevelField();
+			if (docFields != null) {
+				for (DocField docField : docFields) {
+					DocField docFieldForNewDoc = new DocField();
+					docFieldForNewDoc.setConfidence(docField.getConfidence());
+					docFieldForNewDoc.setFieldOrderNumber(docField.getFieldOrderNumber());
+					docFieldForNewDoc.setFieldValueOptionList(docField.getFieldValueOptionList());
+					docFieldForNewDoc.setName(docField.getName());
+					docFieldForNewDoc.setType(docField.getType());
+					docFieldForNewDoc.setValue(docField.getValue());
+					if (listOfNewPageIdentifiers.contains(docField.getPage())) {
+						docFieldForNewDoc.setCoordinatesList(docField.getCoordinatesList());
+						docFieldForNewDoc.setOverlayedImageFileName(docField.getOverlayedImageFileName());
+						docFieldForNewDoc.setPage(docField.getPage());
+						docField.setPage(pageTypeList.get(0).getIdentifier());
+						docField.setCoordinatesList(null);
+						docField.setOverlayedImageFileName(null);
+					} else {
+						docFieldForNewDoc.setCoordinatesList(null);
+						docFieldForNewDoc.setOverlayedImageFileName(null);
+						if (docField.getPage() != null && !docField.getPage().isEmpty()) {
+							docFieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
+						} else {
+							docFieldForNewDoc.setPage(docField.getPage());
+						}
+					}
+					AlternateValues alternateValuesForNewDoc = new AlternateValues();
+					List<Field> fieldsForNewDoc = alternateValuesForNewDoc.getAlternateValue();
+					AlternateValues alternateValues = docField.getAlternateValues();
+					if (alternateValues != null) {
+						createAlternateValues(pageTypeList, listOfNewPages, listOfNewPageIdentifiers, fieldsForNewDoc, alternateValues);
+					}
+					docFieldForNewDoc.setAlternateValues(alternateValuesForNewDoc);
+					docFieldsForNewDoc.add(docFieldForNewDoc);
+				}
+			}
+
+			newDocType.setDocumentLevelFields(documentLevelFieldsForNewDoc);
+		} else {
+			newDocType.setDocumentLevelFields(null);
+		}
+		docTypesList.add(docIndex + 1, newDocType);
+		document = newDocType;
+	}
+
+	private void createAlternateValues(List<Page> pageTypeList, List<Page> listOfNewPages, List<String> listOfNewPageIdentifiers,
+			List<Field> fieldsForNewDoc, AlternateValues alternateValues) {
+		List<Field> alternateValueFields = alternateValues.getAlternateValue();
+		if (alternateValueFields != null) {
+			for (Field field : alternateValueFields) {
+				Field fieldForNewDoc = new Field();
+				fieldForNewDoc.setConfidence(field.getConfidence());
+				fieldForNewDoc.setFieldOrderNumber(field.getFieldOrderNumber());
+				fieldForNewDoc.setFieldValueOptionList(field.getFieldValueOptionList());
+				fieldForNewDoc.setName(field.getName());
+				fieldForNewDoc.setType(field.getType());
+				fieldForNewDoc.setValue(field.getValue());
+				if (listOfNewPageIdentifiers.contains(field.getPage())) {
+					fieldForNewDoc.setCoordinatesList(field.getCoordinatesList());
+					fieldForNewDoc.setOverlayedImageFileName(field.getOverlayedImageFileName());
+					fieldForNewDoc.setPage(field.getPage());
+					field.setCoordinatesList(null);
+					field.setOverlayedImageFileName(null);
+					field.setPage(pageTypeList.get(0).getIdentifier());
+				} else {
+					fieldForNewDoc.setCoordinatesList(null);
+					fieldForNewDoc.setOverlayedImageFileName(null);
+					if (field.getPage() != null && !field.getPage().isEmpty()) {
+						fieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
+					} else {
+						fieldForNewDoc.setPage(field.getPage());
+					}
+				}
+				fieldsForNewDoc.add(fieldForNewDoc);
+			}
+		}
+	}
+	
+	public void setBatchListScreenTab() {
+		final BatchInstanceStatus batchInstanceStatus = batchDTO.getBatchInstanceStatus();
+		rpcService.getUserName(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				
+			}
+
+			@Override
+			public void onSuccess(final String arg0) {
+				rpcService.setBatchListScreenTab(arg0, batchInstanceStatus, new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						
+					}
+
+					@Override
+					public void onSuccess(Void arg0) {
+						
+					}
+				});
+			}
+		});
 	}
 }

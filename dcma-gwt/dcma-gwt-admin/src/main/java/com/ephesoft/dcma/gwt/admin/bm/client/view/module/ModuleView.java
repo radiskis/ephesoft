@@ -42,7 +42,6 @@ import java.util.List;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
-import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ModuleListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ModuleViewPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.PluginListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.PluginListView;

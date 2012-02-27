@@ -7,7 +7,7 @@
 
 	<groupId>com.ephesoft.dcma</groupId>
 	<artifactId>dcma-root</artifactId>
-	<version>0.0.13</version>
+	<version>0.0.14</version>
 	<name>DCMA: Root</name>
 	<description>Root Model</description>
 	<organization>
@@ -317,7 +317,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.ephesoft.dcma</groupId>
-				<artifactId>dcma-imload-script</artifactId>
+				<artifactId>dcma-ibm-cm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

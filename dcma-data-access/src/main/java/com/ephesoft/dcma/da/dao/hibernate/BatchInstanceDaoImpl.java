@@ -155,14 +155,28 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	/**
 	 * An api to fetch count of the batch instance table for batch instance status.
 	 * 
-	 * @param filterClauseList List<BatchInstanceFilter>
-	 * @return count of the batch instance present for the batch instance status.
+	 * @param batchName
+	 * @param batchInstanceStatus
+	 * @param userName
+	 * @param userRole
+	 * @return
 	 */
 	@Override
-	public int getCount(BatchInstanceStatus batchInstanceStatus, String userName, Set<String> batchClassIdentifier) {
+	public int getCount(String batchName, BatchInstanceStatus batchInstanceStatus, String userName, BatchPriority batchPriority,
+			Set<String> batchClassIdentifier) {
 		int count = 0;
+		DetachedCriteria criteria = criteria();
+		if (batchName != null && !batchName.isEmpty()) {
+			String batchNameLocal = batchName.replaceAll("%", "\\\\%");
+			criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+		} else if (null != batchPriority) {
+			Disjunction disjunction = Restrictions.disjunction();
+			Integer lowValue = batchPriority.getLowerLimit();
+			Integer upperValue = batchPriority.getUpperLimit();
+			disjunction.add(Restrictions.between(PRIORITY, lowValue, upperValue));
+			criteria.add(disjunction);
+		}
 		if (null != batchClassIdentifier && batchClassIdentifier.size() > 0) {
-			DetachedCriteria criteria = criteria();
 			criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
 			criteria.add(Restrictions.eq(IS_REMOTE, false));
 			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
@@ -200,7 +214,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		if (null != statusList) {
 			criteria.add(Restrictions.in(STATUS, statusList));
-			//criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+			// criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
 		}
 
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
@@ -257,10 +271,16 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Override
-	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
-			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
-			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier) {
+	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String batchNameToBeSearched,
+			List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults, final List<Order> orderList,
+			final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities, String userName,
+			final Set<String> batchClassIdentifier) {
 		EphesoftCriteria criteria = criteria();
+
+		if (batchNameToBeSearched != null && !batchNameToBeSearched.isEmpty()) {
+			String batchNameLocal = batchNameToBeSearched.replaceAll("%", "\\\\%");
+			criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+		}
 
 		if (null != statusList) {
 			criteria.add(Restrictions.in(STATUS, statusList));
@@ -364,18 +384,18 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 */
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final Set<String> currentRole) {
-		return getCount(batchInstStatusList, batchPriorities, false, currentRole);
+			final Set<String> currentRole, final String currentUserName) {
+		return getCount(batchInstStatusList, batchPriorities, false, currentRole, currentUserName);
 	}
 
 	@Override
-	public int getAllCount(final Set<String> currentRole) {
-		return getCount(null, null, true, currentRole);
+	public int getAllCount(final String currentUser, final Set<String> currentRole) {
+		return getCount(null, null, true, currentRole, currentUser);
 	}
 
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final boolean isAllCurrUsrReq, final Set<String> batchClassIdentifier) {
+			final boolean isNotCurrentUserCheckReq, final Set<String> batchClassIdentifier, final String currentUserName) {
 		DetachedCriteria criteria = criteria();
 
 		if (null != batchInstStatusList) {
@@ -402,8 +422,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 			// Add check for null current users only.
 			// Now we will count only for those current users those are null.
-			if (!isAllCurrUsrReq) {
-				criteria.add(Restrictions.isNull(CURRENT_USER));
+			if (!isNotCurrentUserCheckReq && null != currentUserName) {
+				criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
 			}
 			count = count(criteria);
 		}
@@ -705,7 +725,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	@Override
-	public List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP, BatchInstanceStatus batchInstanceStatus) {
+	public List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP,
+			BatchInstanceStatus batchInstanceStatus) {
 		EphesoftCriteria criteria = criteria();
 		if (null != executingServerIP) {
 			criteria.add(Restrictions.eq(EXECUTING_SERVER, executingServerIP));
@@ -731,5 +752,27 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 			}
 		}
 		return batchInstanceList;
+	}
+
+	/**
+	 * This API fetches all the batch instances on the basis of batch status list passed.
+	 * 
+	 * @param batchStatusList List<{@link BatchInstanceStatus}>
+	 * @return List<{@link BatchInstance}>
+	 */
+	@Override
+	public List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList) {
+		DetachedCriteria criteria = criteria();
+		if (null != batchStatusList && !batchStatusList.isEmpty()) {
+			criteria.add(Restrictions.in(STATUS, batchStatusList));
+		}
+		return find(criteria);
+	}
+	
+	@Override
+	public void clearCurrentUser(String batchInstanceIdentifier) {
+		BatchInstance batchInstance = getBatchInstancesForIdentifier(batchInstanceIdentifier);
+		batchInstance.setCurrentUser(null);
+		updateBatchInstance(batchInstance);
 	}
 }

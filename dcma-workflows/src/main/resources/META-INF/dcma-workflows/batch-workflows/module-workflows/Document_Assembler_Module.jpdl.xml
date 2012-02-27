@@ -8,10 +8,10 @@
 
 	<sub-process continue="async" g="25,88,207,59" name="Document_Assembler_Plugin" sub-process-key="Document_Assembler_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Scripting_Plugin"/>
+		<transition to="Document_Assembler_Scripting_Plugin"/>
 	</sub-process>
 	
-	<sub-process continue="async" g="81,340,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+	<sub-process continue="async" g="81,340,201,59" name="Document_Assembler_Scripting_Plugin" sub-process-key="Document_Assembler_Scripting_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
 		<parameter-in subvar="backUpFileName" expr="Document_Assembler_Module_Scripting_Plugin"/>
 		<parameter-in subvar="scriptName" expr="ScriptDocumentAssembler"/>

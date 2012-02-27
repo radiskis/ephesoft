@@ -79,6 +79,7 @@ import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.TesseractVersionProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.FileType;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
@@ -93,6 +94,7 @@ import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.da.service.BatchClassModuleService;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.BackUpFileService;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileNameFormatter;
@@ -166,6 +168,24 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
+
+	/**
+	 * An api to return the complete local folder location path.
+	 * 
+	 * @return String localFolderLocation
+	 */
+	@Override
+	public boolean isZipSwitchOn() {
+		boolean isZipSwitchOn = true;
+		try {
+			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			isZipSwitchOn = Boolean.parseBoolean(prop.getProperty(ICommonConstants.ZIP_SWITCH));
+		} catch (IOException ioe) {
+			logger.error("Unable to read the zip switch value. Taking default value as false.Exception thrown is:" + ioe.getMessage(),
+					ioe);
+		}
+		return isZipSwitchOn;
+	}
 
 	/**
 	 * An api to return the complete local folder location path.
@@ -315,7 +335,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == batch) {
 			logger.info("batch class is null.");
 		} else {
-			this.batchSchemaDao.create(batch, batch.getBatchInstanceIdentifier());
+			this.batchSchemaDao.create(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn());
 		}
 	}
 
@@ -331,7 +351,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == hocrPages) {
 			logger.info("hocrPages is null.");
 		} else {
-			this.hocrSchemaDao.create(hocrPages, batchInstanceIdentifier, pageId, HOCR_FILE_NAME);
+			this.hocrSchemaDao.create(hocrPages, batchInstanceIdentifier, pageId, HOCR_FILE_NAME, isZipSwitchOn(), true);
 		}
 	}
 
@@ -348,7 +368,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == batchInstanceIdentifier) {
 			logger.info("batchInstanceIdentifier is null.");
 		} else {
-			hocrPages = this.hocrSchemaDao.get(batchInstanceIdentifier, pageId, HOCR_FILE_NAME);
+			hocrPages = this.hocrSchemaDao.get(batchInstanceIdentifier, pageId, HOCR_FILE_NAME, isZipSwitchOn());
 		}
 		return hocrPages;
 	}
@@ -357,7 +377,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == batchInstanceIdentifier) {
 			logger.info("batchInstanceIdentifier is null.");
 		} else {
-			this.hocrSchemaDao.update(hocrPages, batchInstanceIdentifier, "_" + pageId + HOCR_FILE_NAME);
+			this.hocrSchemaDao.update(hocrPages, batchInstanceIdentifier, HOCR_FILE_NAME, pageId, isZipSwitchOn(), false);
 		}
 	}
 
@@ -373,7 +393,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == batchInstanceIdentifier) {
 			logger.info("batchInstanceIdentifier is null.");
 		} else {
-			batch = this.batchSchemaDao.get(batchInstanceIdentifier);
+			batch = this.batchSchemaDao.get(batchInstanceIdentifier, isZipSwitchOn());
 		}
 		return batch;
 	}
@@ -388,7 +408,23 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (null == batch) {
 			logger.info("batch class is null.");
 		} else {
-			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier());
+			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn());
+		}
+	}
+
+	/**
+	 * An api to update the Batch object.
+	 * 
+	 * @param batch Batch
+	 * @param isFirstTimeUpdate
+	 * 
+	 */
+	@Override
+	public void updateBatch(Batch batch, boolean isFirstTimeUpdate) {
+		if (null == batch) {
+			logger.info("batch class is null.");
+		} else {
+			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn(), isFirstTimeUpdate);
 		}
 	}
 
@@ -670,7 +706,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			docTypesList.remove(fromDocIndex);
 		}
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 
 	}
 
@@ -719,7 +755,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			docTypesList.remove(docIndex);
 		}
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 
 	}
 
@@ -763,7 +799,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		// Add the duplicate page type to the end of the document.
 		docTypesList.get(docIndex).getPages().getPage().add(duplicateCopyPageType);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 
 	}
 
@@ -826,7 +862,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		docType.setPages(reOrdPages);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 	}
 
 	/**
@@ -876,7 +912,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		pageTypeList.set(swapPageIndexOne, swapPageTypeTwo);
 		pageTypeList.set(swapPageIndexTwo, swapPageTypeOne);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 	}
 
 	/**
@@ -934,7 +970,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		pageTypeListOne.set(swapPageIndexOne, swapPageTypeTwo);
 		pageTypeListTwo.set(swapPageIndexTwo, swapPageTypeOne);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 	}
 
 	/**
@@ -982,7 +1018,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		mergePageTypeListOne.addAll(pageTypeListTwo);
 		docTypesList.remove(mergeDocTypeTwo);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 		return batchSchemaDao.get(batchInstanceIdentifier);
 	}
 
@@ -1129,7 +1165,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 		docTypesList.add(docIndex + 1, newDocType);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 	}
 
 	/**
@@ -1169,7 +1205,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		docType.setType(docTypeName);
 		docType.setDocumentLevelFields(documentLevelFields);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
 	}
 
 	/**
@@ -1465,7 +1501,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 
 		// Delete the oCRInputFileName file.
-		if (null != oCRInputFileName) {
+		if (null != oCRInputFileName && !oCRInputFileName.equals(displayFileName)) {
 			oCRInputFileName = oCRInputFileName.trim();
 			try {
 				File fileOCRInputFileName = new File(folderToExe + File.separator + oCRInputFileName);
@@ -1479,7 +1515,13 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (null != originalXmlFile) {
 			try {
-				File srcFileHocrFileName = new File(originalXmlFile);
+				String zipFileName = originalXmlFile + FileType.ZIP.getExtensionWithDot();
+				File srcFileHocrFileName = new File(zipFileName);
+				if (!srcFileHocrFileName.exists()) {
+					srcFileHocrFileName = new File(originalXmlFile);
+				} else {
+					originalXmlFile = zipFileName;
+				}
 				logger.info("srcFileHocrFileName : " + srcFileHocrFileName);
 				FileUtils.forceDelete(srcFileHocrFileName);
 			} catch (IOException e) {
@@ -1684,7 +1726,14 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			try {
 				String xmlFileName = folderToExe + File.separator + batchInstanceIdentifier + "_"
 						+ duplicateCopyPageType.getIdentifier() + HOCR_FILE_NAME;
-				File srcFileHocrFileName = new File(originalXmlFile);
+				String zipFileName = originalXmlFile + FileType.ZIP.getExtensionWithDot();
+				File srcFileHocrFileName = new File(zipFileName);
+				if (!srcFileHocrFileName.exists()) {
+					srcFileHocrFileName = new File(originalXmlFile);
+				} else {
+					originalXmlFile = zipFileName;
+					xmlFileName += FileType.ZIP.getExtensionWithDot();
+				}
 				File destFileHocrFileName = new File(xmlFileName);
 				logger.info("srcFileHocrFileName : " + srcFileHocrFileName);
 				logger.info("destFileHocrFileName : " + destFileHocrFileName);
@@ -2131,19 +2180,21 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (batch.getBatchClassName().contains(IUtilCommonConstants.TESSERACT_MAIL_ROOM_NAME)) {
 			isTesseractBatch = true;
 		}
+
 		String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TESSERACT_HOCR_PLUGIN,
 				TesseractVersionProperty.TESSERACT_VERSIONS);
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		outputFilePath = actualFolderLocation + outputFileName;
-
+		String outputFilePathLocal = null;
 		if (null != xmlDocuments) {
 			for (Document document : xmlDocuments) {
 				List<Page> listOfPages = document.getPages().getPage();
 				if (null != listOfPages) {
 					for (Page page : listOfPages) {
-						hOCRGenerationUsingThreadpool(batchInstanceThread, batchInstanceIdentifier, actualFolderLocation, outputFilePath,
-								isTesseractBatch, tesseractVersion, page);
+						outputFilePathLocal = outputFilePath + page.getIdentifier();
+						hOCRGenerationUsingThreadpool(batchInstanceThread, batchInstanceIdentifier, actualFolderLocation,
+								outputFilePathLocal, isTesseractBatch, tesseractVersion, page);
 					}
 				}
 			}
@@ -2152,18 +2203,13 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				batchInstanceThread.execute();
 				logger.info("HOCRgenerated succussfully for all pages.");
 			} catch (DCMAApplicationException dcmae) {
-				logger.error("Error while genmerating xml from html using threadpool");
+				logger.error("Error while genmerating hOCR from html using threadpool");
 				batchInstanceThread.remove();
-				throw new DCMAApplicationException("Error while genmerating xml from html using threadpool ." + dcmae.getMessage(),
+				throw new DCMAApplicationException("Error while genmerating hOCR from html using threadpool ." + dcmae.getMessage(),
 						dcmae);
 			}
 		}
 
-		try {
-			FileUtils.forceDelete(new File(outputFilePath));
-		} catch (IOException e) {
-			logger.info("Deleting the temp file." + e.getMessage());
-		}
 	}
 
 	private void hOCRGenerationUsingThreadpool(final BatchInstanceThread batchInstanceThread, final String batchInstanceIdentifier,
@@ -2186,14 +2232,15 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				hocrPageList.add(hocrPage);
 				hocrFileName = page.getHocrFileName();
 				pathOfHOCRFile = actualFolderLocation + hocrFileName;
+				logger.info("Creating hOCR for page : " + pageID);
 				try {
-					if (isTesseractBatch
-							&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
-						XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-						OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation);
-					} else {
-						XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-					}
+					// if (isTesseractBatch
+					// && tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+					XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+					OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageID);
+					// } else {
+					// XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+					// }
 					inputStream = new FileInputStream(outputFilePath);
 					org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
 					NodeList titleNodeList = doc.getElementsByTagName("title");
@@ -2272,6 +2319,13 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				}
 
 				createHocr(hocrPages, batchInstanceIdentifier, pageID);
+
+				try {
+					logger.info("Deleting temp file : " + outputFilePath);
+					FileUtils.forceDelete(new File(outputFilePath));
+				} catch (IOException e) {
+					logger.info("Deleting the temp file." + e.getMessage());
+				}
 			}
 		});
 	}
@@ -2305,7 +2359,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 					&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 				String actualFolderLocation = new File(outputFilePath).getParent();
-				OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation);
+				OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageName);
 			} else {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 			}
@@ -2776,5 +2830,4 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public String getUploadBatchFolder() {
 		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getUploadBatchFolder();
 	}
-
 }

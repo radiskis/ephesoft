@@ -73,6 +73,11 @@
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/CSV_File_Creation_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/IBM_CM_Plugin.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/XML_To_Database_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Page_Process_Scripting_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Extraction_Scripting_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Automated_Validation_Scripting_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Export_Scripting_Plugin.jpdl.xml</value>
+		<value>/META-INF/dcma-workflows/batch-workflows/plugin-workflows/Document_Assembler_Scripting_Plugin.jpdl.xml</value>
 		
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Automated_Validation_Module.jpdl.xml</value>
 		<value>/META-INF/dcma-workflows/batch-workflows/module-workflows/Document_Assembler_Module.jpdl.xml</value>

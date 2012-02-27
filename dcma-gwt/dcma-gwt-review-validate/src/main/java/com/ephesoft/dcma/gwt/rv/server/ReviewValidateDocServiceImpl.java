@@ -37,7 +37,6 @@ package com.ephesoft.dcma.gwt.rv.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,16 +46,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.core.io.ClassPathResource;
-
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.schema.Column;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.DataTable;
@@ -75,6 +70,7 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchInstance;
@@ -104,16 +100,13 @@ import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
 import com.ephesoft.dcma.script.service.ScriptService;
 import com.ephesoft.dcma.tablefinder.service.TableFinderService;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
 public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet implements ReviewValidateDocService {
 
 	private static final long serialVersionUID = 440658407072287974L;
-
-	private static final String META_INF = "META-INF";
-
-	private static final String PROPERTY_FILE_NAME = "application.properties";
 
 	private static final String LIST_VIEW = "dropdown_list";
 
@@ -128,6 +121,16 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	private static final String FIELD_VALUE_CHANGE_SCRIPT_NAME = "field_value_change_script_name";
 
 	private static final String DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE = "ScriptFieldValueChange";
+
+	private static final String UPDATE_INTERVAL = "update_interval";
+	
+	private static final String PRELOADED_IMAGE_COUNT = "preloaded_image_count";
+
+	private static String updateInterval = null;
+	
+	private static String preloadedImageCount = null;
+	
+	private static String EMPTY_STRING = "";
 
 	@Override
 	public BatchDTO getHighestPriortyBatch() {
@@ -169,6 +172,22 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
 		String fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
+		if (updateInterval == null) {
+			try {
+				ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+				updateInterval = applicationConfigProperties.getProperty(UPDATE_INTERVAL);
+			} catch (IOException e) {
+
+			}
+		}
+		if (preloadedImageCount == null) {
+			try {
+				ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+				preloadedImageCount = applicationConfigProperties.getProperty(PRELOADED_IMAGE_COUNT);
+			} catch (IOException e) {
+
+			}
+		}
 		if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
 			dimensionsForPopUp = new HashMap<String, String>();
 			urlAndShortcutMap = new LinkedHashMap<String, String>();
@@ -177,23 +196,11 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					dimensionsForPopUp, urlAndTitleMap);
 		}
 
-		switch (batchInstance.getStatus()) {
-			case READY_FOR_REVIEW:
-				batch.setBatchStatus(BatchStatus.READY_FOR_REVIEW);
-				break;
-			case READY_FOR_VALIDATION:
-				batch.setBatchStatus(BatchStatus.READY_FOR_VALIDATION);
-				break;
-			case RUNNING:
-				batch.setBatchStatus(BatchStatus.RUNNING);
-				break;
-			default:
-				break;
-		}
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
+		BatchInstanceStatus batchInstanceStatus = batchInstance.getStatus();
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
 				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap,
-				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension);
+				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension, updateInterval, preloadedImageCount, batchInstanceStatus);
 	}
 
 	private void getPropertiesOfExternalApplication(PluginPropertiesService pluginPropertiesService, String batchInstanceIdentifier,
@@ -252,22 +259,6 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public BatchStatus updateBatch(Batch batch) {
-		WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
-		return workflowService.updateBatch(batch, getUserName());
-		// BatchStatus returnStatus = workflowService.updateBatch(batch, getUserName());
-		// return returnStatus;
-	}
-
-	@Override
-	public BatchStatus signalWorkflow(Batch batch) {
-		WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
-		return workflowService.updateBatchAndSignalWorkflow(batch, getUserName());
-		// BatchStatus returnStatus = workflowService.updateBatchAndSignalWorkflow(batch, getUserName());
-		// return returnStatus;
-	}
-
-	@Override
 	public List<DocumentTypeDBBean> getDocTypeByBatchInstanceID(String batchInstanceID) {
 		// DocumentTypeService documentTypeService =
 		// this.getSingleBeanOfType(DocumentTypeService.class);
@@ -310,50 +301,15 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	@Override
 	public BatchDTO mergeDocument(Batch batch, String documentId, String documentIdToBeMerged) {
-		BatchDTO batchDTO = null;
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
+		batchSchemaService.updateBatch(batch);
+		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		try {
-			batchSchemaService.updateBatch(batch);
-			Batch rtbatch = batchSchemaService.mergeDocuments(batch.getBatchInstanceIdentifier(), documentId, documentIdToBeMerged);
-			URL batchURL = batchSchemaService.getBatchContextURL(rtbatch.getBatchInstanceIdentifier());
-			PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
-					BatchInstancePluginPropertiesService.class);
-			String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
-			String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
-					ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
-
-			String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
-
-			String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
-					ValidateProperties.FUZZY_SEARCH_SWITCH);
-			String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.SUGGESTION_BOX_SWITCH);
-			String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
-			Map<String, String> urlAndShortcutMap = null;
-			Map<String, String> dimensionsForPopUp = null;
-			Map<String, String> urlAndTitleMap = null;
-			String fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
-			String fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-					VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
-			if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
-				dimensionsForPopUp = new HashMap<String, String>();
-				urlAndShortcutMap = new LinkedHashMap<String, String>();
-				urlAndTitleMap = new LinkedHashMap<String, String>();
-				getPropertiesOfExternalApplication(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
-						dimensionsForPopUp, urlAndTitleMap);
-			}
-
-			batchDTO = new BatchDTO(rtbatch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch,
-					fuzzySearchSwitch, suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap,
-					dimensionsForPopUp, urlAndTitleMap, fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension);
-
+			batchSchemaService.mergeDocuments(batchInstanceIdentifier, documentId, documentIdToBeMerged);
 		} catch (DCMAApplicationException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
-		return batchDTO;
+		return getBatch(batchInstanceIdentifier);
 	}
 
 	@Override
@@ -382,14 +338,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			dDocFieldType.setOverlayedImageFileName(null);
 			dDocFieldType.setPage(null);
 			dDocFieldType.setType(fieldType.getDataType().name());
-			dDocFieldType.setValue(null);
+			dDocFieldType.setValue(EMPTY_STRING);
 			dDocFieldType.setFieldOrderNumber(fieldType.getFieldOrderNumber());
 			dDocFieldType.setFieldValueOptionList(fieldType.getFieldOptionValueList());
 			documentLevelField.add(dDocFieldType);
 		}
 		documentType.setDocumentLevelFields(documentLevelFields);
 		documentType.setConfidence(0);
-		documentType.setErrorMessage("");
+		documentType.setErrorMessage(EMPTY_STRING);
 		return documentType;
 	}
 
@@ -547,7 +503,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		int rowCount = 0;
 		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		rowCount = batchClassService.getCount(statusList, null, allBatchClassByUserRoles);
+		rowCount = batchClassService.getCount(statusList, null, allBatchClassByUserRoles, getUserName());
 		return rowCount;
 	}
 
@@ -618,9 +574,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public void saveBatch(BatchDTO batchDTO) {
+	public void saveBatch(Batch batch) {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batchDTO.getBatch());
+		batchSchemaService.updateBatch(batch);
 	}
 
 	@Override
@@ -663,30 +619,17 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	@Override
 	public String getDefaultDocTypeView() {
-		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
 		String default_view = null;
-		InputStream propertyInStream = null;
 		try {
-			propertyInStream = new ClassPathResource(filePath).getInputStream();
-			Properties properties = new Properties();
-			properties.load(propertyInStream);
-			String docView = properties.getProperty(DOCUMENT_DEFAULT_VIEW_PROPERTY_KEY);
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			String docView = applicationConfigProperties.getProperty(DOCUMENT_DEFAULT_VIEW_PROPERTY_KEY);
 			if (docView == null) {
 				default_view = LIST_VIEW;
 			} else {
 				default_view = docView;
 			}
-
 		} catch (IOException e) {
 			default_view = LIST_VIEW;
-		} finally {
-			try {
-				if (propertyInStream != null) {
-					propertyInStream.close();
-				}
-			} catch (IOException ioe) {
-
-			}
 		}
 		return default_view;
 	}
@@ -962,27 +905,16 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	private String getDynamicFunctionKeyScriptName() {
-		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
+
 		String scriptName = null;
-		InputStream propertyInStream = null;
 		try {
-			propertyInStream = new ClassPathResource(filePath).getInputStream();
-			Properties properties = new Properties();
-			properties.load(propertyInStream);
-			scriptName = properties.getProperty(DYNAMIC_FUNCTION_KEY_SCRIPT_NAME);
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			scriptName = applicationConfigProperties.getProperty(DYNAMIC_FUNCTION_KEY_SCRIPT_NAME);
 			if (scriptName == null) {
 				scriptName = SCRIPT_TEST;
 			}
 		} catch (IOException e) {
 			scriptName = SCRIPT_TEST;
-		} finally {
-			try {
-				if (propertyInStream != null) {
-					propertyInStream.close();
-				}
-			} catch (IOException ioe) {
-
-			}
 		}
 		return scriptName;
 	}
@@ -1301,39 +1233,27 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		batchSchemaService.updateBatch(batch);
-		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
+		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
+		BatchInstanceID batchInstanceID = new BatchInstanceID(batchInstanceIdentifier);
 		String nameOfPluginScript = getFieldValueChangeScriptName();
 		try {
 			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, document.getIdentifier(), fieldName);
 		} catch (DCMAException e) {
 			throw new GWTException(e.getMessage());
 		}
-		return getBatch(batch.getBatchInstanceIdentifier());
+		return getBatch(batchInstanceIdentifier);
 	}
 
 	private String getFieldValueChangeScriptName() {
-
-		String filePath = META_INF + File.separator + PROPERTY_FILE_NAME;
 		String scriptName = null;
-		InputStream propertyInStream = null;
 		try {
-			propertyInStream = new ClassPathResource(filePath).getInputStream();
-			Properties properties = new Properties();
-			properties.load(propertyInStream);
-			scriptName = properties.getProperty(FIELD_VALUE_CHANGE_SCRIPT_NAME);
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			scriptName = applicationConfigProperties.getProperty(FIELD_VALUE_CHANGE_SCRIPT_NAME);
 			if (scriptName == null) {
 				scriptName = DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE;
 			}
 		} catch (IOException e) {
 			scriptName = DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE;
-		} finally {
-			try {
-				if (propertyInStream != null) {
-					propertyInStream.close();
-				}
-			} catch (IOException ioe) {
-
-			}
 		}
 		return scriptName;
 	}
@@ -1346,5 +1266,24 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	@Override
 	public String getEncodedString(String toEncodeString) {
 		return SecurityTokenHandler.getEncodedString(toEncodeString);
+	}
+
+	@Override
+	public void signalWorkflow(Batch batch) {
+		saveBatch(batch);
+		WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
+		workflowService.signalWorkflow(batch.getBatchInstanceIdentifier(), getUserName());
+	}
+
+	@Override
+	public String getEncodedStringForXMLPath(final String pathOfBatchXml) {
+		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
+		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
+		log.info("Zipped Batch XML switch is:" + isZipSwitchOn);
+		String pathOfBatchXmlLocal = pathOfBatchXml + ICommonConstants.UNDERSCORE_BATCH_XML;
+		if (isZipSwitchOn && FileUtils.isZipFileExists(pathOfBatchXmlLocal)) {
+			pathOfBatchXmlLocal = pathOfBatchXml + ICommonConstants.UNDERSCORE_BATCH_XML_ZIP;
+		}
+		return SecurityTokenHandler.getEncodedString(pathOfBatchXmlLocal);
 	}
 }

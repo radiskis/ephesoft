@@ -88,7 +88,7 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 	 * @param maxFilesProcessedPerLoop
 	 */
 	public MultiPageExecutor(BatchInstanceThread batchInstanceThread, final String[] pages11, final String gsCmdParam,
-			final String ghostScriptCommand, final Integer maxFilesProcessedPerLoop) {
+			final String ghostScriptCommand, final Integer maxFilesProcessedPerLoop, final String documentIdInt) {
 		if (pages11 != null && pages11.length > 0) {
 			this.pages = new String[pages11.length];
 			this.pages = pages11.clone();
@@ -111,12 +111,19 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 					String tempFilePath = pages[noOfPages - 1].substring(0, pages[noOfPages - 1].lastIndexOf('.') == -1
 							? pages[noOfPages].length() : pages[noOfPages - 1].lastIndexOf('.'));
 					boolean isLastPage = false;
+					boolean isDBatchAddedToGSCmd = false;
 					while (!isLastPage) {
 						ghostScriptCommandList.clear();
 						LOGGER.info("creating ghostscript command for multipage pdf creation.");
 						int maxNoOfPages = counter * maxFilesProcessedPerLoop;
 						for (String param : gsCmdParams) {
+							if (!isDBatchAddedToGSCmd && param.trim().equalsIgnoreCase(GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS)) {
+								isDBatchAddedToGSCmd = true;
+							}
 							ghostScriptCommandList.add(param);
+						}
+						if (!isDBatchAddedToGSCmd) {
+							ghostScriptCommandList.add(GHOST_SCRIPT_COMMAND_OUTPUT_PARAMETERS);
 						}
 						if (maxNoOfPages >= noOfPages - 1) {
 							if (OSUtil.isWindows()) {
@@ -128,7 +135,7 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 
 							isLastPage = true;
 						} else {
-							nextTempFilePath = tempFilePath + '_' + counter + FileType.PDF.getExtensionWithDot();
+							nextTempFilePath = tempFilePath + '_' + counter + documentIdInt + FileType.PDF.getExtensionWithDot();
 							outputFileName = nextTempFilePath.substring(nextTempFilePath.lastIndexOf(File.separator) + 1);
 							if (OSUtil.isWindows()) {
 								ghostScriptCommandList.add(DOUBLE_QUOTES + GHOST_SCRIPT_COMMAND_OUTPUT_FILE_PARAM + outputFileName
@@ -179,7 +186,7 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 								line = input.readLine();
 								LOGGER.info(line);
 							} while (line != null);
-							int exitValue = process.waitFor();
+							int exitValue = process.exitValue();
 							if (exitValue != 0) {
 								LOGGER.error("Process exited with an invalid exit value : " + exitValue);
 								setDcmaApplicationException(new DCMAApplicationException(
@@ -190,10 +197,6 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 								fileToBeDeleted.delete();
 							}
 						} catch (IOException e) {
-							LOGGER.error("Error occured while running command for multipage pdf creation." + e.getMessage(), e);
-							setDcmaApplicationException(new DCMAApplicationException(
-									"Error occured while running command for multipage pdf creation." + e.getMessage(), e));
-						} catch (InterruptedException e) {
 							LOGGER.error("Error occured while running command for multipage pdf creation." + e.getMessage(), e);
 							setDcmaApplicationException(new DCMAApplicationException(
 									"Error occured while running command for multipage pdf creation." + e.getMessage(), e));

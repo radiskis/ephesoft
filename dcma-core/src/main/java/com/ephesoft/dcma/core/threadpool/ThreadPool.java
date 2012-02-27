@@ -55,18 +55,18 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	/**
 	 * Maximum number of threads that can be added to the pool.
 	 */
-	private static final int maxPoolSize = Integer.MAX_VALUE;
+	private static final int MAX_POOL_SIZE = Integer.MAX_VALUE;
 
 	/**
 	 * Maximum number of threads that can be executed simultaneously.
 	 */
-	private static final int corePoolSize = 5;
+	private static final int CORE_POOL_SIZE = 5;
 
 	/**
 	 * When the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks
 	 * before terminating.
 	 */
-	private static final long keepAliveTime = 15000L;
+	private static final long KEEP_ALIVE_TIME = 15000L;
 
 	private static final String META_INF = "META-INF";
 
@@ -77,16 +77,16 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(ThreadPool.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
 
 	private static final String FOLDER_NAME = "dcma-core";
 
 	/**
 	 * Object of this class.
 	 */
-	private static ThreadPool threadPool;
+	private static ThreadPool threadPoolInstance;
 
-	private static final Map<String, BatchInstanceThread> batchInstanceThreadMap = new HashMap<String, BatchInstanceThread>();
+	private static final Map<String, BatchInstanceThread> BATCH_INSTANCE_THREAD_MAP = new HashMap<String, BatchInstanceThread>();
 
 	/**
 	 * An object used for synchronization.
@@ -97,7 +97,7 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * Creating a singleton class.
 	 */
 	private ThreadPool() {
-		super(corePoolSize, maxPoolSize, keepAliveTime, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+		super(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		String filePath = META_INF + File.separator + FOLDER_NAME + File.separator + FILE_NAME + ".properties";
 		InputStream propertyInStream = null;
 		try {
@@ -107,14 +107,14 @@ public final class ThreadPool extends ThreadPoolExecutor {
 			int corePoolSize = Integer.parseInt((String) properties.get(THREAD_SIZE));
 			super.setCorePoolSize(corePoolSize);
 		} catch (Exception e) {
-			logger.info("Could not set thread pool size. Using default value of 5");
-		} finally {
+			LOG.info("Could not set thread pool size. Using default value of 5");
+        } finally {
 			try {
 				if (propertyInStream != null) {
 					propertyInStream.close();
 				}
 			} catch (IOException ioe) {
-				logger.info("Could not close property input stream in threadpool.");
+				LOG.info("Could not close property input stream in threadpool.");
 			}
 		}
 
@@ -125,13 +125,13 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * 
 	 * @param r the runnable task to be added.
 	 */
-	public void addTask(Runnable r) throws RejectedExecutionException {
-		super.execute(r);
+	public void addTask(Runnable runnable) throws RejectedExecutionException {
+		super.execute(runnable);
 	}
 
 	public void putBatchInstanceThreadMap(String batchInstanceId, BatchInstanceThread batchInstanceThread) {
 		if (batchInstanceId != null && batchInstanceThread != null) {
-			batchInstanceThreadMap.put(batchInstanceId, batchInstanceThread);
+			BATCH_INSTANCE_THREAD_MAP.put(batchInstanceId, batchInstanceThread);
 		}
 	}
 
@@ -140,8 +140,8 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * 
 	 * @param r the runnable task to be added.
 	 */
-	public boolean removeTask(Runnable r) {
-		return super.remove(r);
+	public boolean removeTask(Runnable runnable) {
+		return super.remove(runnable);
 	}
 
 	/**
@@ -150,27 +150,28 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * @return the thread instance.
 	 */
 	public static synchronized ThreadPool getInstance() {
-		if (threadPool == null) {
+		if (threadPoolInstance == null) {
 			synchronized (object) {
-				if (threadPool == null) {
-					threadPool = new ThreadPool();
+				if (threadPoolInstance == null) {
+					threadPoolInstance = new ThreadPool();
 				}
 			}
 
 		}
-		return threadPool;
+		return threadPoolInstance;
 	}
 
 	/**
 	 * Generates the thread pool results.
 	 */
 	public void generateSystemReport() {
-		logger.info("------------------------------------------------------" + "Active count " + super.getActiveCount()
+		LOG.info("------------------------------------------------------" + "Active count " + super.getActiveCount()
 				+ "-----------------------------------------------");
-		logger.info("------------------------------------------------------" + "Completed count "
-				+ super.getCompletedTaskCount() + "-----------------------------------------------");
-		logger.info("------------------------------------------------------" + "Task Count " + super.getTaskCount()
+		LOG.info("------------------------------------------------------" + "Completed count " + super.getCompletedTaskCount()
 				+ "-----------------------------------------------");
+		LOG.info("------------------------------------------------------" + "Task Count " + super.getTaskCount()
+				+ "-----------------------------------------------\n");
+
 	}
 
 	/**
@@ -179,33 +180,33 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * @return
 	 */
 	public static BatchInstanceThread getBatchInstanceThreadList(String batchInstanceId) {
-		return batchInstanceThreadMap.get(batchInstanceId);
+		return BATCH_INSTANCE_THREAD_MAP.get(batchInstanceId);
 	}
 
 	/**
 	 * Processing to be done after the thread has finished execution.
 	 */
 	@Override
-	protected void afterExecute(Runnable r, Throwable t) {
-		if (r instanceof AbstractRunnable) {
-			AbstractRunnable th = (AbstractRunnable) r;
-			th.setCompleted(true);
+	protected void afterExecute(Runnable runnable, Throwable throwable) {
+		if (runnable instanceof AbstractRunnable) {
+			AbstractRunnable abstractRunnable = (AbstractRunnable) runnable;
+			abstractRunnable.setCompleted(true);
 		}
-		super.afterExecute(r, t);
+		super.afterExecute(runnable, throwable);
 	}
 
 	@Override
-	protected void beforeExecute(Thread t, Runnable r) {
-		if (r instanceof AbstractRunnable) {
-			AbstractRunnable th = (AbstractRunnable) r;
-			th.setStarted(true);
+	protected void beforeExecute(Thread thread, Runnable runnable) {
+		if (runnable instanceof AbstractRunnable) {
+			AbstractRunnable abstractRunnable = (AbstractRunnable) runnable;
+			abstractRunnable.setStarted(true);
 		}
-		super.beforeExecute(t, r);
+		super.beforeExecute(thread, runnable);
 	}
 
 	public void removeBatchInstanceThreadMap(String batchInstanceId) {
 		if (batchInstanceId != null) {
-			batchInstanceThreadMap.remove(batchInstanceId);
+			BATCH_INSTANCE_THREAD_MAP.remove(batchInstanceId);
 		}
 	}
 }

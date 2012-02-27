@@ -69,5 +69,9 @@ public interface BatchInstanceManagementServiceAsync extends DCMARemoteServiceAs
 	void updateBatchInstanceStatus(String identifier, BatchInstanceStatus restartInProgress, AsyncCallback<Results> asyncCallback);
 
 	void deleteBatchFolders(String identifier, AsyncCallback<Results> asyncCallback);
+	
+	void clearCurrentUser(String batchInstanceIdentifier, AsyncCallback<Void> asyncCallback);
+	
+	void restartAllBatchInstances(AsyncCallback<Void> asyncCallback);
 
 }

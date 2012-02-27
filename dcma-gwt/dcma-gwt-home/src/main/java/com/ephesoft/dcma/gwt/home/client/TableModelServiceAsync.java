@@ -44,7 +44,7 @@ import com.ephesoft.dcma.gwt.core.shared.DataFilter;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * TableModelService is a service interface that provides data for displaying in a GWT AdvancedTable widget. The implementing class
+ * TableModelServiceAsync is a service interface that asynchronously provides data for displaying in a GWT AdvancedTable widget. The implementing class
  * should provide paging, filtering and sorting as this interface specifies.
  * 
  * Life-cycle: 1) getColumns() is called by the client to populate the table columns 2) getRowsCount() is called by the client to
@@ -60,13 +60,42 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface TableModelServiceAsync extends DCMARemoteServiceAsync {
 
+	/**
+	 * API to get total Rows Count for the given data filters asynchronously.
+	 * @param filters {@link DataFilter}[ ]
+	 * @param callback {@link AsyncCallback} < {@link Integer} >
+	 */
 	void getRowsCount(DataFilter[] filters, AsyncCallback<Integer> callback);
 
-	void getRows(int startRow, int rowsCount, DataFilter[] filters, Order order, AsyncCallback<List<BatchInstanceDTO>> callback);
+	/**
+	 * API to get Rows of the table in the form of BatchInstanceDTO for the given batch and filters asynchronously.
+	 * @param batchNameToBeSearched {@link String}
+	 * @param startRow int 
+	 * @param rowsCount int
+	 * @param filters {@link DataFilter}[ ] 
+	 * @param order {@link Order}
+	 * @param callback {@link AsyncCallback} < List< {@link BatchInstanceDTO}> >
+	 */
+	void getRows(String batchNameToBeSearched, int startRow, int rowsCount, DataFilter[] filters, Order order,
+			AsyncCallback<List<BatchInstanceDTO>> callback);
 
+	/**
+	 * API to get Individual Row Counts for each batch asynchronously.
+	 * @param callback {@link AsyncCallback} < {@link Integer}[ ]  >
+	 */
 	void getIndividualRowCounts(AsyncCallback<Integer[]> asyncCallback);
 
+	/**
+	 * API to get Next Batch Instance asynchronously.
+	 * @param callback {@link AsyncCallback} < {@link String} >
+	 */
 	void getNextBatchInstance(AsyncCallback<String> callback);
 
-	void getBatchInstanceDTOs(final String batchName, final DataFilter[] filters, AsyncCallback<List<BatchInstanceDTO>> asyncCallback);
+	/**
+	 * API to get Rows Count of a batch passing the given data filters asynchronously.
+	 * @param batchName {@link String}
+	 * @param filters {@link DataFilter}[ ] 
+	 * @param callback {@link AsyncCallback} < {@link Integer} >
+	 */
+	void getRowsCount(String batchName, DataFilter[] filters, AsyncCallback<Integer> callback);
 }

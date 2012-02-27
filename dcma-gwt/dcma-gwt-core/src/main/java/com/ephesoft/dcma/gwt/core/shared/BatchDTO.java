@@ -39,15 +39,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.util.ReverseIterable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class BatchDTO implements IsSerializable {
 
 	private Batch batch;
+
+	private BatchInstanceStatus batchInstanceStatus;
 
 	private String baseHTTPUrl;
 
@@ -61,6 +63,8 @@ public class BatchDTO implements IsSerializable {
 	private Map<String, String> urlAndTitleMap = null;
 	private String fuzzySearchPopUpXDimension = "500";
 	private String fuzzySearchPopUpYDimension = "350";
+	private Integer realUpdateInterval = 5;
+	private Integer preloadedImageCount = 3;
 
 	private static final String PIXELS = "px";
 
@@ -75,16 +79,18 @@ public class BatchDTO implements IsSerializable {
 	public BatchDTO(Batch batch, String baseHTTPUrl, String isValidationScriptEnabled, String isFieldValueChangeScriptEnabled,
 			String isFuzzySearchEnabled, String suggestionBoxSwitchState, String externalApplicationSwitchState,
 			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp, Map<String, String> urlAndTitleMap,
-			String fuzzySearchPopUpXDimension, String fuzzySearchPopUpYDimension) {
+			String fuzzySearchPopUpXDimension, String fuzzySearchPopUpYDimension, String updateIntervalInStringForm,
+			String preloadedImageCountString, BatchInstanceStatus batchInstanceStatus) {
 		this.batch = batch;
 		this.baseHTTPUrl = baseHTTPUrl;
+		this.batchInstanceStatus = batchInstanceStatus;
 		if (null != isValidationScriptEnabled) {
 			setIsValidationScriptEnabled(isValidationScriptEnabled);
 		}
-		if (null != fuzzySearchSwitchState) {
+		if (null != isFuzzySearchEnabled) {
 			setFuzzySearchSwitchState(isFuzzySearchEnabled);
 		}
-		if (null != fieldValueChangeScriptSwitchState) {
+		if (null != isFieldValueChangeScriptEnabled) {
 			setFieldValueChangeScriptSwitchState(isFieldValueChangeScriptEnabled);
 		}
 		if (null != suggestionBoxSwitchState) {
@@ -106,6 +112,24 @@ public class BatchDTO implements IsSerializable {
 			try {
 				if (Integer.parseInt(fuzzySearchPopUpYDimension) > 0) {
 					setFuzzySearchPopUpYDimension(fuzzySearchPopUpYDimension + PIXELS);
+				}
+			} catch (Exception e) {
+			}
+		}
+		if (null != updateIntervalInStringForm) {
+			try {
+				int updateInterval = Integer.parseInt(updateIntervalInStringForm);
+				if (updateInterval > 0) {
+					setRealUpdateInterval(updateInterval);
+				}
+			} catch (Exception e) {
+			}
+		}
+		if (null != preloadedImageCountString) {
+			try {
+				int preloadedImageCount = Integer.parseInt(preloadedImageCountString);
+				if (preloadedImageCount > 0) {
+					setPreloadedImageCount(preloadedImageCount);
 				}
 			} catch (Exception e) {
 			}
@@ -223,7 +247,7 @@ public class BatchDTO implements IsSerializable {
 	}
 
 	public boolean isErrorContained(Document document) {
-		switch (batch.getBatchStatus()) {
+		switch (batchInstanceStatus) {
 			case READY_FOR_REVIEW:
 				return !document.isReviewed();
 			case READY_FOR_VALIDATION:
@@ -243,7 +267,7 @@ public class BatchDTO implements IsSerializable {
 	public boolean isBatchValidated() {
 		boolean valid = true;
 		List<Document> documents = batch.getDocuments().getDocument();
-		if (batch.getBatchStatus().equals(BatchStatus.READY_FOR_REVIEW)) {
+		if (batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
 			for (Document document : documents) {
 				if (!document.isReviewed()) {
 					valid = false;
@@ -259,6 +283,14 @@ public class BatchDTO implements IsSerializable {
 			}
 		}
 		return valid;
+	}
+
+	public BatchInstanceStatus getBatchInstanceStatus() {
+		return batchInstanceStatus;
+	}
+
+	public void setBatchInstanceStatus(BatchInstanceStatus batchInstanceStatus) {
+		this.batchInstanceStatus = batchInstanceStatus;
 	}
 
 	public void setFuzzySearchSwitchState(String fuzzySearchSwitchState) {
@@ -323,5 +355,21 @@ public class BatchDTO implements IsSerializable {
 
 	public void setFuzzySearchPopUpYDimension(String fuzzySearchPopUpYDimension) {
 		this.fuzzySearchPopUpYDimension = fuzzySearchPopUpYDimension;
+	}
+
+	public void setRealUpdateInterval(Integer realUpdateInterval) {
+		this.realUpdateInterval = realUpdateInterval;
+	}
+
+	public Integer getRealUpdateInterval() {
+		return realUpdateInterval;
+	}
+	
+	public Integer getPreloadedImageCount() {
+		return preloadedImageCount;
+	}
+	
+	public void setPreloadedImageCount(Integer preloadedImageCount) {
+		this.preloadedImageCount = preloadedImageCount;
 	}
 }

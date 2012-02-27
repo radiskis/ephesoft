@@ -51,7 +51,7 @@ public interface XmlToDatabaseService {
 	/**
 	 * uses the {@link BatchInstanceID} to save the DocumentLevelField to the database.
 	 * @param batchInstanceID {@link BatchInstanceID}
-	 * @param pluginWorkflow
+	 * @param pluginWorkflow {@link String}
 	 * @throws DCMAException
 	 */
 	void saveXMLToDatabase(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;

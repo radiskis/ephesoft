@@ -1,9 +1,16 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:rv='urn:import:com.ephesoft.dcma.gwt.rv.client.view'>
-
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:rv='urn:import:com.ephesoft.dcma.gwt.rv.client.view' xmlns:core='urn:import:com.ephesoft.dcma.gwt.core.client.ui'>
+<g:DockLayoutPanel unit="PCT">
+<g:north size="1">
+<core:RotatableImage ui:field="tempImage"></core:RotatableImage>
+</g:north>
+<g:center>
 	<g:ScrollPanel ui:field="scrollPanel">
 		<g:FocusPanel width='98%' height='99%'>
 			<g:Tree ui:field="docTree" />
 		</g:FocusPanel>
 	</g:ScrollPanel>
+</g:center>
+</g:DockLayoutPanel>
+	
 </ui:UiBinder>

@@ -6,7 +6,7 @@
 		<transition to="set-status-ready-for-validation"/>
 	</start>
 
-	<java continue="async" expr="#{batchInstanceService}" g="16,88,236,60" method="updateBatchInstanceStatus" name="set-status-ready-for-validation">
+	<java continue="async" expr="#{workflowService}" g="16,88,236,60" method="updateBatchInstanceStatusForReviewAndValidation" name="set-status-ready-for-validation">
 		<arg>
 			<object expr="#{batchInstanceID}"/>
 		</arg>
@@ -16,7 +16,7 @@
 		<transition to="validate-document"/>
 	</java>
 	
-	<state continue="async" g="79,179,167,68" name="validate-document">
+	<state g="79,179,167,68" name="validate-document">
 		<transition to="Workflow_Status_Running"/>
 	</state>
 

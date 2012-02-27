@@ -124,7 +124,9 @@ var rvConstants = {
 	function_key_shortcuts : "Function Key Shortcuts",
 	title_topPanel_batchName : "BatchName",
 	disclosure_panel_shortcut : "Review Panel Open or Close",
-	review_panel : "Review Panel"
+	review_panel : "Review Panel",
+	save_button_tooltip : "Save(Ctrl + s)",
+	title_topPanel_save_anchor : "Save Batch"
 };
 
 var rvMessages = {
@@ -316,7 +318,9 @@ var rvConstants_tk = {
 	review_panel :	"Gözden Geçirme Paneli",
 	image_zoom_lock : "Kilitleme / Kilidini zum",
 	zoom_locked : "Yakınlaştırma Kilitli",
-	zoom_unlocked : "Yakınlaştırma kilidi"
+	zoom_unlocked : "Yakınlaştırma kilidi",
+	save_button_tooltip : "Sakla(Ctrl + s)",
+	title_topPanel_save_anchor : "Sakla Toplu"
 };
 
 var rvMessages_tk = {

@@ -161,7 +161,7 @@ public class KVFieldCreator implements ICommonConstants {
 	final public void setLocationOrder(final String locationOrder) {
 		this.locationOrder = locationOrder;
 		if (locationOrder == null || locationOrder.isEmpty()) {
-			LOGGER.info("locationOrder is not definedin the specified property file ....");
+			LOGGER.info("locationOrder is not defined in the specified property file ....");
 			throw new DCMABusinessException("locationOrder is not definedin the specified property file ....");
 		}
 		this.locationArr = locationOrder.split(KVFieldCreatorConstants.SEMI_COLON);

@@ -275,7 +275,7 @@ public class TesseractProcessExecutor {
 	private String getTesseractBasePath() throws DCMAApplicationException {
 		String tesseractBasePath = null;
 		try {
-			ApplicationConfigProperties app = new ApplicationConfigProperties();
+			ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
 			tesseractBasePath = app.getProperty(tesseractVersion);
 		} catch (IOException ioe) {
 			LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe.getMessage(), ioe);

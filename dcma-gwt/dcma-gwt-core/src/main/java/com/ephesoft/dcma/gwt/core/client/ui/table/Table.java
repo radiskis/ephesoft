@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.RowSelectionListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
@@ -302,15 +304,29 @@ public class Table extends ResizeComposite {
 	private void setNavigationBar() {
 		navBarTable.getCellFormatter().setWidth(0, 1, "40%");
 		navBarTable.getCellFormatter().setWidth(0, 2, "15%");
-		navBarTable.getCellFormatter().setWidth(0, 3, "45%");
+		navBarTable.getCellFormatter().setWidth(0, 3, "22%");
+		navBarTable.getCellFormatter().setWidth(0, 4, "23%");
 		Label displayText = new Label(navBar.getCountString());
+		Label searchPageText = new Label(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_go_to_page));
+		Label totalPageCountText = new Label("  /" + navBar.getTotalPageCount());
+		HorizontalPanel searchPagePanel = new HorizontalPanel();
 		displayText.setStyleName(selectionStyle.boldText());
+		searchPageText.setStyleName(selectionStyle.boldText());
+		totalPageCountText.setStyleName(selectionStyle.boldText());
+		searchPagePanel.add(searchPageText);
+		searchPagePanel.add(navBar.getSearchPageTextBox());
+		searchPagePanel.add(totalPageCountText);
+		searchPagePanel.setCellHorizontalAlignment(searchPageText, HasHorizontalAlignment.ALIGN_RIGHT);
+		searchPagePanel.setCellHorizontalAlignment(navBar.getSearchPageTextBox(), HasHorizontalAlignment.ALIGN_RIGHT);
+		searchPagePanel.setCellHorizontalAlignment(totalPageCountText, HasHorizontalAlignment.ALIGN_RIGHT);
 		if (this.navBar.getListner() != null) {
 			navBarTable.setWidget(0, 2, navBar);
 			navBarTable.getCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_RIGHT);
+			navBarTable.setWidget(0, 3, searchPagePanel);
 		}
-		navBarTable.setWidget(0, 3, displayText);
+		navBarTable.setWidget(0, 4, displayText);
 		navBarTable.getCellFormatter().setHorizontalAlignment(0, 3, HasHorizontalAlignment.ALIGN_RIGHT);
+		navBarTable.getCellFormatter().setHorizontalAlignment(0, 4, HasHorizontalAlignment.ALIGN_RIGHT);
 	}
 
 	public String getSelectedRowId() {

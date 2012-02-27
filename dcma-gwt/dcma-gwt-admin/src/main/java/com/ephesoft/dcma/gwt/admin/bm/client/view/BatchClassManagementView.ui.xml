@@ -135,17 +135,17 @@
 							</g:cell>
 
 							<g:cell width="57%" horizontalAlignment="ALIGN_RIGHT">
-								<g:HorizontalPanel ui:field="rightButtons">
+								<g:HorizontalPanel ui:field="rightButtons" width="26em">
 									<g:cell horizontalAlignment="ALIGN_RIGHT">
 										<g:Button ui:field="sample"></g:Button>
 									</g:cell>
-									<g:cell width="3%">
+									<g:cell width="2%">
 										<g:Label></g:Label>
 									</g:cell>
 									<g:cell horizontalAlignment="ALIGN_RIGHT">
 										<g:Button ui:field="learn"></g:Button>
 									</g:cell>
-									<g:cell width="3%">
+									<g:cell width="2%">
 										<g:Label></g:Label>
 									</g:cell>
 									<g:cell horizontalAlignment="ALIGN_RIGHT">

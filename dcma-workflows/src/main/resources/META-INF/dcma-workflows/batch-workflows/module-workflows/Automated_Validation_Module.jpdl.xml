@@ -8,10 +8,10 @@
 
 	<sub-process continue="async" g="40,111,207,59" name="Automated_Regex_Validation_Plugin" sub-process-key="Automated_Regex_Validation_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Scripting_Plugin"/>
+		<transition to="Automated_Validation_Scripting_Plugin"/>
 	</sub-process>
 	
-	<sub-process continue="async" g="81,340,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+	<sub-process continue="async" g="81,340,201,59" name="Automated_Validation_Scripting_Plugin" sub-process-key="Automated_Validation_Scripting_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
 		<parameter-in subvar="backUpFileName" expr="Automated_Validation_Module_Scripting_Plugin"/>
 		<parameter-in subvar="scriptName" expr="ScriptAutomaticValidation"/>

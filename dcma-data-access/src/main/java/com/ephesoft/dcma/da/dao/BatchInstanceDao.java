@@ -106,10 +106,14 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * An api to fetch count of the batch instance table for batch instance status.
 	 * 
-	 * @param filterClauseList List<BatchInstanceFilter>
-	 * @return count of the batch instance present for the batch instance status.
+	 * @param batchName
+	 * @param batchInstanceStatus
+	 * @param userName
+	 * @param priority
+	 * @param userRole
+	 * @return
 	 */
-	int getCount(BatchInstanceStatus batchInstanceStatus, String userName, Set<String> userRole);
+	int getCount(String batchName, BatchInstanceStatus batchInstanceStatus, String userName, BatchPriority priority, Set<String> userRole);
 
 	/**
 	 * An api to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
@@ -156,15 +160,18 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * An api to fetch count of the batch instance table for batch instance status list and batch priority list.
 	 * 
 	 * @param batchInstStatusList List<BatchInstanceStatus>
+	 * @param batchPriorities List<BatchPriority>
+	 * @param currentRole Set<String>
+	 * @param currentUserName String
 	 * @return count of the batch instance present for the batch instance status list and batch priority list.
 	 */
 	int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final Set<String> currentRole);
+			final Set<String> currentRole, final String currentUserName);
 
 	int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final boolean isCurrUsrNotReq, final Set<String> currentRole);
+			final boolean isCurrUsrNotReq, final Set<String> currentRole, final String currentUserName);
 
-	int getAllCount(final Set<String> currentRole);
+	int getAllCount(final String currentUser, final Set<String> currentRole);
 
 	/**
 	 * An api to fetch all the batch instance by BatchPriority.
@@ -320,9 +327,10 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param currentUserRoles Current User Role.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
-	List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
-			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
-			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier);
+	List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String batchNameToBeSearched, List<BatchInstanceStatus> statusList,
+			final int firstResult, final int maxResults, final List<Order> orderList,
+			final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities, String userName,
+			final Set<String> batchClassIdentifier);
 
 	/**
 	 * An api to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
@@ -342,21 +350,23 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param currentUserRoles Current User Role.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
-	List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult,
-			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
-			final List<BatchPriority> batchPriorities, String userName, final Set<String> batchClassIdentifier);
-	
+	List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
+			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
+			String userName, final Set<String> batchClassIdentifier);
+
 	/**
 	 * This API returns the list of running job executing on the server by the server IP.
+	 * 
 	 * @param serverIP
 	 * @return
 	 */
 	List<BatchInstance> getExecutingJobByServerIP(String serverIP);
-	
+
 	/**
 	 * This API returns the list of batch instance on the basis of executing server IP and batch status.
+	 * 
 	 * @param executingServerIP
-	 * @param batchInstanceStatus 
+	 * @param batchInstanceStatus
 	 * @return
 	 */
 	List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP,
@@ -372,4 +382,21 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 */
 	List<BatchInstance> getBatchInstanceListByBatchNameAndStatus(String batchName, BatchInstanceStatus batchStatus, String userName,
 			Set<String> allBatchClassByUserRoles);
+	
+	/**
+	 * This API for clearing the current user for given batch instance identifier.
+	 * 
+	 * @param batchInstanceIdentifier
+	 */
+	void clearCurrentUser(String batchInstanceIdentifier);
+	
+	/**
+	 * This API fetches all the batch instances on the basis of batch status list passed.
+	 * 
+	 * @param batchStatusList List<{@link BatchInstanceStatus}>
+	 * @return List<{@link BatchInstance}>
+	 */
+	List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList);
+	
+	
 }

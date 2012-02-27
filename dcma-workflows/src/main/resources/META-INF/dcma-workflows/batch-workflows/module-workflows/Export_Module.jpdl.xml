@@ -3,11 +3,11 @@
 <process name="Export_Module" xmlns="http://jbpm.org/4.3/jpdl">
 
 	<start g="16,25,80,40">
-		<transition to="Scripting_Plugin" />
+		<transition to="Export_Scripting_Plugin" />
 	</start>
 
-	<sub-process continue="async" g="128,16,201,59" name="Scripting_Plugin"
-		sub-process-key="Scripting_Plugin">
+	<sub-process continue="async" g="128,16,201,59" name="Export_Scripting_Plugin"
+		sub-process-key="Export_Scripting_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<parameter-in expr="Export_Module_Scripting_Plugin"
 			subvar="backUpFileName" />

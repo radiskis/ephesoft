@@ -25,7 +25,7 @@
 
 	<bean id="scriptService" class="com.ephesoft.dcma.script.service.ScriptServiceImpl" />
 
-	<bean id="scriptExecutor" class="com.ephesoft.dcma.script.ScriptExecutor">
+	<bean id="scriptExecutor" class="com.ephesoft.dcma.script.ScriptExecutor" p:parserType="$script{script.parser_type}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.script" />

@@ -33,146 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.mail.service;
 
 import java.io.BufferedOutputStream;
@@ -208,6 +68,7 @@ import com.ephesoft.dcma.core.common.MailMetaData;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 import com.ephesoft.dcma.mail.constants.MailConstants;
+import com.ephesoft.dcma.util.FileUtils;
 import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.pop3.POP3SSLStore;
 
@@ -227,7 +88,8 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		Boolean isSSL = false;
 		String serverType = null;
 		List<CustomMessage> customMessageList = null;
-
+		String errorMsg = configuration.getUserName() + MailConstants.SPACE + configuration.getServerName() + MailConstants.SPACE
+				+ configuration.getServerType() + MailConstants.SPACE + configuration.getFolderName();
 		try {
 			isSSL = configuration.isSSL();
 			serverType = configuration.getServerType();
@@ -237,16 +99,17 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				} else if (serverType.equalsIgnoreCase("imap")) {
 					store = connectWithIMAPSSL(configuration);
 				} else {
-					logger.error("Error in Server Type Configuration, only imap/pop3 is allowed");
-					throw new DCMAApplicationException("Error in Server Type Configuration, only imap/pop3 is allowed");
+					logger.error("Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
+					throw new DCMAApplicationException(
+							"Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
 				}
 
 			} else {
 				store = connectWithNonSSL(configuration);
 			}
 			if (store == null || !store.isConnected()) {
-				logger.error("Not able to establish connection");
-				throw (new DCMAApplicationException("Not able to establish connection"));
+				logger.error("Not able to establish connection with " + errorMsg);
+				throw (new DCMAApplicationException("Not able to establish connection with " + errorMsg));
 			} else {
 				folder = store.getDefaultFolder();
 				folder = folder.getFolder(configuration.getFolderName());
@@ -273,6 +136,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 							cm.setFolderPath(folderPath);
 							cm.setFolderName(folderName);
 							customMessageList.add(cm);
+							folderPath = folderPath + File.separator + MailConstants.DOWNLOAD_FOLDER_NAME;
 							// downloading all attachments....
 							for (int i = 0; i < multipart.getCount(); i++) {
 								Part part = (Part) multipart.getBodyPart(i);
@@ -285,8 +149,9 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Not able to process the mail reading.", e);
-			throw new DCMAApplicationException(e.getMessage(), e);
+			logger.error("Not able to process the mail reading from configuration : " + errorMsg, e);
+			throw new DCMAApplicationException("Not able to process the mail reading from configuration : " + errorMsg
+					+ e.getMessage(), e);
 		} finally {
 			try {
 				if (folder != null) {
@@ -460,10 +325,22 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		String disPosition = part.getDisposition();
 		String fileName = null;
 		fileName = part.getFileName();
+		if (fileName != null) {
+			int extensionIndex = fileName.indexOf('.');
+			extensionIndex = extensionIndex == -1 ? fileName.length() : extensionIndex;
+			File parentFile = new File(folderPath);
+			logger.info("Updating file name if any file with the same name exists. File : " + fileName);
+			fileName = FileUtils.getUpdatedFileNameForDuplicateFile(fileName.substring(0, extensionIndex), parentFile, -1)
+					+ fileName.substring(extensionIndex);
+			logger.info("Updated file name : " + fileName);
+		}
 		if (disPosition != null && disPosition.equalsIgnoreCase(Part.ATTACHMENT)) {
 			File file = new File(folderPath + File.separator + fileName);
 			file.getParentFile().mkdirs();
 			saveEmailAttachment(file, part);
+			// if (file.getName().endsWith(FileType.ZIP.getExtensionWithDot()) && importZipAttachment) {
+			// FileUtils.unzipFile(file, folderPath);
+			// }
 		}
 	}
 

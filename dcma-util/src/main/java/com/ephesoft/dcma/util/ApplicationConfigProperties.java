@@ -47,25 +47,32 @@ public class ApplicationConfigProperties {
 	private static final long serialVersionUID = 1L;
 	private static final String APPLICATION_PROPERTY_NAME = "application";
 	private static final String META_INF = "META-INF";
+	private Properties properties;
+	private static ApplicationConfigProperties applicationConfigProperties = null;
 
-	public String getProperty(String propertyKey) throws IOException {
-		Properties appProperties;
-		appProperties = loadProperties(APPLICATION_PROPERTY_NAME);
-		return appProperties.getProperty(propertyKey);
-	}
-	
-	private final Properties loadProperties(String propertyName) throws IOException {
+	private ApplicationConfigProperties() throws IOException {
 		InputStream propertyInStream = null;
-		Properties properties = new Properties();
+		this.properties = new Properties();
 		try {
-		String filePath = META_INF + File.separator + propertyName + ".properties";
-		propertyInStream = new ClassPathResource(filePath).getInputStream();
-		properties.load(propertyInStream);
+			String filePath = META_INF + File.separator + APPLICATION_PROPERTY_NAME + ".properties";
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
+			this.properties.load(propertyInStream);
 		} finally {
-			if(propertyInStream != null) {
+			if (propertyInStream != null) {
 				propertyInStream.close();
 			}
 		}
-		return properties;
 	}
+
+	public static ApplicationConfigProperties getApplicationConfigProperties() throws IOException {
+		if (applicationConfigProperties == null) {
+			applicationConfigProperties = new ApplicationConfigProperties();
+		}
+		return applicationConfigProperties;
+	}
+
+	public String getProperty(String propertyKey) throws IOException {
+		return applicationConfigProperties.properties.getProperty(propertyKey);
+	}
+
 }

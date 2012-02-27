@@ -50,7 +50,7 @@ public class BatchInstanceThread {
 	/**
 	 * Time duration the thread sleeps before checking if all tasks have completed.
 	 */
-	private long waitThreadSleepTime;
+	private final long waitThreadSleepTime;
 
 	/**
 	 * String constant for batch instance identifier.
@@ -60,12 +60,12 @@ public class BatchInstanceThread {
 	/**
 	 * List of all tasks associated with a batch instance.
 	 */
-	private List<AbstractRunnable> taskList = new LinkedList<AbstractRunnable>();
+	private final List<AbstractRunnable> taskList = new LinkedList<AbstractRunnable>();
 
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
-	private static final Logger logger = LoggerFactory.getLogger(BatchInstanceThread.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BatchInstanceThread.class);
 
 	public String getBatchInstanceId() {
 		return batchInstanceId;
@@ -95,12 +95,12 @@ public class BatchInstanceThread {
 	 * @param environment the working directory.
 	 */
 
-	public synchronized void add(AbstractRunnable r) {
-		this.taskList.add(r);
+	public synchronized void add(AbstractRunnable runnable) {
+		this.taskList.add(runnable);
 	}
 
-	public synchronized void addAll(List<AbstractRunnable> r) {
-		this.taskList.addAll(r);
+	public synchronized void addAll(List<AbstractRunnable> runnableList) {
+		this.taskList.addAll(runnableList);
 	}
 
 	/**
@@ -112,12 +112,12 @@ public class BatchInstanceThread {
 		if (batchInstanceId != null) {
 			ThreadPool.getInstance().putBatchInstanceThreadMap(batchInstanceId, this);
 		}
-		for (AbstractRunnable r : taskList) {
+		for (AbstractRunnable runnable : taskList) {
 			try {
-				ThreadPool.getInstance().addTask(r);
+				ThreadPool.getInstance().addTask(runnable);
 			} catch (RejectedExecutionException e) {
-				logger.error("Cannot add any more tasks. Some tasks for this batch instance may not have been added.");
-				r.setDcmaApplicationException(new DCMAApplicationException(
+				LOG.error("Cannot add any more tasks. Some tasks for this batch instance may not have been added.");
+				runnable.setDcmaApplicationException(new DCMAApplicationException(
 						"Cannot add any more tasks. Thread pool has reached maximum size."));
 			}
 		}
@@ -129,9 +129,9 @@ public class BatchInstanceThread {
 
 	public synchronized void remove() throws DCMAApplicationException {
 		for (Iterator<AbstractRunnable> iterator = taskList.iterator(); iterator.hasNext();) {
-			AbstractRunnable r = (AbstractRunnable) iterator.next();
-			if (!r.isStarted() || r.isCompleted()) {
-				ThreadPool.getInstance().removeTask(r);
+			AbstractRunnable runnable = (AbstractRunnable) iterator.next();
+			if (!runnable.isStarted() || runnable.isCompleted()) {
+				ThreadPool.getInstance().removeTask(runnable);
 				iterator.remove();
 			}
 		}
@@ -162,7 +162,7 @@ public class BatchInstanceThread {
 					Thread.sleep(waitThreadSleepTime);
 				}
 			} catch (InterruptedException e) {
-				logger.error(Thread.currentThread()
+				LOG.error(Thread.currentThread()
 						+ " interrupted. Resuming execution. Some tasks of this batch instance may not have completed execution.");
 			}
 		}
@@ -186,7 +186,7 @@ public class BatchInstanceThread {
 					Thread.sleep(waitThreadSleepTime);
 				}
 			} catch (InterruptedException e) {
-				logger.error(Thread.currentThread()
+				LOG.error(Thread.currentThread()
 						+ " interrupted. Resuming execution. Some tasks of this batch instance may not have completed execution.");
 			}
 		}

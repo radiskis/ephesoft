@@ -156,9 +156,15 @@ public class NsiExporter implements ICommonConstants {
 						"Nsi Xml file naming convention is null/empty from the data base. Invalid initializing of properties.");
 			}
 			LOGGER.info("Properties Initialized Successfully");
+
+			boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
+			LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
+
 			String exportToFolder = batchSchemaService.getLocalFolderLocation();
 			String baseDocsFolder = exportToFolder + File.separator + batchInstanceID;
-			String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + NSIExportConstant.BATCH_XML;
+
+			String batchXmlName = batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML;
+			String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML;
 			String targetXmlPath = exportFolder + File.separator + batchInstanceID + xmlTagStyle;
 			InputStream xslStream = null;
 			try {
@@ -169,6 +175,7 @@ public class NsiExporter implements ICommonConstants {
 				throw new DCMAApplicationException("Could not find xsl file in the classpath resource", e);
 			}
 			LOGGER.debug("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
+			InputStream in = null;
 			if (xslStream != null) {
 				try {
 					TransformerFactory tFactory = TransformerFactory.newInstance();
@@ -177,7 +184,7 @@ public class NsiExporter implements ICommonConstants {
 						// NOTE, this needs to be fixed to use the InputStream xslStream object, not a hardcoded path to the file.
 						transformer = tFactory.newTransformer(new StreamSource(xslStream));
 					} finally {
-						if(xslStream!= null) {
+						if (xslStream != null) {
 							try {
 								xslStream.close();
 							} catch (IOException e) {
@@ -189,11 +196,11 @@ public class NsiExporter implements ICommonConstants {
 						DateTimeZone zone = DateTimeZone.forID(NSIExportConstant.TIME_ZONE_ID);
 						DateTime dateTime = new DateTime(zone);
 						String date = Integer.toString(dateTime.getYear()) + NSIExportConstant.HYPEN
-						+ Integer.toString(dateTime.getMonthOfYear()) + NSIExportConstant.HYPEN
-						+ Integer.toString(dateTime.getDayOfMonth());
+								+ Integer.toString(dateTime.getMonthOfYear()) + NSIExportConstant.HYPEN
+								+ Integer.toString(dateTime.getDayOfMonth());
 						String time = Integer.toString(dateTime.getHourOfDay()) + NSIExportConstant.COLON
-						+ Integer.toString(dateTime.getMinuteOfHour()) + NSIExportConstant.COLON
-						+ Integer.toString(dateTime.getSecondOfMinute());
+								+ Integer.toString(dateTime.getMinuteOfHour()) + NSIExportConstant.COLON
+								+ Integer.toString(dateTime.getSecondOfMinute());
 						transformer.setParameter(NSIExportConstant.DATE, date);
 						transformer.setParameter(NSIExportConstant.HOURS, time);
 						transformer.setParameter(NSIExportConstant.BASE_DOC_FOLDER_PATH, baseDocsFolder + File.separator);
@@ -218,8 +225,28 @@ public class NsiExporter implements ICommonConstants {
 								LOGGER.info(exportFolder + " folder created");
 								Batch batch = batchSchemaService.getBatch(batchInstanceID);
 								List<Document> documentList = batch.getDocuments().getDocument();
-								transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
-										targetXmlPath)));
+
+								if (isZipSwitchOn) {
+									if (FileUtils.isZipFileExists(sourceXMLPath)) {
+										in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
+										transformer.transform(new StreamSource(in), new StreamResult(new FileOutputStream(
+												targetXmlPath)));
+									} else {
+										transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(
+												new FileOutputStream(targetXmlPath)));
+									}
+								} else {
+									File srcXML = new File(sourceXMLPath);
+									if (srcXML.exists()) {
+										transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(
+												new FileOutputStream(targetXmlPath)));
+									} else {
+										in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
+										transformer.transform(new StreamSource(in), new StreamResult(new FileOutputStream(
+												targetXmlPath)));
+									}
+								}
+								
 								File baseDocFolder = new File(baseDocsFolder);
 								for (Document document : documentList) {
 									if (document != null && document.getMultiPageTiffFile() != null
@@ -251,7 +278,18 @@ public class NsiExporter implements ICommonConstants {
 				} catch (TransformerException e1) {
 					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + e1.getMessage(), e1);
 					throw new DCMAApplicationException("Could not find nsiTransform.xsl file : ", e1);
-				} 
+				} catch (IOException ioe) {
+					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + ioe.getMessage(), ioe);
+					throw new DCMAApplicationException("Could not transform ibmCMTransform.xsl file : " + ioe.getMessage(), ioe);
+				} finally {
+					if (in != null) {
+						try {
+							in.close();
+						} catch (IOException e) {
+							LOGGER.info("Error closing input stream for :" + sourceXMLPath);
+						}
+					}
+				}
 			} else {
 				LOGGER.info("Invalid input stream for :" + xslResource.toString());
 			}

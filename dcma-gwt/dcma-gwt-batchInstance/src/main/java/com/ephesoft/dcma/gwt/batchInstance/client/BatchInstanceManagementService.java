@@ -50,23 +50,97 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("batchInstanceService")
 public interface BatchInstanceManagementService extends DCMARemoteService {
 
+	/**
+	 * API to get BatchInstanceDTO's for the given filter and in defined order.
+	 * @param startRow int
+	 * @param rowsCount int
+	 * @param filters {@link DataFilter}
+	 * @param order {@link Order}
+	 * @return List<{@link BatchInstanceDTO}>
+	 */
 	List<BatchInstanceDTO> getBatchInstanceDTOs(final int startRow, final int rowsCount, final List <DataFilter> filters, final Order order);
-	
+
+	/**
+	 * 	API to get Row Count passing the provided DataFilter.
+	 * @param dataFilters {@link DataFilter}
+	 * @return {@link Integer}
+	 */
 	Integer getRowCount(List<DataFilter> dataFilters);
 
+	/**
+	 * API to delete BatchInstance by identifier.
+	 * @param identifier {@link String}
+	 * @return {@link Results}
+	 * @throws GWTException
+	 */
 	Results deleteBatchInstance(String identifier) throws GWTException;
 
+	/**
+	 * API to restart BatchInstance given it's identifier and module name.
+	 * @param identifier {@link String}
+	 * @param moduleName {@link String}
+	 * @return {@link Results}
+	 * @throws GWTException
+	 */
 	Results restartBatchInstance(String identifier, String moduleName) throws GWTException;
-	
+
+	/**
+	 * 	API to update BatchInstance Status given it's identifier, to the provided BatchInstanceStatus.
+	 * @param identifier {@link String}
+	 * @param biStatus {@link BatchInstanceStatus}
+	 * @return {@link Results}
+	 * @throws GWTException
+	 */
 	Results updateBatchInstanceStatus(String identifier, BatchInstanceStatus biStatus) throws GWTException;
 
+	/**
+	 * API to get Individual Row Count.
+	 * @return {@link Integer}[ ]
+	 */
 	Integer[] getIndividualRowCount();
 
+	/**
+	 * API to get BatchInstanceDTO given it's identifier.
+	 * @param identifier {@link String}
+	 * @return {@link BatchInstanceDTO}
+	 * @throws GWTException
+	 */
 	BatchInstanceDTO getBatchInstanceDTO(String identifier) throws GWTException;
-	
+
+	/**
+	 * API to get Restart Options for a BatchInstance given it's identifier.
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return Map<{@link String},{@link String}>
+	 */
 	Map<String,String> getRestartOptions(String batchInstanceIdentifier);
-	
+
+	/**
+	 * API to get BatchInstanceDTO's given the batch name.
+	 * @param batchName {@link String}
+	 * @return List<{@link BatchInstanceDTO}>
+	 * @throws GWTException
+	 */
 	List <BatchInstanceDTO> getBatchInstanceDTOs(String batchName) throws GWTException;
-	
+
+	/**
+	 * API to delete Batch Folders for a batch instance given it's identifier.
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return {@link Results}
+	 * @throws GWTException
+	 */
 	Results deleteBatchFolders(String batchInstanceIdentifier) throws GWTException;
+	
+	/**
+	 * API to clear current user for a batch instance given it's identifier.
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return {@link Boolean}
+	 * @throws GWTException
+	 */
+	void clearCurrentUser(String batchInstanceIdentifier);
+	
+	/**
+	 * API for restarting batch instance having batch status READY_FOR_REVIEW and 
+	 * READY_FOR_VALIDATION.
+	 */
+	void restartAllBatchInstances();  
 }

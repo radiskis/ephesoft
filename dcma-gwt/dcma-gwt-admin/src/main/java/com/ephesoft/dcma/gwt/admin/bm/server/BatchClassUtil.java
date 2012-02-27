@@ -1161,6 +1161,9 @@ public class BatchClassUtil {
 		List<FunctionKey> newFunctionKeys = new ArrayList<FunctionKey>();
 		for (FunctionKey functionKey : functionKeys) {
 			newFunctionKeys.add(functionKey);
+			functionKey.setId(0);
+			functionKey.setDocType(null);
+			functionKey.setIdentifier(null);
 		}
 		documentType.setFunctionKeys(newFunctionKeys);
 

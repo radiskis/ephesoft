@@ -133,15 +133,15 @@ public class ReviewValidateTable extends ResizeComposite {
 	public ReviewValidateTable() {
 		super();
 		mainPanel = new DockLayoutPanel(Unit.PCT);
-		mainPanel.setHeight("70%");
+		mainPanel.setHeight("95%");
 		filterAndSearchPanel = new HorizontalPanel();
 		filterAndSearchPanel.addStyleName("batchListCompositePanelLayout");
 		filterAndSearchPanel.setSpacing(5);
-		filterAndSearchPanel.setWidth("500px");
+		filterAndSearchPanel.setWidth("490px");
 		priorityListBox = createPriorityListBox();
 		searchPanel = new HorizontalPanel();
 		listView = new ListView();
-		listView.setTableRowCount(5);
+		listView.setTableRowCount(15);
 		addHeaders();
 		HorizontalPanel listBoxPanel;
 		listBoxPanel = new HorizontalPanel();
@@ -164,7 +164,7 @@ public class ReviewValidateTable extends ResizeComposite {
 		searchBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchListConstants.BUTTON_SEARCH_BATCH));
 
 		listBoxPanel.addStyleName("batchListGroupPanelLayout");
-		mainPanel.addNorth(filterAndSearchPanel, 25);
+		mainPanel.addNorth(filterAndSearchPanel, 15);
 		mainPanel.addStyleName("pad0");
 		mainPanel.add(listView);
 		Label priorityLabel = new Label(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_PRIORITY_LISTBOX));

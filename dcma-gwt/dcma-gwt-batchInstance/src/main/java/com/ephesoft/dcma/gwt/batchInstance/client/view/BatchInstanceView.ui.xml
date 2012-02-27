@@ -1,4 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:sliding-panel='urn:import:com.ephesoft.dcma.gwt.core.client.view'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:DockLayoutPanel unit='PCT' ui:field="mainLayoutPanel">
@@ -47,7 +48,7 @@
 								<g:north size="10">
 									<g:HorizontalPanel />
 								</g:north>
-								<g:center>
+								<g:west size="63">
 									<g:HorizontalPanel width="99%">
 										<g:cell width="1%">
 											<g:Label />
@@ -59,12 +60,19 @@
 										<g:cell width="1%">
 											<g:Label />
 										</g:cell>
-										<g:cell width="34%">
-											<g:HorizontalPanel ui:field="actionPanel" />
-										</g:cell>
 									</g:HorizontalPanel>
 
-								</g:center>
+								</g:west>
+								<g:east size="37">
+									<sliding-panel:SlidingPanel
+										ui:field="slidingPanel">
+
+										<g:HorizontalPanel ui:field="actionPanel" />
+
+										<g:HorizontalPanel ui:field="controlPanel" />
+
+									</sliding-panel:SlidingPanel>
+								</g:east>
 							</g:DockLayoutPanel>
 						</g:center>
 					</g:DockLayoutPanel>

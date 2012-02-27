@@ -126,7 +126,7 @@ public class XmlToDatabase implements XmlToDatabaseConstants {
 	/**
 	 * Plugin switch for ON/OFF.
 	 * 
-	 * @param pluginSwitch
+	 * @param pluginSwitch {@link String}
 	 */
 	public void setPluginSwitch(final String pluginSwitch) {
 		this.pluginSwitch = pluginSwitch;
@@ -228,7 +228,7 @@ public class XmlToDatabase implements XmlToDatabaseConstants {
 	/**
 	 * Executes the query to save DLF to database.
 	 * 
-	 * @param queries
+	 * @param queries {@link List}< {@link String} >
 	 * @throws DCMAApplicationException
 	 */
 	public void saveDLF(final List<String> queries) throws DCMAApplicationException {

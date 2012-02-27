@@ -218,6 +218,18 @@
 				report.WORKFLOW_NAME
 		) reports		
 	</sql-query>
+	
+	<sql-query name="getIsAlreadyUserConnected">
+				
+		<return-scalar column="isAlreadyAnotherUserConnected" type="boolean" />
+
+		SELECT 
+		   lastUpdatTime.IS_ALREADY_IN_USE as isAlreadyAnotherUserConnected
+		FROM
+		   last_update_time lastUpdatTime		
+
+	</sql-query>
+	
 
 </hibernate-mapping>
 

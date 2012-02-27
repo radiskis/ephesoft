@@ -46,14 +46,12 @@ import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchInstance;
-import com.ephesoft.dcma.da.domain.RemoteBatchInstance;
 import com.ephesoft.dcma.da.property.BatchInstanceFilter;
 import com.ephesoft.dcma.da.property.BatchPriority;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
 import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
 import com.ephesoft.dcma.gwt.core.shared.DataFilter;
-import com.ephesoft.dcma.gwt.core.shared.RemoteBatchInstanceDTO;
 import com.ephesoft.dcma.gwt.home.client.TableModelService;
 
 /**
@@ -75,7 +73,8 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 	private static final String DATE_FORMAT = "dd-MMM-yyyy HH:mm:ss";
 
 	@Override
-	public List<BatchInstanceDTO> getRows(final int startRow, final int rowsCount, final DataFilter[] filters, final Order order) {
+	public List<BatchInstanceDTO> getRows(final String batchNameToBeSearched, final int startRow, final int rowsCount,
+			final DataFilter[] filters, final Order order) {
 		List<BatchInstanceStatus> statusList = getStatusList(filters);
 
 		List<Order> orderList = null;
@@ -92,8 +91,8 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
 		List<BatchPriority> batchPriorities = new ArrayList<BatchPriority>();
 		batchPriorities.add(priority);
-		batchInstanceList = batchInstanceService.getBatchInstancesExcludedRemoteBatch(statusList, startRow, rowsCount, orderList,
-				filterClauseList, batchPriorities, getUserName(), allBatchClassByUserRoles);
+		batchInstanceList = batchInstanceService.getBatchInstancesExcludedRemoteBatch(batchNameToBeSearched, statusList, startRow,
+				rowsCount, orderList, filterClauseList, batchPriorities, getUserName(), allBatchClassByUserRoles);
 
 		BatchInstanceDTO batch = null;
 		BatchClass batchClass = null;
@@ -175,7 +174,7 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
 		List<BatchPriority> batchPriorities = new ArrayList<BatchPriority>();
 		batchPriorities.add(priority);
-		rowCount = batchClassService.getCount(statusList, batchPriorities, allBatchClassByUserRoles);
+		rowCount = batchClassService.getCount(statusList, batchPriorities, allBatchClassByUserRoles, getUserName());
 		return rowCount;
 	}
 
@@ -184,8 +183,11 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		Integer[] countByStatus = new Integer[2];
 		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		countByStatus[0] = batchClassService.getCount(BatchInstanceStatus.READY_FOR_REVIEW, getUserName(), allBatchClassByUserRoles);
-		countByStatus[1] = batchClassService.getCount(BatchInstanceStatus.READY_FOR_VALIDATION, getUserName(),
+		String userName = getUserName();
+		countByStatus[0] = batchClassService.getCount(null, BatchInstanceStatus.READY_FOR_REVIEW, userName, null,
+				allBatchClassByUserRoles);
+
+		countByStatus[1] = batchClassService.getCount(null, BatchInstanceStatus.READY_FOR_VALIDATION, userName, null,
 				allBatchClassByUserRoles);
 		return countByStatus;
 	}
@@ -203,52 +205,19 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 	}
 
 	@Override
-	public List<BatchInstanceDTO> getBatchInstanceDTOs(final String batchName, final DataFilter[] filters) {
-		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		List<BatchInstance> batchInstanceList = null;
-		BatchInstanceStatus batchStatus = getStatusFilter(filters[1].getValue());
+	public Integer getRowsCount(String batchName, DataFilter[] filters) {
+		BatchInstanceStatus status = BatchInstanceStatus.READY_FOR_REVIEW;
+		BatchPriority priority = null;
+		if (filters[1] != null) {
+			status = getStatusFilter(filters[1].getValue());
+		}
+		if (filters[0] != null) {
+			priority = getPriorityValue(filters[0]);
+		}
+		int rowCount = 0;
+		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
 		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		String userName = getUserName();
-		batchInstanceList = batchInstanceService.getBatchInstanceListByBatchNameAndStatus(batchName, batchStatus, userName,
-				allBatchClassByUserRoles);
-		BatchInstanceDTO batchInstanceDTO = null;
-		ArrayList<BatchInstanceDTO> batches = new ArrayList<BatchInstanceDTO>();
-		if (batchInstanceList != null) {
-			for (BatchInstance instance : batchInstanceList) {
-				batchInstanceDTO = convertBatchInstanceToBatchInstanceDTO(instance);
-				batches.add(batchInstanceDTO);
-			}
-		}
-		return batches;
-	}
-
-	private BatchInstanceDTO convertBatchInstanceToBatchInstanceDTO(BatchInstance instance) {
-		BatchClass batchClass = instance.getBatchClass();
-		BatchInstanceDTO batchInstanceDTO = new BatchInstanceDTO();
-		batchInstanceDTO.setPriority(instance.getPriority());
-		batchInstanceDTO.setBatchIdentifier(instance.getIdentifier());
-		batchInstanceDTO.setBatchName(instance.getBatchName());
-		batchInstanceDTO.setBatchClassName(batchClass.getDescription());
-		batchInstanceDTO.setNoOfDocuments(null);
-		batchInstanceDTO.setExecutedModules(instance.getExecutedModules());
-		batchInstanceDTO.setReviewStatus(null);
-		batchInstanceDTO.setValidationStatus(null);
-		batchInstanceDTO.setNoOfPages(null);
-		batchInstanceDTO.setStatus(instance.getStatus().name());
-		batchInstanceDTO.setCurrentUser(instance.getCurrentUser() != null ? instance.getCurrentUser() : "");
-		batchInstanceDTO.setRemote(instance.isRemote());
-		RemoteBatchInstanceDTO remoteBatchInstanceDTO = null;
-		if (instance.getRemoteBatchInstance() != null) {
-			remoteBatchInstanceDTO = new RemoteBatchInstanceDTO();
-			RemoteBatchInstance remoteBatchInstance = instance.getRemoteBatchInstance();
-			remoteBatchInstanceDTO.setRemoteBatchInstanceIdentifier(remoteBatchInstance.getRemoteBatchInstanceIdentifier());
-			remoteBatchInstanceDTO.setRemoteURL(remoteBatchInstance.getRemoteURL());
-			remoteBatchInstanceDTO.setPreviousRemoteBatchInstanceIdentifier(remoteBatchInstance
-					.getPreviousRemoteBatchInstanceIdentifier());
-			remoteBatchInstanceDTO.setPreviousRemoteURL(remoteBatchInstance.getPreviousRemoteURL());
-			remoteBatchInstanceDTO.setSourceModule(instance.getRemoteBatchInstance().getSourceModule());
-		}
-		batchInstanceDTO.setRemoteBatchInstanceDTO(remoteBatchInstanceDTO);
-		return batchInstanceDTO;
+		rowCount = batchClassService.getCount(batchName, status, getUserName(), priority, allBatchClassByUserRoles);
+		return rowCount;
 	}
 }

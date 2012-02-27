@@ -328,4 +328,8 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 	String BATCH_LIST_HTML = "BatchList.html";
 
 	String FILE_SEPARATOR = "/";
+	
+	String save_button_tooltip = "save_button_tooltip";
+	
+	String title_topPanel_save_anchor = "title_topPanel_save_anchor";
 }
