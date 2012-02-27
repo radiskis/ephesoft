@@ -35,7 +35,6 @@
 
 package com.ephesoft.dcma.gwt.rv.client.view;
 
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
@@ -80,10 +79,13 @@ public class TopPanel extends RVBasePanel {
 	protected Label batchClassNameText;
 	@UiField
 	protected Label batchClassName;
-	/*@UiField
-	protected Label batchStatusText;
 	@UiField
-	protected Label batchStatus;*/
+	protected Anchor saveBatch;
+	/*
+	 * @UiField protected Label batchStatusText;
+	 * 
+	 * @UiField protected Label batchStatus;
+	 */
 	@UiField
 	protected Label pipe;
 	@UiField
@@ -97,16 +99,33 @@ public class TopPanel extends RVBasePanel {
 	public TopPanel() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-		batchIdText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchId) + ReviewValidateConstants.COLON);
+		batchIdText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchId)
+				+ ReviewValidateConstants.COLON);
 		batchIdText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
-		batchNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_TOPANEL_BATCHNAME) + ReviewValidateConstants.COLON);
+		batchNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_TOPANEL_BATCHNAME)
+				+ ReviewValidateConstants.COLON);
 		batchNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
-		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchClass) + ReviewValidateConstants.COLON);
-		//batchClassNameText.setText("name;");
+		saveBatch.setStyleName(ReviewValidateConstants.FONT_BLUE);
+		saveBatch.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_save_anchor) + " >");
+		saveBatch.setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.save_button_tooltip));
+		saveBatch.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				presenter.setControlSorQPressed(true);
+				presenter.performOperationsOnCtrlSPress();
+			}
+		});
+
+		batchClassNameText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batchClass)
+				+ ReviewValidateConstants.COLON);
+		// batchClassNameText.setText("name;");
 		batchClassNameText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
-		/*batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) + ReviewValidateConstants.COLON);
-		batchStatusText.setStyleName(ReviewValidateConstants.BOLD_TEXT);*/
-	  
+		/*
+		 * batchStatusText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_batch_status) +
+		 * ReviewValidateConstants.COLON); batchStatusText.setStyleName(ReviewValidateConstants.BOLD_TEXT);
+		 */
+
 		pipe.setText(ReviewValidateConstants.FULL_STOP);
 		pipe.setStyleName(ReviewValidateConstants.PIPE);
 		secondPipe.setText(ReviewValidateConstants.FULL_STOP);
@@ -128,6 +147,7 @@ public class TopPanel extends RVBasePanel {
 		});
 
 		info.addClickHandler(new ClickHandler() {
+
 			@Override
 			public void onClick(ClickEvent arg0) {
 				showKeyboardShortctPopUp();
@@ -141,15 +161,13 @@ public class TopPanel extends RVBasePanel {
 		batchId.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
 		batchName.setText(presenter.batchDTO.getBatch().getBatchName());
 		batchName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-		//changes to be made here 
+		// changes to be made here
 		
 		batchClassName.setText(presenter.batchDTO.getBatch().getBatchClassDescription());
 		batchClassName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-		//BatchStatus batchStatusType = presenter.batchDTO.getBatch().getBatchStatus();
-//		batchStatus.setText(fetchBatchStatus(batchStatusType));
-//		batchStatus.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-		
+
 		nextBatch.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_next) + " >");
+		this.presenter.setBatchListScreenTab();
 		presenter.rpcService.getRowsCount(new AsyncCallback<Integer>() {
 
 			@Override
@@ -167,46 +185,6 @@ public class TopPanel extends RVBasePanel {
 			}
 		});
 
-	}
-
-	public String fetchBatchStatus(BatchStatus batchStatusType) {
-		StringBuffer returnStatus = new StringBuffer();
-		if (batchStatusType != null && batchStatusType.value() != null && !batchStatusType.value().isEmpty()) {
-			switch (batchStatusType) {
-				case LOCKED:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_locked));
-					break;
-				case ERROR:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_error));
-					break;
-				case FINISHED:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_finished));
-					break;
-				case READY:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_ready));
-					break;
-				case READY_FOR_REVIEW:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_readyForReview));
-					break;
-				case READY_FOR_VALIDATION:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(
-							ReviewValidateConstants.batch_status_readyForValidation));
-					break;
-				case REVIEWED:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_reviewed));
-					break;
-				case RUNNING:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_running));
-					break;
-				case VALIDATED:
-					returnStatus.append(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.batch_status_validated));
-					break;
-				default:
-					returnStatus.append(ReviewValidateConstants.EMPTY_STRING);
-					break;
-			}
-		}
-		return returnStatus.toString();
 	}
 
 	@Override
@@ -236,74 +214,6 @@ public class TopPanel extends RVBasePanel {
 
 	}
 
-	// private void backPage() {
-	// final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-	// confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_backButton_confm));
-	// confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_revVal_backButton));
-	// confirmationDialog.okButton.setText(LocaleDictionary.get().getMessageValue(ReviewValidateConstants.title_confirmation_save));
-	// confirmationDialog.cancelButton.setText(LocaleDictionary.get().getMessageValue(
-	// ReviewValidateConstants.title_confirmation_discard));
-	// confirmationDialog.addDialogListener(new DialogListener() {
-	//
-	// @Override
-	// public void onOkClick() {
-	// presenter.rpcService.updateBatch(presenter.batchDTO.getBatch(), new AsyncCallback<BatchStatus>() {
-	//
-	// @Override
-	// public void onFailure(Throwable arg0) {
-	// ScreenMaskUtility.unmaskScreen();
-	// Window.alert(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_ok_failure,
-	// presenter.batchDTO.getBatch().getBatchInstanceIdentifier(), arg0.getMessage()));
-	// }
-	//
-	// @Override
-	// public void onSuccess(BatchStatus arg0) {
-	// presenter.rpcService.cleanup(new AsyncCallback<Void>() {
-	//
-	// @Override
-	// public void onFailure(Throwable arg0) {
-	// Window.alert(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_ok_failure,
-	// presenter.batchDTO.getBatch().getBatchInstanceIdentifier()));
-	// }
-	//
-	// @Override
-	// public void onSuccess(Void arg0) {
-	// moveToLandingPage();
-	// }
-	// });
-	// ScreenMaskUtility.unmaskScreen();
-	// }
-	// });
-	//
-	// }
-	//
-	// @Override
-	// public void onCancelClick() {
-	// confirmationDialog.hide();
-	// presenter.rpcService.cleanup(new AsyncCallback<Void>() {
-	//
-	// @Override
-	// public void onFailure(Throwable arg0) {
-	// Window.alert(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.error_topPanel_ok_success,
-	// presenter.batchDTO.getBatch().getBatchInstanceIdentifier()));
-	// }
-	//
-	// @Override
-	// public void onSuccess(Void arg0) {
-	// moveToLandingPage();
-	// }
-	// });
-	// ScreenMaskUtility.unmaskScreen();
-	//
-	// }
-	// });
-	//
-	// confirmationDialog.center();
-	// confirmationDialog.show();
-	// confirmationDialog.okButton.setFocus(true);
-	//
-	// }
-
 	private void nextBatchPage() {
 		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
 		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_backButton_confm));
@@ -316,7 +226,7 @@ public class TopPanel extends RVBasePanel {
 			@Override
 			public void onOkClick() {
 				ScreenMaskUtility.maskScreen();
-				presenter.rpcService.updateBatch(presenter.batchDTO.getBatch(), new AsyncCallback<BatchStatus>() {
+				presenter.rpcService.saveBatch(presenter.batchDTO.getBatch(), new AsyncCallback<Void>() {
 
 					@Override
 					public void onFailure(Throwable arg0) {
@@ -327,7 +237,7 @@ public class TopPanel extends RVBasePanel {
 					}
 
 					@Override
-					public void onSuccess(BatchStatus arg0) {
+					public void onSuccess(Void arg0) {
 						confirmationDialog.hide();
 						getHighestPriorityBatch();
 					}
@@ -415,36 +325,34 @@ public class TopPanel extends RVBasePanel {
 
 	public String createKeyboardShortcuts() {
 		String keyBoardShortcuts = "<table border =\"1\"><tr><td>1 </td><td> "
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_save_document)
-				+ "</td><td>CTRL + s " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " S </td></tr><tr><td>2 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_split_document)
-				+ "</td><td>CTRL + t " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " T </td></tr>" + "<tr><td>3 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_zoom_in)
-				+ "</td><td>CTRL+ 1 " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " ! </td></tr><tr><td>4 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_zoom_out)
-				+ "</td><td>CTRL+ 2 " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " @ </td></tr>" + "<tr><td>5 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_save_document) + "</td><td>CTRL + s "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " S </td></tr><tr><td>2 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_split_document) + "</td><td>CTRL + t "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " T </td></tr>" + "<tr><td>3 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_zoom_in) + "</td><td>CTRL+ 1 "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " ! </td></tr><tr><td>4 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_zoom_out) + "</td><td>CTRL+ 2 "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " @ </td></tr>" + "<tr><td>5 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_move_cursor_next_field)
 				+ "</td><td>CTRL+ Tab </td></tr><tr><td>6 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_move_cursor_next_field_error)
-				+ "</td><td>CTRL + > " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " . </td></tr>" + "<tr><td>7 </td><td>"
+				+ "</td><td>CTRL + > " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " . </td></tr>"
+				+ "<tr><td>7 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_move_cursor_previous_field_error)
-				+ "</td><td>CTRL + < " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " , </td></tr>" + "<tr><td>8 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_duplicate_page)
-				+ "</td><td>CTRL + d " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " D </td></tr>" + "<tr><td>9 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_move_page)
-				+ "</td><td>CTRL + m " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " M </td></tr>" + "<tr><td>10 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_fit_page)
+				+ "</td><td>CTRL + < " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " , </td></tr>"
+				+ "<tr><td>8 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_duplicate_page)
+				+ "</td><td>CTRL + d " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " D </td></tr>"
+				+ "<tr><td>9 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_move_page)
+				+ "</td><td>CTRL + m " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " M </td></tr>"
+				+ "<tr><td>10 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_fit_page)
 				+ "</td><td>F12 </td></tr>" + "<tr><td>11 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_rotate_page)
-				+ "</td><td>CTRL + r " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " R </td></tr>" + "<tr><td>12 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_remove_page)
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_rotate_page) + "</td><td>CTRL + r "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " R </td></tr>" + "<tr><td>12 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_remove_page)
 				+ "</td><td>Shift + del </td></tr> <tr><td>13 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_review_to_validate)
-				+ "</td><td>CTRL + q " + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or)
-				+ " Q </td></tr><tr><td>14 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.change_document_type)
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_review_to_validate) + "</td><td>CTRL + q "
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_or) + " Q </td></tr><tr><td>14 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.change_document_type)
 				+ "</td><td>CTRL + ;</td></tr>" + "<tr><td>15 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.merge_document_to_previous_one)
 				+ "</td><td>CTRL + /</td></tr>" + "<tr><td>16 </td><td>"
@@ -452,9 +360,8 @@ public class TopPanel extends RVBasePanel {
 				+ "</td><td>CTRL + Shift + -> </td></tr>" + "<tr><td>17 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.fuzzy_search_tooltip)
 				+ "</td><td>CTRL + z or Z</td></tr>" + "<tr><td>18 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TABLE_VIEW_SHORTCUT)
-				+ "</td><td>CTRL + 5</td></tr>" + "<tr><td>19 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TABLE_VIEW_BACK_SHORTCUT)
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TABLE_VIEW_SHORTCUT) + "</td><td>CTRL + 5</td></tr>"
+				+ "<tr><td>19 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TABLE_VIEW_BACK_SHORTCUT)
 				+ "</td><td>CTRL + 6</td></tr>" + "<tr><td>20 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TABLE_INSERT_ROW_SHORTCUT)
 				+ "</td><td>CTRL + i</td></tr>" + "<tr><td>21 </td><td>"
@@ -478,30 +385,27 @@ public class TopPanel extends RVBasePanel {
 				+ "</td><td>CTRL + up arrow</td></tr>" + "<tr><td>30 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.IMAGE_ZOOM_LOCK)
 				+ "</td><td>CTRL + l or L</td></tr>" + "<tr><td>31 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DOC_TYPE_TOGGLE)
-				+ "</td><td>CTRL + 0</td></tr>" + "<tr><td>32 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.NEXT_DOC_TYPE)
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DOC_TYPE_TOGGLE) + "</td><td>CTRL + 0</td></tr>"
+				+ "<tr><td>32 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.NEXT_DOC_TYPE)
 				+ "</td><td>CTRL + n</td></tr>" + "<tr><td>33 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.PREV_DOC_TYPE)
 				+ "</td><td>CTRL + Shift + n</td></tr>" + "<tr><td>34 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.NEXT_PAGE_TYPE)
-				+ "</td><td>CTRL + p</td></tr>" + "<tr><td>35 </td><td>"
-				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.PREV_PAGE_TYPE)
-				+ "</td><td>CTRL + Shift + p</td></tr>" +"<tr><td>36 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.NEXT_PAGE_TYPE) + "</td><td>CTRL + p</td></tr>"
+				+ "<tr><td>35 </td><td>" + LocaleDictionary.get().getConstantValue(ReviewValidateConstants.PREV_PAGE_TYPE)
+				+ "</td><td>CTRL + Shift + p</td></tr>" + "<tr><td>36 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.FUNCTION_KEY_SHORTCUTS)
-				+ "</td><td>F1 to F11[except F5]" +"<tr><td>37 </td><td>"
+				+ "</td><td>F1 to F11[except F5]" + "<tr><td>37 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.MODAL_WINDOW_SHORTCUTS)
 				+ "</td><td>CTRL + [4/7/8/9]</td></tr>" + "<tr><td>38 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DISCLOSURE_PANEL_SHORCUT)
 				+ "</td><td>CTRL + g or G</td></tr>" + "</table>";
 		return keyBoardShortcuts;
 	}
-	
-	public Anchor getInfo()
-	{
+
+	public Anchor getInfo() {
 		return info;
 	}
-	
+
 	public void showKeyboardShortctPopUp() {
 		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(Boolean.TRUE);
 		String keyBoardShortcuts = createKeyboardShortcuts();

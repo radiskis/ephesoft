@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
@@ -88,7 +89,7 @@ public class UpgradePatchPreparation {
 	private static final String PROPERTY_FILE = "db-patch";
 	private static final String META_INF_PATH = "META-INF\\dcma-data-access";
 
-	private static final String SERIALIZATION_EXT = ".ser";
+	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 
 	private static String upgradePatchFolderPath = null;
 

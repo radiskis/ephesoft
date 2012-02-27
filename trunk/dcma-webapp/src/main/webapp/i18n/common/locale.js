@@ -43,7 +43,15 @@ var commonConstants = {
 
 	title_confirmation_save : "Save",
 
-	title_confirmation_discard : "Discard"
+	title_confirmation_discard : "Discard",
+	
+	title_go_to_page : "Go To Page: ",
+	
+	title_previous : "Previous",
+	
+	title_next : "Next",
+	
+	title_displaying : "Displaying " 
 
 };
 
@@ -89,6 +97,8 @@ var commonConstants_tk = {
 
 	title_confirmation_save : "Kaydetmek",
 
-	title_confirmation_discard : "Atmak"
+	title_confirmation_discard : "Atmak",
+	
+	title_go_to_page : "Içeri Sayfa:"
 
 };

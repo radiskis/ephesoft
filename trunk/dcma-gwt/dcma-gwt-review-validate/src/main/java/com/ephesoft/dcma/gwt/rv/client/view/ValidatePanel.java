@@ -46,14 +46,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.Batch;
-import com.ephesoft.dcma.batch.schema.BatchStatus;
 import com.ephesoft.dcma.batch.schema.Column;
 import com.ephesoft.dcma.batch.schema.DataTable;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.Row;
+import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.event.AnimationCompleteEvent;
 import com.ephesoft.dcma.gwt.core.client.event.AnimationCompleteEventHandler;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
@@ -339,6 +340,16 @@ public class ValidatePanel extends RVBasePanel {
 	}
 
 	public void refreshPanel(final Document document, final boolean isDocumentTypeChange) {
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
+			DocumentLevelFields documentLevelFields = document.getDocumentLevelFields();
+			if (documentLevelFields != null) {
+				List<DocField> docFieldList = documentLevelFields.getDocumentLevelField();
+				if (docFieldList != null) {
+					docFieldList.clear();
+				}
+			}
+		}
+
 		this.presenter.document = document;
 		this.validationTable.clear();
 		presenter.rpcService.getFieldTypeDTOs(document.getType(), presenter.batchDTO.getBatch().getBatchInstanceIdentifier(),
@@ -457,21 +468,6 @@ public class ValidatePanel extends RVBasePanel {
 		}
 		return returnVal;
 	}
-
-	// private void setVisibility() {
-	// switch (presenter.batchDTO.getBatch().getBatchStatus()) {
-	// case READY_FOR_REVIEW:
-	// this.setVisible(false);
-	// clearPanel();
-	// break;
-	// case READY_FOR_VALIDATION:
-	// this.setVisible(true);
-	// break;
-	// default:
-	// GWT.log("Unknown Status for validate Panel.");
-	// break;
-	// }
-	// }
 
 	public void clearPanel() {
 		this.validationTable.clear();
@@ -664,7 +660,7 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldName);
 						}
 						validationTable.setWidget(index++, 0, vWidget);
-						addDocFieldWidget(fieldName, field, null, tempListBox);
+						addDocFieldWidget(presenter.document.getIdentifier(), fieldName, field, null, tempListBox);
 					}
 				} else {
 					if (!isFieldHidden) {
@@ -746,7 +742,7 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldLabel);
 						}
 						validationTable.setWidget(index++, 0, vWidget.getWidget());
-						addDocFieldWidget(fieldLabel, field, vWidget, null);
+						addDocFieldWidget(presenter.document.getIdentifier(), fieldLabel, field, vWidget, null);
 					}
 				}
 			}
@@ -767,48 +763,54 @@ public class ValidatePanel extends RVBasePanel {
 	}
 
 	public void updateDocument(CoordinatesList coordinatesList, String changedWidgetName) {
-		presenter.document.setErrorMessage("");
-		Boolean isValidDoc = Boolean.TRUE;
-		for (DocFieldWidget docFieldWidget : docFieldWidgets) {
-			if (docFieldWidget.widget != null) {
-				docFieldWidget.field.setValue(docFieldWidget.widget.getWidget().getValue());
-				if (!docFieldWidget.widget.validate()) {
-					isValidDoc = Boolean.FALSE;
-				}
-			} else {
-				// Check for the drop down if they have none selected
-				if (docFieldWidget.lWidget != null) {
-					if (docFieldWidget.lWidget.getWidget().getSelectedIndex() == 0) {
-						docFieldWidget.field.setValue("");
+		if (!docFieldWidgets.isEmpty()) {
+			if (docFieldWidgets.get(0).getParentDocumentIdentifier().equals(presenter.document.getIdentifier())) {
+				presenter.document.setErrorMessage("");
+				Boolean isValidDoc = Boolean.TRUE;
+				for (DocFieldWidget docFieldWidget : docFieldWidgets) {
+					if (docFieldWidget.widget != null) {
+						docFieldWidget.field.setValue(docFieldWidget.widget.getWidget().getValue());
+						if (!docFieldWidget.widget.validate()) {
+							isValidDoc = Boolean.FALSE;
+						}
 					} else {
-						docFieldWidget.field.setValue(docFieldWidget.lWidget.getWidget().getItemText(
-								docFieldWidget.lWidget.getWidget().getSelectedIndex()));
-					}
-					if (!docFieldWidget.lWidget.validate()) {
-						isValidDoc = Boolean.FALSE;
+						// Check for the drop down if they have none selected
+						if (docFieldWidget.lWidget != null) {
+							if (docFieldWidget.lWidget.getWidget().getSelectedIndex() == 0) {
+								docFieldWidget.field.setValue("");
+							} else {
+								docFieldWidget.field.setValue(docFieldWidget.lWidget.getWidget().getItemText(
+										docFieldWidget.lWidget.getWidget().getSelectedIndex()));
+							}
+							if (!docFieldWidget.lWidget.validate()) {
+								isValidDoc = Boolean.FALSE;
+							}
+						}
 					}
 				}
-			}
-		}
-		if (coordinatesList != null) {
-			for (DocFieldWidget docFieldWidget : docFieldWidgets) {
-				if (docFieldWidget.field.getName().equals(changedWidgetName)) {
-					docFieldWidget.field.setCoordinatesList(coordinatesList);
+				if (coordinatesList != null) {
+					for (DocFieldWidget docFieldWidget : docFieldWidgets) {
+						if (docFieldWidget.field.getName().equals(changedWidgetName)) {
+							docFieldWidget.field.setCoordinatesList(coordinatesList);
+						}
+					}
+				}
+				if (isValidDoc) {
+					isValidDoc = checkForInvalidDataTables(presenter.document);
+				}
+				presenter.document.setValid(isValidDoc);
+				List<Document> documents = presenter.batchDTO.getBatch().getDocuments().getDocument();
+				int docIndex = 0;
+				for (Document doc : documents) {
+					if (doc.getIdentifier().equals(presenter.document.getIdentifier())) {
+						documents.set(docIndex, presenter.document);
+						break;
+					}
+					docIndex++;
 				}
 			}
-		}
-		if (isValidDoc) {
-			isValidDoc = checkForInvalidDataTables(presenter.document);
-		}
-		presenter.document.setValid(isValidDoc);
-		List<Document> documents = presenter.batchDTO.getBatch().getDocuments().getDocument();
-		int docIndex = 0;
-		for (Document doc : documents) {
-			if (doc.getIdentifier().equals(presenter.document.getIdentifier())) {
-				documents.set(docIndex, presenter.document);
-				break;
-			}
-			docIndex++;
+		} else {
+			presenter.document.setValid(true);
 		}
 	}
 
@@ -859,7 +861,7 @@ public class ValidatePanel extends RVBasePanel {
 
 			@Override
 			public void onKeyDown(RVKeyDownEvent event) {
-				if (presenter.batchDTO.getBatch().getBatchStatus().equals(BatchStatus.READY_FOR_VALIDATION)
+				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
 						&& event.getEvent().isControlKeyDown()) {
 					updateDocument(null, null);
 				}
@@ -1053,20 +1055,24 @@ public class ValidatePanel extends RVBasePanel {
 
 	private static class DocFieldWidget {
 
+		String parentDocumentIdentifier;
 		Field field;
 		ValidatableWidget<SuggestionBox> widget;
 		ValidatableWidget<ListBox> lWidget;
 		boolean isCurrent = false;
 		Label fieldLabel;
 
-		public DocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget, ValidatableWidget<ListBox> lWidget) {
+		public DocFieldWidget(String parentDocumentIdentifier, Field field, ValidatableWidget<SuggestionBox> widget,
+				ValidatableWidget<ListBox> lWidget) {
+			this.parentDocumentIdentifier = parentDocumentIdentifier;
 			this.field = field;
 			this.widget = widget;
 			this.lWidget = lWidget;
 		}
 
-		public DocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
+		public DocFieldWidget(String parentDocumentIdentifier, Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
 				ValidatableWidget<ListBox> lWidget) {
+			this.parentDocumentIdentifier = parentDocumentIdentifier;
 			this.fieldLabel = fieldLabel;
 			this.field = field;
 			this.widget = widget;
@@ -1097,17 +1103,22 @@ public class ValidatePanel extends RVBasePanel {
 		public Label getFieldLabel() {
 			return fieldLabel;
 		}
+
+		public String getParentDocumentIdentifier() {
+			return parentDocumentIdentifier;
+		}
 	}
 
 	private final LinkedList<DocFieldWidget> docFieldWidgets = new LinkedList<DocFieldWidget>();
 
-	private void addDocFieldWidget(Field field, ValidatableWidget<SuggestionBox> widget, ValidatableWidget<ListBox> lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(field, widget, lWidget));
+	private void addDocFieldWidget(String documentIdentifier, Field field, ValidatableWidget<SuggestionBox> widget,
+			ValidatableWidget<ListBox> lWidget) {
+		docFieldWidgets.add(new DocFieldWidget(documentIdentifier, field, widget, lWidget));
 	}
 
-	private void addDocFieldWidget(Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
+	private void addDocFieldWidget(String documentIdentifier, Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
 			ValidatableWidget<ListBox> lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(fieldLabel, field, widget, lWidget));
+		docFieldWidgets.add(new DocFieldWidget(documentIdentifier, fieldLabel, field, widget, lWidget));
 	}
 
 	/*
@@ -1224,7 +1235,11 @@ public class ValidatePanel extends RVBasePanel {
 	}
 
 	public String getCurrentDocFieldWidgetName() {
-		return getCurrentDocFieldWidget().field.getName();
+		String nameOfCurrentField = null;
+		if (getCurrentDocFieldWidget() != null) {
+			nameOfCurrentField = getCurrentDocFieldWidget().field.getName();
+		}
+		return nameOfCurrentField;
 	}
 
 	// private void setCurrentDocFieldWidget(DocFieldWidget dfWidget) {

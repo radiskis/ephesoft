@@ -37,6 +37,11 @@ package com.ephesoft.dcma.tabbed;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * This class states the properties of Tabbed PDF plugin.
+ * @author Ephesoft
+ *
+ */
 public enum TabbedPdfProperties implements PluginProperty {
 
 	TABBED_PDF_EXPORT_FOLDER("tabbedPdf.final_export_folder"), TABBED_PDF_SWITCH("tabbedPdf.switch"), TABBED_PDF_PLACEHOLDER(
@@ -46,10 +51,16 @@ public enum TabbedPdfProperties implements PluginProperty {
 
 	String key;
 
+	/**
+	 * @param key {@link String}
+	 */
 	TabbedPdfProperties(String key) {
 		this.key = key;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ephesoft.dcma.core.common.PluginProperty#getPropertyKey()
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

@@ -60,14 +60,42 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("batchListService")
 public interface TableModelService extends DCMARemoteService {
 
+	/**
+	 * API to get total Rows Count for the given data filters.
+	 * @param filters {@link DataFilter}[ ]
+	 * @return {@link Integer}
+	 */
 	Integer getRowsCount(DataFilter[] filters);
 
-	List<BatchInstanceDTO> getRows(int startRow, int rowsCount, DataFilter[] filters, Order order);
+	/**
+	 * API to get Rows of the table in the form of BatchInstanceDTO for the given batch and filters.
+	 * @param batchNameToBeSearched {@link String}
+	 * @param startRow int 
+	 * @param rowsCount int
+	 * @param filters {@link DataFilter}[ ] 
+	 * @param order {@link Order}
+	 * @return List< {@link BatchInstanceDTO}>
+	 */
+	List<BatchInstanceDTO> getRows(String batchNameToBeSearched, int startRow, int rowsCount, DataFilter[] filters, Order order);
 
+	/**
+	 * API to get Individual Row Counts for each batch.
+	 * @return {@link Integer}[ ] 
+	 */
 	Integer[] getIndividualRowCounts();
 
+	/**
+	 * API to get Next Batch Instance.
+	 * @return {@link String}
+	 */
 	String getNextBatchInstance();
 
-	List<BatchInstanceDTO> getBatchInstanceDTOs(final String batchName, final DataFilter[] filters);
+	/**
+	 * API to get Rows Count of a batch passing the given data filters.
+	 * @param batchName {@link String}
+	 * @param filters {@link DataFilter}[ ] 
+	 * @return {@link Integer}
+	 */
+	Integer getRowsCount(String batchName, DataFilter[] filters);
 
 }

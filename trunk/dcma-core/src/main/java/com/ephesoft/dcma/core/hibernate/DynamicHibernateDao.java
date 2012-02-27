@@ -70,11 +70,13 @@ public class DynamicHibernateDao {
 	private static final String META_INF = "META-INF";
 	private static final String FOLDER_NAME = "dcma-performance-reporting";
 	private static final String FILE_NAME = "dcma-report-db";
+	private static final String TABLE = "TABLE";
+	private static final String VIEW = "VIEW";
 	private SessionFactory sessionFactory = null;
 	private ConnectionProvider connectionProvider = null;
 	private Connection connection = null;
 
-	private static final Logger logger = LoggerFactory.getLogger(DynamicHibernateDao.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DynamicHibernateDao.class);
 	private static final String PASSWORD = "hibernate.connection.password";
 
 	public DynamicHibernateDao(String userName, String password, String driverName, String jdbcUrl, String dialectName) {
@@ -86,7 +88,7 @@ public class DynamicHibernateDao {
 				sessionFactory.close();
 			}
 		} catch (Exception e) {
-			logger.error("Could not close session factory", e);
+			LOG.error("Could not close session factory", e);
 		}
 		sessionFactory = configuration.buildSessionFactory();
 	}
@@ -107,14 +109,14 @@ public class DynamicHibernateDao {
 			properties = new Properties();
 			properties.load(propertyInStream);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			throw new HibernateException(e.getMessage(), e);
 		} finally {
-			if(propertyInStream != null) {
+			if (propertyInStream != null) {
 				try {
 					propertyInStream.close();
 				} catch (IOException ioe) {
-					logger.info("Could not close property input stream in Dynamic Hibernate Dao.");
+					LOG.info("Could not close property input stream in Dynamic Hibernate Dao.");
 				}
 			}
 		}
@@ -127,7 +129,7 @@ public class DynamicHibernateDao {
 				try {
 					configuration.setProperty(propertyKeyString, passwordDecryptor.getDecryptedString());
 				} catch (CryptographyException e) {
-					logger.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 					throw new HibernateException(e.getMessage(), e);
 				}
 			}
@@ -136,14 +138,14 @@ public class DynamicHibernateDao {
 			if (sessionFactory != null) {
 				sessionFactory.close();
 			}
-			
 		} catch (Exception e) {
-			logger.error("Could not close session factory", e);
+			LOG.error("Could not close session factory", e);
 		}
 		sessionFactory = configuration.buildSessionFactory();
 	}
 
 	public StatelessSession getStatelessSession(DynamicHibernateDao dynamicHibernateDao) throws DCMAException {
+		StatelessSession statelessSession = null;
 		try {
 			if (dynamicHibernateDao.sessionFactory instanceof SessionFactoryImplementor) {
 				try {
@@ -154,17 +156,21 @@ public class DynamicHibernateDao {
 						connectionProvider.close();
 					}
 				} catch (Exception e) {
-					logger.error("Unable to close open connections", e);
+					LOG.error("Unable to close open connections", e);
 				}
 				connectionProvider = ((SessionFactoryImplementor) dynamicHibernateDao.sessionFactory).getConnectionProvider();
 				connection = connectionProvider.getConnection();
-				return sessionFactory.openStatelessSession(connection);
+				statelessSession = sessionFactory.openStatelessSession(connection);
+
 			} else {
-				return sessionFactory.openStatelessSession();
+				statelessSession = sessionFactory.openStatelessSession();
+
 			}
 		} catch (SQLException sqle) {
+			LOG.error("Exception occurred while getting report connection.", sqle);
 			throw new DCMAException("Exception occurred while getting report connection.", sqle);
 		}
+		return statelessSession;
 	}
 
 	/* Changes for reporting module End */
@@ -219,28 +225,28 @@ public class DynamicHibernateDao {
 					connectionProvider.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close connections ", e);
+				LOG.error("Could not close connections ", e);
 			}
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 
-			ResultSet rSet = databaseMetaData.getTables(null, null, null, new String[] {"TABLE", "VIEW"});
+			ResultSet rSet = databaseMetaData.getTables(null, null, null, new String[] {TABLE, VIEW});
 			while (rSet.next()) {
-				if (rSet.getString("TABLE_TYPE").equals("TABLE")) {
+				if (rSet.getString("TABLE_TYPE").equals(TABLE)) {
 					tableNames.add(rSet.getString("TABLE_NAME"));
-				} else if (rSet.getString("TABLE_TYPE").equals("VIEW")) {
+				} else if (rSet.getString("TABLE_TYPE").equals(VIEW)) {
 					viewNames.add(rSet.getString("TABLE_NAME"));
 				}
 			}
-			tableMap.put("TABLE", tableNames);
-			tableMap.put("VIEW", viewNames);
+			tableMap.put(TABLE, tableNames);
+			tableMap.put(VIEW, viewNames);
 			try {
 				if (rSet != null) {
 					rSet.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close result set ", e);
+				LOG.error("Could not close result set ", e);
 			}
 		}
 		return tableMap;
@@ -258,7 +264,7 @@ public class DynamicHibernateDao {
 					connectionProvider.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close connections ", e);
+				LOG.error("Could not close connections ", e);
 			}
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
@@ -274,7 +280,7 @@ public class DynamicHibernateDao {
 					rSet.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close result set ", e);
+				LOG.error("Could not close result set ", e);
 			}
 		}
 		return columnDefinitions;
@@ -292,15 +298,15 @@ public class DynamicHibernateDao {
 					connectionProvider.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close connections ", e);
+				LOG.error("Could not close connections ", e);
 			}
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 
-			if (tableType.equals("TABLE")) {
+			if (tableType.equals(TABLE)) {
 				rSet = databaseMetaData.getPrimaryKeys(null, null, table);
-			} else if (tableType.equals("VIEW")) {
+			} else if (tableType.equals(VIEW)) {
 				rSet = databaseMetaData.getBestRowIdentifier(null, null, table, 1, false);
 			}
 			while (rSet.next()) {
@@ -311,58 +317,58 @@ public class DynamicHibernateDao {
 					rSet.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close result set ", e);
+				LOG.error("Could not close result set ", e);
 			}
 		}
 		return primaryKeys;
 	}
 
 	private Class<?> getColumnClassName(int sqlType) throws SQLException {
-		Class<?> clazz = (new String()).getClass();
+		Class<?> clazz = String.class;
 
 		switch (sqlType) {
 
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-				clazz = (new java.math.BigDecimal(0)).getClass();
+				clazz = java.math.BigDecimal.ZERO.getClass();
 				break;
 
 			case Types.BIT:
-				clazz = (new Boolean(false)).getClass();
+				clazz = Boolean.FALSE.getClass();
 				break;
 
 			case Types.TINYINT:
-				clazz = (new Byte("0")).getClass();
+				clazz = Byte.valueOf("0").getClass();
 				break;
 
 			case Types.SMALLINT:
-				clazz = (new Short("0")).getClass();
+				clazz = Short.valueOf("0").getClass();
 				break;
 
 			case Types.INTEGER:
-				clazz = (new Integer(0)).getClass();
+				clazz = Integer.valueOf(0).getClass();
 				break;
 
 			case Types.BIGINT:
-				clazz = (new Long(0)).getClass();
+				clazz = Long.valueOf(0L).getClass();
 				break;
 
 			case Types.REAL:
-				clazz = (new Float(0)).getClass();
+				clazz = Float.valueOf(0f).getClass();
 				break;
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
-				clazz = (new Double(0)).getClass();
-				;
+				clazz = Double.valueOf(0d).getClass();
+
 				break;
 
 			case Types.BINARY:
 			case Types.VARBINARY:
 			case Types.LONGVARBINARY:
-				byte[] b = {};
-				clazz = (b.getClass());
-				;
+				byte[] binaryVar = {};
+				clazz = binaryVar.getClass();
+
 				break;
 
 			case Types.DATE:
@@ -379,21 +385,22 @@ public class DynamicHibernateDao {
 
 			case Types.BLOB:
 				byte[] blob = {};
-				clazz = (blob.getClass());
+				clazz = blob.getClass();
 				break;
 
 			case Types.CLOB:
-				char[] c = {};
-				clazz = (c.getClass());
+				char[] character = {};
+				clazz = character.getClass();
 				break;
+			default:
 		}
 		return clazz;
 	}
 
 	public static class AliasType {
 
-		private String alias;
-		private NullableType type;
+		private final String alias;
+		private final NullableType type;
 
 		public AliasType(String alias, NullableType type) {
 			this.alias = alias;
@@ -403,8 +410,8 @@ public class DynamicHibernateDao {
 
 	public static class ColumnDefinition {
 
-		private String columnName;
-		private Class<?> type;
+		private final String columnName;
+		private final Class<?> type;
 
 		public ColumnDefinition(String columnName, Class<?> type) {
 			this.columnName = columnName;
@@ -432,7 +439,7 @@ public class DynamicHibernateDao {
 				sessionFactory.close();
 			}
 		} catch (Exception e) {
-			logger.error("Could not close open connections", e);
+			LOG.error("Could not close open connections", e);
 		}
 
 	}

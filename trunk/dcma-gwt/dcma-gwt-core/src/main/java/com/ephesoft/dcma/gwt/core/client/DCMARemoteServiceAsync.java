@@ -38,38 +38,135 @@ package com.ephesoft.dcma.gwt.core.client;
 import java.util.Map;
 import java.util.Set;
 
-import com.ephesoft.dcma.batch.schema.BatchStatus;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface DCMARemoteServiceAsync {
 
+	/**
+	 * API to acquire Lock on a batch class given it's identifier asynchronously.
+	 * @param batchIdentifier
+	 * @param callback
+	 */
 	void acquireLock(String batchIdentifier, AsyncCallback<Void> callback);
 
+	/**
+	 * API to initiate Remote Services on the application asynchronously.
+	 * @param callback
+	 */
 	void initRemoteService(AsyncCallback<Void> callback);
 
+	/**
+	 * API to setup remote services on the application asynchronously.
+	 * @param callback
+	 */
 	void setup(AsyncCallback<Void> callback);
 
+	/**
+	 * API to clean up asynchronously.
+	 * @param callback
+	 */
 	void cleanup(AsyncCallback<Void> callback);
 
+	/**
+	 * API to get User Name using the remote services on the application asynchronously.
+	 * @param callback
+	 */
 	void getUserName(AsyncCallback<String> callback);
 
+	/**
+	 * API to logout from remote services on the application asynchronously.
+	 * @param callback
+	 */
 	void logout(AsyncCallback<Void> callback);
 
+	/**
+	 * API to get locale of the user using the remote services on the application asynchronously.
+	 * @param callback
+	 */
 	void getLocale(AsyncCallback<String> callback);
 
+	/**
+	 * API to get roles of the user using the remote services on the application asynchronously.
+	 * @param callback
+	 */
 	void getUserRoles(AsyncCallback<Set<String>> callback);
 
+	/**
+	 * API to check if reporting is enabled asynchronously.
+	 * @param callback
+	 */
 	void isReportingEnabled(AsyncCallback<Boolean> callback);
 
+	/**
+	 * API to get all user's asynchronously.
+	 * @param callback
+	 */
 	void getAllUser(AsyncCallback<Set<String>> callback);
 
+	/**
+	 * API to get all user groups asynchronously.
+	 * @param callback
+	 */
 	void getAllGroups(AsyncCallback<Set<String>> callback);
-	
+
+	/**
+	 * 
+	 * API to get All BatchClass By User Roles asynchronously.
+	 * @param callback
+	 */
 	void getAllBatchClassByUserRoles(AsyncCallback<Set<String>> callback);
-	
+
+	/**
+	 * API to check if Upload Batch is Enabled asynchronously.
+	 * @param callback
+	 */
 	void isUploadBatchEnabled(AsyncCallback<Boolean> callback);
 
-	void getBatchListPriorityFilter(AsyncCallback<Map<BatchStatus, Integer>> callback);
+	/**
+	 * API to get BatchList Priority Filter asynchronously.
+	 * 
+	 * @param callback
+	 */
+	void getBatchListPriorityFilter(AsyncCallback<Map<BatchInstanceStatus, Integer>> callback);
 
+	/**
+	 * API to set BatchList Priority Filter asynchronously.
+	 * @param reviewBatchListPriority
+	 * @param validateBatchListPriority
+	 * @param callback
+	 */
 	void setBatchListPriorityFilter(Integer reviewBatchListPriority, Integer validateBatchListPriority, AsyncCallback<Void> callback);
+	
+	/**
+	 * API to check if Restart All Batch is Enabled asynchronously.
+	 * @param callback
+	 */
+	void isRestartAllBatchEnabled(AsyncCallback<Boolean> callback);
+	
+	/**
+	 * API to get the Batch List table row count asynchronously.
+	 * @param callback
+	 */
+	void getBatchListTableRowCount(AsyncCallback<Integer> callback);
+	
+	/**
+	 * API to get the batch list screen tab asynchronously.
+	 * @param callback
+	 */
+	void getBatchListScreenTab(String userName , AsyncCallback<BatchInstanceStatus> callback);
+	
+	/**
+	 * API to set the batch list screen tab asynchronously.
+	 * @param userName
+	 * @param batchDTOStatus
+	 * @param callback
+	 */
+	void setBatchListScreenTab(String userName , BatchInstanceStatus batchDTOStatus, AsyncCallback<Void> callback);
+	
+	/**
+	 * API to disable the restart all button for current session.
+	 * @return 
+	 */
+	void disableRestartAllButton(AsyncCallback<Void> callback);
 }

@@ -47,6 +47,12 @@ import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.tabbed.constant.TabbedPdfConstant;
 import com.ephesoft.dcma.util.OSUtil;
 
+/**
+ * This class performs the optimisation while creating the tabbed pdf.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class TabbedPdfOptimizer {
 
 	private final String outputFolderPath;
@@ -60,6 +66,17 @@ public class TabbedPdfOptimizer {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TabbedPdfOptimizer.class);
 
+	/**
+	 * Constructor Initialization.
+	 * 
+	 * @param outputFolderPath {@link String}
+	 * @param inputFolderPath {@link String}
+	 * @param thread
+	 * @param tabbedPDFName
+	 * @param pdfOptimizerParam
+	 * @param gsCommand
+	 * @throws DCMAApplicationException
+	 */
 	public TabbedPdfOptimizer(String outputFolderPath, String inputFolderPath, BatchInstanceThread thread, String tabbedPDFName,
 			String pdfOptimizerParam, String gsCommand) throws DCMAApplicationException {
 		this.outputFolderPath = outputFolderPath;
@@ -71,6 +88,11 @@ public class TabbedPdfOptimizer {
 		run();
 	}
 
+	/**
+	 * Method to initiate the command for performing the tabbed pdf optimization.
+	 * 
+	 * @throws DCMAApplicationException
+	 */
 	public void run() throws DCMAApplicationException {
 		try {
 			String pdfOptimizerParams[] = pdfOptimizerParam.split(" ");

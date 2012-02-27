@@ -111,6 +111,24 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	public void bind() {
 		setIndexes(0, view.getBatchInstanceListView().listView.getTableRowCount(), null);
 		getRowCount(filters, true, startIndex, maxResult, order);
+		enableRestartAll();
+	}
+
+	public void enableRestartAll() {
+		controller.getRpcService().isRestartAllBatchEnabled(new AsyncCallback<Boolean>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				
+			}
+
+			@Override
+			public void onSuccess(Boolean arg0) {
+				if (arg0) {
+					view.getRestartAllButton().setEnabled(true);
+				}
+			}
+		});
 	}
 
 	private void getRowCount(List<DataFilter> dataFilters, final int start, final int maxResults, Order order) {
@@ -258,6 +276,37 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 					BatchInstanceMessages.MSG_DELETE_ERROR, e.getMessage()));
 		}
 	}
+	
+	public void onUnlockButtonClicked(final String identifier) {
+		ScreenMaskUtility.maskScreen();
+		controller.getRpcService().clearCurrentUser(identifier, new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				ScreenMaskUtility.unmaskScreen();
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+				ScreenMaskUtility.unmaskScreen();
+				controller.getRpcService().clearCurrentUser(identifier, new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						ScreenMaskUtility.unmaskScreen();
+					}
+
+					@Override
+					public void onSuccess(Void arg0) {
+						ScreenMaskUtility.unmaskScreen();
+						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
+								BatchInstanceMessages.MSG_CLEAR_CURRENT_USER));
+						updateTable();
+					}
+				});
+			}
+		});
+	}
 
 	private void showSuccessConfirmation(final String messageValue, final int startIndex, final int maxResult, final Order order) {
 		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(Boolean.TRUE);
@@ -376,6 +425,38 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			@Override
 			public void onSuccess(Map<String, String> restartOptionsList) {
 				view.setRestartOptions(restartOptionsList);
+			}
+		});
+	}
+
+	public void onRestartAllButtonClicked() {
+		ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_RESTART_ALL_TEXT));
+		view.disableRestartAllButton();
+		controller.getRpcService().restartAllBatchInstances(new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable paramThrowable) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_RESTART_ALL_FAILURE));
+				ScreenMaskUtility.unmaskScreen();
+				view.enableRestartAllButton();
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+				controller.getRpcService().disableRestartAllButton(new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable paramThrowable) {
+						ScreenMaskUtility.unmaskScreen();
+					}
+
+					@Override
+					public void onSuccess(Void arg0) {
+						updateTable();
+						ScreenMaskUtility.unmaskScreen();
+					}
+				});
 			}
 		});
 	}

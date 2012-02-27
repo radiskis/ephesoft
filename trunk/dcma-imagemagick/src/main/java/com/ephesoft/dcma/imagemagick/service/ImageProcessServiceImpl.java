@@ -125,7 +125,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			String inputParameters = multipageTiffPdfCreator.getInputParameters();
 			String outputParameters = multipageTiffPdfCreator.getOutputParameters();
 			thumbnailPNGCreator.generateFullFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					IImageMagickCommonConstants.OCR_INPUT_FILE, ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, pluginWorkflow, generateDisplayPng, inputParameters, outputParameters);
+					IImageMagickCommonConstants.OCR_INPUT_FILE, ImageMagicKConstants.CREATE_OCR_INPUT_PLUGIN, pluginWorkflow,
+					generateDisplayPng, inputParameters, outputParameters);
 		} catch (Exception ex) {
 			LOGGER.error(ERROR_IN_PNG_FILE_GENERATION, ex);
 			throw new DCMAException(ERROR_IN_PNG_FILE_GENERATION, ex);
@@ -189,7 +190,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 			String inputParameters = multipageTiffPdfCreator.getInputParameters();
 			String outputParameters = multipageTiffPdfCreator.getOutputParameters();
 			thumbnailPNGCreator.generateFullFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					IImageMagickCommonConstants.DISPLAY_IMAGE, ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, pluginWorkflow, generateDisplayPng, inputParameters, outputParameters);
+					IImageMagickCommonConstants.DISPLAY_IMAGE, ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, pluginWorkflow,
+					generateDisplayPng, inputParameters, outputParameters);
 		} catch (Exception ex) {
 			LOGGER.error("Problem in generating Display File");
 			throw new DCMAException("Problem in generating Display File", ex);
@@ -260,10 +262,11 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	}
 
 	@Override
-	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, BatchInstanceThread thread,
-			Boolean allowPdfConversion) throws DCMAException {
+	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, File outputFilePath,
+			BatchInstanceThread thread, Boolean allowPdfConversion) throws DCMAException {
 		try {
-			multiPageToSinglePageConverter.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, null, thread, allowPdfConversion);
+			multiPageToSinglePageConverter.convertPdfOrMultiPageTiffToTiff(batchClass, imagePath, outputFilePath, thread,
+					allowPdfConversion);
 		} catch (DCMAApplicationException e) {
 			throw new DCMAException(e.getMessage());
 		}
@@ -282,7 +285,7 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		BatchClass batchClass = batchClassService.get(batchClassID.getID());
 		List<File> allImageFiles = getAllImagesPathInFolder(folderPath);
 		for (File imageFile : allImageFiles) {
-			convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, thread, true);
+			convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, null, thread, true);
 		}
 		return allImageFiles;
 	}

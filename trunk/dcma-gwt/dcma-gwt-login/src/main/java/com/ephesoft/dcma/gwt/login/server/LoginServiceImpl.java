@@ -59,14 +59,14 @@ public class LoginServiceImpl extends DCMARemoteServiceServlet implements LoginR
 	}
 
 	private final Properties loadProperties(String propertyName) throws IOException {
-		InputStream propertyInStream  = null;
-		Properties properties = properties = new Properties();
+		InputStream propertyInStream = null;
+		Properties properties = new Properties();
 		try {
-		String filePath = META_INF + File.separator + propertyName + ".properties";
-		propertyInStream = new ClassPathResource(filePath).getInputStream();
-		properties.load(propertyInStream);
+			String filePath = META_INF + File.separator + propertyName + ".properties";
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
+			properties.load(propertyInStream);
 		} finally {
-			if(propertyInStream != null) {
+			if (propertyInStream != null) {
 				propertyInStream.close();
 			}
 		}

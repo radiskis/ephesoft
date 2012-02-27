@@ -45,6 +45,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -52,51 +54,62 @@ public class OCREngineUtil {
 
 	private static final String ID_ATTR = "id";
 
-	public static void formatHOCRForTesseract(final String outputFilePath, final String actualFolderLocation) throws Exception {
-		InputStream inputStream = null;
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(OCREngineUtil.class);
 
-		inputStream = new FileInputStream(outputFilePath);
-
+	public static void formatHOCRForTesseract(final String outputFilePath, final String actualFolderLocation, final String pageId)
+			throws Exception {
+		LOGGER.info("Entering format HOCR for tessearct . outputfilepath : " + outputFilePath);
+		InputStream inputStream = new FileInputStream(outputFilePath);
 		XPathFactory xFactory = new org.apache.xpath.jaxp.XPathFactoryImpl();
 		XPath xpath = xFactory.newXPath();
-		XPathExpression pageExpr = xpath.compile("//div[@class='ocr_page']");
-		XPathExpression wordExpr = xpath.compile("//span[@class='ocr_word']");
+		XPathExpression pageExpr = xpath.compile("//div[@class=\"ocr_page\"]");
+		XPathExpression wordExpr = xpath.compile("//span[@class=\"ocr_word\"]");
+		XPathExpression xOcrWordExpr = xpath.compile("//span[@class=\"xocr_word\"]");
 		org.w3c.dom.Document doc2 = null;
 		try {
 			doc2 = XMLUtil.createDocumentFrom(inputStream);
+		} catch (Exception e) {
+			LOGGER.info("Premature end of file for " + outputFilePath + e);
 		} finally {
 			if (inputStream != null) {
 				inputStream.close();
 			}
 		}
 		if (doc2 != null) {
-
+			LOGGER.info("document is not null.");
 			NodeList wordList = (NodeList) wordExpr.evaluate(doc2, XPathConstants.NODESET);
 			for (int wordNodeIndex = 0; wordNodeIndex < wordList.getLength(); wordNodeIndex++) {
 				Node wordNode = wordList.item(wordNodeIndex);
-				if (wordNode != null && wordNode.getFirstChild() != null) {
-					wordNode.setTextContent(wordNode.getFirstChild().getTextContent());
+				if (wordNode != null) {
+					Node word = (Node) xOcrWordExpr.evaluate(wordNode, XPathConstants.NODE);
+					if (word != null) {
+						wordNode.setTextContent(word.getTextContent());
+					}
 				}
 			}
 
 			NodeList pageList = (NodeList) pageExpr.evaluate(doc2, XPathConstants.NODESET);
 			for (int pageNodeIndex = 0; pageNodeIndex < pageList.getLength(); pageNodeIndex++) {
 				Node pageNode = pageList.item(pageNodeIndex);
-				String pageID = ((Node) pageNode.getAttributes().getNamedItem(ID_ATTR)).getTextContent();
-				wordExpr = xpath.compile("//div[@id='" + pageID + "']//span[@class='ocr_word']");
-				NodeList wordInPageList = (NodeList) wordExpr.evaluate(pageNode, XPathConstants.NODESET);
+				if (pageNode != null && ((Node) pageNode.getAttributes().getNamedItem(ID_ATTR)) != null) {
+					String pageID = ((Node) pageNode.getAttributes().getNamedItem(ID_ATTR)).getTextContent();
+					wordExpr = xpath.compile("//div[@id='" + pageID + "']//span[@class='ocr_word']");
+					NodeList wordInPageList = (NodeList) wordExpr.evaluate(pageNode, XPathConstants.NODESET);
 
-				Node pageNodeClone = pageNode.cloneNode(false);
-				for (int i = 0; i < wordInPageList.getLength(); i++) {
-					pageNodeClone.appendChild(wordInPageList.item(i));
+					Node pageNodeClone = pageNode.cloneNode(false);
+					for (int i = 0; i < wordInPageList.getLength(); i++) {
+						pageNodeClone.appendChild(wordInPageList.item(i));
+					}
+					pageNode.getParentNode().appendChild(pageNodeClone);
+					pageNode.getParentNode().removeChild(pageNode);
 				}
-				pageNode.getParentNode().appendChild(pageNodeClone);
-				pageNode.getParentNode().removeChild(pageNode);
 			}
 
 			XMLUtil.flushDocumentToFile(doc2.getDocumentElement().getOwnerDocument(), outputFilePath);
-
-			File tempFile = new File(actualFolderLocation + File.separator + "tempFile_hocr.html");
+			File tempFile = new File(actualFolderLocation + File.separator + pageId + "_tempFile_hocr.html");
 			FileUtils.copyFile(new File(outputFilePath), tempFile);
 
 			XMLUtil.htmlOutputStream(tempFile.getAbsolutePath(), outputFilePath);
@@ -105,6 +118,6 @@ public class OCREngineUtil {
 				tempFile.delete();
 			}
 		}
-
+		LOGGER.info("Exiting format HOCR for tessearct . outputfilepath : " + outputFilePath);
 	}
 }

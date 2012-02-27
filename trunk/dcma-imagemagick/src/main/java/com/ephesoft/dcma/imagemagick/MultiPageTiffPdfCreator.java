@@ -735,7 +735,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			BatchInstanceThread batchInstanceThread, List<MultiPageExecutor> multiPageExecutors, String documentIdInt,
 			String gsCmdParam, String gsCommand, Integer maxFilesProcessedPerGSCmdInt) throws DCMAApplicationException {
 		LOGGER.info("Adding command for multi page pdf execution");
-		multiPageExecutors.add(new MultiPageExecutor(batchInstanceThread, pages, gsCmdParam, gsCommand, maxFilesProcessedPerGSCmdInt));
+		multiPageExecutors.add(new MultiPageExecutor(batchInstanceThread, pages, gsCmdParam, gsCommand, maxFilesProcessedPerGSCmdInt, documentIdInt));
 	}
 
 	public boolean createPDFFromHOCR(Batch batchXML, String batchInstanceID, String localFolder, String[] pages,

@@ -26,9 +26,14 @@
 	<bean id="sampleThumbnailGenerator"
 		class="com.ephesoft.dcma.imagemagick.imageClassifier.SampleThumbnailGenerator" />
 
-	<bean id="thumbnailPNGCreator" class="com.ephesoft.dcma.imagemagick.ThumbnailPNGCreator" />
+	<bean id="thumbnailPNGCreator" class="com.ephesoft.dcma.imagemagick.ThumbnailPNGCreator"
+		p:thumbnailWidthForScannedImage="$imagemagick{imagemagick.thumbnail_width_for_scanned_images}"
+		p:thumbnailHeightForScannedImage="$imagemagick{imagemagick.thumbnail_height_for_scanned_images}"
+		p:pngWidthForScannedImage="$imagemagick{imagemagick.png_width_for_scanned_images}"
+		p:pngHeightForScannedImage="$imagemagick{imagemagick.png_height_for_scanned_images}" />
 
-	<bean id="multiPageToSinglePageConverter" class="com.ephesoft.dcma.imagemagick.MultiPageToSinglePageConverter" />
+	<bean id="multiPageToSinglePageConverter"
+		class="com.ephesoft.dcma.imagemagick.MultiPageToSinglePageConverter" />
 
 	<bean id="imageRotator" class=" com.ephesoft.dcma.imagemagick.ImageRotator" />
 
@@ -37,26 +42,25 @@
 		<property name="placeholderPrefix" value="$imagemagick{" />
 		<property name="placeholderSuffix" value="}" />
 		<property name="locations">
-			<value>classpath:/META-INF/dcma-imagemagick/imagemagick.properties</value>
+			<value>classpath:/META-INF/dcma-imagemagick/imagemagick.properties
+			</value>
 		</property>
 	</bean>
 
 	<bean id="multipageTiffPdfCreator" class="com.ephesoft.dcma.imagemagick.MultiPageTiffPdfCreator"
-	p:tiffCmds="$imagemagick{imagemagick.multi_tiff_commands}" 
-	p:pdfCmds="$imagemagick{imagemagick.multi_pdf_commands}"
-	p:unixTiffCmds="$imagemagick{imagemagick.unix_multi_tiff_commands}"
-	p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
-	p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"
-	p:tifCompression="$imagemagick{imagemagick.tif_compression}"
-	p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" 
-	p:coloredImage="$imagemagick{imagemagick.colored}"
-	p:generateDisplayPng="$imagemagick{imagemagick.generate_display_png}"
-	p:inputParameters="$imagemagick{imagemagick.display_image_input_parameters}"
-	p:outputParameters="$imagemagick{imagemagick.display_image_output_parameters}"
-	p:pdfCompression="$imagemagick{imagemagick.pdf_compression}"
-	p:ghostScriptCommand="$imagemagick{imagemagick.ghostscript_command}"
-	p:unixGhostScriptCommand="$imagemagick{imagemagick.unix_ghostscript_command}"
-	p:maxFilesProcessedPerGSCmd="$imagemagick{imagemagick.max_files_processed_per_gs_cmd}">
+		p:tiffCmds="$imagemagick{imagemagick.multi_tiff_commands}" p:pdfCmds="$imagemagick{imagemagick.multi_pdf_commands}"
+		p:unixTiffCmds="$imagemagick{imagemagick.unix_multi_tiff_commands}"
+		p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
+		p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"
+		p:tifCompression="$imagemagick{imagemagick.tif_compression}"
+		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}"
+		p:generateDisplayPng="$imagemagick{imagemagick.generate_display_png}"
+		p:inputParameters="$imagemagick{imagemagick.display_image_input_parameters}"
+		p:outputParameters="$imagemagick{imagemagick.display_image_output_parameters}"
+		p:pdfCompression="$imagemagick{imagemagick.pdf_compression}"
+		p:ghostScriptCommand="$imagemagick{imagemagick.ghostscript_command}"
+		p:unixGhostScriptCommand="$imagemagick{imagemagick.unix_ghostscript_command}"
+		p:maxFilesProcessedPerGSCmd="$imagemagick{imagemagick.max_files_processed_per_gs_cmd}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.imagemagick" />

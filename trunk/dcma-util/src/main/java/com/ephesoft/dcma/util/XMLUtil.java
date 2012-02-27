@@ -50,11 +50,18 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.PrettyHtmlSerializer;
+import org.htmlcleaner.TagNode;
+import org.jdom.input.SAXBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -69,6 +76,9 @@ public class XMLUtil {
 	private static final String UTF_ENCODING = "UTF-8";
 	private static final String PROPERTY_INDENT = "indent";
 	private static final String VALUE_YES = "yes";
+	public static final String HTML_PARSER = "html_parser";
+	public static final String HTML_CLEANER = "0";
+	public static final String JTIDY = "1";
 
 	private static DocumentBuilder getBuilder() throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -109,6 +119,16 @@ public class XMLUtil {
 
 	public static DOMSource createSourceFromFile(File file) throws Exception {
 		Document document = createDocumentFrom(file);
+		return getDomSourceForDoc(document);
+	}
+
+	public static DOMSource createSourceFromStream(InputStream inputStream) throws Exception {
+		Document document = createDocumentFrom(inputStream);
+		return getDomSourceForDoc(document);
+	}
+
+	private static DOMSource getDomSourceForDoc(Document document) throws TransformerFactoryConfigurationError,
+			TransformerConfigurationException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
 		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
@@ -203,24 +223,38 @@ public class XMLUtil {
 	 * @throws IOException
 	 */
 	public static void htmlOutputStream(final String pathOfHOCRFile, final String outputFilePath) throws IOException {
+		ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+		String htmlParser = applicationConfigProperties.getProperty(HTML_PARSER);
+		if (htmlParser != null && htmlParser.equals(HTML_CLEANER)) {
+			htmlOutputStreamViaHtmlCleaner(pathOfHOCRFile, outputFilePath);
+		} else {
+			htmlOutputStreamViaTidy(pathOfHOCRFile, outputFilePath);
+		}
+	}
+
+	public static void htmlOutputStreamViaTidy(final String pathOfHOCRFile, final String outputFilePath) throws IOException {
 
 		Tidy tidy = new Tidy();
 		tidy.setXHTML(true);
 		tidy.setDocType(DOC_TYPE_OMIT);
 		tidy.setInputEncoding(UTF_ENCODING);
 		tidy.setOutputEncoding(UTF_ENCODING);
+		tidy.setForceOutput(true);
+		tidy.setWraplen(0);
 		FileInputStream inputStream = null;
-		
+
 		OutputStream fout = null;
 		OutputStream bout = null;
 		OutputStreamWriter out = null;
 		try {
-			/*Fix for UTF-8 encoding to support special characters in turkish and czech language. UTF-8 encoding
-			 supports major characters in all the languages*/
+			/*
+			 * Fix for UTF-8 encoding to support special characters in turkish and czech language. UTF-8 encoding supports major
+			 * characters in all the languages
+			 */
 			fout = new FileOutputStream(outputFilePath);
 			bout = new BufferedOutputStream(fout);
 			out = new OutputStreamWriter(bout, UTF_ENCODING);
-			
+
 			inputStream = new FileInputStream(pathOfHOCRFile);
 			tidy.parse(inputStream, out);
 		} finally {
@@ -260,9 +294,34 @@ public class XMLUtil {
 					out.close();
 				}
 			} catch (IOException e) {
-				
+
 			}
-		
+
+		}
+	}
+
+	public static void htmlOutputStreamViaHtmlCleaner(String pathOfHOCRFile, String outputFilePath) throws IOException {
+		CleanerProperties cleanerProps = new CleanerProperties();
+
+		// set some properties to non-default values
+		cleanerProps.setTransResCharsToNCR(true);
+		cleanerProps.setTranslateSpecialEntities(true);
+		cleanerProps.setOmitComments(true);
+		cleanerProps.setOmitDoctypeDeclaration(true);
+		cleanerProps.setOmitXmlDeclaration(false);
+		HtmlCleaner cleaner = new HtmlCleaner(cleanerProps);
+
+		// take default cleaner properties
+		// CleanerProperties props = cleaner.getProperties();
+		FileInputStream hOCRFileInputStream = new FileInputStream(pathOfHOCRFile);
+		TagNode tagNode = cleaner.clean(hOCRFileInputStream, UTF_ENCODING);
+		if (null != hOCRFileInputStream) {
+			hOCRFileInputStream.close();
+		}
+		try {
+			new PrettyHtmlSerializer(cleanerProps).writeToFile(tagNode, outputFilePath, UTF_ENCODING);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -310,19 +369,72 @@ public class XMLUtil {
 	 */
 	public static void transformXML(final String pathToSourceXML, final String pathToTargetXML, final InputStream xslStream)
 			throws TransformerException, FileNotFoundException, Exception {
+		InputStream fis = new FileInputStream(new File(pathToSourceXML));
+		transformXMLWithStream(fis, pathToTargetXML, xslStream);
+	}
+
+	/**
+	 * @param pathToSourceXML
+	 * @param pathToTargetXML
+	 * @param xslStream
+	 * @throws TransformerFactoryConfigurationError
+	 * @throws TransformerConfigurationException
+	 * @throws FileNotFoundException
+	 * @throws TransformerException
+	 * @throws IOException
+	 */
+	public static void transformXMLWithStream(final InputStream fis, final String pathToTargetXML, final InputStream xslStream)
+			throws TransformerFactoryConfigurationError, TransformerConfigurationException, FileNotFoundException,
+			TransformerException, IOException {
 		FileOutputStream fileOutputStream = null;
 		try {
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 			Transformer transformer = tFactory.newTransformer(new javax.xml.transform.stream.StreamSource(xslStream));
 			fileOutputStream = new FileOutputStream(pathToTargetXML);
-			transformer.transform(new javax.xml.transform.stream.StreamSource(pathToSourceXML),
-					new javax.xml.transform.stream.StreamResult(fileOutputStream));
+			transformer.transform(new javax.xml.transform.stream.StreamSource(fis), new javax.xml.transform.stream.StreamResult(
+					fileOutputStream));
 		} finally {
 			if (fileOutputStream != null) {
 				fileOutputStream.flush();
 				fileOutputStream.close();
 			}
-		}
 
+			if (fis != null) {
+				fis.close();
+			}
+		}
+	}
+
+	/**
+	 * API for creating JDOM document using file path.
+	 * 
+	 * @param filePath {@link String}
+	 * @return
+	 * @throws Exception
+	 */
+	public static org.jdom.Document createJDOMDocumentFrom(String filePath) throws Exception {
+		return new SAXBuilder().build(filePath);
+	}
+
+	/**
+	 * API for creating JDOM document using file.
+	 * 
+	 * @param file {@link File}
+	 * @return
+	 * @throws Exception
+	 */
+	public static org.jdom.Document createJDOMDocumentFromFile(File file) throws Exception {
+		return new SAXBuilder().build(file);
+	}
+
+	/**
+	 * API for creating JDOM document from input stream.
+	 * 
+	 * @param inputStream {@link InputStream}
+	 * @return
+	 * @throws Exception
+	 */
+	public static org.jdom.Document createJDOMDocumentFromInputStream(InputStream inputStream) throws Exception {
+		return new SAXBuilder().build(inputStream);
 	}
 }

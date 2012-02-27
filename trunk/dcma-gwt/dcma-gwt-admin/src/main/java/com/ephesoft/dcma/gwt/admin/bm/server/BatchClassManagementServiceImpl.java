@@ -119,6 +119,7 @@ import com.ephesoft.dcma.util.FileUtils;
 
 public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet implements BatchClassManagementService {
 
+	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 	private static final String PLUGIN_CONFIGURATION = "PluginConfiguration";
 	private static final String EMAIL_ACCOUNTS = "EmailAccounts";
 	private static final String FUZZY_DB_INDEX = "Fuzzy-DBIndex";
@@ -669,7 +670,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 		}
 		config.setUncFolderList(uncFolderList);
 		InputStream serializableFileStream = null;
-		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(zipSourcePath, ".ser");
+		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(zipSourcePath, SERIALIZATION_EXT);
 
 		try {
 			serializableFileStream = new FileInputStream(serializableFilePath);
@@ -710,7 +711,7 @@ public class BatchClassManagementServiceImpl extends DCMARemoteServiceServlet im
 
 		String tempOutputUnZipDir = userOptions.getZipFileName();
 		File originalFolder = new File(tempOutputUnZipDir);
-		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, FileType.SER.getExtensionWithDot());
+		String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, SERIALIZATION_EXT);
 
 		InputStream serializableFileStream = null;
 		boolean isSuccess = true;

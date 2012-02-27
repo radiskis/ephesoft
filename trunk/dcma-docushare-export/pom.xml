@@ -3,12 +3,12 @@
 	<parent>
 		<groupId>com.ephesoft.dcma</groupId>
 		<artifactId>dcma-parent</artifactId>
-		<version>0.0.13-SNAPSHOT</version>
+		<version>0.0.14-SNAPSHOT</version>
 		<relativePath>../parent</relativePath>
 	</parent>
 	<groupId>com.ephesoft.dcma</groupId>
 	<artifactId>dcma-docushare-export</artifactId>
-	<version>0.0.13-SNAPSHOT</version>
+	<version>0.0.14-SNAPSHOT</version>
 	<name>DCMA: DocuShare Export model</name>
 	<description>DCMA DocuShare Export model</description>
 	<dependencies>

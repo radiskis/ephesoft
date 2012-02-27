@@ -33,181 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.util;
 
 import java.io.IOException;
@@ -245,8 +70,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	/**
 	 * This method gives the name of multi page files based on the parameters. The format of the file name is configurable. The example
-	 * entry in the properties file is: multiPageFileNameFormat=batchInstanceIdentifier;seperator ;document;documentId;extension
-	 * multiPageFileNameSeperator=_
+	 * entry in the properties file is: multiPageFileNameFormat=batchInstanceIdentifier;separator ;document;documentId;extension
+	 * multiPageFileNameSeparator=_
 	 * 
 	 * @param documentID
 	 * @param batchInstanceIdentifier
@@ -256,7 +81,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 */
 	public String getMuliPageFileName(String documentID, String batchInstanceIdentifier, String extension) throws Exception {
 		String multiPageFileNameFormat = prop.getProperty(MULIPAGE_FILENAME_FORMAT);
-		String seperator = prop.getProperty(MULIPAGE_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(MULIPAGE_FILENAME_SEPARATOR);
 		if (multiPageFileNameFormat == null || multiPageFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + MULIPAGE_FILENAME_FORMAT);
 		}
@@ -270,8 +95,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				documentFileNameBuffer.append(DOCUMENT);
 			} else if (fileNameComponents[index].equals(BATCH_ID)) {
 				documentFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				documentFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				documentFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equalsIgnoreCase(EXTENSION)) {
 				documentFileNameBuffer.append(extension);
 			} else if (fileNameComponents[index].equals(DOCUMENT_ID)) {
@@ -288,7 +113,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	/**
 	 * Returns the Hocr File name. Example configuration is hocrFileNameFormat=batchInstanceIdentifier
-	 * ;seperator;oldFileNameWOExt;extension hocrFileNameSeperator=_
+	 * ;separator;oldFileNameWOExt;extension hocrFileNameSeparator=_
 	 * 
 	 * @param batchInstanceIdentifier
 	 * @param oldFileName
@@ -301,7 +126,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	public String getHocrFileName(String batchInstanceIdentifier, String oldFileName, String newFileName, String OCRInputFileName,
 			String extension, String pageId, boolean forExtraction) throws Exception {
 		String hocrFileNameFormat = prop.getProperty(HOCR_FILENAME_FORMAT);
-		String seperator = prop.getProperty(HOCR_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(HOCR_FILENAME_SEPARATOR);
 		if (hocrFileNameFormat == null || hocrFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + HOCR_FILENAME_FORMAT);
 		}
@@ -311,8 +136,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				hocrFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				hocrFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				hocrFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				hocrFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
@@ -327,7 +152,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				hocrFileNameBuffer.append(removeExtension(OCRInputFileName));
 			} else if (fileNameComponents[index].equalsIgnoreCase(EXTENSION)) {
 				if (forExtraction) {
-					hocrFileNameBuffer.append(seperator);
+					hocrFileNameBuffer.append(separator);
 					hocrFileNameBuffer.append(EXTRACTION);
 					hocrFileNameBuffer.append(extension);
 				} else {
@@ -377,7 +202,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	/**
 	 * This method returns the Display thumbnail file name. eg. of configuration displayThumbNailFileNameFormat
-	 * =batchInstanceIdentifier;seperator;oldFileNameWOExt ;seperator;displayThumb;extension thumbNailFileNameSeperator=_
+	 * =batchInstanceIdentifier;separator;oldFileNameWOExt ;separator;displayThumb;extension thumbNailFileNameSeparator=_
 	 * 
 	 * @param batchInstanceIdentifier
 	 * @param oldFileName
@@ -390,7 +215,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	public String getDisplayThumbnailFileName(String batchInstanceIdentifier, String oldFileName, String newFileName,
 			String OCRInputFileName, String extension, String pageId) throws Exception {
 		String thumbNailFileNameFormat = prop.getProperty(DISPLAY_THUMBNAIL_FILENAME_FORMAT);
-		String seperator = prop.getProperty(THUMBNAIL_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(THUMBNAIL_FILENAME_SEPARATOR);
 		if (thumbNailFileNameFormat == null || thumbNailFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + DISPLAY_THUMBNAIL_FILENAME_FORMAT);
 		}
@@ -400,8 +225,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				dispThumbFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				dispThumbFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				dispThumbFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				dispThumbFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
@@ -436,7 +261,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	/**
 	 * This method returns the Compare thumbnail file name. eg. of configuration compareThumbNailFileNameFormat
-	 * =batchInstanceIdentifier;seperator;oldFileNameWOExt ;seperator;compareThumb;extension thumbNailFileNameSeperator=_
+	 * =batchInstanceIdentifier;separator;oldFileNameWOExt ;separator;compareThumb;extension thumbNailFileNameSeparator=_
 	 * 
 	 * @param batchInstanceIdentifier
 	 * @param oldFileName
@@ -449,7 +274,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	public String getCompareThumbnailFileName(String batchInstanceIdentifier, String oldFileName, String newFileName,
 			String OCRInputFileName, String extension, String pageId) throws Exception {
 		String thumbNailFileNameFormat = prop.getProperty(COMPARE_THUMBNAIL_FILENAME_FORMAT);
-		String seperator = prop.getProperty(THUMBNAIL_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(THUMBNAIL_FILENAME_SEPARATOR);
 		if (thumbNailFileNameFormat == null || thumbNailFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + COMPARE_THUMBNAIL_FILENAME_FORMAT);
 		}
@@ -459,8 +284,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				dispThumbFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				dispThumbFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				dispThumbFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				dispThumbFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
@@ -495,8 +320,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	/**
 	 * Retturns name of overlayed files. eg. of configuration overlayFileNameFormat
-	 * =batchInstanceIdentifier;seperator;oldFileNameWOExt;seperator;fieldName ;alternateValueIndex;extension
-	 * overlayFileNameSeperator=_
+	 * =batchInstanceIdentifier;separator;oldFileNameWOExt;separator;fieldName ;alternateValueIndex;extension
+	 * overlayFileNameSeparator=_
 	 * 
 	 * @param batchInstanceIdentifier
 	 * @param documentId
@@ -512,7 +337,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 			int alternateValueIndex, boolean alternateValue, String extension) throws Exception {
 
 		String overlayedFileNameFormat = prop.getProperty(HOCR_FILENAME_FORMAT);
-		String seperator = prop.getProperty(OVERLAY_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(OVERLAY_FILENAME_SEPARATOR);
 		if (overlayedFileNameFormat == null || overlayedFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + OVERLAY_FILENAME_FORMAT);
 		}
@@ -522,8 +347,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				overlayFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				overlayFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				overlayFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				// hocrFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
@@ -542,7 +367,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				overlayFileNameBuffer.append(fieldName);
 			} else if (fileNameComponents[index].equals(ALTERNATE_VALUE_INDEX)) {
 				if (alternateValue) {
-					overlayFileNameBuffer.append(seperator);
+					overlayFileNameBuffer.append(separator);
 					overlayFileNameBuffer.append(alternateValueIndex);
 				}
 			}
@@ -566,8 +391,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	}
 
 	/**
-	 * Eg. of configuration ocrInputFileNameFormat=batchInstanceIdentifier;seperator ;oldFileNameWOExt;extension
-	 * ocrInputFileNameSeperator=_
+	 * Eg. of configuration ocrInputFileNameFormat=batchInstanceIdentifier;separator ;oldFileNameWOExt;extension
+	 * ocrInputFileNameSeparator=_
 	 * 
 	 * @param batchInstanceIdentifier
 	 * @param oldFileName
@@ -579,7 +404,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	public String getOCRInputFileName(String batchInstanceIdentifier, String oldFileName, String newFileName, String extension,
 			String pageId) throws Exception {
 		String ocrInputFileNameFormat = prop.getProperty(OCR_INPUT_FILENAME_FORMAT);
-		String seperator = prop.getProperty(OCR_INPUT_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(OCR_INPUT_FILENAME_SEPARATOR);
 		if (ocrInputFileNameFormat == null || ocrInputFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + OCR_INPUT_FILENAME_FORMAT);
 		}
@@ -589,8 +414,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				ocrInputFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				ocrInputFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				ocrInputFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				ocrInputFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
@@ -617,7 +442,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	public String getNewFileName(String batchInstanceIdentifier, String oldFileName, String pageId, String extension) throws Exception {
 		String newFileFileNameFormat = prop.getProperty(NEW_FILE_FILENAME_FORMAT);
-		String seperator = prop.getProperty(NEW_FILE_FILENAME_SEPERATOR);
+		String separator = prop.getProperty(NEW_FILE_FILENAME_SEPARATOR);
 		if (newFileFileNameFormat == null || newFileFileNameFormat.isEmpty()) {
 			throw new Exception(SET_PROPERTY_NAME + '=' + NEW_FILE_FILENAME_FORMAT);
 		}
@@ -627,8 +452,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		for (int index = 0; index < fileNameComponents.length; index++) {
 			if (fileNameComponents[index].equals(BATCH_ID)) {
 				newFileFileNameBuffer.append(batchInstanceIdentifier);
-			} else if (fileNameComponents[index].equals(SEPERATOR)) {
-				newFileFileNameBuffer.append(seperator);
+			} else if (fileNameComponents[index].equals(SEPARATOR)) {
+				newFileFileNameBuffer.append(separator);
 			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
 				newFileFileNameBuffer.append(oldFileName);
 			} else if (fileNameComponents[index].equals(OLD_FILENAME_WO_EXT)) {

@@ -52,7 +52,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.ephesoft.dcma.batch.schema.BatchStatus;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
 import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
@@ -73,6 +73,8 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	private static final String REVIEW_BATCH_LIST_PRIORITY_FILTER = "reviewBatchListPriorityFilter";
 
 	private static final String VALIDATE_BATCH_LIST_PRIORITY_FILTER = "validateBatchListPriorityFilter";
+
+	private static final String RESTART_ALL_STATUS = "restartAllStatus";
 
 	private static final long serialVersionUID = 1L;
 
@@ -192,9 +194,9 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	@Override
 	public Boolean isReportingEnabled() {
-		ApplicationConfigProperties configProperties = new ApplicationConfigProperties();
 		boolean isReportingEnabled = false;
 		try {
+			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			isReportingEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.reporting"));
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
@@ -205,9 +207,9 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	@Override
 	public Boolean isUploadBatchEnabled() {
-		ApplicationConfigProperties configProperties = new ApplicationConfigProperties();
 		boolean isUploadBatchEnabled = false;
 		try {
+			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			isUploadBatchEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.uploadBatch"));
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
@@ -249,17 +251,17 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	}
 
 	@Override
-	public Map<BatchStatus, Integer> getBatchListPriorityFilter() {
-		Map<BatchStatus, Integer> priorityFilter = new HashMap<BatchStatus, Integer>(2);
+	public Map<BatchInstanceStatus, Integer> getBatchListPriorityFilter() {
+		Map<BatchInstanceStatus, Integer> priorityFilter = new HashMap<BatchInstanceStatus, Integer>(2);
 		Object reviewBatchListPriorityFilter = this.getThreadLocalRequest().getSession().getAttribute(
 				REVIEW_BATCH_LIST_PRIORITY_FILTER);
 		Object validateBatchListPriorityFilter = this.getThreadLocalRequest().getSession().getAttribute(
 				VALIDATE_BATCH_LIST_PRIORITY_FILTER);
 		if (reviewBatchListPriorityFilter != null) {
-			priorityFilter.put(BatchStatus.READY_FOR_REVIEW, (Integer) reviewBatchListPriorityFilter);
+			priorityFilter.put(BatchInstanceStatus.READY_FOR_REVIEW, (Integer) reviewBatchListPriorityFilter);
 		}
 		if (validateBatchListPriorityFilter != null) {
-			priorityFilter.put(BatchStatus.READY_FOR_VALIDATION, (Integer) validateBatchListPriorityFilter);
+			priorityFilter.put(BatchInstanceStatus.READY_FOR_VALIDATION, (Integer) validateBatchListPriorityFilter);
 		}
 		return priorityFilter;
 	}
@@ -268,5 +270,54 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	public void setBatchListPriorityFilter(Integer reviewBatchListPriority, Integer validateBatchListPriority) {
 		this.getThreadLocalRequest().getSession().setAttribute(REVIEW_BATCH_LIST_PRIORITY_FILTER, reviewBatchListPriority);
 		this.getThreadLocalRequest().getSession().setAttribute(VALIDATE_BATCH_LIST_PRIORITY_FILTER, validateBatchListPriority);
+	}
+	
+	@Override
+	public Boolean isRestartAllBatchEnabled() {
+		boolean isRestartAllBatchEnabled = false;
+		Object restartAllStatus = this.getThreadLocalRequest().getSession().getAttribute(RESTART_ALL_STATUS);
+		try {
+			if (null == restartAllStatus) {
+				ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+				isRestartAllBatchEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.restart_all_batch"));
+				this.getThreadLocalRequest().getSession().setAttribute(RESTART_ALL_STATUS, isRestartAllBatchEnabled);
+			} else {
+				isRestartAllBatchEnabled = (Boolean) restartAllStatus;
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+			isRestartAllBatchEnabled = false;
+		}
+		return isRestartAllBatchEnabled;
+	}
+
+	@Override
+	public Integer getBatchListTableRowCount() {
+		Integer rowCount = null;
+		try {
+			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			rowCount = Integer.parseInt(configProperties.getProperty("batchlist.table_row_count"));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return rowCount;
+
+	}
+
+	@Override
+	public BatchInstanceStatus getBatchListScreenTab(String userName) {
+		BatchInstanceStatus batchListScreenTab = (BatchInstanceStatus) this.getThreadLocalRequest().getSession()
+				.getAttribute(userName);
+		return batchListScreenTab;
+	}
+
+	@Override
+	public void setBatchListScreenTab(String userName, BatchInstanceStatus batchDTOStatus) {
+		this.getThreadLocalRequest().getSession().setAttribute(userName, batchDTOStatus);
+	}
+
+	@Override
+	public void disableRestartAllButton() {
+		this.getThreadLocalRequest().getSession().setAttribute(RESTART_ALL_STATUS, Boolean.FALSE);
 	}
 }

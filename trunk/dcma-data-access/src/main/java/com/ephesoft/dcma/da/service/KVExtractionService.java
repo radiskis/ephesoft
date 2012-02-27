@@ -52,37 +52,38 @@ public interface KVExtractionService {
 	/**
 	 * An api to fetch all KV Extraction by field type.
 	 * 
-	 * @param fieldType FieldType
-	 * @return List<KVExtraction>
+	 * @param fieldType {@link FieldType}
+	 * @return List<{@link KVExtraction}>
 	 */
 	List<KVExtraction> getKVExtractionByFieldType(FieldType fieldType);
 
 	/**
 	 * An api to insert the kvExtraction object.
 	 * 
-	 * @param kvExtraction KVExtraction
+	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void insertKVExtraction(KVExtraction kvExtraction);
 
 	/**
 	 * An api to update the kvExtraction object.
 	 * 
-	 * @param kvExtraction KVExtraction
+	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void updateKVExtraction(KVExtraction kvExtraction);
 
 	/**
 	 * An api to remove the kvExtraction object.
 	 * 
-	 * @param kvExtraction KVExtraction
+	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void removeKVExtraction(KVExtraction kvExtraction);
 
 	/**
 	 * An api to check whether KVExtraction field already exists for a field type.
 	 * 
-	 * @param fieldType
-	 * @param kvExtractionField
+	 * @param fieldType {@link FieldType}
+	 * @param {@link KVExtraction}
+	 * @return List<{@link KVExtraction}>
 	 */
 	List<KVExtraction> getDuplicateKVFields(FieldType fieldType, KVExtraction kvExtractionField);
 

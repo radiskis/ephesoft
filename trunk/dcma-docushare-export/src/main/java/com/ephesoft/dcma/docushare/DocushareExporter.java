@@ -60,7 +60,6 @@ import com.ephesoft.dcma.util.FileUtils;
 public class DocushareExporter implements ICommonConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocushareExporter.class);
-	private static final String BATCH_XML = "_batch.xml";
 
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -218,19 +217,39 @@ public class DocushareExporter implements ICommonConstants {
 		String exportToFolder = batchSchemaService.getLocalFolderLocation();
 		LOGGER.info("Properties Initialized Successfully");
 
+		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
+		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
+
 		String baseDocsFolder = exportToFolder + File.separator + batchInstanceID;
-		String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + BATCH_XML;
+		String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML;
 		String targetXmlPath = baseDocsFolder + File.separator + batchInstanceID + finalXmlName;
 		InputStream xslStream = null;
+		InputStream xmlStream = null;
 		try {
 			xslStream = xslResource.getInputStream();
 		} catch (IOException e2) {
 			LOGGER.error("Could not find xsl file in the classpath resource", e2);
 			throw new DCMAApplicationException("Could not find xsl file in the classpath resource", e2);
 		}
-		LOGGER.debug("Transforming XML " + sourceXMLPath +  temp_var_to + targetXmlPath);
+		LOGGER.debug("Transforming XML " + sourceXMLPath + temp_var_to + targetXmlPath);
 		try {
-			com.ephesoft.dcma.util.XMLUtil.transformXML(sourceXMLPath, targetXmlPath, xslStream);
+			if (isZipSwitchOn) {
+				if (FileUtils.isZipFileExists(sourceXMLPath)) {
+					xmlStream = FileUtils
+							.getInputStreamFromZip(sourceXMLPath, batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML);
+					com.ephesoft.dcma.util.XMLUtil.transformXMLWithStream(xmlStream, targetXmlPath, xslStream);
+				} else {
+					com.ephesoft.dcma.util.XMLUtil.transformXML(sourceXMLPath, targetXmlPath, xslStream);
+				}
+			} else {
+				if (new File(sourceXMLPath).exists()) {
+					com.ephesoft.dcma.util.XMLUtil.transformXML(sourceXMLPath, targetXmlPath, xslStream);
+				} else {
+					xmlStream = FileUtils
+							.getInputStreamFromZip(sourceXMLPath, batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML);
+					com.ephesoft.dcma.util.XMLUtil.transformXMLWithStream(xmlStream, targetXmlPath, xslStream);
+				}
+			}
 		} catch (FileNotFoundException e1) {
 			LOGGER.error("Could not find docushareTransform.xsl file : " + e1, e1);
 			throw new DCMAApplicationException("Could not find docushareTransform.xsl file : " + e1, e1);
@@ -240,10 +259,17 @@ public class DocushareExporter implements ICommonConstants {
 		} catch (Exception e1) {
 			LOGGER.error("Problem occured in transforming " + sourceXMLPath + temp_var_to + targetXmlPath + e1);
 			throw new DCMAApplicationException("Problem in transforming : " + e1, e1);
-		}finally {
+		} finally {
 			if (xslStream != null) {
 				try {
 					xslStream.close();
+				} catch (IOException e) {
+					LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
+				}
+			}
+			if (xmlStream != null) {
+				try {
+					xmlStream.close();
 				} catch (IOException e) {
 					LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
 				}

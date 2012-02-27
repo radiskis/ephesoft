@@ -52,6 +52,7 @@ import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
+import com.ephesoft.dcma.gwt.core.client.view.SlidingPanel;
 import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchPriority;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
@@ -70,6 +71,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -129,6 +131,12 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	@UiField
 	HorizontalPanel actionPanel;
 
+	@UiField
+	SlidingPanel slidingPanel;
+
+	@UiField
+	HorizontalPanel controlPanel;
+
 	private Button restartBatchButton;
 
 	private Button deleteBatchButton;
@@ -158,6 +166,22 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	private Button refreshButton;
 
 	public ListBox restartOptions;
+
+	private HorizontalPanel restartAllButtonPanel;
+
+	private HorizontalPanel unlockButtonPanel;
+
+	private Button restartAllButton;
+
+	private Button unlockButton;
+
+	private Button nextButton;
+
+	private Button previousButton;
+
+	private HorizontalPanel previousButtonPanel;
+
+	private HorizontalPanel nextButtonPanel;
 
 	private BatchInstanceListView batchInstanceListView;
 
@@ -201,7 +225,25 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		restartOptions = new ListBox();
 
+		restartAllButton = new Button();
+
+		unlockButton = new Button();
+
+		nextButton = new Button(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.NEXT_TEXT));
+
+		previousButton = new Button(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.PREVIOUS_TEXT));
+
+		previousButtonPanel = new HorizontalPanel();
+
+		nextButtonPanel = new HorizontalPanel();
+
+		restartAllButtonPanel = new HorizontalPanel();
+
+		unlockButtonPanel = new HorizontalPanel();
+
 		refreshButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_REFRESH));
+		restartAllButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_ALL));
+		unlockButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_UNLOCK));
 		searchBatchLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_SEARCH_BATCH)
 				+ BatchInstanceConstants.COLON);
 		searchBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_SEARCH_BATCH));
@@ -223,12 +265,18 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		filterPanel.addStyleName("groupPanelLayout");
 		restartPanel.addStyleName("groupPanelLayout");
 		deleteButtonPanel.addStyleName("groupPanelLayout");
+		restartAllButtonPanel.addStyleName("groupPanelLayout");
+		unlockButtonPanel.addStyleName("groupPanelLayout");
+		nextButtonPanel.addStyleName("groupPanelLayout");
+		previousButtonPanel.addStyleName("groupPanelLayout");
 
 		filterAndSearchPanel.addStyleName("compositePanelLayout");
 		actionPanel.addStyleName("compositePanelLayout");
+		controlPanel.addStyleName("compositePanelLayout");
 
 		filterAndSearchPanel.setSpacing(5);
 		actionPanel.setSpacing(5);
+		controlPanel.setSpacing(5);
 
 		filterPanel.add(priorityLabel);
 		filterPanel.add(priorityListBox);
@@ -259,10 +307,38 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		deleteButtonPanel.setCellVerticalAlignment(deleteBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		deleteButtonPanel.setSpacing(5);
 
+		nextButtonPanel.add(nextButton);
+		nextButtonPanel.setCellVerticalAlignment(nextButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		nextButtonPanel.setSpacing(5);
+
+		previousButtonPanel.add(previousButton);
+		previousButtonPanel.setCellVerticalAlignment(previousButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		previousButtonPanel.setSpacing(5);
+
+		restartAllButton.setEnabled(false);
+
+		restartAllButtonPanel.add(restartAllButton);
+		restartAllButtonPanel.setCellVerticalAlignment(restartAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		restartAllButtonPanel.setSpacing(5);
+
+		unlockButtonPanel.add(unlockButton);
+		unlockButtonPanel.setCellVerticalAlignment(unlockButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		unlockButtonPanel.setSpacing(5);
+
 		filterAndSearchPanel.add(filterPanel);
 		filterAndSearchPanel.add(searchPanel);
+
 		actionPanel.add(restartPanel);
 		actionPanel.add(deleteButtonPanel);
+		actionPanel.add(nextButtonPanel);
+
+		controlPanel.setWidth("100%");
+		controlPanel.add(unlockButtonPanel);
+		controlPanel.add(restartAllButtonPanel);
+		controlPanel.add(previousButtonPanel);
+		controlPanel.setCellHorizontalAlignment(unlockButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
+		controlPanel.setCellHorizontalAlignment(restartAllButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
+		controlPanel.setCellHorizontalAlignment(previousButtonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		batchAlertPanel.setBorderWidth(0);
 		labelPanel.addStyleName("top-box");
@@ -278,6 +354,9 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		batchInstanceListBox.setVisibleItemCount(3);
 		clearRestartOptions();
 		restartOptions.setWidth("100%");
+		slidingPanel.addStyleName("compositePanelLayout");
+		slidingPanel.setWidget(actionPanel);
+		slidingPanel.setVisible(true);
 
 		refreshButton.addClickHandler(new ClickHandler() {
 
@@ -288,6 +367,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 			}
 		});
+
+		restartAllButton.setEnabled(false);
 
 		deleteBatchButton.addClickHandler(new ClickHandler() {
 
@@ -309,6 +390,35 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 					}
 				}
 
+			}
+		});
+
+		restartAllButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TEXT));
+				confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TITLE));
+				confirmationDialog.addDialogListener(new DialogListener() {
+
+					@Override
+					public void onOkClick() {
+						confirmationDialog.hide();
+						presenter.onRestartAllButtonClicked();
+						presenter.updateTable();
+					}
+
+					@Override
+					public void onCancelClick() {
+						confirmationDialog.hide();
+					}
+				});
+				confirmationDialog.center();
+				confirmationDialog.show();
+				confirmationDialog.okButton.setFocus(true);
 			}
 		});
 
@@ -348,6 +458,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				}
 			}
 		});
+
 		searchBatchButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -391,6 +502,35 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			public void onKeyPress(KeyPressEvent event) {
 				if (event.getCharCode() == KeyCodes.KEY_ENTER) {
 					searchBatchButton.click();
+				}
+			}
+		});
+
+		nextButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				controlPanel.setWidth("100%");
+				slidingPanel.setWidget(controlPanel);
+				slidingPanel.setVisible(true);
+			}
+		});
+
+		previousButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				slidingPanel.setWidget(actionPanel);
+				slidingPanel.setVisible(true);
+			}
+		});
+
+		unlockButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if (checkRowSelection()) {
+					presenter.onUnlockButtonClicked(batchInstanceListView.listView.getSelectedRowIndex());
 				}
 			}
 		});
@@ -817,5 +957,33 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				presenter.getRestartOptions(batchInstanceListView.listView.getSelectedRowIndex());
 			}
 		}
+	}
+
+	public SlidingPanel getSlidingPanel() {
+		return slidingPanel;
+	}
+
+	public void setSlidingPanel(SlidingPanel slidingPanel) {
+		this.slidingPanel = slidingPanel;
+	}
+
+	public HorizontalPanel getControlPanel() {
+		return controlPanel;
+	}
+
+	public void setControlPanel(HorizontalPanel controlPanel) {
+		this.controlPanel = controlPanel;
+	}
+
+	public Button getRestartAllButton() {
+		return restartAllButton;
+	}
+
+	public void disableRestartAllButton() {
+		restartAllButton.setEnabled(Boolean.FALSE);
+	}
+
+	public void enableRestartAllButton() {
+		restartAllButton.setEnabled(Boolean.TRUE);
 	}
 }

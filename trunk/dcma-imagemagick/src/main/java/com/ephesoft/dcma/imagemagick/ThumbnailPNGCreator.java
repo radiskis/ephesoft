@@ -75,6 +75,16 @@ import com.ephesoft.dcma.util.OSUtil;
  */
 public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommonConstants {
 
+	private static final String INVALID_THUMBAIL_HEIGHT_SPECIFIED = "Invalid thumbail height for scanned images specified in imagemagick property file.";
+
+	private static final String INVALID_THUMBAIL_WIDTH_SPECIFIED = "Invalid thumbail width for scanned images specified in imagemagick property file.";
+
+	private static final String INVALID_PNG_WIDTH_SPECIFIED = "Invalid PNG width for scanned images specified in imagemagick property file.";
+
+	private static final String INVALID_PNG_HEIGHT_SPECIFIED = "Invalid PNG height for scanned images specified in imagemagick property file.";
+
+	private static final String SETTING_TO_DEFAULT_VALUE = "Setting to default value:";
+
 	private static final String EMPTY_STRING = "";
 
 	private static final char DOT = '.';
@@ -88,6 +98,22 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 	private static final String QUOTES = "\"";
 
 	private static final String SPACE = " ";
+
+	private static final Integer DEFAULT_THUMBNAIL_WIDTH = 200;
+
+	private static final Integer DEFAULT_THUMBNAIL_HEIGHT = 150;
+
+	private static final Integer DEFAULT_PNG_WIDTH = 800;
+
+	private static final Integer DEFAULT_PNG_HEIGHT = 600;
+
+	private transient String thumbnailHeightForScannedImage;
+
+	private transient String thumbnailWidthForScannedImage;
+
+	private transient String pngWidthForScannedImage;
+
+	private transient String pngHeightForScannedImage;
 
 	/**
 	 * Instance of PluginPropertiesService.
@@ -129,17 +155,64 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		String pngPath = imageName.substring(0, imageName.indexOf(FileType.TIF.getExtensionWithDot()));
 		StringBuffer command = new StringBuffer(EMPTY_STRING);
 		ArrayList<String> commandList = new ArrayList<String>();
-		String outputParams = "-density 300 -colorspace " + GRAY_COLOR + " -thumbnail " + Integer.parseInt(thumbnailH) + "x"
-				+ Integer.parseInt(thumbnailW);
+		Integer thumbnailHeight;
+		Integer thumbnailWidth;
+		Integer pngHeight;
+		Integer pngWidth;
+		try {
+			thumbnailHeight = Integer.parseInt(thumbnailHeightForScannedImage);
+			if (thumbnailHeight <= 0) {
+				thumbnailHeight = DEFAULT_THUMBNAIL_HEIGHT;
+				LOGGER.info(INVALID_THUMBAIL_HEIGHT_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_THUMBNAIL_HEIGHT);
+			}
+		} catch (Exception e) {
+			thumbnailHeight = DEFAULT_THUMBNAIL_HEIGHT;
+			LOGGER.info(INVALID_THUMBAIL_HEIGHT_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_THUMBNAIL_HEIGHT);
+		}
+		try {
+			thumbnailWidth = Integer.parseInt(thumbnailWidthForScannedImage);
+			if (thumbnailWidth <= 0) {
+				thumbnailWidth = DEFAULT_THUMBNAIL_WIDTH;
+				LOGGER.info(INVALID_THUMBAIL_WIDTH_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_THUMBNAIL_WIDTH);
+			}
+		} catch (Exception e) {
+			thumbnailWidth = DEFAULT_THUMBNAIL_WIDTH;
+			LOGGER.info(INVALID_THUMBAIL_WIDTH_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_THUMBNAIL_WIDTH);
+		}
+
+		try {
+			pngWidth = Integer.parseInt(pngWidthForScannedImage);
+			if (pngWidth < 0) {
+				pngWidth = DEFAULT_PNG_WIDTH;
+				LOGGER.info(INVALID_PNG_WIDTH_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_PNG_WIDTH);
+			}
+		} catch (Exception e) {
+			pngWidth = DEFAULT_PNG_WIDTH;
+			LOGGER.info(INVALID_PNG_WIDTH_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_PNG_WIDTH);
+		}
+
+		try {
+			pngHeight = Integer.parseInt(pngHeightForScannedImage);
+			if (pngHeight < 0) {
+				pngHeight = DEFAULT_PNG_HEIGHT;
+				LOGGER.info(INVALID_PNG_HEIGHT_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_PNG_HEIGHT);
+			}
+		} catch (Exception e) {
+			pngHeight = DEFAULT_PNG_HEIGHT;
+			LOGGER.info(INVALID_PNG_HEIGHT_SPECIFIED + SETTING_TO_DEFAULT_VALUE + DEFAULT_PNG_HEIGHT);
+		}
+
+		String outputParamsForThumbnail = "-density 300 -colorspace " + GRAY_COLOR + " -thumbnail " + thumbnailWidth + "x"
+				+ thumbnailHeight;
 		String inputParams = "";
 		if (OSUtil.isWindows()) {
-			createCommandforWindows(commandList, inputParams, outputParams, QUOTES + System.getenv(IMAGEMAGICK_ENV_VARIABLE)
-					+ File.separator + "convert\"", QUOTES + imageName + QUOTES, QUOTES + pngPath + SUFFIX_THUMBNAIL_SAMPLE_PNG
-					+ QUOTES);
+			createCommandforWindows(commandList, inputParams, outputParamsForThumbnail, QUOTES
+					+ System.getenv(IMAGEMAGICK_ENV_VARIABLE) + File.separator + "convert\"", QUOTES + imageName + QUOTES, QUOTES
+					+ pngPath + SUFFIX_THUMBNAIL_SAMPLE_PNG + QUOTES);
 
 		} else {
 			commandList.add(System.getenv(IMAGEMAGICK_ENV_VARIABLE) + File.separator + "convert");
-			createCommandForLinux(commandList, inputParams, outputParams, imageName, pngPath + SUFFIX_THUMBNAIL_SAMPLE_PNG);
+			createCommandForLinux(commandList, inputParams, outputParamsForThumbnail, imageName, pngPath + SUFFIX_THUMBNAIL_SAMPLE_PNG);
 		}
 		String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
 		LOGGER.info("Starting execution of ");
@@ -181,14 +254,16 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 
 		command = new StringBuffer(EMPTY_STRING);
 		commandList = new ArrayList<String>();
+		String outputParamsForPNGCreation = "-density 300 -colorspace " + GRAY_COLOR + " -resize " + pngWidth + "x" + pngHeight;
 		if (OSUtil.isWindows()) {
-			createCommandforWindows(commandList, inputParams, outputParams, QUOTES + System.getenv(IMAGEMAGICK_ENV_VARIABLE)
-					+ File.separator + "convert\"", QUOTES + imageName + QUOTES, QUOTES + pngPath + FileType.PNG.getExtensionWithDot()
-					+ QUOTES);
+			createCommandforWindows(commandList, inputParams, outputParamsForPNGCreation, QUOTES
+					+ System.getenv(IMAGEMAGICK_ENV_VARIABLE) + File.separator + "convert\"", QUOTES + imageName + QUOTES, QUOTES
+					+ pngPath + FileType.PNG.getExtensionWithDot() + QUOTES);
 
 		} else {
 			commandList.add(System.getenv(IMAGEMAGICK_ENV_VARIABLE) + File.separator + "convert");
-			createCommandForLinux(commandList, inputParams, outputParams, imageName, pngPath + FileType.PNG.getExtensionWithDot());
+			createCommandForLinux(commandList, inputParams, outputParamsForPNGCreation, imageName, pngPath
+					+ FileType.PNG.getExtensionWithDot());
 		}
 		cmds = (String[]) commandList.toArray(new String[commandList.size()]);
 		LOGGER.info("Starting execution of ");
@@ -701,5 +776,37 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 		}
 		commandList.add(outputImageName.trim());
 		return command.toString();
+	}
+
+	public String getThumbnailHeightForScannedImage() {
+		return thumbnailHeightForScannedImage;
+	}
+
+	public void setThumbnailHeightForScannedImage(String thumbnailHeightForScannedImage) {
+		this.thumbnailHeightForScannedImage = thumbnailHeightForScannedImage;
+	}
+
+	public String getThumbnailWidthForScannedImage() {
+		return thumbnailWidthForScannedImage;
+	}
+
+	public void setThumbnailWidthForScannedImage(String thumbnailWidthForScannedImage) {
+		this.thumbnailWidthForScannedImage = thumbnailWidthForScannedImage;
+	}
+
+	public void setPngWidthForScannedImage(String pngWidthForScannedImage) {
+		this.pngWidthForScannedImage = pngWidthForScannedImage;
+	}
+
+	public String getPngWidthForScannedImage() {
+		return pngWidthForScannedImage;
+	}
+
+	public void setPngHeightForScannedImage(String pngHeightForScannedImage) {
+		this.pngHeightForScannedImage = pngHeightForScannedImage;
+	}
+
+	public String getPngHeightForScannedImage() {
+		return pngHeightForScannedImage;
 	}
 }

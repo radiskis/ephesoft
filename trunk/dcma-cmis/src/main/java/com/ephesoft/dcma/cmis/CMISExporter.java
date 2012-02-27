@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -116,6 +117,10 @@ public class CMISExporter implements ICommonConstants {
 
 	private static final String PDF_MIME_TYPE = "application/pdf";
 
+	private static final String EXCEPTION_MESSAGE_CONSTANT_1 = "The WSDL URL of the CMIS Navigation Service must be specified as the value of the \"dcma-cmis.properties\"configuration file property \" ";
+	private static final String EXCEPTION_MESSAGE_CONSTANT_2 = " when WS-Security is specified as the CMIS security mode.HTTP Basic Authentication will be used by default.";
+	private static final String SERVER_URL = "{serverURL}";
+	private static final String FALSE = "false";
 	/**
 	 * Instance of BatchInstanceService.
 	 */
@@ -481,7 +486,7 @@ public class CMISExporter implements ICommonConstants {
 					if (sMultiPagePdf != null && !sMultiPagePdf.isEmpty()) {
 						File fSourcePdfFile = new File(sFolderToBeExported + File.separator + sMultiPagePdf);
 						try {
-							uploadDocument(session, batchInstanceFolder, fSourcePdfFile, document, batchInstanceIdentifier,
+							uploadDocument(session, batchInstanceFolder, fSourcePdfFile, document,
 									batchClassIdentifier, true);
 						} catch (IOException e) {
 							LOGGER.error("Problem uploading PDF file : " + fSourcePdfFile, e);
@@ -495,7 +500,7 @@ public class CMISExporter implements ICommonConstants {
 
 							File fSourceTifFile = new File(sFolderToBeExported + File.separator + sMultiPageTif);
 							try {
-								uploadDocument(session, batchInstanceFolder, fSourceTifFile, document, batchInstanceIdentifier,
+								uploadDocument(session, batchInstanceFolder, fSourceTifFile, document,
 										batchClassIdentifier, false);
 							} catch (Exception e) {
 								LOGGER.error("Problem uploading Tiff file : " + fSourceTifFile, e);
@@ -549,175 +554,187 @@ public class CMISExporter implements ICommonConstants {
 		String versioningServiceURL = null;
 
 		try {
-				// Determine if a security mode property was specified in the file.
-				String securityMode = getSecurityMode();
+			StringBuffer errorMsg = new StringBuffer();
+			// Determine if a security mode property was specified in the file.
+			String securityMode = getSecurityMode();
 
-				if ((securityMode != null) && (securityMode.trim().length() > 0)) {
+			if ((securityMode != null) && (securityMode.trim().isEmpty())) {
 
-					if (securityMode.trim().equalsIgnoreCase("wssecurity")) {
-						// We will be using WS-Security.
-						basicSecurity = false;
+				if (securityMode.trim().equalsIgnoreCase("wssecurity")) {
+					// We will be using WS-Security.
+					basicSecurity = false;
 
-						// Get the URL's for each of the services.
-						aclServiceURL = getUrlAclService(); //bundle.getString("cmis.url.acl_service");
-						if ((aclServiceURL == null) || (aclServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS ACL Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.acl_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							aclServiceURL = aclServiceURL.trim();
+					// Get the URL's for each of the services.
+					aclServiceURL = getUrlAclService(); // bundle.getString("cmis.url.acl_service");
+					if ((aclServiceURL == null) || (aclServiceURL.trim().length() <= 0)) {
 
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (aclServiceURL.contains("{serverURL}")) {
-								aclServiceURL = aclServiceURL.replace("{serverURL}", serverURL);
-							}
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.acl_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						aclServiceURL = aclServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (aclServiceURL.contains(SERVER_URL)) {
+							aclServiceURL = aclServiceURL.replace(SERVER_URL, serverURL);
 						}
-
-						discoverServiceURL = getUrlDiscoveryService(); //bundle.getString("cmis.url.discovery_service");
-						if ((discoverServiceURL == null) || (discoverServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Discovery Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.discovery_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							discoverServiceURL = discoverServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (discoverServiceURL.contains("{serverURL}")) {
-								discoverServiceURL = discoverServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						multifilingServiceURL = getUrlMultifilingService(); //bundle.getString("cmis.url.multifiling_service");
-						if ((multifilingServiceURL == null) || (multifilingServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Multi-Filing Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.multifiling_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							multifilingServiceURL = multifilingServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (multifilingServiceURL.contains("{serverURL}")) {
-								multifilingServiceURL = multifilingServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						navigationServiceURL = getUrlNavigationService(); //bundle.getString("cmis.url.navigation_service");
-						if ((navigationServiceURL == null) || (navigationServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Navigation Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.navigation_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							navigationServiceURL = navigationServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (navigationServiceURL.contains("{serverURL}")) {
-								navigationServiceURL = navigationServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						objectServiceURL = getUrlObjectService(); //bundle.getString("cmis.url.object_service");
-						if ((objectServiceURL == null) || (objectServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Object Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.object_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							objectServiceURL = objectServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (objectServiceURL.contains("{serverURL}")) {
-								objectServiceURL = objectServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						policyServiceURL = getUrlPolicyService(); //bundle.getString("cmis.url.policy_service");
-						if ((policyServiceURL == null) || (policyServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Policy Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.policy_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							policyServiceURL = policyServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (policyServiceURL.contains("{serverURL}")) {
-								policyServiceURL = policyServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						relationshipServiceURL = getUrlRelationshipService(); //bundle.getString("cmis.url.relationship_service");
-						if ((relationshipServiceURL == null) || (relationshipServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Relationship Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.relationship_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							relationshipServiceURL = relationshipServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (relationshipServiceURL.contains("{serverURL}")) {
-								relationshipServiceURL = relationshipServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						repositoryServiceURL = getUrlRepositoryService(); //bundle.getString("cmis.url.repository_service");
-						if ((repositoryServiceURL == null) || (repositoryServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Repository Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.repository_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							repositoryServiceURL = repositoryServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (repositoryServiceURL.contains("{serverURL}")) {
-								repositoryServiceURL = repositoryServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-						versioningServiceURL = getUrlVersioningService();//bundle.getString("cmis.url.versioning_service");
-						if ((versioningServiceURL == null) || (versioningServiceURL.trim().length() <= 0)) {
-							throw new Exception(
-									"The WSDL URL of the CMIS Versioning Service must be specified as the value of the \"dcma-cmis.properties\" "
-											+ "configuration file property \"cmis.url.versioning_service\" when WS-Security is specified as the CMIS security mode. "
-											+ "HTTP Basic Authentication will be used by default.");
-						} else {
-							// Make sure that it's tidy.
-							versioningServiceURL = versioningServiceURL.trim();
-
-							// Determine if a part of the specified URL needs to be replaced with the server URL
-							// configured in the batch classe.
-							if (versioningServiceURL.contains("{serverURL}")) {
-								versioningServiceURL = versioningServiceURL.replace("{serverURL}", serverURL);
-							}
-						}
-
-					} else if (!securityMode.trim().equalsIgnoreCase("basic")) {
-						// This security mode isn't recognized.
-						LOGGER.warn("CMIS CONFIGURATION WARNING: \"cmis.security.mode\" property value \"" + securityMode.trim()
-								+ "\" isn't supported. HTTP Basic Authentication will be used by default.");
 					}
+
+					discoverServiceURL = getUrlDiscoveryService(); // bundle.getString("cmis.url.discovery_service");
+					if ((discoverServiceURL == null) || (discoverServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.discovery_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						discoverServiceURL = discoverServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (discoverServiceURL.contains(SERVER_URL)) {
+							discoverServiceURL = discoverServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					multifilingServiceURL = getUrlMultifilingService(); // bundle.getString("cmis.url.multifiling_service");
+					if ((multifilingServiceURL == null) || (multifilingServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.multifiling_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						multifilingServiceURL = multifilingServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (multifilingServiceURL.contains(SERVER_URL)) {
+							multifilingServiceURL = multifilingServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					navigationServiceURL = getUrlNavigationService(); // bundle.getString("cmis.url.navigation_service");
+					if ((navigationServiceURL == null) || (navigationServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.navigation_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString()
+
+						);
+					} else {
+						// Make sure that it's tidy.
+						navigationServiceURL = navigationServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (navigationServiceURL.contains(SERVER_URL)) {
+							navigationServiceURL = navigationServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					objectServiceURL = getUrlObjectService(); // bundle.getString("cmis.url.object_service");
+					if ((objectServiceURL == null) || (objectServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.object_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						objectServiceURL = objectServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (objectServiceURL.contains(SERVER_URL)) {
+							objectServiceURL = objectServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					policyServiceURL = getUrlPolicyService(); // bundle.getString("cmis.url.policy_service");
+					if ((policyServiceURL == null) || (policyServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.policy_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						policyServiceURL = policyServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (policyServiceURL.contains(SERVER_URL)) {
+							policyServiceURL = policyServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					relationshipServiceURL = getUrlRelationshipService(); // bundle.getString("cmis.url.relationship_service");
+					if ((relationshipServiceURL == null) || (relationshipServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.relationship_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						relationshipServiceURL = relationshipServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (relationshipServiceURL.contains(SERVER_URL)) {
+							relationshipServiceURL = relationshipServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					repositoryServiceURL = getUrlRepositoryService(); // bundle.getString("cmis.url.repository_service");
+					if ((repositoryServiceURL == null) || (repositoryServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.relationship_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						repositoryServiceURL = repositoryServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (repositoryServiceURL.contains(SERVER_URL)) {
+							repositoryServiceURL = repositoryServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+					versioningServiceURL = getUrlVersioningService();// bundle.getString("cmis.url.versioning_service");
+					if ((versioningServiceURL == null) || (versioningServiceURL.trim().length() <= 0)) {
+						errorMsg.setLength(0);
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_1);
+						errorMsg.append("cmis.url.versioning_service");
+						errorMsg.append(EXCEPTION_MESSAGE_CONSTANT_2);
+						throw new Exception(errorMsg.toString());
+					} else {
+						// Make sure that it's tidy.
+						versioningServiceURL = versioningServiceURL.trim();
+
+						// Determine if a part of the specified URL needs to be replaced with the server URL
+						// configured in the batch classe.
+						if (versioningServiceURL.contains(SERVER_URL)) {
+							versioningServiceURL = versioningServiceURL.replace(SERVER_URL, serverURL);
+						}
+					}
+
+				} else if (!securityMode.trim().equalsIgnoreCase("basic")) {
+					// This security mode isn't recognized.
+					LOGGER.warn("CMIS CONFIGURATION WARNING: \"cmis.security.mode\" property value \"" + securityMode.trim()
+							+ "\" isn't supported. HTTP Basic Authentication will be used by default.");
 				}
+			}
 		} catch (Exception configEx) {
 			LOGGER.error("CMIS CONFIGURATION ERROR: An error occurred while attempting to obtain configuration properties from the "
 					+ "configuraiton file. The error was: " + configEx.getMessage());
@@ -734,7 +751,7 @@ public class CMISExporter implements ICommonConstants {
 			// Configure Open Chemistry for WS-Security.
 			sessionParameters.put(SessionParameter.BINDING_TYPE, BindingType.WEBSERVICES.value());
 			sessionParameters.put(SessionParameter.AUTH_SOAP_USERNAMETOKEN, "true");
-			sessionParameters.put(SessionParameter.AUTH_HTTP_BASIC, "false");
+			sessionParameters.put(SessionParameter.AUTH_HTTP_BASIC, FALSE);
 
 			sessionParameters.put(SessionParameter.WEBSERVICES_ACL_SERVICE, aclServiceURL);
 			sessionParameters.put(SessionParameter.WEBSERVICES_DISCOVERY_SERVICE, discoverServiceURL);
@@ -796,6 +813,7 @@ public class CMISExporter implements ICommonConstants {
 		// a root level folder. Recursion is employed in order to walk the folder tree.
 		// ****************************************************************************************
 		Folder targetFolder = null;
+		Folder targetFolderReturnValue=null;
 
 		// Get the name of the folder at the current index in the path.
 		String currentFolderName = folderPathList[currentFolderIndex];
@@ -825,30 +843,34 @@ public class CMISExporter implements ICommonConstants {
 			} catch (Exception createEx) {
 				LOGGER.error("An error occurred while attempting to create the folder node \"" + currentFolderName
 						+ "\" within the parent folder node \"" + currentFolderName + "\". The error was: " + createEx.getMessage());
-				return null;
+				
 			}
 		}
 
-		if (targetFolder != null) {
+		else {
 			// The folder does exist, but we need to determine if we are at the end of the chain.
 			int newFolderIndex = currentFolderIndex + 1;
 			if (newFolderIndex < folderPathList.length) {
 				String subfolderPath = parentFolderPath;
-				if (!parentFolderPath.equals("/")) {
-					subfolderPath += "/";
+				StringBuffer tempSubfolderPath=new StringBuffer();
+				tempSubfolderPath.append(subfolderPath);
+				if (!("/").equals(parentFolderPath)) {
+					tempSubfolderPath.append('/');
 				}
-				subfolderPath += currentFolderName;
+				tempSubfolderPath.append(currentFolderName);
+				subfolderPath=tempSubfolderPath.toString();
 
 				// We are not at the end of the tree. Iterate to the next node in the path.
 				targetFolder = this.checkCreateFolder(session, targetFolder, subfolderPath, newFolderIndex, folderPathList);
 			}
 			// Else this is the end of the line.
+		targetFolderReturnValue=targetFolder;
 		}
 		// ****************************************************************************************
 		// END: Zia Consulting Enhancement
 		// ****************************************************************************************
-
-		return targetFolder;
+		
+		return targetFolderReturnValue;
 	} // End checkCreateFolder
 
 	/**
@@ -917,7 +939,7 @@ public class CMISExporter implements ICommonConstants {
 	 * @param batchClassIdentifier String
 	 * @throws IOException
 	 */
-	private void uploadDocument(Session session, Folder folder, File file, Document document, String batchInstanceIdentifier,
+	private void uploadDocument(Session session, Folder folder, File file, Document document,
 			String batchClassIdentifier, boolean isPdfFile) throws IOException, DCMAApplicationException {
 		String mimeType = null;
 		try {
@@ -1096,7 +1118,7 @@ public class CMISExporter implements ICommonConstants {
 					GregorianCalendar calendar = new GregorianCalendar();
 					DateFormat formatter = null;
 					Date date;
-					formatter = new SimpleDateFormat(getDateFormat());
+					formatter = new SimpleDateFormat(getDateFormat(), Locale.ENGLISH);
 					date = (Date) formatter.parse(value);
 					calendar.setTime(date);
 					returnValue = calendar;
@@ -1138,15 +1160,15 @@ public class CMISExporter implements ICommonConstants {
 						if (valueInt != 0) {
 							valueToConvert = "true";
 						} else {
-							valueToConvert = "false";
+							valueToConvert = FALSE;
 						}
 					} catch (NumberFormatException nfe) {
-						valueToConvert = "false";
+						valueToConvert = FALSE;
 						LOGGER.info("Found non integer value in boolean field.");
 					}
 				}
 
-				returnValue = new Boolean(valueToConvert);
+				returnValue =  Boolean.valueOf(valueToConvert);
 				break;
 			default:
 				LOGGER.info(CONVERTING + property + " to default value of String");
@@ -1188,12 +1210,14 @@ public class CMISExporter implements ICommonConstants {
 			// Get the value of the configuration property.
 			String batchInSubfolderString = getRepoCreateBatchFolder();
 
-			if ((batchInSubfolderString != null) && (batchInSubfolderString.trim().length() > 0)
-					&& (batchInSubfolderString.trim().equalsIgnoreCase("false"))) {
+			if ((batchInSubfolderString != null) && (batchInSubfolderString.trim().isEmpty())
+					&& (batchInSubfolderString.trim().equalsIgnoreCase(FALSE))) {
 				// Batches do not get their own subfolders.
 				batchInSubfolder = false;
 			}
 		} catch (Exception configEx) {
+			LOGGER.info("Ignore exceptions related to this feature, as this is not a required behavior");
+			
 			// Ignore exceptions related to this feature, as this is not a required behavior.
 		}
 

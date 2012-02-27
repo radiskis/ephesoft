@@ -33,181 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.tablefinder.service;
 
 import java.math.BigInteger;
@@ -737,7 +562,7 @@ public class TableFinderServiceImpl implements TableFinderService {
 
 			if (null != spans) {
 
-				List<Span> linkedList = getSortedList(spans);
+				List<Span> linkedList = getSortedSpanList(spans);
 				if (null == linkedList || linkedList.isEmpty()) {
 					LOGGER.info("Return linked list is null for the page id = " + pageID);
 					return null;
@@ -748,7 +573,6 @@ public class TableFinderServiceImpl implements TableFinderService {
 					return null;
 				}
 				// int nextIndex = -1;
-
 				if (startDataCarrier == null) {
 					while (listItr.hasNext()) {
 						final Span span = listItr.next();
@@ -760,7 +584,6 @@ public class TableFinderServiceImpl implements TableFinderService {
 								break;
 							} else {
 								LOGGER.info("No start pattern found for table where start pattern : " + startPattern);
-
 							}
 						} catch (Exception e) {
 							errMsg = e.getMessage();
@@ -940,10 +763,8 @@ public class TableFinderServiceImpl implements TableFinderService {
 		return outputList;
 	}
 
-	private List<Span> getSortedList(final Spans spans) {
-
+	private List<Span> getSortedSpanList(final Spans spans) {
 		final List<Span> spanList = spans.getSpan();
-
 		int width = 20;
 		try {
 			width = Integer.parseInt(getWidthOfLine());
@@ -951,7 +772,55 @@ public class TableFinderServiceImpl implements TableFinderService {
 			LOGGER.error(nfe.getMessage(), nfe);
 			width = 20;
 		}
+		LOGGER.info("width of line : " + width);
 		final int defaultValue = width;
+		final Set<Span> setQ = new TreeSet<Span>(new Comparator<Span>() {
+
+			public int compare(final Span firstSpan, final Span secSpan) {
+				BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
+				BigInteger s2Y1 = secSpan.getCoordinates().getY1();
+				int returnValue = s1Y1.intValue() - s2Y1.intValue();
+				if (returnValue == 0) {
+					returnValue = -1;
+				}
+				return returnValue;
+			}
+		});
+		setQ.addAll(spanList);
+		Set<Span> set = getSortedTreeSet(defaultValue);
+		final List<Span> linkedList = new LinkedList<Span>();
+		List<Span> sortedSpanList = new ArrayList<Span>();
+		boolean isFirst = true;
+		int y1Coord = 0;
+		for (Span span : setQ) {
+			int spanY1Coord = span.getCoordinates().getY1().intValue();
+			if (isFirst) {
+				y1Coord = spanY1Coord;
+				isFirst = false;
+			}
+			if (spanY1Coord - y1Coord >= -defaultValue && spanY1Coord - y1Coord <= defaultValue) {
+				sortedSpanList.add(span);
+			} else {
+				set.addAll(sortedSpanList);
+				LOGGER.info("Sorted Row : " + sortedSpanList);
+				linkedList.addAll(set);
+				sortedSpanList = new ArrayList<Span>();
+				sortedSpanList.add(span);
+				set.clear();
+				y1Coord = spanY1Coord;
+			}
+		}
+		set.addAll(sortedSpanList);
+		linkedList.addAll(set);
+		LOGGER.info("Span List sorted");
+		// linkedList.addAll(set);
+		// TODO add the clear method to remove all elements of set since it not required after adding it to linked list.
+		// set.clear();
+		return linkedList;
+	}
+
+	private Set<Span> getSortedTreeSet(final int defaultValue) {
+
 		final Set<Span> set = new TreeSet<Span>(new Comparator<Span>() {
 
 			public int compare(final Span firstSpan, final Span secSpan) {
@@ -969,20 +838,7 @@ public class TableFinderServiceImpl implements TableFinderService {
 				return returnValue;
 			}
 		});
-
-		set.addAll(spanList);
-		if (set != null) {
-			for (Span span : set) {
-				LOGGER.info(span.getValue());
-			}
-		}
-		final List<Span> linkedList = new LinkedList<Span>();
-		linkedList.addAll(set);
-
-		// TODO add the clear method to remove all elements of set since it not required after adding it to linked list.
-		// set.clear();
-
-		return linkedList;
-
+		return set;
 	}
+
 }

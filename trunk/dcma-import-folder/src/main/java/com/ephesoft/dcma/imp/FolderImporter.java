@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.imp;
 
 import java.io.File;
@@ -163,13 +93,13 @@ public final class FolderImporter implements ICommonConstants {
 
 	private static final String SEMICOLON_DELIMITER = ";";
 
-	private static final String SER_EXTENSION = ";ser";
+	private static final String SER_EXTENSION = SEMICOLON_DELIMITER + FileType.SER.getExtension();
 
 	private static final String IMPORT_MULTIPAGE_FILES_PLUGIN = "IMPORT_MULTIPAGE_FILES";
 
 	private static final String IMPORT_BATCH_FOLDER_PLUGIN = "IMPORT_BATCH_FOLDER";
 
-	private static final String SERIALIZATION_EXT = ".ser";
+	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 	private static final String BCF_SER_FILE_NAME = "BCF_ASSO";
 	private static final Logger LOGGER = LoggerFactory.getLogger(FolderImporter.class);
 
@@ -421,7 +351,7 @@ public final class FolderImporter implements ICommonConstants {
 
 		batchXmlObj.setDocuments(documents);
 		addBatchClassFieldToBatch(batchXmlObj, batchInstance, objectFactory);
-		batchSchemaService.updateBatch(batchXmlObj);
+		batchSchemaService.updateBatch(batchXmlObj, true);
 
 	}
 
@@ -560,23 +490,24 @@ public final class FolderImporter implements ICommonConstants {
 			if (folderValid) {
 				File indivisualFile = new File(fFolderToBeMoved, fileName);
 
-				if (indivisualFile.isDirectory()) {
+				/*if (indivisualFile.isDirectory()) {
 					LOGGER.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
 							+ " will not be moved");
 					folderValid = false;
 					break;
-				}
+				}*/
 
 				String nameOfFile = fileName;
 				boolean invalidFileExtension = true;
 				for (String validExt : validExtensions) {
-					if (nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
+					if (indivisualFile.isDirectory()
+							|| nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
 						invalidFileExtension = false;
 					}
 
 				}
 				if (invalidFileExtension) {
-					LOGGER.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions-- "
+					LOGGER.info("\tBuisiness Rule Violation Folder --" + "File with Invalid Extensions (or is directory) -- "
 							+ indivisualFile.getAbsolutePath() + " will not be moved");
 				}
 
@@ -815,11 +746,11 @@ public final class FolderImporter implements ICommonConstants {
 							fileOriginal.renameTo(fileNew);
 
 							LOGGER.info("Converting multi page tiff file : " + fileNew.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, threadList, false);
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, null, threadList, false);
 							deleteFileList.add(fileNew);
 						} else {
 							LOGGER.info("Converting multi page tiff file : " + fileOriginal.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, threadList, false);
+							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, null, threadList, false);
 							deleteFileList.add(fileOriginal);
 						}
 					} catch (Exception e) {

@@ -67,8 +67,7 @@ import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
-import com.ephesoft.dcma.core.EphesoftProperty;
-import com.ephesoft.dcma.core.common.DCMABusinessException;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
@@ -83,11 +82,6 @@ import com.ephesoft.dcma.util.OSUtil;
 public class TabbedPdfExporter implements ICommonConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TabbedPdfExporter.class);
-
-	private static final String TABBED_PDF_PLUGIN = "TABBED_PDF";
-	private static final String MAPPING_SEPERATOR = "===";
-	private static final String YES = "YES";
-	private static final String DOCUMENT_IDENTIFIER = "DOC ";
 
 	private String ghostScriptCommand;
 	private String unixGhostScriptCommand;
@@ -138,36 +132,39 @@ public class TabbedPdfExporter implements ICommonConstants {
 		return pluginPropertiesService;
 	}
 
-	public void createTabbedPDF(String batchInstanceIdentifier, BatchSchemaService batchSchemaService, String pluginName)
-			throws DCMAApplicationException {
-		String tabbedPDFSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-				TabbedPdfProperties.TABBED_PDF_SWITCH);
-		if ("ON".equalsIgnoreCase(tabbedPDFSwitch)) {
-			String sFolderToBeExported = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_EXPORT_FOLDER);
-			String placeHolder = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_PLACEHOLDER);
-			String pdfCreationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_CREATION_PARAMETERS);
-			String pdfOptimizationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_PARAMETERS);
-			String propertyFile = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_PROPERTY_FILE);
-			String pdfOptimizationSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABBED_PDF_PLUGIN,
-					TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_SWITCH);
-			this.batchSchemaService = batchSchemaService;
+	/**
+	 * This will create the tabbed pdf for the given batchInstance
+	 * 
+	 * @param batchInstanceIdentifier(@link String)
+	 * @throws DCMAApplicationException
+	 */
+	public void createTabbedPDF(String batchInstanceIdentifier) throws DCMAApplicationException {
+		String tabbedPDFSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_SWITCH);
+		if (TabbedPdfConstant.ON.equalsIgnoreCase(tabbedPDFSwitch)) {
+			String sFolderToBeExported = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_EXPORT_FOLDER);
+			String placeHolder = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_PLACEHOLDER);
+			String pdfCreationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_CREATION_PARAMETERS);
+			String pdfOptimizationParam = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_PARAMETERS);
+			String propertyFile = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_PROPERTY_FILE);
+			String pdfOptimizationSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+					TabbedPdfConstant.TABBED_PDF_PLUGIN, TabbedPdfProperties.TABBED_PDF_OPTIMIZATION_SWITCH);
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
-			boolean exportFolderExistes = isExportFolderAlreadyCreated(sFolderToBeExported);
+			boolean exportFolderExists = isExportFolderAlreadyCreated(sFolderToBeExported);
 			File fFolderToBeExported = new File(sFolderToBeExported);
 
-			if (!exportFolderExistes) {
+			if (!exportFolderExists) {
 				throw new DCMAApplicationException(fFolderToBeExported.toString() + " is not a Directory.");
 			}
-			checkForUnknownDocument(batch);
-
+			// checkForUnknownDocument(batch);
 			LinkedHashMap<String, List<String>> documentPDFMap;
 			try {
-				if (YES.equalsIgnoreCase(placeHolder)) {
+				if (TabbedPdfConstant.YES.equalsIgnoreCase(placeHolder)) {
 					documentPDFMap = createBatchClassDocumentPDFMap(batch, batchInstanceIdentifier, propertyFile);
 				} else {
 					documentPDFMap = createDocumentPDFMap(batch, batchInstanceIdentifier);
@@ -180,107 +177,9 @@ public class TabbedPdfExporter implements ICommonConstants {
 			if (envVariable == null || envVariable.isEmpty()) {
 				throw new DCMAApplicationException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
 			}
-			String gsCommand = getGSCommand();
-			if (gsCommand == null) {
-				LOGGER.info("No ghostcript command specifeid in properties file.  ghostcript command = " + gsCommand);
-				throw new DCMAApplicationException("No ghostcript command specifeid in properties file.  ghostcript command = "
-						+ gsCommand);
-			}
-			String pdfMarkTemplatePath = batchSchemaService.getAbsolutePath(batch.getBatchClassIdentifier(), batchSchemaService
-					.getScriptConfigFolderName(), true);
-			File pdfMarksSample = new File(pdfMarkTemplatePath + File.separator + TabbedPdfConstant.PDF_MARKS_FILE_NAME);
-			if (!pdfMarksSample.exists()) {
-				throw new DCMAApplicationException("Sample PdfMarks file not provided.");
-			}
-			Set<String> documentNames;
-			documentNames = documentPDFMap.keySet();
-			Iterator<String> iterator = documentNames.iterator();
-			List<String> documentPDFPaths = new ArrayList<String>();
-
-			String documentIdInt;
 			try {
-				File localPdfMarksSample = new File(batchSchemaService.getLocalFolderLocation() + File.separator
-						+ batchInstanceIdentifier + File.separator + pdfMarksSample.getName());
-				FileUtils.copyFile(pdfMarksSample, localPdfMarksSample);
-				String pdfBookMarkTemplate = TabbedPdfConstant.PDF_MARKS_TEMPLATE;
-
-				FileWriter fileWriter = new FileWriter(localPdfMarksSample, true);
-				String pdfBookMarkText = "";
-				while (iterator.hasNext()) {
-					documentIdInt = iterator.next();
-					List<String> docDetails = documentPDFMap.get(documentIdInt);
-					pdfBookMarkText = pdfBookMarkTemplate.replace("**", docDetails.get(0)); // document type i.e bookmark title
-					pdfBookMarkText = pdfBookMarkText.replace("##", docDetails.get(1)); // bookmark page number
-					fileWriter.write(pdfBookMarkText + "\n");
-					documentPDFPaths.add(docDetails.get(2));
-				}
-
-				fileWriter.close();
-
-				BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
-
-				List<TabbedPDFExecutor> tabbedPDFExecutors = new ArrayList<TabbedPDFExecutor>();
-				String batchName = "";
-				Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
-				if (subPoenaLoanMap.size() == 2) {
-					batchName = subPoenaLoanMap.get(TabbedPdfConstant.SUBPOENA) + TabbedPdfConstant.UNDERSCORE
-							+ subPoenaLoanMap.get(TabbedPdfConstant.LOAN_NUMBER);
-				}
-				if (batchName == null || batchName.isEmpty()) {
-					batchName = batch.getBatchName();
-				}
-				String tabbedPDFName = batchName + "_" + batchInstanceIdentifier + ".pdf";
-				String tabbedPDFTempFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
-				String tabbedPDFLocalPath = tabbedPDFTempFolder + File.separator + tabbedPDFName;
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase("ON")) {
-					tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths,
-							localPdfMarksSample.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
-				} else {
-					tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, sFolderToBeExported, documentPDFPaths,
-							localPdfMarksSample.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
-				}
-
-				try {
-					LOGGER.info("Executing commands for creation of tabbed pdf using thread pool.");
-					batchInstanceThread.execute();
-					LOGGER.info("Tabebd pdf creation ends.");
-				} catch (DCMAApplicationException dcmae) {
-					LOGGER.error("Error in executing command for tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
-					batchInstanceThread.remove();
-					// Throw the exception to set the batch status to Error by Application aspect
-					throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-				}
-				if(pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase("ON")) {
-					batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
-					List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
-					
-					tabbedPdfOptimier.add(new TabbedPdfOptimizer(sFolderToBeExported, tabbedPDFTempFolder, batchInstanceThread,
-							tabbedPDFName, pdfOptimizationParam, gsCommand));
-					try {
-						LOGGER.info("Executing commands for optimizing tabbed pdf using thread pool.");
-						batchInstanceThread.execute();
-						LOGGER.info("Tabebd pdf creation ends.");
-					} catch (DCMAApplicationException dcmae) {
-						LOGGER.error("Error in executing command for optimizing tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
-						batchInstanceThread.remove();
-						// Throw the exception to set the batch status to Error by Application aspect
-						throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-					}
-				}
-
-				File destFile = new File(tabbedPDFLocalPath);
-				if (destFile.exists()) {
-					destFile.delete();
-				}
-
-				// copying file to ephesoft system folder
-				LOGGER.info("Started copying multipage pdf file in ephesoft system folder.");
-				File srcFile = new File(sFolderToBeExported + File.separator + tabbedPDFName);
-				destFile = new File(tabbedPDFLocalPath);
-				FileUtils.copyFile(srcFile, destFile);
-				LOGGER.info("Completed copying multipage pdf file in ephesoft system folder.");
-
-				mergeBatchXmlDocs(batchSchemaService, batch, documentNames, documentPDFMap, tabbedPDFName);
+				writePDFMarksFile(sFolderToBeExported, pdfCreationParam, batchInstanceIdentifier, pdfOptimizationParam,
+						pdfOptimizationSwitch, documentPDFMap);
 			} catch (Exception e) {
 				LOGGER.error("Error in writing pdfMarks file" + e.getMessage(), e);
 				throw new DCMAApplicationException("Error in writing pdfMarks file." + e.getMessage(), e);
@@ -292,6 +191,150 @@ public class TabbedPdfExporter implements ICommonConstants {
 		}
 	}
 
+	/**
+	 * 
+	 * This will create the PDFMarks file
+	 * 
+	 * @param sFolderToBeExported
+	 * @param pdfCreationParam
+	 * @param pdfOptimizationParam
+	 * @param pdfOptimizationSwitch
+	 * @param batchInstanceIdentifier
+	 * @param documentPDFMap
+	 * @throws DCMAApplicationException
+	 * 
+	 */
+	private void writePDFMarksFile(String sFolderToBeExported, String pdfCreationParam, String batchInstanceIdentifier,
+			String pdfOptimizationParam, String pdfOptimizationSwitch, LinkedHashMap<String, List<String>> documentPDFMap)
+			throws IOException, DCMAApplicationException {
+		String gsCommand = getGSCommand();
+		if (gsCommand == null) {
+			LOGGER.info("No ghostcript command specifeid in properties file.  ghostcript command = " + gsCommand);
+			throw new DCMAApplicationException("No ghostcript command specifeid in properties file.  ghostcript command = "
+					+ gsCommand);
+		}
+		Set<String> documentNames;
+		documentNames = documentPDFMap.keySet();
+		Iterator<String> iterator = documentNames.iterator();
+		List<String> documentPDFPaths = new ArrayList<String>();
+
+		String documentId;
+		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
+
+		String pdfMarkTemplatePath = batchSchemaService.getAbsolutePath(batch.getBatchClassIdentifier(), batchSchemaService
+				.getScriptConfigFolderName(), true);
+		File pdfMarksSample = new File(pdfMarkTemplatePath + File.separator + TabbedPdfConstant.PDF_MARKS_FILE_NAME);
+		if (!pdfMarksSample.exists()) {
+			throw new DCMAApplicationException("Sample PdfMarks file not provided.");
+		}
+		File localPdfMarksSample = new File(batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier
+				+ File.separator + pdfMarksSample.getName());
+		try {
+			FileUtils.copyFile(pdfMarksSample, localPdfMarksSample);
+		} catch (Exception e) {
+			throw new DCMAApplicationException("Exception in copying the file \"" + localPdfMarksSample.getAbsolutePath() + "\" to \""
+					+ pdfMarksSample.getAbsolutePath() + "\"", e);
+
+		}
+		String pdfBookMarkTemplate = TabbedPdfConstant.PDF_MARKS_TEMPLATE;
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter(localPdfMarksSample, true);
+			String pdfBookMarkText = "";
+			while (iterator.hasNext()) {
+				documentId = iterator.next();
+				List<String> docDetails = documentPDFMap.get(documentId);
+				pdfBookMarkText = pdfBookMarkTemplate.replace(TabbedPdfConstant.BOOKMARK_TITLE_PLACEHOLDER, docDetails.get(0));// page bookmark
+				pdfBookMarkText = pdfBookMarkText.replace(TabbedPdfConstant.BOOKMARK_PAGE_NUMBER_PLACEHOLDER, docDetails.get(1));// page title
+				fileWriter.write(pdfBookMarkText + System.getProperty("line.separator"));
+				documentPDFPaths.add(docDetails.get(2));
+			}
+		} catch (IOException ioException) {
+			throw new DCMAApplicationException("Exception in getting the FileWriter.", ioException);
+
+		} finally {
+			try {
+				if (fileWriter != null) {
+					fileWriter.close();
+				}
+			} catch (IOException e) {
+				LOGGER.info("Unable to close the file stream for file:\"" + localPdfMarksSample.getAbsolutePath() + "\"");
+			}
+
+		}
+		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+
+		List<TabbedPDFExecutor> tabbedPDFExecutors = new ArrayList<TabbedPDFExecutor>();
+		String batchName = "";
+		Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
+		if (subPoenaLoanMap.size() == 2) {
+			batchName = subPoenaLoanMap.get(TabbedPdfConstant.SUBPOENA) + TabbedPdfConstant.UNDERSCORE
+					+ subPoenaLoanMap.get(TabbedPdfConstant.LOAN_NUMBER);
+		}
+		if (batchName == null || batchName.isEmpty()) {
+			batchName = batch.getBatchName();
+		}
+		String tabbedPDFName = batchName + "_" + batchInstanceIdentifier + FileType.PDF.getExtensionWithDot();
+		String tabbedPDFTempFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
+		String tabbedPDFLocalPath = tabbedPDFTempFolder + File.separator + tabbedPDFName;
+		if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(TabbedPdfConstant.ON)) {
+			tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, tabbedPDFTempFolder, documentPDFPaths, localPdfMarksSample
+					.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
+		} else {
+			tabbedPDFExecutors.add(new TabbedPDFExecutor(tabbedPDFName, sFolderToBeExported, documentPDFPaths, localPdfMarksSample
+					.getAbsolutePath(), batchInstanceThread, pdfCreationParam, gsCommand));
+		}
+		try {
+			LOGGER.info("Executing commands for creation of tabbed pdf using thread pool.");
+			batchInstanceThread.execute();
+			LOGGER.info("Tabbed pdf creation ends.");
+		} catch (DCMAApplicationException dcmae) {
+			LOGGER.error("Error in executing command for tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
+			batchInstanceThread.remove();
+			// Throw the exception to set the batch status to Error by Application aspect
+			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+		}
+		if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(TabbedPdfConstant.ON)) {
+			batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+			List<TabbedPdfOptimizer> tabbedPdfOptimier = new ArrayList<TabbedPdfOptimizer>();
+
+			tabbedPdfOptimier.add(new TabbedPdfOptimizer(sFolderToBeExported, tabbedPDFTempFolder, batchInstanceThread, tabbedPDFName,
+					pdfOptimizationParam, gsCommand));
+			try {
+				LOGGER.info("Executing commands for optimizing tabbed pdf using thread pool.");
+				batchInstanceThread.execute();
+				LOGGER.info("Tabbed pdf creation ends.");
+			} catch (DCMAApplicationException dcmae) {
+				LOGGER.error("Error in executing command for optimizing tabbed pdf using thread pool" + dcmae.getMessage(), dcmae);
+				batchInstanceThread.remove();
+				// Throw the exception to set the batch status to Error by Application aspect
+				throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+			}
+		}
+
+		File destFile = new File(tabbedPDFLocalPath);
+		if (destFile.exists()) {
+			destFile.delete();
+		}
+		// copying file to ephesoft system folder
+		LOGGER.info("Started copying multipage pdf file in ephesoft system folder.");
+		File srcFile = new File(sFolderToBeExported + File.separator + tabbedPDFName);
+		destFile = new File(tabbedPDFLocalPath);
+		try {
+			FileUtils.copyFile(srcFile, destFile);
+		} catch (Exception e) {
+			throw new DCMAApplicationException("Exception in copying the file  " + destFile.getAbsolutePath() + " to "
+					+ srcFile.getAbsolutePath(), e);
+		}
+		LOGGER.info("Completed copying multipage pdf file in ephesoft system folder.");
+		mergeBatchXmlDocs(batchSchemaService, batch, documentNames, documentPDFMap, tabbedPDFName);
+	}
+
+	/**
+	 * This will return the ghost script command for window or linux environment.
+	 * 
+	 * @return {@link String}
+	 */
 	private String getGSCommand() {
 		String gsCommand = null;
 		if (OSUtil.isWindows() && ghostScriptCommand != null) {
@@ -303,24 +346,21 @@ public class TabbedPdfExporter implements ICommonConstants {
 	}
 
 	/**
-	 * This API merges all the documents as per prioritylist into first document. Also, updates the multipage pdf file name to tabbed
+	 * This API merges all the documents as per priority list into first document. Also, updates the multi page pdf file name to tabbed
 	 * pdf file name.
 	 * 
-	 * @param batchSchemaService
-	 * @param batch
-	 * @param documentNames
-	 * @param documentPDFMap
-	 * @param tabbedPDFName
-	 * @param exportFolderPath
+	 * @param batchSchemaService{@link BatchSchemaService}
+	 * @param batch{@link Batch}
+	 * @param documentNames {@link Set<String>}
+	 * @param documentPDFMap {@link LinkedHashMap<String, List<String>>}
+	 * @param tabbedPDFName {@link String}
 	 */
 	private void mergeBatchXmlDocs(BatchSchemaService batchSchemaService, Batch batch, Set<String> documentNames,
 			LinkedHashMap<String, List<String>> documentPDFMap, String tabbedPDFName) {
 		boolean isFirstDocInXML = true;
 		String documentIdInt;
-
 		Documents documents = new Documents();
 		List<Document> docList = new ArrayList<Document>();
-
 		Iterator<String> iterator = documentNames.iterator();
 		while (iterator.hasNext()) {
 			documentIdInt = iterator.next();
@@ -350,7 +390,6 @@ public class TabbedPdfExporter implements ICommonConstants {
 				}
 			}
 		}
-
 		// update the multipage pdf file name
 		docList.get(0).setMultiPagePdfFile(tabbedPDFName);
 		batchSchemaService.updateBatch(batch);
@@ -360,7 +399,7 @@ public class TabbedPdfExporter implements ICommonConstants {
 	 * This API created the export folder if it not exists else it will created the export folder.
 	 * 
 	 * @param exportFolder {@link String}
-	 * @return
+	 * @return isExportFolderCreated {@link boolean}
 	 */
 	private boolean isExportFolderAlreadyCreated(final String exportFolder) {
 		LOGGER.info("Checking the export folder is already created or not");
@@ -371,61 +410,53 @@ public class TabbedPdfExporter implements ICommonConstants {
 		} else {
 			isExportFolderCreated = true;
 		}
+		LOGGER.info("Value of variable \"isExportFolderCreated:\"" + isExportFolderCreated);
+		LOGGER.info("Checking the export folder is already created or not");
 		return isExportFolderCreated;
 	}
 
-	private LinkedHashMap<String, List<String>> createDocumentPDFMap(final Batch pasrsedXMLFile, String batchInstanceID)
+	/**
+	 * This will create the document pdf map for
+	 * 
+	 * @param pasrsedXMLFile{@link Batch}
+	 * @param batchInstanceID{@link String}
+	 * @return documentPDFMap{@link LinkedHashMap<String, List<String>>}
+	 * @throws DCMAApplicationException
+	 */
+	private LinkedHashMap<String, List<String>> createDocumentPDFMap(final Batch parsedXMLFile, String batchInstanceID)
 			throws DCMAApplicationException {
 
-		List<Document> xmlDocuments = pasrsedXMLFile.getDocuments().getDocument();
+		List<Document> xmlDocuments = parsedXMLFile.getDocuments().getDocument();
 		LinkedHashMap<String, List<String>> documentPDFMap = new LinkedHashMap<String, List<String>>();
-
 		int startPageNumber = 1;
-
 		for (Document document : xmlDocuments) {
 			List<String> detailsList = new LinkedList<String>();
-			List<Page> listOfPages = document.getPages().getPage();
-
 			String documentId = document.getIdentifier();
 			LOGGER.info("Document documentid =" + documentId + " contains the following info:");
-			int numberOfPages = listOfPages.size();
-			String documentType = document.getType();
-
-			detailsList.add(documentType);
-			detailsList.add(String.valueOf(startPageNumber));
-
-			String pdfFile = document.getMultiPagePdfFile();
-			if (pdfFile != null && !pdfFile.isEmpty()) {
-				File fPDFFile = batchSchemaService.getFile(batchInstanceID, pdfFile);
-				if (fPDFFile.exists()) {
-					LOGGER.info("PDF File Name:" + fPDFFile);
-					detailsList.add(fPDFFile.getAbsolutePath());
-				} else {
-					throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
-				}
-			} else {
-				throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
-			}
+			int numberOfPages = document.getPages().getPage().size();
+			// adding details to the document
+			addDetailsToDocTypeWithoutPlaceHolder(document, startPageNumber, detailsList, batchInstanceID);
 			startPageNumber = startPageNumber + numberOfPages;
 			documentPDFMap.put(documentId, detailsList);
 		}
-
 		return documentPDFMap;
 	}
 
-	private LinkedHashMap<String, List<String>> createBatchClassDocumentPDFMap(final Batch pasrsedXMLFile, String batchInstanceID,
+	/**
+	 * This will create the document map on the basis of order and load the error pdf if the document is not present.
+	 * 
+	 * @param parsedXMLFile {@link Batch}
+	 * @param batchInstanceID{@link String}
+	 * @param propertyFile{@link String}
+	 * @return documentPDFMap {@link LinkedHashMap<String, List<String>>}
+	 * @throws Exception
+	 */
+	private LinkedHashMap<String, List<String>> createBatchClassDocumentPDFMap(final Batch parsedXMLFile, String batchInstanceID,
 			String propertyFile) throws Exception {
-		String errorPDFPath = batchSchemaService.getAbsolutePath(pasrsedXMLFile.getBatchClassIdentifier(), batchSchemaService
+		String errorPDFPath = batchSchemaService.getAbsolutePath(parsedXMLFile.getBatchClassIdentifier(), batchSchemaService
 				.getScriptConfigFolderName(), true);
-		// File samplePDF = new File(errorPDFPath + File.separator + TabbedPdfConstant.SAMPLE_PDF_FILE_NAME);
-		// if (!samplePDF.exists()) {
-		// throw new DCMABusinessException("Sample Pdf file not provided.");
-		// }
-		// File localSamplePDF = new File(batchSchemaService.getLocalFolderLocation() + File.separator
-		// + pasrsedXMLFile.getBatchInstanceIdentifier() + File.separator + samplePDF.getName());
-		// FileUtils.copyFile(samplePDF, localSamplePDF);
 		List<String> batchDocumentTypeNameList = new ArrayList<String>();
-		String batchClassId = pasrsedXMLFile.getBatchClassIdentifier();
+		String batchClassId = parsedXMLFile.getBatchClassIdentifier();
 		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassId);
 		List<DocumentType> batchDocumentList = batchClass.getDocumentTypes();
 		for (DocumentType docType : batchDocumentList) {
@@ -444,103 +475,118 @@ public class TabbedPdfExporter implements ICommonConstants {
 		} else {
 			Object[] sortedArray = sortedSet.toArray();
 			int size = sortedArray.length;
-			for (int i = 0; i < size; i++) {
-				String documentType = (String) mapKeys.get(mapValues.indexOf(sortedArray[i]));
+			for (int sortedArrayIndex = 0; sortedArrayIndex < size; sortedArrayIndex++) {
+				String documentType = (String) mapKeys.get(mapValues.indexOf(sortedArray[sortedArrayIndex]));
 				for (int documentIndex = 0; documentIndex < batchDocumentTypeNameList.size(); documentIndex++) {
 					if (documentType.equals(batchDocumentTypeNameList.get(documentIndex))) {
 						sortedDocumentList.add(batchDocumentTypeNameList.get(documentIndex));
 					}
 				}
 			}
-			List<Document> xmlDocuments = pasrsedXMLFile.getDocuments().getDocument();
+			List<Document> xmlDocuments = parsedXMLFile.getDocuments().getDocument();
 			LinkedHashMap<String, List<String>> documentPDFMap = new LinkedHashMap<String, List<String>>();
-
-			int startPageNumber = 1;
+            int startPageNumber = 1;
 			int docIdentifier = 1;
 			int batchDocumentIndex = 0;
 			for (String document : sortedDocumentList) {
 				List<String> detailsList = new LinkedList<String>();
-				String documentId = DOCUMENT_IDENTIFIER + docIdentifier;
+				String documentId = TabbedPdfConstant.DOCUMENT_IDENTIFIER + docIdentifier;
 				int numberOfPages;
-				String documentType;
-				String pdfFile = null;
 				if (batchDocumentIndex < xmlDocuments.size()) {
 					Document xmlDocument = xmlDocuments.get(batchDocumentIndex);
 					if (document.equals(xmlDocument.getType())) {
 						List<Page> listOfPages = xmlDocuments.get(batchDocumentIndex).getPages().getPage();
-
 						LOGGER.info("Document documentid =" + documentId + " contains the following info:");
 						numberOfPages = listOfPages.size();
-						documentType = xmlDocument.getType();
-
-						pdfFile = xmlDocument.getMultiPagePdfFile();
-						detailsList.add(documentType);
-						detailsList.add(String.valueOf(startPageNumber));
-						if (pdfFile != null && !pdfFile.isEmpty()) {
-							File fPDFFile = batchSchemaService.getFile(batchInstanceID, pdfFile);
-							if (fPDFFile.exists()) {
-								LOGGER.info("PDF File Name:" + fPDFFile);
-								detailsList.add(fPDFFile.getAbsolutePath());
-							} else {
-								throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
-							}
-							docIdentifier++;
-							startPageNumber = startPageNumber + numberOfPages;
-							documentPDFMap.put(documentId, detailsList);
-						} else {
-							throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
-						}
-						batchDocumentIndex++;
-
-					} else {
-
-						documentType = document;
-						numberOfPages = 1;
-						pdfFile = TabbedPdfConstant.SAMPLE_PDF_FILE_NAME;
-						detailsList.add(documentType);
-						detailsList.add(String.valueOf(startPageNumber));
-						if (pdfFile != null && !pdfFile.isEmpty()) {
-							File fPDFFile = new File(errorPDFPath + File.separator + TabbedPdfConstant.SAMPLE_PDF_FILE_NAME);
-							if (fPDFFile.exists()) {
-								LOGGER.info("PDF File Name:" + fPDFFile);
-								detailsList.add(fPDFFile.getAbsolutePath());
-							} else {
-								throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
-							}
-							docIdentifier++;
-							startPageNumber = startPageNumber + numberOfPages;
-							documentPDFMap.put(documentId, detailsList);
-						} else {
-							throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
-						}
-					}
-				} else {
-					documentType = document;
-					numberOfPages = 1;
-					pdfFile = TabbedPdfConstant.SAMPLE_PDF_FILE_NAME;
-					detailsList.add(documentType);
-					detailsList.add(String.valueOf(startPageNumber));
-					if (pdfFile != null && !pdfFile.isEmpty()) {
-						File fPDFFile = new File(errorPDFPath + File.separator + TabbedPdfConstant.SAMPLE_PDF_FILE_NAME);
-						if (fPDFFile.exists()) {
-							LOGGER.info("PDF File Name:" + fPDFFile);
-							detailsList.add(fPDFFile.getAbsolutePath());
-						} else {
-							throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
-						}
+						// adding the details of document in the details list
+						addDetailsToDocTypeWithoutPlaceHolder(xmlDocument, startPageNumber, detailsList, batchInstanceID);
 						docIdentifier++;
 						startPageNumber = startPageNumber + numberOfPages;
 						documentPDFMap.put(documentId, detailsList);
+						batchDocumentIndex++;
 					} else {
-						throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
+						numberOfPages = TabbedPdfConstant.ERROR_PDF_NUMBER_OF_PAGES;
+						addDetailsToDocTypeWithPlaceHolder(document, detailsList, startPageNumber, errorPDFPath);
+						docIdentifier++;
+						startPageNumber = startPageNumber + numberOfPages;
+						documentPDFMap.put(documentId, detailsList);
 					}
+				} else {
+					numberOfPages = TabbedPdfConstant.ERROR_PDF_NUMBER_OF_PAGES;
+					addDetailsToDocTypeWithPlaceHolder(document, detailsList, startPageNumber, errorPDFPath);
+					docIdentifier++;
+					startPageNumber = startPageNumber + numberOfPages;
+					documentPDFMap.put(documentId, detailsList);
 				}
-
 			}
 			return documentPDFMap;
 		}
 	}
 
+	/**
+	 * This will add the details to the given document when the place-holder property is not present
+	 * 
+	 * @param document {@link Document}
+	 * @param startPageNumber {@link int}
+	 * @param detailsList {@link List<String>}
+	 * @param batchInstanceID {@link String}
+	 * @throws DCMAApplicationException
+	 */
+	void addDetailsToDocTypeWithoutPlaceHolder(Document document, int startPageNumber, List<String> detailsList, String batchInstanceID)
+			throws DCMAApplicationException {
+		String documentType = document.getType();
+        String pdfFile = document.getMultiPagePdfFile();
+		detailsList.add(documentType);
+		detailsList.add(String.valueOf(startPageNumber));
+		if (pdfFile != null && !pdfFile.isEmpty()) {
+			File fPDFFile = batchSchemaService.getFile(batchInstanceID, pdfFile);
+			if (fPDFFile.exists()) {
+				LOGGER.info("PDF File Name:" + fPDFFile);
+				detailsList.add(fPDFFile.getAbsolutePath());
+			} else {
+				throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
+			}
+		} else {
+			throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
+		}
+
+	}
+
+	/**
+	 * This will add the details to the given document when the place-holder property is present
+	 * 
+	 * @param document{@link String}
+	 * @param detailsList{@link List<String>}
+	 * @param startPageNumber{@link int}
+	 * @param errorPDFPath{@link String}
+	 * @throws DCMAApplicationException
+	 */
+	void addDetailsToDocTypeWithPlaceHolder(String document, List<String> detailsList, int startPageNumber, String errorPDFPath)
+			throws DCMAApplicationException {
+		String documentType = document;
+		String pdfFile = TabbedPdfConstant.SAMPLE_PDF_FILE_NAME;
+		detailsList.add(documentType);
+		detailsList.add(String.valueOf(startPageNumber));
+		if (pdfFile != null && !pdfFile.isEmpty()) {
+			File fPDFFile = new File(errorPDFPath + File.separator + TabbedPdfConstant.SAMPLE_PDF_FILE_NAME);
+			if (fPDFFile.exists()) {
+				LOGGER.info("PDF File Name:" + fPDFFile);
+				detailsList.add(fPDFFile.getAbsolutePath());
+			} else {
+				throw new DCMAApplicationException("File does not exist. File Name=" + fPDFFile);
+			}
+		} else {
+			throw new DCMAApplicationException("MultiPagePDF file does not exist in batch xml.");
+		}
+
+	}
+
+	/**
+	 * This will check for unknown document.
+	 * 
+	 * @param parsedXMLFile
+	 */
+	/*
 	private void checkForUnknownDocument(Batch pasrsedXMLFile) {
 		Documents documents = pasrsedXMLFile.getDocuments();
 		if (documents != null) {
@@ -572,7 +618,15 @@ public class TabbedPdfExporter implements ICommonConstants {
 		}
 
 	}
+	 */
 
+	/**
+	 * This will fetch the document from the property file.
+	 * 
+	 * @param propertyFilePath{@link String}
+	 * @return
+	 * @throws DCMAApplicationException
+	 */
 	private Map<String, Integer> fetchDocNameMapping(String propertyFilePath) throws DCMAApplicationException {
 		final String filePath = propertyFilePath;
 		HashMap<String, Integer> propertyMap = new HashMap<String, Integer>();
@@ -584,10 +638,9 @@ public class TabbedPdfExporter implements ICommonConstants {
 			String eachLine = bufferReader.readLine();
 			while (eachLine != null) {
 				if (eachLine.length() > 0) {
-					final String[] keyValue = eachLine.split(MAPPING_SEPERATOR);
+					final String[] keyValue = eachLine.split(TabbedPdfConstant.MAPPING_SEPERATOR);
 					if (keyValue != null && keyValue.length == 2) {
 						propertyMap.put(keyValue[0], Integer.parseInt(keyValue[1]));
-
 					}
 				}
 				eachLine = bufferReader.readLine();
@@ -603,12 +656,18 @@ public class TabbedPdfExporter implements ICommonConstants {
 					fileInputStream.close();
 				}
 			} catch (IOException e) {
-				throw new DCMAApplicationException("Property file not provided.Cannot be exported.");
+				LOGGER.info("Unable to close the fileInputStream or bufferReader for the file:" + filePath);
 			}
 		}
 		return propertyMap;
 	}
 
+	/**
+	 * This will fetch the SubPoenaLoanNumber.
+	 * 
+	 * @param documentList{@link List<Document>}
+	 * @return resultMap {@link Map<String, String>}
+	 */
 	private Map<String, String> getSubPoenaLoanNumber(List<Document> documentList) {
 		HashMap<String, String> resultMap = new HashMap<String, String>();
 		for (Document document : documentList) {

@@ -117,6 +117,8 @@ public class ReviewValidateView extends RVBasePanel {
 		docTree.addStyleName("doc_tree");
 
 		slidingPanel.setEventBus(eventBus);
+		
+		this.presenter.setBatchListScreenTab();
 	}
 
 	public DockLayoutPanel getOuter() {

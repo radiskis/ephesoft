@@ -156,17 +156,22 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	/**
 	 * An api to fetch count of the batch instance table for batch instance status.
 	 * 
-	 * @param filterClauseList List<BatchInstanceFilter>
+	 * @param batchName
+	 * @param batchInstanceStatus
+	 * @param userName
+	 * @param priority
+	 * @param userRole
 	 * @return count of the batch instance present for the batch instance status.
 	 */
 	@Transactional(readOnly = true)
 	@Override
-	public int getCount(BatchInstanceStatus batchInstanceStatus, String userName, Set<String> userRole) {
+	public int getCount(String batchName, BatchInstanceStatus batchInstanceStatus, String userName, BatchPriority priority,
+			Set<String> userRole) {
 		int count = -1;
 		if (null == batchInstanceStatus) {
 			LOGGER.info("batchInstanceStatus is null.");
 		} else {
-			count = batchInstanceDao.getCount(batchInstanceStatus, userName, userRole);
+			count = batchInstanceDao.getCount(batchName, batchInstanceStatus, userName, priority, userRole);
 		}
 		return count;
 	}
@@ -277,7 +282,7 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
 			final boolean isCurrUsrNotReq, final String currentUser, final Set<String> currentRole) {
-		return batchInstanceDao.getCount(batchInstStatusList, batchPriorities, isCurrUsrNotReq, currentRole);
+		return batchInstanceDao.getCount(batchInstStatusList, batchPriorities, isCurrUsrNotReq, currentRole, currentUser);
 	}
 
 	/**
@@ -288,7 +293,7 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Transactional(readOnly = true)
 	@Override
 	public int getAllCount(final String currentUser, final Set<String> currentRole) {
-		return batchInstanceDao.getAllCount(currentRole);
+		return batchInstanceDao.getAllCount(currentUser, currentRole);
 	}
 
 	/**
@@ -300,12 +305,12 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Transactional(readOnly = true)
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final Set<String> currentRole) {
+			final Set<String> currentRole, final String currentUserName) {
 		int count = -1;
 		if (null == batchInstStatusList || batchInstStatusList.isEmpty()) {
 			LOGGER.info("filterClauseList is null or empty.");
 		} else {
-			count = batchInstanceDao.getCount(batchInstStatusList, batchPriorities, currentRole);
+			count = batchInstanceDao.getCount(batchInstStatusList, batchPriorities, currentRole, currentUserName);
 		}
 		return count;
 	}
@@ -709,15 +714,16 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	 */
 	@Transactional(readOnly = true)
 	@Override
-	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(List<BatchInstanceStatus> statusList, final int firstResult,
-			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
-			final List<BatchPriority> batchPriorities, String userName, Set<String> currentUserRoles) {
+	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String batchNameToBeSearched,
+			List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults, final List<Order> orderList,
+			final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities, String userName,
+			Set<String> currentUserRoles) {
 		List<BatchInstance> batchInstance = null;
 		if (null == statusList || statusList.isEmpty()) {
 			LOGGER.info("batchInstanceStatus is null or empty.");
 		} else {
-			batchInstance = batchInstanceDao.getBatchInstancesExcludedRemoteBatch(statusList, firstResult, maxResults, orderList,
-					filterClauseList, batchPriorities, userName, currentUserRoles);
+			batchInstance = batchInstanceDao.getBatchInstancesExcludedRemoteBatch(batchNameToBeSearched, statusList, firstResult,
+					maxResults, orderList, filterClauseList, batchPriorities, userName, currentUserRoles);
 		}
 		return batchInstance;
 	}
@@ -753,13 +759,13 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 		}
 		return batchInstance;
 	}
-	
+
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchInstance> getExecutingJobByServerIP(String serverIP) {
 		return batchInstanceDao.getExecutingJobByServerIP(serverIP);
 	}
-	
+
 	@Transactional
 	@Override
 	public void evict(BatchInstance batchInstance) {
@@ -767,7 +773,8 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	}
 
 	@Override
-	public List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP, BatchInstanceStatus batchInstanceStatus) {
+	public List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP,
+			BatchInstanceStatus batchInstanceStatus) {
 		return batchInstanceDao.getBatchInstanceByExecutingServerIPAndBatchStatus(executingServerIP, batchInstanceStatus);
 	}
 
@@ -783,4 +790,26 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 		}
 		return batchInstanceList;
 	}
+	
+	@Transactional
+	@Override
+	public void clearCurrentUser(String batchInstanceIdentifier) {
+		batchInstanceDao.clearCurrentUser(batchInstanceIdentifier);
+	}
+	
+	/**
+	 * This API fetches all the batch instances on the basis of batch status list passed.
+	 * 
+	 * @param batchStatusList List<{@link BatchInstanceStatus}>
+	 * @return List<{@link BatchInstance}>
+	 */
+	@Override
+	public List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList) {
+		List<BatchInstance> batchInstanceList = null;
+		if(null != batchStatusList && ! batchStatusList.isEmpty()){
+			batchInstanceList = batchInstanceDao.getBatchInstanceByStatusList(batchStatusList);
+		}
+		return batchInstanceList;
+	}
+
 }

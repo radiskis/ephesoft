@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.service.DBScriptExecuter;
 import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.ModuleConfigDao;
@@ -100,7 +101,7 @@ public class ExecuteUpdatePatch {
 	@Autowired
 	private DBScriptExecuter executer;
 
-	private static final String SERIALIZATION_EXT = ".ser";
+	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 
 	private String dbPatchFolderLocation;
 

@@ -26,7 +26,7 @@
 		<transition to="Table_Doc_Fields_Extraction_Plugin"/>
 	</sub-process>
 
-	<sub-process continue="async" g="21,452,201,59" name="Scripting_Plugin" sub-process-key="Scripting_Plugin">
+	<sub-process continue="async" g="21,452,201,59" name="Extraction_Scripting_Plugin" sub-process-key="Extraction_Scripting_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
 		<parameter-in expr="Tesseract_Extraction_Module_Scripting_Plugin" subvar="backUpFileName"/>
 		<parameter-in expr="ScriptExtraction" subvar="scriptName"/>
@@ -35,7 +35,7 @@
 	
 	<sub-process continue="async" g="26,543,190,59" name="Table_Doc_Fields_Extraction_Plugin" sub-process-key="Table_Doc_Fields_Extraction_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
-		<transition to="Scripting_Plugin"/>
+		<transition to="Extraction_Scripting_Plugin"/>
 	</sub-process>
 	
 	<end g="81,634,80,40" name="end"/>

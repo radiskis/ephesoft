@@ -45,10 +45,12 @@ import org.w3c.dom.Document;
 
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
-import com.ephesoft.dcma.core.DCMAException;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.service.BatchClassPluginConfigService;
 import com.ephesoft.dcma.script.compiler.DynamicCodeCompiler;
+import com.ephesoft.dcma.script.constant.ScriptConstants;
+import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.util.XMLUtil;
 
 /**
@@ -67,6 +69,27 @@ public class ScriptExecutor {
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ScriptExecutor.class);
+	
+	/**
+	 * Variable for parserType.
+	 */
+	private String parserType;
+
+	/**
+	 * Getter for parserType.
+	 * @return
+	 */
+	public String getParserType() {
+		return parserType;
+	}
+
+	/**
+	 * Setter for parserType.
+	 * @param parserType
+	 */
+	public void setParserType(final String parserType) {
+		this.parserType = parserType;
+	}
 
 	/**
 	 * Reference of BatchSchemaService.
@@ -114,6 +137,9 @@ public class ScriptExecutor {
 
 		LOGGER.info(" batchInstanceId : " + batchInstanceId + "  nameOfPluginScript : " + pluginScriptName);
 
+		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
+		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
+
 		final Batch batch = batchSchemaService.getBatch(batchInstanceId);
 
 		if (null == batch) {
@@ -155,22 +181,80 @@ public class ScriptExecutor {
 					+ batchSchemaService.getScriptFolderName();
 			final DynamicCodeCompiler dynacode = new DynamicCodeCompiler();
 			dynacode.addSourceDir(new File(pathToComplile));
-			final IScripts iExecutor = (IScripts) dynacode.newProxyInstance(IScripts.class, pluginScriptName);
-			if (null == iExecutor) {
-				LOGGER.info("IScripts was returned as null.");
+
+			if (ScriptConstants.JDOM_PARSER_TYPE.equalsIgnoreCase(getParserType())) {
+
+				final IJDomScript iJDomExecutor = (IJDomScript) dynacode.newProxyInstance(IJDomScript.class, pluginScriptName);
+				if (null == iJDomExecutor) {
+					LOGGER.info("IJDomScript was returned as null.");
+				} else {
+					String batchXmlFileName = batchInstanceId + ICommonConstants.UNDERSCORE_BATCH_XML;
+					String srcXmlPath = localFolderPath + File.separator + batchInstanceId + File.separator + batchXmlFileName;
+					org.jdom.Document document = null;
+
+					if (isZipSwitchOn) {
+						if (FileUtils.isZipFileExists(srcXmlPath)) {
+							document = XMLUtil.createJDOMDocumentFromInputStream(FileUtils.getInputStreamFromZip(srcXmlPath,
+									batchXmlFileName));
+						} else {
+							final File batchXmlFile = new File(srcXmlPath);
+							document = XMLUtil.createJDOMDocumentFromFile(batchXmlFile);
+						}
+					} else {
+						final File batchXmlFile = new File(srcXmlPath);
+						if (batchXmlFile.exists()) {
+							document = XMLUtil.createJDOMDocumentFromFile(batchXmlFile);
+						} else {
+							document = XMLUtil.createJDOMDocumentFromInputStream(FileUtils.getInputStreamFromZip(srcXmlPath,
+									batchXmlFileName));
+						}
+					}
+
+					Object obj = iJDomExecutor.execute(document, scriptVariableName, docIdentifier);
+					if (obj != null && obj instanceof Exception) {
+						Exception e = (Exception) obj;
+						throw new DCMAApplicationException("Script errored out. Throwing workflow in error.Exception thrown is:"
+								+ e.getMessage(), e);
+					}
+				}
 			} else {
-				final File batchXmlFile = new File(localFolderPath + File.separator + batchInstanceId + File.separator
-						+ batchInstanceId + "_batch.xml");
-				final Document document = XMLUtil.createDocumentFrom(batchXmlFile);
-				Object obj = iExecutor.execute(document, scriptVariableName, docIdentifier);
-				if(obj != null && obj instanceof Exception) {
-					Exception e = (Exception)obj;
-					throw new DCMAApplicationException("Script errored out. Throwing workflow in error.Exception thrown is:" + e.getMessage(), e);
+				final IScripts iExecutor = (IScripts) dynacode.newProxyInstance(IScripts.class, pluginScriptName);
+				if (null == iExecutor) {
+					LOGGER.info("IScripts was returned as null.");
+				} else {
+					String batchXmlFileName = batchInstanceId + ICommonConstants.UNDERSCORE_BATCH_XML;
+					String srcXmlPath = localFolderPath + File.separator + batchInstanceId + File.separator + batchXmlFileName;
+					Document document = null;
+
+					if (isZipSwitchOn) {
+						if (FileUtils.isZipFileExists(srcXmlPath)) {
+							document = XMLUtil.createDocumentFrom(FileUtils.getInputStreamFromZip(srcXmlPath, batchXmlFileName));
+						} else {
+							final File batchXmlFile = new File(srcXmlPath);
+							document = XMLUtil.createDocumentFrom(batchXmlFile);
+						}
+					} else {
+						final File batchXmlFile = new File(srcXmlPath);
+						if (batchXmlFile.exists()) {
+							document = XMLUtil.createDocumentFrom(batchXmlFile);
+						} else {
+							document = XMLUtil.createDocumentFrom(FileUtils.getInputStreamFromZip(srcXmlPath, batchXmlFileName));
+						}
+					}
+
+					Object obj = iExecutor.execute(document, scriptVariableName, docIdentifier);
+					if (obj != null && obj instanceof Exception) {
+						Exception e = (Exception) obj;
+						throw new DCMAApplicationException("Script errored out. Throwing workflow in error.Exception thrown is:"
+								+ e.getMessage(), e);
+					}
 				}
 			}
 		} catch (DCMAApplicationException dcmae) {
-			throw new DCMAApplicationException("Script errored out.Throwing workflow in error.Exception thrown is:" + dcmae.getMessage(), dcmae);
+			throw new DCMAApplicationException("Script errored out.Throwing workflow in error.Exception thrown is:"
+					+ dcmae.getMessage(), dcmae);
 		} catch (Exception e) {
+			e.printStackTrace();
 			LOGGER.error(e.getMessage(), e);
 		}
 	}

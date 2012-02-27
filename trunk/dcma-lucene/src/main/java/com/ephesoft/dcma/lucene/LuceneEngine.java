@@ -33,76 +33,6 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
-/********************************************************************************* 
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
-* 
-* This program is free software; you can redistribute it and/or modify it under 
-* the terms of the GNU Affero General Public License version 3 as published by the 
-* Free Software Foundation with the addition of the following permission added 
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT 
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
-* details. 
-* 
-* You should have received a copy of the GNU Affero General Public License along with 
-* this program; if not, see http://www.gnu.org/licenses or write to the Free 
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
-* 02110-1301 USA. 
-* 
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
-* 
-* The interactive user interfaces in modified source and object code versions 
-* of this program must display Appropriate Legal Notices, as required under 
-* Section 5 of the GNU Affero General Public License version 3. 
-* 
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
-* If the display of the logo is not reasonably feasible for 
-* technical reasons, the Appropriate Legal Notices must display the words 
-* "Powered by Ephesoft". 
-********************************************************************************/ 
-
 package com.ephesoft.dcma.lucene;
 
 import java.io.BufferedReader;
@@ -161,6 +91,7 @@ import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.util.OSUtil;
+import com.ephesoft.dcma.util.XMLUtil;
 
 /**
  * This class generate the confidence score by using Lucene search engine.It first creates the indexes for a well defined set of input
@@ -908,6 +839,17 @@ public class LuceneEngine implements ICommonConstants {
 	 */
 	public void generateHOCRFiles(final String learnFolder, final String batchClassIdentifier) throws DCMAApplicationException {
 		LOGGER.info("Inside Recostar hocr generation");
+		ApplicationConfigProperties applicationConfigProperties;
+		String htmlParser = null;
+		try {
+			applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			htmlParser = applicationConfigProperties.getProperty(XMLUtil.HTML_PARSER);
+		} catch (IOException e1) {
+			LOGGER.info("Unable to fetch parser name from property file");
+		}
+		if (htmlParser == null || !htmlParser.equals(XMLUtil.HTML_CLEANER)) {
+			htmlParser = XMLUtil.JTIDY;
+		}
 		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifier,
 				RECOSTAR_HOCR_PLUGIN, null);
 		String projectFileName = EMPTY_STRING;
@@ -962,7 +904,8 @@ public class LuceneEngine implements ICommonConstants {
 										cmds[1] = "/c";
 										cmds[2] = "RecostarPlugin.exe " + " RSO2-NET.476 " + projectFileName + " \""
 												+ imageAbsolutePath + "\" " + workingDirectory + SPACE + jarPath + SPACE
-												+ LICENSE_VERIFIER + "  \"" + targetHTMlAbsolutePath + BACKWARD_SLASH;
+												+ LICENSE_VERIFIER + "  \"" + targetHTMlAbsolutePath + BACKWARD_SLASH + SPACE
+												+ htmlParser;
 										LOGGER.info("command formed is :" + cmds[2]);
 										batchInstanceThread
 												.add(new ProcessExecutor(cmds, new File(System.getenv(RECOSTAR_BASE_PATH))));
@@ -1077,7 +1020,7 @@ public class LuceneEngine implements ICommonConstants {
 					tesseractVersion = pluginConfiguration[0].getValue();
 				}
 				try {
-					ApplicationConfigProperties app = new ApplicationConfigProperties();
+					ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
 					tesseractBasePath = app.getProperty(tesseractVersion);
 				} catch (IOException ioe) {
 					LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe, ioe);
@@ -1226,6 +1169,17 @@ public class LuceneEngine implements ICommonConstants {
 	private void generateHOCRForRecostar(final String batchClassIdentifer, StringBuffer targetHTMlAbsolutePath,
 			String imageAbsolutePath, List<String> cmdList) throws DCMAApplicationException {
 		LOGGER.info("Generating hocr from recostar....");
+		ApplicationConfigProperties applicationConfigProperties;
+		String htmlParser = null;
+		try {
+			applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			htmlParser = applicationConfigProperties.getProperty(XMLUtil.HTML_PARSER);
+		} catch (IOException e1) {
+			LOGGER.info("Unable to fetch parser name from property file.");
+		}
+		if (htmlParser == null || !htmlParser.equals(XMLUtil.HTML_CLEANER)) {
+			htmlParser = XMLUtil.JTIDY;
+		}
 		targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
 		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifer,
 				RECOSTAR_HOCR_PLUGIN, null);
@@ -1251,7 +1205,7 @@ public class LuceneEngine implements ICommonConstants {
 		cmdList.add("/c");
 		cmdList.add("RecostarPlugin.exe " + " RSO2-NET.476 " + projectFileName + SPACE + BACKWARD_SLASH + imageAbsolutePath
 				+ BACKWARD_SLASH + SPACE + workingDirectory + SPACE + jarPath + SPACE + LICENSE_VERIFIER + "  " + BACKWARD_SLASH
-				+ targetHTMlAbsolutePath + BACKWARD_SLASH);
+				+ targetHTMlAbsolutePath + BACKWARD_SLASH + SPACE + htmlParser);
 	}
 
 	/**
@@ -1272,7 +1226,7 @@ public class LuceneEngine implements ICommonConstants {
 		}
 		String tesseractBasePath = EMPTY_STRING;
 		try {
-			ApplicationConfigProperties app = new ApplicationConfigProperties();
+			ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
 			tesseractBasePath = app.getProperty(tesseractVersion);
 		} catch (IOException ioe) {
 			LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe, ioe);

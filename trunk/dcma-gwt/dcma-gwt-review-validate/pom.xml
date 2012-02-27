@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.ephesoft.dcma</groupId>
 		<artifactId>dcma-gwt</artifactId>
-		<version>0.0.13-SNAPSHOT</version>
+		<version>0.0.14-SNAPSHOT</version>
 	</parent>
 	<artifactId>dcma-gwt-review-validate</artifactId>
 	<name>DCMA: Review and validation Page</name>

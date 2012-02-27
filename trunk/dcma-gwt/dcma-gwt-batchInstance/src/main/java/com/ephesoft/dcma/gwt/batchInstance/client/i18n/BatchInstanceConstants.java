@@ -128,8 +128,6 @@ public interface BatchInstanceConstants extends LocaleCommonConstants {
 
 	String PROPERTIES_DIRECTORY = "properties";
 
-	String PROPERTIES_FILE_EXTENSION = ".ser";
-
 	String SEPERATOR = "-";
 
 	String BUTTON_SEARCH_BATCH = "search_batch_button";
@@ -177,5 +175,13 @@ public interface BatchInstanceConstants extends LocaleCommonConstants {
 	 * Used in the label for current user for a batch on batch instance management screen.
 	 */
 	String LABEL_CURRENT_USER = "label_current_user";
+	
+	String BUTTON_RESTART_ALL = "restart_all_button";
+	
+	String BUTTON_UNLOCK = "unlock_button";
+	
+	String NEXT_TEXT = "next_text";
+	
+	String PREVIOUS_TEXT = "previous_text";
 
 }

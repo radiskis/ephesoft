@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.ephesoft.dcma.batch.schema.BatchStatus;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -121,33 +121,54 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	public void bind() {
 		reviewTable = view.getReviewTable();
-		validateTable = view.getValidateTable();
-		final ListBox reviewTableListBox = reviewTable.getPriorityListBox();
-		final ListBox validateTableListBox = validateTable.getPriorityListBox();
-		service.getBatchListPriorityFilter(new AsyncCallback<Map<BatchStatus, Integer>>() {
+		service.getBatchListTableRowCount(new AsyncCallback<Integer>() {
 
-			public void onFailure(final Throwable caught) {
-				ScreenMaskUtility.unmaskScreen();
+			@Override
+			public void onFailure(Throwable arg0) {
+				
 			}
 
-			public void onSuccess(final Map<BatchStatus, Integer> priorityFilter) {
-				if (priorityFilter != null && !priorityFilter.isEmpty()) {
-					Integer reviewBatchListPriority = priorityFilter.get(BatchStatus.READY_FOR_REVIEW);
-					Integer validateBatchListPriority = priorityFilter.get(BatchStatus.READY_FOR_VALIDATION);
-					reviewTableListBox.setSelectedIndex(reviewBatchListPriority);
-					validateTableListBox.setSelectedIndex(validateBatchListPriority);
+			@Override
+			public void onSuccess(Integer arg0) {
+				if(arg0 != null && arg0 > 0) {
+					reviewTable.getListView().setTableRowCount(arg0);
 				}
 			}
 		});
-		loadDefaultData();
+		validateTable = view.getValidateTable();
+		final ListBox reviewTableListBox = reviewTable.getPriorityListBox();
+		final ListBox validateTableListBox = validateTable.getPriorityListBox();
+		service.getBatchListPriorityFilter(new AsyncCallback<Map<BatchInstanceStatus, Integer>>() {
+
+			public void onFailure(final Throwable caught) {
+				ScreenMaskUtility.unmaskScreen();
+				loadDefaultData();
+				addClickHandlers();
+			}
+
+			public void onSuccess(final Map<BatchInstanceStatus, Integer> priorityFilter) {
+				if (priorityFilter != null && !priorityFilter.isEmpty()) {
+					Integer reviewBatchListPriority = priorityFilter.get(BatchInstanceStatus.READY_FOR_REVIEW);
+					Integer validateBatchListPriority = priorityFilter.get(BatchInstanceStatus.READY_FOR_VALIDATION);
+					reviewTableListBox.setSelectedIndex(reviewBatchListPriority);
+					validateTableListBox.setSelectedIndex(validateBatchListPriority);
+				}
+				loadDefaultData();
+				addClickHandlers();
+			}
+		});
+
+	}
+
+	private void addClickHandlers() {
 		reviewTable.getPriorityListBox().addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(final ChangeEvent arg0) {
 				persistPriorityFilter(reviewTable.getPriorityListBox().getSelectedIndex(), validateTable.getPriorityListBox()
 						.getSelectedIndex());
+				reviewTable.getSearchBatchTextBox().setText(EMPTY_STRING);
 				updateTableData(reviewTable);
-
 			}
 		});
 
@@ -157,6 +178,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 			public void onChange(final ChangeEvent arg0) {
 				persistPriorityFilter(reviewTable.getPriorityListBox().getSelectedIndex(), validateTable.getPriorityListBox()
 						.getSelectedIndex());
+				validateTable.getSearchBatchTextBox().setText(EMPTY_STRING);
 				updateTableData(validateTable);
 			}
 		});
@@ -164,14 +186,14 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				loadDefaultData();
+				refreshTable();
 			}
 		});
 		validateTable.getRefreshButton().addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				loadDefaultData();
+				refreshTable();
 			}
 		});
 		reviewTable.getSearchBatchButton().addClickHandler(new ClickHandler() {
@@ -194,6 +216,12 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		});
 	}
 
+	private void refreshTable() {
+		reviewTable.getSearchBatchTextBox().setText(EMPTY_STRING);
+		validateTable.getSearchBatchTextBox().setText(EMPTY_STRING);
+		loadDefaultData();
+	}
+
 	private boolean checkTextEntered(TextBox searchBatchTextBox) {
 		boolean check = true;
 		if (searchBatchTextBox == null || searchBatchTextBox.getText().isEmpty()) {
@@ -204,26 +232,37 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	private void onSearchButtonClicked(final String searchText, final ReviewValidateTable selectedTable) {
 		ScreenMaskUtility.maskScreen();
+		selectedTable.getPriorityListBox().setSelectedIndex(0);
 		populateFilters(selectedTable);
-		service.getBatchInstanceDTOs(searchText, filters, new AsyncCallback<List<BatchInstanceDTO>>() {
+		final String batchName = selectedTable.getSearchBatchTextBox().getText();
+
+		service.getRowsCount(batchName, filters, new AsyncCallback<Integer>() {
 
 			@Override
-			public void onSuccess(List<BatchInstanceDTO> batchInstanceDTOs) {
-				selectedTable.getPriorityListBox().setSelectedIndex(0);
-				if (batchInstanceDTOs == null || batchInstanceDTOs.isEmpty()) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchListMessages.MSG_SEARCH_FAILURE));
-				} else {
-					updateTable(batchInstanceDTOs, 0, selectedTable, batchInstanceDTOs.size());
-				}
-				ScreenMaskUtility.unmaskScreen();
+			public void onFailure(final Throwable arg0) {
+				// nothing to do in case of failure.
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchListMessages.MSG_SEARCH_ERROR));
-				ScreenMaskUtility.unmaskScreen();
+			public void onSuccess(final Integer arg0) {
+
+				service.getRows(batchName, 0, selectedTable.getListView().getTableRowCount(), filters, null,
+						new AsyncCallback<List<BatchInstanceDTO>>() {
+
+							public void onFailure(final Throwable caught) {
+								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+										BatchListMessages.MSG_SEARCH_ERROR));
+								ScreenMaskUtility.unmaskScreen();
+							}
+
+							public void onSuccess(final List<BatchInstanceDTO> result) {
+								updateDefaultData();
+								if (null != result) {
+									updateTable(result, 0, null, arg0);
+								}
+								ScreenMaskUtility.unmaskScreen();
+							}
+						});
 			}
 
 		});
@@ -261,7 +300,6 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	}
 
 	private void updateTableData(final ReviewValidateTable table) {
-		ScreenMaskUtility.maskScreen();
 		populateFilters(table);
 		updateRowsCount(filters, new AsyncCallback<Integer>() {
 
@@ -272,14 +310,13 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			public void onSuccess(final Integer result) {
 				updateTable(table, result);
-				ScreenMaskUtility.unmaskScreen();
 			}
 		});
 	}
 
 	public void updateTable(final ReviewValidateTable table, final int rowCount) {
 		ScreenMaskUtility.maskScreen();
-		service.getRows(0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
+		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
 
 			public void onFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
@@ -305,12 +342,33 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onSuccess(final Integer[] result) {
-				udateTabLabels(result);
-				populateFilters(reviewTable);
-				initializeTable(reviewTable, result[0]);
-				populateFilters(validateTable);
-				initializeTable(validateTable, result[1]);
+				updateTabLabels(result);
+				updateTables();
+			}
+		});
+	}
+
+	private void updateTables() {
+		populateFilters(reviewTable);
+		service.getRowsCount(filters, new AsyncCallback<Integer>() {
+
+			public void onFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
+			}
+
+			public void onSuccess(final Integer rowCount) {
+				initializeTable(reviewTable, rowCount);
+				populateFilters(validateTable);
+				service.getRowsCount(filters, new AsyncCallback<Integer>() {
+
+					public void onFailure(final Throwable caught) {
+						ScreenMaskUtility.unmaskScreen();
+					}
+
+					public void onSuccess(final Integer rowCount) {
+						initializeTable(validateTable, rowCount);
+					}
+				});
 			}
 		});
 	}
@@ -327,7 +385,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onSuccess(final Integer[] result) {
-				udateTabLabels(result);
+				updateTabLabels(result);
 				populateFilters(reviewTable);
 				populateFilters(validateTable);
 				ScreenMaskUtility.unmaskScreen();
@@ -335,7 +393,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		});
 	}
 
-	private void udateTabLabels(final Integer[] result) {
+	private void updateTabLabels(final Integer[] result) {
 		view.getReviewLabel().setText(EMPTY_STRING + result[0]);
 		view.getValidationLabel().setText(EMPTY_STRING + result[1]);
 		view.getTotalBatchLabel().setText(EMPTY_STRING + (result[0] + result[1]));
@@ -368,7 +426,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	private void initializeTable(final ReviewValidateTable table, final Integer count) {
 		ScreenMaskUtility.maskScreen();
-		service.getRows(0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
+		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
 
 			public void onFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
@@ -418,19 +476,20 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	@Override
 	public void onPagination(final int startIndex, final int maxResult, final Order order) {
-		populateFilters(getSelectedTable());
-		service.getRowsCount(filters, new AsyncCallback<Integer>() {
+		ReviewValidateTable rvTable = getSelectedTable();
+		populateFilters(rvTable);
+		final String batchName = rvTable.getSearchBatchTextBox().getText();
+		service.getRowsCount(batchName, filters, new AsyncCallback<Integer>() {
 
 			@Override
 			public void onFailure(final Throwable arg0) {
 				// nothing to do in case of failure.
-
 			}
 
 			@Override
 			public void onSuccess(final Integer arg0) {
 
-				service.getRows(startIndex, maxResult, filters, order, new AsyncCallback<List<BatchInstanceDTO>>() {
+				service.getRows(batchName, startIndex, maxResult, filters, order, new AsyncCallback<List<BatchInstanceDTO>>() {
 
 					public void onFailure(final Throwable caught) {
 						ScreenMaskUtility.unmaskScreen();
