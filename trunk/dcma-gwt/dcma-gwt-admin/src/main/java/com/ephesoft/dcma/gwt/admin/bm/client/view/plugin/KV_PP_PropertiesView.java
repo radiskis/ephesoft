@@ -160,7 +160,7 @@ public class KV_PP_PropertiesView extends View<KV_PP_PropertiesPresenter> {
 
 	@UiHandler("configButton")
 	public void onconfigButtonClick(ClickEvent clickEvent) {
-		presenter.onconfigButtonClicked();
+		presenter.onConfigButtonClicked();
 	}
 
 	public VerticalPanel getConfigButtonPanel() {

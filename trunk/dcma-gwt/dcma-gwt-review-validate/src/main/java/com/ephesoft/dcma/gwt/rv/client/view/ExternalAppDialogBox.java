@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.gwt.rv.client.view;
 
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
 import com.google.gwt.core.client.GWT;
@@ -85,8 +86,9 @@ public class ExternalAppDialogBox extends DialogBox {
 		addStyleName(ReviewValidateConstants.CONFIGURED_DIMENSIONS_DIALOG);
 		int xDimension;
 		int yDimension;
+		
 		try {
-			xDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey()));
+			xDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ReviewValidateConstants.POP_UP_X_DIMENSION));
 			if (xDimension < 0) {
 				throw new Exception("Invalid x-dimension set");
 			}
@@ -95,7 +97,7 @@ public class ExternalAppDialogBox extends DialogBox {
 		}
 
 		try {
-			yDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey()));
+			yDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ReviewValidateConstants.POP_UP_Y_DIMENSION));
 			if (yDimension < 0) {
 				throw new Exception("Invalid y-dimension set");
 			}

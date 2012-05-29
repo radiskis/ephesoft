@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.da.service;
 
+import java.util.List;
+
 import com.ephesoft.dcma.da.domain.PluginConfig;
 
 /**
@@ -53,5 +55,20 @@ public interface PluginConfigService {
 	 * @return {@link PluginConfig}
 	 */
 	PluginConfig getPluginConfigByName(String configName);
+
+	/**
+	 * API to create new plugin config.
+	 * 
+	 * @param pluginConfig {@link PluginConfig}
+	 */
+	void createNewPluginConfig(PluginConfig pluginConfig);
+
+	/**
+	 * API to get list of plugin configs corresponding to the given plugin id.
+	 * 
+	 * @param pluginId {@link String}
+	 * @return {@link List}< {@link PluginConfig}>
+	 */
+	List<PluginConfig> getPluginConfigForPluginId(String pluginId);
 
 }

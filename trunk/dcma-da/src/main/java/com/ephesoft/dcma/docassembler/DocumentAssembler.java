@@ -35,18 +35,25 @@
 
 package com.ephesoft.dcma.docassembler;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.service.DocumentTypeService;
 import com.ephesoft.dcma.da.service.PageTypeService;
 import com.ephesoft.dcma.docassembler.classification.DocumentClassification;
+import com.ephesoft.dcma.docassembler.classification.barcode.BarcodeClassification;
+import com.ephesoft.dcma.docassembler.classification.engine.SearchClassification;
+import com.ephesoft.dcma.docassembler.classification.image.ImageClassification;
 import com.ephesoft.dcma.docassembler.constant.DocumentAssemblerConstants;
 import com.ephesoft.dcma.docassembler.factory.DocumentClassificationFactory;
 
@@ -125,6 +132,13 @@ public class DocumentAssembler {
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
+
+	/**
+	 * Instance of PluginPropertiesService.
+	 */
+	@Autowired
+	@Qualifier("batchClassPluginPropertiesService")
+	private PluginPropertiesService bcPluginPropertiesService;
 
 	/**
 	 * docTypeService DocumentTypeService.
@@ -295,6 +309,7 @@ public class DocumentAssembler {
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
+	
 
 	/**
 	 * @param pluginPropertiesService the pluginPropertiesService to set
@@ -324,6 +339,28 @@ public class DocumentAssembler {
 
 		documentClassification.processUnclassifiedPages(this, batchInstanceID, pluginPropertiesService);
 
+	}
+	
+	/**
+	 * This method will create new documents for all the pages of the document type Unknown.
+	 * 
+	 * @param batchInstanceID String
+	 * @throws DCMAApplicationException Check for input parameters, read all pages of document and create document for every page.
+	 */
+	public final List<Document> createDocumentAPI(final DocumentClassificationFactory classType, final String batchClassID, final List<Page> docPageInfo) throws DCMAApplicationException {
+		List<Document> doc = null;
+		DocumentClassification documentClassification = DocumentClassificationFactory.getDocumentClassification(classType.getNameClassification());
+		if(classType.compareTo(DocumentClassificationFactory.IMAGE) == 0){
+			ImageClassification imgClassification = (ImageClassification)documentClassification;
+			doc = imgClassification.processUnclassifiedPagesAPI(docPageInfo, this, batchClassID, bcPluginPropertiesService);
+		} else if(classType.compareTo(DocumentClassificationFactory.SEARCHCLASSIFICATION) == 0) {
+			SearchClassification searchClassification = (SearchClassification)documentClassification;
+			doc =  searchClassification.processUnclassifiedPagesAPI(docPageInfo, this, batchClassID, bcPluginPropertiesService);
+		} else if(classType.compareTo(DocumentClassificationFactory.BARCODE) == 0) {
+			BarcodeClassification barcodeClassification = (BarcodeClassification)documentClassification;
+			doc =  barcodeClassification.processUnclassifiedPagesAPI(docPageInfo, this, batchClassID, bcPluginPropertiesService);
+		}
+		return doc;
 	}
 
 	/**

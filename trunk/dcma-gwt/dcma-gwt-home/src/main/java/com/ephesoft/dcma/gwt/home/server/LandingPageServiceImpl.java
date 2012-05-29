@@ -40,9 +40,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchInstance;
@@ -88,11 +88,14 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		List<BatchInstance> batchInstanceList = null;
 
 		BatchPriority priority = getPriorityValue(filters[0]);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
 		List<BatchPriority> batchPriorities = new ArrayList<BatchPriority>();
 		batchPriorities.add(priority);
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
+		if (isSuperAdmin()) {
+			ephesoftUser = EphesoftUser.SUPER_ADMIN;
+		}
 		batchInstanceList = batchInstanceService.getBatchInstancesExcludedRemoteBatch(batchNameToBeSearched, statusList, startRow,
-				rowsCount, orderList, filterClauseList, batchPriorities, getUserName(), allBatchClassByUserRoles);
+				rowsCount, orderList, filterClauseList, batchPriorities, getUserName(), getUserRoles(), ephesoftUser);
 
 		BatchInstanceDTO batch = null;
 		BatchClass batchClass = null;
@@ -168,35 +171,42 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 	@Override
 	public Integer getRowsCount(final DataFilter[] filters) {
 		List<BatchInstanceStatus> statusList = getStatusList(filters);
-		int rowCount = 0;
-		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		BatchPriority priority = getPriorityValue(filters[0]);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
 		List<BatchPriority> batchPriorities = new ArrayList<BatchPriority>();
 		batchPriorities.add(priority);
-		rowCount = batchClassService.getCount(statusList, batchPriorities, allBatchClassByUserRoles, getUserName());
+		Integer rowCount = null;
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
+		if (isSuperAdmin()) {
+			ephesoftUser = EphesoftUser.SUPER_ADMIN;
+		}
+		rowCount = batchInstanceService.getCount(statusList, batchPriorities, getUserRoles(), getUserName(), ephesoftUser);
 		return rowCount;
 	}
 
 	@Override
 	public Integer[] getIndividualRowCounts() {
 		Integer[] countByStatus = new Integer[2];
-		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		String userName = getUserName();
-		countByStatus[0] = batchClassService.getCount(null, BatchInstanceStatus.READY_FOR_REVIEW, userName, null,
-				allBatchClassByUserRoles);
 
-		countByStatus[1] = batchClassService.getCount(null, BatchInstanceStatus.READY_FOR_VALIDATION, userName, null,
-				allBatchClassByUserRoles);
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
+		if (isSuperAdmin()) {
+			ephesoftUser = EphesoftUser.SUPER_ADMIN;
+		}
+		countByStatus[0] = batchInstanceService.getCount(null, BatchInstanceStatus.READY_FOR_REVIEW, userName, null, getUserRoles(),
+				ephesoftUser);
+
+		countByStatus[1] = batchInstanceService.getCount(null, BatchInstanceStatus.READY_FOR_VALIDATION, userName, null,
+				getUserRoles(), ephesoftUser);
 		return countByStatus;
 	}
 
 	@Override
 	public String getNextBatchInstance() {
-		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		BatchInstance nextBatchInstance = batchClassService.getHighestPriorityBatchInstance(allBatchClassByUserRoles);
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+		BatchInstance nextBatchInstance = batchInstanceService.getHighestPriorityBatchInstance(getUserRoles(),
+				EphesoftUser.NORMAL_USER);
 		String returnValue = null;
 		if (nextBatchInstance != null) {
 			returnValue = nextBatchInstance.getIdentifier();
@@ -215,9 +225,8 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 			priority = getPriorityValue(filters[0]);
 		}
 		int rowCount = 0;
-		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		rowCount = batchClassService.getCount(batchName, status, getUserName(), priority, allBatchClassByUserRoles);
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+		rowCount = batchInstanceService.getCount(batchName, status, getUserName(), priority, getUserRoles(), EphesoftUser.NORMAL_USER);
 		return rowCount;
 	}
 }

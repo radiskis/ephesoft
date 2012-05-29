@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="KVExtractionFieldPatterns">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="KVExtractionFieldPattern" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Distance" type="xs:string" />
+							<xs:element name="FetchValue" type="xs:string" />
+							<xs:element name="KeyPattern" type="xs:string" />
+							<xs:element name="Length" type="xs:int" />
+							<xs:element name="Location" type="xs:string" />
+							<xs:element name="Multiplier" type="xs:float" />
+							<xs:element name="NoOfWords" type="xs:int" />
+							<xs:element name="ValuePattern" type="xs:string" />
+							<xs:element name="Width" type="xs:int" />
+							<xs:element name="XOffset" type="xs:int" />
+							<xs:element name="YOffset" type="xs:int" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

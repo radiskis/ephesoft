@@ -61,6 +61,7 @@ import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.schema.Page.PageLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
+import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.imagemagick.IImageMagickCommonConstants;
@@ -133,23 +134,47 @@ public class ImageClassifier {
 		String batchClassIdentifier = parsedXmlFile.getBatchClassIdentifier();
 		LOGGER.info("batchClassIdentifier = " + batchClassIdentifier);
 		String sampleBaseFolderPath = batchSchemaService.getImageMagickBaseFolderPath(batchClassIdentifier, false);
+		
+		String imMetric = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
+				ImageMagicProperties.CLASSIFY_IMAGES_COMP_METRIC);
+		String imFuzz = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
+				ImageMagicProperties.CLASSIFY_IMAGES_FUZZ_PERCNT);
+		String maxVal = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
+				ImageMagicProperties.CLASSIFY_IMAGES_MAX_RESULTS);
+
 		LOGGER.info("Properties Initialized Successfully, sampleBaseFolderPath = " + sampleBaseFolderPath);
 
 		// Get list of Page names from parsedXmlFile.
 		List<String> listOfUnclasifiedPgPth = new LinkedList<String>();
 		Map<String, Integer> unclassifiedPgIndexMap = new HashMap<String, Integer>();
+		
 		getPathOfPagesOfBatch(parsedXmlFile, listOfUnclasifiedPgPth, unclassifiedPgIndexMap, sBatchFolder);
+		Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap = performClassification(maxVal, imMetric, imFuzz,
+				sampleBaseFolderPath, listOfUnclasifiedPgPth);
+		
+		List<Document> listOfDocuments = parsedXmlFile.getDocuments().getDocument();
+		Document docuemnt = listOfDocuments.get(0);
+		Pages pages = docuemnt.getPages();
+		List<Page> listOfPages = pages.getPage();
+
+		updateXmlObject(finalUnclasifiedPageConfidenceMap, unclassifiedPgIndexMap, listOfPages);
+		batchSchemaService.updateBatch(parsedXmlFile);
+	}
+
+	private Map<String, CustomValueSortedMap> performClassification(String maxVal, String imMetric, String imFuzz, String sampleBaseFolderPath,
+			List<String> listOfUnclasifiedPgPth) throws IOException, DCMAApplicationException {
 		File batchClassFolder = new File(sampleBaseFolderPath);
 		String[] documentTypeArray = batchClassFolder.list();
 
-		String maxVal = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
-				ImageMagicProperties.CLASSIFY_IMAGES_MAX_RESULTS);
 		int maxValue = 10;
 		try {
 			maxValue = Integer.valueOf(maxVal);
 			LOGGER.info("maxValue = " + maxValue);
 		} catch (NumberFormatException nfe) {
 			LOGGER.error("Max value is not a number. Using default value of 10. " + nfe.getMessage(), nfe);
+		}
+		if(documentTypeArray == null || documentTypeArray.length == 0) {
+			throw new DCMAApplicationException(" Learning not done for batch class sample folder path:" + sampleBaseFolderPath);
 		}
 		// CustomValueSortedMap finalUnclasifiedPageConfidenceMap = new CustomValueSortedMap(maxValue);
 		Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap = new HashMap<String, CustomValueSortedMap>();
@@ -164,15 +189,46 @@ public class ImageClassifier {
 				List<String> listOfSamplePages = getListOfSamplePagesForDoc(documentName, sampleBaseFolderPath);
 				for (String samplePageName : listOfSamplePages) {
 					List<String> listOfSambleThumbsPaths = getListOfThumbnailPaths(samplePageName, documentName, sampleBaseFolderPath);
-					double maxConfidence = getMaxCondifence(unclasifiedPagePath, listOfSambleThumbsPaths, batchInstanceIdentifier);
+					double maxConfidence = getMaxCondifence(unclasifiedPagePath, listOfSambleThumbsPaths, imMetric, imFuzz);
 					LOGGER.info("samplePageName = " + samplePageName + ", maxConfidence = " + maxConfidence);
 					sampleConfidenceList.add(samplePageName, maxConfidence);
 				}
 			}
 			finalUnclasifiedPageConfidenceMap.put(unclasifiedPagePath, sampleConfidenceList);
 		}
-		updateXmlObject(finalUnclasifiedPageConfidenceMap, unclassifiedPgIndexMap, parsedXmlFile);
-		batchSchemaService.updateBatch(parsedXmlFile);
+		return finalUnclasifiedPageConfidenceMap;
+	}
+
+	/**
+	 * This method takes in the batch InstanceID and subsequently gets the parsedXMLFile. Then it fetches all the Pages from it as they
+	 * are with a document type unknown. and it classifies all the pages based on Image comparison. In the end the result is put in the
+	 * batch.xml file.
+	 * 
+	 * @param batchInstanceIdentifier Batch instance Id.
+	 * @param batchClassIdentifier Batch ClassId.
+	 * @param sBatchFolder Batch Folder Path.
+	 * @param isFromWebService 
+	 * @param batchSchemaService
+	 * @throws IOException
+	 */
+	public void classifyAllImgsOfBatchInternal(String maxVal, String imMetric, String imFuzz,String batchInstanceIdentifier, String batchClassIdentifier, String sBatchFolder, List<Page> listOfPages) throws IOException,
+			DCMAApplicationException {
+
+		// Initialize properties
+		LOGGER.info("Initializing properties...");
+		LOGGER.info("batchClassIdentifier = " + batchClassIdentifier);
+		String sampleBaseFolderPath = batchSchemaService.getImageMagickBaseFolderPath(batchClassIdentifier, false);
+		LOGGER.info("Properties Initialized Successfully, sampleBaseFolderPath = " + sampleBaseFolderPath);
+
+		// Get list of Page names from parsedXmlFile.
+		List<String> listOfUnclasifiedPgPth = new LinkedList<String>();
+		Map<String, Integer> unclassifiedPgIndexMap = new HashMap<String, Integer>();
+		processPageList(listOfPages, listOfUnclasifiedPgPth, unclassifiedPgIndexMap, sBatchFolder);
+		Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap = performClassification(maxVal, imMetric, imFuzz, 
+				sampleBaseFolderPath, listOfUnclasifiedPgPth);
+		
+		updateXmlObject(finalUnclasifiedPageConfidenceMap, unclassifiedPgIndexMap, listOfPages);
+		
 	}
 
 	/**
@@ -187,7 +243,7 @@ public class ImageClassifier {
 	 * @param parsedXmlFile The xml file object.
 	 */
 	private void updateXmlObject(Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap,
-			Map<String, Integer> unclassifiedPgIndexMap, Batch parsedXmlFile) {
+			Map<String, Integer> unclassifiedPgIndexMap, List<Page> listOfPages) {
 		Set<String> unclasifiedPgsSet = finalUnclasifiedPageConfidenceMap.keySet();
 		for (String unclassifiedPage : unclasifiedPgsSet) {
 			CustomValueSortedMap listOfConfidenceValues = finalUnclasifiedPageConfidenceMap.get(unclassifiedPage);
@@ -195,10 +251,6 @@ public class ImageClassifier {
 			if (indexOfPage == null) {
 				continue;
 			}
-			List<Document> listOfDocuments = parsedXmlFile.getDocuments().getDocument();
-			Document docuemnt = listOfDocuments.get(0);
-			Pages pages = docuemnt.getPages();
-			List<Page> listOfPages = pages.getPage();
 			Page unclassifiedPageNode = listOfPages.get(indexOfPage);
 			PageLevelFields pageLevelFields = unclassifiedPageNode.getPageLevelFields();
 			if (pageLevelFields == null) {
@@ -208,13 +260,12 @@ public class ImageClassifier {
 			List<DocField> listOfPageLevelFields = pageLevelFields.getPageLevelField();
 			DocField pageLevelField = new DocField();
 			listOfPageLevelFields.add(pageLevelField);
-
+			
 			if (listOfConfidenceValues.size() >= 1) {
 				pageLevelField.setName(IImageMagickCommonConstants.IMAGE_COMPARE_CLASSIFICATION);
 				pageLevelField.setValue(listOfConfidenceValues.last().getKey());
 				pageLevelField.setConfidence(formatDecimalValue(listOfConfidenceValues.last().getValue()));
-			}
-
+			} 
 			AlternateValues alternativeValues = pageLevelField.getAlternateValues();
 			if (alternativeValues == null) {
 				alternativeValues = new AlternateValues();
@@ -231,9 +282,7 @@ public class ImageClassifier {
 				listOfAltValues.add(alternateValue);
 
 			}
-
 		}
-
 	}
 
 	/**
@@ -246,7 +295,7 @@ public class ImageClassifier {
 	 * @throws IOException
 	 */
 	private double getMaxCondifence(final String unclasifiedPagePath, List<String> listOfSambleThumbsPaths,
-			final String batchInstanceID) throws IOException, DCMAApplicationException {
+			final String imMetric, final String imFuzz) throws IOException, DCMAApplicationException {
 		if (imageComparisonUtil == null) {
 			imageComparisonUtil = new ImageComparisonUtil(true);
 		}
@@ -261,7 +310,7 @@ public class ImageClassifier {
 					LOGGER.info("Thumbnail File does not exist filename = " + fSampleThumb);
 					continue;
 				}
-				confidence = imageComparisonUtil.compareImagesRuntime(unclasifiedPagePath, sampleThumbnailPath, batchInstanceID);
+				confidence = imageComparisonUtil.compareImagesRuntime(unclasifiedPagePath, sampleThumbnailPath, imMetric, imFuzz);
 				LOGGER.info("confidence = " + confidence);
 			} catch (Exception e) {
 				LOGGER.info("Problem comparing images " + unclasifiedPagePath + "," + sampleThumbnailPath + " Exception = "
@@ -379,18 +428,23 @@ public class ImageClassifier {
 			}
 		}
 		if (valid) {
-			StringBuffer unclassifiedPgPath;
-			int index = 0;
-			for (Page page : listOfPages) {
-				unclassifiedPgPath = new StringBuffer();
-				unclassifiedPgPath.append(sBatchFolder);
-				unclassifiedPgPath.append(File.separator);
-				unclassifiedPgPath.append(page.getComparisonThumbnailFileName());
-				listOfUnclasifiedPages.add(unclassifiedPgPath.toString());
-				unclassifiedPgIndexMap.put(unclassifiedPgPath.toString(), Integer.valueOf(index));
-				index++;
+			processPageList(listOfPages, listOfUnclasifiedPages, unclassifiedPgIndexMap, sBatchFolder);
+		}
+	}
 
-			}
+	private void processPageList(List<Page> listOfPages, List<String> listOfUnclasifiedPages,
+			Map<String, Integer> unclassifiedPgIndexMap, String sBatchFolder) {
+		StringBuffer unclassifiedPgPath;
+		int index = 0;
+		for (Page page : listOfPages) {
+			unclassifiedPgPath = new StringBuffer();
+			unclassifiedPgPath.append(sBatchFolder);
+			unclassifiedPgPath.append(File.separator);
+			unclassifiedPgPath.append(page.getComparisonThumbnailFileName());
+			listOfUnclasifiedPages.add(unclassifiedPgPath.toString());
+			unclassifiedPgIndexMap.put(unclassifiedPgPath.toString(), Integer.valueOf(index));
+			index++;
+
 		}
 	}
 

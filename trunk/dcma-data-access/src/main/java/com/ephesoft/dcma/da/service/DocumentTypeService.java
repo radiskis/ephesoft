@@ -51,10 +51,10 @@ public interface DocumentTypeService {
 	/**
 	 * An api to fetch all DocumentType by batch instance id.
 	 * 
-	 * @param batchInstanceID {@link Long}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @return List<{@link DocumentType}>
 	 */
-	List<DocumentType> getDocTypeByBatchInstanceIdentifier(String batchInstanceIdentifierIdentifier);
+	List<DocumentType> getDocTypeByBatchInstanceIdentifier(String batchInstanceIdentifier);
 
 	/**
 	 * An api to fetch all DocumentType by batch class id.
@@ -109,4 +109,12 @@ public interface DocumentTypeService {
 	 * @param {@link DocumentType}
 	 */
 	void evict(DocumentType documentType);
+	
+	/**
+	 * An api to fetch all DocumentType by batch class id.
+	 * 
+	 * @param batchClassID {@link Long}
+	 * @return List<{@link DocumentType}>
+	 */
+	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier);
 }

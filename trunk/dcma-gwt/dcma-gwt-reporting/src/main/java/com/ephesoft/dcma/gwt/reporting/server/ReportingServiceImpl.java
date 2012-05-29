@@ -53,6 +53,7 @@ import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.common.WorkflowType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
 import com.ephesoft.dcma.gwt.core.shared.ReportDTO;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
@@ -127,8 +128,8 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
 		List<BatchClass> batchClassList = batchClassService.getAllBatchClasses();
 		LinkedHashMap<String, String> batchClassNames = new LinkedHashMap<String, String>();
-		batchClassNames.put(ReportingConstants.ALL_TEXT,ReportingConstants.ALL_TEXT); 
-				
+		batchClassNames.put(ReportingConstants.ALL_TEXT, ReportingConstants.ALL_TEXT);
+
 		for (Iterator<BatchClass> iterator = batchClassList.iterator(); iterator.hasNext();) {
 			BatchClass batchClass = (BatchClass) iterator.next();
 			batchClassNames.put(batchClass.getIdentifier(), batchClass.getIdentifier() + " - " + batchClass.getDescription());
@@ -187,54 +188,13 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 
 	@Override
 	public void syncDatabase() throws GWTException {
-		InputStreamReader inputStreamReader = null;
-		BufferedReader input = null;
+		ReportDataService reportService = this.getSingleBeanOfType(ReportDataService.class);
 		try {
 			ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
 			String antPath = app.getProperty("report.ant.buildfile.path");
-			String commandStr = "";
-			if (OSUtil.isWindows()) {
-				commandStr = "cmd /c";
-			}
-			commandStr = commandStr + " ant manual-report-generator -f " + antPath;
-			Process process = Runtime.getRuntime().exec(commandStr, null, new File(System.getenv(ANT_HOME_PATH)));
-			inputStreamReader = new InputStreamReader(process.getInputStream());
-			input = new BufferedReader(inputStreamReader);
-			String line = null;
-			do {
-				line = input.readLine();
-				log.debug(line);
-			} while (line != null);
-			int exitValue = process.waitFor();
-			log.debug("System exited with error code:" + exitValue);
-			if (exitValue != 0) {
-				log.debug("exitValue for command:" + exitValue);
-				log.error("Non-zero exit value for command found. So exiting the application.");
-				throw new GWTException("Non-zero exit value for command found. So exiting the application");
-			}
-		} catch (IOException ioe) {
-			ioe.printStackTrace(System.out);
-			log.error("Exception while Reading Ant File." + ioe.getMessage(), ioe);
-			throw new GWTException("Exception while reading Ant File. " + ioe.getMessage());
+			reportService.syncDatabase(antPath);
 		} catch (Exception e) {
-			e.printStackTrace(System.out);
-			log.error("Exception while Executing Ant Task." + e.getMessage(), e);
-			throw new GWTException("Exception while Executing Ant Task." + e.getMessage());
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					log.error(e.getMessage(), e);
-				}
-			}
-			if (inputStreamReader != null) {
-				try {
-					inputStreamReader.close();
-				} catch (IOException e) {
-					log.error(e.getMessage(), e);
-				}
-			}
+			throw new GWTException("Exception while running reporting. " + e.getMessage());
 		}
 	}
 
@@ -251,10 +211,10 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 	}
 
 	@Override
-	public Map<String,String> getCustomReportButtonPopUpConfigs() throws GWTException {
+	public Map<String, String> getCustomReportButtonPopUpConfigs() throws GWTException {
 		ReportDataService reportDataService = this.getSingleBeanOfType(ReportDataService.class);
 
-		Map<String,String> popUpConfigs = new HashMap<String,String>();
+		Map<String, String> popUpConfigs = new HashMap<String, String>();
 		try {
 			popUpConfigs = reportDataService.getCustomReportButtonPopUpConfigs();
 		} catch (Exception e) {

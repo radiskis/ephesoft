@@ -66,6 +66,14 @@ public interface PageTypeService {
 	List<PageType> getPageTypesByBatchInstanceID(String batchInstanceIdentifierIdentifier);
 
 	/**
+	 * An api to fetch all Page types by batch Class ID.
+	 * 
+	 * @param batchClassID {@link String}
+	 * @return List<@link PageType}>
+	 */
+	List<PageType> getPageTypesByBatchClassID(String batchClassID);
+
+	/**
 	 * An api to fetch all document type by Page type name.
 	 * 
 	 * @param name {@link String}

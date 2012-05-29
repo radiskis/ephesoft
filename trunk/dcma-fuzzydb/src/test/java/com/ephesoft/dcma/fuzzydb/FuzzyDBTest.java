@@ -263,7 +263,7 @@ public class FuzzyDBTest extends AbstractFuzzyDBTest {
 		try {
 			String searchString = prop.getProperty(SEACRCH_STRING);
 			fuzzyDBSearchService.learnDataBase(new BatchClassID(batchClassId), true);
-			List<List<String>> searchResult = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceId), searchString);
+			List<List<String>> searchResult = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceId), null, searchString);
 			if (searchResult.size() == 0) {
 				throw new DCMAException();
 			}

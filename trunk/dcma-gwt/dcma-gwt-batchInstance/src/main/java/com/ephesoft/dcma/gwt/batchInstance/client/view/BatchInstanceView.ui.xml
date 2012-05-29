@@ -41,7 +41,7 @@
 		<g:center>
 			<g:DockLayoutPanel ui:field="batchInstanceListPanel"
 				width="98%" height="93%">
-				<g:north size="80">
+				<g:north size="120">
 					<g:DockLayoutPanel unit="PCT">
 						<g:center>
 							<g:DockLayoutPanel unit="PCT">

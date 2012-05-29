@@ -75,10 +75,25 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 		for (int index = 0; index < docFieldWidgets.size(); index++) {
 			if (docFieldWidgets.get(index).isValidatable()) {
 				if (!docFieldWidgets.get(index).isListBox()) {
+					String textBoxValue = docFieldWidgets.get(index).getTextBoxWidget().getWidget().getText();
 					if (!docFieldWidgets.get(index).getTextBoxWidget().validate()) {
-						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
-						fieldsValid = true;
-						break;
+						if (docFieldWidgets.get(index).isMandatory) {// mandatory fields
+							if ((textBoxValue != null && textBoxValue.isEmpty())) {
+								ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
+								fieldsValid = true;
+								break;
+							} else if (textBoxValue != null) {
+								ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.FIELD_NOT_VALID_ERROR_MSG);
+								fieldsValid = true;
+								break;
+							}
+						} else {// non-mandatory fields
+							if (!(textBoxValue != null && textBoxValue.isEmpty())) {
+								ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.FIELD_NOT_VALID_ERROR_MSG);
+								fieldsValid = true;
+								break;
+							}
+						}
 					}
 				} else {
 					if (docFieldWidgets.get(index).getListBoxwidget().getSelectedIndex() == -1) {
@@ -86,7 +101,6 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 						fieldsValid = true;
 						break;
 					}
-
 				}
 			}
 		}
@@ -213,7 +227,12 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 					// Create a text box
 					ValidatableWidget<TextBox> validatableTextBox = view.addTextBox(row, batchClassPluginConfig, false);
 					view.addWidget(row, 2, validatableTextBox.getWidget());
-					docFieldWidgets.add(new EditableWidgetStorage(validatableTextBox));
+					EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(validatableTextBox);
+					if (batchClassPluginConfig.isMandatory()) {
+						editableWidgetStorage.setMandatory(true);
+					}
+					docFieldWidgets.add(editableWidgetStorage);
+
 				}
 				row++;
 			}
@@ -228,20 +247,23 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 	private static class EditableWidgetStorage {
 
 		private ValidatableWidget<TextBox> widget;
-		private  boolean isListBox;
+		private boolean isListBox;
 		private ListBox listBoxwidget;
 		private boolean isValidatable;
+		private boolean isMandatory;
 
 		public EditableWidgetStorage(ValidatableWidget<TextBox> widget) {
 			this.widget = widget;
 			this.isListBox = false;
 			this.isValidatable = true;
+			this.isMandatory = false;
 		}
 
 		public EditableWidgetStorage(ListBox listBoxwidget) {
 			this.listBoxwidget = listBoxwidget;
 			this.isListBox = true;
 			this.isValidatable = true;
+			this.isMandatory = false;
 		}
 
 		public ValidatableWidget<TextBox> getTextBoxWidget() {
@@ -262,6 +284,10 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 
 		public void setValidatable(boolean isValidatable) {
 			this.isValidatable = isValidatable;
+		}
+
+		public void setMandatory(boolean isMandatory) {
+			this.isMandatory = isMandatory;
 		}
 	}
 

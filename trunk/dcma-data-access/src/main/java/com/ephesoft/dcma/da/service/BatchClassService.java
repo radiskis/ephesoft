@@ -167,12 +167,13 @@ public interface BatchClassService {
 	 */
 	List<BatchClass> getBatchClassList(int firstResult, int maxResults, Order order);
 
-	/**
-	 * API to count all the batch classes.
+	/**API to count all the batch classes.
 	 * 
-	 * @return count int
+	 * @param userRoles
+	 * @return
 	 */
-	int countAllBatchClassesExcludeDeleted();
+	 
+	int countAllBatchClassesExcludeDeleted(Set<String> userRoles);
 
 	/**
 	 * 
@@ -272,4 +273,12 @@ public interface BatchClassService {
 	 * @return {@link String}
 	 */ 
 	String getBatchClassIdentifierByUNCfolder(String uncFolder);
+	
+	/**
+	 * API to get all batch class identifiers.
+	 * 
+	 * 
+	 * @return List<{@link String}>
+	 */ 
+	List<String> getAllBatchClassIdentifier();
 }

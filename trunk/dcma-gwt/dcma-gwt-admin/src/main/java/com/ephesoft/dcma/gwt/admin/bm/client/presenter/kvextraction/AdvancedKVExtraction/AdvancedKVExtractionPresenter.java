@@ -35,20 +35,38 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction.AdvancedKVExtraction;
 
+import java.util.List;
+
 import com.ephesoft.dcma.core.common.KVFetchValue;
+import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction.AdvancedKVExtractionView;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction.Coordinates;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
+import com.ephesoft.dcma.gwt.core.shared.AdvancedKVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
+import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DialogBox;
 
 public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<AdvancedKVExtractionView> {
+
+	private static final String STYLE_WIDTH500PX = "width500px";
+	private static final String EXTENSION_PNG = ".png";
+	private static final char EXT_CHAR = '.';
+	private static final String KV_EXTRACTION_RESULT = "KV Extraction Result";
+	protected static final String EXTENSION_TIF = ".tif";
+
+	boolean isEditAdvancedKV;
 
 	public AdvancedKVExtractionPresenter(BatchClassManagementController controller, AdvancedKVExtractionView view) {
 		super(controller, view);
@@ -62,37 +80,43 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 
 	@Override
 	public void bind() {
-		if (controller.getSelectedKVExtraction() != null) {
-			view.setLocation(controller.getSelectedKVExtraction().getLocationType());
-			view.setKeyPattern(controller.getSelectedKVExtraction().getKeyPattern());
-			view.setValuePattern(controller.getSelectedKVExtraction().getValuePattern());
-			if (controller.getSelectedKVExtraction().getFetchValue() != null) {
-				view.setFetchValue(controller.getSelectedKVExtraction().getFetchValue());
+		KVExtractionDTO selectedKVExtraction = controller.getSelectedKVExtraction();
+		if (selectedKVExtraction != null) {
+			view.setLocation(selectedKVExtraction.getLocationType());
+			view.setKeyPattern(selectedKVExtraction.getKeyPattern());
+			view.setValuePattern(selectedKVExtraction.getValuePattern());
+			if (selectedKVExtraction.getFetchValue() != null) {
+				view.setFetchValue(selectedKVExtraction.getFetchValue());
 			} else {
 				view.setFetchValue(KVFetchValue.ALL);
 			}
-			if (controller.getSelectedKVExtraction().getXoffset() != null) {
-				view.setxOffset(String.valueOf(controller.getSelectedKVExtraction().getXoffset()));
+			if (selectedKVExtraction.getKvPageValue() != null) {
+				view.setKVPageValue(selectedKVExtraction.getKvPageValue());
+			} else {
+				view.setKVPageValue(KVPageValue.ALL);
+			}
+			if (selectedKVExtraction.getXoffset() != null) {
+				view.setxOffset(String.valueOf(selectedKVExtraction.getXoffset()));
 			} else {
 				view.setxOffset(AdminConstants.EMPTY_STRING);
 			}
-			if (controller.getSelectedKVExtraction().getYoffset() != null) {
-				view.setyOffset(String.valueOf(controller.getSelectedKVExtraction().getYoffset()));
+			if (selectedKVExtraction.getYoffset() != null) {
+				view.setyOffset(String.valueOf(selectedKVExtraction.getYoffset()));
 			} else {
 				view.setyOffset(AdminConstants.EMPTY_STRING);
 			}
-			if (controller.getSelectedKVExtraction().getWidth() != null) {
-				view.setWidthOfRect(String.valueOf(controller.getSelectedKVExtraction().getWidth()));
+			if (selectedKVExtraction.getWidth() != null) {
+				view.setWidthOfRect(String.valueOf(selectedKVExtraction.getWidth()));
 			} else {
 				view.setWidthOfRect(AdminConstants.EMPTY_STRING);
 			}
-			if (controller.getSelectedKVExtraction().getLength() != null) {
-				view.setLengthOfRect(String.valueOf(controller.getSelectedKVExtraction().getLength()));
+			if (selectedKVExtraction.getLength() != null) {
+				view.setLengthOfRect(String.valueOf(selectedKVExtraction.getLength()));
 			} else {
 				view.setLengthOfRect(AdminConstants.EMPTY_STRING);
 			}
-			if (controller.getSelectedKVExtraction().getMultiplier() != null) {
-				float Rval = controller.getSelectedKVExtraction().getMultiplier();
+			if (selectedKVExtraction.getMultiplier() != null) {
+				float Rval = selectedKVExtraction.getMultiplier();
 				int Rpl = 2;
 				float pVarLocal = (float) Math.pow(10, Rpl);
 				Rval = Rval * pVarLocal;
@@ -112,113 +136,188 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 		}
 	}
 
-	public void getPageImageUrl(String batchClassId, String imageName) {
-		controller.getRpcService().getAdvancedKVImageUploadPath(batchClassId, imageName, new AsyncCallback<String>() {
+	public boolean isEditAdvancedKV() {
+		return this.isEditAdvancedKV;
+	}
+
+	public void setEditAdvancedKV(boolean isEditAdvancedKV) {
+		this.isEditAdvancedKV = isEditAdvancedKV;
+	}
+
+	public void createKeyValueOverlay() {
+		AdvancedKVExtractionDTO advancedKVExtraction = controller.getSelectedKVExtraction().getAdvancedKVExtractionDTO();
+		Coordinates keyCoordinates = new Coordinates();
+		Coordinates valueCoordinates = new Coordinates();
+		keyCoordinates.setX0(advancedKVExtraction.getKeyX0Coord());
+		keyCoordinates.setY0(advancedKVExtraction.getKeyY0Coord());
+		keyCoordinates.setX1(advancedKVExtraction.getKeyX1Coord());
+		keyCoordinates.setY1(advancedKVExtraction.getKeyY1Coord());
+		valueCoordinates.setX0(advancedKVExtraction.getValueX0Coord());
+		valueCoordinates.setY0(advancedKVExtraction.getValueY0Coord());
+		valueCoordinates.setX1(advancedKVExtraction.getValueX1Coord());
+		valueCoordinates.setY1(advancedKVExtraction.getValueY1Coord());
+		view.createKeyValueOverlay(keyCoordinates, valueCoordinates);
+	}
+
+	public void getPageImageUrl(final String batchClassId, final String documentName, final String imageName) {
+		controller.getRpcService().getAdvancedKVImageUploadPath(batchClassId, documentName, imageName, new AsyncCallback<String>() {
 
 			@Override
 			public void onFailure(Throwable paramThrowable) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ERROR_RETRIEVING_PATH));
+				setEditAdvancedKV(false);
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.ERROR_RETRIEVING_PATH));
 			}
 
 			@Override
 			public void onSuccess(String pathUrl) {
-				view.setPageImageUrl(pathUrl);
+				if (null == pathUrl || pathUrl.isEmpty()) {
+					setEditAdvancedKV(false);
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchClassManagementMessages.ERROR_RETRIEVING_PATH));
+				} else {
+					if (view.getFileName() != null && !view.getFileName().isEmpty()) {
+						setImageNameInDTO(view.getFileName());
+					}
+					view.setPageImageUrl(pathUrl);
+				}
 			}
 		});
 	}
 
 	public void onSaveButtonClicked() {
-		boolean validFlag = true;
-		if (validFlag && (!view.getValidateKeyPatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.BLANK_ERROR));
-			validFlag = false;
-		}
+		boolean validFlag = validateFields();
+		KVExtractionDTO selectedKVExtraction = controller.getSelectedKVExtraction();
 
-		if (validFlag && (!view.getValidateValuePatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.BLANK_ERROR));
-			validFlag = false;
-		}
-
-		if (validFlag && !view.getValidateMultiplierTextBox().validate()) {
-			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MULTIPLIER_ERROR));
-			}
-			validFlag = false;
-		}
 		if (validFlag) {
-			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
-				Integer mult = (int)(Float.parseFloat(view.getMultiplier()) * 100);
-				if (mult > 100 || mult < 0) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.MULTIPLIER_ERROR));
-					validFlag = false;
-				}
-			}
-		}
-
-//		if (validFlag
-//				&& (controller.isAdd() && controller.getSelectedDocumentLevelField().checkKVExtractionDetails(view.getKeyPattern(),
-//						view.getValuePattern(), view.getLocation()))) {
-//			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue((BatchClassManagementMessages.NAME_COMMON_ERROR)));
-//			validFlag = false;
-//		}
-		
-		if (validFlag) {
-			int length = 0, width=0;
+			int length = 0, width = 0;
 			if (view.getLength() != null && !view.getLength().isEmpty()) {
 				length = Integer.parseInt(view.getLength());
 			}
 			if (view.getWidth() != null && !view.getWidth().isEmpty()) {
 				width = Integer.parseInt(view.getWidth());
 			}
-			if (length==0 || width==0){
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADVANCED_KV_ERROR));
-				validFlag=false;
+			if (length == 0 || width == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.ADVANCED_KV_ERROR));
+				validFlag = false;
 			}
 		}
 
 		if (validFlag) {
 			if (controller.isAdd()) {
-				controller.getSelectedDocumentLevelField().addKvExtraction(controller.getSelectedKVExtraction());
+				controller.getSelectedDocumentLevelField().addKvExtraction(selectedKVExtraction);
 				controller.setAdd(false);
 			}
-
-			controller.getSelectedKVExtraction().setKeyPattern(view.getKeyPattern());
-			controller.getSelectedKVExtraction().setValuePattern(view.getValuePattern());
-			controller.getSelectedKVExtraction().setLocationType(view.getLocation());
-			controller.getSelectedKVExtraction().setNoOfWords(null);
-			if (view.getLength() != null && !view.getLength().isEmpty()) {
-				Integer length = Integer.parseInt(view.getLength());
-				controller.getSelectedKVExtraction().setLength(length);
-			}
-			if (view.getWidth() != null && !view.getWidth().isEmpty()) {
-				Integer width = Integer.parseInt(view.getWidth());
-				controller.getSelectedKVExtraction().setWidth(width);
-			}
-			if (view.getxOffset() != null && !view.getxOffset().isEmpty()) {
-				Integer xoffset = Integer.parseInt(view.getxOffset());
-				controller.getSelectedKVExtraction().setXoffset(xoffset);
-			}
-			if (view.getyOffset() != null && !view.getyOffset().isEmpty()) {
-				Integer yoffset = Integer.parseInt(view.getyOffset());
-				controller.getSelectedKVExtraction().setYoffset(yoffset);
-			}
-			if (view.getFetchValue() != null) {
-				controller.getSelectedKVExtraction().setFetchValue(view.getFetchValue());
-			}
-			if (view.getMultiplier() != null) {
-				if(!view.getMultiplier().isEmpty()) {
-					Float multiplier = Float.parseFloat(view.getMultiplier());
-					controller.getSelectedKVExtraction().setMultiplier(multiplier);
-				} else {
-					controller.getSelectedKVExtraction().setMultiplier(null);
-				}
-			}
-
+			saveDataInDTO(selectedKVExtraction);
 			view.removeAllOverlays();
 			controller.getView().toggleBottomPanelShowHide(true);
 			controller.getMainPresenter().showFieldTypeView(false);
-
 		}
+	}
+
+	private void saveDataInDTO(final KVExtractionDTO selectedKVExtraction) {
+		selectedKVExtraction.setKeyPattern(view.getKeyPattern());
+		selectedKVExtraction.setValuePattern(view.getValuePattern());
+		selectedKVExtraction.setLocationType(view.getLocation());
+		selectedKVExtraction.setNoOfWords(null);
+		if (view.getLength() != null && !view.getLength().isEmpty()) {
+			Integer length = Integer.parseInt(view.getLength());
+			selectedKVExtraction.setLength(length);
+		}
+		if (view.getWidth() != null && !view.getWidth().isEmpty()) {
+			Integer width = Integer.parseInt(view.getWidth());
+			selectedKVExtraction.setWidth(width);
+		}
+		if (view.getxOffset() != null && !view.getxOffset().isEmpty()) {
+			Integer xoffset = Integer.parseInt(view.getxOffset());
+			selectedKVExtraction.setXoffset(xoffset);
+		}
+		if (view.getyOffset() != null && !view.getyOffset().isEmpty()) {
+			Integer yoffset = Integer.parseInt(view.getyOffset());
+			selectedKVExtraction.setYoffset(yoffset);
+		}
+		if (view.getFetchValue() != null) {
+			selectedKVExtraction.setFetchValue(view.getFetchValue());
+		}
+		if (view.getKVPageValue() != null) {
+			selectedKVExtraction.setKvPageValue(view.getKVPageValue());
+		}
+		if (view.getMultiplier() != null) {
+			if (!view.getMultiplier().isEmpty()) {
+				Float multiplier = Float.parseFloat(view.getMultiplier());
+				selectedKVExtraction.setMultiplier(multiplier);
+			} else {
+				selectedKVExtraction.setMultiplier(null);
+			}
+		}
+		setAdvKVExtractionDTO(view.getKeyCoordinates(), view.getValueCoordinates(), selectedKVExtraction.getAdvancedKVExtractionDTO());
+	}
+
+	private boolean validateFields() {
+		boolean validFlag = true;
+		if (validFlag && (!view.getValidateKeyPatternTextBox().validate())) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.BLANK_ERROR));
+			validFlag = false;
+		}
+
+		if (validFlag && (!view.getValidateValuePatternTextBox().validate())) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.BLANK_ERROR));
+			validFlag = false;
+		}
+
+		if (validFlag && !view.getValidateMultiplierTextBox().validate()) {
+			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MULTIPLIER_ERROR));
+			}
+			validFlag = false;
+		}
+		if (validFlag) {
+			if (view.getMultiplier() != null && !view.getMultiplier().isEmpty()) {
+				Integer mult = (int) (Float.parseFloat(view.getMultiplier()) * 100);
+				if (mult > 100 || mult < 0) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchClassManagementMessages.MULTIPLIER_ERROR));
+					validFlag = false;
+				}
+			}
+		}
+		return validFlag;
+	}
+
+	private AdvancedKVExtractionDTO setAdvKVExtractionDTO(final Coordinates keyCoord, final Coordinates valueCoord,
+			AdvancedKVExtractionDTO advancedKVExtractionDTO) {
+		String fileName = view.getFileName();
+		if (null != fileName && !fileName.isEmpty()) {
+			String pngFileName = fileName.substring(0, fileName.lastIndexOf(EXT_CHAR)) + EXTENSION_PNG;
+			advancedKVExtractionDTO.setDisplayImageName(pngFileName);
+			setKeyValueCoordinates(keyCoord, valueCoord, advancedKVExtractionDTO);
+		} else if (!keyCoord.isEmpty() && !valueCoord.isEmpty()) {
+			setKeyValueCoordinates(keyCoord, valueCoord, advancedKVExtractionDTO);
+		}
+		return advancedKVExtractionDTO;
+	}
+
+	/**
+	 * This method sets the Key and Value coordinates in the advanced KV DTO.
+	 * 
+	 * @param keyCoord
+	 * @param valueCoord
+	 * @param advKVExtractionDTO
+	 */
+	private void setKeyValueCoordinates(final Coordinates keyCoord, final Coordinates valueCoord,
+			AdvancedKVExtractionDTO advKVExtractionDTO) {
+		advKVExtractionDTO.setKeyX0Coord(keyCoord.getX0());
+		advKVExtractionDTO.setKeyX1Coord(keyCoord.getX1());
+		advKVExtractionDTO.setKeyY0Coord(keyCoord.getY0());
+		advKVExtractionDTO.setKeyY1Coord(keyCoord.getY1());
+		advKVExtractionDTO.setValueX0Coord(valueCoord.getX0());
+		advKVExtractionDTO.setValueX1Coord(valueCoord.getX1());
+		advKVExtractionDTO.setValueY0Coord(valueCoord.getY0());
+		advKVExtractionDTO.setValueY1Coord(valueCoord.getY1());
 	}
 
 	public void onCancelButtonClicked() {
@@ -242,6 +341,77 @@ public class AdvancedKVExtractionPresenter extends AbstractBatchClassPresenter<A
 			view.setValuePattern(AdminConstants.EMPTY_STRING);
 			view.setLocation(null);
 			view.setFetchValue(KVFetchValue.ALL);
+		}
+	}
+
+	public void setImageUrlAndCoordinates() {
+		KVExtractionDTO selectedKVExtraction = controller.getSelectedKVExtraction();
+		if (selectedKVExtraction != null) {
+			AdvancedKVExtractionDTO advancedKVExtractionDTO = selectedKVExtraction.getAdvancedKVExtractionDTO();
+			if (null != advancedKVExtractionDTO && null != advancedKVExtractionDTO.getDisplayImageName()) {
+				// advancedKVExtractionDTO.setImageName(view.getFileName());
+				view.setBatchClassID(controller.getBatchClass().getIdentifier());
+				view.setDocName(controller.getSelectedDocument().getName());
+				getPageImageUrl(view.getBatchClassID(), view.getDocName(), advancedKVExtractionDTO.getDisplayImageName());
+			}
+		}
+	}
+
+	public void onTestAdvancedKvButtonClicked() {
+		final AdvancedKVExtractionDTO advancedKVExtractionDTO = controller.getSelectedKVExtraction().getAdvancedKVExtractionDTO();
+		final String fileName = advancedKVExtractionDTO.getImageName();
+		if (validateFields()) {
+			ScreenMaskUtility.maskScreen();
+			saveDataInDTO(controller.getSelectedKVExtraction());
+			controller.getRpcService().testAdvancedKVExtraction(controller.getBatchClass(), controller.getSelectedKVExtraction(),
+					view.getDocName(), fileName, new AsyncCallback<List<OutputDataCarrierDTO>>() {
+
+						@Override
+						public void onFailure(Throwable throwable) {
+							ScreenMaskUtility.unmaskScreen();
+							ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(), MessageConstants.TITLE_TEST_FAILURE,
+									Boolean.TRUE);
+						}
+
+						@Override
+						public void onSuccess(List<OutputDataCarrierDTO> outputDtos) {
+							ScreenMaskUtility.unmaskScreen();
+							getUpdatedFileName(advancedKVExtractionDTO, fileName);
+							DialogBox dialogBox = new DialogBox();
+							dialogBox.addStyleName(STYLE_WIDTH500PX);
+							dialogBox.setHeight("200px");
+							view.getKvExtractionTestResultView().createKVFieldList(outputDtos);
+							view.getKvExtractionTestResultView().setDialogBox(dialogBox);
+							dialogBox.setText(KV_EXTRACTION_RESULT);
+							dialogBox.setWidget(view.getKvExtractionTestResultView());
+							dialogBox.center();
+							view.getKvExtractionTestResultView().getBackButton().setFocus(true);
+							dialogBox.show();
+						}
+
+						private void getUpdatedFileName(final AdvancedKVExtractionDTO advancedKVExtractionDTO, final String fileName) {
+							controller.getRpcService().getUpdatedTestFileName(view.getBatchClassID(), view.getDocName(), fileName,
+									new AsyncCallback<String>() {
+
+										@Override
+										public void onFailure(Throwable arg0) {
+											// TODO
+										}
+
+										@Override
+										public void onSuccess(String updatedFileName) {
+											setImageNameInDTO(updatedFileName);
+										}
+									});
+						}
+					});
+		}
+	}
+
+	public void setImageNameInDTO(final String imageName) {
+		AdvancedKVExtractionDTO advancedKVExtractionDTO = controller.getSelectedKVExtraction().getAdvancedKVExtractionDTO();
+		if (advancedKVExtractionDTO != null) {
+			advancedKVExtractionDTO.setImageName(imageName);
 		}
 	}
 }

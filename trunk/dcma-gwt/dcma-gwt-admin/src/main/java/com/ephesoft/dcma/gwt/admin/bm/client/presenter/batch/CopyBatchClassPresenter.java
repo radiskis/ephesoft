@@ -101,10 +101,12 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 	}
 
 	public void onOkClicked() {
-		batchClassDTO.setName(view.getName());
+		String batchClassName = view.getName();
+		batchClassDTO.setName(batchClassName);
 		boolean isPriorityNumber = isNumber(view.getPriority());
 		boolean validCheck = true;
-		if (validCheck && (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate())) {
+		if (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate()
+				|| !view.getValidateNameTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
 			validCheck = false;
 		}
@@ -115,6 +117,10 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 		if (validCheck
 				&& (Integer.parseInt(view.getPriority()) < AdminConstants.PRIORITY_LOWER_LIMIT || Integer.parseInt(view.getPriority()) > AdminConstants.PRIORITY_UPPER_LIMIT)) {
 			ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.PRIORITY_SHOULD_BE_BETWEEN_1_AND_100);
+			validCheck = false;
+		}
+		if (validCheck && (batchClassName.contains(" ") || batchClassName.contains("-"))) {
+			ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.BATCH_CLASS_NAME_ERROR);
 			validCheck = false;
 		}
 		if (validCheck) {
@@ -173,9 +179,10 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 										@Override
 										public void onSuccess(final Void arg0) {
 											ScreenMaskUtility.unmaskScreen();
-											ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-											confirmationDialog.setText(MessageConstants.COPY_SUCCESSFUL);
-											confirmationDialog.setMessage(MessageConstants.BATCH_CLASS_COPY_CREATED_SUCCESSFULLY);
+
+											ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+													MessageConstants.BATCH_CLASS_COPY_CREATED_SUCCESSFULLY,
+													MessageConstants.COPY_SUCCESSFUL, Boolean.TRUE);
 											confirmationDialog.addDialogListener(new DialogListener() {
 
 												@Override
@@ -190,9 +197,7 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 												}
 											});
 
-											confirmationDialog.center();
-											confirmationDialog.show();
-											confirmationDialog.okButton.setFocus(true);
+											
 										}
 
 										@Override

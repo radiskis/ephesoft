@@ -41,6 +41,7 @@ import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
+import com.ephesoft.dcma.gwt.core.shared.listener.ThirdButtonListener;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.TreeRefreshEvent;
@@ -112,6 +113,7 @@ public class TopPanel extends RVBasePanel {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
+				presenter.getView().getRvPanel().getValidatePanel().updateDocument(null, null);
 				presenter.setControlSorQPressed(true);
 				presenter.performOperationsOnCtrlSPress();
 			}
@@ -161,11 +163,8 @@ public class TopPanel extends RVBasePanel {
 		batchId.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
 		batchName.setText(presenter.batchDTO.getBatch().getBatchName());
 		batchName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-		// changes to be made here
-		
 		batchClassName.setText(presenter.batchDTO.getBatch().getBatchClassDescription());
 		batchClassName.setStyleName(ReviewValidateConstants.BATCH_ALERT_TEXT);
-
 		nextBatch.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_topPanel_next) + " >");
 		this.presenter.setBatchListScreenTab();
 		presenter.rpcService.getRowsCount(new AsyncCallback<Integer>() {
@@ -215,13 +214,21 @@ public class TopPanel extends RVBasePanel {
 	}
 
 	private void nextBatchPage() {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+		moveToNextBatch();
+	}
+
+	private void moveToNextBatch() {
+		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
 		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_backButton_confm));
 		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_revVal_nextButton));
 		confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_confirmation_save));
 		confirmationDialog.cancelButton.setText(LocaleDictionary.get().getConstantValue(
 				ReviewValidateConstants.title_confirmation_discard));
-		confirmationDialog.addDialogListener(new DialogListener() {
+		confirmationDialog.thirdButton.setText(LocaleDictionary.get().getConstantValue(
+				ReviewValidateConstants.title_confirmation_cancel));
+		confirmationDialog.show();
+		confirmationDialog.center();
+		confirmationDialog.addDialogListener(new ThirdButtonListener() {
 
 			@Override
 			public void onOkClick() {
@@ -231,9 +238,11 @@ public class TopPanel extends RVBasePanel {
 					@Override
 					public void onFailure(Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.error_topPanel_ok_failure,
-								presenter.batchDTO.getBatch().getBatchInstanceIdentifier(), arg0.getMessage()));
+						if (!presenter.displayErrorMessage(arg0)) {
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									ReviewValidateMessages.error_topPanel_ok_failure,
+									presenter.batchDTO.getBatch().getBatchInstanceIdentifier(), arg0.getMessage()), Boolean.TRUE);
+						}
 					}
 
 					@Override
@@ -250,63 +259,65 @@ public class TopPanel extends RVBasePanel {
 				confirmationDialog.hide();
 				getHighestPriorityBatch();
 			}
-		});
 
-		confirmationDialog.center();
-		confirmationDialog.show();
+			@Override
+			public void onThirdButtonClick() {
+				confirmationDialog.hide();
+			}
+		});
 		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	private void getHighestPriorityBatch() {
-
-		presenter.rpcService.cleanup(new AsyncCallback<Void>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.error_topPanel_ok_success, presenter.batchDTO.getBatch().getBatchInstanceIdentifier()));
-			}
+		presenter.rpcService.getHighestPriortyBatch(new AsyncCallback<BatchDTO>() {
 
 			@Override
-			public void onSuccess(Void arg0) {
-				presenter.rpcService.getHighestPriortyBatch(new AsyncCallback<BatchDTO>() {
+			public void onSuccess(final BatchDTO batchDTO) {
 
-					@Override
-					public void onSuccess(final BatchDTO batchDTO) {
-						if (batchDTO == null) {
-							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.error_topPanel_noMoreBatches));
-						}
-						final String batchID2 = batchDTO.getBatch().getBatchInstanceIdentifier();
-						presenter.rpcService.acquireLock(batchID2, new AsyncCallback<Void>() {
-
-							@Override
-							public void onFailure(Throwable arg0) {
-								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-										ReviewValidateMessages.error_topPanel_lock_acquire, batchID2, arg0.getMessage()));
-							}
-
-							@Override
-							public void onSuccess(Void arg0) {
-								presenter.batchDTO = batchDTO;
-								initializeWidget();
-								// presenter.getView().asWidget();
-								presenter.onTableViewBackButtonClicked();
-								presenter.getView().imgOverlayPanel.clearPanel();
-								presenter.getView().getRvPanel().setVisibility();
-								TopPanel.this.fireEvent(new TreeRefreshEvent(batchDTO, null, null));
-							}
-
-						});
-
-					}
+				
+				presenter.rpcService.cleanUpCurrentBatch(presenter.batchDTO.getBatch().getBatchInstanceIdentifier(), new AsyncCallback<Void>() {
 
 					@Override
 					public void onFailure(Throwable arg0) {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.error_ret_next_batch));
+						
+					}
+
+					@Override
+					public void onSuccess(Void arg0) {
+					
 					}
 				});
+			
+				if (batchDTO == null) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.error_topPanel_noMoreBatches), Boolean.TRUE);
+				}
+				presenter.setTitleOfTab(batchDTO.getBatch().getBatchInstanceIdentifier());
+				presenter.batchDTO = batchDTO;
+				initializeWidget();
+				TopPanel.this.fireEvent(new TreeRefreshEvent(batchDTO, null, null));
+				presenter.onTableViewBackButtonClicked();
+				presenter.getView().imgOverlayPanel.clearPanel();
+				presenter.getView().getRvPanel().setVisibility();
+				
+			}
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				String errorMessage = arg0.getLocalizedMessage();
+				if (errorMessage.contains(ReviewValidateConstants.ERROR_TYPE_5)) {
+					int indexOfError = errorMessage.indexOf(ReviewValidateConstants.ERROR_TYPE_5);
+					int errorMessageLength = ReviewValidateConstants.ERROR_TYPE_5.length();
+					String batchID = errorMessage.substring(indexOfError + errorMessageLength + 1);
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.error_topPanel_lock_acquire, batchID, errorMessage.substring(0, indexOfError)),
+							Boolean.TRUE);
+
+				} else if (!presenter.displayErrorMessage(arg0)) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.error_ret_next_batch), Boolean.TRUE);
+				}
 			}
 		});
 		ScreenMaskUtility.unmaskScreen();
@@ -398,7 +409,9 @@ public class TopPanel extends RVBasePanel {
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.MODAL_WINDOW_SHORTCUTS)
 				+ "</td><td>CTRL + [4/7/8/9]</td></tr>" + "<tr><td>38 </td><td>"
 				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DISCLOSURE_PANEL_SHORCUT)
-				+ "</td><td>CTRL + g or G</td></tr>" + "</table>";
+				+ "</td><td>CTRL + g or G</td></tr>" + "<tr><td>39 </td><td>"
+				+ LocaleDictionary.get().getConstantValue(ReviewValidateConstants.REGEX_ACTIVATE_DEACTIVATE_TOGGLE_SHORTCUT)
+				+ "</td><td>CTRL + b or B</td></tr>" + "</table>";
 		return keyBoardShortcuts;
 	}
 
@@ -407,8 +420,8 @@ public class TopPanel extends RVBasePanel {
 	}
 
 	public void showKeyboardShortctPopUp() {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(Boolean.TRUE);
 		String keyBoardShortcuts = createKeyboardShortcuts();
+		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
 		confirmationDialog.setMessage(keyBoardShortcuts);
 		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.info_title));
 		confirmationDialog.addDialogListener(new DialogListener() {
@@ -426,9 +439,11 @@ public class TopPanel extends RVBasePanel {
 			}
 
 		});
-		confirmationDialog.center();
 		confirmationDialog.show();
-		confirmationDialog.getPanel().getElementById("textPanel").addClassName("scrollClass");
+		confirmationDialog.center();
 		confirmationDialog.okButton.setFocus(true);
+		confirmationDialog.cancelButton.setVisible(false);
+		confirmationDialog.getPanel().getElementById("textPanel").addClassName("scrollClass");
+
 	}
 }

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
+import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 
 /**
@@ -114,5 +115,12 @@ public interface BatchClassPluginConfigService {
 	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
 	 */
 	void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
+	
+	
+	/**
+	 * API to evict the batch class plugin config object.
+	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
+	 */
+	void evict(BatchClassPluginConfig batchClassPluginConfig);
 
 }

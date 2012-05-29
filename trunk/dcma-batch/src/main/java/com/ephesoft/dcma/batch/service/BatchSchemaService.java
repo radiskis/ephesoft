@@ -36,6 +36,8 @@
 package com.ephesoft.dcma.batch.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
@@ -178,8 +180,8 @@ public interface BatchSchemaService {
 	 * An api to create the hocrPages object.
 	 * 
 	 * @param batch {@link Batch}
-	 * @param batchInstanceIdentifier {@link {@link String}}
-	 * @param pageId {@link {@link String}}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pageId {@link {@link String}
 	 */
 	public void createHocr(HocrPages hocrPages, String batchInstanceIdentifier, String pageId);
 
@@ -187,7 +189,7 @@ public interface BatchSchemaService {
 	 * An api to get the HocrPages object for an input of HOCR.XML.
 	 * 
 	 * @param batchInstanceIdentifier Serializable
-	 * @param pageId {@link {@link String}}
+	 * @param pageId {@link {@link String}
 	 * @return {@link HocrPages}
 	 */
 	HocrPages getHocrPages(Serializable batchInstanceIdentifier, String pageId);
@@ -519,10 +521,12 @@ public interface BatchSchemaService {
 	 * @param pageName {@link String}
 	 * @param pathOfHOCRFile {@link String}
 	 * @param outputFilePath {@link String}
-	 * @param batchClassIdentifier 
+	 * @param batchClassIdentifier
+	 * @param ocrEngineName
 	 * @return {@link HocrPage}
 	 */
-	public HocrPage generateHocrPage(String pageName, String pathOfHOCRFile, String outputFilePath, String batchClassIdentifier);
+	public HocrPage generateHocrPage(String pageName, String pathOfHOCRFile, String outputFilePath, String batchClassIdentifier,
+			String ocrEngineName);
 
 	/**
 	 * An api to return the complete export batch class folder location path.
@@ -682,17 +686,20 @@ public interface BatchSchemaService {
 
 	/**
 	 * API to get Script Config Folder Name.
-	 *
+	 * 
 	 */
 	public String getScriptConfigFolderName();
 
-	/** API to get the upload batch folder path
+	/**
+	 * API to get the upload batch folder path
+	 * 
 	 * @return
 	 */
 	public String getUploadBatchFolder();
 
 	/**
-	 * API to copy all the files from the sourcePath+folderName to the batchPath+folderName. Valid file types are specified by the filter.
+	 * API to copy all the files from the sourcePath+folderName to the batchPath+folderName. Valid file types are specified by the
+	 * filter.
 	 * 
 	 * @param sourcePath the path containing the folder to be copied
 	 * @param folderName the folder to be copied.
@@ -707,4 +714,55 @@ public interface BatchSchemaService {
 	 * @return the switch value from application properties
 	 */
 	public boolean isZipSwitchOn();
+
+	/**
+	 * API to get the Web services folder name
+	 * 
+	 * @return
+	 */
+	public String getWebServicesFolderPath();
+
+	/**
+	 * API to get advanced test extraction folder path.
+	 * 
+	 * @param batchClassIdentifier
+	 * @param createDirectory
+	 * @return
+	 */
+	public String getTestAdvancedKvExtractionFolderPath(String batchClassIdentifier, boolean createDirectory);
+
+	/**
+	 * API to get advanced test extraction folder name.
+	 * 
+	 * @return
+	 */
+	String getTestAdvancedKVExtractionFolderName();
+
+	/**
+	 * API to get the sample pattern file name.
+	 * 
+	 * @return
+	 */
+	public String getSamplePatternFilePath();
+	
+	/**
+	 * Method to generate the HOCR files for given html files for web services.
+	 * 
+	 * @param workingDir
+	 * @param pageID
+	 * @param pathOfHOCRFile
+	 * @param hocrPage
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	void hocrGenerationAPI(String workingDir, String pageID, String pathOfHOCRFile, HocrPage hocrPage) throws FileNotFoundException, IOException, Exception;
+	
+	/**
+	 * API to update the batch object to the file path specified.
+	 * 
+	 * @param batch
+	 * @param filePath
+	 */
+	public void update(final Batch batch, final String filePath);
 }

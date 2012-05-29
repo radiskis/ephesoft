@@ -37,4 +37,59 @@ package com.ephesoft.dcma.export;
 
 public interface IExportCommonConstants {
 
+	/**
+	 * Constant for batch id.
+	 */
+	String EPHESOFT_BATCH_ID = "EphesoftBatchID";
+
+	/**
+	 * Constant for document id in file name.
+	 */
+	String EPHESOFT_DOCUMENT_ID = "EphesoftDOCID";
+
+	/**
+	 * Empty string.
+	 */
+	String EMPTY_STRING = "";
+
+	/**
+	 * Parameter start delimeter.
+	 */
+	String PARAM_START_DELIMETER = "$";
+
+	/**
+	 * Default folder where document files are to be exported exported.
+	 */
+	String DEFAULT_FOLDER_NAME = "Unknown";
+
+	/**
+	 * Separator between the parameters specified by admin.
+	 */
+	String FILE_FORMAT_SEPARATOR = "&&";
+
+	/**
+	 * Constant for export folder name for batch xml.
+	 */
+	String FINAL_EXPORT_FOLDER = "Final Export Folder";
+
+	/**
+	 * Constant for batch instance folder name for batch xml.
+	 */
+	String BATCH_INSTANCE_FOLDER = "Batch Instance Folder";
+
+	/**
+	 * Replace character to be used while renaming file names.
+	 */
+	String DEFAULT_REPLACE_CHAR = "-";
+
+	/**
+	 * Separator for getting invalid characters from string.
+	 */
+	String INVALID_CHAR_SEPARATOR = ";";
+
+	/**
+	 * ON Switch.
+	 */
+	String ON_SWITCH = "ON";
+
 }

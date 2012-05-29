@@ -35,10 +35,10 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.ephesoft.dcma.batch.schema.Column;
+import com.ephesoft.dcma.batch.schema.DataTable;
 import com.ephesoft.dcma.batch.schema.HeaderRow;
 import com.ephesoft.dcma.batch.schema.Row;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
@@ -47,24 +47,23 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.TableTestResultViewPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class TableTestResultView extends View<TableTestResultViewPresenter> {
 
-	interface Binder extends UiBinder<ScrollPanel, TableTestResultView> {
+	interface Binder extends UiBinder<VerticalPanel, TableTestResultView> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
@@ -74,41 +73,31 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 	@UiField
 	protected FlowPanel tableListPanel;
 
-	private HorizontalPanel buttonPanel;
-
-	private Button backButton;
+	@UiField
+	protected Button backButton;
 
 	private DialogBox dialogBox;
-	
-	@UiField ScrollPanel scrollPanel;
+
+	@UiField
+	ScrollPanel scrollPanel;
 
 	public TableTestResultView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-		
+
 		scrollPanel.setSize("500px", "300px");
-		
+
 		resultTable = new FlexTable();
 		resultTable.setWidth("100%");
 		resultTable.setCellSpacing(0);
 		resultTable.addStyleName("border-result-table");
-
-		backButton = new Button();
 		backButton.setText(AdminConstants.CLOSE_BUTTON);
-		
-		buttonPanel = new HorizontalPanel();
-		buttonPanel.add(backButton);
-
-		tableListPanel.add(buttonPanel);
 		tableListPanel.add(resultTable);
+	}
 
-		backButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				dialogBox.hide(true);
-			}
-		});
+	@UiHandler("backButton")
+	public void onBackButtonClicked(ClickEvent e) {
+		dialogBox.hide();
 	}
 
 	public void createTestTableList(List<TestTableResultDTO> outputDtos) {
@@ -116,43 +105,49 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 		setResultList(outputDtos);
 	}
 
-	private List<Record> setResultList(List<TestTableResultDTO> outputDtos) {
-
-		List<Record> recordList = new LinkedList<Record>();
+	private void setResultList(List<TestTableResultDTO> outputDtos) {
 		int index = 0;
 		int rows = 0;
 		boolean isHeaderRowAdded = false;
-		if (outputDtos != null && outputDtos.size() > 0) {
+		if (outputDtos != null && !outputDtos.isEmpty()) {
 			for (final TestTableResultDTO resultDTO : outputDtos) {
-				if(!isHeaderRowAdded) {
-					isHeaderRowAdded = createHeaderRow(resultDTO.getDataTable().getHeaderRow());
+				DataTable dataTable = resultDTO.getDataTable();
+				if (!isHeaderRowAdded) {
+					isHeaderRowAdded = createHeaderRow(dataTable.getHeaderRow());
 				}
-				for (rows = 0; rows < resultDTO.getDataTable().getRows().getRow().size(); rows++) {
-					resultTable.setWidget(index + rows + 1, 0, new Label(resultDTO.getInputFileName()));
-					Row row = resultDTO.getDataTable().getRows().getRow().get(rows);
-					int colIndex = 1;
-					//row.getRowCoordinates();
-					for(Column column : row.getColumns().getColumn()) {
-						resultTable.setWidget(index + rows + 1, colIndex, new Label(column.getValue()));
-						colIndex++;
+				if (dataTable != null && dataTable.getRows() != null && dataTable.getRows().getRow().size() > 0) {
+					for (rows = 0; rows < dataTable.getRows().getRow().size(); rows++) {
+						resultTable.setWidget(index + rows + 1, 0, new Label(resultDTO.getInputFileName()));
+						Row row = resultDTO.getDataTable().getRows().getRow().get(rows);
+						int colIndex = 1;
+						// row.getRowCoordinates();
+						for (Column column : row.getColumns().getColumn()) {
+							resultTable.setWidget(index + rows + 1, colIndex, new Label(column.getValue()));
+							colIndex++;
+						}
 					}
+					index = rows;
+					// index = index + rows ;
+				} else {
+					resultTable.getFlexCellFormatter().setColSpan(index + 1, 1, 4);
+					resultTable.setWidget(index + 1, 0, new Label(resultDTO.getInputFileName()));
+					resultTable.setWidget(index + 1, 1, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
+					index++;
 				}
-				index = rows;
 			}
 		} else {
-			resultTable.getFlexCellFormatter().setColSpan(1, 0, 4);
-			resultTable.setWidget(index, 0, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
+			resultTable.getFlexCellFormatter().setColSpan(index + 1, 0, 4);
+			resultTable.setWidget(index + 1, 0, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 		}
 
-		return recordList;
 	}
 
-	private boolean createHeaderRow(HeaderRow headerRow) {		
+	private boolean createHeaderRow(HeaderRow headerRow) {
 		resultTable.getCellFormatter().setWidth(0, 0, "25%");
-		
+
 		resultTable.setWidget(0, 0, new Label(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PAGE_NAME)));
 		int index = 1;
-		for(Column column : headerRow.getColumns().getColumn()) {
+		for (Column column : headerRow.getColumns().getColumn()) {
 			resultTable.getCellFormatter().setWidth(0, index, "20%");
 			resultTable.setWidget(0, index, new Label(column.getName()));
 			index++;
@@ -168,7 +163,7 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
-	
+
 	public Button getBackButton() {
 		return backButton;
 	}

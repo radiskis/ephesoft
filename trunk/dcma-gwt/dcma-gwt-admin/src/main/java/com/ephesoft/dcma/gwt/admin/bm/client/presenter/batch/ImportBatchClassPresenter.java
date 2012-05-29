@@ -37,6 +37,7 @@ package com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
@@ -105,9 +106,9 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 	}
 
 	public void onSubmitComplete() {
-		ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setText(MessageConstants.IMPORT_SUCCESSFUL);
-		confirmationDialog.setMessage(MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY);
+		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+				MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY, MessageConstants.IMPORT_SUCCESSFUL, Boolean.TRUE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -122,18 +123,16 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 			}
 		});
 
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
 	}
 
 	public void onOkClicked(final boolean isUseSource, final boolean isImportExisting) {
 		boolean validCheck = true;
 		if (!isUseSource) {
-
 			boolean isPriorityNumber = isNumber(view.getPriority());
 
-			if (validCheck && (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate())) {
+			if (validCheck
+					&& (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate() || !view
+							.getValidateNameTextBox().validate())) {
 				ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
 				ScreenMaskUtility.unmaskScreen();
 				validCheck = false;
@@ -150,6 +149,12 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 				ScreenMaskUtility.unmaskScreen();
 				validCheck = false;
 			}
+
+			if (validCheck && (view.getName().indexOf(" ") > -1 || view.getName().indexOf("-") > -1)) {
+				ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.WORKFLOW_IMPROPER_CHARACTER);
+				ScreenMaskUtility.unmaskScreen();
+				validCheck = false;
+			}
 		}
 
 		if (validCheck && !isImportExisting && !view.getValidateUNCTextBox().validate()) {
@@ -159,56 +164,96 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 		}
 
 		if (validCheck) {
-
-			controller.getRpcService().matchBaseFolder(view.getUncFolder(), new AsyncCallback<String>() {
+			controller.getRpcService().getAllBatchClassesIncludingDeleted(new AsyncCallback<List<BatchClassDTO>>() {
 
 				@Override
-				public void onFailure(Throwable arg0) {
-
+				public void onFailure(final Throwable arg0) {
+					ScreenMaskUtility.unmaskScreen();
+					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
 				}
 
 				@Override
-				public void onSuccess(String matchBaseFolderPath) {
+				public void onSuccess(final List<BatchClassDTO> batches) {
+					boolean isUNCPathUnique = true;
+					boolean isNameExistInDatabase = false;
+					// Perform validation on batchClass UNC path (should not exist in Database)
+					for (BatchClassDTO batchDTO : batches) {
+						if (batchDTO.getUncFolder().equalsIgnoreCase(view.getUncFolder())) {
+							isUNCPathUnique = false;
+						}
 
-					controller.getRpcService().getAllBatchClassesIncludingDeleted(new AsyncCallback<List<BatchClassDTO>>() {
+						// Perform validation on batchClass "Name" (Should exist in database)
+						if (isNameExistInDatabase || batchDTO.getName().equalsIgnoreCase(view.getName())) {
+							isNameExistInDatabase = true;
+						}
+					}
+					final boolean isNameExistInDatabaseFinal = isNameExistInDatabase;
 
-						@Override
-						public void onFailure(final Throwable arg0) {
+					if (!isImportExisting) {
+						// new batch class
+						// UNC path should be unique
+						if (!isUNCPathUnique) {
+							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
 							ScreenMaskUtility.unmaskScreen();
-							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
+							return;
 						}
+					}
+					controller.getRpcService().isWorkflowContentEqual(view.getImportBatchClassUserOptionDTO(), view.getName(),
+							new AsyncCallback<Map<String, Boolean>>() {
 
-						@Override
-						public void onSuccess(final List<BatchClassDTO> batches) {
-							boolean isNameValidInDatabase = false;
-							if (!isImportExisting) {
-								boolean isUNCPathUnique = true;
-								// Perform validation on batchClass "Name" (Should exist in database)
-								for (BatchClassDTO batchDTO : batches) {
-									if (batchDTO.getUncFolder().equalsIgnoreCase(view.getUncFolder())) {
-										isUNCPathUnique = false;
+								@Override
+								public void onFailure(Throwable arg0) {
+									// TODO Auto-generated method stub
+
+								}
+
+								public void onSuccess(Map<String, Boolean> results) {
+									boolean isContentEqual = results.get("isEqual");
+									boolean isDeployed = results.get("isDepoyed");
+									view.getImportBatchClassUserOptionDTO().setWorkflowDeployed(isDeployed);
+									// verify the contents are equal to the deployed workflow
+									if (isNameExistInDatabaseFinal && !isContentEqual) {
+										ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.WORKFLOWNAME_EXISTS);
+										ScreenMaskUtility.unmaskScreen();
+										return;
 									}
+									// verify the contents are equal to the deployed workflow
+									if (!isNameExistInDatabaseFinal && isDeployed) {
+										// warning
+										// if yes, import with the specified workflow name.
+										ConfirmationDialog cf = ConfirmationDialogUtil.showConfirmationDialog(
+												MessageConstants.CONFIRM_IMPORT, MessageConstants.BATCH_CLASS_IMPORT, false, true);
+										cf.addDialogListener(new DialogListener() {
 
-									// Perform validation on batchClass "Name" (Should exist in database)
-									if (!isUseSource && (isNameValidInDatabase || batchDTO.getName().equals(view.getName()))) {
-										isNameValidInDatabase = true;
+											@Override
+											public void onOkClick() {
+												saveBatchClass();
+											}
+
+											@Override
+											public void onCancelClick() {
+												ScreenMaskUtility.unmaskScreen();
+												return;
+											}
+										});
+									} else {
+										saveBatchClass();
 									}
 								}
+							});
 
-								if (!isUNCPathUnique) {
-									ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
-									ScreenMaskUtility.unmaskScreen();
-									return;
-								}
-								if (!isUseSource && (!isNameValidInDatabase || view.getName().isEmpty())) {
-									ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.BATCH_NAME_INVALID);
-									ScreenMaskUtility.unmaskScreen();
-									return;
-								}
-							}
-							saveBatchClass();
-						}
-					});
+					/*
+					 * if ((!isImportExisting || !view.getImportBatchClassUserOptionDTO().isWorkflowDeployed()) && !isUNCPathUnique) {
+					 * ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
+					 * ScreenMaskUtility.unmaskScreen(); return; }
+					 * 
+					 * if (!view.getImportBatchClassUserOptionDTO().isWorkflowDeployed() && isNameExistInDatabase ||
+					 * view.getName().isEmpty()) {
+					 * ConfirmationDialogUtil.showConfirmationDialogError("Batch name should not be any of the existing batch name.");
+					 * ScreenMaskUtility.unmaskScreen(); return; } if (isImportExisting && !isNameExistInDatabase) {
+					 * ConfirmationDialogUtil.showConfirmationDialogError("Batch name should MATCH any of the existing batch name.");
+					 * ScreenMaskUtility.unmaskScreen(); return; }
+					 */
 				}
 			});
 		} else if (validCheck && isImportExisting) {
@@ -218,6 +263,7 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 	}
 
 	private void saveBatchClass() {
+		view.getImportBatchClassUserOptionDTO().setName(view.getName());
 		controller.getRpcService().importBatchClass(view.getImportBatchClassUserOptionDTO(), new AsyncCallback<Boolean>() {
 
 			@Override
@@ -225,7 +271,7 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 				ScreenMaskUtility.unmaskScreen();
 				if (isSuccess) {
 					ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY,
-							MessageConstants.BATCH_CLASS_IMPORT);
+							MessageConstants.BATCH_CLASS_IMPORT, Boolean.TRUE);
 					controller.getMainPresenter().init();
 				} else {
 					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.IMPORT_UNSUCCESSFUL);
@@ -276,6 +322,14 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 							return;
 						}
 						view.setUNCFolderList(importBatchClassSuperConfig.getUncFolderList());
+						if (!view.getImportBatchClassUserOptionDTO().isWorkflowEqual()
+								|| !view.getImportBatchClassUserOptionDTO().isWorkflowExistsInBatchClass()) {
+							view.toggleUseExistingState(false);
+							view.getErrorMessage().setText(MessageConstants.WORKFLOWNAME_EXISTS);
+						} else {
+							view.toggleUseExistingState(true);
+							view.getErrorMessage().setText("");
+						}
 						uiConfigList.clear();
 						uiConfigList.addAll(importBatchClassSuperConfig.getUiConfigRoot().getChildren());
 						setFolderList();

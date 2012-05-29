@@ -35,11 +35,16 @@
 
 package com.ephesoft.dcma.kvextraction.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.DocField;
+import com.ephesoft.dcma.batch.schema.ExtractKVParams;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
@@ -76,4 +81,14 @@ public class KVExtractionServiceImpl implements KVExtractionService {
 		}
 	}
 
+	@Override
+	public boolean extractKVDocumentFieldsFromHOCR(final List<DocField> updtDocList, final HocrPages hocrPages, final ExtractKVParams params) throws DCMAException {
+		try {
+			boolean results = keyValueExtraction.extractFieldsFromHOCR(updtDocList, hocrPages, params);
+			return results;
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
 }

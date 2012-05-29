@@ -65,7 +65,6 @@ public class BatchClassPluginConfig extends AbstractChangeableEntity implements 
 	private BatchClassPlugin batchClassPlugin;
 
 	@OneToOne
-	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "plugin_config_id")
 	private PluginConfig pluginConfig;
 

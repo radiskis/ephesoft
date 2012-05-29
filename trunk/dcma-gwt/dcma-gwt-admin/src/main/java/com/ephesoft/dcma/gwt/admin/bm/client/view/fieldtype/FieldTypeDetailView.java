@@ -55,6 +55,10 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 		return isHidden;
 	}
 
+	public CheckBox getIsMultiLine() {
+		return isMultiLine;
+	}
+
 	interface Binder extends UiBinder<VerticalPanel, FieldTypeDetailView> {
 	}
 
@@ -109,6 +113,10 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 	protected Label isHiddenLabel;
 	@UiField
 	protected CheckBox isHidden;
+	@UiField
+	protected Label isMultiLineLabel;
+	@UiField
+	protected CheckBox isMultiLine;
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
@@ -130,6 +138,8 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 		barcodeTypeLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BARCODE_TYPE)
 				+ AdminConstants.COLON);
 		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
+		isMultiLineLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_MULTILINE)
+				+ AdminConstants.COLON);
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descriptionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		dataTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -140,10 +150,16 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 		barcodeTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHidden.setEnabled(false);
+		isMultiLineLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		isMultiLine.setEnabled(false);
 	}
 
 	public Label getIsHiddenLabel() {
 		return isHiddenLabel;
+	}
+
+	public Label getIsMultiLineLabel() {
+		return isMultiLineLabel;
 	}
 
 	public void setName(String name) {
@@ -184,6 +200,10 @@ public class FieldTypeDetailView extends View<FieldTypeDetailPresenter> {
 
 	public void setIsHidden(boolean isHidden) {
 		this.isHidden.setValue(isHidden);
+	}
+
+	public void setIsMultiLine(boolean isMultiLine) {
+		this.isMultiLine.setValue(isMultiLine);
 	}
 
 }

@@ -1,0 +1,12 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
+
+	<g:DockLayoutPanel ui:field="customWorkflowPanel">
+		<g:south size="80">
+			<g:HorizontalPanel ui:field="buttonsHorizontalPanel">
+				<g:Button ui:field="okButton"></g:Button>
+				<g:Button ui:field="cancelButton"></g:Button>
+			</g:HorizontalPanel>
+		</g:south>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

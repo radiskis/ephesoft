@@ -38,14 +38,14 @@ package com.ephesoft.dcma.mail.constants;
 public interface MailConstants {
 
 	char SPACE = ' ';
-	char CLOSING_BRACKET = '>';
-	char OPENING_BRACKET = '<';
+	char CLOSING_BRACKET = ']';
+	char OPENING_BRACKET = '[';
 	char QUOTES = '\'';
 	String ERROR_FILE = "error.pdf";
 	Integer DEFAULT_PORT_NUMBER_POP3 = 995;
 	Integer DEFAULT_PORT_NUMBER_IMAP = 993;
 	String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
-	String ZZZZZ_ATTACHMENT_PDF = "zzzzz-attachment.pdf";
+	String ZZZZZ_ATTACHMENT = "zzzzz-";
 	String TEMP_FILE_NAME = "!!!!mail";
 	String DOT_SEPARATOR = ".";
 	String EXTENSION_SEPARATOR_CONSTANT = ";";
@@ -54,4 +54,6 @@ public interface MailConstants {
 	char UNDERSCORE = '_';
 	String DOWNLOAD_FOLDER_NAME = "downloaded-email-attachments";
 	String UTF_8_ENCODING = "UTF-8";
+	char OPENING_ANGULAR_BRACKET = '<';
+	char CLOSING_ANGULAR_BRACKET = '>';
 }

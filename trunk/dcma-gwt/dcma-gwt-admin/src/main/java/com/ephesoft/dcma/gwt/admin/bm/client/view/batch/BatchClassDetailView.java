@@ -55,6 +55,8 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 	}
 
 	@UiField
+	protected Label name;
+	@UiField
 	protected Label priority;
 	@UiField
 	protected Label uncFolder;
@@ -65,6 +67,8 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 	@UiField
 	protected Label role;
 
+	@UiField
+	protected Label nameLabel;
 	@UiField
 	protected Label priorityLabel;
 	@UiField
@@ -84,11 +88,13 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 
 		priorityLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PRIORITY_LABEL)
 				+ AdminConstants.COLON);
-		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
+		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + AdminConstants.COLON);
 		uncLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.UNC_FOLDER) + AdminConstants.COLON);
 		versionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VERSION) + AdminConstants.COLON);
 		roleLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.ROLE) + AdminConstants.COLON);
+		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 
+		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		priorityLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		uncLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -108,6 +114,10 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 		this.description.setText(description);
 	}
 
+	public void setName(String name) {
+		this.name.setText(name);
+	}
+
 	public void setVersion(String version) {
 		this.version.setText(version);
 	}
@@ -116,17 +126,23 @@ public class BatchClassDetailView extends View<BatchClassDetailPresenter> {
 		this.roleLabel.setText(roleLabel);
 	}
 
+	public void setNameLabel(String nameLabel) {
+		this.nameLabel.setText(nameLabel);
+	}
+
 	public void setRole(List<RoleDTO> roleName) {
 		StringBuffer role = new StringBuffer("");
 		boolean isFirst = true;
+		List<RoleDTO> allRoles = presenter.getController().getAllRoles();
 		for (RoleDTO roleDTO : roleName) {
-			if (isFirst) {
-				isFirst = false;
-			}else {
-				role.append(';');
+			if (allRoles != null && allRoles.contains(roleDTO)) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					role.append(';');
+				}
+				role.append(roleDTO.getName());
 			}
-			role.append(roleDTO.getName());
-
 		}
 		this.role.setText(role.toString());
 	}

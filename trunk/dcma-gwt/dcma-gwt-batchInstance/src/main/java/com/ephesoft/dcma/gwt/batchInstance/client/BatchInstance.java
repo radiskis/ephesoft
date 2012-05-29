@@ -70,7 +70,8 @@ public class BatchInstance extends DCMAEntryPoint<BatchInstanceManagementService
 		final RootPanel rootPanel = new RootPanel(layoutPanel);
 		rootPanel.getHeader().setEventBus(eventBus);
 		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
-		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
+		rootPanel.getHeader().addNonClickableTab("Batch Instance Management", "BatchInstanceManagement.html");
+		rootPanel.getHeader().addTab("Custom Workflow Management", "CustomWorkflowManagement.html", false);
 		rootPanel.getHeader().getTabBar().selectTab(1);
 		ScreenMaskUtility.maskScreen();
 

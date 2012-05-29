@@ -60,6 +60,7 @@ public class FieldTypeDetailPresenter extends AbstractBatchClassPresenter<FieldT
 			barcodeType = barcodeType == null ? "" : barcodeType;
 			view.setBarcodeType(barcodeType);
 			view.setIsHidden(controller.getSelectedDocumentLevelField().isHidden());
+			view.setIsMultiLine(controller.getSelectedDocumentLevelField().isMultiLine());
 		}
 	}
 

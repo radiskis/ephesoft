@@ -66,6 +66,8 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 	
 	private Document document;
 
+	private boolean validatorsValidated;
+
 	public ValidationFieldChangeEvent(Field field) {
 		this.field = field;
 		this.coordinatesList = null;
@@ -87,12 +89,13 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 		this.removeOverlay = Boolean.FALSE;
 	}
 
-	public ValidationFieldChangeEvent(boolean validated, String sampleValue, String fieldName) {
+	public ValidationFieldChangeEvent(boolean validated, String sampleValue, String fieldName, boolean validatorsValidated) {
 		this.validated = validated;
 		this.action = Action.ValueChange;
 		this.sampleValue = sampleValue;
 		this.fieldName = fieldName;
 		this.removeOverlay = Boolean.FALSE;
+		this.validatorsValidated = validatorsValidated;
 	}
 	
 	public ValidationFieldChangeEvent(boolean validated, Document document) {
@@ -150,5 +153,9 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 	
 	public void setDocument(Document document) {
 		this.document = document;
+	}
+
+	public boolean isValidatorsValidated() {
+		return validatorsValidated;
 	}
 }

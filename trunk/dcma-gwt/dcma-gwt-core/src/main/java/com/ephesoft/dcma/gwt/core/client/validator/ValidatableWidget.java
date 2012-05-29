@@ -42,39 +42,86 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ValidatableWidget<W extends Widget> implements Validatable, HasValidators {
 
+	private static final String DATE_BOX_FORMAT_ERROR = "dateBoxFormatError";
+
 	private W widget;
-	
-	public ValidatableWidget(W w) {
-		widget = w;
+
+	private boolean validateWidget;
+
+	private boolean isForcedReviewDone = true;
+
+	public boolean isValidateWidget() {
+		return validateWidget;
 	}
-	
+
+	public void setValidateWidget(boolean validateWidget) {
+		this.validateWidget = validateWidget;
+	}
+
+	public ValidatableWidget(W w) {
+		this(w, true);
+	}
+
+	public ValidatableWidget(W w, boolean validateWidget) {
+		this.widget = w;
+		this.validateWidget = validateWidget;
+	}
+
 	private Set<Validator> _validators = new HashSet<Validator>();
-	
+
 	@Override
 	public void addValidator(Validator validator) {
 		_validators.add(validator);
 	}
-	
+
 	public W getWidget() {
 		return widget;
-		 
+
 	}
-	
+
 	@Override
 	public void toggleValidDateBox() {
-		if(validate()) widget.removeStyleName("dateBoxFormatError");
-		else widget.addStyleName("dateBoxFormatError");
+		validate();
+	}
+
+	public void toggleValidateBox(boolean valid) {
+		if (valid)
+			widget.removeStyleName(DATE_BOX_FORMAT_ERROR);
+		else
+			widget.addStyleName(DATE_BOX_FORMAT_ERROR);
 	}
 
 	@Override
 	public boolean validate() {
+		boolean valid = isForcedReviewDone;
+		if (isForcedReviewDone) {
+			valid = validateThroughValidators();
+		}
+		toggleValidateBox(valid);
+		return valid;
+	}
+
+	public boolean validateThroughValidators() {
 		boolean valid = true;
- 
-		for(Validator validator : _validators) {
-			if(! validator.validate()) {
-				valid = false;
+		if (validateWidget) {
+			for (Validator validator : _validators) {
+				if (validator != null) {
+					if (!validator.validate()) {
+						valid = false;
+						break;
+					}
+				}
 			}
 		}
 		return valid;
+	}
+
+	public void setForcedReviewDone(boolean isForcedReviewDone) {
+		this.isForcedReviewDone = isForcedReviewDone;
+		validate();
+	}
+
+	public boolean isForcedReviewDone() {
+		return isForcedReviewDone;
 	}
 }

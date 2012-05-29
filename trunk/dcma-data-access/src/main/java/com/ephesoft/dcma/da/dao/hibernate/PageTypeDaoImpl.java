@@ -49,6 +49,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.PageTypeDao;
+import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.PageType;
@@ -109,6 +110,24 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 
 		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 
+		return find(criteria);
+	}
+	
+	/**
+	 * An api to fetch all Page types by batchClassID.
+	 * 
+	 * @param batchClassID Long
+	 * @return List<PageType>
+	 */
+	@Override
+	public List<PageType> getPageTypesByBatchClassID(String batchClassID) {
+		DetachedCriteria criteria = criteria();
+		criteria.createAlias(DOC_TYPE, DOC_TYPE, JoinFragment.INNER_JOIN);
+		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
+		DetachedCriteria subQuery = criteria(BatchClass.class);
+		subQuery.add(Restrictions.eq(IDENTIFIER, batchClassID));
+		subQuery.setProjection(Projections.property(IDENTIFIER));
+		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
 		return find(criteria);
 	}
 

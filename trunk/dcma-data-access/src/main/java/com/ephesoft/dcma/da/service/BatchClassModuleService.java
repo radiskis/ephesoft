@@ -37,6 +37,7 @@ package com.ephesoft.dcma.da.service;
 
 import java.util.List;
 
+import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.Module;
 
@@ -98,4 +99,24 @@ public interface BatchClassModuleService {
 	 * @return {@link BatchClassModule}
 	 */
 	BatchClassModule getBatchClassModuleByWorkflowName(String batchClassIdentifier, String workflowName);
+	
+	/**
+	 * API to get list of all batch class modules given the batch class identifier.
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
+	List<BatchClassModule> getAllBatchClassModulesByIdentifier (String batchClassIdentifier);
+	
+	/**
+	 * API to get all the batch class modules available.
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
+	List<BatchClassModule> getAllBatchClassModules();
+	
+	/**
+	 * API to get the list of all batch class modules in ascending or descending workflow name order.
+	 * @param ascending boolean
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
+	List<BatchClassModule> getAllBatchClassModules(Order order);
 }

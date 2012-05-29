@@ -35,11 +35,16 @@
 
 package com.ephesoft.dcma.lucene.service;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
+import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.lucene.LuceneProperties;
 
 /**
  * This service is used to generate the confidence score using Lucene search engine.It first creates the indexes for a well defined set
@@ -86,12 +91,17 @@ public interface SearchClassificationService {
 	/**
 	 * This method generates the hocr files for all the images present inside supplied folder for a paticular batch class.
 	 * 
-	 * @param imageFolder {@link String}
-	 * @param ocrEngineName {@link String}
-	 * @param batchClassIdentifer {@link String}
-	 * @return List<{@link String}> as a collection of output path of all output files
+	 * @param imageFolder
+	 * @param ocrEngineName
+	 * @param batchClassIdentifer
+	 * @param testImageFile
+	 * @param isAdvancedKVExtraction
+	 * @return
 	 * @throws DCMAException
 	 */
-	List<String> generateHOCRForKVExtractionTest(final String imageFolder, final String ocrEngineName, final String batchClassIdentifer)
-			throws DCMAException;
+	List<String> generateHOCRForKVExtractionTest(final String imageFolder, final String ocrEngineName,
+			final String batchClassIdentifer, final File testImageFile, final boolean isAdvancedKVExtraction) throws DCMAException;
+
+	void generateConfidenceScoreAPI(List<Document> xmlDocuments, HocrPages hocrPages, String workingDir,
+			Map<LuceneProperties, String> propertyMap, String batchClassIdentifier) throws DCMAException;
 }

@@ -60,4 +60,13 @@ public interface UserConnectivityService {
 	 * @return Set<{@link String}> if result is found else return null
 	 */
 	Set<String> getAllUser();
+	
+	Set<String> getUserGroups(String userName);
+
+	/**
+	 * This method is used to return set of string of all super admin groups.
+	 * 
+	 * @return Set<{@link String}> if result is found else return null
+	 */
+	Set<String> getAllSuperAdminGroups();
 }

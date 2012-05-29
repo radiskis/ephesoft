@@ -91,8 +91,8 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 
 			public void onSuccess(Integer result) {
 				if (result == null || result.intValue() == 0) {
-					rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_BATCH_DETAIL),
-							"WebScanner.html",false);
+					rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_BATCH_DETAIL),
+							"UploadBatch.html");
 					rootPanel.getHeader().getTabBar().setTabEnabled(1, false);
 				} else {
 					rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_BATCH_DETAIL),
@@ -113,8 +113,8 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 					@Override
 					public void onSuccess(Boolean isUploadBatchEnabled) {
 						if(isUploadBatchEnabled) {
-							rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_UPLOAD_BATCH),
-									"UploadBatch.html",false);
+							rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_UPLOAD_BATCH),
+									"UploadBatch.html");
 						}
 					}
 				});

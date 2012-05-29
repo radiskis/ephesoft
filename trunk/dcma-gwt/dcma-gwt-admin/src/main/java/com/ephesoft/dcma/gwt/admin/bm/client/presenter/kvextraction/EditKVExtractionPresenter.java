@@ -40,9 +40,10 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.EditKVExtractionView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditKVExtractionView> {
@@ -62,8 +63,14 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 	public void onSave() {
 		boolean validFlag = true;
 		if (validFlag && (!view.getValidateKeyPatternTextBox().validate() || !view.getValidateValuePatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+			if (view.getValidateKeyPatternTextBox().getWidget().getText().isEmpty()
+					|| view.getValidateValuePatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			}
 			validFlag = false;
 		}
 
@@ -99,6 +106,7 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 			controller.getSelectedKVExtraction().setYoffset(null);
 			controller.getSelectedKVExtraction().setMultiplier(null);
 			controller.getSelectedKVExtraction().setFetchValue(null);
+			controller.getSelectedKVExtraction().setKvPageValue(null);
 			controller.getSelectedKVExtraction().setKeyPattern(view.getKeyPattern());
 			controller.getSelectedKVExtraction().setLocationType(view.getLocation());
 			controller.getSelectedKVExtraction().setValuePattern(view.getValuePattern());
@@ -119,13 +127,21 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 			if (controller.getSelectedKVExtraction().getNoOfWords() != null) {
 				view.setNoOfWords(String.valueOf(controller.getSelectedKVExtraction().getNoOfWords()));
 			}
-			view.getValidateKeyPatternTextBox().addValidator(new EmptyStringValidator(view.getKeyPatternTextBox()));
-			view.getValidateKeyPatternTextBox().toggleValidDateBox();
-			view.getValidateValuePatternTextBox().addValidator(new EmptyStringValidator(view.getValuePatternTextBox()));
-			view.getValidateValuePatternTextBox().toggleValidDateBox();
-			view.getValidateNoOfWordsTextBox().addValidator(new NumberValidator(view.getNoOfWordsTextBox(), false, false));
-			view.getValidateKeyPatternTextBox().toggleValidDateBox();
+		} else {
+			KVExtractionDTO kvExtractionDTO = controller.getMainPresenter().getFieldTypeViewPresenter().createKVExtractionDTOObject();
+			kvExtractionDTO.setKeyPattern(view.getKeyPattern());
+			kvExtractionDTO.setValuePattern(view.getValuePattern());
+
+			controller.setAdd(true);
+			controller.setSelectedKVExtraction(kvExtractionDTO);
 		}
+
+		view.getValidateKeyPatternTextBox().addValidator(new RegExValidator(view.getKeyPatternTextBox(), true, false, true, null));
+		view.getValidateKeyPatternTextBox().toggleValidDateBox();
+		view.getValidateValuePatternTextBox().addValidator(new RegExValidator(view.getValuePatternTextBox(), true, false, true, null));
+		view.getValidateValuePatternTextBox().toggleValidDateBox();
+		view.getValidateNoOfWordsTextBox().addValidator(new NumberValidator(view.getNoOfWordsTextBox(), false, false));
+		view.getValidateKeyPatternTextBox().toggleValidDateBox();
 	}
 
 	@Override

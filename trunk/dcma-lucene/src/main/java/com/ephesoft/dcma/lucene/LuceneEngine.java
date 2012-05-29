@@ -111,7 +111,6 @@ public class LuceneEngine implements ICommonConstants {
 	private static final String CMD_COMMAND = "cmd";
 	private static final String PROJECT_FILE_NAME_COULD_NOT_BE_FETCHED = "Project File Name could not be fetched";
 	private static final String RECOSTAR_HOCR_PLUGIN = "RECOSTAR_HOCR";
-	private static final String SEARCH_CLASSIFICATION_PLUGIN = "SEARCH_CLASSIFICATION";
 	private static final String TESSERACT_HOCR_PLUGIN = "TESSERACT_HOCR";
 	private static final String TESSERACT_BASE_PATH_NOT_CONFIGURED = "Tesseract Base path not configured.";
 	private static final String JAR_PATH_FOR_LICENSE_NOT_FOUND = "Jar Path for License file could not be found";
@@ -377,9 +376,10 @@ public class LuceneEngine implements ICommonConstants {
 			List<Page> allPages = null;
 			Query query = null;
 			Map<String, Float> returnMap = new HashMap<String, Float>();
+			List<Document> xmlDocuments = batch.getDocuments().getDocument();
 
 			try {
-				allPages = findAllHocrFromXML(batch);
+				allPages = findAllHocrFromXML(xmlDocuments);
 			} catch (DCMAApplicationException e1) {
 				LOGGER.error("Exception while reading from XML" + e1.getMessage());
 				throw new DCMAApplicationException(e1.getMessage(), e1);
@@ -481,7 +481,7 @@ public class LuceneEngine implements ICommonConstants {
 							LOGGER.error("Exception while generating index or updating xml" + e.getMessage(), e);
 						}
 						LOGGER.info("Started updating batch xml for : " + eachPage);
-						updateBatchXML(returnMap, batch, eachPage, allPageTypes, first_page_conf_weightage_float,
+						updateBatchXML(returnMap, xmlDocuments, eachPage, allPageTypes, first_page_conf_weightage_float,
 								middle_page_conf_weightage_float, last_page_conf_weightage_float);
 						LOGGER.info("Successfully ended updating batch xml for : " + eachPage);
 					} else {
@@ -501,6 +501,194 @@ public class LuceneEngine implements ICommonConstants {
 		}
 	}
 
+	/**
+	 * This method generates the confidence score for each HOCR file read from batch xml and stores maximum of 5 best fir pages inbatch
+	 * xml. For comparison it refers to the already created indexes of standard HOCR pages stored in hierarchy : batch class > document
+	 * type > page type.
+	 * 
+	 * @param batchInstanceID String
+	 * @throws DCMAApplicationException
+	 * @throws DCMABusinessException
+	 */
+	public void generateConfidenceAPI(final List<Document> xmlDocuments, final HocrPages hocrPages, final String workingDir, final Map<LuceneProperties, String> propertyMap, final String batchClassIdentifier) throws DCMAApplicationException {
+		// Initialize properties
+			LOGGER.info("Initializing properties...");
+			String validExt = propertyMap.get(LuceneProperties.LUCENE_VALID_EXTNS);
+			String indexFields =  propertyMap.get(LuceneProperties.LUCENE_INDEX_FIELDS);
+			String stopWords =  propertyMap.get(LuceneProperties.LUCENE_STOP_WORDS);
+			String minTermFreq =  propertyMap.get(LuceneProperties.LUCENE_MIN_TERM_FREQ);
+			String minDocFreq =  propertyMap.get(LuceneProperties.LUCENE_MIN_DOC_FREQ);
+			String minWordLength =  propertyMap.get(LuceneProperties.LUCENE_MIN_WORD_LENGTH);
+			String maxQueryTerms =  propertyMap.get(LuceneProperties.LUCENE_MAX_QUERY_TERMS);
+			String topLevelField =  propertyMap.get(LuceneProperties.LUCENE_TOP_LEVEL_FIELD);
+			String numOfPages =  propertyMap.get(LuceneProperties.LUCENE_NO_OF_PAGES);
+			String max_results =  propertyMap.get(LuceneProperties.LUCENE_MAX_RESULT_COUNT);
+			String first_page_conf_weightage =  propertyMap.get(LuceneProperties.LUCENE_FIRST_PAGE_CONF_WEIGHTAGE);
+			String middle_page_conf_weightage =  propertyMap.get(LuceneProperties.LUCENE_MIDDLE_PAGE_CONF_WEIGHTAGE);
+			String last_page_conf_weightage =  propertyMap.get(LuceneProperties.LUCENE_LAST_PAGE_CONF_WEIGHTAGE);
+
+			int max_result = 10;
+			try {
+				max_result = Integer.valueOf(max_results);
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max result value. Using default value of 10.");
+			}
+			Float f_100 = 100.0f;
+			float first_page_conf_weightage_float = 1f;
+			try {
+				first_page_conf_weightage_float = Integer.valueOf(first_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max first page confidence weightage value. Using default value of 100.");
+			}
+
+			float middle_page_conf_weightage_float = 0.90f;
+			try {
+				middle_page_conf_weightage_float = Integer.valueOf(middle_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max middle page confidence weightage value. Using default value of 90.");
+			}
+
+			float last_page_conf_weightage_float = 0.80f;
+			try {
+				last_page_conf_weightage_float = Integer.valueOf(last_page_conf_weightage) / f_100;
+			} catch (NumberFormatException e) {
+				LOGGER.info("Could not set max last page confidence weightage value. Using default value of 80.");
+			}
+
+			LOGGER.info("Properties Initialized Successfully");
+			String indexFolder = batchSchemaService.getSearchClassIndexFolder(batchClassIdentifier, false);
+			if(indexFolder == null) {
+				LOGGER.info("No learn folder exist: " + indexFolder);
+				throw new DCMAApplicationException("No learn folder exist : " + indexFolder);
+			}
+			String[] validExtensions = validExt.split(";");
+			String[] allIndexFields = indexFields.split(";");
+			String[] allStopWords = stopWords.split(";");
+			if (allIndexFields == null || allIndexFields.length <= 0) {
+				LOGGER.error("Cannot read Index level fields from resources");
+				throw new DCMAApplicationException("Cannot read Index level fields from resources");
+			}
+			IndexReader reader = null;
+			Query query = null;
+			Map<String, Float> returnMap = new HashMap<String, Float>();
+
+			List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pageTypeService.getPageTypesByBatchClassID(batchClassIdentifier);
+			if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
+				LOGGER.error("Page Types not configured in Database");
+				throw new DCMAApplicationException("Page Types not configured in Database");
+			}
+
+			String[] indexFiles = new File(indexFolder).list();
+			if (indexFiles == null || indexFiles.length <= 0) {
+				LOGGER.info("No index files exist inside folder : " + indexFolder);
+				throw new DCMAApplicationException("No index files exist inside folder : " + indexFolder);
+			}
+
+			try {
+				reader = IndexReader.open(FSDirectory.open(new File(indexFolder)), true);
+			} catch (CorruptIndexException e) {
+				LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
+				throw new DCMAApplicationException("CorruptIndexException while reading Index" + e.getMessage(), e);
+			} catch (IOException e) {
+				LOGGER.error("IOException while reading Index" + e.getMessage(), e);
+				throw new DCMAApplicationException("IOException while reading Index" + e.getMessage(), e);
+			}
+			MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
+			moreLikeThis.setFieldNames(allIndexFields);
+			// moreLikeThis.setBoost(true);
+			// moreLikeThis.setBoostFactor(10.0f);
+			moreLikeThis.setMinTermFreq(Integer.valueOf(minTermFreq));
+			moreLikeThis.setMinDocFreq(Integer.valueOf(minDocFreq));
+			moreLikeThis.setMinWordLen(Integer.valueOf(minWordLength));
+			moreLikeThis.setMaxQueryTerms(Integer.valueOf(maxQueryTerms));
+			if (allStopWords != null && allStopWords.length > 0) {
+				Set<String> stopWordsTemp = new HashSet<String>();
+				for (int i = 0; i < allStopWords.length; i++) {
+					stopWordsTemp.add(allStopWords[i]);
+				}
+				moreLikeThis.setStopWords(stopWordsTemp);
+			}
+			
+			List<Page> allPages = null;
+			try {
+				allPages = findAllHocrFromXML(xmlDocuments);
+			} catch (DCMAApplicationException e1) {
+				LOGGER.error("Exception while reading from XML" + e1.getMessage());
+				throw new DCMAApplicationException(e1.getMessage(), e1);
+			}
+
+			if (null != allPages) {
+				for (Page page : allPages) {
+					String eachPage = page.getHocrFileName();
+
+					eachPage = eachPage.trim();
+					boolean isFileValid = false;
+					if (validExtensions != null && validExtensions.length > 0) {
+						for (int l = 0; l < validExtensions.length; l++) {
+							if (eachPage.endsWith(validExtensions[l])) {
+								isFileValid = true;
+								break;
+							}
+						}
+					} else {
+						LOGGER.error("No valid extensions are specified in resources");
+						cleanUpResource(reader);
+						throw new DCMAApplicationException("No valid extensions are specified in resources");
+					}
+					if (isFileValid) {
+						try {
+							LOGGER.info("Generating query for : " + eachPage);
+							String hocrContent = null;
+
+							List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+							HocrPage hocrPage = hocrPageList.get(0);
+							hocrContent = hocrPage.getHocrContent();
+
+							if (null != hocrContent) {
+								try {
+									InputStream inputStream = new ByteArrayInputStream(hocrContent.getBytes("UTF-8"));
+									query = moreLikeThis.like(inputStream);
+								} catch (UnsupportedEncodingException e) {
+									LOGGER.error(e.getMessage(), e);
+									query = moreLikeThis.like(new File(workingDir + File.separator + eachPage));
+								}
+							} else {
+								query = moreLikeThis.like(new File(workingDir + File.separator + eachPage));
+							}
+
+							if (query != null && query.toString() != null && query.toString().length() > 0) {
+								LOGGER.info("Generating confidence score for : " + eachPage);
+								returnMap = SearchFiles.generateConfidence(indexFolder, query.toString(), topLevelField, Integer
+										.valueOf(numOfPages), max_result);
+							} else {
+								LOGGER.info("Empty query generated for : " + eachPage);
+							}
+
+						} catch (IOException e) {
+							LOGGER.error("Exception while generating query for :" + eachPage + e.getMessage(), e);
+							cleanUpResource(reader);
+							throw new DCMAApplicationException("Exception while generating query for :" + eachPage + e.getMessage(), e);
+						} catch (Exception e) {
+							cleanUpResource(reader);
+							LOGGER.error("Exception while generating index or updating xml" + e.getMessage(), e);
+						}
+						LOGGER.info("Started updating batch xml for : " + eachPage);
+						updateBatchXML(returnMap, xmlDocuments, eachPage, allPageTypes, first_page_conf_weightage_float,
+								middle_page_conf_weightage_float, last_page_conf_weightage_float);
+						LOGGER.info("Successfully ended updating batch xml for : " + eachPage);
+					} else {
+						LOGGER.error("File " + eachPage + " has invalid extension.");
+						throw new DCMABusinessException("File " + eachPage + " has invalid extension.");
+					}
+				}
+			} else {
+				LOGGER.error("No pages found in batch XML.");
+				throw new DCMAApplicationException("No pages found in batch XML.");
+			}
+			cleanUpResource(reader);
+		}
+	
+
 	public void cleanUpResource(IndexReader reader) {
 		if (reader != null) {
 			try {
@@ -518,10 +706,8 @@ public class LuceneEngine implements ICommonConstants {
 	 * @return List<PageType>
 	 * @throws DCMAApplicationException
 	 */
-	public List<Page> findAllHocrFromXML(final Batch batch) throws DCMAApplicationException {
+	public List<Page> findAllHocrFromXML(final List<Document> xmlDocuments) throws DCMAApplicationException {
 		List<Page> allPages = new ArrayList<Page>();
-
-		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			Document document = xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
@@ -543,10 +729,9 @@ public class LuceneEngine implements ICommonConstants {
 	 * @param firstPageConfWeightage confidence score weightage of first page
 	 * @throws DCMAApplicationException
 	 */
-	public void updateBatchXML(final Map<String, Float> batchDocNameScore, final Batch batch, final String eachHtmlPage,
+	public void updateBatchXML(final Map<String, Float> batchDocNameScore, final List<Document> xmlDocuments, final String eachHtmlPage,
 			final List<com.ephesoft.dcma.da.domain.PageType> allPageTypes, float firstPageConfWeightage,
 			float middlePageConfWeightage, float lastPageConfWeightage) throws DCMAApplicationException {
-		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		float highestConfScore = fetchHighestScoreValue(batchDocNameScore);
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			Document document = xmlDocuments.get(i);
@@ -856,6 +1041,14 @@ public class LuceneEngine implements ICommonConstants {
 		if (properties != null && !properties.isEmpty()) {
 			projectFileName = properties.get(LuceneProperties.RECOSTAR_PROJECT_FILE.getPropertyKey());
 		}
+		if (projectFileName != null) {
+			String projectFileAbsPath = batchSchemaService.getBaseFolderLocation() + File.separator + batchClassIdentifier
+					+ File.separator + batchSchemaService.getProjectFileBaseFolder() + File.separator + projectFileName;
+			File file = new File(projectFileAbsPath);
+			if (file.exists()) {
+				projectFileName = projectFileAbsPath;
+			}
+		}
 		if (projectFileName.length() <= 0) {
 			LOGGER.error(PROJECT_FILE_NAME_COULD_NOT_BE_FETCHED);
 			throw new DCMAApplicationException(PROJECT_FILE_NAME_COULD_NOT_BE_FETCHED);
@@ -902,7 +1095,7 @@ public class LuceneEngine implements ICommonConstants {
 										String[] cmds = new String[3];
 										cmds[0] = CMD_COMMAND;
 										cmds[1] = "/c";
-										cmds[2] = "RecostarPlugin.exe " + " RSO2-NET.476 " + projectFileName + " \""
+										cmds[2] = "RecostarPlugin.exe " + " RSO2-NET.632 " + projectFileName + " \""
 												+ imageAbsolutePath + "\" " + workingDirectory + SPACE + jarPath + SPACE
 												+ LICENSE_VERIFIER + "  \"" + targetHTMlAbsolutePath + BACKWARD_SLASH + SPACE
 												+ htmlParser;
@@ -986,6 +1179,7 @@ public class LuceneEngine implements ICommonConstants {
 			for (String eachFile : listOfFiles) {
 				if (eachFile.equalsIgnoreCase(hocrName)) {
 					returnValue = true;
+					break;
 				}
 			}
 		}
@@ -1001,131 +1195,152 @@ public class LuceneEngine implements ICommonConstants {
 	 * @throws DCMAApplicationException
 	 */
 	public List<String> generateHOCRForKVExtractionTest(final String imageFolder, final String ocrEngineName,
-			final String batchClassIdentifer) throws DCMAApplicationException {
+			final String batchClassIdentifer, final File testImageFile, final boolean isAdvancedKvExtraction)
+			throws DCMAApplicationException {
 		LOGGER.info("Inside generateHOCRForKVExtractionTest");
 		List<String> targetHtmlPaths = new ArrayList<String>();
-		File imageFolderPath = new File(imageFolder);
-		File[] listOfimages = imageFolderPath.listFiles(new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
-				.getExtensionWithDot()));
-		String[] listOfHtmlFiles = imageFolderPath.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
-		StringBuffer targetHTMlAbsolutePath = new StringBuffer();
-		if (ocrEngineName != null && !ocrEngineName.isEmpty()) {
-			String tesseractBasePath = EMPTY_STRING;
-			String tesseractVersion = EMPTY_STRING;
-			if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
-				BatchPluginConfiguration[] pluginConfiguration = batchClassPluginPropertiesService.getPluginProperties(
-						batchClassIdentifer, TESSERACT_HOCR_PLUGIN, TesseractVersionProperty.TESSERACT_VERSIONS);
-				if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-						&& pluginConfiguration[0].getValue().length() > 0) {
-					tesseractVersion = pluginConfiguration[0].getValue();
-				}
-				try {
-					ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
-					tesseractBasePath = app.getProperty(tesseractVersion);
-				} catch (IOException ioe) {
-					LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe, ioe);
-					throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED, ioe);
-				}
-				if (tesseractBasePath == null) {
-					LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED);
-					throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED);
-				}
+		boolean isValid = true;
+		LOGGER.info("Is hOCRing for advanced KV Extraction = " + isAdvancedKvExtraction);
+		if (isAdvancedKvExtraction) {
+			if (null == testImageFile || !testImageFile.exists()) {
+				LOGGER.error("No file name specified for advanced KV Extraction");
+				isValid = false;
 			}
-			boolean isTesseractVersion3Batch = false;
-			if (listOfimages != null && listOfimages.length > 0) {
-				for (File eachImage : listOfimages) {
-					if (eachImage.exists()) {
-						String imageAbsolutePath = eachImage.getAbsolutePath();
-						String imagePath = imageAbsolutePath.toLowerCase(Locale.getDefault());
-						targetHTMlAbsolutePath.append(imageAbsolutePath.substring(0, imagePath.indexOf(FileType.TIF
-								.getExtensionWithDot())));
-						String imageName = eachImage.getName().toLowerCase(Locale.getDefault());
-						String hocrFileName = eachImage.getName().substring(0, imageName.indexOf(FileType.TIF.getExtensionWithDot()))
-								+ FileType.HTML.getExtensionWithDot();
-						boolean hocrExists = checkHocrExists(hocrFileName, listOfHtmlFiles);
-						if (!hocrExists) {
-							try {
-								Runtime runtime = Runtime.getRuntime();
-								ArrayList<String> cmdList = new ArrayList<String>();
-
-								if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
-									isTesseractVersion3Batch = generateHOCRForTesseract(targetHTMlAbsolutePath, tesseractVersion,
-											isTesseractVersion3Batch, imageAbsolutePath, cmdList, tesseractBasePath);
-								} else {
-									generateHOCRForRecostar(batchClassIdentifer, targetHTMlAbsolutePath, imageAbsolutePath, cmdList);
-								}
-								File envFile = null;
-
-								if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
-									if (OSUtil.isUnix()) {
-										envFile = new File(tesseractBasePath);
-									}
-								} else {
-									envFile = new File(System.getenv(RECOSTAR_BASE_PATH));
-								}
-								String[] cmds = cmdList.toArray(new String[cmdList.size()]);
-								StringBuffer commandStr = new StringBuffer();
-								for (int ind = 0; ind < cmds.length; ind++) {
-									if (cmds[ind] == null) {
-										cmds[ind] = EMPTY_STRING;
-									}
-									commandStr.append(cmds[ind]);
-									commandStr.append(' ');
-								}
-								Process process = runtime.exec(cmds, null, envFile);
-								int exitValue = process.waitFor();
-
-								LOGGER.info("Command exited with error code no " + exitValue);
-								LOGGER.info("Generated HOCR file : " + targetHTMlAbsolutePath);
-
-								InputStreamReader inputStreamReader = null;
-								BufferedReader input = null;
-								try {
-									inputStreamReader = new InputStreamReader(process.getErrorStream());
-									input = new BufferedReader(inputStreamReader);
-									String line = null;
-									do {
-										line = input.readLine();
-										LOGGER.debug(line);
-									} while (line != null);
-								} catch (IOException e) {
-									LOGGER.error(e.getMessage(), e);
-								} finally {
-									if (input != null) {
-										try {
-											input.close();
-										} catch (IOException e) {
-											LOGGER.error(e.getMessage(), e);
-										}
-									}
-									if (inputStreamReader != null) {
-										try {
-											inputStreamReader.close();
-										} catch (IOException e) {
-											LOGGER.error(e.getMessage(), e);
-										}
-									}
-								}
-							} catch (Exception e) {
-								LOGGER.error(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage());
-								throw new DCMAApplicationException(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath
-										+ e.getMessage(), e);
-							}
-						}
-						if (isTesseractVersion3Batch || hocrExists) {
-							targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
-						}
-						targetHtmlPaths.add(targetHTMlAbsolutePath.toString());
-						targetHTMlAbsolutePath = new StringBuffer();
+		}
+		if (isValid) {
+			File imageFolderPath = new File(imageFolder);
+			File[] listOfimages = imageFolderPath.listFiles(new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(),
+					FileType.TIFF.getExtensionWithDot()));
+			String[] listOfHtmlFiles = imageFolderPath.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
+			if (ocrEngineName != null && !ocrEngineName.isEmpty()) {
+				String tesseractBasePath = EMPTY_STRING;
+				String tesseractVersion = EMPTY_STRING;
+				if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
+					BatchPluginConfiguration[] pluginConfiguration = batchClassPluginPropertiesService.getPluginProperties(
+							batchClassIdentifer, TESSERACT_HOCR_PLUGIN, TesseractVersionProperty.TESSERACT_VERSIONS);
+					if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
+							&& pluginConfiguration[0].getValue().length() > 0) {
+						tesseractVersion = pluginConfiguration[0].getValue();
+					}
+					try {
+						ApplicationConfigProperties app = ApplicationConfigProperties.getApplicationConfigProperties();
+						tesseractBasePath = app.getProperty(tesseractVersion);
+					} catch (IOException ioe) {
+						LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED + ioe, ioe);
+						throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED, ioe);
+					}
+					if (tesseractBasePath == null) {
+						LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED);
+						throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED);
 					}
 				}
+				if (listOfimages != null && listOfimages.length > 0) {
+					if (isAdvancedKvExtraction) {
+						LOGGER.info("hOCRing file: " + testImageFile.getAbsolutePath());
+						performHOCRingOfImage(testImageFile, targetHtmlPaths, ocrEngineName, listOfHtmlFiles, tesseractVersion,
+								tesseractBasePath, batchClassIdentifer);
+					} else {
+						for (File eachImage : listOfimages) {
+							performHOCRingOfImage(eachImage, targetHtmlPaths, ocrEngineName, listOfHtmlFiles, tesseractVersion,
+									tesseractBasePath, batchClassIdentifer);
+						}
+					}
+				} else {
+					LOGGER.info("No images found for learning inside :" + imageFolder);
+				}
 			} else {
-				LOGGER.info("No images found for learning inside :" + imageFolder);
+				LOGGER.info("OCR Engine not configured.");
 			}
-		} else {
-			LOGGER.info("OCR Engine not configured.");
 		}
 		return targetHtmlPaths;
+	}
+
+	private void performHOCRingOfImage(final File testImage, List<String> targetHtmlPaths, String ocrEngineName,
+			String[] listOfHtmlFiles, final String tesseractVersion, final String tesseractBasePath, final String batchClassIdentifer)
+			throws DCMAApplicationException {
+		StringBuffer targetHTMlAbsolutePath = new StringBuffer();
+		boolean isTesseractVersion3Batch = false;
+		if (testImage.exists()) {
+			String imageAbsolutePath = testImage.getAbsolutePath();
+			String imagePath = imageAbsolutePath.toLowerCase(Locale.getDefault());
+			targetHTMlAbsolutePath.append(imageAbsolutePath.substring(0, imagePath.indexOf(FileType.TIF.getExtensionWithDot())));
+			String imageName = testImage.getName().toLowerCase(Locale.getDefault());
+			String hocrFileName = testImage.getName().substring(0, imageName.indexOf(FileType.TIF.getExtensionWithDot()))
+					+ FileType.HTML.getExtensionWithDot();
+			boolean hocrExists = checkHocrExists(hocrFileName, listOfHtmlFiles);
+			if (!hocrExists) {
+				try {
+					Runtime runtime = Runtime.getRuntime();
+					ArrayList<String> cmdList = new ArrayList<String>();
+
+					if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
+						isTesseractVersion3Batch = generateHOCRForTesseract(targetHTMlAbsolutePath, tesseractVersion,
+								isTesseractVersion3Batch, imageAbsolutePath, cmdList, tesseractBasePath);
+					} else {
+						generateHOCRForRecostar(batchClassIdentifer, targetHTMlAbsolutePath, imageAbsolutePath, cmdList);
+					}
+					File envFile = null;
+
+					if (ocrEngineName.equalsIgnoreCase(TESSERACT_HOCR_PLUGIN)) {
+						if (OSUtil.isUnix()) {
+							envFile = new File(tesseractBasePath);
+						}
+					} else {
+						envFile = new File(System.getenv(RECOSTAR_BASE_PATH));
+					}
+					String[] cmds = cmdList.toArray(new String[cmdList.size()]);
+					StringBuffer commandStr = new StringBuffer();
+					for (int ind = 0; ind < cmds.length; ind++) {
+						if (cmds[ind] == null) {
+							cmds[ind] = EMPTY_STRING;
+						}
+						commandStr.append(cmds[ind]);
+						commandStr.append(' ');
+					}
+					Process process = runtime.exec(cmds, null, envFile);
+					int exitValue = process.waitFor();
+
+					LOGGER.info("Command exited with error code no " + exitValue);
+					LOGGER.info("Generated HOCR file : " + targetHTMlAbsolutePath);
+
+					InputStreamReader inputStreamReader = null;
+					BufferedReader input = null;
+					try {
+						inputStreamReader = new InputStreamReader(process.getErrorStream());
+						input = new BufferedReader(inputStreamReader);
+						String line = null;
+						do {
+							line = input.readLine();
+							LOGGER.debug(line);
+						} while (line != null);
+					} catch (IOException e) {
+						LOGGER.error(e.getMessage(), e);
+					} finally {
+						if (input != null) {
+							try {
+								input.close();
+							} catch (IOException e) {
+								LOGGER.error(e.getMessage(), e);
+							}
+						}
+						if (inputStreamReader != null) {
+							try {
+								inputStreamReader.close();
+							} catch (IOException e) {
+								LOGGER.error(e.getMessage(), e);
+							}
+						}
+					}
+				} catch (Exception e) {
+					LOGGER.error(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage());
+					throw new DCMAApplicationException(EXCEPTION_GENERATING_HOCR_FOR_IMAGE + imageAbsolutePath + e.getMessage(), e);
+				}
+			}
+			if (isTesseractVersion3Batch || hocrExists) {
+				targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
+			}
+			targetHtmlPaths.add(targetHTMlAbsolutePath.toString());
+		}
 	}
 
 	private boolean generateHOCRForTesseract(StringBuffer targetHTMlAbsolutePath, String tesseractVersion,
@@ -1166,7 +1381,7 @@ public class LuceneEngine implements ICommonConstants {
 		return isTesseractVersion3;
 	}
 
-	private void generateHOCRForRecostar(final String batchClassIdentifer, StringBuffer targetHTMlAbsolutePath,
+	private void generateHOCRForRecostar(final String batchClassIdentifier, StringBuffer targetHTMlAbsolutePath,
 			String imageAbsolutePath, List<String> cmdList) throws DCMAApplicationException {
 		LOGGER.info("Generating hocr from recostar....");
 		ApplicationConfigProperties applicationConfigProperties;
@@ -1181,11 +1396,19 @@ public class LuceneEngine implements ICommonConstants {
 			htmlParser = XMLUtil.JTIDY;
 		}
 		targetHTMlAbsolutePath.append(FileType.HTML.getExtensionWithDot());
-		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifer,
+		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifier,
 				RECOSTAR_HOCR_PLUGIN, null);
 		String projectFileName = EMPTY_STRING;
 		if (properties != null && !properties.isEmpty()) {
 			projectFileName = properties.get(LuceneProperties.RECOSTAR_PROJECT_FILE.getPropertyKey());
+		}
+		if (projectFileName != null) {
+			String projectFileAbsPath = batchSchemaService.getBaseFolderLocation() + File.separator + batchClassIdentifier
+					+ File.separator + batchSchemaService.getProjectFileBaseFolder() + File.separator + projectFileName;
+			File file = new File(projectFileAbsPath);
+			if (file.exists()) {
+				projectFileName = projectFileAbsPath;
+			}
 		}
 		if (projectFileName.length() <= 0) {
 			LOGGER.error(PROJECT_FILE_NAME_COULD_NOT_BE_FETCHED);
@@ -1203,7 +1426,7 @@ public class LuceneEngine implements ICommonConstants {
 		}
 		cmdList.add(CMD_COMMAND);
 		cmdList.add("/c");
-		cmdList.add("RecostarPlugin.exe " + " RSO2-NET.476 " + projectFileName + SPACE + BACKWARD_SLASH + imageAbsolutePath
+		cmdList.add("RecostarPlugin.exe " + " RSO2-NET.632 " + projectFileName + SPACE + BACKWARD_SLASH + imageAbsolutePath
 				+ BACKWARD_SLASH + SPACE + workingDirectory + SPACE + jarPath + SPACE + LICENSE_VERIFIER + "  " + BACKWARD_SLASH
 				+ targetHTMlAbsolutePath + BACKWARD_SLASH + SPACE + htmlParser);
 	}

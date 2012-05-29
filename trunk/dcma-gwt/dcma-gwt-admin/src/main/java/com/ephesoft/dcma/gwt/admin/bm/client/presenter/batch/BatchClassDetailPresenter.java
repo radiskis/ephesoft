@@ -57,6 +57,7 @@ public class BatchClassDetailPresenter extends AbstractBatchClassPresenter<Batch
 	@Override
 	public void bind() {
 		if (controller.getBatchClass() != null) {
+			view.setName(controller.getBatchClass().getName());
 			view.setDescription(controller.getBatchClass().getDescription());
 			view.setPriority(controller.getBatchClass().getPriority());
 			view.setUncFolder(controller.getBatchClass().getUncFolder());

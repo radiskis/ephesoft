@@ -51,6 +51,10 @@
 										visible="false" />
 								</g:layer>
 								<g:layer>
+									<plugin:KV_PP_ConfigView
+										ui:field="kvPPConfigView" visible="false" />
+								</g:layer>
+								<g:layer>
 									<plugin:KV_PP_PropertiesView
 										ui:field="kvPPPropertiesView" visible="false" />
 								</g:layer>
@@ -66,8 +70,8 @@
 									<email:EmailView ui:field="emailView" visible="false" />
 								</g:layer>
 								<g:layer>
-									<function-key:FunctionKeyView ui:field="functionKeyView"
-										visible="false" />
+									<function-key:FunctionKeyView
+										ui:field="functionKeyView" visible="false" />
 								</g:layer>
 								<g:layer>
 									<bcf:BatchClassFieldView ui:field="batchClassFieldView"
@@ -108,6 +112,16 @@
 									<table-column-info:TableColumnInfoView
 										ui:field="tableColumnInfoView" visible="false" />
 								</g:layer>
+								<g:layer>
+									<g:LayoutPanel ui:field="addModulesViewLayoutPanel"
+										visible="false">
+									</g:LayoutPanel>
+								</g:layer>
+								<g:layer>
+									<g:LayoutPanel ui:field="editModulesPluginSelectViewLayoutPanel"
+										visible="false">
+									</g:LayoutPanel>
+								</g:layer>
 							</g:LayoutPanel>
 						</g:north>
 					</g:DockLayoutPanel>
@@ -130,12 +144,26 @@
 								<g:Label></g:Label>
 							</g:cell>
 
-							<g:cell width="40%" horizontalAlignment="ALIGN_LEFT">
+							<g:cell width="20%" horizontalAlignment="ALIGN_LEFT">
 								<g:Button ui:field="cancel"></g:Button>
+							</g:cell>
+							<g:cell width="1%">
+								<g:Label></g:Label>
+							</g:cell>
+							
+							<g:cell>
+								<g:Button ui:field="validate"></g:Button>
+							</g:cell>
+							<g:cell width="1%">
+								<g:Label></g:Label>
+							</g:cell>
+							<g:cell width="20%" horizontalAlignment="ALIGN_LEFT">
+								<g:Button ui:field="deploy"></g:Button>
 							</g:cell>
 
 							<g:cell width="57%" horizontalAlignment="ALIGN_RIGHT">
-								<g:HorizontalPanel ui:field="rightButtons" width="26em">
+								<g:HorizontalPanel ui:field="rightButtons"
+									width="26em">
 									<g:cell horizontalAlignment="ALIGN_RIGHT">
 										<g:Button ui:field="sample"></g:Button>
 									</g:cell>

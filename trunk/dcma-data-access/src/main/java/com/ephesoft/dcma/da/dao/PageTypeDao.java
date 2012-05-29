@@ -120,4 +120,12 @@ public interface PageTypeDao extends CacheableDao<PageType> {
 	 * @param pageType PageType
 	 */
 	void removePageType(PageType pageType);
+
+	/**
+	 * API to get the page type by batch class ID.
+	 * 
+	 * @param batchClassID
+	 * @return
+	 */
+	List<PageType> getPageTypesByBatchClassID(String batchClassID);
 }

@@ -2,7 +2,19 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
-	
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="nameLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="name" />
+			</g:cell>
+		</g:HorizontalPanel>
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="descLabel"></g:Label>

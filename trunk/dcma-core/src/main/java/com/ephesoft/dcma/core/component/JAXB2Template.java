@@ -74,6 +74,10 @@ public class JAXB2Template {
 	private String testFolderLocation;
 	private String scriptConfigFolderName;	
 	private String uploadBatchFolder;
+	private String testAdvancedKvExtractionFolder;
+	private String webServicesFolderPath;
+	private String samplePatternFolderName;
+	private String samplePatternFileName;
 	
 
 	/**
@@ -104,6 +108,10 @@ public class JAXB2Template {
 	 * @param testFolderLocation
 	 * @param scriptConfigFolderName
 	 * @param uploadBatchFolder
+	 * @param testAdvancedKvExtractionFolder
+	 * @param webServicesFolderPath
+     * @param samplePatternFolderName
+	 * @param samplePatternFileName
 	 */
 	public JAXB2Template(Jaxb2Marshaller jaxb2Marshaller, String baseFolderLocation, String localFolderLocation,
 			String exportFolderLocation, String baseHttpURL, String baseSampleFdLoc, String sampleFolders, String searchSampleName,
@@ -112,7 +120,7 @@ public class JAXB2Template {
 			String scriptFolderName, String cmisPluginMappingFolderName, String batchExportFolder, String batchClassSerializableFile,
 			String fileboundPluginMappingFolderName, String validationScriptName, String tempFolder, String testTableFolderName,
 			String threadpoolLockFolder,String addNewTableScriptName, String testFolderLocation,
-			String scriptConfigFolderName, String uploadBatchFolder) {
+			String scriptConfigFolderName, String uploadBatchFolder, String testAdvancedKvExtractionFolder, String webServicesFolderPath, String samplePatternFileName, String samplePatternFolderName) {
 		super();
 		this.jaxb2Marshaller = jaxb2Marshaller;
 		this.baseFolderLocation = baseFolderLocation;
@@ -142,6 +150,10 @@ public class JAXB2Template {
 		this.testFolderLocation = FileUtils.getAbsoluteFilePath(testFolderLocation);
 		this.scriptConfigFolderName = scriptConfigFolderName;
 		this.uploadBatchFolder = uploadBatchFolder;
+		this.testAdvancedKvExtractionFolder = testAdvancedKvExtractionFolder;
+		this.webServicesFolderPath = webServicesFolderPath;
+		this.samplePatternFolderName = samplePatternFolderName;
+		this.samplePatternFileName = samplePatternFileName;
 	}
 
 	
@@ -430,9 +442,34 @@ public class JAXB2Template {
 		return uploadBatchFolder;
 	}
 	
-	
 	public void setUploadBatchFolder(String uploadBatchFolder) {
 		this.uploadBatchFolder = uploadBatchFolder;
 	}
+
+	public String getWebServicesFolderPath() {
+		return webServicesFolderPath;
+	}
 	
+	public void setWebServicesFolderPath(String webServicesFolderPath) {
+		this.webServicesFolderPath = webServicesFolderPath;
+	}
+	
+	public String getTestAdvancedKvExtractionFolderName() {
+		return testAdvancedKvExtractionFolder;
+	}
+	public String getSamplePatternFolder() {
+		return samplePatternFolderName;
+	}
+	
+	public void setSamplePatternFolderName(String samplePatternFolderName) {
+		this.samplePatternFolderName = samplePatternFolderName;
+	}
+	
+	public String getSamplePatternFileName() {
+		return samplePatternFileName;
+	}
+
+	public void setSamplePatternFileName(String samplePatternFileName) {
+		this.samplePatternFileName = samplePatternFileName;
+	}			
 }

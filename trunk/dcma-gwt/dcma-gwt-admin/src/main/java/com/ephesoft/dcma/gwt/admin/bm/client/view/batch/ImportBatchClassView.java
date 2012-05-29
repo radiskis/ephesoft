@@ -41,8 +41,10 @@ import java.util.Set;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.ImportBatchClassPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
@@ -124,6 +126,9 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	protected Label uncLabel;
 	@UiField
 	protected Label importLabel;
+	
+	@UiField
+	protected Label errorMessage;
 
 	@UiField
 	protected Label priorityStar;
@@ -163,6 +168,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 	private DialogBox dialogBox;
 	private boolean zipImported = false;
+	private String zipWorkflowName = "";
 
 	private Hidden importExisting = new Hidden("importExisting", "false");
 
@@ -188,6 +194,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		attachButton.addStyleName("disabled");
 		attachButton.removeStyleName("enabled");
 		attachButton.setEnabled(Boolean.FALSE);
+		errorMessage.addStyleName("error_style");
 
 		uncFolder = new TextBox();
 		uncFolder.setName("uncFolder");
@@ -261,7 +268,8 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 		uncStar.setText(AdminConstants.STAR);
 		importStar.setText(AdminConstants.STAR);
-
+		nameStar.setText(AdminConstants.STAR);
+		
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		priorityLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -303,18 +311,24 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				boolean checked = event.getValue();
-				importBatchClassUserOptionDTO.setImportExisting(Boolean.valueOf(checked));
-				uncPanel.clear();
-				if (checked) {
-					uncPanel.add(uncFolderList);
-					importExisting.setValue(TRUE);
+				if (uncFolderList.getItemCount() != 0) {
+					boolean checked = event.getValue();
+					importBatchClassUserOptionDTO.setImportExisting(Boolean.valueOf(checked));
+					uncPanel.clear();
+					if (checked) {
+						uncPanel.add(uncFolderList);
+						importExisting.setValue(TRUE);
+					} else {
+						uncPanel.add(uncFolder);
+						uncFolder.setText("");
+						importExisting.setValue(FALSE);
+					}
+					presenter.setFolderList();
 				} else {
-					uncPanel.add(uncFolder);
-					uncFolder.setText("");
-					importExisting.setValue(FALSE);
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchClassManagementMessages.NO_UNC_FOLDER_EXISTS));
+					useExisting.setValue(Boolean.FALSE);
 				}
-				presenter.setFolderList();
 			}
 		});
 
@@ -325,17 +339,22 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				boolean checked = ((CheckBox) event.getSource()).getValue();
 				importBatchClassUserOptionDTO.setUseSource(Boolean.valueOf(checked));
 				if (checked) {
+					name.setEnabled(Boolean.FALSE);
 					description.setEnabled(false);
 					description.setText("");
+					name.setText(importBatchClassUserOptionDTO.getName());
 					priority.setEnabled(false);
 					priority.setText("");
 					descStar.setText("");
 					priorityStar.setText("");
+					nameStar.setText("");
 				} else {
+					name.setEnabled(Boolean.TRUE);
 					description.setEnabled(true);
 					priority.setEnabled(true);
 					descStar.setText(AdminConstants.STAR);
 					priorityStar.setText(AdminConstants.STAR);
+					nameStar.setText(AdminConstants.STAR);
 				}
 			}
 		});
@@ -370,13 +389,28 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				}
 				String keyWorkFlowName = "workFlowName:";
 				String keyZipFolderPath = "filePath:";
+				String keyWorkflowDeployed = "workflowDeployed:";
+				String keyWorkflowEqual = "workflowEqual:";
+				String keyWorkflowExistInBatchClass = "workflowExistInBatchClass:";
+				
 				String workFlowName = result.substring(result.indexOf(keyWorkFlowName) + keyWorkFlowName.length(), result.indexOf('|',
 						result.indexOf(keyWorkFlowName)));
 				String zipSourcePath = result.substring(result.indexOf(keyZipFolderPath) + keyZipFolderPath.length(), result.indexOf(
 						'|', result.indexOf(keyZipFolderPath)));
+				String workflowDeployed = result.substring(result.indexOf(keyWorkflowDeployed) + keyWorkflowDeployed.length(), result.indexOf(
+						'|', result.indexOf(keyWorkflowDeployed)));
+				String workflowEqual = result.substring(result.indexOf(keyWorkflowEqual) + keyWorkflowEqual.length(), result.indexOf(
+						'|', result.indexOf(keyWorkflowEqual)));
+				String workflowExistInBatchClass = result.substring(result.indexOf(keyWorkflowExistInBatchClass) + keyWorkflowExistInBatchClass.length(), result.indexOf(
+						'|', result.indexOf(keyWorkflowExistInBatchClass)));
 				name.setText(workFlowName);
+				zipWorkflowName = workFlowName;
 				importBatchClassUserOptionDTO.setName(workFlowName);
 				importBatchClassUserOptionDTO.setZipFileName(zipSourcePath);
+				importBatchClassUserOptionDTO.setWorkflowDeployed(Boolean.valueOf(workflowDeployed));
+				importBatchClassUserOptionDTO.setWorkflowEqual(Boolean.valueOf(workflowEqual));
+				importBatchClassUserOptionDTO.setWorkflowExistsInBatchClass(Boolean.valueOf(workflowExistInBatchClass));
+			
 				uncPanel.clear();
 				uncPanel.add(uncFolder);
 				presenter.onAttachComplete(workFlowName, zipSourcePath);
@@ -663,5 +697,17 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				}
 			}
 		}
+	}
+
+	public void toggleUseExistingState(boolean isEnabled) {
+		useExisting.setEnabled(isEnabled);
+	}
+	
+	public String getZipWorkflowName() {
+		return zipWorkflowName;
+	}
+	
+	public Label getErrorMessage() {
+		return errorMessage;
 	}
 }

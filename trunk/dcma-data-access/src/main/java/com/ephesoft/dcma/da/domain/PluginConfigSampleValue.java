@@ -55,13 +55,21 @@ public class PluginConfigSampleValue extends AbstractChangeableEntity {
 	private PluginConfig pluginConfig;
 
 	@Column(name = "sample_value")
-	private String sample_value;
-	
+	private String sampleValue;
+
 	public PluginConfig getPluginConfig() {
 		return pluginConfig;
 	}
-	
+
 	public String getSampleValue() {
-		return sample_value;
+		return sampleValue;
+	}
+
+	public void setSamplevalue(String sampleValue) {
+		this.sampleValue = sampleValue;
+	}
+
+	public void setPluginConfig(PluginConfig pluginConfig) {
+		this.pluginConfig = pluginConfig;
 	}
 }

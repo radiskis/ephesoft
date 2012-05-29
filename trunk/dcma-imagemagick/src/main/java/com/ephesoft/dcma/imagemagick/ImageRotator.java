@@ -46,16 +46,21 @@ import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 
 public class ImageRotator {
+	private static final double DEFAULT_DEGREE_OF_ROTATION = 90.0;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	public void rotateImage(String imagePath) throws DCMAApplicationException{
+
+	public void rotateImage(String imagePath) throws DCMAApplicationException {
+		rotateImage(imagePath, DEFAULT_DEGREE_OF_ROTATION);
+	}
+
+	public void rotateImage(String imagePath, double degreeOfRotation) throws DCMAApplicationException {
 		File fImagePath = new File(imagePath);
 		if(!fImagePath.exists()){
 			throw new DCMABusinessException("File does not exist filename="+fImagePath);
 		}
 		ConvertCmd convertcmd = new ConvertCmd();
 		IMOperation operation = new IMOperation();
-		operation.rotate(90.00);
+		operation.rotate(degreeOfRotation);
 		operation.addImage();
 		operation.addImage();
 		Object[] listOfFiles = {imagePath,imagePath};

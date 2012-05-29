@@ -56,7 +56,6 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
-import com.ephesoft.dcma.util.FileUtils;
 
 public class UploadImageFileServlet extends DCMAHttpServlet {
 
@@ -73,6 +72,7 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String batchClassId = null;
+		String docName = null;
 		String fileName = null;
 		InputStream instream = null;
 		OutputStream out = null;
@@ -87,7 +87,7 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 
 			List<FileItem> items;
 			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-			String uploadPath = batchSchemaService.getBaseFolderLocation() + File.separator;
+			String uploadPath = null;
 			try {
 				items = upload.parseRequest(req);
 				for (FileItem item : items) {
@@ -96,6 +96,8 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 					if (item.isFormField()) {
 						if (item.getFieldName().equalsIgnoreCase("batchClassID")) {
 							batchClassId = item.getString();
+						} else if (item.getFieldName().equalsIgnoreCase("docName")) {
+							docName = item.getString();
 						}
 					} else if (!item.isFormField() && "importFile".equals(item.getFieldName())) {
 						fileName = item.getName();
@@ -105,18 +107,18 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 						instream = item.getInputStream();
 					}
 				}
-				uploadPath += File.separator + batchClassId + File.separator + batchSchemaService.getTempFolderName();
+				uploadPath = batchSchemaService.getTestAdvancedKvExtractionFolderPath(batchClassId, true);
+				uploadPath += File.separator + docName + File.separator;
 				File uploadFolder = new File(uploadPath);
 
-				if (uploadFolder.exists()) {
-					FileUtils.deleteDirectoryAndContentsRecursive(uploadFolder, false);
-				} else {
+				if (!uploadFolder.exists()) {
 					try {
 						boolean tempPath = uploadFolder.mkdirs();
 						if (!tempPath) {
 							log
 									.error("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
-							printWriter.write("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
+							printWriter
+									.write("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
 							return;
 						}
 					} catch (Exception e) {
@@ -125,7 +127,6 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 						return;
 					}
 				}
-
 				uploadPath += File.separator + fileName;
 				out = new FileOutputStream(uploadPath);
 				byte buf[] = new byte[1024];
@@ -137,6 +138,7 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 				// convert tiff to png
 				ImageProcessService imageProcessService = this.getSingleBeanOfType(ImageProcessService.class);
 				imageProcessService.generatePNGForImage(new File(uploadPath));
+				log.info("Png file created successfully for file: " + uploadPath);
 			} catch (FileUploadException e) {
 				log.error("Unable to read the form contents." + e, e);
 				printWriter.write("Unable to read the form contents.Please try again.");

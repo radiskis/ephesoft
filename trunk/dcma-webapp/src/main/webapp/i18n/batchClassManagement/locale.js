@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ******************************* Default locale
  * **************************************************
  */
@@ -168,7 +168,9 @@ var batchClassManagementConstants = {
 		
 	is_hidden : "Hidden",
 	
-	key_warning : "  Press key F1 to F11 (except F5)",
+	is_multiline :"MultiLine",
+	
+	key_warning : "Press key F1 to F11 (except F5)",
 	
 	delete_regex_validation : "Delete Regex Validation",
 		
@@ -176,7 +178,13 @@ var batchClassManagementConstants = {
 	
 	remote_url : "Remote URL",
 	
-	remote_bc_identifier : "Remote Batch Class Identifier"
+	test_adv_kv : "Test Adv KV",
+	
+	remote_bc_identifier : "Remote Batch Class Identifier",
+	
+	kv_page_value : "Page Value",
+	
+	warning_title : "Warning"
 
 };
 var batchClassManagementMessages = {
@@ -261,13 +269,41 @@ var batchClassManagementMessages = {
 
 	delete_batch_class_field_conformation : "Are you sure you want to delete this batch class field?",
 
-	no_record_to_copy : "no record to copy.",
+	no_record_to_copy : "No record to copy.",
+	
+	no_record_to_export : "No record to export.",
 
 	error_upload_image : "Error uploading image.Please try again.",
 	
-	delete_regex_validation_confirmation : "Making field type hidden will delete Regex Validation for document level field. Are you sure you want to proceed?",
+	delete_regex_validation_confirmation : "Making field type hidden or multiline will delete Regex Validation for document level field. Are you sure you want to proceed?",
 		
-	add_regex_failure : "Regex Validation cannot be added to hidden document level field."	
+	add_regex_failure : "Regex Validation cannot be added to hidden or multiline document level field.",
+	
+    mandatory_fields_cannot_be_blank : "Mandatory fields cannot be blank",
+
+	remote_batch_class_identifier_cannot_be_empty : "Remote batch class identifier cannot be empty",
+
+	error_while_retaining_the_batch_list_priority : "Error while retaining the batch list priority",
+
+	remote_url_cannot_be_empty : "Remote urls cannot be empty",
+
+	all_details_are_necessary : "All details are necessary",
+
+	incomplete_details : "Incomplete details",
+
+	key_is_not_allowed : "Key is not allowed",
+
+	unable_to_determine_location : "Unable to determine location",
+
+	value_overlaps_with_key : "Value overlaps with key",
+		
+	invalid_regex_pattern: "Invalid regular expression",
+	
+	cant_delete_own_role: "You can’t unmap the role: '{0}' assigned to you by the admin.",
+	
+	no_unc_folder_exists: "No Batch Classes found associated with the logged in user.",
+	
+	unsaved_data_will_lost: "All unsaved changes will be lost.Do you want to continue?"
 
 };
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -435,6 +471,8 @@ var batchClassManagementConstants_tk = {
 	
 	is_hidden : "gizli",
 	
+	is_multiline :"Çok satırlı iskonto",
+	
 	key_warning : "F11 (F5 dışında F1 tuşuna basın.)",
 	
 	delete_regex_validation : "Regex Doğrulama Sil",
@@ -443,7 +481,13 @@ var batchClassManagementConstants_tk = {
 	
 	remote_url : "uzaktan URL",
 		
-	remote_bc_identifier : "Uzaktan Toplu Sınıfı Tanımlayıcı"
+	remote_bc_identifier : "Uzaktan Toplu Sınıfı Tanımlayıcı",
+	
+	test_adv_kv : "Testi İlan KV",
+	
+	kv_page_value : "Sayfa Değeri",
+	
+	warning_title : "Uyarı"
 
 };
 
@@ -528,11 +572,39 @@ var batchClassManagementMessages_tk = {
 	delete_batch_class_field_conformation : "Bu toplu sınıf alan silmek istediğiniz emin misiniz?",
 
 	no_record_to_copy : "hiçbir kayıt kopyalamak için.",
+	
+	no_record_to_export : "Hayır rekor ihracat.",
 
 	error_upload_image : "Hata yükleme image.Please tekrar deneyin.",
 	
-	delete_regex_validation_confirmation : "Alan türü gizli belge düzeyinde alan için Regex Doğrulama silecektir. Devam etmek istediğiniz emin misiniz?",
+	delete_regex_validation_confirmation : "Böylece alan tipi gizli veya birden çok satırda sil (regex doğrulaması için belge seviyesi. Devam etmek istediğinizden emin misiniz?",
 	
-	add_regex_failure : "Regex Doğrulama gizli belge düzeyinde alanına eklenemez."	
+	add_regex_failure : "Regex Doğrulama için gizli veya birden çok satırda belge seviyesi.",	
+
+	mandatory_fields_cannot_be_blank : "Zorunlu alanlar boş olamaz",
+
+	remote_batch_class_identifier_cannot_be_empty : "Uzaktan toplu sınıf tanımlayıcısı boş olamaz",
+
+	error_while_retaining_the_batch_list_priority : "Hata toplu listesi önceliği korurken",
+
+	remote_url_cannot_be_empty : "Uzaktan url'ler boş olamaz",
+
+	all_details_are_necessary : "Tüm detaylar gerekli",
+
+	incomplete_details : "eksik bilgi",
+
+	key_is_not_allowed : "Anahtar izin verilmiyor",
+
+	unable_to_determine_location : "Konumunu belirlemek için açılamıyor",
+
+	value_overlaps_with_key : "Tuşu ile Değer örtüşmektedir",
+		
+	invalid_regex_pattern :"Geçersiz olağan ifade",
+	
+	cant_delete_own_role:"Bu rolü Eşlemesini Geri Al'ı olamaz: {0} yönetici tarafından atanmış.",
+	
+	no_unc_folder_exists: "Hayır UNC klasörü geçerli kullanıcı için var.",
+	
+	unsaved_data_will_lost: "Kaydedilmemiş tüm değişiklikler devam etmek istiyor lost.Do olacak?"
 
 };

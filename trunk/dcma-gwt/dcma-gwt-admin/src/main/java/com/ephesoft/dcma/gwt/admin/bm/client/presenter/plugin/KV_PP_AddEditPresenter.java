@@ -138,7 +138,7 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 			controller.getSelectedKvPageProcessDTO().setNoOfWords(Integer.parseInt(view.getNoOfWords()));
 			controller.getSelectedKvPageProcessDTO().setPageLevelFieldName(view.getPageLevelFieldName());
 			controller.getMainPresenter().getKvPPPropertiesPresenter().bind();
-			controller.getMainPresenter().showKVPPAddEditPluginView();
+			controller.getMainPresenter().showKVppPluginConfigAddEditView();
 			controller.getMainPresenter().getKvPPAddEditListPresenter().showKVPPDetailView();
 			controller.getBatchClass().setDirty(true);
 		}
@@ -149,7 +149,7 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 			controller.getPluginConfigDTO().removeKVPageProcessDTO(controller.getSelectedKvPageProcessDTO());
 			controller.getMainPresenter().getKvPPPropertiesPresenter().bind();
 			controller.getMainPresenter().showKVppPluginView();
-			controller.getMainPresenter().getKvPPPropertiesPresenter().showKvPPConfigView();
+			controller.getMainPresenter().getKvPPPropertiesPresenter().showKVppPluginConfigView();
 			controller.setAdd(false);
 			return;
 		}

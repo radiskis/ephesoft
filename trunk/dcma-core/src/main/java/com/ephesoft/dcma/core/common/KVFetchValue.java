@@ -35,8 +35,18 @@
 
 package com.ephesoft.dcma.core.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum KVFetchValue {
 
 	ALL, FIRST, LAST;
-
+	
+	public static List<String> valuesAsStringList() {
+		List<String> values = new ArrayList<String>();
+		for (KVFetchValue type : KVFetchValue.values()) {
+			values.add(type.toString());
+		}
+		return values;
+	}
 }

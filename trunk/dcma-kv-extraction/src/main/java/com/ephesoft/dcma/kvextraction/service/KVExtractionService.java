@@ -35,6 +35,11 @@
 
 package com.ephesoft.dcma.kvextraction.service;
 
+import java.util.List;
+
+import com.ephesoft.dcma.batch.schema.DocField;
+import com.ephesoft.dcma.batch.schema.ExtractKVParams;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
@@ -58,5 +63,16 @@ public interface KVExtractionService {
 	 * @throws DCMAException If not able to extract Key Value document level fields.
 	 */
 	void extractKVDocumentFields(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
+
+	/**
+	 * This API is called from web services to perform KV extraction on the specified HOCR.
+	 * @param updtDocList
+	 * @param hocrPages
+	 * @param params
+	 * @return
+	 * @throws DCMAException
+	 */
+	boolean extractKVDocumentFieldsFromHOCR(List<DocField> updtDocList, HocrPages hocrPages, ExtractKVParams params)
+			throws DCMAException;
 
 }

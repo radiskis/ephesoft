@@ -47,6 +47,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Field;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.RotatableImage;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
@@ -69,6 +70,7 @@ import com.ephesoft.dcma.gwt.rv.client.event.TreeRefreshEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.TreeRefreshEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.ValidationFieldChangeEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.ValidationFieldChangeEventHandler;
+import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateMessages;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -115,9 +117,10 @@ public class DocumentTree extends RVBasePanel {
 		return tempImage;
 	}
 
-	private void setDocumentSelected(final TreeItem item) {
-		if (item == null)
-			return;
+	private void setDocumentSelected(TreeItem item) {
+		if (item == null) {
+			item = docTree.getItem(0);
+		}
 		if (selectedDocItem != null && selectedDocItem.getTitle().equals(item.getTitle())) {
 			if (!item.getState()) {
 				selectedDocItem.setState(true);
@@ -201,25 +204,28 @@ public class DocumentTree extends RVBasePanel {
 		boolean isFirstThumbNail = false;
 		for (final Document docBean : docBeans) {
 
+			VerticalPanel docTitleVerticalPanel = new VerticalPanel();
 			HorizontalPanel docTitlePanel = new HorizontalPanel();
 			docTitlePanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-
+			docTitleVerticalPanel.add(docTitlePanel);
 			Label docTitleLabel = new Label();
+			Label docType = new Label();
 			docTitlePanel.add(docTitleLabel);
 
 			Label icon = new Label();
 			icon.setStyleName("no_error_icon");
 
 			docTitlePanel.add(icon);
+			docTitleVerticalPanel.add(docType);
+			final TreeItem docItem = docTree.addItem(docTitleVerticalPanel);
 
-			final TreeItem docItem = docTree.addItem(docTitlePanel);
-
-			DocumentTreeItem documentTreeItem = new DocumentTreeItem(docItem, docBean, icon, docTitleLabel);
+			String docDisplayProperty = getDocDisplayProperty(docBean, presenter.batchDTO.getDocDisplayName());
+			DocumentTreeItem documentTreeItem = new DocumentTreeItem(docItem, docBean, icon, docTitleLabel, docDisplayProperty);
 			addDocTreeItem(documentTreeItem);
 
 			docItem.setTitle(documentTreeItem.documentTitle);
 			docTitleLabel.setText(documentTreeItem.documentTitle);
-
+			docType.setText(documentTreeItem.displayName);
 			docTitleLabel.addClickHandler(new ClickHandler() {
 
 				@Override
@@ -305,6 +311,29 @@ public class DocumentTree extends RVBasePanel {
 		}
 	}
 
+	public String getDocDisplayProperty(Document document, int displayName) {
+		String docDisplayName = "";
+		switch (displayName) {
+			case 1: // display document type
+				docDisplayName = document.getType();
+				break;
+			case 2: // display document size
+				docDisplayName = document.getSize();
+				break;
+
+			case 3: // display document confidence
+				docDisplayName = String.valueOf(document.getConfidence());
+				break;
+			case 4: // display document confidence threshold
+				docDisplayName = String.valueOf(document.getConfidenceThreshold());
+				break;
+
+			default:
+
+		}
+		return docDisplayName;
+	}
+
 	public void setView(BatchDTO batchDTO) {
 		presenter.batchDTO = batchDTO;
 		createTree(true);
@@ -342,14 +371,16 @@ public class DocumentTree extends RVBasePanel {
 	private static class DocumentTreeItem {
 
 		String documentTitle;
+		String displayName;
 		Document document;
 		TreeItem treeItem;
 		Label icon;
 
 		// Label docTitleLabel;
 
-		DocumentTreeItem(TreeItem treeItem, Document document, Label icon, Label docTitleLabel) {
+		DocumentTreeItem(TreeItem treeItem, Document document, Label icon, Label docTitleLabel, String docDisplayName) {
 			this.document = document;
+			this.displayName = docDisplayName;
 			this.treeItem = treeItem;
 			this.icon = icon;
 			this.documentTitle = createDocumentTitle(document.getIdentifier());
@@ -370,6 +401,7 @@ public class DocumentTree extends RVBasePanel {
 		public boolean equals(Object obj) {
 			return ((DocumentTreeItem) obj).document.getIdentifier().equals(this.document.getIdentifier());
 		}
+
 	}
 
 	private Map<String, DocumentTreeItem> docTreeItemMap = new LinkedHashMap<String, DocumentTreeItem>();
@@ -475,7 +507,6 @@ public class DocumentTree extends RVBasePanel {
 		return pageImageMap.get(id);
 	}
 
-	// @SuppressWarnings("unused")
 	private PageImage getPageImageByTitle(String title) {
 		return pageImageMap.get(title);
 	}
@@ -588,8 +619,8 @@ public class DocumentTree extends RVBasePanel {
 			public void refresh(IconRefreshEvent iconRefreshEvent) {
 				TreeItem item = getdocTreeItemById(iconRefreshEvent.getDocument().getIdentifier()).treeItem;
 				selectedDocItem = item;
-				selectedDocItem.setState(true);
-				selectedDocItem.setSelected(true);
+				selectedDocItem.setState(false);
+				selectedDocItem.setSelected(false);
 				DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
 				selectedDocItem.addStyleName("document-style");
 				treeItem.icon.setStyleName("no_error_icon");
@@ -716,7 +747,10 @@ public class DocumentTree extends RVBasePanel {
 
 											@Override
 											public void onFailure(Throwable paramThrowable) {
-												ConfirmationDialogUtil.showConfirmationDialog("Script Execution Error", "Error");
+												if (!presenter.displayErrorMessage(paramThrowable)) {
+													ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+															.getMessageValue(ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
+												}
 												ScreenMaskUtility.unmaskScreen();
 
 											}
@@ -757,7 +791,10 @@ public class DocumentTree extends RVBasePanel {
 
 											@Override
 											public void onFailure(Throwable paramThrowable) {
-												ConfirmationDialogUtil.showConfirmationDialog("Script Execution Error", "Error");
+												if (!presenter.displayErrorMessage(paramThrowable)) {
+													ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+															.getMessageValue(ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
+												}
 												ScreenMaskUtility.unmaskScreen();
 
 											}

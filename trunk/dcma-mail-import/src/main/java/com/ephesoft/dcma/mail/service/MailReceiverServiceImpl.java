@@ -85,6 +85,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		String defaultFolderLocation = batchSchemaService.getEmailFolderPath();
 		Folder folder = null;
 		Message[] messages = null;
+		boolean isUsingImapConf = false;
 		Boolean isSSL = false;
 		String serverType = null;
 		List<CustomMessage> customMessageList = null;
@@ -98,6 +99,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 					store = connectWithPOP3SSL(configuration);
 				} else if (serverType.equalsIgnoreCase("imap")) {
 					store = connectWithIMAPSSL(configuration);
+					isUsingImapConf = true;
 				} else {
 					logger.error("Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
 					throw new DCMAApplicationException(
@@ -115,14 +117,17 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				folder = folder.getFolder(configuration.getFolderName());
 				folder.open(Folder.READ_WRITE);
 				messages = folder.getMessages();
-
+				customMessageList = new ArrayList<CustomMessage>();
 				// Populating the message object. This is done to cater lazy loading of message objects.
 				for (int messageNumber = 0; messageNumber < messages.length; messageNumber++) {
 
 					if (messages[messageNumber] != null && messages[messageNumber].getContent() != null) {
+						if (isUsingImapConf && messages[messageNumber].isSet(Flags.Flag.SEEN)) {
+							logger.info("Message " + messageNumber + " already proceesed.");
+							continue;
+						}
 						Object messagecontentObject = messages[messageNumber].getContent();
 						if (messagecontentObject instanceof Multipart) {
-							customMessageList = new ArrayList<CustomMessage>();
 							Multipart multipart = (Multipart) messages[messageNumber].getContent();
 							CustomMessage cm = new CustomMessage();
 							MailMetaData mmd = new MailMetaData();
@@ -144,8 +149,10 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 							}
 						}
 					}
-
-					messages[messageNumber].setFlag(Flags.Flag.DELETED, true);
+					messages[messageNumber].setFlag(Flags.Flag.SEEN, true);
+					if (!isUsingImapConf) {
+						messages[messageNumber].setFlag(Flags.Flag.DELETED, true);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -194,6 +201,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		Properties imapProps = new Properties();
 		imapProps.setProperty("mail.imap.socketFactory.class", MailConstants.SSL_FACTORY);
 		imapProps.setProperty("mail.imap.socketFactory.fallback", "false");
+		imapProps.setProperty("mail.imap.partialfetch", "false");
 		Integer portNumber = configuration.getPortNumber();
 
 		if (portNumber == null) {
@@ -234,18 +242,24 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 			StringBuffer sender = new StringBuffer();
 			if (toAddressArray != null && toAddressArray.length > 0) {
 				for (int i = 0; i < toAddressArray.length; i++) {
-					toAddresses.add(toAddressArray[i].toString());
+					String toAddress = toAddressArray[i].toString();
+					toAddress = getFormattedAddress(toAddress);
+					toAddresses.add(toAddress);
 				}
 			}
 			if (ccAddressArray != null && ccAddressArray.length > 0) {
 				for (int i = 0; i < ccAddressArray.length; i++) {
-					ccAddresses.add(ccAddressArray[i].toString());
+					String address = ccAddressArray[i].toString();
+					address = getFormattedAddress(address);
+					ccAddresses.add(address);
 				}
 			}
 
 			if (bccAddressArray != null && bccAddressArray.length > 0) {
 				for (int i = 0; i < bccAddressArray.length; i++) {
-					bccAddresses.add(bccAddressArray[i].toString());
+					String address = bccAddressArray[i].toString();
+					address = getFormattedAddress(address);
+					bccAddresses.add(address);
 				}
 			}
 
@@ -281,6 +295,12 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		}
 		return mailMetaData;
 
+	}
+
+	private String getFormattedAddress(String address) {
+		address = address.replace(MailConstants.OPENING_ANGULAR_BRACKET, MailConstants.OPENING_BRACKET);
+		address = address.replace(MailConstants.CLOSING_ANGULAR_BRACKET, MailConstants.CLOSING_BRACKET);
+		return address;
 	}
 
 	public String getText(Part part) throws MessagingException, IOException {
@@ -338,28 +358,34 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 			File file = new File(folderPath + File.separator + fileName);
 			file.getParentFile().mkdirs();
 			saveEmailAttachment(file, part);
-			// if (file.getName().endsWith(FileType.ZIP.getExtensionWithDot()) && importZipAttachment) {
-			// FileUtils.unzipFile(file, folderPath);
-			// }
 		}
 	}
 
 	protected int saveEmailAttachment(File saveFile, Part part) throws Exception {
 
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(saveFile));
-
-		byte[] buff = new byte[2048];
-		InputStream is = part.getInputStream();
+		BufferedOutputStream bos = null;
+		InputStream is = null;
 		int ret = 0, count = 0;
-		while ((ret = is.read(buff)) > 0) {
-			bos.write(buff, 0, ret);
-			count += ret;
-		}
-		if (bos != null) {
-			bos.close();
-		}
-		if (is != null) {
-			is.close();
+		try {
+			bos = new BufferedOutputStream(new FileOutputStream(saveFile));
+
+			byte[] buff = new byte[2048];
+			is = part.getInputStream();
+			while ((ret = is.read(buff)) > 0) {
+				bos.write(buff, 0, ret);
+				count += ret;
+			}
+		} finally {
+			try {
+				if (bos != null) {
+					bos.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			} catch (IOException ioe) {
+				logger.error("Error while closing the stream.", ioe);
+			}
 		}
 		return count;
 	}

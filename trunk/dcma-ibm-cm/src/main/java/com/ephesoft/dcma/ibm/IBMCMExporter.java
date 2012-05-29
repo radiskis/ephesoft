@@ -1,38 +1,37 @@
-/*********************************************************************************
-* Ephesoft is a Intelligent Document Capture and Mailroom Automation program
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc.
-*
-* This program is free software; you can redistribute it and/or modify it under
-* the terms of the GNU Affero General Public License version 3 as published by the
-* Free Software Foundation with the addition of the following permission added
-* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK
-* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY
-* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
-* details.
-*
-* You should have received a copy of the GNU Affero General Public License along with
-* this program; if not, see http://www.gnu.org/licenses or write to the Free
-* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-* 02110-1301 USA.
-*
-* You can contact Ephesoft, Inc. headquarters at 111 Academy Way,
-* Irvine, CA 92617, USA. or at email address info@ephesoft.com.
-*
-* The interactive user interfaces in modified source and object code versions
-* of this program must display Appropriate Legal Notices, as required under
-* Section 5 of the GNU Affero General Public License version 3.
-*
-* In accordance with Section 7(b) of the GNU Affero General Public License version 3,
-* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo.
-* If the display of the logo is not reasonably feasible for
-* technical reasons, the Appropriate Legal Notices must display the words
-* "Powered by Ephesoft".
-********************************************************************************/
-
+/********************************************************************************* 
+* Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* 
+* This program is free software; you can redistribute it and/or modify it under 
+* the terms of the GNU Affero General Public License version 3 as published by the 
+* Free Software Foundation with the addition of the following permission added 
+* to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED WORK 
+* IN WHICH THE COPYRIGHT IS OWNED BY EPHESOFT, EPHESOFT DISCLAIMS THE WARRANTY 
+* OF NON INFRINGEMENT OF THIRD PARTY RIGHTS. 
+* 
+* This program is distributed in the hope that it will be useful, but WITHOUT 
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+* FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more 
+* details. 
+* 
+* You should have received a copy of the GNU Affero General Public License along with 
+* this program; if not, see http://www.gnu.org/licenses or write to the Free 
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+* 02110-1301 USA. 
+* 
+* You can contact Ephesoft, Inc. headquarters at 111 Academy Way, 
+* Irvine, CA 92617, USA. or at email address info@ephesoft.com. 
+* 
+* The interactive user interfaces in modified source and object code versions 
+* of this program must display Appropriate Legal Notices, as required under 
+* Section 5 of the GNU Affero General Public License version 3. 
+* 
+* In accordance with Section 7(b) of the GNU Affero General Public License version 3, 
+* these Appropriate Legal Notices must retain the display of the "Ephesoft" logo. 
+* If the display of the logo is not reasonably feasible for 
+* technical reasons, the Appropriate Legal Notices must display the words 
+* "Powered by Ephesoft". 
+********************************************************************************/ 
 
 package com.ephesoft.dcma.ibm;
 
@@ -87,7 +86,7 @@ import com.ephesoft.dcma.util.XMLUtil;
 
 /**
  * This Class is used to export the XML , DAT and CTL file in IBM content management accepted format.
- *
+ * 
  * @author Ephesoft
  * @version 1.0
  */
@@ -198,7 +197,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * Getter for supplyingSystem.
-	 *
+	 * 
 	 * @return {@link String}
 	 */
 
@@ -208,7 +207,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * Setter for supplyingSystem.
-	 *
+	 * 
 	 * @param supplyingSystem
 	 */
 	public final void setSupplyingSystem(final String supplyingSystem) {
@@ -245,7 +244,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API update the batch.xml.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 */
 	private void updateBatch(final String batchInstanceID) {
@@ -267,7 +266,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API retrieving the file location, calculating the file size and update it to batch.xml.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param batch {@link Batch}
 	 * @param document {@link Document}
@@ -295,7 +294,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API calculating the document size of mutipage pdf and returns the sum of all multipage pdf document.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @return totalDocSize
 	 */
@@ -321,7 +320,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This method transforms the batch.xml to another XML acceptable by IBM Content Management.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @throws JAXBException
 	 * @throws DCMAApplicationException
@@ -350,7 +349,7 @@ public class IBMCMExporter implements ICommonConstants {
 			}
 
 			LOGGER.info("Properties Initialized Successfully");
-
+			
 			boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
 			LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
 
@@ -432,7 +431,7 @@ public class IBMCMExporter implements ICommonConstants {
 							cmodAppGroupLocal = this.cmodAppGroup;
 							cmodAppLocal = this.cmodApp;
 						}
-
+						
 						// Parsing parameter to XML
 						parsingParamterToXML(batchInstanceID, transformer, cmodAppGroupLocal, cmodAppLocal);
 						// Setting parameter for total document size for updating its value in XML
@@ -442,7 +441,7 @@ public class IBMCMExporter implements ICommonConstants {
 						// Setting parameter for DAT file name for updating its value in XML.
 						transformer.setParameter(IBMCMConstant.DAT_FILE_NAME.getId(), new File(datFile).getName());
 						transformer.setParameter(IBMCMConstant.SUPLLYING_SYSTEM.getId(), this.getSupplyingSystem());
-
+						
 						if (isZipSwitchOn) {
 							if (FileUtils.isZipFileExists(sourceXMLPath)) {
 								in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
@@ -460,8 +459,8 @@ public class IBMCMExporter implements ICommonConstants {
 								in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
 								transformer.transform(new StreamSource(in), new StreamResult(new FileOutputStream(targetXmlPath)));
 							}
-						}
-
+						}									
+						
 						updateDocumentOffsetValue(batchInstanceID, targetXmlPath);
 					} else {
 						LOGGER.error("Transformer is null due to Invalid xsl file.");
@@ -500,7 +499,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API is used to parsing parameter to ibmCMTransform.xsl file.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param transformer {@link Transformer}
 	 */
@@ -545,7 +544,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API created the export folder if it not exists else it will created the export folder.
-	 *
+	 * 
 	 * @param exportFolder {@link String}
 	 * @return
 	 */
@@ -563,7 +562,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API provides the target file path to be created.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param exportFolder {@link String}
 	 * @param batch {@link Batch}
@@ -601,7 +600,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API fetching the document list of mutipage pdf.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @return totalDocSize
 	 */
@@ -629,7 +628,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API for generating DAT file.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param exportFolder {@link String}
 	 * @param batch {@link Batch}
@@ -685,7 +684,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API for generating CTL file.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param exportFolder {@link String}
 	 * @param batch {@link Batch}
@@ -716,7 +715,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API is used to update the offset value in XML file generated for IBM Content Management.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param filePath {@link String}
 	 * @throws DCMAApplicationException if any exception or error occur
@@ -766,7 +765,7 @@ public class IBMCMExporter implements ICommonConstants {
 
 	/**
 	 * This API is used to get the offset value for the specific document identifier.
-	 *
+	 * 
 	 * @param batchInstanceID {@link String}
 	 * @param docID {@link String}
 	 * @return offset
@@ -791,7 +790,7 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 		return offset;
 	}
-
+	
 	/**
 	 * API for getting subpoena loan number on the basis of document list.
 	 * @param documentList

@@ -59,6 +59,11 @@ import com.google.gwt.event.shared.HandlerManager;
 
 public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<BatchClassBreadCrumbView> {
 
+	private static final String OPENING_BRACKET = " [";
+	private static final String CLOSING_BRACKET = "] ";
+	public static final String BATCH_CLASS_LISTING = ViewType.BATCH_CLASS_LISTING.getValue();
+	public static final String CONFIGURE = ViewType.KV_PP_PLUGIN_CONFIG.getValue();
+
 	public BatchClassBreadCrumbPresenter(BatchClassManagementController controller, BatchClassBreadCrumbView view) {
 		super(controller, view);
 	}
@@ -73,9 +78,15 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		// event handling should be done here.
 	}
 
+	public void createBreadCrumb() {
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null));
+	}
+
 	public void createBreadCrumb(BatchClassDTO batchClassDTO) {
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + " ["
-				+ batchClassDTO.getIdentifier() + "]", batchClassDTO.getIdentifier()));
+
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + OPENING_BRACKET
+						+ batchClassDTO.getIdentifier() + CLOSING_BRACKET, batchClassDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(FunctionKeyDTO functionKeyDTO) {
@@ -86,10 +97,12 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (functionKeyName == null || functionKeyName.isEmpty()) {
 			functionKeyName = "";
 		}
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.FUNCTION_KEY, functionKeyName, documentTypeDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.FUNCTION_KEY, functionKeyName,
+						documentTypeDTO.getIdentifier()));
 
 	}
 
@@ -100,11 +113,12 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (kvExtractionDTO.isNew()) {
 			KVName = AdminConstants.NEW_KV_EXTRACTION;
 		}
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + " ["
-				+ batchClassDTO.getIdentifier() + "]", batchClassDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD,
-						kvExtractionDTO.getFieldTypeDTO().getName(), kvExtractionDTO.getFieldTypeDTO().getIdentifier()),
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + OPENING_BRACKET
+						+ batchClassDTO.getIdentifier() + CLOSING_BRACKET, batchClassDTO.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD, kvExtractionDTO
+						.getFieldTypeDTO().getName(), kvExtractionDTO.getFieldTypeDTO().getIdentifier()),
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_EXTRACTION, KVName, kvExtractionDTO.getIdentifier()));
 	}
 
@@ -115,19 +129,21 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (regexDTO.isNew()) {
 			name = AdminConstants.NEW_REGEX;
 		}
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + " ["
-				+ batchClassDTO.getIdentifier() + "]", batchClassDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD, regexDTO.getFieldTypeDTO().getName(),
-						regexDTO.getFieldTypeDTO().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.REGEX, name,
-						regexDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassDTO.getDescription() + OPENING_BRACKET
+						+ batchClassDTO.getIdentifier() + CLOSING_BRACKET, batchClassDTO.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD, regexDTO
+						.getFieldTypeDTO().getName(), regexDTO.getFieldTypeDTO().getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.REGEX, name, regexDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(BatchClassModuleDTO moduleDTO) {
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, moduleDTO.getBatchClass().getDescription()
-				+ " [" + moduleDTO.getBatchClass().getIdentifier() + "]", moduleDTO.getBatchClass().getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, moduleDTO.getModule().getName(), moduleDTO
-						.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, moduleDTO.getBatchClass().getDescription()
+						+ OPENING_BRACKET + moduleDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET, moduleDTO.getBatchClass()
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, moduleDTO.getModule()
+						.getName(), moduleDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(DocumentTypeDTO documentTypeDTO) {
@@ -135,12 +151,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (documentTypeName == null || documentTypeName.length() == 0) {
 			documentTypeName = AdminConstants.NEW_DOCUMENT;
 		}
-		view
-				.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, documentTypeDTO.getBatchClass()
-						.getDescription()
-						+ " [" + documentTypeDTO.getBatchClass().getIdentifier() + "]", documentTypeDTO.getBatchClass()
-						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeName,
-						documentTypeDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, documentTypeDTO.getBatchClass().getDescription()
+						+ OPENING_BRACKET + documentTypeDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET, documentTypeDTO
+						.getBatchClass().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE,
+						documentTypeName, documentTypeDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(EmailConfigurationDTO emailConfigurationDTO) {
@@ -148,11 +163,12 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (emailName == null || emailName.length() == 0) {
 			emailName = AdminConstants.NEW_EMAIL;
 		}
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, emailConfigurationDTO.getBatchClass()
-				.getDescription()
-				+ " [" + emailConfigurationDTO.getBatchClass().getIdentifier() + "]", emailConfigurationDTO.getBatchClass()
-				.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.EMAIL, emailName, emailConfigurationDTO
-				.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, emailConfigurationDTO.getBatchClass()
+						.getDescription()
+						+ OPENING_BRACKET + emailConfigurationDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET,
+						emailConfigurationDTO.getBatchClass().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.EMAIL, emailName, emailConfigurationDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(BatchClassFieldDTO batchClassFieldDTO) {
@@ -160,21 +176,23 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		if (name == null || name.length() == 0) {
 			name = LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE);
 		}
-		view.create(
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClassFieldDTO.getBatchClass().getDescription()
-						+ " [" + batchClassFieldDTO.getBatchClass().getIdentifier() + "]", batchClassFieldDTO.getBatchClass()
-						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_FIELD, name,
-						batchClassFieldDTO.getIdentifier()));
+						+ OPENING_BRACKET + batchClassFieldDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET, batchClassFieldDTO
+						.getBatchClass().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_FIELD,
+						name, batchClassFieldDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(BatchClassPluginDTO batchClassPluginDTO) {
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.MODULE, module.getModule().getName(), module.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(), batchClassPluginDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, module.getModule().getName(), module.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(),
+						batchClassPluginDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
@@ -182,13 +200,15 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.MODULE, module.getModule().getName(), module.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.FUZZY_DB, batchClassPluginDTO.getPlugin().getPluginName(), batchClassPluginDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DATABASE_MAPPING, AdminConstants.DATABASE_MAPPING,
-						batchClassDynamicPluginConfigDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-						ViewType.TABLE_MAPPING, AdminConstants.TABLE_MAPPING, batchClass.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, module.getModule().getName(), module.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.FUZZY_DB, batchClassPluginDTO.getPlugin().getPluginName(),
+						batchClassPluginDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DATABASE_MAPPING,
+						AdminConstants.DATABASE_MAPPING, batchClassDynamicPluginConfigDTO.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_MAPPING, AdminConstants.TABLE_MAPPING, batchClass
+						.getIdentifier()));
 	}
 
 	public void createBreadCrumbForDocumentType() {
@@ -196,12 +216,13 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.MODULE, module.getModule().getName(), module.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.FUZZY_DB, batchClassPluginDTO.getPlugin().getPluginName(), batchClassPluginDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DATABASE_MAPPING, AdminConstants.DATABASE_MAPPING, batchClass
-						.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, module.getModule().getName(), module.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.FUZZY_DB, batchClassPluginDTO.getPlugin().getPluginName(),
+						batchClassPluginDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DATABASE_MAPPING,
+						AdminConstants.DATABASE_MAPPING, batchClass.getIdentifier()));
 	}
 
 	public void createBreadCrumb(FieldTypeDTO fieldTypeDTO) {
@@ -212,11 +233,12 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 			fieldTypeName = AdminConstants.NEW_FIELD_TYPE;
 		}
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD, fieldTypeName, documentTypeDTO
-						.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_LEVEL_FIELD, fieldTypeName,
+						documentTypeDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(TableInfoDTO tableInfoDTO) {
@@ -227,10 +249,12 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 			tableInfoName = AdminConstants.NEW_TABLE_INFO_TYPE;
 		}
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_INFO, tableInfoName, documentTypeDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_INFO, tableInfoName,
+						documentTypeDTO.getIdentifier()));
 	}
 
 	public void createBreadCrumb(TableColumnInfoDTO tableColumnInfoDTO) {
@@ -243,12 +267,14 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 			tableColumnInfoName = AdminConstants.NEW_TABLE_COLUMN_INFO_TYPE;
 		}
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_INFO, tableColumnInfoDTO.getTableInfoDTO().getName(),
-						tableColumnInfoDTO.getTableInfoDTO().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-						ViewType.TABLE_COLUMN_INFO, tableColumnInfoName, tableColumnInfoDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.DOCUMENT_TYPE, documentTypeDTO.getName(), documentTypeDTO
+						.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_INFO, tableColumnInfoDTO
+						.getTableInfoDTO().getName(), tableColumnInfoDTO.getTableInfoDTO().getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.TABLE_COLUMN_INFO, tableColumnInfoName, tableColumnInfoDTO
+						.getIdentifier()));
 	}
 
 	public void createBreadCrumbForKVPPPlugin(BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
@@ -256,11 +282,49 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
 
-		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + " ["
-				+ batchClass.getIdentifier() + "]", batchClass.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.MODULE, module.getModule().getName(), module.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
-				ViewType.KV_PP_PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(), batchClassPluginDTO.getIdentifier()),
-				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_PAGE_PROCESS, batchClassPluginConfigDTO.getName(),
-						batchClassPluginConfigDTO.getIdentifier()));
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, module.getModule().getName(), module.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_PP_PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(),
+						batchClassPluginDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.KV_PP_PLUGIN_CONFIG, CONFIGURE, null), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.KV_PP_PLUGIN_CONFIG_ADD_EDIT, batchClassPluginConfigDTO.getName(), batchClassPluginConfigDTO
+								.getIdentifier()));
+	}
+
+	public void createBreadCrumbForKVPPPluginConfig(BatchClassPluginDTO batchClassPluginDTO) {
+		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
+		BatchClassDTO batchClass = module.getBatchClass();
+
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, module.getModule().getName(), module.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_PP_PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(),
+						batchClassPluginDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.KV_PP_PLUGIN_CONFIG, CONFIGURE, null));
+	}
+
+	public void createBreadCrumbForModules() {
+		BatchClassDTO batchClass = controller.getBatchClass();
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.CONFIGURE_MODULE, ViewType.CONFIGURE_MODULE.getValue(),
+						batchClass.getIdentifier()));
+
+	}
+
+	public void createBreadCrumbForPluginsSelect(String moduleIdentifier) {
+		BatchClassDTO batchClass = controller.getBatchClass();
+		String moduleName = controller.getBatchClass().getModuleByIdentifier(moduleIdentifier).getModule().getName();
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
+						+ batchClass.getIdentifier() + CLOSING_BRACKET, batchClass.getIdentifier()),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.MODULE, moduleName, moduleIdentifier),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.CONFIGURE_PLUGIN, ViewType.CONFIGURE_PLUGIN.getValue(),
+						batchClass.getIdentifier()));
+
 	}
 }

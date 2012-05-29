@@ -62,6 +62,7 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PointCoordinate;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.ephesoft.dcma.gwt.rv.client.ReviewValidateDocServiceAsync;
 import com.ephesoft.dcma.gwt.rv.client.event.IconRefreshEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.RVKeyDownEvent;
@@ -83,9 +84,14 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ReviewValidatePresenter implements Presenter {
 
+	private static final String ERROR_TYPE_1 = "1";
+	private static final String ERROR_TYPE_2 = "2";
+	private static final String ERROR_TYPE_3 = "3";
+	private static final String ERROR_TYPE_4 = "4";
 	private static final String UNKNOWN_DOC_TYPE = "Unknown";
 	private static final int RADIX_BASE = 10;
 	private static final String DOCUMENT = "DOC";
+	private static final String EMPTY = "";
 	public BatchDTO batchDTO;
 	public Document document;
 	public Page page;
@@ -111,7 +117,7 @@ public class ReviewValidatePresenter implements Presenter {
 	private PreImageLoadingPresenter preImageLoadingPresenter = null;
 
 	private Integer virtualUpdateCounter = 0;
-	
+
 	public Integer getVirtualUpdateCounter() {
 		return virtualUpdateCounter++;
 	}
@@ -135,8 +141,9 @@ public class ReviewValidatePresenter implements Presenter {
 
 	@Override
 	public void go(HasWidgets container) {
-		final String batchId = com.google.gwt.user.client.Window.Location.getParameter("batch_id");
+		final String batchId = com.google.gwt.user.client.Window.Location.getParameter(ReviewValidateConstants.BATCH_ID);
 		ScreenMaskUtility.maskScreen();
+		setZoomCount();
 		if (batchId == null) {
 			getHighestPriorityBatch();
 			batchSelected = true;
@@ -150,7 +157,7 @@ public class ReviewValidatePresenter implements Presenter {
 					if (!(batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_REVIEW) || batchInstanceStatus
 							.equals(BatchInstanceStatus.READY_FOR_VALIDATION))) {
 						ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary
-								.get().getMessageValue(ReviewValidateMessages.error_batch_status, batchId, batchInstanceStatus));
+								.get().getMessageValue(ReviewValidateMessages.ERROR_BATCH_STATUS, batchId, batchInstanceStatus));
 						confirmationDialog.okButton.addClickHandler(new ClickHandler() {
 
 							@Override
@@ -161,7 +168,7 @@ public class ReviewValidatePresenter implements Presenter {
 						});
 						// return;
 					}
-					
+
 					final String batchID2 = batchDTO.getBatch().getBatchInstanceIdentifier();
 					rpcService.acquireLock(batchID2, new AsyncCallback<Void>() {
 
@@ -180,32 +187,45 @@ public class ReviewValidatePresenter implements Presenter {
 
 						@Override
 						public void onSuccess(Void arg0) {
-							ReviewValidatePresenter.this.batchDTO = batchDTO;
-							ReviewValidatePresenter.this.view.initializeWidget();
-							realUpdateInterval = batchDTO.getRealUpdateInterval();
-							int preloadedImageCount = batchDTO.getPreloadedImageCount();
-							// pre loading images
-							if (preImageLoadingPresenter != null) {
-								preImageLoadingPresenter.loadInvalidDocuments(batchId, preloadedImageCount);
-							}
-							ScreenMaskUtility.unmaskScreen();
+							onLockAcquired(batchDTO);
 
 						}
-
 					});
-					
-					
+
 				}
 
 				@Override
 				public void onFailure(Throwable throwable) {
 					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							ReviewValidateMessages.error_ret_specific_batch, batchId));
-					moveToLandingPage();
+					if (!displayErrorMessage(throwable)) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								ReviewValidateMessages.error_ret_specific_batch, batchId)).okButton
+								.addClickHandler(new ClickHandler() {
+
+									@Override
+									public void onClick(ClickEvent arg0) {
+										moveToLandingPage();
+									}
+								});
+					}
 				}
 			});
 		}
+	}
+
+	private void onLockAcquired(final BatchDTO batchDTO) {
+		ReviewValidatePresenter.this.batchDTO = batchDTO;
+		ReviewValidatePresenter.this.view.initializeWidget();
+		realUpdateInterval = batchDTO.getRealUpdateInterval();
+		int preloadedImageCount = batchDTO.getPreloadedImageCount();
+		Batch batch = batchDTO.getBatch();
+		if (batch != null) {
+			if (preImageLoadingPresenter != null) {
+				preImageLoadingPresenter.loadInvalidDocuments(batch.getBatchInstanceIdentifier(), preloadedImageCount);
+			}
+			setTitleOfTab(batch.getBatchInstanceIdentifier());
+		}
+		ScreenMaskUtility.unmaskScreen();
 	}
 
 	private void getHighestPriorityBatch() {
@@ -213,33 +233,46 @@ public class ReviewValidatePresenter implements Presenter {
 
 			@Override
 			public void onSuccess(final BatchDTO batchDTO) {
-				final String batchID2 = batchDTO.getBatch().getBatchInstanceIdentifier();
-				rpcService.acquireLock(batchID2, new AsyncCallback<Void>() {
-
-					@Override
-					public void onFailure(Throwable arg0) {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.error_batch_already_locked, batchDTO.getBatch().getBatchInstanceIdentifier()));
-
-					}
-
-					@Override
-					public void onSuccess(Void arg0) {
-						ReviewValidatePresenter.this.batchDTO = batchDTO;
-						ReviewValidatePresenter.this.view.initializeWidget();
-						ScreenMaskUtility.unmaskScreen();
-					}
-				});
+			onLockAcquired(batchDTO);
 			}
 
 			@Override
 			public void onFailure(Throwable throwable) {
 				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.error_ret_batch));
-				moveToLandingPage();
+                String errorMessage = throwable.getLocalizedMessage();
+				if (errorMessage.contains(ReviewValidateConstants.ERROR_TYPE_5)) {
+					int indexOfError = errorMessage.indexOf(ReviewValidateConstants.ERROR_TYPE_5);
+					int errorMessageLength = ReviewValidateConstants.ERROR_TYPE_5.length();
+					String batchID = errorMessage.substring(indexOfError + errorMessageLength + 1);
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.error_batch_already_locked, batchID));
+
+				} else if (!displayErrorMessage(throwable)) {
+					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+							.getMessageValue(ReviewValidateMessages.error_ret_batch), true);
+					confirmationDialog.addDialogListener(new DialogListener() {
+
+						@Override
+						public void onOkClick() {
+							moveToLandingPage();
+						}
+
+						@Override
+						public void onCancelClick() {
+						}
+					});
+
+				}
 			}
 		});
+	}
+
+	public void setTitleOfTab(String batchInstanceIdentifier) {
+		if (batchInstanceIdentifier != null) {
+			String defaultTitle = LocaleDictionary.get().getConstantValue(ReviewValidateConstants.rv_title);
+			String newTitle = defaultTitle + ReviewValidateConstants.SPACE + batchInstanceIdentifier;
+			Window.setTitle(newTitle);
+		}
 	}
 
 	public ReviewValidateView getView() {
@@ -387,34 +420,30 @@ public class ReviewValidatePresenter implements Presenter {
 
 			@Override
 			public void onTabSelection(final TabSelectionEvent event) {
-				rpcService.saveBatch(batchDTO.getBatch(), new AsyncCallback<Void>() {
+				if (event.getSaveState()) {
 
-					@Override
-					public void onFailure(Throwable arg0) {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.error_topPanel_ok_failure, batchDTO.getBatch().getBatchInstanceIdentifier(),
-								arg0.getMessage()));
-					}
+					rpcService.saveBatch(batchDTO.getBatch(), new AsyncCallback<Void>() {
 
-					@Override
-					public void onSuccess(Void arg0) {
-						rpcService.cleanup(new AsyncCallback<Void>() {
-
-							@Override
-							public void onFailure(Throwable arg0) {
+						@Override
+						public void onFailure(Throwable arg0) {
+							if (!displayErrorMessage(arg0)) {
 								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 										ReviewValidateMessages.error_topPanel_ok_failure,
-										batchDTO.getBatch().getBatchInstanceIdentifier()));
+										batchDTO.getBatch().getBatchInstanceIdentifier(), arg0.getMessage()));
 							}
+						}
 
-							@Override
-							public void onSuccess(Void arg0) {
-								String htmlPattern = event.getHtmlPattern();
-								moveToTab(htmlPattern);
-							}
-						});
-					}
-				});
+						@Override
+						public void onSuccess(Void arg0) {
+							String htmlPattern = event.getHtmlPattern();
+							moveToTab(htmlPattern);
+						}
+					});
+
+				} else {
+					String htmlPattern = event.getHtmlPattern();
+					moveToTab(htmlPattern);
+				}
 			}
 		});
 	}
@@ -431,6 +460,7 @@ public class ReviewValidatePresenter implements Presenter {
 			@Override
 			public void onFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
+				displayErrorMessage(arg0);
 			}
 
 			@Override
@@ -454,16 +484,48 @@ public class ReviewValidatePresenter implements Presenter {
 
 	}
 
-	private void moveToTab(String htmlPattern) {
+	public void moveToTab(final String htmlPattern) {
+		if (batchDTO != null && batchDTO.getBatch() != null) {
+			rpcService.cleanUpCurrentBatch(batchDTO.getBatch().getBatchInstanceIdentifier(), new AsyncCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable arg0) {
+					moveToUrl(htmlPattern);
+				}
+
+				@Override
+				public void onSuccess(Void arg0) {
+					moveToUrl(htmlPattern);
+				}
+			});
+		} else {
+			moveToUrl(htmlPattern);
+		}
+	}
+
+	private void moveToUrl(final String htmlPattern) {
 		String href = Window.Location.getHref();
 		String baseUrl = href.substring(0, href.lastIndexOf('/'));
 		Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR + htmlPattern);
 	}
 
 	private void moveToLandingPage() {
-		String href = Window.Location.getHref();
-		String baseUrl = href.substring(0, href.lastIndexOf('/'));
-		Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR + ReviewValidateConstants.BATCH_LIST_HTML);
+		if (batchDTO != null && batchDTO.getBatch() != null) {
+			rpcService.cleanUpCurrentBatch(batchDTO.getBatch().getBatchInstanceIdentifier(), new AsyncCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable arg0) {
+					moveToUrl(ReviewValidateConstants.BATCH_LIST_HTML);
+				}
+
+				@Override
+				public void onSuccess(Void arg0) {
+					moveToUrl(ReviewValidateConstants.BATCH_LIST_HTML);
+				}
+			});
+		} else {
+			moveToUrl(ReviewValidateConstants.BATCH_LIST_HTML);
+		}
 	}
 
 	public void onTableViewButtonClicked() {
@@ -522,7 +584,7 @@ public class ReviewValidatePresenter implements Presenter {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
 								ReviewValidateConstants.UNABLE_TO_FIND), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
+								ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 					}
 
 					@Override
@@ -551,7 +613,7 @@ public class ReviewValidatePresenter implements Presenter {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
 								ReviewValidateConstants.UNABLE_TO_FIND), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
+								ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 
 					}
 
@@ -571,8 +633,9 @@ public class ReviewValidatePresenter implements Presenter {
 	}
 
 	public void setCustomizedShortcutPanels() {
-		if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)
-				|| batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+		if (document != null
+				&& (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW) || batchDTO
+						.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION))) {
 			ScreenMaskUtility.maskScreen();
 			rpcService.getFunctionKeyDTOs(document.getType(), batchDTO.getBatch().getBatchInstanceIdentifier(),
 					new AsyncCallback<List<FunctionKeyDTO>>() {
@@ -582,7 +645,7 @@ public class ReviewValidatePresenter implements Presenter {
 							ScreenMaskUtility.unmaskScreen();
 							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
 									ReviewValidateConstants.UNABLE_TO_FIND), LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.ERROR_MESSAGE));
+									ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 						}
 
 						@Override
@@ -672,71 +735,107 @@ public class ReviewValidatePresenter implements Presenter {
 	}
 
 	public void performOperationsOnCtrlSPress() {
-		if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)
-				&& batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
-			ScreenMaskUtility.maskScreen("Executing Script and Saving....");
-			String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
-			rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
+		if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					ReviewValidateMessages.SELECT_DOC_TYPE)).okButton.addClickHandler(new ClickHandler() {
 
 				@Override
-				public void onFailure(Throwable arg0) {
-					ScreenMaskUtility.unmaskScreen();
-					setControlSorQPressed(false);
-					ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
-							ReviewValidateMessages.UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE), LocaleDictionary.get().getMessageValue(
-							ReviewValidateMessages.ERROR_MESSAGE));
-				}
-
-				@Override
-				public void onSuccess(final BatchDTO arg0) {
-					batchDTO = arg0;
-					List<Document> documents = arg0.getBatch().getDocuments().getDocument();
-					for (final Document doc : documents) {
-						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
-							document = doc;
-							break;
-						}
-					}
-					validateBatch(true);
+				public void onClick(ClickEvent arg0) {
+					setFocus();
 				}
 			});
 		} else {
-			ScreenMaskUtility.maskScreen("Saving...");
-			validateBatch(false);
+			if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+				view.getRvPanel().getValidatePanel().setForceReviewDoneForDocFieldWidgets();
+				if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)) {
+					ScreenMaskUtility.maskScreen("Executing Script and Saving....");
+					String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
+					rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+							ScreenMaskUtility.unmaskScreen();
+							setControlSorQPressed(false);
+							if (!displayErrorMessage(arg0)) {
+								ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
+										ReviewValidateMessages.UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE), LocaleDictionary.get()
+										.getMessageValue(ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
+							}
+						}
+
+						@Override
+						public void onSuccess(final BatchDTO arg0) {
+							batchDTO = arg0;
+							List<Document> documents = arg0.getBatch().getDocuments().getDocument();
+							for (final Document doc : documents) {
+								if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
+									document = doc;
+									break;
+								}
+							}
+							validateBatch(true);
+						}
+					});
+				} else {
+				ScreenMaskUtility.maskScreen("Saving...");
+				validateBatch(false);
+				}
+			} else {
+				ScreenMaskUtility.maskScreen("Saving...");
+				validateBatch(false);
+			}
 		}
 	}
 
 	public void performOperationsOnCtrlQPress() {
-		if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)
-				&& batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
-			ScreenMaskUtility.maskScreen("Executing Script and Saving....");
-			String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
-			rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
+		if (document.getType().equals(UNKNOWN_DOC_TYPE)) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					ReviewValidateMessages.SELECT_DOC_TYPE)).okButton.addClickHandler(new ClickHandler() {
 
 				@Override
-				public void onFailure(Throwable arg0) {
-					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
-							ReviewValidateMessages.UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE), LocaleDictionary.get().getMessageValue(
-							ReviewValidateMessages.ERROR_MESSAGE));
-				}
-
-				@Override
-				public void onSuccess(final BatchDTO arg0) {
-					batchDTO = arg0;
-					List<Document> documents = arg0.getBatch().getDocuments().getDocument();
-					for (final Document doc : documents) {
-						if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
-							document = doc;
-							break;
-						}
-					}
-					reviewBatch(true);
+				public void onClick(ClickEvent arg0) {
+					setFocus();
 				}
 			});
 		} else {
-			ScreenMaskUtility.maskScreen("Saving...");
-			reviewBatch(false);
+			if (batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+				view.getRvPanel().getValidatePanel().setForceReviewDoneForDocFieldWidgets();
+				if (batchDTO.getFieldValueChangeScriptSwitchState().equals(ReviewValidateConstants.ON)) {
+					ScreenMaskUtility.maskScreen("Executing Script and Saving....");
+					String fieldName = view.getRvPanel().getValidatePanel().getCurrentDocFieldWidgetName();
+					rpcService.executeScriptOnFieldChange(batchDTO.getBatch(), document, fieldName, new AsyncCallback<BatchDTO>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+							ScreenMaskUtility.unmaskScreen();
+							if (!displayErrorMessage(arg0)) {
+								ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
+										ReviewValidateMessages.UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE), LocaleDictionary.get()
+										.getMessageValue(ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
+							}
+						}
+
+						@Override
+						public void onSuccess(final BatchDTO arg0) {
+							batchDTO = arg0;
+							List<Document> documents = arg0.getBatch().getDocuments().getDocument();
+							for (final Document doc : documents) {
+								if (doc.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
+									document = doc;
+									break;
+								}
+							}
+							reviewBatch(true);
+						}
+					});
+				} else {
+				ScreenMaskUtility.maskScreen("Saving...");
+				reviewBatch(false);
+				}
+			} else {
+				ScreenMaskUtility.maskScreen("Saving...");
+				reviewBatch(false);
+			}
 		}
 	}
 
@@ -751,7 +850,7 @@ public class ReviewValidatePresenter implements Presenter {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								ReviewValidateMessages.UNABLE_TO_FETCH_DATA), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
+								ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 						getView().getTableExtractionView().undoManualExtractionChanges();
 					}
 
@@ -778,7 +877,7 @@ public class ReviewValidatePresenter implements Presenter {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								ReviewValidateMessages.UNABLE_TO_FETCH_DATA), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
+								ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 						getView().getTableExtractionView().undoManualExtractionChanges();
 					}
 
@@ -832,7 +931,7 @@ public class ReviewValidatePresenter implements Presenter {
 			public void onFailure(Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						ReviewValidateMessages.UNABLE_TO_DISPLAY_EXTERNAL_APP), LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.ERROR_MESSAGE));
+						ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 			}
 
 			@Override
@@ -843,14 +942,17 @@ public class ReviewValidatePresenter implements Presenter {
 					public void onFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								ReviewValidateMessages.UNABLE_TO_DISPLAY_EXTERNAL_APP), LocaleDictionary.get().getMessageValue(
-								ReviewValidateMessages.ERROR_MESSAGE));
+								ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 
 					}
 
 					@Override
 					public void onSuccess(String securityTokenString) {
 						StringBuffer newUrl = new StringBuffer();
-						String documentId = document.getIdentifier();
+						String documentId = EMPTY;
+						if (document != null) {
+							documentId = document.getIdentifier();
+						}
 						newUrl.append(htmlPattern);
 						if (htmlPattern.indexOf("?") != -1) {
 							newUrl.append("&document_id=").append(documentId);
@@ -863,7 +965,7 @@ public class ReviewValidatePresenter implements Presenter {
 						} else {
 							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 									ReviewValidateMessages.UNABLE_TO_CREATE_AUTHENTICATION_FOR_EXTERNAL_APP), LocaleDictionary.get()
-									.getMessageValue(ReviewValidateMessages.ERROR_MESSAGE));
+									.getMessageValue(ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
 						}
 						displayExternalApp(newUrl.toString(), title);
 					}
@@ -880,9 +982,12 @@ public class ReviewValidatePresenter implements Presenter {
 			@Override
 			public void onFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.UNABLE_TO_FETCH_BATCH_XML), LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.ERROR_MESSAGE));
+				if (!displayErrorMessage(arg0)) {
+					ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.UNABLE_TO_FETCH_BATCH_XML), LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.ERROR_MESSAGE), Boolean.TRUE);
+
+				}
 			}
 
 			@Override
@@ -894,6 +999,65 @@ public class ReviewValidatePresenter implements Presenter {
 			}
 		});
 
+	}
+
+	public boolean displayErrorMessage(Throwable arg0) {
+		String errorMessage = arg0.getLocalizedMessage();
+		String batchInstanceIdentifier = "";
+		if (batchDTO != null && batchDTO.getBatch() != null) {
+			batchInstanceIdentifier = batchDTO.getBatch().getBatchInstanceIdentifier();
+		} else {
+			batchInstanceIdentifier = Window.Location.getParameter(ReviewValidateConstants.BATCH_ID);
+		}
+		boolean errorCauseFound = false;
+		if (errorMessage.equals(ERROR_TYPE_1)) {
+			errorCauseFound = true;
+			ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.SESSION_TIME_OUT), true);
+			confirmationDialog.okButton.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent arg0) {
+					Window.Location.reload();
+				}
+			});
+		} else if (errorMessage.equals(ERROR_TYPE_2)) {
+			errorCauseFound = true;
+			ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.error_batch_already_locked, batchInstanceIdentifier), true);
+			confirmationDialog.okButton.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent arg0) {
+					moveToLandingPage();
+				}
+			});
+		} else if (errorMessage.equals(ERROR_TYPE_3)) {
+			errorCauseFound = true;
+			ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.NO_RIGHT_TO_OPEN_BATCH), true);
+			confirmationDialog.okButton.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent arg0) {
+					moveToLandingPage();
+				}
+			});
+
+		} else if (errorMessage.equals(ERROR_TYPE_4)) {
+			errorCauseFound = true;
+			ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.error_ret_specific_batch, batchInstanceIdentifier), true);
+			confirmationDialog.okButton.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent arg0) {
+					moveToLandingPage();
+				}
+			});
+
+		}
+		return errorCauseFound;
 	}
 
 	public void executeScriptOnFieldChange(String fieldName) {
@@ -911,6 +1075,7 @@ public class ReviewValidatePresenter implements Presenter {
 				@Override
 				public void onFailure(Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
+					displayErrorMessage(arg0);
 				}
 
 				@Override
@@ -923,15 +1088,16 @@ public class ReviewValidatePresenter implements Presenter {
 							view.getRvPanel().getValidatePanel().setFieldAlreadySelected(true);
 							if (!batchDTO.isErrorContained(document)) {
 								view.getRvPanel().getValidatePanel().setFieldAlreadySelected(false);
+								validateBatch(true);
+							} else {
+								refreshDocumentChanges(page);
+								ScreenMaskUtility.unmaskScreen();
+								setControlSorQPressed(false);
 							}
 							break;
 						}
 					}
-					if (!checkAndSignalWorkflow(batchDTO.getBatch(), batchDTO.getBatchInstanceStatus(), true)) {
-						refreshDocumentChanges();
-						ScreenMaskUtility.unmaskScreen();
-						setControlSorQPressed(false);
-					}
+
 				}
 			});
 		}
@@ -968,6 +1134,7 @@ public class ReviewValidatePresenter implements Presenter {
 					public void onFailure(Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
 						setControlSorQPressed(false);
+						displayErrorMessage(arg0);
 					}
 
 					@Override
@@ -997,10 +1164,15 @@ public class ReviewValidatePresenter implements Presenter {
 	}
 
 	private void refreshDocumentChanges() {
+		refreshDocumentChanges(null);
+	}
+
+	private void refreshDocumentChanges(Page page) {
 		if (!batchDTO.isErrorContained(document)) {
 			document = batchDTO.getNextDocumentTo(document, true);
+			page = null;
 		}
-		eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, document.getPages().getPage().get(0)));
+		eventBus.fireEvent(new TreeRefreshEvent(batchDTO, document, page));
 	}
 
 	public void reviewBatch(boolean isFieldChangeScriptExecuted) {
@@ -1019,6 +1191,7 @@ public class ReviewValidatePresenter implements Presenter {
 					public void onFailure(Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
 						setControlSorQPressed(false);
+						displayErrorMessage(arg0);
 					}
 
 					@Override
@@ -1110,9 +1283,11 @@ public class ReviewValidatePresenter implements Presenter {
 
 			@Override
 			public void onFailure(Throwable paramThrowable) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
-						+ paramThrowable.getMessage());
+				if (!displayErrorMessage(paramThrowable)) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
+							+ paramThrowable.getMessage(), Boolean.TRUE);
+				}
 				ScreenMaskUtility.unmaskScreen();
 				setControlSorQPressed(false);
 			}
@@ -1135,16 +1310,16 @@ public class ReviewValidatePresenter implements Presenter {
 		refreshDocumentIcon();
 		switch (batchInstanceStatus) {
 			case READY_FOR_REVIEW:
-				confirmationDialog = new ConfirmationDialog();
-				confirmationDialog
-						.setDialogTitle(LocaleDictionary.get().getConstantValue((ReviewValidateConstants.title_review_done)));
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_review_confirm));
+				confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.msg_review_confirm), LocaleDictionary.get().getConstantValue(
+						(ReviewValidateConstants.title_review_done)), Boolean.FALSE);
+
 				break;
 			case READY_FOR_VALIDATION:
-				confirmationDialog = new ConfirmationDialog();
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						(ReviewValidateConstants.title_validation_done)));
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_validation_confirm));
+				confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.msg_validation_confirm), LocaleDictionary.get().getConstantValue(
+						(ReviewValidateConstants.title_validation_done)), Boolean.FALSE);
+
 				break;
 			default:
 				showConfirmationDialog = Boolean.FALSE;
@@ -1155,9 +1330,6 @@ public class ReviewValidatePresenter implements Presenter {
 		}
 		if (showConfirmationDialog) {
 			confirmationDialog.setPerformCancelOnEscape(true);
-			confirmationDialog.show();
-			confirmationDialog.center();
-			confirmationDialog.okButton.setFocus(true);
 			confirmationDialog.addDialogListener(new com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener() {
 
 				@Override
@@ -1168,23 +1340,21 @@ public class ReviewValidatePresenter implements Presenter {
 						public void onFailure(Throwable paramThrowable) {
 							ScreenMaskUtility.unmaskScreen();
 							setControlSorQPressed(false);
-							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
-									+ paramThrowable.getMessage());
+							if (!displayErrorMessage(paramThrowable)) {
+								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+										ReviewValidateMessages.error_save_batch, batch.getBatchInstanceIdentifier())
+										+ paramThrowable.getMessage(), Boolean.TRUE);
+							}
 						}
 
 						@Override
 						public void onSuccess(Void arg0) {
 							ScreenMaskUtility.unmaskScreen();
 							setControlSorQPressed(false);
-							String href = Window.Location.getHref();
-							String baseUrl = href.substring(0, href.lastIndexOf('/'));
 							if (!batchSelected) {
-								Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
-										+ ReviewValidateConstants.BATCH_LIST_HTML);
+								moveToLandingPage();
 							} else {
-								Window.Location.assign(baseUrl + ReviewValidateConstants.FILE_SEPARATOR
-										+ ReviewValidateConstants.REVIEW_VALIDATE_HTML);
+								moveToTab(ReviewValidateConstants.REVIEW_VALIDATE_HTML);
 							}
 						}
 					});
@@ -1404,14 +1574,14 @@ public class ReviewValidatePresenter implements Presenter {
 			}
 		}
 	}
-	
+
 	public void setBatchListScreenTab() {
 		final BatchInstanceStatus batchInstanceStatus = batchDTO.getBatchInstanceStatus();
 		rpcService.getUserName(new AsyncCallback<String>() {
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				
+
 			}
 
 			@Override
@@ -1420,14 +1590,33 @@ public class ReviewValidatePresenter implements Presenter {
 
 					@Override
 					public void onFailure(Throwable arg0) {
-						
+
 					}
 
 					@Override
 					public void onSuccess(Void arg0) {
-						
+
 					}
 				});
+			}
+		});
+	}
+
+	public void setZoomCount() {
+		this.rpcService.getZoomCount(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				ScreenMaskUtility.unmaskScreen();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.UNABLE_TO_GET_ZOOM_COUNT), Boolean.TRUE);
+
+			}
+
+			@Override
+			public void onSuccess(String zoomCountValue) {
+				int zoomCount = Integer.parseInt(zoomCountValue);
+				view.getImgOverlayPanel().setZoomCount(zoomCount);
 			}
 		});
 	}

@@ -44,7 +44,8 @@ var batchListMessages = {
 		msg_table_no_data: "There is no data to display",
 		msg_table_batches_two: "Showing {0}-{1} batches",
 		search_failure : "No such batch found.",
-		search_error : "Unable to perform Search {0}"
+		search_error : "Unable to perform Search {0}",
+		error_while_retaining_the_batch_list_priority : "Error while retaining the batch list priority"
 };
 
 /**************************** Turkish locale (suffix: _tk)*******************/
@@ -53,7 +54,7 @@ var batchListConstants_tk = {
 		tabLabel_home: "Ev",
 		tabLabel_batch_detail: "Is Detayi",
 		tabLabel_web_scanner: "Web Tarayıcı",
-		tabLabel_upload_batch: "Toplu Y�kle",
+		tabLabel_upload_batch: "Toplu Y�kle",
 		label_batch_alerts: "Is Uyarilari",
 		label_pend_for_review: "Düzeltilmesi için Beklemede",
 		label_pend_for_validation: "Dogrulama için Beklemede",
@@ -92,6 +93,7 @@ var batchListMessages_tk = {
 		msg_table_batches_list_default: "0-0 Isleri Gösterilmektedir",
 		msg_table_no_data: "Görüntülenecek veri bulunamamistir",
 		msg_table_batches_two: "{0}-{1} Isleri",
-		search_failure : "B�yle toplu bulundu.",
-		search_error : "Arama yapmak i�in {0}"
+		search_failure : "B�yle toplu bulundu.",
+		search_error : "Arama yapmak i�in {0}",
+		error_while_retaining_the_batch_list_priority : "Hata toplu listesi önceliği korurken"
 };

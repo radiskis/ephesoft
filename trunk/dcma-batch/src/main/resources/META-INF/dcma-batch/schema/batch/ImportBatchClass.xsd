@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="ImportBatchClassOptions">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ImportIfConflict" type="xs:boolean" />
+				<xs:element name="ZipFilePath" type="xs:string" />
+				<xs:element name="UseExisting" type="xs:boolean" />
+				<xs:element name="UncFolder" type="xs:string" />
+				<xs:element name="UseSource" type="xs:boolean" />
+				<xs:element name="Name" type="xs:string" />
+				<xs:element name="Description" type="xs:string" />
+				<xs:element name="Priority" type="xs:int" />
+				<xs:element name="RolesImported" type="xs:boolean" />
+				<xs:element name="EmailAccounts" type="xs:boolean" />
+
+				<xs:element name="BatchClassDefinition" minOccurs="0"
+					maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Scripts" minOccurs="0" maxOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Script" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="FileName" type="xs:string" />
+													<xs:element name="Selected" type="xs:boolean" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Folders" minOccurs="0" maxOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Folder" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="FileName" type="xs:string" />
+													<xs:element name="Selected" type="xs:boolean" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="BatchClassModules" minOccurs="0"
+								maxOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="BatchClassModule" minOccurs="0"
+											maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="ModuleName" type="xs:string" />
+													<xs:element name="PluginConfiguration" type="xs:boolean" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

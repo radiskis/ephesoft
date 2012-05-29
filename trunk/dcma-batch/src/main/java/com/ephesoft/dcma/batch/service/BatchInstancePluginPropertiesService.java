@@ -68,7 +68,7 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesDao")
 	private PluginPropertiesDao pluginPropertiesDao;
-	
+
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
@@ -76,11 +76,11 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 	@Override
 	@Deprecated
 	public String getPropertyValue(String batchIdentifier, String pluginName, PluginProperty pluginProperty) {
-		
+
 		String localFolderLocation = batchSchemaService.getLocalFolderLocation();
 		String pathToPropertiesFolder = localFolderLocation + File.separator + "properties";
 		File file = new File(pathToPropertiesFolder + File.separator + batchIdentifier + FileType.SER.getExtensionWithDot());
-		if(!file.exists()) {
+		if (!file.exists()) {
 			pluginPropertiesDao.clearPluginProperties(batchIdentifier);
 		}
 		BatchPluginPropertyContainer container = pluginPropertiesDao.getPluginProperties(batchIdentifier);
@@ -224,6 +224,7 @@ public class BatchInstancePluginPropertiesService implements PluginPropertiesSer
 									localFieldType.setBarcodeType(eachFieldType.getBarcodeType());
 									localFieldType.setFieldOptionValueList(eachFieldType.getFieldOptionValueList());
 									localFieldType.setHidden(eachFieldType.isHidden());
+									localFieldType.setMultiLine(eachFieldType.isMultiLine());
 									localFieldType.setSampleValue(eachFieldType.getSampleValue());
 									List<RegexValidation> finalExtractionList = new ArrayList<RegexValidation>();
 									Map<String, com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.RegexValidation> regexMap = eachFieldType

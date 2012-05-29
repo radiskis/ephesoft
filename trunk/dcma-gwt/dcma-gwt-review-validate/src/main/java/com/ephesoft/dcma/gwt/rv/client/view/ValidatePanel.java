@@ -117,6 +117,7 @@ import com.google.gwt.user.client.ui.KeyboardListenerAdapter;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
@@ -222,11 +223,9 @@ public class ValidatePanel extends RVBasePanel {
 				ScreenMaskUtility.maskScreen();
 				String value = fuzzySearchText.getValue();
 				if (null == value || value.trim().isEmpty()) {
-					final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-					confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-							ReviewValidateMessages.msg_fuzzy_search_invalid_entry));
-					confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-							ReviewValidateConstants.fuzzy_search_tooltip));
+					final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+							.getMessageValue(ReviewValidateMessages.msg_fuzzy_search_invalid_entry), LocaleDictionary.get()
+							.getConstantValue(ReviewValidateConstants.fuzzy_search_tooltip), Boolean.TRUE);
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
@@ -242,50 +241,19 @@ public class ValidatePanel extends RVBasePanel {
 							presenter.setFocus();
 						}
 					});
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
+
 				} else {
+					if (presenter.document != null) {
+						presenter.rpcService.fuzzyTextSearch(presenter.batchDTO.getBatch(), presenter.document.getType(), value,
+								new AsyncCallback<List<List<String>>>() {
 
-					presenter.rpcService.fuzzyTextSearch(presenter.batchDTO.getBatch(), value,
-							new AsyncCallback<List<List<String>>>() {
+									@Override
+									public void onFailure(Throwable arg0) {
+										final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+												LocaleDictionary.get().getMessageValue(
+														ReviewValidateMessages.msg_fuzzy_search_unsuccessful), LocaleDictionary.get()
+														.getConstantValue(ReviewValidateConstants.fuzzy_search_tooltip), Boolean.TRUE);
 
-								@Override
-								public void onFailure(Throwable arg0) {
-									final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-									confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-											ReviewValidateMessages.msg_fuzzy_search_unsuccessful));
-									confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-											ReviewValidateConstants.fuzzy_search_tooltip));
-									confirmationDialog.addDialogListener(new DialogListener() {
-
-										@Override
-										public void onOkClick() {
-											confirmationDialog.hide();
-											ScreenMaskUtility.unmaskScreen();
-											presenter.setFocus();
-										}
-
-										@Override
-										public void onCancelClick() {
-											ScreenMaskUtility.unmaskScreen();
-											presenter.setFocus();
-										}
-									});
-									confirmationDialog.center();
-									confirmationDialog.show();
-									confirmationDialog.okButton.setFocus(true);
-								}
-
-								@Override
-								public void onSuccess(List<List<String>> arg0) {
-
-									if (arg0 == null || arg0.isEmpty()) {
-										final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-										confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-												ReviewValidateMessages.msg_fuzzy_search_no_result));
-										confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-												ReviewValidateConstants.fuzzy_search_tooltip));
 										confirmationDialog.addDialogListener(new DialogListener() {
 
 											@Override
@@ -300,34 +268,61 @@ public class ValidatePanel extends RVBasePanel {
 												ScreenMaskUtility.unmaskScreen();
 												presenter.setFocus();
 											}
-
 										});
-										confirmationDialog.center();
-										confirmationDialog.show();
-										confirmationDialog.okButton.setFocus(true);
-									} else {
-										fuzzyDataCarrier = arg0;
 
-										final DialogBox dialogBox = new DialogBox();
-										dialogBox.addStyleName(ReviewValidateConstants.CONFIGURED_DIMENSIONS_DIALOG);
-										final FuzzySearchResultView fuzzySearchResultView = new FuzzySearchResultView(arg0.get(0),
-												presenter, presenter.batchDTO.getFuzzySearchPopUpXDimension(), presenter.batchDTO
-														.getFuzzySearchPopUpYDimension());
-										fuzzySearchResultView.setEventBus(eventBus);
-										dialogBox.setWidget(fuzzySearchResultView);
-										fuzzySearchResultView.setDialogBox(dialogBox);
-										fuzzySearchResultView.createBatchList(arg0);
-
-										fuzzySearchResultView.setWidth(presenter.batchDTO.getFuzzySearchPopUpYDimension());
-										dialogBox.center();
-										dialogBox.setText(LocaleDictionary.get().getConstantValue(
-												ReviewValidateConstants.fuzzy_search_title));
-										dialogBox.show();
-										fuzzySearchResultView.getSelectBtn().setFocus(true);
 									}
-								}
 
-							});
+									@Override
+									public void onSuccess(List<List<String>> arg0) {
+
+										if (arg0 == null || arg0.isEmpty()) {
+											final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil
+													.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+															ReviewValidateMessages.msg_fuzzy_search_no_result), LocaleDictionary.get()
+															.getConstantValue(ReviewValidateConstants.fuzzy_search_tooltip),
+															Boolean.TRUE);
+
+											confirmationDialog.addDialogListener(new DialogListener() {
+
+												@Override
+												public void onOkClick() {
+													confirmationDialog.hide();
+													ScreenMaskUtility.unmaskScreen();
+													presenter.setFocus();
+												}
+
+												@Override
+												public void onCancelClick() {
+													ScreenMaskUtility.unmaskScreen();
+													presenter.setFocus();
+												}
+
+											});
+
+										} else {
+											fuzzyDataCarrier = arg0;
+
+											final DialogBox dialogBox = new DialogBox();
+											dialogBox.addStyleName(ReviewValidateConstants.CONFIGURED_DIMENSIONS_DIALOG);
+											final FuzzySearchResultView fuzzySearchResultView = new FuzzySearchResultView(arg0.get(0),
+													presenter, presenter.batchDTO.getFuzzySearchPopUpXDimension(), presenter.batchDTO
+															.getFuzzySearchPopUpYDimension());
+											fuzzySearchResultView.setEventBus(eventBus);
+											dialogBox.setWidget(fuzzySearchResultView);
+											fuzzySearchResultView.setDialogBox(dialogBox);
+											fuzzySearchResultView.createBatchList(arg0);
+
+											fuzzySearchResultView.setWidth(presenter.batchDTO.getFuzzySearchPopUpYDimension());
+											dialogBox.center();
+											dialogBox.setText(LocaleDictionary.get().getConstantValue(
+													ReviewValidateConstants.fuzzy_search_title));
+											dialogBox.show();
+											fuzzySearchResultView.getSelectBtn().setFocus(true);
+										}
+									}
+
+								});
+					}
 				}
 				fuzzySearchText.setText("");
 			}
@@ -392,6 +387,10 @@ public class ValidatePanel extends RVBasePanel {
 					currentDocFieldWidget.lWidget.getWidget().setFocus(true);
 					focusWasSet = true;
 					currentDocFieldWidget.setCurrent(true);
+				} else if (currentDocFieldWidget.textAreaWidget != null) {
+					currentDocFieldWidget.textAreaWidget.getWidget().setFocus(true);
+					focusWasSet = true;
+					currentDocFieldWidget.setCurrent(true);
 				}
 			}
 		}
@@ -412,6 +411,11 @@ public class ValidatePanel extends RVBasePanel {
 							docFieldWid.setCurrent(true);
 							// focusSet = Boolean.TRUE;
 							break;
+						} else if (docFieldWid.textAreaWidget != null) {
+							docFieldWid.textAreaWidget.getWidget().setFocus(true);
+							focusWasSet = true;
+							docFieldWid.setCurrent(true);
+							break;
 						}
 					}
 				}
@@ -430,6 +434,11 @@ public class ValidatePanel extends RVBasePanel {
 							focusWasSet = true;
 							// focusSet = Boolean.TRUE;
 							break;
+						} else if (docFieldWidget.textAreaWidget != null) {
+							docFieldWidget.textAreaWidget.getWidget().setFocus(true);
+							focusWasSet = true;
+							docFieldWidget.setCurrent(true);
+							break;
 						}
 					}
 
@@ -440,22 +449,31 @@ public class ValidatePanel extends RVBasePanel {
 			docFieldWidgets.get(0).setCurrent(true);
 			if (docFieldWidgets.get(0).widget != null) {
 				docFieldWidgets.get(0).widget.getWidget().setFocus(true);
-			} else {
+			} else if (docFieldWidgets.get(0).lWidget != null) {
 				docFieldWidgets.get(0).lWidget.getWidget().setFocus(true);
+			} else {
+				docFieldWidgets.get(0).textAreaWidget.getWidget().setFocus(true);
 			}
 		}
 		DocFieldWidget currentDocFieldWidget = getCurrentDocFieldWidget();
 		if (currentDocFieldWidget != null) {
 			scrollPanel.ensureVisible(getCurrentDocFieldWidget().getFieldLabel());
-			if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
-				ValidatableWidget<SuggestionBox> vWidget = currentDocFieldWidget.widget;
-				if (vWidget != null) {
+			ValidatableWidget<SuggestionBox> vWidget = currentDocFieldWidget.widget;
+			ValidatableWidget<ListBox> lWidget = currentDocFieldWidget.lWidget;
+			ValidatableWidget<TextArea> textArea = currentDocFieldWidget.textAreaWidget;
+			if (vWidget != null) {
+				if (presenter.batchDTO.getSuggestionBoxSwitchState().equals("OFF")) {
 					SuggestionBox suggestionBoxWidget = vWidget.getWidget();
 					if (suggestionBoxWidget != null) {
 						suggestionBoxWidget.hideSuggestionList();
 					}
-				}
 
+				}
+				vWidget.getWidget().setFocus(true);
+			} else if (lWidget != null) {
+				lWidget.getWidget().setFocus(true);
+			} else if (textArea != null) {
+				textArea.getWidget().setFocus(true);
 			}
 		}
 	}
@@ -500,9 +518,13 @@ public class ValidatePanel extends RVBasePanel {
 		seperator.addStyleName("fuzzy-seperator");
 		// fuzzySearchTable.setWidget(2, 0, seperator);
 		int index = 1;
-		List<DocField> documentLevelFields = presenter.document.getDocumentLevelFields().getDocumentLevelField();
-		if (null != documentLevelFields && !documentLevelFields.isEmpty()) {
-			Collections.sort(documentLevelFields, new Comparator<DocField>() {
+		DocumentLevelFields documentLevelFields = presenter.document.getDocumentLevelFields();
+		List<DocField> documentLevelFieldList = null;
+		if (documentLevelFields != null) {
+			documentLevelFieldList = documentLevelFields.getDocumentLevelField();
+		}
+		if (null != documentLevelFieldList && !documentLevelFieldList.isEmpty()) {
+			Collections.sort(documentLevelFieldList, new Comparator<DocField>() {
 
 				public int compare(DocField fieldOne, DocField fieldSec) {
 					int compare = 0;
@@ -522,7 +544,7 @@ public class ValidatePanel extends RVBasePanel {
 					return compare;
 				};
 			});
-			for (final DocField field : documentLevelFields) {
+			for (final DocField field : documentLevelFieldList) {
 
 				Map<String, Integer> alternateValues = new HashMap<String, Integer>();
 				if (field.getAlternateValues() != null) {
@@ -554,7 +576,9 @@ public class ValidatePanel extends RVBasePanel {
 				String fieldTypeDescription = null;
 				List<String> values = new ArrayList<String>();
 				ValidatableWidget<SuggestionBox> tempVWidget = null;
+				ValidatableWidget<TextArea> tempTextArea = null;
 				boolean isShowListBox = false;
+				boolean showTextArea = false;
 				ValidatableWidget<ListBox> tempListBox = null;
 				for (FieldTypeDTO fieldTypeDTO : fieldTypeDTOs) {
 					if (!fieldTypeDTO.isHidden()) {
@@ -576,6 +600,14 @@ public class ValidatePanel extends RVBasePanel {
 								tempFieldName = field.getName();
 								sampleVString = fieldTypeDTO.getSampleValue();
 								fieldTypeDescription = fieldTypeDTO.getDescription();
+								break;
+							} else if (fieldTypeDTO.isMultiLine()) {
+								TextArea textArea = new TextArea();
+								tempTextArea = new ValidatableWidget<TextArea>(textArea);
+								tempTextArea.getWidget().setValue(field.getValue());
+								tempFieldName = field.getName();
+								fieldTypeDescription = fieldTypeDTO.getDescription();
+								showTextArea = true;
 								break;
 							} else {
 								tempVWidget = GWTValidatableControl.createGWTControl(field.getType(), field.getValue(), field
@@ -636,7 +668,8 @@ public class ValidatePanel extends RVBasePanel {
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field, false));
 
 								// commented out this line to remove the overlay in case the actual value not found in drop down
-								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(true, null, null));
+								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(listBoxWidget.validate(), null, null,
+										listBoxWidget.validateThroughValidators()));
 							}
 						});
 
@@ -651,6 +684,24 @@ public class ValidatePanel extends RVBasePanel {
 								}
 							}
 						});
+						vWidget.addKeyDownHandler(new KeyDownHandler() {
+
+							@Override
+							public void onKeyDown(KeyDownEvent event) {
+								switch (event.getNativeKeyCode()) {
+									case 'b':
+									case 'B':
+										if (event.isControlKeyDown()) {
+											event.preventDefault();
+											boolean validateWidget = listBoxWidget.isValidateWidget();
+											listBoxWidget.setValidateWidget(!validateWidget);
+											ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(listBoxWidget.validate(),
+													sampleValueString, field.getName(), listBoxWidget.validateThroughValidators()));
+										}
+										break;
+								}
+							}
+						});
 						Label fieldName = null;
 						if (fieldTypeDescription != null && !fieldTypeDescription.isEmpty()) {
 							fieldName = new Label(fieldTypeDescription);
@@ -660,7 +711,57 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldName);
 						}
 						validationTable.setWidget(index++, 0, vWidget);
-						addDocFieldWidget(presenter.document.getIdentifier(), fieldName, field, null, tempListBox);
+						addDocFieldWidget(presenter.document.getIdentifier(), fieldName, field, null, tempListBox, null);
+					}
+				} else if (showTextArea) {
+					if (!isFieldHidden) {
+						if (tempTextArea == null) {
+							TextArea textArea = new TextArea();
+							tempTextArea = new ValidatableWidget<TextArea>(textArea);
+						}
+
+						final ValidatableWidget<TextArea> textAreaWidget = tempTextArea;
+						for (int k = 0; k < alternateValuesSet.size(); k++) {
+							textAreaWidget.getWidget().setTitle(field.getName());
+						}
+
+						textAreaWidget.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+							@Override
+							public void onValueChange(ValueChangeEvent<String> arg0) {
+								if (presenter.batchDTO.getFieldValueChangeScriptSwitchState().equalsIgnoreCase("ON")) {
+									presenter.executeScriptOnFieldChange(field.getName());
+								}
+							}
+
+						});
+						textAreaWidget.getWidget().addFocusHandler(new FocusHandler() {
+
+							@Override
+							public void onFocus(FocusEvent event) {
+								if (!currentFieldSet) {
+									currentFieldSet = true;
+									setFieldAlreadySelected(true);
+									presenter.setCurrentFieldName(field.getName());
+								}
+								setCurrentDocFieldWidget(field.getName());
+								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field));
+								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(true, sampleValueString, fieldNameString,
+										true));
+
+							}
+						});
+
+						Label fieldLabel = null;
+						if (fieldTypeDescription != null && !fieldTypeDescription.isEmpty()) {
+							fieldLabel = new Label(fieldTypeDescription);
+							validationTable.setWidget(index++, 0, fieldLabel);
+						} else {
+							fieldLabel = new Label(field.getName());
+							validationTable.setWidget(index++, 0, fieldLabel);
+						}
+						validationTable.setWidget(index++, 0, textAreaWidget.getWidget());
+						addDocFieldWidget(presenter.document.getIdentifier(), fieldLabel, field, null, null, textAreaWidget);
 					}
 				} else {
 					if (!isFieldHidden) {
@@ -694,7 +795,18 @@ public class ValidatePanel extends RVBasePanel {
 									arg0.preventDefault();
 									vWidget.getWidget().hideSuggestionList();
 								}
-
+								switch (arg0.getNativeKeyCode()) {
+									case 'b':
+									case 'B':
+										if (arg0.isControlKeyDown()) {
+											arg0.preventDefault();
+											boolean validateWidget = vWidget.isValidateWidget();
+											vWidget.setValidateWidget(!validateWidget);
+											ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(vWidget.validate(),
+													sampleValueString, field.getName(), vWidget.validateThroughValidators()));
+										}
+										break;
+								}
 							}
 						});
 						vWidget.getWidget().getTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -721,7 +833,7 @@ public class ValidatePanel extends RVBasePanel {
 								}
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field));
 								ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(vWidget.validate(), sampleValueString,
-										fieldNameString));
+										fieldNameString, vWidget.validateThroughValidators()));
 							}
 						});
 
@@ -742,7 +854,7 @@ public class ValidatePanel extends RVBasePanel {
 							validationTable.setWidget(index++, 0, fieldLabel);
 						}
 						validationTable.setWidget(index++, 0, vWidget.getWidget());
-						addDocFieldWidget(presenter.document.getIdentifier(), fieldLabel, field, vWidget, null);
+						addDocFieldWidget(presenter.document.getIdentifier(), fieldLabel, field, vWidget, null, null);
 					}
 				}
 			}
@@ -773,6 +885,9 @@ public class ValidatePanel extends RVBasePanel {
 						if (!docFieldWidget.widget.validate()) {
 							isValidDoc = Boolean.FALSE;
 						}
+					} else if (docFieldWidget.textAreaWidget != null) {
+						docFieldWidget.field.setValue(docFieldWidget.textAreaWidget.getWidget().getValue());
+
 					} else {
 						// Check for the drop down if they have none selected
 						if (docFieldWidget.lWidget != null) {
@@ -904,8 +1019,10 @@ public class ValidatePanel extends RVBasePanel {
 								if (docFieldWidget != null) {
 									if (docFieldWidget.widget != null) {
 										docFieldWidget.widget.getWidget().setFocus(true);
-									} else {
+									} else if (docFieldWidget.lWidget != null) {
 										docFieldWidget.lWidget.getWidget().setFocus(true);
+									} else {
+										docFieldWidget.textAreaWidget.getWidget().setFocus(true);
 									}
 								} else {
 									openNextDocument();
@@ -922,8 +1039,10 @@ public class ValidatePanel extends RVBasePanel {
 								if (docFieldWidget != null) {
 									if (docFieldWidget.widget != null) {
 										docFieldWidget.widget.getWidget().setFocus(true);
-									} else {
+									} else if (docFieldWidget.lWidget != null) {
 										docFieldWidget.lWidget.getWidget().setFocus(true);
+									} else {
+										docFieldWidget.textAreaWidget.getWidget().setFocus(true);
 									}
 								} else {
 									openPreviousDocument();
@@ -937,15 +1056,17 @@ public class ValidatePanel extends RVBasePanel {
 								fuzzySearchText.setFocus(true);
 							}
 							break;
-						case '5':
+						// CTRL + 5
+						case 53:
 						case 101:
-							presenter.setTableView(Boolean.TRUE);
 							event.getEvent().getNativeEvent().preventDefault();
 							if (showTableViewBtn.isVisible()) {
+								presenter.setTableView(Boolean.TRUE);
 								presenter.onTableViewButtonClicked();
 							}
 							break;
-						case '6':
+						// CTRL + 6
+						case 54:
 						case 102:
 							event.getEvent().getNativeEvent().preventDefault();
 							presenter.setTableView(Boolean.FALSE);
@@ -1007,18 +1128,17 @@ public class ValidatePanel extends RVBasePanel {
 						int jIndex = 0;
 						for (String headerName : resultHeaderList) {
 							String data = resultDataList.get(jIndex);
-							setFuzzySerachValue(headerName, data);
+							setFuzzySearchValue(headerName, data);
 							jIndex++;
 						}
 					}
 				}
 				if (isError) {
 					// Window.alert("Unsuccessful fuzzy search");
-					final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-					confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-							ReviewValidateMessages.msg_fuzzy_search_unsuccessful));
-					confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-							ReviewValidateConstants.fuzzy_search_tooltip));
+					final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+							.getMessageValue(ReviewValidateMessages.msg_fuzzy_search_unsuccessful), LocaleDictionary.get()
+							.getConstantValue(ReviewValidateConstants.fuzzy_search_tooltip), Boolean.TRUE);
+
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
@@ -1033,9 +1153,7 @@ public class ValidatePanel extends RVBasePanel {
 							presenter.setFocus();
 						}
 					});
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
+
 				}
 			}
 		});
@@ -1059,24 +1177,34 @@ public class ValidatePanel extends RVBasePanel {
 		Field field;
 		ValidatableWidget<SuggestionBox> widget;
 		ValidatableWidget<ListBox> lWidget;
+		ValidatableWidget<TextArea> textAreaWidget;
 		boolean isCurrent = false;
 		Label fieldLabel;
 
-		public DocFieldWidget(String parentDocumentIdentifier, Field field, ValidatableWidget<SuggestionBox> widget,
-				ValidatableWidget<ListBox> lWidget) {
-			this.parentDocumentIdentifier = parentDocumentIdentifier;
-			this.field = field;
-			this.widget = widget;
-			this.lWidget = lWidget;
-		}
-
 		public DocFieldWidget(String parentDocumentIdentifier, Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
-				ValidatableWidget<ListBox> lWidget) {
+				ValidatableWidget<ListBox> lWidget, ValidatableWidget<TextArea> textAreaWidget) {
 			this.parentDocumentIdentifier = parentDocumentIdentifier;
 			this.fieldLabel = fieldLabel;
 			this.field = field;
+			this.textAreaWidget = textAreaWidget;
 			this.widget = widget;
 			this.lWidget = lWidget;
+			setForceReviewOfValidatableWidget();
+		}
+
+		private void setForceReviewOfValidatableWidget() {
+			Field field = this.field;
+			if (field != null) {
+				boolean forceReview = field.isForceReview();
+				if (forceReview) {
+					if (this.widget != null) {
+						this.widget.setForcedReviewDone(false);
+					}
+					if (this.lWidget != null) {
+						this.lWidget.setForcedReviewDone(false);
+					}
+				}
+			}
 		}
 
 		/*
@@ -1111,14 +1239,9 @@ public class ValidatePanel extends RVBasePanel {
 
 	private final LinkedList<DocFieldWidget> docFieldWidgets = new LinkedList<DocFieldWidget>();
 
-	private void addDocFieldWidget(String documentIdentifier, Field field, ValidatableWidget<SuggestionBox> widget,
-			ValidatableWidget<ListBox> lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(documentIdentifier, field, widget, lWidget));
-	}
-
 	private void addDocFieldWidget(String documentIdentifier, Label fieldLabel, Field field, ValidatableWidget<SuggestionBox> widget,
-			ValidatableWidget<ListBox> lWidget) {
-		docFieldWidgets.add(new DocFieldWidget(documentIdentifier, fieldLabel, field, widget, lWidget));
+			ValidatableWidget<ListBox> lWidget, ValidatableWidget<TextArea> textArea) {
+		docFieldWidgets.add(new DocFieldWidget(documentIdentifier, fieldLabel, field, widget, lWidget, textArea));
 	}
 
 	/*
@@ -1144,6 +1267,17 @@ public class ValidatePanel extends RVBasePanel {
 					nextDocFieldWidget = docFieldWidget;
 					break;
 				}
+			} else if (docFieldWidget.textAreaWidget != null) {
+				if (docFieldWidget.isCurrent) {
+					reachedToCurrent = Boolean.TRUE;
+					continue;
+				}
+
+				if (reachedToCurrent && !isError) {
+					nextDocFieldWidget = docFieldWidget;
+					break;
+				}
+
 			} else {
 				if (docFieldWidget.isCurrent) {
 					reachedToCurrent = Boolean.TRUE;
@@ -1170,6 +1304,12 @@ public class ValidatePanel extends RVBasePanel {
 			docFieldWidget.widget.getWidget().setValue(value, true);
 			// ValueChangeEvent.fire(docFieldWidget.widget.getWidget(), value);
 			docFieldWidget.widget.getWidget().setFocus(true);
+		} else if (docFieldWidget.textAreaWidget != null) {
+			docFieldWidget.field.setCoordinatesList(coordinatesList);
+			docFieldWidget.field.setPage(pageid);
+			docFieldWidget.field.setValue(value);
+			docFieldWidget.textAreaWidget.getWidget().setValue(value, true);
+			docFieldWidget.textAreaWidget.getWidget().setFocus(true);
 		} else {
 			ListBox widget = docFieldWidget.lWidget.getWidget();
 			for (int i = 0; i < widget.getItemCount(); i++) {
@@ -1200,6 +1340,16 @@ public class ValidatePanel extends RVBasePanel {
 					previousDocFieldWidget = docFieldWidget;
 					break;
 				}
+			} else if (docFieldWidget.textAreaWidget != null) {
+				if (docFieldWidget.isCurrent) {
+					reachedToCurrent = Boolean.TRUE;
+					continue;
+				}
+
+				if (reachedToCurrent && !isError) {
+					previousDocFieldWidget = docFieldWidget;
+					break;
+				}
 			} else {
 				if (docFieldWidget.isCurrent) {
 					reachedToCurrent = Boolean.TRUE;
@@ -1224,6 +1374,11 @@ public class ValidatePanel extends RVBasePanel {
 					break;
 				}
 
+			} else if (docFieldWidget.textAreaWidget != null) {
+				if (docFieldWidget.isCurrent) {
+					currentDocFieldWidget = docFieldWidget;
+					break;
+				}
 			} else {
 				if (docFieldWidget.isCurrent) {
 					currentDocFieldWidget = docFieldWidget;
@@ -1246,6 +1401,18 @@ public class ValidatePanel extends RVBasePanel {
 	// setCurrentDocFieldWidget(dfWidget.field.getName());
 	// }
 
+	public void setForceReviewDoneForDocFieldWidgets() {
+		DocFieldWidget currenDocFieldWidget = getCurrentDocFieldWidget();
+		if (currenDocFieldWidget != null) {
+			Field field = currenDocFieldWidget.field;
+			if (field.isForceReview()) {
+				field.setForceReview(false);
+			}
+			currenDocFieldWidget.setForceReviewOfValidatableWidget();
+		}
+
+	}
+
 	private void setCurrentDocFieldWidget(String fieldName) {
 		for (DocFieldWidget docFieldWidget : docFieldWidgets) {
 			docFieldWidget.setCurrent(false);
@@ -1261,8 +1428,10 @@ public class ValidatePanel extends RVBasePanel {
 		dfWidget.setCurrent(true);
 		if (dfWidget.widget != null) {
 			dfWidget.widget.getWidget().setFocus(true);
-		} else {
+		} else if (dfWidget.lWidget != null) {
 			dfWidget.lWidget.getWidget().setFocus(true);
+		} else if (dfWidget.textAreaWidget != null) {
+			dfWidget.textAreaWidget.getWidget().setFocus(true);
 		}
 	}
 
@@ -1273,13 +1442,21 @@ public class ValidatePanel extends RVBasePanel {
 	 * @param fieldName String
 	 * @param fieldValue String
 	 */
-	private void setFuzzySerachValue(String fieldName, String fieldValue) {
+	private void setFuzzySearchValue(String fieldName, String fieldValue) {
 		for (DocFieldWidget docFieldWidget : docFieldWidgets) {
 			if (docFieldWidget.field.getName().equals(fieldName)) {
-				docFieldWidget.widget.getWidget().setValue(fieldValue);
-				docFieldWidget.field.setValue(fieldValue);
-				docFieldWidget.widget.getWidget().getTextBox().setText(fieldValue);
-				docFieldWidget.widget.toggleValidDateBox();
+				if (docFieldWidget.widget != null) {
+					docFieldWidget.widget.getWidget().setValue(fieldValue);
+					docFieldWidget.field.setValue(fieldValue);
+					docFieldWidget.widget.getWidget().getTextBox().setText(fieldValue);
+					docFieldWidget.widget.toggleValidDateBox();
+				} else {
+					docFieldWidget.textAreaWidget.getWidget().setValue(fieldValue);
+					docFieldWidget.field.setValue(fieldValue);
+					docFieldWidget.textAreaWidget.getWidget().setText(fieldValue);
+					docFieldWidget.textAreaWidget.toggleValidDateBox();
+				}
+
 			}
 		}
 	}
@@ -1297,6 +1474,45 @@ public class ValidatePanel extends RVBasePanel {
 		vWidget.getWidget().getTextBox().setText(inputString);
 		vWidget.getWidget().setValue(inputString);
 		vWidget.toggleValidDateBox();
+		CoordinatesList coordinatesList = field.getCoordinatesList();
+		int count = 0;
+		if (field.getAlternateValues() != null) {
+			for (Field alternateField : field.getAlternateValues().getAlternateValue()) {
+				if (pos < 0) {
+					if (alternateField.getValue().equals(inputString)) {
+						ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(alternateField));
+						coordinatesList = alternateField.getCoordinatesList();
+					}
+				} else {
+					if (alternateField.getValue().equals(inputString)) {
+						if (count == index) {
+							ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(alternateField));
+							coordinatesList = alternateField.getCoordinatesList();
+						}
+						count++;
+					}
+				}
+
+			}
+		}
+		if (field.getValue().equals(originalString)) {
+			ValidatePanel.this.fireEvent(new ValidationFieldChangeEvent(field));
+		}
+		updateDocument(coordinatesList, field.getName());
+	}
+
+	public void setTextAreaEvent(DocField field, String inputString, final ValidatableWidget<TextArea> textAreaWidget) {
+		int pos = inputString.lastIndexOf(SEPERATOR);
+		int index = 0;
+		String originalString = inputString;
+		if (!(pos < 0)) {
+			index = Integer.parseInt(inputString.substring(pos + ALTERNATE_STRING_VALUE.length() + SEPERATOR.length(), inputString
+					.length()));
+			inputString = inputString.substring(0, pos);
+		}
+		textAreaWidget.getWidget().setText(inputString);
+		textAreaWidget.getWidget().setValue(inputString);
+		// textAreaWidget.toggleValidDateBox();
 		CoordinatesList coordinatesList = field.getCoordinatesList();
 		int count = 0;
 		if (field.getAlternateValues() != null) {
@@ -1367,10 +1583,12 @@ public class ValidatePanel extends RVBasePanel {
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				String title = LocaleDictionary.get().getConstantValue(ReviewValidateConstants.SCRIPT_EXECUTION);
-				String message = LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_script_execution_failed);
 				ScreenMaskUtility.unmaskScreen();
-				showConfirmationDialog(title, message);
+				if (!presenter.displayErrorMessage(arg0)) {
+					String title = LocaleDictionary.get().getConstantValue(ReviewValidateConstants.SCRIPT_EXECUTION);
+					String message = LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_script_execution_failed);
+					showConfirmationDialog(title, message);
+				}
 			}
 
 			@Override
@@ -1408,9 +1626,7 @@ public class ValidatePanel extends RVBasePanel {
 	}
 
 	private void showConfirmationDialog(String title, String message) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle(title);
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(message, title, Boolean.TRUE);
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -1425,9 +1641,7 @@ public class ValidatePanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	private void setFieldValues(Document previousDocument, Document selectedDocument) {

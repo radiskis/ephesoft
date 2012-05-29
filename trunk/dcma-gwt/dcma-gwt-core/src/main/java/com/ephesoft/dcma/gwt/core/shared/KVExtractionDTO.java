@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.core.shared;
 
 import com.ephesoft.dcma.core.common.KVFetchValue;
+import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -54,9 +55,11 @@ public class KVExtractionDTO implements IsSerializable {
 	private boolean isDeleted;
 
 	private boolean isNew;
-	
+
 	private Integer noOfWords;
-	
+
+	private KVPageValue kvPageValue;
+
 	/**
 	 * multiplier.
 	 */
@@ -66,26 +69,31 @@ public class KVExtractionDTO implements IsSerializable {
 	 * fetchValue.
 	 */
 	private KVFetchValue fetchValue;
-	
+
 	/**
 	 * length.
 	 */
 	private Integer length;
-	
+
 	/**
 	 * width.
 	 */
 	private Integer width;
-	
+
 	/**
 	 * x-offset.
 	 */
 	private Integer xoffset;
-	
+
 	/**
 	 * y-offset.
 	 */
 	private Integer yoffset;
+
+	/**
+	 * Advanced Key Value extraction.
+	 */
+	private AdvancedKVExtractionDTO advancedKVExtractionDTO;
 
 	public FieldTypeDTO getFieldTypeDTO() {
 		return fieldTypeDTO;
@@ -143,105 +151,107 @@ public class KVExtractionDTO implements IsSerializable {
 		this.isNew = isNew;
 	}
 
-	
 	/**
 	 * @return the noOfWords
 	 */
 	public Integer getNoOfWords() {
-		if(null == noOfWords){
+		if (null == noOfWords) {
 			noOfWords = 0;
 		}
 		return noOfWords;
 	}
 
-	
 	/**
 	 * @param noOfWords the noOfWords to set
 	 */
 	public void setNoOfWords(Integer noOfWords) {
-		if(null == noOfWords){
+		if (null == noOfWords) {
 			noOfWords = 0;
 		}
 		this.noOfWords = noOfWords;
 	}
 
-	
 	public Float getMultiplier() {
 		return multiplier;
 	}
 
-	
 	public void setMultiplier(Float multiplier) {
 		this.multiplier = multiplier;
 	}
 
-	
 	public KVFetchValue getFetchValue() {
 		return fetchValue;
 	}
 
-	
 	public void setFetchValue(KVFetchValue fetchValue) {
 		this.fetchValue = fetchValue;
 	}
 
-	
 	public Integer getLength() {
-		if(null == length){
+		if (null == length) {
 			length = 0;
 		}
 		return length;
 	}
 
-	
 	public void setLength(Integer length) {
 		this.length = length;
 	}
 
-	
 	public Integer getWidth() {
-		if(null == width){
+		if (null == width) {
 			width = 0;
 		}
 		return width;
 	}
 
-	
 	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
-	
 	public Integer getXoffset() {
-		if(null == xoffset){
+		if (null == xoffset) {
 			xoffset = 0;
 		}
 		return xoffset;
 	}
 
-	
 	public void setXoffset(Integer xoffset) {
 		this.xoffset = xoffset;
 	}
 
-	
 	public Integer getYoffset() {
-		if(null == yoffset){
+		if (null == yoffset) {
 			yoffset = 0;
 		}
 		return yoffset;
 	}
 
-	
 	public void setYoffset(Integer yoffset) {
 		this.yoffset = yoffset;
 	}
 
 	public boolean isSimpleKVExtraction() {
-		boolean returnVal=true;
-		if (width!=null && width!=0 && length!=null && length!=0){
+		boolean returnVal = true;
+		if (width != null && width != 0 && length != null && length != 0) {
 			returnVal = false;
 		}
 		return returnVal;
+	}
+
+	public AdvancedKVExtractionDTO getAdvancedKVExtractionDTO() {
+		return advancedKVExtractionDTO;
+	}
+
+	public void setAdvancedKVExtractionDTO(AdvancedKVExtractionDTO advancedKVExtractionDTO) {
+		this.advancedKVExtractionDTO = advancedKVExtractionDTO;
+	}
+
+	public KVPageValue getKvPageValue() {
+		return kvPageValue;
+	}
+
+	public void setKvPageValue(KVPageValue kvPageValue) {
+		this.kvPageValue = kvPageValue;
 	}
 }

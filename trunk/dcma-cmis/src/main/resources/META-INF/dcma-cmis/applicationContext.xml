@@ -37,7 +37,8 @@
 		p:urlRelationshipService="$cmis{cmis.url.relationship_service}"
 		p:urlRepositoryService="$cmis{cmis.url.repository_service}"
 		p:urlVersioningService="$cmis{cmis.url.versioning_service}"
-		p:repoCreateBatchFolder="$cmis{cmis.repo.create_batch_subfolders}">
+		p:repoCreateBatchFolder="$cmis{cmis.repo.create_batch_subfolders}"
+		p:aspectMappingFileName="$cmis{cmis.aspect_mapping_file_name}">
 	</bean>
 
 	<bean id="cmisExportService" class="com.ephesoft.dcma.cmis.service.CMISExportServiceImpl" />

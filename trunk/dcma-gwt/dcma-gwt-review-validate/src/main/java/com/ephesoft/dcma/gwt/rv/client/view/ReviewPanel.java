@@ -67,6 +67,11 @@ import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateMessages;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -97,7 +102,6 @@ public class ReviewPanel extends RVBasePanel {
 
 	private ListBox documentTypes;
 
-
 	ValidatableWidget<SuggestBox> validatableSuggestBox;
 
 	private Map<Integer, Document> indexedDocumentMap = new LinkedHashMap<Integer, Document>();
@@ -112,6 +116,15 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	private static final Binder binder = GWT.create(Binder.class);
+	boolean keyPressed = true;
+	boolean keyPressedForDocList = true;
+
+	private void fireDocTypeChangeEvent() {
+		ScreenMaskUtility.maskScreen();
+		final String docType = documentTypes.getValue(documentTypes.getSelectedIndex());
+		onDocumentTypeChange(docType);
+		keyPressed = true;
+	}
 
 	public ReviewPanel() {
 		initWidget(binder.createAndBindUi(this));
@@ -127,9 +140,33 @@ public class ReviewPanel extends RVBasePanel {
 
 			@Override
 			public void onChange(ChangeEvent arg0) {
-				ScreenMaskUtility.maskScreen();
-				final String docType = documentTypes.getValue(documentTypes.getSelectedIndex());
-				onDocumentTypeChange(docType);
+				if (!keyPressed) {
+					fireDocTypeChangeEvent();
+					keyPressed = true;
+				}
+			}
+		});
+
+		documentTypes.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				keyPressed = false;
+			}
+		});
+
+		documentTypes.addKeyDownHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent arg0) {
+				keyPressed = true;
+				switch (arg0.getNativeKeyCode()) {
+					case KeyCodes.KEY_ENTER:
+						arg0.preventDefault();
+						fireDocTypeChangeEvent();
+						break;
+				}
+
 			}
 		});
 
@@ -137,12 +174,43 @@ public class ReviewPanel extends RVBasePanel {
 
 			@Override
 			public void onChange(ChangeEvent arg0) {
-				if (documentList.getSelectedIndex() == 0)
-					return;
-				final Document selectedDoc = indexedDocumentMap.get(documentList.getSelectedIndex());
-				mergeDocument(selectedDoc);
+				if (!keyPressedForDocList) {
+					fireDocListChangeEvent();
+					keyPressedForDocList = true;
+				}
+
 			}
 		});
+		documentList.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				keyPressedForDocList = false;
+			}
+		});
+		documentList.addKeyDownHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent arg0) {
+				keyPressedForDocList = true;
+				switch (arg0.getNativeKeyCode()) {
+					case KeyCodes.KEY_ENTER:
+						arg0.preventDefault();
+						fireDocListChangeEvent();
+						break;
+				}
+
+			}
+		});
+
+	}
+
+	private void fireDocListChangeEvent() {
+		if (documentList.getSelectedIndex() == 0)
+			return;
+		final Document selectedDoc = indexedDocumentMap.get(documentList.getSelectedIndex());
+		mergeDocument(selectedDoc);
+		keyPressedForDocList = false;
 	}
 
 	@Override
@@ -163,6 +231,8 @@ public class ReviewPanel extends RVBasePanel {
 			@Override
 			public void onExpand(DocExpandEvent event) {
 				presenter.document = event.getDocument();
+
+				presenter.getView().getRvPanel().getReviewDisclosurePanel().setOpen(true);
 
 				presenter.rpcService.getDocTypeByBatchInstanceID(presenter.batchDTO.getBatch().getBatchInstanceIdentifier(),
 						new AsyncCallback<List<DocumentTypeDBBean>>() {
@@ -332,10 +402,11 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	private void mergeDocument(final Document selectedDoc) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_tree_merge_doc,
-				presenter.document.getIdentifier(), selectedDoc.getIdentifier()));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_mege_confirm));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(ReviewValidateMessages.msg_tree_merge_doc, presenter.document.getIdentifier(),
+						selectedDoc.getIdentifier()), LocaleDictionary.get().getConstantValue(
+				ReviewValidateConstants.title_merge_confirm), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -353,9 +424,7 @@ public class ReviewPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	class DocumentTypesComparator implements Comparator<DocumentTypeDBBean> {
@@ -373,20 +442,22 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	public void setFocus() {
-		if (documentTypes.isVisible()) {
-			documentTypes.setFocus(true);
-		} else if (documentTypeSuggestBox.isVisible()) {
-			documentTypeSuggestBox.setFocus(true);
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
+			if (documentTypes.isVisible()) {
+				documentTypes.setFocus(true);
+			} else if (documentTypeSuggestBox.isVisible()) {
+				documentTypeSuggestBox.setFocus(true);
+			}
 		}
 	}
 
 	private void setFocus(boolean isSuggestBox) {
-		if (isSuggestBox) {
-
-			documentTypeSuggestBox.setFocus(true);
-		} else {
-
-			documentTypes.setFocus(true);
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
+			if (isSuggestBox) {
+                 documentTypeSuggestBox.setFocus(true);
+			} else {
+                  documentTypes.setFocus(true);
+			}
 		}
 	}
 

@@ -55,6 +55,11 @@ public class ListView extends ResizeComposite {
 		void onRowSelected(String identifer);
 	}
 
+	public interface DoubleClickListner {
+
+		void onDoubleClickTable();
+	}
+
 	public interface PaginationListner {
 		void onPagination(int startIndex, int maxResult, Order order);
 	}
@@ -70,6 +75,8 @@ public class ListView extends ResizeComposite {
 	
 	RowSelectionListner rowSelectionListner;
 
+	DoubleClickListner doubleClickListener;
+
 	private static final Binder binder = GWT.create(Binder.class);
 
 	public ListView() {
@@ -82,6 +89,10 @@ public class ListView extends ResizeComposite {
 	
 	public void setRowSelectionListner(RowSelectionListner rowSelectionListner) {
 		this.rowSelectionListner = rowSelectionListner;
+	}
+
+	public void setDoubleClickListener(DoubleClickListner doubleClickListener) {
+		this.doubleClickListener = doubleClickListener;
 	}
 
 	public void addHeaderColumns(HeaderColumn... columns) {
@@ -105,13 +116,25 @@ public class ListView extends ResizeComposite {
 			header.addHeaderColumn(headerColumn);
 		}
 	}
+	
+	public void initTable(int totalCount, PaginationListner paginationListner, List<Record> recordList, boolean requireRadioButton,
+			boolean fireEventForFirstRow) {
+		initTable(totalCount, paginationListner, recordList, requireRadioButton, fireEventForFirstRow, null);
+	}
 
-	public void initTable(int totalCount, PaginationListner paginationListner, List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow) {
-		initTable(totalCount, paginationListner,null, recordList, requireRadioButton, fireEventForFirstRow);
+	public void initTable(int totalCount, PaginationListner paginationListner, List<Record> recordList, boolean requireRadioButton,
+			boolean fireEventForFirstRow, DoubleClickListner doubleClickListner) {
+		initTable(totalCount, paginationListner, null, recordList, requireRadioButton, fireEventForFirstRow, doubleClickListner);
 	}
 	
-	public void initTable(int totalCount, PaginationListner paginationListner, RowSelectionListner rowSelectionListner, List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow) {
-		table = new Table(totalCount, header, requireRadioButton, fireEventForFirstRow);
+	public void initTable(int totalCount, PaginationListner paginationListner,RowSelectionListner rowSelectionListner,  List<Record> recordList,boolean requireRadioButton,
+			boolean fireEventForFirstRow) {
+		initTable(totalCount, paginationListner, rowSelectionListner, recordList, requireRadioButton, fireEventForFirstRow, null);
+	}
+
+	public void initTable(int totalCount, PaginationListner paginationListner, RowSelectionListner rowSelectionListner,
+			List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow, DoubleClickListner doubleClickListner) {
+		table = new Table(totalCount, header, requireRadioButton, fireEventForFirstRow, doubleClickListner);
 		table.setPaginationListner(paginationListner);
 		table.setRowSelectionListener(rowSelectionListner);
 		table.pushData(recordList, 0);
@@ -147,8 +170,16 @@ public class ListView extends ResizeComposite {
 	public void setTableRowCount(int count) {
 		Table.VISIBLE_RECORD_COUNT = count;
 	}
-	
+
 	public int getTableRecordCount() {
 		return table.getTableRecordCount();
+	}
+
+	public Order getTableOrder() {
+		return table.getOrder();
+	}
+
+	public int getStartIndex() {
+		return table.getStartIndex();
 	}
 }

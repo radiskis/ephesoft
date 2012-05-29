@@ -125,6 +125,24 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
+	 * An api to fetch all Page types by batch Class ID.
+	 * 
+	 * @param batchClassID String
+	 * @return List<PageType>
+	 */
+	@Transactional(readOnly = true)
+	@Override
+	public List<PageType> getPageTypesByBatchClassID(String batchClassID) {
+		List<PageType> pageTypes = null;
+		if (null == batchClassID) {
+			LOGGER.info("batchClassID is null.");
+		} else {
+			pageTypes = pageTypeDao.getPageTypesByBatchClassID(batchClassID);
+		}
+		return pageTypes;
+	}
+
+	/**
 	 * An api to fetch all document type by Page type name.
 	 * 
 	 * @param name String

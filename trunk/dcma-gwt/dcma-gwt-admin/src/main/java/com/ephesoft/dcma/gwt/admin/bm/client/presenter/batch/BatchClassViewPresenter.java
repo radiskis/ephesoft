@@ -132,14 +132,19 @@ public class BatchClassViewPresenter extends AbstractBatchClassPresenter<BatchCl
 	}
 
 	public void onAddEmailButtonClicked() {
+		EmailConfigurationDTO emailConfigurationDTO = createEmailConfigurationDTOObject();
+		controller.setAdd(true);
+		controller.setSelectedEmailConfiguration(emailConfigurationDTO);
+		controller.getMainPresenter().showEmailView(true);
+	}
+
+	public EmailConfigurationDTO createEmailConfigurationDTOObject() {
 		EmailConfigurationDTO emailConfigurationDTO = new EmailConfigurationDTO();
 		emailConfigurationDTO.setNew(true);
 		emailConfigurationDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
 		emailConfigurationDTO.setUserName("");
 		emailConfigurationDTO.setBatchClass(controller.getBatchClass());
-		controller.setAdd(true);
-		controller.setSelectedEmailConfiguration(emailConfigurationDTO);
-		controller.getMainPresenter().showEmailView(true);
+		return emailConfigurationDTO;
 	}
 
 	public void onEditEmailButtonClicked(final String identifier) {
@@ -154,13 +159,18 @@ public class BatchClassViewPresenter extends AbstractBatchClassPresenter<BatchCl
 		controller.getMainPresenter().showBatchClassView();
 	}
 	public void onAddBatchClassFieldButtonClicked() {
+		BatchClassFieldDTO batchClassFieldDTO = createBatchClassFieldDTOObject();
+		controller.setAdd(true);
+		controller.setSelectedBatchClassField(batchClassFieldDTO);
+		controller.getMainPresenter().showBatchClassFieldView(true);
+	}
+
+	public BatchClassFieldDTO createBatchClassFieldDTOObject() {
 		BatchClassFieldDTO batchClassFieldDTO = new BatchClassFieldDTO();
 		batchClassFieldDTO.setNew(true);
 		batchClassFieldDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
 		batchClassFieldDTO.setBatchClass(controller.getBatchClass());
-		controller.setAdd(true);
-		controller.setSelectedBatchClassField(batchClassFieldDTO);
-		controller.getMainPresenter().showBatchClassFieldView(true);
+		return batchClassFieldDTO;
 	}
 
 	public void onEditBatchClassFieldButtonClicked(final String identifier) {

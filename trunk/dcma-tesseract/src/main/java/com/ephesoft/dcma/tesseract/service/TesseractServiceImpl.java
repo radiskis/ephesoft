@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
+import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.tesseract.TesseractReader;
 import com.ephesoft.dcma.util.BackUpFileService;
@@ -73,6 +74,17 @@ public class TesseractServiceImpl implements TesseractService {
 			tesseractReader.readOCR(batchInstanceID.getID(), pluginWorkflow);
 		} catch (Exception e) {
 			LOGGER.error("Uncaught Exception in readOCR method " + e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void createOCR(String actualFolderLocation, String colorSwitch, String imageName,
+			BatchInstanceThread batchInstanceThread, String outputFolderLocation, String cmdLanguage, String tesseractVersion) throws DCMAException {
+		try {
+			tesseractReader.createOCR(actualFolderLocation, colorSwitch, imageName, batchInstanceThread, outputFolderLocation, cmdLanguage, tesseractVersion);
+		} catch (Exception e) {
+			LOGGER.error("Exception occurs in creating OCR file " + e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}

@@ -57,12 +57,12 @@ public class BatchClassFieldListView extends View<BatchClassFieldListPresenter> 
 			BatchClassManagementConstants.BATCH_CLASS_FIELD_TYPE), 15, true, BatchClassFieldProperty.TYPE);
 
 	public HeaderColumn fdOrder = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_ORDER), 15, true, BatchClassFieldProperty.FIELDORDERNUMBER);
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_ORDER), 10, true, BatchClassFieldProperty.FIELDORDERNUMBER);
 
 	public HeaderColumn sampleValue = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.BATCH_CLASS_FIELD_SAMPLE), 15);
 	public HeaderColumn validationPattern = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_PATTERN), 10);
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_PATTERN), 15);
 
 	public ListView listView = new ListView();
 

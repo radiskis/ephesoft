@@ -37,13 +37,13 @@ package com.ephesoft.dcma.gwt.admin.bm.client.view.plugin;
 
 import com.ephesoft.dcma.da.property.PluginProperty;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
-import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ModuleViewPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.PluginListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
-public class PluginListView extends View<ModuleViewPresenter> {
+public class PluginListView extends View<PluginListPresenter> {
 
 	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 20,
 			true, PluginProperty.NAME);
@@ -52,7 +52,7 @@ public class PluginListView extends View<ModuleViewPresenter> {
 
 	public ListView listView = new ListView();
 
-	public ListView getModuleListView() {
+	public ListView getPluginListView() {
 		return listView;
 	}
 

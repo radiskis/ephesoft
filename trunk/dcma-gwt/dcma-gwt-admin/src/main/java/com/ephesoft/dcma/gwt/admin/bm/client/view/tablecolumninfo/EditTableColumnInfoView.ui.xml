@@ -2,7 +2,7 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editTableColumnInfoViewPanel">
-		
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="columnPatternLabel"></g:Label>
@@ -14,7 +14,7 @@
 				<g:TextBox ui:field="columnPattern" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="columnNameLabel"></g:Label>
@@ -26,7 +26,19 @@
 				<g:TextBox ui:field="columnName" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="columnHeaderPatternLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:TextBox ui:field="columnHeaderPattern" />
+			</g:cell>
+		</g:HorizontalPanel>
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="betweenLeftLabel"></g:Label>
@@ -68,8 +80,12 @@
 			<g:cell width="7%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="cancelButton" />
+			<g:Button ui:field="cancelButton" />	
+			<g:cell width="7%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:Button ui:field="samplePatternButton" />
 		</g:HorizontalPanel>
-		
+
 	</g:VerticalPanel>
 </ui:UiBinder>

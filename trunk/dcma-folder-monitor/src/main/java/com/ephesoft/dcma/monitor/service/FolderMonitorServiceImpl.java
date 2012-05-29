@@ -36,13 +36,16 @@
 package com.ephesoft.dcma.monitor.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.contentobjects.jnotify.JNotify;
 import net.contentobjects.jnotify.JNotifyException;
@@ -62,6 +65,10 @@ import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.monitor.EphesoftFolderListner;
 import com.ephesoft.dcma.monitor.FolderDetail;
 import com.ephesoft.dcma.monitor.FolderModificationEvent;
+import com.ephesoft.dcma.monitor.service.folderMoniterConstants.FolderMoniterConstants;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
+import com.ephesoft.dcma.util.FileUtils;
+import com.sun.star.io.IOException;
 
 public class FolderMonitorServiceImpl implements FolderMonitorService, ApplicationListener<FolderModificationEvent> {
 
@@ -72,6 +79,8 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 	// private static final String TIMEFORMAT_PM = "PM";
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(FolderMonitorServiceImpl.class);
+
+	protected static final String CREATE_BATCH_INSTANCE_BACKUP = "create_batch_instance_backup";
 
 	@Autowired
 	private BatchClassService batchClassService;
@@ -164,12 +173,83 @@ public class FolderMonitorServiceImpl implements FolderMonitorService, Applicati
 
 			@Override
 			public void run() {
+				String createBackup = FolderMoniterConstants.OFF;
 				try {
 					Thread.sleep(waitTime);
+					ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+					createBackup = prop.getProperty(CREATE_BATCH_INSTANCE_BACKUP);
 				} catch (InterruptedException e) {
+					LOGGER.info("Exception while excuting thread" + e.getMessage());
+				} catch (Exception exception) {
+					LOGGER.info("Exception occur :" + exception.getMessage());
+				}
+				FolderDetail folderDetail = event.getFolderDetail();
+				Set<String> inspectedFiles = new HashSet<String>();
+				String folderPath = folderDetail.getFullPath();
+				File folderToCheck = new File(folderPath);
+				String[] fileList = folderToCheck.list();
+				while (fileList.length != inspectedFiles.size()) {
+					if (folderDetail != null) {
+						if (folderToCheck != null && folderToCheck.exists()) {
+							for (String filePath : fileList) {
+								if (!inspectedFiles.contains(filePath)) {
+									String inputFilePath = folderPath + File.separator + filePath;
+									File fileToCheck = new File(inputFilePath);
+									if (fileToCheck.exists()) {
+										RandomAccessFile randomAccessFile = null;
+										try {
+											randomAccessFile = new RandomAccessFile(fileToCheck, "rw");
+											inspectedFiles.add(filePath);
+										} catch (Exception ex) {
+											LOGGER.info("Error in opening file "+inputFilePath);
+										} finally {
+											if (randomAccessFile != null) {
+												try {
+													randomAccessFile.close();
+												} catch (java.io.IOException e) {
+													LOGGER.info("Unable to close file: " +e.getMessage());
+												}
+											}else {
+												try {
+													Thread.sleep(5000);
+												} catch (InterruptedException ex) {
+													LOGGER.info(ex.getMessage());
+												}
+											}
+											randomAccessFile = null;
+										}
+										
+									}
+								}
+							}
+						}
+						fileList = folderToCheck.list();
+					}
 				}
 
-				FolderDetail folderDetail = event.getFolderDetail();
+				if ((FolderMoniterConstants.ON).equalsIgnoreCase(createBackup)) {
+					File folderBackup = new File(folderDetail.getFullPath() + File.separator + folderDetail.getFolderName());
+					File[] filesToCopy = folderToCheck.listFiles();
+					if (filesToCopy != null && (filesToCopy.length != 0)) {
+						folderBackup.mkdir();
+						for (File srcFile : filesToCopy) {
+							if (srcFile != null && srcFile.exists()) {
+								File destFile = new File(folderBackup.getAbsolutePath() + File.separator + srcFile.getName());
+								try {
+									FileUtils.copyFile(srcFile, destFile);
+								} catch (FileNotFoundException e) {
+									System.out.println("Exception while copying file from source to destination folder"
+											+ e.getMessage());
+								} catch (IOException e) {
+									System.out.println("Exception while reading or writing file" + e.getMessage());
+								} catch (Exception e) {
+									System.out.println("Exception while reading or writing file" + e.getMessage());
+								}
+							}
+						}
+					}
+				}
+
 				List<BatchClass> batchClasses = batchClassService.getAllBatchClassesExcludeDeleted();
 				for (BatchClass batchClass : batchClasses) {
 					if (batchClass.getUncFolder().equals(folderDetail.getParentPath())) {

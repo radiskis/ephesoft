@@ -231,5 +231,98 @@ public class LineDataCarrier {
 
 		return coordinates;
 	}
-	
+
+	/**
+	 * API to return the span at right of the passed span. Returns null if span doesn't exists at right.
+	 * 
+	 * @param span
+	 * @return
+	 */
+	public Span getRightSpan(final Span span) {
+		Span rightSpan = null;
+		if (this.spanList != null && span != null) {
+			for (Span currentSpan : this.spanList) {
+				if (currentSpan != null) {
+					int indexOf = spanList.indexOf(currentSpan);
+					if (indexOf < spanList.size() - 1 && compareSpans(currentSpan, span)) {
+						rightSpan = spanList.get(indexOf + 1);
+						break;
+					}
+				}
+			}
+		}
+		return rightSpan;
+	}
+
+	/**
+	 * API to return the span at right of the passed span. Returns null if span doesn't exists at right.
+	 * 
+	 * @param span
+	 * @return
+	 */
+	public Span getLeftSpan(final Span span) {
+		Span leftSpan = null;
+		if (this.spanList != null && span != null) {
+			for (Span currentSpan : this.spanList) {
+				if (currentSpan != null) {
+					int indexOf = spanList.indexOf(currentSpan);
+					if (indexOf > 0 && compareSpans(currentSpan, span)) {
+						leftSpan = spanList.get(indexOf - 1);
+						break;
+					}
+				}
+			}
+		}
+		return leftSpan;
+	}
+
+	/**
+	 * API to match two spans. Returns true if they match otherwise false.
+	 * 
+	 * @param currentSpan {@link Span}
+	 * @param span {@link Span}
+	 * @return
+	 */
+	public boolean compareSpans(Span currentSpan, Span span) {
+		boolean spanMatched = false;
+		if (currentSpan.getCoordinates() != null && span.getCoordinates() != null) {
+			BigInteger currSpanX0 = currentSpan.getCoordinates().getX0();
+			BigInteger currSpanX1 = currentSpan.getCoordinates().getX1();
+			BigInteger currSpanY0 = currentSpan.getCoordinates().getY0();
+			BigInteger currSpanY1 = currentSpan.getCoordinates().getY0();
+
+			BigInteger spanX0 = span.getCoordinates().getX0();
+			BigInteger spanX1 = span.getCoordinates().getX1();
+			BigInteger spanY0 = span.getCoordinates().getY0();
+			BigInteger spanY1 = span.getCoordinates().getY0();
+
+			if (spanX0.compareTo(currSpanX0) == 0 && spanX1.compareTo(currSpanX1) == 0 && spanY0.compareTo(currSpanY0) == 0
+					&& spanY1.compareTo(currSpanY1) == 0) {
+				spanMatched = true;
+			}
+		}
+		return spanMatched;
+	}
+
+	/**
+	 * API to get the index of passed {@link Span} in the current row.
+	 * 
+	 * @param span
+	 * @return
+	 */
+	public Integer getIndexOfSpan(final Span span) {
+		Integer indexOf = null;
+		if (this.spanList != null && span != null) {
+			for (Span currentSpan : this.spanList) {
+				if (currentSpan != null) {
+					if (compareSpans(currentSpan, span)) {
+						indexOf = spanList.indexOf(currentSpan);
+						break;
+					}
+				}
+			}
+		}
+		return indexOf;
+	}
+
 }

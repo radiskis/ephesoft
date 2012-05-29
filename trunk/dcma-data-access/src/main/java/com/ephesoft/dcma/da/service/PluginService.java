@@ -71,4 +71,22 @@ public interface PluginService {
 	 * @return List<{@link Plugin}>
 	 */
 	List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
+	
+	/**
+	 * 
+	 * @return {@link List} <{@link Plugin}>
+	 */
+	List<Plugin> getAllPluginsNames();
+	
+	/**
+	 * API to create a new plugin.
+	 * @param plugin {@link Plugin}
+	 */
+	void createNewPlugin(Plugin plugin);
+	
+	/**
+	 * API to merge/update the given plugin.
+	 * @param plugin {@link Plugin}
+	 */
+	void mergePlugin(Plugin plugin);
 }

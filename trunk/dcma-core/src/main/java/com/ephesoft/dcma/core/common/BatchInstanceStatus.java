@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.core.common;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,7 +58,15 @@ public enum BatchInstanceStatus {
 	public static List<BatchInstanceStatus> valuesAsList() {
 		return Arrays.asList(values());
 	}
-
+	
+	public static List<String> valuesAsStringList() {
+		List<String> values = new ArrayList<String>();
+		for (BatchInstanceStatus status : BatchInstanceStatus.values()) {
+			values.add(status.toString());
+		}
+		return values;
+	}
+	
 	public Integer getId() {
 		return statusId;
 	}

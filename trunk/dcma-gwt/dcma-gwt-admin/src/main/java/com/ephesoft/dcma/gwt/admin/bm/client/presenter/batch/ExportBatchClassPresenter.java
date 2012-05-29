@@ -44,6 +44,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.ExportBatchClassView;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
@@ -96,9 +97,8 @@ public class ExportBatchClassPresenter extends AbstractBatchClassPresenter<Expor
 	}
 
 	public void onSubmitComplete() {
-		ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setText(MessageConstants.IMPORT_SUCCESSFUL);
-		confirmationDialog.setMessage(MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY);
+		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY, MessageConstants.IMPORT_SUCCESSFUL, Boolean.TRUE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -113,9 +113,7 @@ public class ExportBatchClassPresenter extends AbstractBatchClassPresenter<Expor
 			}
 		});
 
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+	
 	}
 
 	public void onOkClicked() {

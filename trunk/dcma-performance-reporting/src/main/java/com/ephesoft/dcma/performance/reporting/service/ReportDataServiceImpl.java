@@ -35,7 +35,10 @@
 
 package com.ephesoft.dcma.performance.reporting.service;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,6 +52,7 @@ import org.hibernate.StatelessSession;
 import org.hibernate.transform.Transformers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.ephesoft.dcma.core.DCMAException;
@@ -58,6 +62,8 @@ import com.ephesoft.dcma.core.hibernate.DynamicHibernateDao;
 import com.ephesoft.dcma.performance.reporting.ReportingConstants;
 import com.ephesoft.dcma.performance.reporting.domain.ReportDisplayData;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
+import com.ephesoft.dcma.util.ApplicationContextUtil;
+import com.ephesoft.dcma.util.OSUtil;
 
 @Service
 public class ReportDataServiceImpl implements ReportDataService {
@@ -65,6 +71,11 @@ public class ReportDataServiceImpl implements ReportDataService {
 	private DynamicHibernateDao dynamicHibernateDao = new DynamicHibernateDao(ReportingConstants.TARGET_DB_CFG);
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportDataServiceImpl.class);
+	
+	/**
+	 * The path where the ant is placed.
+	 */
+	public static final String ANT_HOME_PATH = "ANT_HOME_PATH";
 
 	/*
 	 * (non-Javadoc)
@@ -72,7 +83,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 	 * @see com.ephesoft.dcma.performance.reporting.service.ReportDataService#getSystemStatistics(java.util.Date, java.util.Date)
 	 */
 	public List<Integer> getSystemStatistics(Date endTime, Date startTime) throws DCMAException {
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		Query qry = session.getNamedQuery("getSystemStatistics");
 
 		// Adding 1 Day in the End Time to show all the records for that Day
@@ -104,7 +115,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 	@SuppressWarnings("unchecked")
 	public List<ReportDisplayData> getReportByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime,
 			Date startTime, int StartIndex, int range, Order order) throws DCMAException {
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		Query qry = session.getNamedQuery("getReportByWorkflow");
 		qry.setResultTransformer(Transformers.aliasToBean(ReportDisplayData.class));
 
@@ -138,7 +149,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 	@SuppressWarnings("unchecked")
 	public List<ReportDisplayData> getReportByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime,
 			int StartIndex, int range, Order order) throws DCMAException {
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		Query qry;
 		if (userName.equalsIgnoreCase("ALL")) {
 			qry = session.getNamedQuery("getReportForAllUsers");
@@ -173,7 +184,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 	 */
 	public Integer getReportTotalRowCountByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime, Date startTime)
 			throws DCMAException {
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		Query qry = session.getNamedQuery("getTotalRowCountByWorkflow");
 		qry.setParameterList("batch_class_id_list", batchClassIds);
 
@@ -201,7 +212,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 	 */
 	public Integer getReportTotalRowCountByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime)
 			throws DCMAException {
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		Query qry;
 		if (userName.equalsIgnoreCase("ALL")) {
 			qry = session.getNamedQuery("getTotalRowCountByAllUsers");
@@ -226,8 +237,8 @@ public class ReportDataServiceImpl implements ReportDataService {
 	}
 
 	public Boolean isAnotherUserConnected() throws DCMAException {
-		LOGGER.info("Entering is already user connected method.");
-		StatelessSession session = dynamicHibernateDao.getStatelessSession(dynamicHibernateDao);
+	   	LOGGER.info("Entering is already user connected method.");
+		StatelessSession session = dynamicHibernateDao.getStatelessSession();
 		List<?> results = null;
 		try {
 			Query qry = session.getNamedQuery("getIsAlreadyUserConnected");
@@ -237,7 +248,7 @@ public class ReportDataServiceImpl implements ReportDataService {
 			LOGGER.error(errorMesg + "Exception thrown is:", e);
 			throw new DCMAException(errorMesg);
 		} catch (Exception e) {
-			String errorMesg = "An error occurred with the reporting query. Please chek the logs for further details.";
+			String errorMesg = "An error occurred with the reporting query. Please check the logs for further details.";
 			LOGGER.error(errorMesg + "Exception thrown is:", e);
 			throw new DCMAException(errorMesg);
 		}
@@ -271,5 +282,54 @@ public class ReportDataServiceImpl implements ReportDataService {
 					+ ioe.getMessage(), ioe);
 		}
 		return popUpConfigs;
+	}
+	
+	@Override
+	public void syncDatabase(String antPath) throws Exception {
+		InputStreamReader inputStreamReader = null;
+		BufferedReader input = null;
+		try {
+			String commandStr = "";
+			if (OSUtil.isWindows()) {
+				commandStr = "cmd /c";
+			}
+			commandStr = commandStr + " ant manual-report-generator -f " + antPath;
+			Process process = Runtime.getRuntime().exec(commandStr, null, new File(System.getenv(ANT_HOME_PATH)));
+			inputStreamReader = new InputStreamReader(process.getInputStream());
+			input = new BufferedReader(inputStreamReader);
+			String line = null;
+			do {
+				line = input.readLine();
+				LOGGER.debug(line);
+			} while (line != null);
+			int exitValue = process.waitFor();
+			LOGGER.debug("System exited with error code:" + exitValue);
+			if (exitValue != 0) {
+				LOGGER.debug("exitValue for command:" + exitValue);
+				LOGGER.error("Non-zero exit value for command found. So exiting the application.");
+				throw new Exception("Non-zero exit value for command found. So exiting the application");
+			}
+		} catch (IOException ioe) {
+			LOGGER.error("Exception while Reading Ant File." + ioe.getMessage(), ioe);
+			throw new Exception("Exception while reading Ant File. " + ioe.getMessage());
+		} catch (Exception e) {
+			LOGGER.error("Exception while Executing Ant Task." + e.getMessage(), e);
+			throw new Exception("Exception while Executing Ant Task." + e.getMessage());
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+			}
+			if (inputStreamReader != null) {
+				try {
+					inputStreamReader.close();
+				} catch (IOException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+			}
+		}
 	}
 }

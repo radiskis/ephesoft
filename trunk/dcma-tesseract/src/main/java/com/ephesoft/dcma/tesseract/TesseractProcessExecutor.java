@@ -74,6 +74,7 @@ public class TesseractProcessExecutor {
 	final private String windowsCmd;
 	final private String overwriteHOCR;
 	final private String cmdParams;
+	final private String outputFolderLocation;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractProcessExecutor.class);
 
@@ -93,6 +94,7 @@ public class TesseractProcessExecutor {
 		this.unixCmd = unixCmd;
 		this.overwriteHOCR = "true";
 		this.cmdParams = "";
+		this.outputFolderLocation = actualFolderLocation;
 		run();
 	}
 
@@ -112,7 +114,28 @@ public class TesseractProcessExecutor {
 		this.unixCmd = unixCmd;
 		this.overwriteHOCR = overwriteHOCR;
 		this.cmdParams = cmdParams;
+		this.outputFolderLocation = actualFolderLocation;
 		run();
+	}
+
+	public TesseractProcessExecutor(String fileName, String actualFolderLocation, String cmdLanguage, BatchInstanceThread thread,
+			String tesseractVersion, String colorSwitch, String windowsCmd, String unixCmd, String cmdParams,
+			String outputFolderLocation) throws DCMAApplicationException {
+		this.fileName = fileName;
+		this.batch = null;
+		this.batchInstanceID = null;
+		this.cmdList = new ArrayList<String>();
+		this.actualFolderLocation = actualFolderLocation;
+		this.cmdLanguage = cmdLanguage;
+		this.thread = thread;
+		this.tesseractVersion = tesseractVersion;
+		this.colorSwitch = colorSwitch;
+		this.windowsCmd = windowsCmd;
+		this.unixCmd = unixCmd;
+		this.overwriteHOCR = "true";
+		this.cmdParams = cmdParams;
+		this.outputFolderLocation = outputFolderLocation;
+		createOCR();
 	}
 
 	public final void run() throws DCMAApplicationException {
@@ -175,17 +198,17 @@ public class TesseractProcessExecutor {
 		LOGGER.info("Target HOCR name is: " + targetHOCR);
 
 		boolean isHOCRExists = false;
-		
+
 		LOGGER.info("Overwrite HOCR is :" + this.overwriteHOCR);
-		
+
 		if (!"true".equalsIgnoreCase(this.overwriteHOCR)) {
 			File fPageFolder = new File(actualFolderLocation);
 			String[] listOfHtmlFiles = fPageFolder.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
 			isHOCRExists = checkHocrExists(targetHOCR, listOfHtmlFiles);
 		}
-		
+
 		LOGGER.info("Is HOCR existing for page" + pageId + "is" + isHOCRExists);
-		
+
 		if (!isHOCRExists) {
 			try {
 				if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
@@ -227,7 +250,71 @@ public class TesseractProcessExecutor {
 		} else {
 			this.targetHOCR = targetHOCR;
 		}
-		
+
+	}
+
+	public final void createOCR() throws DCMAApplicationException {
+		List<String> cmdListLocal = new ArrayList<String>();
+		cmdListLocal.addAll(this.cmdList);
+		if (fileName.contains(" ")) {
+			LOGGER.error(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
+			throw new DCMAApplicationException(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
+		}
+		String tesseractBasePath = getTesseractBasePath();
+		if (tesseractBasePath == null) {
+			LOGGER.error(TESSERACT_BASE_PATH_NOT_CONFIGURED);
+			throw new DCMAApplicationException(TESSERACT_BASE_PATH_NOT_CONFIGURED);
+		}
+
+		String targetHOCR = "";
+		targetHOCR = fileName.substring(0, fileName.lastIndexOf("."));
+
+		LOGGER.info("image file name is: " + fileName);
+		LOGGER.info("Target HOCR name is: " + targetHOCR);
+
+		LOGGER.info("Overwrite HOCR is :" + this.overwriteHOCR);
+
+		try {
+			if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+				creatingTesseractVersion3Command(cmdListLocal, targetHOCR, cmdParams);
+			} else {
+				creatingTesseractVersion2Command(cmdListLocal, targetHOCR);
+			}
+			String[] cmds = new String[cmdListLocal.size()];
+			for (int i = 0; i < cmdListLocal.size(); i++) {
+				if (cmdListLocal.get(i).contains("cmd")) {
+					LOGGER.info("inside cmd");
+					cmds[i] = cmdListLocal.get(i);
+				} else if (cmdListLocal.get(i).contains("/c")) {
+					LOGGER.info("inside /c");
+					cmds[i] = cmdListLocal.get(i);
+				} else {
+					LOGGER.info("inside Tesseract");
+					cmds[i] = cmdListLocal.get(i);
+				}
+			}
+			LOGGER.info("command formed is :");
+			for (int i = 0; i < cmds.length; i++) {
+				LOGGER.info(cmds[i]);
+			}
+			LOGGER.info("command formed Ends.");
+			if (OSUtil.isUnix()) {
+				thread.add(new ProcessExecutor(cmds, new File(tesseractBasePath)));
+			} else if (OSUtil.isWindows()) {
+				thread.add(new ProcessExecutor(cmds, null));
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception while generating HOCR for image" + fileName + e.getMessage());
+			throw new DCMAApplicationException("Exception while generating HOCR for image" + fileName + e.getMessage(), e);
+		}
+
+		if (tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+			// Appending the .html extension to the file(since Tesseract 3.0 appends it automatically)
+			this.targetHOCR = targetHOCR + FileType.HTML.getExtensionWithDot();
+		} else {
+			this.targetHOCR = targetHOCR;
+		}
+
 	}
 
 	private void creatingTesseractVersion2Command(List<String> cmdListLocal, String targetHOCR) throws DCMAApplicationException {
@@ -236,7 +323,7 @@ public class TesseractProcessExecutor {
 		cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
 		cmdListLocal.add(cmdLanguage);
 		cmdListLocal.add(">");
-		cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
+		cmdListLocal.add("\"" + outputFolderLocation + File.separator + targetHOCR + "\"");
 	}
 
 	private void creatingTesseractVersion3Command(List<String> cmdListLocal, String targetHOCR, String cmdParams)
@@ -245,7 +332,7 @@ public class TesseractProcessExecutor {
 			cmdListLocal.add("\"" + System.getenv(TESSERACT_EXECUTOR_PATH) + File.separator + "TesseractExecutor.exe" + "\"");
 			cmdListLocal.add("\"" + getTesseractBasePath() + File.separator + windowsCmd + "\"");
 			cmdListLocal.add("\"" + actualFolderLocation + File.separator + fileName + "\"");
-			cmdListLocal.add("\"" + actualFolderLocation + File.separator + targetHOCR + "\"");
+			cmdListLocal.add("\"" + outputFolderLocation + File.separator + targetHOCR + "\"");
 			cmdListLocal.add("\"-l");
 			cmdListLocal.add(cmdLanguage);
 			if (cmdParams != null && !cmdParams.trim().isEmpty()) {
@@ -259,7 +346,7 @@ public class TesseractProcessExecutor {
 		} else {
 			cmdListLocal.add(unixCmd);
 			cmdListLocal.add(actualFolderLocation + File.separator + fileName);
-			cmdListLocal.add(actualFolderLocation + File.separator + targetHOCR);
+			cmdListLocal.add(outputFolderLocation + File.separator + targetHOCR);
 			cmdListLocal.add("-l");
 			cmdListLocal.add(cmdLanguage);
 			if (cmdParams != null && !cmdParams.trim().isEmpty()) {
@@ -298,7 +385,7 @@ public class TesseractProcessExecutor {
 
 	private boolean checkHocrExists(String hocrName, final String[] listOfFiles) {
 		boolean returnValue = false;
-		String localHOCRFileName = hocrName + ".html";
+		String localHOCRFileName = hocrName + FileType.HTML.getExtensionWithDot();
 		if (listOfFiles != null && listOfFiles.length > 0 && localHOCRFileName != null) {
 			for (String eachFile : listOfFiles) {
 				if (eachFile.equalsIgnoreCase(localHOCRFileName)) {

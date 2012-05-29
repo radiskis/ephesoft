@@ -40,10 +40,19 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("loginService")
 public interface LoginRemoteService extends DCMARemoteService {
+
 	/**
 	 * API to get the application version in use.
+	 * 
 	 * @return {@link String}
 	 * @throws Exception
 	 */
 	public String getProductVersion() throws Exception;
+
+	/**
+	 * API to get license expiry message.
+	 * 
+	 * @throws Exception
+	 */
+	public void getLicenseExpiryMsg() throws Exception;
 }

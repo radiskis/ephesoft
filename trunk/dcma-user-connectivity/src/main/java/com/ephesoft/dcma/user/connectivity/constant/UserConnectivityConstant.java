@@ -152,5 +152,9 @@ public interface UserConnectivityConstant {
 	 * Variable for empty string.
 	 */
 	String EMPTY_STRING = "";
-
+	
+	/**
+	 * Variable for tomcat roles.
+	 */
+	String ROLES = "roles";
 }

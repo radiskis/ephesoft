@@ -368,9 +368,8 @@ public class ReportingPresenter extends AbstractReportingPresenter<ReportingView
 	}
 
 	private void showConfirmationDialog(String message) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(ReportingMessages.DIALOG_TITLE_ERROR));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(message, LocaleDictionary.get().getMessageValue(ReportingMessages.DIALOG_TITLE_ERROR), Boolean.TRUE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -383,9 +382,7 @@ public class ReportingPresenter extends AbstractReportingPresenter<ReportingView
 				// Auto-generated method stub
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	public void onSyncDBClicked() {

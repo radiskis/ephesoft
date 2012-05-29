@@ -35,13 +35,20 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.EditBatchClassView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
@@ -65,7 +72,8 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 	public void onSave() {
 
 		if (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate()) {
-			ConfirmationDialogUtil.showConfirmationDialogError("Mandatory fields cannot be blank.");
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
 		} else {
 			boolean validCheck = true;
 			boolean isPriorityNumber = isNumber(view.getPriority());
@@ -85,6 +93,15 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 				validCheck = false;
 			}
 
+			if (validCheck && !controller.IsSuperAdmin()) {
+				String roleName = checkForValidRoleToUnmap();
+				if(roleName!=null){
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.CANT_DELETE_OWN_ROLE,roleName));
+				validCheck = false;
+				}
+			}
+
 			if (validCheck) {
 				controller.getBatchClass().setDescription(view.getDescription());
 				controller.getBatchClass().setPriority(view.getPriority());
@@ -101,6 +118,7 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 	@Override
 	public void bind() {
 		if (controller.getBatchClass() != null) {
+			view.setName(controller.getBatchClass().getName());
 			view.setDescription(controller.getBatchClass().getDescription());
 			view.setPriority(controller.getBatchClass().getPriority());
 			view.setUncFolder(controller.getBatchClass().getUncFolder());
@@ -126,5 +144,33 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 			returnValue = false;
 		}
 		return returnValue;
+	}
+
+	public String checkForValidRoleToUnmap() {
+		String roleName = null;
+		List<RoleDTO> assignedRoles = controller.getBatchClass().getAssignedRole();
+		Set<String> userRoles = controller.getUserRoles();
+		List<RoleDTO> assignedUserRoles = getAssignedUserRoles(assignedRoles, userRoles);
+		List<RoleDTO> selectedRolesList = view.getRoleList();
+		for (RoleDTO roleDTO : assignedUserRoles) {
+			if (!selectedRolesList.contains(roleDTO)) {
+				roleName = roleDTO.getName();
+				break;
+			}
+		}
+		if (roleName != null) {
+			view.setRole(assignedRoles, controller.getAllRoles());
+		}
+		return roleName;
+	}
+
+	private List<RoleDTO> getAssignedUserRoles(List<RoleDTO> assignedRoles, Set<String> userRoles) {
+		List<RoleDTO> assignedUserRoles = new ArrayList<RoleDTO>();
+		for (RoleDTO roleDTO : assignedRoles) {
+			if (userRoles.contains(roleDTO.getName())) {
+				assignedUserRoles.add(roleDTO);
+			}
+        }
+		return assignedUserRoles;
 	}
 }

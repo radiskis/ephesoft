@@ -40,6 +40,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.EditFunctionKeyView;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
+import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFunctionKeyView> {
@@ -60,6 +61,13 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 			view.setMethodName(controller.getSelectedFunctionKeyDTO().getMethodName());
 			view.setKeyName(controller.getSelectedFunctionKeyDTO().getShortcutKeyName());
 			view.setMethodDescription(controller.getSelectedFunctionKeyDTO().getMethodDescription());
+		} else {
+			FunctionKeyDTO functionKeyDTO = controller.getMainPresenter().getDocumentTypeViewPresenter().createFunctionKeyDTOObject();
+			functionKeyDTO.setMethodName(view.getMethodName());
+			functionKeyDTO.setShortcutKeyName(view.getKeyName());
+			functionKeyDTO.setMethodDescription(view.getMethodDescription());
+			controller.setAdd(true);
+			controller.setSelectedFunctionKeyDTO(functionKeyDTO);
 		}
 		view.getValidateMethodNameTextBox().addValidator(new EmptyStringValidator(view.getMethodNameTextBox()));
 		view.getValidateMethodDescriptionTextBox().addValidator(new EmptyStringValidator(view.getMethodDescriptionTextBox()));

@@ -105,7 +105,7 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 	public List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId) {
 		DetachedCriteria criteria = criteria();
 		criteria.createAlias(BATCH_CLASS_PLUGIN, BATCH_CLASS_PLUGIN, JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClassPlugin.identifier", pluginId));
+		criteria.add(Restrictions.eq("batchClassPlugin.id", pluginId));
 		return find(criteria);
 	}
 

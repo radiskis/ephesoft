@@ -39,7 +39,7 @@ import com.ephesoft.dcma.core.common.DomainProperty;
 
 public enum ModuleProperty implements DomainProperty {
 
-	NAME("name"), DESCRIPTION("description"), ;
+	NAME("name"), DESCRIPTION("description"), ORDER("order");
 
 	private String property;
 

@@ -274,6 +274,25 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 		}
 		return batchClassModule1;
 	}
+	
+	/**
+	 * API to return the batch class module by workflow name.
+	 * 
+	 * @param workflowName {@link String} the workflowName of the module required
+	 * @return {@link BatchClassModule} the module corresponding to the supplied name
+	 */
+	public BatchClassModule getBatchClassModuleByWorkflowName(String workflowName) {
+		BatchClassModule batchClassModule1 = null;
+		if (!(this.batchClassModules == null || this.batchClassModules.isEmpty())) {
+			for (BatchClassModule batchClassModule : this.batchClassModules) {
+				if (batchClassModule.getWorkflowName().equalsIgnoreCase(workflowName)) {
+					batchClassModule1 = batchClassModule;
+					break;
+				}
+			}
+		}
+		return batchClassModule1;
+	}
 
 	/**
 	 * Removes the document type from this batch class based on the identifier Used to delete a document type
@@ -465,5 +484,19 @@ public class BatchClass extends AbstractChangeableEntity implements Serializable
 			isDeleted = Boolean.FALSE;
 		}
 		this.isDeleted = isDeleted;
+	}
+
+	public void removeModuleByIdentifier(String moduleIdentifier) {
+		List<BatchClassModule> batchClassModules = new ArrayList<BatchClassModule>(this.batchClassModules);
+		for (BatchClassModule batchClassModule : batchClassModules) {
+			if (moduleIdentifier.equals(String.valueOf(batchClassModule.getId()))) {
+				this.batchClassModules.remove(batchClassModule);
+				break;
+			}
+		}
+	}
+
+	public void addModule(BatchClassModule batchClassModule) {
+		this.batchClassModules.add(batchClassModule);
 	}
 }

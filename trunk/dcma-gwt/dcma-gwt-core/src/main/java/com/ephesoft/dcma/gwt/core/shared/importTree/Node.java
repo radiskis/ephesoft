@@ -35,7 +35,7 @@
 
 package com.ephesoft.dcma.gwt.core.shared.importTree;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -49,7 +49,7 @@ public class Node implements IsSerializable {
 	public Node() {
 		super();
 		this.label = new Label();
-		this.children = new ArrayList<Node>();
+		this.children = new LinkedList<Node>();
 	}
 
 	public Node(Label label, List<Node> children) {

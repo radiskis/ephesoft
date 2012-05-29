@@ -42,12 +42,13 @@ import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_ConfigView;
 import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVPageProcessDTO;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
-public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_ConfigView> {
+public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_ConfigView> implements DoubleClickListner{
 
 	private BatchClassPluginConfigDTO batchClassPluginConfigDTO;
 
@@ -101,7 +102,7 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 			controller.setPluginConfigDTO(batchClassPluginConfigDTO);
 			controller.setAdd(false);
 		}
-		controller.getMainPresenter().showKVPPAddEditPluginView();
+		controller.getMainPresenter().showKVppPluginConfigAddEditView();
 		controller.getMainPresenter().getKvPPAddEditListPresenter().showKVPPEditView();
 	}
 
@@ -113,7 +114,7 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 		controller.setPluginConfigDTO(batchClassPluginConfigDTO);
 		controller.setAdd(true);
 		controller.setKvPageProcessDTO(kvPageProcessDTO);
-		controller.getMainPresenter().showKVPPAddEditPluginView();
+		controller.getMainPresenter().showKVppPluginConfigAddEditView();
 		controller.getMainPresenter().getKvPPAddEditListPresenter().showKVPPEditView();
 	}
 
@@ -127,7 +128,7 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 					kvPageProcessDTO.setBatchClassPluginConfigDTO(batchClassPluginConfigDTO);
 					controller.getMainPresenter().getKvPPPropertiesPresenter().bind();
 					controller.getMainPresenter().showKVppPluginView();
-					controller.getMainPresenter().getKvPPPropertiesPresenter().showKvPPConfigView();
+					controller.getMainPresenter().getKvPPPropertiesPresenter().showKVppPluginConfigView();
 					controller.getBatchClass().setDirty(true);
 					break;
 				}
@@ -155,5 +156,10 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 
 	public KVPageProcessDTO getKvPageProcessDTO() {
 		return kvPageProcessDTO;
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditKVPPClicked();
 	}
 }

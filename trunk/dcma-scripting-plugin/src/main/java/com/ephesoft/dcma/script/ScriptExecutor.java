@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.script;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,9 @@ import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.service.BatchClassPluginConfigService;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.script.compiler.DynamicCodeCompiler;
 import com.ephesoft.dcma.script.constant.ScriptConstants;
 import com.ephesoft.dcma.util.FileUtils;
@@ -69,14 +72,38 @@ public class ScriptExecutor {
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ScriptExecutor.class);
-	
+
 	/**
 	 * Variable for parserType.
 	 */
 	private String parserType;
 
 	/**
+	 * Variable for updateBatchInstFromBatch.
+	 */
+	private String updateBatchInstFromBatch;
+
+	/**
+	 * Getter for updateBatchInstFromBatch.
+	 * 
+	 * @return
+	 */
+	public String getUpdateBatchInstFromBatch() {
+		return updateBatchInstFromBatch;
+	}
+
+	/**
+	 * Setter for updateBatchInstFromBatch.
+	 * 
+	 * @param updateBatchInstFromBatch
+	 */
+	public void setUpdateBatchInstFromBatch(String updateBatchInstFromBatch) {
+		this.updateBatchInstFromBatch = updateBatchInstFromBatch;
+	}
+
+	/**
 	 * Getter for parserType.
+	 * 
 	 * @return
 	 */
 	public String getParserType() {
@@ -85,6 +112,7 @@ public class ScriptExecutor {
 
 	/**
 	 * Setter for parserType.
+	 * 
 	 * @param parserType
 	 */
 	public void setParserType(final String parserType) {
@@ -96,6 +124,26 @@ public class ScriptExecutor {
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
+
+	/**
+	 * Reference of batchInstanceService.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * @return the batchInstanceService
+	 */
+	public BatchInstanceService getBatchInstanceService() {
+		return batchInstanceService;
+	}
+
+	/**
+	 * @param batchInstanceService the batchInstanceService to set
+	 */
+	public void setBatchInstanceService(BatchInstanceService batchInstanceService) {
+		this.batchInstanceService = batchInstanceService;
+	}
 
 	/**
 	 * Instance of BatchClassPluginConfigService.
@@ -250,9 +298,58 @@ public class ScriptExecutor {
 					}
 				}
 			}
+
+			if (ScriptConstants.ON_STRING.equalsIgnoreCase(getUpdateBatchInstFromBatch())) {
+				Batch updatedBatch = batchSchemaService.getBatch(batchInstanceId);
+				BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+				String batchInstanceBatchName = batchInstance.getBatchName();
+				String batchName = updatedBatch.getBatchName();
+				if (batchName != null && batchInstanceBatchName != null && !batchInstanceBatchName.equals(batchName)) {
+					File srcPath = new File(batchInstance.getUncSubfolder());
+					String batchLocalFolder = batchSchemaService.getLocalFolderLocation();
+					String batchInstancePath = batchLocalFolder + File.separator + batchInstanceId + File.separator
+							+ batchInstanceBatchName;
+					File destPath = new File(batchInstancePath);
+					try {
+						try {
+							FileUtils.copyDirectoryWithContents(srcPath, destPath);
+						} catch (IOException ioException) {
+							LOGGER
+									.error("Unable to copy the content of UNC folder to batch instance folder.Trying to copy it again.... ");
+							FileUtils.copyDirectoryWithContents(srcPath, destPath);
+						}
+					} catch (IOException ioException) {
+						LOGGER
+								.error("Unable to copy the content of UNC folder to batch instance folder.Admin need to copy it manually.");
+					}
+					boolean isDeleted = FileUtils.deleteDirectoryAndContents(srcPath);
+					if (!isDeleted) {
+						LOGGER.error("Unable to delete UNC folder.Trying to delete again....");
+						FileUtils.deleteDirectoryAndContents(srcPath);
+					}
+				}
+				if (batchName != null) {
+					batchInstance.setBatchName(batchName);
+				}
+				String batchPriority = updatedBatch.getBatchPriority();
+				if (batchPriority != null) {
+					try {
+						Integer batchPriorityInt = Integer.parseInt(batchPriority);
+						if (batchPriorityInt != null) {
+							batchInstance.setPriority(batchPriorityInt);
+						}
+					} catch (NumberFormatException numberFormatException) {
+
+					}
+				}
+				batchInstanceService.updateBatchInstance(batchInstance);
+			}
+
 		} catch (DCMAApplicationException dcmae) {
 			throw new DCMAApplicationException("Script errored out.Throwing workflow in error.Exception thrown is:"
 					+ dcmae.getMessage(), dcmae);
+		} catch (IllegalArgumentException illegalArgumentException) {
+			throw new DCMAApplicationException("Script having invalid parser type or invalid agruments.Throwing workflow in error");
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOGGER.error(e.getMessage(), e);

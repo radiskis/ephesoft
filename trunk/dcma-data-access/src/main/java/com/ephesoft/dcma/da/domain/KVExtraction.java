@@ -43,9 +43,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 import com.ephesoft.dcma.core.common.KVFetchValue;
+import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
@@ -72,40 +77,52 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 
 	@Column(name = "no_of_words")
 	private Integer noOfWords;
-	
+
 	@Column(name = "distance")
 	private String distance;
-	
+
 	@Column(name = "multiplier")
 	private Float multiplier;
-	
+
 	@Column(name = "fetch_value")
 	@Enumerated(EnumType.STRING)
 	private KVFetchValue fetchValue;
-	
+
+	@Column(name = "page_value")
+	@Enumerated(EnumType.STRING)
+	private KVPageValue pageValue;
+
 	/**
 	 * length.
 	 */
 	@Column(name = "length")
 	private Integer length;
-	
+
 	/**
 	 * width.
 	 */
 	@Column(name = "width")
 	private Integer width;
-	
+
 	/**
 	 * x-offset.
 	 */
 	@Column(name = "x_offset")
 	private Integer xoffset;
-	
+
 	/**
 	 * y-offset.
 	 */
 	@Column(name = "y_offset")
 	private Integer yoffset;
+
+	/**
+	 * 
+	 */
+	@OneToOne
+	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
+	@JoinColumn(name = "advanced_kv_extraction_id")
+	private AdvancedKVExtraction advancedKVExtraction;
 
 	/**
 	 * @return the fieldType
@@ -163,7 +180,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		this.locationType = locationType;
 	}
 
-	
 	/**
 	 * @return the noOfWords
 	 */
@@ -171,7 +187,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		return noOfWords;
 	}
 
-	
 	/**
 	 * @param noOfWords the noOfWords to set
 	 */
@@ -179,7 +194,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		this.noOfWords = noOfWords;
 	}
 
-	
 	/**
 	 * @return the distance
 	 */
@@ -187,7 +201,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		return distance;
 	}
 
-	
 	/**
 	 * @param distance the distance to set
 	 */
@@ -195,7 +208,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		this.distance = distance;
 	}
 
-	
 	/**
 	 * @return the multiplier
 	 */
@@ -203,7 +215,6 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		return multiplier;
 	}
 
-	
 	/**
 	 * @param multiplier the multiplier to set
 	 */
@@ -211,54 +222,60 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 		this.multiplier = multiplier;
 	}
 
-	
 	public KVFetchValue getFetchValue() {
 		return fetchValue;
 	}
 
-	
 	public void setFetchValue(KVFetchValue fetchValue) {
 		this.fetchValue = fetchValue;
 	}
 
-	
 	public Integer getLength() {
 		return length;
 	}
 
-	
 	public void setLength(Integer length) {
 		this.length = length;
 	}
 
-	
 	public Integer getWidth() {
 		return width;
 	}
 
-	
 	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
-	
 	public Integer getXoffset() {
 		return xoffset;
 	}
 
-	
 	public void setXoffset(Integer xoffset) {
 		this.xoffset = xoffset;
 	}
 
-	
 	public Integer getYoffset() {
 		return yoffset;
 	}
 
-	
+	public KVPageValue getPageValue() {
+		return pageValue;
+	}
+
+	public void setPageValue(KVPageValue pageValue) {
+		this.pageValue = pageValue;
+	}
+
 	public void setYoffset(Integer yoffset) {
 		this.yoffset = yoffset;
+	}
+
+	public AdvancedKVExtraction getAdvancedKVExtraction() {
+		return advancedKVExtraction;
+	}
+
+	public void setAdvancedKVExtraction(AdvancedKVExtraction advancedKVExtraction) {
+		this.advancedKVExtraction = advancedKVExtraction;
 	}
 
 }

@@ -132,11 +132,7 @@ public class AutomaticClassification implements DocumentClassification {
 		// Unknown.
 		List<Page> docPageInfo = automaticPageProcess.readAllPages();
 
-		if (null == docPageInfo) {
-			String error = "No Pages found for the desired document type.";
-			LOGGER.error(error);
-			throw new DCMAApplicationException(error);
-		} else {
+		if (null != docPageInfo) {
 			// create new document for pages that was found in the
 			// batch.xml file for Unknown type document.
 			automaticPageProcess.createDocForPages(docPageInfo);

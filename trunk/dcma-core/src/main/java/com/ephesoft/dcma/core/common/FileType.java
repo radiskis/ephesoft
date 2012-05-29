@@ -37,8 +37,8 @@ package com.ephesoft.dcma.core.common;
 
 public enum FileType {
 
-	PNG("png"), TIFF("tiff"), XML("xml"), PDF("pdf"), DOC("doc"), XLS("xls")
-	, PPT("ppt"), DOCX("docx"), XLSX("xlsx"), PPTX("pptx"), TIF("tif"), TXT("txt"), HTML("html"), ODT("odt"), SER("ser"), ZIP("zip");
+	PNG("png"), TIFF("tiff"), XML("xml"), PDF("pdf"), DOC("doc"), XLS("xls"), PPT("ppt"), DOCX("docx"), XLSX("xlsx"), PPTX("pptx"),
+	TIF("tif"), TXT("txt"), HTML("html"), ODT("odt"), SER("ser"), ZIP("zip"), JPDL("jpdl.xml"), JAR("jar"), JAVA("java");
 
 	private String extension;
 

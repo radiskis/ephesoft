@@ -37,6 +37,7 @@ package com.ephesoft.dcma.imagemagick;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -55,6 +56,12 @@ import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.util.OSUtil;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.codec.TiffImage;
 
 /**
  * This class is used for creating multipage tiff and pdf.
@@ -306,7 +313,8 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 
 				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
 					LOGGER.info("Adding pdfOptimnisation.");
-					op.type("optimize");
+					// As per Ike suggestion, not performing any optimization with Imagemagick using PDF
+					//op.type("optimize");
 				}
 
 				op.addImage();
@@ -320,6 +328,65 @@ public class MultiPageExecutor implements ImageMagicKConstants {
 				}
 			}
 		});
+	}
+
+	/**
+	 * This method creates multi page pdf using IText.
+	 * 
+	 * @param batchInstanceThread
+	 * @param pages11
+	 * @param widthOfPdfPageInt
+	 * @param heightOfPdfPageInt
+	 */
+	public MultiPageExecutor(BatchInstanceThread batchInstanceThread, final String[] pages11, final int widthOfPdfPage,
+			final int heightOfPdfPage) {
+		if (pages11 != null && pages11.length > 0) {
+			this.pages = new String[pages11.length];
+			this.pages = pages11.clone();
+			batchInstanceThread.add(new AbstractRunnable() {
+
+				@Override
+				public void run() {
+					// target path PDF
+					String pdf = pages[pages.length - 1];
+					Document document = new Document(PageSize.LETTER, 0, 0, 0, 0);
+					PdfWriter writer = null;
+					try {
+						writer = PdfWriter.getInstance(document, new FileOutputStream(pdf));
+						// int pages = 0;
+						document.open();
+						RandomAccessFileOrArray ra = null;
+						int comps = 1;
+						int totalTiffImages = pages.length - 1;
+						int index = 0;
+						while (index < totalTiffImages) {
+							ra = new RandomAccessFileOrArray(pages[index]);
+							comps = TiffImage.getNumberOfPages(ra);
+							// Conversion statement
+							for (int tiffPageNumber = 0; tiffPageNumber < comps; ++tiffPageNumber) {
+								Image img = TiffImage.getTiffImage(ra, tiffPageNumber + 1);
+								img.scaleToFit(widthOfPdfPage, heightOfPdfPage);
+								document.add(img);
+								document.newPage();
+								// ++pages;
+							}
+							ra.close();
+							index++;
+						}
+					} catch (Exception e) {
+						LOGGER.error("Error while creating pdf using iText" + e.getMessage(), e);
+						pdf = null;
+					} finally {
+						if (document != null) {
+							document.close();
+						}
+						if (writer != null) {
+							writer.close();
+						}
+					}
+				}
+			});
+		}
 	}
 
 	public String[] getPages() {

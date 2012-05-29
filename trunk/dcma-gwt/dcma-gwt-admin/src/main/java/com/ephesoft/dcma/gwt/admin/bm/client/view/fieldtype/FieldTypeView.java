@@ -39,10 +39,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.KVFetchValue;
+import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.FieldTypeViewPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction.KVTypeListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.regex.RegexListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVFieldTypeListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.regex.RegexListView;
 import com.ephesoft.dcma.gwt.core.client.View;
@@ -58,7 +61,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -77,6 +79,10 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 	private final KVFieldTypeListView kvFieldTypeListView;
 
 	private final RegexListView regexListView;
+
+	private KVTypeListPresenter kvFieldTypeListPresenter;
+
+	private RegexListPresenter regexListPresenter;
 
 	@UiField
 	protected LayoutPanel kvFieldTypeListPanel;
@@ -182,7 +188,8 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 	public void createKVFieldList(List<KVExtractionDTO> fields) {
 		List<Record> recordList = setFieldsList(fields);
 
-		kvFieldTypeListView.listView.initTable(recordList.size(), recordList, true);
+		kvFieldTypeListPresenter = new KVTypeListPresenter(presenter.getController(), kvFieldTypeListView);
+		kvFieldTypeListView.listView.initTable(recordList.size(), null, null, recordList, true, false, kvFieldTypeListPresenter);
 	}
 
 	private List<Record> setFieldsList(List<KVExtractionDTO> fields) {
@@ -205,6 +212,12 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 			} else {
 				record.addWidget(kvFieldTypeListView.fetchValue, new Label(AdminConstants.EMPTY_STRING));
 			}
+			KVPageValue kvPageValue = kvExtractionDTO.getKvPageValue();
+			if (kvPageValue != null) {
+				record.addWidget(kvFieldTypeListView.kvPageValue, new Label(kvExtractionDTO.getKvPageValue().name()));
+			} else {
+				record.addWidget(kvFieldTypeListView.kvPageValue, new Label(AdminConstants.EMPTY_STRING));
+			}
 			Float multiplier = kvExtractionDTO.getMultiplier();
 			if (multiplier != null) {
 				float Rval = multiplier;
@@ -225,8 +238,8 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
 	public void createRegexList(List<RegexDTO> regex) {
 		List<Record> recordList = setRegexList(regex);
-
-		regexListView.listView.initTable(recordList.size(), recordList, true);
+		regexListPresenter = new RegexListPresenter(presenter.getController(), regexListView);
+		regexListView.listView.initTable(recordList.size(), null, null, recordList, true, false, regexListPresenter);
 	}
 
 	private List<Record> setRegexList(List<RegexDTO> regexDTOs) {
@@ -297,9 +310,9 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		int rowCount = kvFieldTypeListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
 			} else {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
@@ -308,18 +321,7 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
 	@UiHandler("editKVButton")
 	public void onEditKVButtonClicked(ClickEvent clickEvent) {
-		String identifier = kvFieldTypeListView.listView.getSelectedRowIndex();
-		int rowCount = kvFieldTypeListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-			} else {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			}
-			return;
-		}
-		presenter.onEditKVButtonClicked(identifier);
-
+		kvFieldTypeListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteKVButton")
@@ -328,16 +330,16 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		int rowCount = kvFieldTypeListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
 			} else {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog
-				.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.DELETE_KV_TYPE_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_KV_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_KV_TYPE_CONFORMATION), LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.DELETE_KV_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -351,33 +353,22 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	@UiHandler("editRegexBtn")
 	public void onEditRegexBtnClicked(ClickEvent clickEvent) {
-		String identifier = regexListView.listView.getSelectedRowIndex();
-		int rowCount = regexListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-			} else {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			}
-			return;
-		}
-		presenter.onEditRegexButtonClicked(identifier);
+		regexListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("addRegexBtn")
 	public void onAddRegexBtnClicked(ClickEvent clickEvent) {
-		if (fieldTypeDetailView.getIsHidden().getValue() || editFieldTypeView.getIsHidden().getValue()) {
-			final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_REGEX_FAILURE));
-			confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-					BatchClassManagementConstants.ADD_REGEX_FAILURE_TITLE));
+		if (((fieldTypeDetailView.getIsHidden().getValue()) || (fieldTypeDetailView.getIsMultiLine().getValue()))
+				|| ((editFieldTypeView.getIsHidden().getValue()) || (editFieldTypeView.getIsMultiLine().getValue()))) {
+			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+					.getMessageValue(BatchClassManagementMessages.ADD_REGEX_FAILURE), LocaleDictionary.get().getConstantValue(
+					BatchClassManagementConstants.ADD_REGEX_FAILURE_TITLE), Boolean.TRUE);
+
 			confirmationDialog.addDialogListener(new DialogListener() {
 
 				@Override
@@ -390,9 +381,7 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 					confirmationDialog.hide();
 				}
 			});
-			confirmationDialog.center();
-			confirmationDialog.show();
-			confirmationDialog.okButton.setFocus(true);
+
 		} else {
 			presenter.onAddRegexBtnClicked();
 		}
@@ -404,16 +393,16 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		int rowCount = regexListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
 			} else {
-				Window.alert(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_REGEX_TYPE_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_REGEX_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_REGEX_TYPE_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_REGEX_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -427,16 +416,14 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	public void getConformationForKVExtractionView(final boolean isAdvanced, final KVExtractionDTO kvExtractionDTO) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog
-				.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.CONTINUE_CONFORMATION));
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.DATA_LOSS));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DATA_LOSS), LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.CONTINUE_CONFORMATION), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -454,8 +441,6 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 }

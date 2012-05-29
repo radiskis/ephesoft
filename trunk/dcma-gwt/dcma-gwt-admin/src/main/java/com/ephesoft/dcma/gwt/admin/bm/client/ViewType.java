@@ -37,10 +37,13 @@ package com.ephesoft.dcma.gwt.admin.bm.client;
 
 public enum ViewType {
 
-	BATCH_CLASS("Batch Class"), MODULE("Module"), PLUGIN("Plugin"), KV_PP_PLUGIN("KV_Plugin"), DOCUMENT_TYPE("Document Type"), PAGE_TYPE("Page Type"),
-	DOCUMENT_DETAIL("Document Detail"), FUZZY_DB("Plugin"), DATABASE_MAPPING("Database Mapping"), TABLE_MAPPING("Table Mapping"),
-	DOCUMENT_LEVEL_FIELD("Document Level Field"), KV_EXTRACTION("KV Extraction"), REGEX("Regex"), EMAIL("Email"), BATCH_CLASS_FIELD("Batch_Class_Field"), KV_PAGE_PROCESS("KV Page Process"),
-	TABLE_INFO("Table Info"),TABLE_COLUMN_INFO("Table Column Info"),FUNCTION_KEY("Function Key");
+	BATCH_CLASS_LISTING("Batch Class List"), BATCH_CLASS("Batch Class"), MODULE("Module"), PLUGIN("Plugin"),
+	KV_PP_PLUGIN("KV_Plugin"), DOCUMENT_TYPE("Document Type"), PAGE_TYPE("Page Type"), DOCUMENT_DETAIL("Document Detail"), FUZZY_DB(
+			"Plugin"), DATABASE_MAPPING("Database Mapping"), TABLE_MAPPING("Table Mapping"), DOCUMENT_LEVEL_FIELD(
+			"Document Level Field"), KV_EXTRACTION("KV Extraction"), REGEX("Regex"), EMAIL("Email"), BATCH_CLASS_FIELD(
+			"Batch_Class_Field"), KV_PP_PLUGIN_CONFIG_ADD_EDIT("KV Page Process"), TABLE_INFO("Table Info"), TABLE_COLUMN_INFO(
+			"Table Column Info"), FUNCTION_KEY("Function Key"), CONFIGURE_MODULE("Configure modules"), CONFIGURE_PLUGIN(
+			"Configure plugins"), KV_PP_PLUGIN_CONFIG("Configure");
 
 	String value;
 

@@ -152,8 +152,9 @@ public class EditPluginView extends View<EditPluginPresenter> {
 		fieldValue.setText(dto.getValue());
 		final ValidatableWidget<TextBox> validatableTextBox = new ValidatableWidget<TextBox>(fieldValue);
 		if (!readOnly) {
-			if (dto.getPluginConfig() != null && (dto.isMandatory())) {
+			if (dto.getPluginConfig() != null) {
 				validatableTextBox.addValidator((Validator) ValidatorFactory.getValidator(dto.getDataType(), fieldValue));
+
 				validatableTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 					@Override

@@ -49,6 +49,11 @@
 	<bean id="tomcatConnectivity" class="com.ephesoft.dcma.user.connectivity.impl.TomcatConnectivity"
 		p:tomcatUserXmlPath="$user{user.tomcatUserXmlPath}">
 	</bean>
+	
+	<bean id="userConnectivityServiceImpl" class="com.ephesoft.dcma.user.service.UserConnectivityServiceImpl"
+		p:superAdmins="$user{user.super_admin}">
+	</bean>
+	
 
 	<context:component-scan base-package="com.ephesoft.dcma.user.connectivity.factory" />
 	<context:component-scan base-package="com.ephesoft.dcma.user.service" />

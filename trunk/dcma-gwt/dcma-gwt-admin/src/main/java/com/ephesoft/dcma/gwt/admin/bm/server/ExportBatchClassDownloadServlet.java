@@ -56,6 +56,7 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.gwt.core.server.BatchClassUtil;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.util.FileUtils;
 
@@ -80,102 +81,120 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		BatchClass batchClass = batchClassService.getLoadedBatchClassByIdentifier(req.getParameter("identifier"));
-		Calendar cal = Calendar.getInstance();
-		String exportSerailizationFolderPath = batchSchemaService.getBatchExportFolderLocation();
+		if(batchClass == null) {
+			log.error("Incorrect batch class identifier specified.");
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Incorrect batch class identifier specified.");
+		} else {
+			Calendar cal = Calendar.getInstance();
+			String exportSerailizationFolderPath = batchSchemaService.getBatchExportFolderLocation();
 
-		SimpleDateFormat formatter = new SimpleDateFormat("MMddyy");
-		String formattedDate = formatter.format(new Date());
-		String zipFileName = batchClass.getIdentifier() + "_" + formattedDate + "_" + cal.get(Calendar.HOUR_OF_DAY)
-				+ cal.get(Calendar.SECOND);
+			SimpleDateFormat formatter = new SimpleDateFormat("MMddyy");
+			String formattedDate = formatter.format(new Date());
+			String zipFileName = batchClass.getIdentifier() + "_" + formattedDate + "_" + cal.get(Calendar.HOUR_OF_DAY)
+					+ cal.get(Calendar.SECOND);
 
-		String tempFolderLocation = exportSerailizationFolderPath + File.separator + zipFileName;
-		File copiedFolder = new File(tempFolderLocation);
+			String tempFolderLocation = exportSerailizationFolderPath + File.separator + zipFileName;
+			File copiedFolder = new File(tempFolderLocation);
 
-		if (copiedFolder.exists()) {
-			copiedFolder.delete();
-		}
+			if (copiedFolder.exists()) {
+				copiedFolder.delete();
+			}
 
-		copiedFolder.mkdirs();
+			copiedFolder.mkdirs();
 
-		BatchClassUtil.copyModules(batchClass);
-		BatchClassUtil.copyDocumentTypes(batchClass);
-		BatchClassUtil.exportEmailConfiguration(batchClass);
-		BatchClassUtil.exportUserGroups(batchClass);
-		BatchClassUtil.exportBatchClassField(batchClass);
+			BatchClassUtil.copyModules(batchClass);
+			BatchClassUtil.copyDocumentTypes(batchClass);
+			BatchClassUtil.exportEmailConfiguration(batchClass);
+			BatchClassUtil.exportUserGroups(batchClass);
+			BatchClassUtil.exportBatchClassField(batchClass);
 
-		File serializedExportFile = new File(tempFolderLocation + File.separator + batchClass.getIdentifier() + SERIALIZATION_EXT);
+			File serializedExportFile = new File(tempFolderLocation + File.separator + batchClass.getIdentifier() + SERIALIZATION_EXT);
 
-		try {
-			SerializationUtils.serialize(batchClass, new FileOutputStream(serializedExportFile));
+			try {
+				SerializationUtils.serialize(batchClass, new FileOutputStream(serializedExportFile));
+				boolean isImagemagickBaseFolder = false;
+				String imageMagickBaseFolderParam = req.getParameter(batchSchemaService.getImagemagickBaseFolderName());
+				if(imageMagickBaseFolderParam != null && (
+						imageMagickBaseFolderParam.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
+								||
+						Boolean.parseBoolean(imageMagickBaseFolderParam))){
+					isImagemagickBaseFolder = true;
+				}
+				
+				boolean isSearchSampleName = false;
+				String isSearchSampleNameParam = req.getParameter(batchSchemaService.getSearchSampleName());
+				if(isSearchSampleNameParam != null && (
+						isSearchSampleNameParam.equalsIgnoreCase(batchSchemaService.getSearchSampleName())
+								||
+						Boolean.parseBoolean(isSearchSampleNameParam))){
+					isSearchSampleName = true;
+				}
 
-			boolean isImagemagickBaseFolder = req.getParameter(batchSchemaService.getImagemagickBaseFolderName()) != null ? true
-					: false;
-			boolean isSearchSampleName = req.getParameter(batchSchemaService.getSearchSampleName()) != null ? true : false;
+				File originalFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator + batchClass.getIdentifier());
 
-			File originalFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator + batchClass.getIdentifier());
+				if (originalFolder.isDirectory()) {
 
-			if (originalFolder.isDirectory()) {
+					String[] folderList = originalFolder.list();
+					Arrays.sort(folderList);
 
-				String[] folderList = originalFolder.list();
-				Arrays.sort(folderList);
-
-				for (int i = 0; i < folderList.length; i++) {
-					if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestKVExtractionFolderName())
-							|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestTableFolderName())
-							|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getFileboundPluginMappingFolderName())) {
-						// Skip this folder
-						continue;
-					} else if (FilenameUtils.getName(folderList[i])
-							.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
-							&& isImagemagickBaseFolder) {
-						FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-								folderList[i]));
-					} else if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getSearchSampleName())
-							&& isSearchSampleName) {
-						FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-								folderList[i]));
-					} else if (!(FilenameUtils.getName(folderList[i]).equalsIgnoreCase(
-							batchSchemaService.getImagemagickBaseFolderName()) || FilenameUtils.getName(folderList[i])
-							.equalsIgnoreCase(batchSchemaService.getSearchSampleName()))) {
-						FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-								folderList[i]));
+					for (int i = 0; i < folderList.length; i++) {
+						if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestKVExtractionFolderName())
+								|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestTableFolderName())
+								|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getFileboundPluginMappingFolderName())) {
+							// Skip this folder
+							continue;
+						} else if (FilenameUtils.getName(folderList[i])
+								.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
+								&& isImagemagickBaseFolder) {
+							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
+									folderList[i]));
+						} else if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getSearchSampleName())
+								&& isSearchSampleName) {
+							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
+									folderList[i]));
+						} else if (!(FilenameUtils.getName(folderList[i]).equalsIgnoreCase(
+								batchSchemaService.getImagemagickBaseFolderName()) || FilenameUtils.getName(folderList[i])
+								.equalsIgnoreCase(batchSchemaService.getSearchSampleName()))) {
+							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
+									folderList[i]));
+						}
 					}
 				}
-			}
 
-		} catch (FileNotFoundException e) {
-			// Unable to read serializable file
-			log.error("Error occurred while creating the serializable file." + e, e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error occurred while creating the serializable file.");
+			} catch (FileNotFoundException e) {
+				// Unable to read serializable file
+				log.error("Error occurred while creating the serializable file." + e, e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error occurred while creating the serializable file.");
 
-		} catch (IOException e) {
-			// Unable to create the temporary export file(s)/folder(s)
-			log.error("Error occurred while creating the serializable file." + e, e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"Error occurred while creating the serializable file.Please try again");
-		}
-		resp.setContentType("application/x-zip\r\n");
-		resp.setHeader("Content-Disposition", "attachment; filename=\"" + zipFileName + ZIP_EXT + "\"\r\n");
-		ServletOutputStream out = null;
-		ZipOutputStream zout = null;
-		try {
-			out = resp.getOutputStream();
-			zout = new ZipOutputStream(out);
-			FileUtils.zipDirectory(tempFolderLocation, zout, zipFileName);
-			resp.setStatus(HttpServletResponse.SC_OK);
-		} catch (IOException e) {
-			// Unable to create the temporary export file(s)/folder(s)
-			log.error("Error occurred while creating the zip file." + e, e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to export.Please try again.");
-		} finally {
-			// clean up code
-			if (zout != null) {
-				zout.close();
+			} catch (IOException e) {
+				// Unable to create the temporary export file(s)/folder(s)
+				log.error("Error occurred while creating the serializable file." + e, e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Error occurred while creating the serializable file.Please try again");
 			}
-			if (out != null) {
-				out.flush();
+			resp.setContentType("application/x-zip\r\n");
+			resp.setHeader("Content-Disposition", "attachment; filename=\"" + zipFileName + ZIP_EXT + "\"\r\n");
+			ServletOutputStream out = null;
+			ZipOutputStream zout = null;
+			try {
+				out = resp.getOutputStream();
+				zout = new ZipOutputStream(out);
+				FileUtils.zipDirectory(tempFolderLocation, zout, zipFileName);
+				resp.setStatus(HttpServletResponse.SC_OK);
+			} catch (IOException e) {
+				// Unable to create the temporary export file(s)/folder(s)
+				log.error("Error occurred while creating the zip file." + e, e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to export.Please try again.");
+			} finally {
+				// clean up code
+				if (zout != null) {
+					zout.close();
+				}
+				if (out != null) {
+					out.flush();
+				}
+				FileUtils.deleteDirectoryAndContentsRecursive(copiedFolder);
 			}
-			FileUtils.deleteDirectoryAndContentsRecursive(copiedFolder);
 		}
 	}
 }

@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.docassembler.classification.engine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
@@ -49,7 +51,9 @@ import com.ephesoft.dcma.docassembler.DocumentAssembler;
 import com.ephesoft.dcma.docassembler.DocumentAssemblerProperties;
 import com.ephesoft.dcma.docassembler.classification.DocumentClassification;
 import com.ephesoft.dcma.docassembler.classification.engine.process.LucenePageProcess;
+import com.ephesoft.dcma.docassembler.classification.image.process.ImagePageProcess;
 import com.ephesoft.dcma.docassembler.constant.DocumentAssemblerConstants;
+import com.ephesoft.dcma.docassembler.factory.DocumentClassificationFactory;
 
 /**
  * This class does the actual processing on the basis of Search classification for document assembly. It will read all the pages of the
@@ -122,21 +126,69 @@ public class SearchClassification implements DocumentClassification {
 		propertyMap.put(DocumentAssemblerConstants.RULE_M_PAGE, ruleMPage);
 
 		lucenePageProcess.setPropertyMap(propertyMap);
-
 		// read all the pages of the document for document type
 		// Unknown.
 		List<Page> docPageInfo = lucenePageProcess.readAllPages();
 
-		if (null == docPageInfo) {
-			String error = "No Pages found for the desired document type.";
-			LOGGER.error(error);
-			throw new DCMAApplicationException(error);
-		} else {
+		if (null != docPageInfo) {
 			// create new document for pages that was found in the
 			// batch.xml file for Unknown type document.
-			lucenePageProcess.createDocForPages(docPageInfo);
+			List<Document> insertAllDocument = new ArrayList<Document>();			
+			lucenePageProcess.createDocForPages(insertAllDocument, docPageInfo, false);
 		}
 
+	}
+
+	public List<Document> processUnclassifiedPagesAPI(List<Page> docPageInfo, DocumentAssembler documentAssembler,
+			String batchClassID, PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException {
+		LOGGER.info("Setting all the fields for LucenePageProcess.");
+
+		LucenePageProcess lucenePageProcess = new LucenePageProcess();
+
+		lucenePageProcess.setPageTypeService(documentAssembler.getPageTypeService());
+		lucenePageProcess.setPluginPropertiesService(documentAssembler.getPluginPropertiesService());
+		lucenePageProcess.setBatchClassIdentifier(batchClassID);
+		lucenePageProcess.setDocTypeService(documentAssembler.getDocTypeService());
+		lucenePageProcess.setBatchSchemaService(documentAssembler.getBatchSchemaService());
+
+		Map<String, String> propertyMap = new HashMap<String, String>();
+		propertyMap.put(DocumentAssemblerConstants.LUCENE_CLASSIFICATION, documentAssembler.getLuceneClassification());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_FIRST_PAGE, documentAssembler.getCheckFirstPage());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE, documentAssembler.getCheckMiddlePage());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_LAST_PAGE, documentAssembler.getCheckLastPage());
+
+		LOGGER.info("Initializing properties...");
+		String factoryClassification = DocumentClassificationFactory.SEARCHCLASSIFICATION.toString();
+		String ruleFMLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_MP_LP);
+		String ruleFPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP);
+		String ruleMPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_MP);
+		String ruleLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_LP);
+		String ruleFLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_LP);
+		String ruleMLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_MP_LP);
+		String ruleFMPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_MP);
+		LOGGER.info("Properties Initialized Successfully");
+
+		propertyMap.put(DocumentAssemblerConstants.FACTORY_CLASSIFICATION, factoryClassification);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FL_PAGE, ruleFLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FML_PAGE, ruleFMLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FM_PAGE, ruleFMPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_F_PAGE, ruleFPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_L_PAGE, ruleLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_ML_PAGE, ruleMLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_M_PAGE, ruleMPage);
+
+		lucenePageProcess.setPropertyMap(propertyMap);
+		
+		List<Document> insertAllDocument = new ArrayList<Document>();
+		lucenePageProcess.createDocForPages(insertAllDocument,docPageInfo, true);
+		return insertAllDocument;
 	}
 
 }

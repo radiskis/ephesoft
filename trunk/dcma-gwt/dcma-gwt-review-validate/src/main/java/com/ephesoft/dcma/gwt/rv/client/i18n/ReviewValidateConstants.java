@@ -57,7 +57,7 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 
 	String title_select_doc = "title_select_doc";
 
-	String title_mege_confirm = "title_mege_confirm";
+	String title_merge_confirm = "title_merge_confirm";
 
 	String tooltip_split = "tooltip_split";
 
@@ -332,4 +332,22 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 	String save_button_tooltip = "save_button_tooltip";
 	
 	String title_topPanel_save_anchor = "title_topPanel_save_anchor";
+
+	String BATCH_ID_AS_FIRST_ARG = "?batch_id=";
+
+	String BATCH_ID_AS_ANOTHER_ARG = "&batch_id=";
+	
+	String BATCH_ID = "batch_id";
+	
+	String SPACE = " ";
+
+	String BATCH_INSTANCE_ABBREVIATION = "BI";
+	
+	String ERROR_TYPE_5 = "custom_error";
+
+	String REGEX_ACTIVATE_DEACTIVATE_TOGGLE_SHORTCUT = "regex_activate_deactivate_toggle_shortcut";
+
+	String POP_UP_X_DIMENSION = "x_dimension";
+	
+	String POP_UP_Y_DIMENSION = "y_dimension";
 }

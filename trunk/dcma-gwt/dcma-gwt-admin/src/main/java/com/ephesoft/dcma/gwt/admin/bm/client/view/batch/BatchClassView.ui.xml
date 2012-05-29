@@ -39,9 +39,15 @@
 					</g:customHeader>
 					<g:DockLayoutPanel ui:field="moduleTypeListPanel"
 						width="98%" height="92%" unit="PCT">
-						<g:north size="10">
+						<g:north size="27">
 							<g:HorizontalPanel width="99%" ui:field="buttonPanel">
-								<g:cell width="80%" horizontalAlignment="ALIGN_RIGHT">
+								<g:cell width="96%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addModuleButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
 									<g:Button ui:field="editModuleButton"></g:Button>
 								</g:cell>
 							</g:HorizontalPanel>
@@ -126,7 +132,8 @@
 					<g:DockLayoutPanel ui:field="batchClassFieldListPanel"
 						width="98%" height="92%">
 						<g:north size="27">
-							<g:HorizontalPanel width="99%" ui:field="batchClassFieldButtonPanel">
+							<g:HorizontalPanel width="99%"
+								ui:field="batchClassFieldButtonPanel">
 								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
 									<g:Button ui:field="addBatchClassFieldButton"></g:Button>
 								</g:cell>

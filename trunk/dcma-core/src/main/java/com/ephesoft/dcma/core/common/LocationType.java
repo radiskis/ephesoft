@@ -35,8 +35,18 @@
 
 package com.ephesoft.dcma.core.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum LocationType {
 
 	TOP, RIGHT, LEFT, BOTTOM, TOP_RIGHT, TOP_LEFT, BOTTOM_LEFT, BOTTOM_RIGHT;
-
+	
+	public static List<String> valuesAsStringList() {
+		List<String> values = new ArrayList<String>();
+		for (LocationType type : LocationType.values()) {
+			values.add(type.toString());
+		}
+		return values;
+	}
 }

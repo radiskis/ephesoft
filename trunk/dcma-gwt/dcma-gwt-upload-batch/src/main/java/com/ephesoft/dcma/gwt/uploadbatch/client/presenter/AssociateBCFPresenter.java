@@ -143,7 +143,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					if (!docFieldWidgets.get(index).getTextBoxWidget().validate()) {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.INVALID_REGEX_PATTERN), LocaleDictionary.get().getConstantValue(
-								UploadBatchConstants.ASSOCIATE_BCF_BUTTON));
+								UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
 						fieldsValid = true;
 						setVisibleDialogue = false;
 						break;
@@ -153,7 +153,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					if (docFieldWidgets.get(index).getListBoxwidget().getSelectedIndex() == -1) {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-								UploadBatchConstants.ASSOCIATE_BCF_BUTTON));
+								UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
 						fieldsValid = true;
 						break;
 					}
@@ -211,7 +211,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					} else {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.ASSOCIATE_BATCH_CLASS_FIELD_SUCCESS), LocaleDictionary.get()
-								.getConstantValue(UploadBatchConstants.ASSOCIATE_BCF_BUTTON));
+								.getConstantValue(UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
 					}
 				}
 
@@ -260,7 +260,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 							view.getDialogBox().hide();
 							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 									UploadBatchMessages.NO_BATCH_CLASS_FIELD_FOUND), LocaleDictionary.get().getConstantValue(
-									UploadBatchConstants.ASSOCIATE_BCF_BUTTON));
+									UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
 						}
 
 						@Override

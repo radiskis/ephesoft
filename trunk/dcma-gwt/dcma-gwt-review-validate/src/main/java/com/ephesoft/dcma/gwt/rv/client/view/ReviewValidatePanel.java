@@ -39,8 +39,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.view.SlidingPanel;
+import com.ephesoft.dcma.gwt.rv.client.constant.ReviewProperties;
 import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.gwt.rv.client.event.DocExpandEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.DocExpandEventHandler;
@@ -77,14 +79,6 @@ public class ReviewValidatePanel extends RVBasePanel {
 	interface Binder extends UiBinder<DockLayoutPanel, ReviewValidatePanel> {
 	}
 
-	private final String URL_CTRL_4 = ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey();
-
-	private final String URL_CTRL_7 = ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey();
-
-	private final String URL_CTRL_8 = ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey();
-
-	private final String URL_CTRL_9 = ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey();
-
 	HorizontalPanel urlButtonPanel = new HorizontalPanel();
 	@UiField
 	Label functionKeyLabel;
@@ -92,7 +86,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 	SlidingPanel slidingPanel;
 	ReviewPanel reviewPanel = new ReviewPanel();
 	ValidatePanel validatePanel = new ValidatePanel();
-	Label seperator = new Label();
+	Label separator = new Label();
 	LayoutPanel pageImageLayoutPanel = new LayoutPanel();
 	@UiField
 	HorizontalPanel firstShortcutsPanel;
@@ -104,7 +98,8 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 	DockLayoutPanel tempPanel;
 
-	DisclosurePanel reviewDisclosurePanel = new DisclosurePanel(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.REVIEW_PANEL), true);
+	DisclosurePanel reviewDisclosurePanel = new DisclosurePanel(LocaleDictionary.get().getConstantValue(
+			ReviewValidateConstants.REVIEW_PANEL), true);
 
 	FocusPanel reviewFocusPanel = new FocusPanel();
 	VerticalPanel reviewVerticalPanel = new VerticalPanel();
@@ -113,7 +108,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 	LayoutPanel layoutPanel = new LayoutPanel();
 
 	VerticalPanel centerPanel = new VerticalPanel();
-	
+
 	FocusPanel focusPanel = new FocusPanel();
 	private static final Binder binder = GWT.create(Binder.class);
 
@@ -124,6 +119,10 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private Map<String, String> urlAndTitleMap;
 
 	private Map<String, String> urlAndApplicationMap;
+	private String URL_CTRL_4;
+	private String URL_CTRL_7;
+	private String URL_CTRL_8;
+	private String URL_CTRL_9;
 
 	public ReviewValidatePanel() {
 		initWidget(binder.createAndBindUi(this));
@@ -150,7 +149,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 			pageImagePanel.initializeWidget();
 		}
 		functionKeyLabel.setVisible(false);
-		functionKeyLabel.setText(ReviewValidateConstants.FUNCTION_KEYS + ":");
+		functionKeyLabel.setText(ReviewValidateConstants.FUNCTION_KEYS + ReviewValidateConstants.COLON);
 		functionKeyLabel.addStyleName(ReviewValidateConstants.BOLD_TEXT);
 		slidingPanel.setWidget(firstShortcutsPanel);
 		reviewDisclosurePanel.setWidth("100%");
@@ -170,18 +169,50 @@ public class ReviewValidatePanel extends RVBasePanel {
 				focusPanel.setFocus(true);
 			}
 		});
-
+		BatchInstanceStatus batchInstanceStatus = presenter.batchDTO.getBatchInstanceStatus();
+		setURLConstants(batchInstanceStatus);
 		setUrlAndApplicationMap();
+
+		if (batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_VALIDATION)
+				|| batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
+			reviewDisclosurePanel.setOpen(false);
+		}
+
 		setVisibility();
+
 		slidingPanel.setEventBus(eventBus);
 
 		tempPanel = new DockLayoutPanel(Unit.PCT);
-		
+
 		focusPanel.add(reviewDisclosurePanel);
+	}
+
+	private void setURLConstants(BatchInstanceStatus batchInstanceStatus) {
+		switch (batchInstanceStatus) {
+			case READY_FOR_VALIDATION:
+				URL_CTRL_4 = ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey();
+				URL_CTRL_7 = ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey();
+
+				URL_CTRL_8 = ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey();
+
+				URL_CTRL_9 = ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey();
+				break;
+			case READY_FOR_REVIEW:
+				URL_CTRL_4 = ReviewProperties.EXTERNAL_APP_URL1.getPropertyKey();
+				URL_CTRL_7 = ReviewProperties.EXTERNAL_APP_URL2.getPropertyKey();
+
+				URL_CTRL_8 = ReviewProperties.EXTERNAL_APP_URL3.getPropertyKey();
+
+				URL_CTRL_9 = ReviewProperties.EXTERNAL_APP_URL4.getPropertyKey();
+				break;
+
+			default:
+		}
 
 	}
 
 	private void setUrlAndApplicationMap() {
+
 		urlAndApplicationMap = new HashMap<String, String>();
 		urlAndApplicationMap.put(URL_CTRL_4, ReviewValidateConstants.APP_CTRL_4);
 		urlAndApplicationMap.put(URL_CTRL_7, ReviewValidateConstants.APP_CTRL_7);
@@ -201,9 +232,9 @@ public class ReviewValidatePanel extends RVBasePanel {
 					} else if (event.getDocument() != null && event.isValidated()) {
 						removeErrorText();
 					} else {
-						if (!event.isValidated() && event.getFieldName() != null && !event.getFieldName().isEmpty()
+						if (!event.isValidatorsValidated() && event.getFieldName() != null && !event.getFieldName().isEmpty()
 								&& event.getSampleValue() != null && !event.getSampleValue().isEmpty()) {
-							setErrorText(event.getFieldName() + " "
+							setErrorText(event.getFieldName() + ReviewValidateConstants.SPACE
 									+ LocaleDictionary.get().getMessageValue(ReviewValidateMessages.REGEX_PATTERN_COMPLAINT) + " : "
 									+ event.getSampleValue());
 						} else {
@@ -230,7 +261,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 					isDocumentError = false;
 				}
 				if (!isDocumentError) {
-					setErrorText("");
+					setErrorText(ReviewValidateConstants.EMPTY_STRING);
 				}
 				presenter.document = event.getDocument();
 				presenter.setCustomizedShortcutPanels();
@@ -253,13 +284,13 @@ public class ReviewValidatePanel extends RVBasePanel {
 				if (!presenter.isTableView()) {
 					if (event.getEvent().isControlKeyDown()) {
 						switch (event.getEvent().getNativeKeyCode()) {
-							case '4':
+							case 52:
 							case 100:
-							case '7':
+							case 55:
 							case 103:
-							case '8':
+							case 56:
 							case 104:
-							case '9':
+							case 57:
 							case 105:
 								event.getEvent().preventDefault();
 								break;
@@ -277,19 +308,23 @@ public class ReviewValidatePanel extends RVBasePanel {
 					if (event.getEvent().isControlKeyDown()) {
 						String urlToFire = null;
 						switch (event.getEvent().getNativeKeyCode()) {
-							case '4':
+							case 52: // ctrl+4
+							case 100:
 								event.getEvent().preventDefault();
 								urlToFire = URL_CTRL_4;
 								break;
-							case '7':
+							case 55:
+							case 103: // ctrl+7
 								event.getEvent().preventDefault();
 								urlToFire = URL_CTRL_7;
 								break;
-							case '8':
+							case 56: // ctrl+8
+							case 104:
 								event.getEvent().preventDefault();
 								urlToFire = URL_CTRL_8;
 								break;
-							case '9':
+							case 57:
+							case 105: // ctrl+9
 								event.getEvent().preventDefault();
 								urlToFire = URL_CTRL_9;
 								break;
@@ -312,8 +347,8 @@ public class ReviewValidatePanel extends RVBasePanel {
 			case READY_FOR_REVIEW:
 				// reviewPanel.clearPanel();
 				// validatePanel.clearPanel();
-				setErrorText("");
-				urlButtonPanel.setVisible(false);
+				setErrorText(ReviewValidateConstants.EMPTY_STRING);
+				urlButtonPanel.setVisible(true);
 				slidingPanel.setVisible(false);
 				functionKeyLabel.setVisible(false);
 				pageImagePanel.setVisible(true);
@@ -322,8 +357,6 @@ public class ReviewValidatePanel extends RVBasePanel {
 				pageImageLayoutPanel.clear();
 				pageImageLayoutPanel.add(pageImagePanel);
 				layoutPanel.add(pageImageLayoutPanel);
-				centerPanel.add(urlButtonPanel);
-				centerPanel.add(seperator);
 				reviewValidatePanel.clear();
 				reviewFocusPanel.setHeight("100%");
 				reviewFocusPanel.setWidth("100%");
@@ -332,18 +365,36 @@ public class ReviewValidatePanel extends RVBasePanel {
 				reviewVerticalPanel.add(reviewPanel);
 				reviewDisclosurePanel.add(reviewPanel);
 				if (reviewDisclosurePanel.isOpen()) {
-					reviewValidatePanel.addNorth(focusPanel, 30);
+					reviewValidatePanel.addNorth(focusPanel, 31);
+					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+						setButtonsForUrls();
+						reviewValidatePanel.addSouth(layoutPanel, 52);
+						centerPanel.add(urlButtonPanel);
+					} else {
+						reviewValidatePanel.addSouth(layoutPanel, 60);
+					}
+					centerPanel.add(separator);
+
 				} else {
-					reviewValidatePanel.addNorth(focusPanel, 7);
+
+					reviewValidatePanel.addNorth(focusPanel, 8.5);
+					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+						setButtonsForUrls();
+						reviewValidatePanel.addSouth(layoutPanel, 74.5);
+						centerPanel.add(urlButtonPanel);
+					} else {
+						reviewValidatePanel.addSouth(layoutPanel, 83.5);
+					}
+
 				}
-				reviewValidatePanel.addSouth(layoutPanel, 55);
+
 				reviewValidatePanel.add(centerPanel);
 				break;
 			case READY_FOR_VALIDATION:
 				// reviewPanel.clearPanel();
 				// validatePanel.clearPanel();
 				urlButtonPanel.setVisible(true);
-				setErrorText("");
+				setErrorText(ReviewValidateConstants.EMPTY_STRING);
 				slidingPanel.setVisible(false);
 				functionKeyLabel.setVisible(false);
 				validatePanel.setVisible(true);
@@ -366,11 +417,12 @@ public class ReviewValidatePanel extends RVBasePanel {
 					} else {
 						reviewValidatePanel.addSouth(layoutPanel, 60);
 					}
-					centerPanel.add(seperator);
+					centerPanel.add(separator);
 					reviewValidatePanel.add(centerPanel);
 				} else {
 					reviewValidatePanel.addNorth(focusPanel, 8.5);
 					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+						setButtonsForUrls();
 						reviewValidatePanel.addSouth(layoutPanel, 74.5);
 						centerPanel.add(urlButtonPanel);
 					} else {
@@ -386,13 +438,13 @@ public class ReviewValidatePanel extends RVBasePanel {
 	}
 
 	private void setErrorText(String errorText) {
-		seperator.setText(errorText);
-		seperator.setStyleName(ReviewValidateConstants.ERROR_STYLE);
+		separator.setText(errorText);
+		separator.setStyleName(ReviewValidateConstants.ERROR_STYLE);
 	}
 
 	private void removeErrorText() {
-		seperator.setText("");
-		seperator.removeStyleName(ReviewValidateConstants.ERROR_STYLE);
+		separator.setText(ReviewValidateConstants.EMPTY_STRING);
+		separator.removeStyleName(ReviewValidateConstants.ERROR_STYLE);
 	}
 
 	public ValidatePanel getValidatePanel() {
@@ -448,7 +500,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 		}
 	}
-	
+
 	public DisclosurePanel getReviewDisclosurePanel() {
 		return reviewDisclosurePanel;
 	}

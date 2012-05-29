@@ -141,16 +141,8 @@ public class ImageComparisonUtil {
 	 * @param path2 image file 2
 	 * @return Similarity Percentage 100 for totally similar images.
 	 */
-	public double compareImagesRuntime(final String path1, final String path2, final String batchInstanceID) {
+	public double compareImagesRuntime(final String path1, final String path2, String imMetric, String imFuzz) {
 		double similarity = 0;
-
-		// Initialize properties
-		LOGGER.info("Initializing properties...");
-		String imMetric = pluginPropertiesService.getPropertyValue(batchInstanceID, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
-				ImageMagicProperties.CLASSIFY_IMAGES_COMP_METRIC);
-		String imFuzz = pluginPropertiesService.getPropertyValue(batchInstanceID, ImageMagicKConstants.CLASSIFY_IMAGES_PLUGIN,
-				ImageMagicProperties.CLASSIFY_IMAGES_FUZZ_PERCNT);
-		LOGGER.info("Properties Initialized Successfully");
 
 		LOGGER.info("imMetric = " + imMetric);
 		LOGGER.info("imFuzz = " + imFuzz);
@@ -169,7 +161,7 @@ public class ImageComparisonUtil {
 				compareCommand.append("cmd /c");
 				compareCommand.append(" ");
 			}
-			compareCommand.append(System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE) + File.separator + "compare");
+			compareCommand.append("compare");
 			compareCommand.append(' ');
 			compareCommand.append("-dissimilarity-threshold");
 			compareCommand.append(SPACE);
@@ -183,7 +175,7 @@ public class ImageComparisonUtil {
 			compareCommand.append(SPACE);
 			compareCommand.append(imFuzz);
 			compareCommand.append('%');
-			compareCommand.append(SPACE);
+			compareCommand.append(SPACE);  
 			compareCommand.append(QUOTES + path1 + QUOTES);
 			compareCommand.append(SPACE);
 			compareCommand.append(QUOTES + path2 + QUOTES);
@@ -191,7 +183,7 @@ public class ImageComparisonUtil {
 			compareCommand.append("null");
 			String compareString = compareCommand.toString();
 			LOGGER.info("Compare command = " + compareString);
-			Process proc = runtime.exec(compareString);
+			Process proc = runtime.exec(compareString, null, new File(System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE)));
 
 			String cmdOutput = "";
 			InputStreamReader inputStreamReader = null;
@@ -217,7 +209,7 @@ public class ImageComparisonUtil {
 
 			LOGGER.info("openingBraces = " + openingBraces);
 			LOGGER.info("closingBraces = " + closingBraces);
-
+			
 			if (openingBraces != -1 && closingBraces != -1) {
 				String strDisimilarity = cmdOutput.substring(openingBraces + 1, closingBraces);
 				LOGGER.info("strDisimilarity = " + strDisimilarity);

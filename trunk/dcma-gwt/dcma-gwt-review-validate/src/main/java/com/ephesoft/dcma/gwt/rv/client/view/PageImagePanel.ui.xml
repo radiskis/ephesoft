@@ -2,7 +2,7 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c='urn:import:com.ephesoft.dcma.gwt.core.client.ui'>
 
 	<g:DockLayoutPanel unit="PCT">
-		<g:north size="50">
+		<g:north size="40">
 			<g:VerticalPanel></g:VerticalPanel>
 		</g:north>
 		<g:center>

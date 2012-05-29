@@ -65,6 +65,9 @@ public class BatchDTO implements IsSerializable {
 	private String fuzzySearchPopUpYDimension = "350";
 	private Integer realUpdateInterval = 5;
 	private Integer preloadedImageCount = 3;
+	//value '1' signifies document to be displayed in tree view
+	private int docDisplayName=1;
+	
 
 	private static final String PIXELS = "px";
 
@@ -80,9 +83,10 @@ public class BatchDTO implements IsSerializable {
 			String isFuzzySearchEnabled, String suggestionBoxSwitchState, String externalApplicationSwitchState,
 			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp, Map<String, String> urlAndTitleMap,
 			String fuzzySearchPopUpXDimension, String fuzzySearchPopUpYDimension, String updateIntervalInStringForm,
-			String preloadedImageCountString, BatchInstanceStatus batchInstanceStatus) {
+			String preloadedImageCountString, BatchInstanceStatus batchInstanceStatus,int docDisplayName) {
 		this.batch = batch;
 		this.baseHTTPUrl = baseHTTPUrl;
+		this.setDocDisplayName(docDisplayName);
 		this.batchInstanceStatus = batchInstanceStatus;
 		if (null != isValidationScriptEnabled) {
 			setIsValidationScriptEnabled(isValidationScriptEnabled);
@@ -157,6 +161,11 @@ public class BatchDTO implements IsSerializable {
 
 	public String getAbsoluteURLForRotatedImage(String fileName, String direction) {
 		return this.baseHTTPUrl + "/" + direction + "/" + fileName;
+	}
+
+	public String getDocDisplayNameByDocId(String id) {
+		Document document = getDocumentById(id);
+		return document.getType();
 	}
 
 	public Document getDocumentById(String id) {
@@ -364,12 +373,20 @@ public class BatchDTO implements IsSerializable {
 	public Integer getRealUpdateInterval() {
 		return realUpdateInterval;
 	}
-	
+
 	public Integer getPreloadedImageCount() {
 		return preloadedImageCount;
 	}
-	
+
 	public void setPreloadedImageCount(Integer preloadedImageCount) {
 		this.preloadedImageCount = preloadedImageCount;
+	}
+
+	public void setDocDisplayName(int docDisplayName) {
+		this.docDisplayName = docDisplayName;
+	}
+
+	public int getDocDisplayName() {
+		return docDisplayName;
 	}
 }

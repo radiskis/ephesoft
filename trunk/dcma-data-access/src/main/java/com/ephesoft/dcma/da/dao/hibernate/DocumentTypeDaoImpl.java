@@ -145,4 +145,12 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 		criteria.add(Restrictions.eq("identifier", identifier));
 		return this.findSingle(criteria);
 	}
+	
+	@Override
+	public List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier) {
+		DetachedCriteria criteria = criteria();
+		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		return find(criteria);
+	}
 }

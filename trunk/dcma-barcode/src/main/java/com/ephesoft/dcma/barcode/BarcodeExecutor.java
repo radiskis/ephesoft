@@ -110,6 +110,18 @@ public class BarcodeExecutor extends AbstractRunnable {
 							barCodeFormatVector.add(BarcodeFormat.QR_CODE);
 						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.DATAMATRIX.name())) {
 							barCodeFormatVector.add(BarcodeFormat.DATA_MATRIX);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODE128.name())) {
+							barCodeFormatVector.add(BarcodeFormat.CODE_128);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODE93.name())) {
+							barCodeFormatVector.add(BarcodeFormat.CODE_93);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.ITF.name())) {
+							barCodeFormatVector.add(BarcodeFormat.ITF);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODABAR.name())) {
+							barCodeFormatVector.add(BarcodeFormat.CODABAR);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.PDF417.name())) {
+							barCodeFormatVector.add(BarcodeFormat.PDF417);
+						} else if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.EAN13.name())) {
+							barCodeFormatVector.add(BarcodeFormat.EAN_13);
 						}
 					}
 					codeResults = getBarCodeResults(sourceImage, fileName, barCodeFormatVector);
@@ -181,12 +193,25 @@ public class BarcodeExecutor extends AbstractRunnable {
 				barcodeResults[i].setY0Cord(results[i].getResultPoints()[0].getY());
 				barcodeResults[i].setY1Cord(results[i].getResultPoints()[1].getY());
 				barcodeResults[i].setTexts(results[i].getText());
-				if (BarcodeFormat.CODE_39.getName().equalsIgnoreCase(results[i].getBarcodeFormat().getName())) {
+				String barcodeName = results[i].getBarcodeFormat().getName();
+				if (BarcodeFormat.CODE_39.getName().equalsIgnoreCase(barcodeName)) {
 					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODE39);
-				} else if (BarcodeFormat.QR_CODE.getName().equalsIgnoreCase(results[i].getBarcodeFormat().getName())) {
+				} else if (BarcodeFormat.QR_CODE.getName().equalsIgnoreCase(barcodeName)) {
 					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.QR);
-				} else if (BarcodeFormat.DATA_MATRIX.getName().equalsIgnoreCase(results[i].getBarcodeFormat().getName())) {
+				} else if (BarcodeFormat.DATA_MATRIX.getName().equalsIgnoreCase(barcodeName)) {
 					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.DATAMATRIX);
+				} else if (BarcodeFormat.PDF417.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.PDF417);
+				} else if (BarcodeFormat.EAN_13.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.EAN13);
+				} else if (BarcodeFormat.CODE_93.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODE93);
+				} else if (BarcodeFormat.ITF.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.ITF);
+				} else if (BarcodeFormat.CODABAR.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODABAR);
+				} else if (BarcodeFormat.CODE_128.getName().equalsIgnoreCase(barcodeName)) {
+					barcodeResults[i].setBarcodeType(BarcodeReaderTypes.CODE128);
 				}
 			}
 		}

@@ -104,6 +104,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Override
 	public void startWorkflow(final BatchInstanceID batchInstanceID, String moduleName) {
+		LOGGER.info("Start Workflow for batch instance id:" + batchInstanceID + " for module name:" + moduleName);
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID.getID());
 		Map<String, Object> vars = new HashMap<String, Object>();
 		vars.put(JBPMVariables.BATCH_INSTANCE_ID, batchInstanceID);
@@ -151,6 +152,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void signalWorkflow(BatchInstance batchInstance) {
+		LOGGER.info("Signal Workflow for batch instance id:" + batchInstance.getIdentifier());
 		String processInstanceKey = batchInstance.getProcessInstanceKey();
 		ProcessInstance processInstance = executionService.findProcessInstanceById(processInstanceKey);
 		Execution execution = processInstance.findActiveExecutionIn(((ExecutionImpl) processInstance).getActivityName());
@@ -169,6 +171,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Override
 	public String getActiveModule(BatchInstance batchInstance) {
+		LOGGER.info("Get active module for batch instance id:" + batchInstance.getIdentifier());
 		String returnValue = null;
 		String processInstanceKey = batchInstance.getProcessInstanceKey();
 		ProcessInstance processInstance = executionService.findProcessInstanceById(processInstanceKey);
@@ -182,6 +185,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 				returnValue = execution.getId();
 			}
 		}
+		LOGGER.info("Active module for batch instance id:" + batchInstance.getIdentifier() + " is:" + returnValue);
 		return returnValue;
 
 	}
@@ -203,18 +207,17 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public void signalWorkflow(String batchId, String userName) {
+	public void signalWorkflow(String batchId) {
+		LOGGER.info("Signal workflow for batch instance id:" + batchId);
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchId);
 		boolean needToSignal = false;
 		switch (batchInstance.getStatus()) {
 			case READY_FOR_REVIEW:
 				needToSignal = true;
-				batchInstance.setReviewUserName(userName);
 				break;
 
 			case READY_FOR_VALIDATION:
 				needToSignal = true;
-				batchInstance.setValidationUserName(userName);
 				break;
 
 			default:

@@ -155,4 +155,11 @@ public class BatchClassPluginConfigServiceImpl implements BatchClassPluginConfig
 
 	}
 
+	@Override
+	public void evict(BatchClassPluginConfig batchClassPluginConfig) {
+
+		LOGGER.info("Evicting the batch class plugin config: " + batchClassPluginConfig.getDescription());
+		batchClassPluginConfigDao.evict(batchClassPluginConfig);
+	}
+
 }

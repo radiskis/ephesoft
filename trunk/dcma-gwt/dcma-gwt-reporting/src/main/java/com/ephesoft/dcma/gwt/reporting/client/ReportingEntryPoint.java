@@ -75,7 +75,7 @@ public class ReportingEntryPoint extends DCMAEntryPoint<ReportingModelServiceAsy
 		
 		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
 		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
-		rootPanel.getHeader().addTab("Reports", "Reporting.html", false);
+		rootPanel.getHeader().addNonClickableTab("Reports", "Reporting.html");
 		rootPanel.getHeader().getTabBar().selectTab(2);
 		rootPanel.addStyleName("set_position");
 		rootPanel.getHeader().setEventBus(eventBus);

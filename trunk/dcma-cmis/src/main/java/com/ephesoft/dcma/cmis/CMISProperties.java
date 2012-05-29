@@ -53,7 +53,8 @@ public enum CMISProperties implements PluginProperty {
 	CMIS_SERVER_USER_NAME("cmis.server_username"), 
 	CMIS_SERVER_PASSWORD("cmis.server_password"), 
 	CMIS_REPOSITORY_ID("cmis.repository_id"), 
-	CMIS_SWITCH("cmis.switch");
+	CMIS_SWITCH("cmis.switch"),
+	CMIS_ASPECTS_SWITCH("cmis.aspects_switch");
 	
 	String key;
 	

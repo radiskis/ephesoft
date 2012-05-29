@@ -35,15 +35,19 @@
 
 package com.ephesoft.dcma.kvfieldcreation.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
+import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.kvfieldcreation.KVFieldCreator;
 import com.ephesoft.dcma.util.BackUpFileService;
@@ -87,6 +91,16 @@ public class KVFieldCreatorServiceImpl implements KVFieldCreatorService, ICommon
 			LOGGER.info("Start execution of key value learning .");
 			kvFieldCreator.createKeyValueFields(batchInstanceID.getID(), pluginWorkflow);
 			LOGGER.info("End execution of key value learning .");
+		} catch (Exception e) {
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+	
+	@Override
+	public List<KVExtraction> createKeyValueFieldAPI(String value, HocrPage hocrPage) throws DCMAException {
+		try {
+			LOGGER.info("Start execution of key value learning for value:"+value);
+			return kvFieldCreator.createKeyValueFieldsAPI(value, hocrPage);
 		} catch (Exception e) {
 			throw new DCMAException(e.getMessage(), e);
 		}

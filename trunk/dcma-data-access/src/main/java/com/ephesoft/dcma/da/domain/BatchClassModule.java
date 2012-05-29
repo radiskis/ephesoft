@@ -132,6 +132,11 @@ public class BatchClassModule extends AbstractChangeableEntity {
 		return plugin;
 	}
 
+	public void removeBatchClassPluginById(long identifier) {
+		BatchClassPlugin plugin = getBatchClassPluginById(identifier);
+		batchClassPlugins.remove(plugin);
+	}
+
 	public String getWorkflowName() {
 		return workflowName;
 	}

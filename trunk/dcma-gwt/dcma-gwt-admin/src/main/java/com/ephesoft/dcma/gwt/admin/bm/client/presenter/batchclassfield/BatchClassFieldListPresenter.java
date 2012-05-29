@@ -42,15 +42,21 @@ import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
-import com.ephesoft.dcma.gwt.admin.bm.client.util.BatchClassFieldComparator;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield.BatchClassFieldListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.comparator.BatchClassFieldComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class BatchClassFieldListPresenter extends AbstractBatchClassPresenter<BatchClassFieldListView> implements PaginationListner {
+public class BatchClassFieldListPresenter extends AbstractBatchClassPresenter<BatchClassFieldListView> implements PaginationListner,
+		DoubleClickListner {
 
 	private Collection<BatchClassFieldDTO> BatchClassFieldDTOList;
 
@@ -85,4 +91,29 @@ public class BatchClassFieldListPresenter extends AbstractBatchClassPresenter<Ba
 	public Collection<BatchClassFieldDTO> getBatchClassFieldDTOList() {
 		return BatchClassFieldDTOList;
 	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+	}
+
+	public void onEditButtonClicked() {
+		String rowIndex = view.getBatchClassFieldListView().getSelectedRowIndex();
+		int rowCount = view.getBatchClassFieldListView().getTableRecordCount();
+		if (rowIndex == null || rowIndex.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
+			}
+
+		} else {
+			controller.getMainPresenter().getBatchClassViewPresenter().onEditBatchClassFieldButtonClicked(rowIndex);
+		}
+	}
+
 }

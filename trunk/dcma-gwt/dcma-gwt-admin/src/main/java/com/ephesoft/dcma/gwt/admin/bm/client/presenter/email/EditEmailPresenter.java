@@ -44,6 +44,7 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailView> {
@@ -71,14 +72,14 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 							.getValue().isEmpty() || view.getPortNumberTextBox().getValue() == null)))) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION));
+						BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION), Boolean.TRUE);
 				validFlag = false;
 			}
 			if (validFlag && view.getIsSSL() && !view.getValidatePortNumberTextBox().validate()) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.INTEGER_ERROR)
 						+ " " + view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
-						.getConstantValue(BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION));
+						.getConstantValue(BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION), Boolean.TRUE);
 				validFlag = false;
 			}
 			if (validFlag
@@ -86,7 +87,7 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 							.getServerName(), view.getServerType(), view.getFolderName()))) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.ALREADY_EXISTS_ERROR), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION));
+						BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION), Boolean.TRUE);
 				validFlag = false;
 			}
 		} else {
@@ -97,14 +98,14 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 							.getValue().isEmpty() || view.getPortNumberTextBox().getValue() == null)))) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE));
+						BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE), Boolean.TRUE);
 				validFlag = false;
 			}
 			if (validFlag && view.getIsSSL() && !view.getValidatePortNumberTextBox().validate()) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.INTEGER_ERROR)
 						+ " " + view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
-						.getConstantValue(BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE));
+						.getConstantValue(BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE), Boolean.TRUE);
 				validFlag = false;
 			}
 		}
@@ -156,20 +157,36 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 			}
 			view.setPortNumber(portNumber);
 
-			view.getValidateUserNameTextBox().addValidator(new EmptyStringValidator(view.getUserNameTextBox()));
-			view.getValidatePasswordTextBox().addValidator(new EmptyStringValidator(view.getPasswordTextBox()));
-			view.getValidateServerNameTextBox().addValidator(new EmptyStringValidator(view.getServerNameTextBox()));
-			view.getValidateServerTypeTextBox().addValidator(new EmptyStringValidator(view.getServerTypeTextBox()));
-			view.getValidateFolderNameTextBox().addValidator(new EmptyStringValidator(view.getFolderNameTextBox()));
-			view.getValidatePortNumberTextBox().addValidator(new NumberValidator(view.getPortNumberTextBox(), false, false));
+		} else {
+			EmailConfigurationDTO emailConfigurationDTO = controller.getMainPresenter().getBatchClassViewPresenter()
+					.createEmailConfigurationDTOObject();
+			emailConfigurationDTO.setUserName(view.getUsername());
+			emailConfigurationDTO.setPassword(view.getPassword());
+			emailConfigurationDTO.setServerName(view.getServerName());
+			emailConfigurationDTO.setServerType(view.getServerType());
+			emailConfigurationDTO.setFolderName(view.getFolderName());
+			if (view.getIsSSL() != null) {
+				emailConfigurationDTO.setIsSSL(view.getIsSSL());
+			} else {
+				emailConfigurationDTO.setIsSSL(Boolean.FALSE);
+			}
 
-			view.getValidateUserNameTextBox().toggleValidDateBox();
-			view.getValidatePasswordTextBox().toggleValidDateBox();
-			view.getValidateServerNameTextBox().toggleValidDateBox();
-			view.getValidateServerTypeTextBox().toggleValidDateBox();
-			view.getValidateFolderNameTextBox().toggleValidDateBox();
-			view.getValidatePortNumberTextBox().toggleValidDateBox();
+			controller.setAdd(true);
+			controller.setSelectedEmailConfiguration(emailConfigurationDTO);
 		}
+		view.getValidateUserNameTextBox().addValidator(new EmptyStringValidator(view.getUserNameTextBox()));
+		view.getValidatePasswordTextBox().addValidator(new EmptyStringValidator(view.getPasswordTextBox()));
+		view.getValidateServerNameTextBox().addValidator(new EmptyStringValidator(view.getServerNameTextBox()));
+		view.getValidateServerTypeTextBox().addValidator(new EmptyStringValidator(view.getServerTypeTextBox()));
+		view.getValidateFolderNameTextBox().addValidator(new EmptyStringValidator(view.getFolderNameTextBox()));
+		view.getValidatePortNumberTextBox().addValidator(new NumberValidator(view.getPortNumberTextBox(), false, false));
+
+		view.getValidateUserNameTextBox().toggleValidDateBox();
+		view.getValidatePasswordTextBox().toggleValidDateBox();
+		view.getValidateServerNameTextBox().toggleValidDateBox();
+		view.getValidateServerTypeTextBox().toggleValidDateBox();
+		view.getValidateFolderNameTextBox().toggleValidDateBox();
+		view.getValidatePortNumberTextBox().toggleValidDateBox();
 	}
 
 	@Override

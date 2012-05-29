@@ -40,7 +40,10 @@ import com.ephesoft.dcma.core.common.PluginProperty;
 public enum ExportProperties implements PluginProperty {
 
 	EXPORT_FOLDER("batch.export_to_folder"),
-	EXPORT_TO_FOLDER_SWITCH("batch.export_to_folder_switch");
+	EXPORT_TO_FOLDER_SWITCH("batch.export_to_folder_switch"),
+	FOLDER_NAME("batch.folder_name"),
+	FILE_NAME("batch.file_name"),
+	BATCH_XML_EXPORT_FOLDER("batch.batch_xml_export_folder");
 
 	String key;
 

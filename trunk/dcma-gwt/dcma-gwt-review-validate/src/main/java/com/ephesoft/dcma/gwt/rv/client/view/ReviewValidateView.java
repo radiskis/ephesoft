@@ -166,4 +166,8 @@ public class ReviewValidateView extends RVBasePanel {
 	public TableExtractionView getTableExtractionView() {
 		return tableExtractionView;
 	}
+	public ImageOverlayPanel getImgOverlayPanel() {
+		return imgOverlayPanel;
+	}
+
 }

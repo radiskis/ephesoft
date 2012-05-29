@@ -53,6 +53,7 @@ public class BatchClassDTO implements IsSerializable {
 	private String version;
 	private boolean isDirty;
 	private boolean isDeleted;
+	private boolean isDeployed;
 
 	private Map<String, BatchClassModuleDTO> moduleMap = new LinkedHashMap<String, BatchClassModuleDTO>();
 
@@ -115,11 +116,31 @@ public class BatchClassDTO implements IsSerializable {
 	}
 
 	public Collection<BatchClassModuleDTO> getModules() {
-		return this.moduleMap.values();
+		return getModules(false);
+	}
+
+	public Collection<BatchClassModuleDTO> getModules(boolean includeDeleted) {
+		Collection<BatchClassModuleDTO> values = moduleMap.values();
+		if (!includeDeleted) {
+			Map<String, BatchClassModuleDTO> batchClassModulesMap = new LinkedHashMap<String, BatchClassModuleDTO>();
+
+			for (BatchClassModuleDTO batchClassModuleDTO : values) {
+				if (!(batchClassModuleDTO.isDeleted())) {
+					batchClassModulesMap.put(batchClassModuleDTO.getIdentifier(), batchClassModuleDTO);
+				}
+			}
+			values = batchClassModulesMap.values();
+		}
+		return values;
+
 	}
 
 	public void addModule(BatchClassModuleDTO batchClassModuleDTO) {
 		this.moduleMap.put(batchClassModuleDTO.getIdentifier(), batchClassModuleDTO);
+	}
+
+	public void removeModule(BatchClassModuleDTO batchClassModuleDTO) {
+		this.moduleMap.remove(batchClassModuleDTO.getIdentifier());
 	}
 
 	/**
@@ -234,6 +255,19 @@ public class BatchClassDTO implements IsSerializable {
 			}
 		}
 		return null;
+	}
+
+	public BatchClassModuleDTO getModuleByWorkflowName(String name) {
+		BatchClassModuleDTO batchClassModuleDTO = null;
+		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
+			for (BatchClassModuleDTO batchClassModuleDTOObject : this.moduleMap.values()) {
+				if (batchClassModuleDTOObject.getWorkflowName().equals(name)) {
+					batchClassModuleDTO = batchClassModuleDTOObject;
+					break;
+				}
+			}
+		}
+		return batchClassModuleDTO;
 	}
 
 	public void addEmailConfiguration(EmailConfigurationDTO emailConfigurationDTO) {
@@ -385,6 +419,20 @@ public class BatchClassDTO implements IsSerializable {
 	 */
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	/**
+	 * @return the isDeployed
+	 */
+	public boolean isDeployed() {
+		return isDeployed;
+	}
+
+	/**
+	 * @param isDeployed the isDeployed to set
+	 */
+	public void setDeployed(boolean isDeployed) {
+		this.isDeployed = isDeployed;
 	}
 
 }

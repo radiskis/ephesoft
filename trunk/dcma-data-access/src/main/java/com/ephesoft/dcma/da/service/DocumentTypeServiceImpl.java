@@ -131,7 +131,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	/**
 	 * An api to fetch all DocumentType by batch instance id.
 	 * 
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<DocumentType>
 	 */
 	@Transactional
@@ -183,5 +183,17 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	@Override
 	public void evict(DocumentType documentType) {
 		documentTypeDao.evict(documentType);
+	}
+	
+	@Transactional
+	@Override
+	public List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier) {
+		List<DocumentType> documentType = null;
+		if (null == batchClassIdentifier) {
+			LOGGER.info("Input batchClassID is null.");
+		} else {
+			documentType = documentTypeDao.getDocTypeByBatchClassIdentifier(batchClassIdentifier);
+		}
+		return documentType;
 	}
 }

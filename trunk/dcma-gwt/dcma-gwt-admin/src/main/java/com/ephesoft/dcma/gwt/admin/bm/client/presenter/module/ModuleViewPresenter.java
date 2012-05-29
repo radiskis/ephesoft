@@ -103,4 +103,10 @@ public class ModuleViewPresenter extends AbstractBatchClassPresenter<ModuleView>
 	public EditModulePresenter getEditModulePresenter() {
 		return editModulePresenter;
 	}
+
+	public void setAddButtonEnable(boolean enable) {
+		view.getAddPlugin().setEnabled(enable);
+		view.getEditPlugin().setEnabled(!enable);
+	}
+
 }

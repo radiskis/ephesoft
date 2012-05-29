@@ -35,7 +35,13 @@
 						width="98%">
 						<g:north size="25">
 							<g:HorizontalPanel width="99%" ui:field="buttonPanel">
-								<g:cell width="80%" horizontalAlignment="ALIGN_RIGHT">
+								<g:cell width="97%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addPlugin"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
 									<g:Button ui:field="editPlugin"></g:Button>
 								</g:cell>
 							</g:HorizontalPanel>

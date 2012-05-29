@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,6 @@ import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 
-
 /**
  * This class reads the bar-code on each image file fetched from batch.xml, processes images with Zxing library to find the barcode
  * information for each image and writes the extracted information to batch xml to be used by subsequent plugins.
@@ -85,8 +85,6 @@ public class BarcodeReader implements ICommonConstants {
 	private static final String EMPTY_STRING = "";
 
 	private static final int BARCODE_FIELD_SUFFIX = 1;
-
-	private static final String BARCODE_READER_PLUGIN = "BARCODE_READER";
 
 	/**
 	 * Instance of BatchSchemaService.
@@ -184,10 +182,10 @@ public class BarcodeReader implements ICommonConstants {
 	 * @param batch Batch
 	 * @throws DCMAApplicationException
 	 */
-	public void updateBatchXML(final String fileName, final BarcodeResult[] barCodeResults, final Batch batch,
+	public void updateBatchXML(final String fileName, final BarcodeResult[] barCodeResults, final List<Document> xmlDocuments,
 			final String maxConfidence, final String minConfidence) throws DCMAApplicationException {
 
-		List<Document> xmlDocuments = batch.getDocuments().getDocument();
+		
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			Document document = xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
@@ -206,12 +204,12 @@ public class BarcodeReader implements ICommonConstants {
 							if (k == 0) {
 								docFieldType.setName(barcodeName + (k + 1));
 								String value = barCodeResults[k].getTexts();
-								StringBuffer tempValue=new StringBuffer();
+								StringBuffer tempValue = new StringBuffer();
 								tempValue.append(value);
 								if (null != tempValue.toString() && !tempValue.toString().isEmpty()) {
 									tempValue.append(getFirstPage());
 								}
-                                value=tempValue.toString();
+								value = tempValue.toString();
 								docFieldType.setValue(value);
 								docFieldType.setType(barCodeResults[k].getBarcodeType().name());
 								if (!value.isEmpty()) {
@@ -277,6 +275,79 @@ public class BarcodeReader implements ICommonConstants {
 		}
 	}
 
+	public void readBarcodeAPI(final String batchInstanceIdentifier, final List<Document> xmlDocuments, final String workingDir,
+			final Map<BarcodeProperties, String> propertyMap) throws DCMAApplicationException {
+		LOGGER.info("Started Processing image at " + new Date());
+		// Initialize properties
+		LOGGER.info("Initializing properties...");
+		String validExt = propertyMap.get(BarcodeProperties.BARCODE_VALID_EXTNS);
+		String readerTypes = propertyMap.get(BarcodeProperties.BARCODE_READER_TYPES);
+		String maxConfidence = propertyMap.get(BarcodeProperties.MAX_CONFIDENCE);
+		String minConfidence = propertyMap.get(BarcodeProperties.MIN_CONFIDENCE);
+		LOGGER.info("Properties Initialized Successfully");
+		String[] validExtensions = validExt.split(SEMICOLON_DELIMITER);
+		String[] appReaderTypes = readerTypes.split(SEMICOLON_DELIMITER);
+		List<String> allPages = null;
+		try {
+			allPages = findAllPagesFromXML(xmlDocuments);
+		} catch (DCMAApplicationException e1) {
+			LOGGER.error("Exception while reading from XML" + e1.getMessage());
+			throw new DCMAApplicationException(e1.getMessage(), e1);
+		}
+		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+
+		List<BarcodeExecutor> barcodeExecutorList = new ArrayList<BarcodeExecutor>();
+		if (!allPages.isEmpty()) {
+			for (int i = 0; i < allPages.size(); i++) {
+				String eachPage = allPages.get(i);
+				eachPage = eachPage.trim();
+				boolean isFileValid = false;
+				if (validExtensions != null && validExtensions.length > 0) {
+					for (int l = 0; l < validExtensions.length; l++) {
+						if (eachPage.substring(eachPage.indexOf(DOT_DELIMITER) + BARCODE_FIELD_SUFFIX).equalsIgnoreCase(
+								validExtensions[l])) {
+							isFileValid = true;
+							break;
+						}
+					}
+				} else {
+					LOGGER.error("No valid extensions are specified in resources");
+					throw new DCMAApplicationException("No valid extensions are specified in resources");
+				}
+				if (isFileValid) {
+					LOGGER.info("Calling Zxing library for image :" + eachPage);
+					BarcodeExecutor barcodeExecutor = new BarcodeExecutor(workingDir + File.separator + eachPage, eachPage,
+							appReaderTypes);
+					barcodeExecutorList.add(barcodeExecutor);
+					batchInstanceThread.add(barcodeExecutor);
+					LOGGER.info("Done with Zxing library for image : " + eachPage);
+				} else {
+					LOGGER.error("File " + eachPage + " has invalid extension.");
+					throw new DCMABusinessException("File " + eachPage + " has invalid extension.");
+				}
+			}
+			LOGGER.info("Starting execution through thread pool");
+			try {
+				batchInstanceThread.execute();
+			} catch (DCMAApplicationException dcmae) {
+				LOGGER.error("Error in generating barcode.");
+				batchInstanceThread.remove();
+				// Throw the exception to set the batch status to Error by Application aspect
+				LOGGER.error("Error in generating barcode" + dcmae.getMessage(), dcmae);
+				throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+			}
+			LOGGER.info("Done execution through thread pool");
+			for (BarcodeExecutor barcodeExecutor : barcodeExecutorList) {
+				LOGGER.info("updating XML for image :" + barcodeExecutor.getFileName());
+				updateBatchXML(barcodeExecutor.getFileName(), barcodeExecutor.getBarCodeResults(), xmlDocuments, maxConfidence, minConfidence);
+			}
+		} else {
+			LOGGER.error("No pages found in batch XML.");
+			throw new DCMAApplicationException("No pages found in batch XML.");
+		}
+		LOGGER.info("Processing finished at " + new Date());
+	}
+
 	/**
 	 * Main method to read barcode information from an image file.
 	 * 
@@ -309,7 +380,8 @@ public class BarcodeReader implements ICommonConstants {
 			List<String> allPages = null;
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 			try {
-				allPages = findAllPagesFromXML(batch);
+				List<Document> xmlDocuments = batch.getDocuments().getDocument();
+				allPages = findAllPagesFromXML(xmlDocuments);
 			} catch (DCMAApplicationException e1) {
 				LOGGER.error("Exception while reading from XML" + e1.getMessage());
 				throw new DCMAApplicationException(e1.getMessage(), e1);
@@ -359,7 +431,8 @@ public class BarcodeReader implements ICommonConstants {
 				LOGGER.info("Done execution through thread pool");
 				for (BarcodeExecutor barcodeExecutor : barcodeExecutorList) {
 					LOGGER.info("updating XML for image :" + barcodeExecutor.getFileName());
-					updateBatchXML(barcodeExecutor.getFileName(), barcodeExecutor.getBarCodeResults(), batch, maxConfidence,
+					List<Document> xmlDocuments = batch.getDocuments().getDocument();
+					updateBatchXML(barcodeExecutor.getFileName(), barcodeExecutor.getBarCodeResults(), xmlDocuments, maxConfidence,
 							minConfidence);
 				}
 			} else {
@@ -381,10 +454,9 @@ public class BarcodeReader implements ICommonConstants {
 	 * @return List<String>
 	 * @throws DCMAApplicationException
 	 */
-	public List<String> findAllPagesFromXML(final Batch batch) throws DCMAApplicationException {
+	public List<String> findAllPagesFromXML(final List<Document> xmlDocuments) throws DCMAApplicationException {
 		List<String> allPages = new ArrayList<String>();
 
-		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			Document document = xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
@@ -403,7 +475,7 @@ public class BarcodeReader implements ICommonConstants {
 	 * Enum for Barcode Reader types possible values are CODE39, QR, DATAMATRIX.
 	 */
 	public static enum BarcodeReaderTypes {
-		CODE39, QR, DATAMATRIX;
+		CODE39, QR, DATAMATRIX, PDF417, CODE128, CODE93, ITF, CODABAR, EAN13;
 
 		public static List<BarcodeReaderTypes> valuesAsList() {
 			return Arrays.asList(values());

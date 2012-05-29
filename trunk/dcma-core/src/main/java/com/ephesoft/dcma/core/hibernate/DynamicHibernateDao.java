@@ -144,29 +144,25 @@ public class DynamicHibernateDao {
 		sessionFactory = configuration.buildSessionFactory();
 	}
 
-	public StatelessSession getStatelessSession(DynamicHibernateDao dynamicHibernateDao) throws DCMAException {
+	public StatelessSession getStatelessSession() throws DCMAException {
+		ConnectionProvider connectionProvider = null;
+		Connection connection = null;
 		StatelessSession statelessSession = null;
 		try {
-			if (dynamicHibernateDao.sessionFactory instanceof SessionFactoryImplementor) {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-					if (connectionProvider != null) {
-						connectionProvider.close();
-					}
-				} catch (Exception e) {
-					LOG.error("Unable to close open connections", e);
+			/*try {
+				if (connection != null) {
+					connection.close();
 				}
-				connectionProvider = ((SessionFactoryImplementor) dynamicHibernateDao.sessionFactory).getConnectionProvider();
-				connection = connectionProvider.getConnection();
-				statelessSession = sessionFactory.openStatelessSession(connection);
-
-			} else {
-				statelessSession = sessionFactory.openStatelessSession();
-
-			}
-		} catch (SQLException sqle) {
+				if (connectionProvider != null) {
+					connectionProvider.close();
+				}
+			} catch (Exception e) {
+				LOG.error("Unable to close open connections", e);
+			}*/
+			connectionProvider = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
+			connection = connectionProvider.getConnection();
+			statelessSession = sessionFactory.openStatelessSession(connection);
+		} catch (Exception sqle) {
 			LOG.error("Exception occurred while getting report connection.", sqle);
 			throw new DCMAException("Exception occurred while getting report connection.", sqle);
 		}
@@ -201,6 +197,18 @@ public class DynamicHibernateDao {
 
 	public SQLQuery createQuery(String queryString, Object... params) {
 		SQLQuery sqlQuery = sessionFactory.openStatelessSession().createSQLQuery(queryString);
+
+		if (params != null) {
+			int pos = 1;
+			for (Object p : params) {
+				sqlQuery.setParameter(pos++, p);
+			}
+		}
+		return sqlQuery;
+	}
+
+	public SQLQuery createUpdateOrInsertQuery(StatelessSession session, String queryString, Object... params) {
+		SQLQuery sqlQuery = session.createSQLQuery(queryString);
 
 		if (params != null) {
 			int pos = 1;

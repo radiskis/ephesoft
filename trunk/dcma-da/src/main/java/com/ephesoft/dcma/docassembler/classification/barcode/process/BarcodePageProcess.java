@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.docassembler.classification.barcode.process;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -99,7 +100,11 @@ public class BarcodePageProcess {
 	 * Batch instance ID.
 	 */
 	private String batchInstanceIdentifier;
-
+	
+	/**
+	 * Batch Class ID.
+	 */
+	private String batchClassIdentifier;
 	/**
 	 * Reference of BatchSchemaService.
 	 */
@@ -166,6 +171,19 @@ public class BarcodePageProcess {
 		this.batchInstanceIdentifier = batchInstanceIdentifier;
 	}
 
+	/**
+	 * @param batchClassIdentifier. 
+	 */
+	public void setBatchClassIdentifier(String batchClassIdentifier) {
+		this.batchClassIdentifier = batchClassIdentifier;
+	}	
+	
+	/**
+	 * @return batch class identifier.
+	 */
+	public String getBatchClassIdentifier() {
+		return batchClassIdentifier;
+	}
 	/**
 	 * @return the barcodeClassification
 	 */
@@ -245,20 +263,56 @@ public class BarcodePageProcess {
 		return docTypeName;
 	}
 
+
+	/**
+	 * This method return the document type name for the page type name input from the batch class id.
+	 * 
+	 * @param pageTypeName String
+	 * @return String docTypeName which is present in data base table document_type for the corresponding page type name.
+	 */
+	public final String getDocTypeNameAPI(final String batchClassID, final String pageTypeName) {
+
+		String docTypeName = null;
+
+		List<com.ephesoft.dcma.da.domain.DocumentType> docTypeList = docTypeService
+		.getDocTypeByBatchClassIdentifier(batchClassID, -1, -1);
+
+		String docTypeNameTemp = "";
+		if (null == docTypeList || docTypeList.isEmpty()) {
+			LOGGER.error("No document type name found for the page type name : " + pageTypeName);
+		} else {
+			
+			final Iterator<com.ephesoft.dcma.da.domain.DocumentType> itr = docTypeList.iterator();
+			while (itr.hasNext()) {
+				final com.ephesoft.dcma.da.domain.DocumentType docTypeDB = itr.next();
+				docTypeNameTemp = docTypeDB.getName();
+				if(pageTypeName.contains(docTypeNameTemp)){
+					docTypeName = docTypeNameTemp;					
+					LOGGER.debug("DocumentType name : " + docTypeName);
+					break;
+				}
+			}
+		}
+		return docTypeName;
+	}
 	/**
 	 * This method will create new document for pages that was found in the batch.xml file for Unknown type document.
+	 * @param insertAllDocument 
 	 * 
 	 * @param docPageInfo List<Page>
+	 * @param isFromWebService 
 	 * @throws DCMAApplicationException Check for input parameters, create new documents for page found in document type Unknown.
 	 */
-	public final void createDocForPages(final List<Page> docPageInfo) throws DCMAApplicationException {
+	public final void createDocForPages(List<Document> insertAllDocument, final List<Page> docPageInfo, final boolean isFromWebService) throws DCMAApplicationException {
 
 		String errMsg = null;
 
-		if (null == this.xmlDocuments) {
-			throw new DCMAApplicationException("Unable to write pages for the document.");
+		if (!isFromWebService) {
+			if (null == this.xmlDocuments) {
+				throw new DCMAApplicationException("Unable to write pages for the document.");
+			}
 		}
-
+		
 		int confidenceValue = 0;
 
 		try {
@@ -273,7 +327,6 @@ public class BarcodePageProcess {
 		try {
 			String previousValue = DocumentAssemblerConstants.EMPTY;
 
-			List<Document> insertAllDocument = new ArrayList<Document>();
 			Document document = null;
 			Long idGenerator = 0L;
 			List<Integer> removeIndexList = new ArrayList<Integer>();
@@ -301,8 +354,12 @@ public class BarcodePageProcess {
 					}
 				} else {
 					previousValue = value;
-
-					String docTypeName = getDocTypeName(previousValue);
+					String docTypeName = null;
+					if(isFromWebService) {
+						docTypeName = getDocTypeNameAPI(batchClassIdentifier, previousValue);
+					} else {
+						docTypeName = getDocTypeName(previousValue);
+					}
 					if (docTypeName == null || docTypeName.isEmpty()) {
 						errMsg = "DocumentType name is not found in the data base for the page type name : " + previousValue;
 						LOGGER.info(errMsg);
@@ -327,8 +384,12 @@ public class BarcodePageProcess {
 				}
 			}
 
-			// update the xml file.
-			updateBatchXML(insertAllDocument, removeIndexList);
+			if (isFromWebService) {
+				updateBatchXMLAPI(insertAllDocument);
+			} else {
+				// update the xml file.
+				updateBatchXML(insertAllDocument, removeIndexList);
+			}
 
 		} catch (Exception e) {
 			errMsg = "Unable to write pages for the document. " + e.getMessage();
@@ -426,7 +487,27 @@ public class BarcodePageProcess {
 		LOGGER.info("updateBatchXML done.");
 
 	}
-
+	
+	/**
+	 * Update Batch XML file.
+	 * 
+	 * @param insertAllDocument List<DocumentType>
+	 * @param removeIndexList List<Integer>
+	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
+	 */
+	private void updateBatchXMLAPI(final List<Document> insertAllDocument) throws DCMAApplicationException {
+		// setting the batch level documentClassificationTypes.
+		DocumentClassificationTypes documentClassificationTypes = new DocumentClassificationTypes();
+		List<String> documentClassificationType = documentClassificationTypes.getDocumentClassificationType();
+		documentClassificationType.add(getFactoryClassification());
+		
+		// Set the error message explicitly to blank to display the node in batch xml
+		for (int i = 0; i < insertAllDocument.size(); i++) {
+			final Document document = insertAllDocument.get(i);
+			document.setErrorMessage("");
+		}
+		LOGGER.info("updateBatchXML for web services done.");
+	}
 	/**
 	 * This method will retrieve the page level field type value for any input page type for current classification name.
 	 * 
@@ -483,5 +564,6 @@ public class BarcodePageProcess {
 
 		return docPageInfo;
 	}
+
 
 }

@@ -59,7 +59,6 @@ public class ValidatorFactory {
 				break;
 
 			case STRING:
-				validator = new EmptyStringValidator(value);
 				break;
 				
 			default:

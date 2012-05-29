@@ -57,6 +57,8 @@ public class TableColumnInfoDTO implements IsSerializable {
 
 	private boolean isDeleted;
 
+	private String columnHeaderPattern;
+
 	public TableInfoDTO getTableInfoDTO() {
 		return tableInfoDTO;
 	}
@@ -127,5 +129,13 @@ public class TableColumnInfoDTO implements IsSerializable {
 
 	public void setRequired(boolean isRequired) {
 		this.isRequired = isRequired;
+	}
+
+	public String getColumnHeaderPattern() {
+		return columnHeaderPattern;
+	}
+
+	public void setColumnHeaderPattern(String columnHeaderPattern) {
+		this.columnHeaderPattern = columnHeaderPattern;
 	}
 }

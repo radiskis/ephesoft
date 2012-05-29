@@ -35,6 +35,12 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.BatchClassPluginDao;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
@@ -45,12 +51,23 @@ import com.ephesoft.dcma.da.domain.BatchClassPlugin;
  * @author Ephesoft
  * @version 1.0
  */
+
+@Repository
 public class BatchClassPluginDaoImpl extends HibernateDao<BatchClassPlugin> implements BatchClassPluginDao {
 
 	//Empty Constructor.
 		public BatchClassPluginDaoImpl() {
 			super();
 	}
+
+		private static final String BATCH_CLASS_PLUGIN_PLUGIN = "plugin.id";
+		
+		@Override
+		public List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId) {
+			DetachedCriteria criteria = criteria();
+			criteria.add(Restrictions.eq(BATCH_CLASS_PLUGIN_PLUGIN, pluginId.longValue()));
+			return find(criteria);
+		}
 
 }
 	

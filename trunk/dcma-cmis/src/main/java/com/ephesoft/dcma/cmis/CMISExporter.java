@@ -59,6 +59,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import org.alfresco.cmis.client.AlfrescoDocument;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
@@ -74,7 +75,13 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.TagNode;
+import org.htmlcleaner.XPatherException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +114,62 @@ import com.ephesoft.dcma.da.service.BatchInstanceService;
 @Component
 public class CMISExporter implements ICommonConstants {
 
+	private static final String COULD_NOT_UPDATE_PROPERTIES = "Could not update properties";
+
+	private static final String UNABLE_TO_CLOSE_THE_INPUT_STREAM = "Unable to close the input stream ";
+
+	private static final String CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN = "Custom error message from CMIS plugin : ";
+
+	private static final String ERROR_WHILE_UPLOADING_DOCUMENT_WITH_IDENTIFIER = "Error while uploading document with identifier: ";
+
+	private static final String AND_CONTINUING = " and continuing.";
+
+	private static final String SKIPPING_THE_ASPECT_PROPERTY = ". Skipping the aspect property: ";
+
+	private static final String BECAUSE_IT_ALREADY_EXISTS_ON_THE_REPOSITORY = " because it already exists on the repository";
+
+	private static final String DELETING_ALL_THE_VERSIONS_OF_THE_DOCUMENT = "Deleting all the versions of the document: ";
+
+	private static final String UPDATING_THE_ADDED_PROPERTIES_FOR = "Updating the added properties for :";
+
+	private static final String HAVING_DOCUMENT_TYPE = " having document type:";
+
+	private static final String FOR_DOCUMENT_ID = " for document id:";
+
+	private static final String FOR_DOCUMENT_LEVEL_FIELD = " for document level field: ";
+
+	private static final String ADDED_ASPECT_PROPERTY = "Added aspect property: ";
+
+	private static final String SEARCHING_FOR_EXISTENCE_OF_ASPECT_PROPERTY = "Searching for existence of aspect property: ";
+
+	private static final String ON_CMIS_REPOSITORY = " on CMIS repository";
+
+	private static final String DOT = ".";
+
+	private static final String ADDING_ASPECT = "Adding aspect: ";
+
+	private static final String FOLDER_SEPARATOR = "/";
+
+	private static final String NO_SUCH_DOCUMENT_LEVEL_FIELD_EXISTS = ". No such document level field exists:";
+
+	private static final String FOR_DOCUMENT_TYPE = " for document type: ";
+
+	private static final String DEFINED_FOR_DOCUMENT_ID = " defined for document id: ";
+
+	private static final String UNABLE_TO_READ_ASPECT_MAPPING_FROM_PROPERTY_FILE = "Unable to read aspect mapping from property file: ";
+
+	private static final String IMPROPER_MAPPING_IN_PROPERTY_FILE = "Improper mapping in property file: ";
+
+	private static final String NO_SUCH_ASPECT_PROPERTY_EXISTS = ". No such aspect property exists: ";
+
+	private static final String DEFINED_IN_THE_PROPERTY_MAPPING_FILE = " defined in the property mapping file: ";
+
+	private static final String UNABLE_TO_ADD_ASPECT = "Unable to add aspect: ";
+
+	private static final String FOR_BATCH_INSTANCE = " for batch instance: ";
+
+	private static final String ON = "ON";
+
 	private static final String CONVERTING = "Converting";
 
 	private static final String CMIS_EXPORT_PLUGIN = "CMIS_EXPORT";
@@ -121,6 +184,7 @@ public class CMISExporter implements ICommonConstants {
 	private static final String EXCEPTION_MESSAGE_CONSTANT_2 = " when WS-Security is specified as the CMIS security mode.HTTP Basic Authentication will be used by default.";
 	private static final String SERVER_URL = "{serverURL}";
 	private static final String FALSE = "false";
+	private Properties aspectProperties;
 	/**
 	 * Instance of BatchInstanceService.
 	 */
@@ -172,6 +236,10 @@ public class CMISExporter implements ICommonConstants {
 	 * plugin mapping file name.
 	 */
 	private String pluginMappingFileName;
+	/**
+	 * aspect mapping file name.
+	 */
+	private String aspectMappingFileName;
 
 	/**
 	 * document versioning state name.
@@ -331,7 +399,6 @@ public class CMISExporter implements ICommonConstants {
 		if (isCMISON == null || !isCMISON.equals("ON")) {
 			return;
 		}
-
 		String rootFolder = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, CMIS_EXPORT_PLUGIN,
 				CMISProperties.CMIS_ROOT_FOLDER);
 		String serverURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, CMIS_EXPORT_PLUGIN,
@@ -344,7 +411,8 @@ public class CMISExporter implements ICommonConstants {
 				CMISProperties.CMIS_REPOSITORY_ID);
 		String uploadFileTypeExt = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, CMIS_EXPORT_PLUGIN,
 				CMISProperties.CMIS_UPLOAD_FILE_EXT);
-
+		String alfrescoAspectSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, CMIS_EXPORT_PLUGIN,
+				CMISProperties.CMIS_ASPECTS_SWITCH);
 		/*
 		 * String rootFolder = "Ephesoft_test"; String serverURL = "http://172.16.1.38:9090/alfresco/service/cmis"; String
 		 * serverUserName = "admin"; String serverPassword = "admin"; String repositoryID = "0e5a3a1c-d22d-457a-a04b-4bf379b868af";
@@ -386,7 +454,10 @@ public class CMISExporter implements ICommonConstants {
 				List<Repository> repositories = sessionFactory.getRepositories(sessionParameters);
 				sessionParameters.put(SessionParameter.REPOSITORY_ID, repositories.get(0).getId());
 			}
-
+			if (null != alfrescoAspectSwitch && alfrescoAspectSwitch.equals(ON)) {
+				sessionParameters
+						.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+			}
 			session = sessionFactory.createSession(sessionParameters);
 
 			// test
@@ -398,7 +469,7 @@ public class CMISExporter implements ICommonConstants {
 
 			// Split the specified repository folder path into its individual parts using "/" as the
 			// delimeter.
-			String[] folderPathList = rootFolder.split("/");
+			String[] folderPathList = rootFolder.split(FOLDER_SEPARATOR);
 
 			// Determine if there is an empty string in the first index of the folder path list.
 			// This happens because split inserts an empty string if the first character is "/".
@@ -411,15 +482,15 @@ public class CMISExporter implements ICommonConstants {
 			}
 
 			// Get a handle to the target folder. If it doesn't exist, then it will be created.
-			Folder mainFolder = checkCreateFolder(session, root, "/", startIndex, folderPathList);
+			Folder mainFolder = checkCreateFolder(session, root, FOLDER_SEPARATOR, startIndex, folderPathList);
 
 			// Determine if a batch specific folder should be created within the main folder.
 			Folder batchInstanceFolder = null;
 			if (this.isBatchInSubfolder()) {
 				// The batch files are to be placed within a subfolder. See if this folder exists, or otherwise create it.
-				String[] batchFolderPathList = (rootFolder + "/" + batchInstanceIdentifier).split("/");
-				batchInstanceFolder = this.checkCreateFolder(session, mainFolder, rootFolder, batchFolderPathList.length - 1,
-						batchFolderPathList);
+				String[] batchFolderPathList = (rootFolder + FOLDER_SEPARATOR + batchInstanceIdentifier).split(FOLDER_SEPARATOR);
+				batchInstanceFolder = this.checkCreateFolder(session, mainFolder, FOLDER_SEPARATOR + rootFolder,
+						batchFolderPathList.length - 1, batchFolderPathList);
 			} else {
 				// The batch files are not to be placed within a subfolder. Therefore, the main folder
 				// is the batch instance folder.
@@ -429,25 +500,24 @@ public class CMISExporter implements ICommonConstants {
 			// END: Zia Consulting Enhancement
 			// ****************************************************************************************
 			/*
+			 * if (null == batchInstanceFolder) { ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder,
+			 * batchInstanceIdentifier); // get an object CmisObject object = session.getObject(batchInstanceFolderID); if (object
+			 * instanceof Folder) { batchInstanceFolder = (Folder) object; LOGGER.info("batchInstance folder : " +
+			 * batchInstanceFolder); LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID); } }
+			 */
 			if (null == batchInstanceFolder) {
 				ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder, batchInstanceIdentifier);
-				// get an object
-				CmisObject object = session.getObject(batchInstanceFolderID);
-				if (object instanceof Folder) {
-					batchInstanceFolder = (Folder) object;
-					LOGGER.info("batchInstance folder : " + batchInstanceFolder);
-					LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
-				}
-			}
-			*/
-			if (null == batchInstanceFolder) {
-				ObjectId batchInstanceFolderID = createBatchInstanceFolder(session, mainFolder, batchInstanceIdentifier);
-				// get an object
-				CmisObject object = session.getObject(batchInstanceFolderID);
-				if (object instanceof Folder) {
-					batchInstanceFolder = (Folder) object;
-					LOGGER.info("batchInstance folder : " + batchInstanceFolder);
-					LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
+				if (batchInstanceFolderID == null) {
+					LOGGER.error("Unable to create batch instance folder.");
+					throw new DCMABusinessException("Batch Instance folder can not be created.");
+				} else {
+					// get an object
+					CmisObject object = session.getObject(batchInstanceFolderID);
+					if (object instanceof Folder) {
+						batchInstanceFolder = (Folder) object;
+						LOGGER.info("batchInstance folder : " + batchInstanceFolder);
+						LOGGER.info("batchInstance folder ID : " + batchInstanceFolderID);
+					}
 				}
 			}
 
@@ -486,8 +556,18 @@ public class CMISExporter implements ICommonConstants {
 					if (sMultiPagePdf != null && !sMultiPagePdf.isEmpty()) {
 						File fSourcePdfFile = new File(sFolderToBeExported + File.separator + sMultiPagePdf);
 						try {
-							uploadDocument(session, batchInstanceFolder, fSourcePdfFile, document,
-									batchClassIdentifier, true);
+							org.apache.chemistry.opencmis.client.api.Document doc = null;
+							try {
+								doc = (org.apache.chemistry.opencmis.client.api.Document) session.getObjectByPath(FOLDER_SEPARATOR
+										+ rootFolder + FOLDER_SEPARATOR + fSourcePdfFile.getName());
+							} catch (CmisObjectNotFoundException e) {
+								// explicitly no logging done here as it is handled in uploadDocument method
+							}
+							doc = uploadDocument(doc, session, batchInstanceFolder, fSourcePdfFile, document, batchClassIdentifier,
+									true, batchInstanceIdentifier);
+							if (null != alfrescoAspectSwitch && alfrescoAspectSwitch.equalsIgnoreCase(ON)) {
+								addAspectsToDocument(doc, document, batchClassIdentifier, batchInstanceIdentifier);
+							}
 						} catch (IOException e) {
 							LOGGER.error("Problem uploading PDF file : " + fSourcePdfFile, e);
 							throw new DCMAApplicationException("Unable to upload the document : " + fSourcePdfFile, e);
@@ -500,8 +580,19 @@ public class CMISExporter implements ICommonConstants {
 
 							File fSourceTifFile = new File(sFolderToBeExported + File.separator + sMultiPageTif);
 							try {
-								uploadDocument(session, batchInstanceFolder, fSourceTifFile, document,
-										batchClassIdentifier, false);
+								org.apache.chemistry.opencmis.client.api.Document doc = null;
+								try {
+									doc = (org.apache.chemistry.opencmis.client.api.Document) session.getObjectByPath(FOLDER_SEPARATOR
+											+ rootFolder + FOLDER_SEPARATOR + fSourceTifFile.getName());
+								} catch (CmisObjectNotFoundException e) {
+									// explicitly no logging done here as it is handled in uploadDocument method
+								}
+								doc = uploadDocument(doc, session, batchInstanceFolder, fSourceTifFile, document,
+										batchClassIdentifier, true, batchInstanceIdentifier);
+
+								if (null != alfrescoAspectSwitch && alfrescoAspectSwitch.equalsIgnoreCase(ON)) {
+									addAspectsToDocument(doc, document, batchClassIdentifier, batchInstanceIdentifier);
+								}
 							} catch (Exception e) {
 								LOGGER.error("Problem uploading Tiff file : " + fSourceTifFile, e);
 								throw new DCMAApplicationException("Unable to upload the document : " + sMultiPageTif, e);
@@ -517,8 +608,21 @@ public class CMISExporter implements ICommonConstants {
 
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
+			if (e instanceof CmisBaseException) {
+				String errorContent = ((CmisBaseException) e).getErrorContent();
+				if (null != errorContent) {
+					String errorText = getTextFromHtmlString(errorContent);
+					LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+				}
+			}
 			throw new DCMAApplicationException(e.getMessage(), e);
+		} finally {
+			resetAspectProperties();
 		}
+	}
+
+	private void resetAspectProperties() {
+		aspectProperties = null;
 	}
 
 	/**
@@ -800,11 +904,6 @@ public class CMISExporter implements ICommonConstants {
 		return mainFolderID;
 	}
 
-	/**
-	 * @param root Folder
-	 * @param rootFolder String
-	 * @return Folder
-	 */
 	private Folder checkCreateFolder(Session session, Folder parentFolder, String parentFolderPath, int currentFolderIndex,
 			String[] folderPathList) {
 		// ****************************************************************************************
@@ -813,7 +912,6 @@ public class CMISExporter implements ICommonConstants {
 		// a root level folder. Recursion is employed in order to walk the folder tree.
 		// ****************************************************************************************
 		Folder targetFolder = null;
-		Folder targetFolderReturnValue=null;
 
 		// Get the name of the folder at the current index in the path.
 		String currentFolderName = folderPathList[currentFolderIndex];
@@ -821,16 +919,28 @@ public class CMISExporter implements ICommonConstants {
 		LOGGER.info("Determining if the target folder \"" + currentFolderName + "\" exists within the repository folder \""
 				+ parentFolderPath + "\".");
 
-		// Iterate through the child nodes of the parent node until we find the specified child folder.
-		for (CmisObject childNode : parentFolder.getChildren()) {
-			if (childNode.getName().equals(currentFolderName) && (childNode instanceof Folder)) {
-				targetFolder = (Folder) childNode;
+		// Build a proper path to the folder.
+		String subfolderPath = parentFolderPath;
+		if (!parentFolderPath.equals(FOLDER_SEPARATOR)) {
+			subfolderPath += FOLDER_SEPARATOR;
+		}
+		subfolderPath += currentFolderName;
+
+		try {
+			// Determine if the folder already exists.
+			CmisObject folderCmisObj = session.getObjectByPath(subfolderPath);
+
+			if (folderCmisObj != null) {
+				// The folder does exist, so use it.
 				LOGGER.info("Folder already present");
-				LOGGER.info("Found the child folder. Its folder ID is " + childNode.getId() + ".");
-				break;
+				LOGGER.info("Found the child folder. Its folder ID is " + folderCmisObj.getId() + DOT);
+				targetFolder = (Folder) folderCmisObj;
 			}
+		} catch (Exception objEx) {
+			// The specified folder doesn't exist. Ignore the error.
 		}
 
+		// If no folder exists, then have it created.
 		if (targetFolder == null) {
 			LOGGER.info("The folder doesn't exist. Creating it...");
 
@@ -843,35 +953,72 @@ public class CMISExporter implements ICommonConstants {
 			} catch (Exception createEx) {
 				LOGGER.error("An error occurred while attempting to create the folder node \"" + currentFolderName
 						+ "\" within the parent folder node \"" + currentFolderName + "\". The error was: " + createEx.getMessage());
-				
+				return null;
 			}
 		}
 
-		else {
+		if (targetFolder != null) {
 			// The folder does exist, but we need to determine if we are at the end of the chain.
 			int newFolderIndex = currentFolderIndex + 1;
 			if (newFolderIndex < folderPathList.length) {
-				String subfolderPath = parentFolderPath;
-				StringBuffer tempSubfolderPath=new StringBuffer();
-				tempSubfolderPath.append(subfolderPath);
-				if (!("/").equals(parentFolderPath)) {
-					tempSubfolderPath.append('/');
-				}
-				tempSubfolderPath.append(currentFolderName);
-				subfolderPath=tempSubfolderPath.toString();
-
 				// We are not at the end of the tree. Iterate to the next node in the path.
 				targetFolder = this.checkCreateFolder(session, targetFolder, subfolderPath, newFolderIndex, folderPathList);
 			}
 			// Else this is the end of the line.
-		targetFolderReturnValue=targetFolder;
 		}
 		// ****************************************************************************************
 		// END: Zia Consulting Enhancement
 		// ****************************************************************************************
-		
-		return targetFolderReturnValue;
+
+		return targetFolder;
 	} // End checkCreateFolder
+
+	/**
+	 * @param root Folder
+	 * @param rootFolder String
+	 * @return Folder
+	 */
+	/*
+	 * private Folder checkCreateFolder(Session session, Folder parentFolder, String parentFolderPath, int currentFolderIndex, String[]
+	 * folderPathList) { // **************************************************************************************** // BEGIN: Zia
+	 * Consulting Enhancement // Modified to support a nested folder structure within the repository rather than simply // a root level
+	 * folder. Recursion is employed in order to walk the folder tree. //
+	 * **************************************************************************************** Folder targetFolder = null; Folder
+	 * targetFolderReturnValue = null;
+	 * 
+	 * // Get the name of the folder at the current index in the path. String currentFolderName = folderPathList[currentFolderIndex];
+	 * 
+	 * LOGGER.info("Determining if the target folder \"" + currentFolderName + "\" exists within the repository folder \"" +
+	 * parentFolderPath + "\".");
+	 * 
+	 * // Iterate through the child nodes of the parent node until we find the specified child folder. for (CmisObject childNode :
+	 * parentFolder.getChildren()) { if (childNode.getName().equals(currentFolderName) && (childNode instanceof Folder)) { targetFolder
+	 * = (Folder) childNode; LOGGER.info("Folder already present"); LOGGER.info("Found the child folder. Its folder ID is " +
+	 * childNode.getId() + "."); break; } }
+	 * 
+	 * if (targetFolder == null) { LOGGER.info("The folder doesn't exist. Creating it...");
+	 * 
+	 * try { // Have the folder created. ObjectId newFolderID = this.createFolder(session,
+	 * session.createObjectId(parentFolder.getId()), currentFolderName);
+	 * 
+	 * // Convert the object ID to a folder reference. targetFolder = (Folder) session.getObject(newFolderID); } catch (Exception
+	 * createEx) { LOGGER.error("An error occurred while attempting to create the folder node \"" + currentFolderName +
+	 * "\" within the parent folder node \"" + currentFolderName + "\". The error was: " + createEx.getMessage());
+	 * 
+	 * } }
+	 * 
+	 * else { // The folder does exist, but we need to determine if we are at the end of the chain. int newFolderIndex =
+	 * currentFolderIndex + 1; if (newFolderIndex < folderPathList.length) { String subfolderPath = parentFolderPath; StringBuffer
+	 * tempSubfolderPath = new StringBuffer(); tempSubfolderPath.append(subfolderPath); if (!("/").equals(parentFolderPath)) {
+	 * tempSubfolderPath.append('/'); } tempSubfolderPath.append(currentFolderName); subfolderPath = tempSubfolderPath.toString();
+	 * 
+	 * // We are not at the end of the tree. Iterate to the next node in the path. targetFolder = this.checkCreateFolder(session,
+	 * targetFolder, subfolderPath, newFolderIndex, folderPathList); } // Else this is the end of the line. targetFolderReturnValue =
+	 * targetFolder; } // **************************************************************************************** // END: Zia
+	 * Consulting Enhancement // ****************************************************************************************
+	 * 
+	 * return targetFolderReturnValue; } // End checkCreateFolder
+	 */
 
 	/**
 	 * @param mainFolder Folder
@@ -925,22 +1072,35 @@ public class CMISExporter implements ICommonConstants {
 			LOGGER.info("Batch instance folder created successfully : " + batchInstanceFolderID);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
+			if (e instanceof CmisBaseException) {
+				String errorContent = ((CmisBaseException) e).getErrorContent();
+				if (null != errorContent) {
+					String errorText = getTextFromHtmlString(errorContent);
+					LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+				}
+			}
 		}
 
 		return batchInstanceFolderID;
 	}
 
 	/**
-	 * @param session Session
-	 * @param folder Folder
-	 * @param file File
-	 * @param document DocumentType
-	 * @param batchInstanceIdentifier String
-	 * @param batchClassIdentifier String
+	 * 
+	 * @param session
+	 * @param folder
+	 * @param file
+	 * @param document
+	 * @param batchClassIdentifier
+	 * @param isPdfFile
+	 * @param doc
+	 * @param batchInstanceIdentifier
+	 * @return
 	 * @throws IOException
+	 * @throws DCMAApplicationException
 	 */
-	private void uploadDocument(Session session, Folder folder, File file, Document document,
-			String batchClassIdentifier, boolean isPdfFile) throws IOException, DCMAApplicationException {
+	private org.apache.chemistry.opencmis.client.api.Document uploadDocument(org.apache.chemistry.opencmis.client.api.Document doc,
+			Session session, Folder folder, File file, Document document, String batchClassIdentifier, boolean isPdfFile,
+			String batchInstanceIdentifier) throws IOException, DCMAApplicationException {
 		String mimeType = null;
 		try {
 			FileNameMap fileNameMap = URLConnection.getFileNameMap();
@@ -961,6 +1121,7 @@ public class CMISExporter implements ICommonConstants {
 		DataInputStream dis = new DataInputStream(fis);
 		byte[] bytes = new byte[(int) file.length()];
 		dis.readFully(bytes);
+		ContentStream contentStream = null;
 
 		Map<String, Object> newDocProps = getPropertyMap(file, document, batchClassIdentifier);
 
@@ -973,8 +1134,7 @@ public class CMISExporter implements ICommonConstants {
 		try {
 
 			// BigInteger bInteger = new BigInteger("10");
-			ContentStream contentStream = new ContentStreamImpl(file.getAbsolutePath(), null, mimeType,
-					new ByteArrayInputStream(bytes));
+			contentStream = new ContentStreamImpl(file.getAbsolutePath(), null, mimeType, new ByteArrayInputStream(bytes));
 
 			VersioningState versioningState;// default Versioning State of Document
 
@@ -984,16 +1144,27 @@ public class CMISExporter implements ICommonConstants {
 				LOGGER.error("In valid parameter set in the property file " + e.getMessage(), e);
 				versioningState = VersioningState.NONE;
 			}
-
-			org.apache.chemistry.opencmis.client.api.Document doc = folder.createDocument(newDocProps, contentStream, versioningState,
-					policies, removeAces, addAces, session.getDefaultContext());
+			if (null != doc) {
+				LOGGER.info(DELETING_ALL_THE_VERSIONS_OF_THE_DOCUMENT + doc.getName() + BECAUSE_IT_ALREADY_EXISTS_ON_THE_REPOSITORY);
+				doc.deleteAllVersions();
+			}
+			doc = folder.createDocument(newDocProps, contentStream, versioningState, policies, removeAces, addAces, session
+					.getDefaultContext());
 			if (null != doc) {
 				LOGGER.info("*** Created Document : " + file.getAbsolutePath() + "  " + doc.getCheckinComment());
 			}
 			// Document created
 
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
+			LOGGER.error(ERROR_WHILE_UPLOADING_DOCUMENT_WITH_IDENTIFIER + document.getIdentifier() + FOR_BATCH_INSTANCE
+					+ batchInstanceIdentifier, e);
+			if (e instanceof CmisBaseException) {
+				String errorContent = ((CmisBaseException) e).getErrorContent();
+				if (null != errorContent) {
+					String errorText = getTextFromHtmlString(errorContent);
+					LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+				}
+			}
 			throw new DCMAApplicationException("Unable to upload the document : " + file.getName(), e);
 		} finally {
 			try {
@@ -1003,11 +1174,149 @@ public class CMISExporter implements ICommonConstants {
 				if (fis != null) {
 					fis.close();
 				}
+				if (contentStream != null && contentStream.getStream() != null) {
+					contentStream.getStream().close();
+				}
 			} catch (IOException io) {
-				LOGGER.error("Unable to close the input stream " + io.getMessage());
+				LOGGER.error(UNABLE_TO_CLOSE_THE_INPUT_STREAM + io.getMessage());
 			}
 		}
+		return doc;
+	}
 
+	private void addAspectsToDocument(org.apache.chemistry.opencmis.client.api.Document doc, Document document,
+			String batchClassIdentifier, String batchInstanceIdentifier) throws DCMAApplicationException {
+		if (doc != null) {
+			String aspectMappingFileName = getAspectMappingFileName();
+			if (aspectMappingFileName == null || aspectMappingFileName.isEmpty()) {
+				throw new DCMAApplicationException("Name for aspect mapping file not specified in cmis properties file.");
+			}
+			String filePath = getPropertyFolderPath(batchClassIdentifier) + File.separator + aspectMappingFileName;
+			Properties aspectMappingProperties = getAspectProperties(filePath);
+			Map<String, Object> newDocProperties = new HashMap<String, Object>();
+			String documentType = document.getType();
+
+			String documentTypeAspectsToBeAdded = aspectMappingProperties.getProperty(documentType);
+			List<DocField> documentLevelFieldList = document.getDocumentLevelFields().getDocumentLevelField();
+			AlfrescoDocument alfrescoDocument = (AlfrescoDocument) doc;
+			if (documentTypeAspectsToBeAdded != null && !documentTypeAspectsToBeAdded.isEmpty()) {
+				String[] aspects = documentTypeAspectsToBeAdded.split(";");
+				for (String aspect : aspects) {
+					try {
+						LOGGER.info(ADDING_ASPECT + aspect + FOR_DOCUMENT_TYPE + documentType + FOR_BATCH_INSTANCE
+								+ batchInstanceIdentifier);
+						alfrescoDocument.addAspect(aspect);
+					} catch (Exception e) {
+						String errorMsg = UNABLE_TO_ADD_ASPECT + aspect + DEFINED_IN_THE_PROPERTY_MAPPING_FILE + filePath
+								+ FOR_BATCH_INSTANCE + batchInstanceIdentifier;
+						LOGGER.error(errorMsg, e);
+						if (e instanceof CmisBaseException) {
+							String errorContent = ((CmisBaseException) e).getErrorContent();
+							if (null != errorContent) {
+								String errorText = getTextFromHtmlString(errorContent);
+								LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+							}
+						}
+						throw new DCMAApplicationException(errorMsg, e);
+					}
+				}
+			}
+			Set<Object> keySet = aspectMappingProperties.keySet();
+			Iterator<Object> iterator = keySet.iterator();
+			while (iterator.hasNext()) {
+				Object key = iterator.next();
+				String keyString = (String) key;
+				if (keyString.contains(documentType + DOT)) {
+					String documentLevelFieldName = keyString.substring(documentType.length() + 1);
+					if (documentLevelFieldName != null && !documentLevelFieldName.isEmpty()) {
+						String aspectProperty = (String) aspectMappingProperties.get(key);
+						LOGGER.info(SEARCHING_FOR_EXISTENCE_OF_ASPECT_PROPERTY + aspectProperty + ON_CMIS_REPOSITORY);
+						if (alfrescoDocument.findAspect(aspectProperty) != null) {
+							if (aspectProperty != null && !aspectProperty.isEmpty()) {
+								String docLevelFieldValue = null;
+								String docFieldType = null;
+								for (DocField docField : documentLevelFieldList) {
+									if (docField != null) {
+										String name = docField.getName();
+										if (name != null && !name.isEmpty()) {
+											if (name.equals(documentLevelFieldName.trim())) {
+												docLevelFieldValue = docField.getValue();
+												docFieldType = docField.getType();
+											}
+										}
+									}
+								}
+								if (docLevelFieldValue != null && docFieldType != null) {
+									Object aspectPropertyValue = convert(docLevelFieldValue, docFieldType, documentLevelFieldName);
+									newDocProperties.put(aspectProperty, aspectPropertyValue);
+									String logMsg = ADDED_ASPECT_PROPERTY + aspectProperty + FOR_DOCUMENT_LEVEL_FIELD
+											+ documentLevelFieldName + FOR_DOCUMENT_ID + document.getIdentifier()
+											+ HAVING_DOCUMENT_TYPE + documentType + FOR_BATCH_INSTANCE + batchInstanceIdentifier;
+									LOGGER.info(logMsg);
+								} else {
+									String errorMsg = IMPROPER_MAPPING_IN_PROPERTY_FILE + filePath + FOR_BATCH_INSTANCE
+											+ batchInstanceIdentifier + NO_SUCH_DOCUMENT_LEVEL_FIELD_EXISTS + documentLevelFieldName
+											+ FOR_DOCUMENT_TYPE + document.getType() + DEFINED_FOR_DOCUMENT_ID
+											+ document.getIdentifier() + SKIPPING_THE_ASPECT_PROPERTY + aspectProperty
+											+ AND_CONTINUING;
+
+									LOGGER.error(errorMsg);
+								}
+							}
+						} else {
+							String errorMsg = IMPROPER_MAPPING_IN_PROPERTY_FILE + filePath + FOR_BATCH_INSTANCE
+									+ batchInstanceIdentifier + NO_SUCH_ASPECT_PROPERTY_EXISTS + aspectProperty;
+							LOGGER.error(errorMsg);
+							throw new DCMAApplicationException(errorMsg);
+						}
+					}
+				}
+			}
+			if (!newDocProperties.isEmpty()) {
+				String logMsg = UPDATING_THE_ADDED_PROPERTIES_FOR + alfrescoDocument.getName();
+				LOGGER.info(logMsg);
+				try {
+					alfrescoDocument.updateProperties(newDocProperties);
+				} catch (Exception e) {
+
+					if (e instanceof CmisBaseException) {
+						String errorContent = ((CmisBaseException) e).getErrorContent();
+						if (null != errorContent) {
+							String errorText = getTextFromHtmlString(errorContent);
+							LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+						}
+					}
+					String errMsg = COULD_NOT_UPDATE_PROPERTIES + FOR_DOCUMENT_ID + document.getIdentifier() + FOR_BATCH_INSTANCE
+							+ batchInstanceIdentifier;
+					throw new DCMAApplicationException(errMsg, e);
+				}
+			}
+		}
+	}
+
+	private Properties getAspectProperties(String filePath) throws DCMAApplicationException {
+		FileInputStream propertyInStream = null;
+		if (aspectProperties == null) {
+			aspectProperties = new Properties();
+			try {
+				File propertyFile = new File(filePath);
+				propertyInStream = new FileInputStream(propertyFile);
+				aspectProperties.load(propertyInStream);
+			} catch (IOException e) {
+				String errorMsg = UNABLE_TO_READ_ASPECT_MAPPING_FROM_PROPERTY_FILE + filePath;
+				LOGGER.error(errorMsg, e);
+				throw new DCMAApplicationException(errorMsg, e);
+			} finally {
+				try {
+					if (propertyInStream != null) {
+						propertyInStream.close();
+					}
+				} catch (IOException e) {
+
+				}
+			}
+		}
+		return aspectProperties;
 	}
 
 	/**
@@ -1032,13 +1341,7 @@ public class CMISExporter implements ICommonConstants {
 		FileInputStream fis = null;
 		try {
 
-			String propertyFolderPath = batchSchemaService.getAbsolutePath(batchClassIdentifier, batchSchemaService
-					.getCmisPluginMappingFolderName(), false);
-
-			if (null == propertyFolderPath) {
-				throw new DCMAApplicationException("In valid folder name in properties file.");
-			}
-
+			String propertyFolderPath = getPropertyFolderPath(batchClassIdentifier);
 			String propertyFilePath = propertyFolderPath + File.separator + getPluginMappingFileName();
 
 			File propertyFile = new File(propertyFilePath);
@@ -1077,7 +1380,7 @@ public class CMISExporter implements ICommonConstants {
 			if (null != keyString) {
 				String type = document.getType();
 				if (null != type) {
-					type = type.replaceAll(" ", "");
+					// type = type.replaceAll(SPACE, "");
 					if (keyString.contains(type)) {
 						String value = properties.getProperty(keyString);
 						LOGGER.info("property - keyString : " + keyString + " , property-value : " + value);
@@ -1088,11 +1391,11 @@ public class CMISExporter implements ICommonConstants {
 							for (DocField fdType : documentLevelFieldList) {
 								String name = fdType.getName();
 								if (null != name) {
-									String nameDLF = name.replaceAll(" ", "");
-									if (keyString.contains(nameDLF)) {
+									// String nameDLF = name.replaceAll(SPACE, "");
+									if (keyString.contains(name)) {
 										String valueFdType = fdType.getValue();
 										if (!(valueFdType == null || valueFdType.trim().isEmpty())) {
-											Object valueDLF = convert(valueFdType, fdType.getType(), nameDLF);
+											Object valueDLF = convert(valueFdType, fdType.getType(), name);
 											newDocProps.put(value, valueDLF);
 										}
 										break;
@@ -1108,6 +1411,15 @@ public class CMISExporter implements ICommonConstants {
 
 		return newDocProps;
 
+	}
+
+	private String getPropertyFolderPath(String batchClassIdentifier) throws DCMAApplicationException {
+		String propertyFolderPath = batchSchemaService.getAbsolutePath(batchClassIdentifier, batchSchemaService
+				.getCmisPluginMappingFolderName(), false);
+		if (null == propertyFolderPath) {
+			throw new DCMAApplicationException("In valid folder name in properties file.");
+		}
+		return propertyFolderPath;
 	}
 
 	private Object convert(String value, String type, String property) {
@@ -1168,7 +1480,7 @@ public class CMISExporter implements ICommonConstants {
 					}
 				}
 
-				returnValue =  Boolean.valueOf(valueToConvert);
+				returnValue = Boolean.valueOf(valueToConvert);
 				break;
 			default:
 				LOGGER.info(CONVERTING + property + " to default value of String");
@@ -1210,17 +1522,17 @@ public class CMISExporter implements ICommonConstants {
 			// Get the value of the configuration property.
 			String batchInSubfolderString = getRepoCreateBatchFolder();
 
-			if ((batchInSubfolderString != null) && (batchInSubfolderString.trim().isEmpty())
+			if ((batchInSubfolderString != null) && (!batchInSubfolderString.trim().isEmpty())
 					&& (batchInSubfolderString.trim().equalsIgnoreCase(FALSE))) {
 				// Batches do not get their own subfolders.
 				batchInSubfolder = false;
 			}
 		} catch (Exception configEx) {
 			LOGGER.info("Ignore exceptions related to this feature, as this is not a required behavior");
-			
+
 			// Ignore exceptions related to this feature, as this is not a required behavior.
 		}
-
+		LOGGER.info("value of property:cmis.repo.create_batch_subfolders is:" + batchInSubfolder);
 		return batchInSubfolder;
 	} // End isBatchInSubfolder
 
@@ -1249,7 +1561,6 @@ public class CMISExporter implements ICommonConstants {
 				CMISProperties.CMIS_REPOSITORY_ID);
 		String uploadFileTypeExt = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, CMIS_EXPORT_PLUGIN,
 				CMISProperties.CMIS_UPLOAD_FILE_EXT);
-
 		try {
 			Session session = null;
 
@@ -1273,7 +1584,7 @@ public class CMISExporter implements ICommonConstants {
 
 			// Split the specified repository folder path into its individual parts using "/" as the
 			// delimeter.
-			String[] folderPathList = rootFolder.split("/");
+			String[] folderPathList = rootFolder.split(FOLDER_SEPARATOR);
 
 			// Determine if there is an empty string in the first index of the folder path list.
 			// This happens because split inserts an empty string if the first character is "/".
@@ -1287,7 +1598,7 @@ public class CMISExporter implements ICommonConstants {
 
 			// Get a handle to the target folder. If it doesn't exist, then it will be created.
 			// We start at index 1, because split inserts and empty string into index 0.
-			Folder mainFolder = checkCreateFolder(session, root, "/", startIndex, folderPathList);
+			Folder mainFolder = checkCreateFolder(session, root, FOLDER_SEPARATOR, startIndex, folderPathList);
 
 			// Determine if the batch file was placed within a batch sub-folder
 			Folder batchInstanceFolder = null;
@@ -1296,8 +1607,8 @@ public class CMISExporter implements ICommonConstants {
 				batchInstanceFolder = checkBatchInstanceFolder(mainFolder, batchInstanceIdentifier);
 
 				if (batchInstanceFolder == null) {
-					throw new Exception("Unable to locate the batch folder \"" + rootFolder + "/" + batchInstanceIdentifier
-							+ "\" within the repository.");
+					throw new Exception("Unable to locate the batch folder \"" + rootFolder + FOLDER_SEPARATOR
+							+ batchInstanceIdentifier + "\" within the repository.");
 				}
 			} else {
 				// Batch files are not to be written to sub-folder. Therefore, the configured root folder
@@ -1317,7 +1628,56 @@ public class CMISExporter implements ICommonConstants {
 
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
+			if (e instanceof CmisBaseException) {
+				String errorContent = ((CmisBaseException) e).getErrorContent();
+				if (null != errorContent) {
+					String errorText = getTextFromHtmlString(errorContent);
+					LOGGER.error(CUSTOM_ERROR_MESSAGE_FROM_CMIS_PLUGIN + errorText);
+				}
+			}
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
+	}
+
+	public void setAspectMappingFileName(String aspectMappingFileName) {
+		this.aspectMappingFileName = aspectMappingFileName;
+	}
+
+	public String getAspectMappingFileName() {
+		return aspectMappingFileName;
+	}
+
+	private String getTextFromHtmlString(String htmlString) {
+		String errorText = "";
+		CleanerProperties cleanerProps = new CleanerProperties();
+		// set some properties to non-default values
+		cleanerProps.setTransResCharsToNCR(true);
+		cleanerProps.setTranslateSpecialEntities(true);
+		cleanerProps.setOmitComments(true);
+		cleanerProps.setOmitDoctypeDeclaration(true);
+		cleanerProps.setOmitXmlDeclaration(true);
+		cleanerProps.setUseEmptyElementTags(true);
+
+		HtmlCleaner cleaner = new HtmlCleaner(cleanerProps);
+		TagNode tagNode = cleaner.clean(htmlString);
+		Object[] rootNode = null;
+		try {
+			rootNode = tagNode.evaluateXPath("//table");
+			if (null != rootNode && rootNode.length > 0) {
+				TagNode[] textNode = ((TagNode) rootNode[rootNode.length - 1]).getElementsByName("td", true);
+				for (TagNode tag : textNode) {
+					if (tag != null && tag.getText() != null) {
+						if (tag.getText().toString().trim().equals("&nbsp;")) {
+							errorText = errorText + " ";
+						} else {
+							errorText = errorText + tag.getText();
+						}
+					}
+				}
+			}
+		} catch (XPatherException e) {
+			LOGGER.error("Error extracting table node from html." + e.getMessage());
+		}
+		return errorText;
 	}
 }

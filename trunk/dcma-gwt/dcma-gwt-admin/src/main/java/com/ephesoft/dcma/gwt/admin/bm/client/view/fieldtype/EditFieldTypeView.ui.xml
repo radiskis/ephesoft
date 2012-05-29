@@ -111,13 +111,27 @@
 				<g:CheckBox ui:field="isHidden" />
 			</g:cell>
 		</g:HorizontalPanel>
-
+    <g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="isMultiLineLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:CheckBox ui:field="isMultiLine" />
+			</g:cell>
+		</g:HorizontalPanel>
 		<g:HorizontalPanel ui:field="editFieldPanel">
 			<g:Button ui:field="saveButton" />
 			<g:cell width="7%">
 				<g:Label></g:Label>
 			</g:cell>
 			<g:Button ui:field="cancelButton" />
+			<g:cell width="7%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:Button ui:field="samplePatternButton" />
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

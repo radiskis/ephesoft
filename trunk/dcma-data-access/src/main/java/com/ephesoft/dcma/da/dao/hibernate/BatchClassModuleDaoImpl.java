@@ -57,6 +57,7 @@ public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> impl
 	private static final String MODULE = "module";
 	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
 	private static final Logger LOG = LoggerFactory.getLogger(BatchClassModuleDaoImpl.class);
+	private static final String WORKFLOW_NAME = "workflowName";
 
 	@Override
 	public Integer countModules(String batchClassIdentifier) {
@@ -97,9 +98,23 @@ public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> impl
 	public BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName) {
 		DetachedCriteria criteria = criteria();
 		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
-		criteria.add(Restrictions.eq("workflowName", workflowName));
 		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
-		return findSingle(criteria);
+		criteria.add(Restrictions.eq(WORKFLOW_NAME, workflowName));
+		return (BatchClassModule) find(criteria).get(0);
+	}
+
+	@Override
+	public List<BatchClassModule> getAllBatchClassModulesInOrder(com.ephesoft.dcma.core.common.Order order) {
+
+		DetachedCriteria criteria = criteria();
+		if (order != null) {
+			if (order.isAscending()) {
+				criteria.addOrder(Order.asc(order.getSortProperty().getProperty()));
+			} else {
+				criteria.addOrder(Order.desc(order.getSortProperty().getProperty()));
+			}
+		}
+		return find(criteria);
 	}
 
 }

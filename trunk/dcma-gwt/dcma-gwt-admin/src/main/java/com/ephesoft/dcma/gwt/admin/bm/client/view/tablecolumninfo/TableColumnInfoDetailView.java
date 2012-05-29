@@ -68,6 +68,11 @@ public class TableColumnInfoDetailView extends View<TableColumnInfoDetailPresent
 	protected Label columnName;
 
 	@UiField
+	protected Label columnHeaderPatternLabel;
+	@UiField
+	protected Label columnHeaderPattern;
+
+	@UiField
 	protected Label columnPatternLabel;
 	@UiField
 	protected Label columnPattern;
@@ -89,6 +94,7 @@ public class TableColumnInfoDetailView extends View<TableColumnInfoDetailPresent
 				+ AdminConstants.COLON);
 		columnNameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.COLUMN_NAME)
 				+ AdminConstants.COLON);
+		columnHeaderPatternLabel.setText("Column Header Pattern");
 		columnPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.COLUMN_PATTERN)
 				+ AdminConstants.COLON);
 		isRequiredLabel.setText(BatchClassManagementConstants.IS_REQUIRED.toString() + AdminConstants.COLON);
@@ -96,6 +102,7 @@ public class TableColumnInfoDetailView extends View<TableColumnInfoDetailPresent
 		betweenLeftLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		betweenRightLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnNameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		columnHeaderPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isRequiredLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isRequired.setEnabled(false);
@@ -115,6 +122,10 @@ public class TableColumnInfoDetailView extends View<TableColumnInfoDetailPresent
 
 	public void setColumnPattern(String columnPattern) {
 		this.columnPattern.setText(columnPattern);
+	}
+
+	public void setColumnHeaderPattern(String columnHeaderPattern) {
+		this.columnHeaderPattern.setText(columnHeaderPattern);
 	}
 
 	public void setRequired(boolean isRequired) {

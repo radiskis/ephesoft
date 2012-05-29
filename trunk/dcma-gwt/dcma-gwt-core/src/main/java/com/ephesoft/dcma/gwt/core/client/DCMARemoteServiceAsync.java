@@ -69,6 +69,12 @@ public interface DCMARemoteServiceAsync {
 	void cleanup(AsyncCallback<Void> callback);
 
 	/**
+	 * API to clean up the current user for the current batch
+	 * @param batchIdentifier
+	 * @param callback
+	 */
+	void cleanUpCurrentBatch(String batchIdentifier,AsyncCallback<Void> callback);
+	/**
 	 * API to get User Name using the remote services on the application asynchronously.
 	 * @param callback
 	 */
@@ -169,4 +175,21 @@ public interface DCMARemoteServiceAsync {
 	 * @return 
 	 */
 	void disableRestartAllButton(AsyncCallback<Void> callback);
+	/**
+	 * API to get current user of a batch.
+	 * @param batchInstanceIdentifier
+	 * @param callback
+	 */
+	void getCurrentUser(String batchInstanceIdentifier,AsyncCallback<String> callback);
+	
+	/**
+	 * API to show License expiry message on login.
+	 * 
+	 */
+	void setUpForLicenseExpiryAlert(AsyncCallback<Void> callback);
+	
+	/**
+	 * API to show License expiry message on login.
+	 */
+	void initRemoteServiceForLicenseAlert(AsyncCallback<Void> callback);
 }

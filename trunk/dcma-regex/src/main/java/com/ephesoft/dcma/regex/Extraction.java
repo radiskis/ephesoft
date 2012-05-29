@@ -324,6 +324,9 @@ public class Extraction {
 				}
 
 				final DocField updtDocFdType = new DocField();
+				updtDocFdType.setName(key);
+				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
+				
 				final AlternateValues alternateValues = new AlternateValues();
 
 				setFirstFieldValue(true);
@@ -368,9 +371,7 @@ public class Extraction {
 						}
 
 						if (foundData != null && foundData.size() > 0) {
-
-							processPageType(updtDocFdType, foundData, key, pageID, alternateValues, fdTypeName, fieldOrderNumber);
-
+							processPageType(updtDocFdType, foundData, pageID, alternateValues, fdTypeName);
 						}
 						break;
 					} else {
@@ -383,9 +384,7 @@ public class Extraction {
 				if (!isFirstFieldValue()) {
 					updtDocFdTyList.add(updtDocFdType);
 				} else {
-					updtDocFdType.setName(key);
 					updtDocFdType.setType(fdTypeName);
-					updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
 					updtDocFdTyList.add(updtDocFdType);
 					isValidateData = true;
 				}
@@ -518,17 +517,15 @@ public class Extraction {
 	 * @param fieldOrderNumber int
 	 * @throws DCMAApplicationException Check for input parameters and process the document page.
 	 */
-	private void processPageType(final DocField updtDocFdType, final List<DataCarrier> foundData, final String key,
-			final String pageID, final AlternateValues alternateValues, final String fdTypeName, final int fieldOrderNumber)
+	private void processPageType(final DocField updtDocFdType, final List<DataCarrier> foundData,
+			final String pageID, final AlternateValues alternateValues, final String fdTypeName)
 			throws DCMAApplicationException {
 
 		for (DataCarrier dataCarrier : foundData) {
 			Span span = dataCarrier.getSpan();
 			String value = dataCarrier.getValue();
 			if (isFirstFieldValue()) {
-				updtDocFdType.setName(key);
 				updtDocFdType.setPage(pageID);
-				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
 				updtDocFdType.setType(fdTypeName);
 				updtDocFdType.setConfidence(dataCarrier.getConfidence());
 				updtDocFdType.setValue(value);
@@ -548,9 +545,7 @@ public class Extraction {
 				final List<Field> alternateValue = alternateValues.getAlternateValue();
 
 				final Field fieldType = new Field();
-				fieldType.setName(key);
 				fieldType.setValue(value);
-				fieldType.setFieldOrderNumber(fieldOrderNumber);
 				fieldType.setType(fdTypeName);
 				fieldType.setConfidence(dataCarrier.getConfidence());
 

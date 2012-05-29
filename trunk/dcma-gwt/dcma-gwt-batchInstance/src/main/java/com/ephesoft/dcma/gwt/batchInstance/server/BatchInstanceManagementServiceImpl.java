@@ -53,23 +53,23 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.ephesoft.dcma.batch.service.BatchInstancePluginPropertiesService;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
+import com.ephesoft.dcma.batch.service.ImportBatchService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.common.Order;
-import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.core.threadpool.ThreadPool;
-import com.ephesoft.dcma.da.dao.hibernate.BatchClassGroupsDaoImpl;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
-import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.RemoteBatchInstance;
 import com.ephesoft.dcma.da.property.BatchInstanceFilter;
 import com.ephesoft.dcma.da.property.BatchInstanceProperty;
 import com.ephesoft.dcma.da.property.BatchPriority;
+import com.ephesoft.dcma.da.service.BatchClassGroupsService;
 import com.ephesoft.dcma.da.service.BatchClassModuleService;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
@@ -89,13 +89,8 @@ import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet implements BatchInstanceManagementService {
 
 	private static final long serialVersionUID = 1L;
-	private static final String INPUT_BATCH_XML = "backup.input_batch_xml";
-	private static final String OUTPUT_BATCH_XML = "backup.output_batch_xml";
-	private static final String INPUT_BATCH_XML_ZIP = "backup.input_batch_xml_zip";
-
 	private static final String BACKUP_PROPERTY_FILE = "META-INF" + File.separator + "dcma-util" + File.separator
 			+ "dcma-backup-service.properties";
-	private static final String SCRIPTING_PLUGIN = "Scripting_Plugin";
 
 	@Override
 	public List<BatchInstanceDTO> getBatchInstanceDTOs(final int startRow, final int rowsCount, final List<DataFilter> filters,
@@ -114,10 +109,14 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 		List<BatchInstance> batchInstanceList = null;
 		List<BatchPriority> batchPriorities = getPriorityList(filters);
 		List<BatchInstanceStatus> statusList = getStatusList(filters);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
+		Set<String> userRoles = getUserRoles();
+		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
+		
 		batchInstanceList = batchInstanceService.getBatchInstances(statusList, startRow, rowsCount, orderList, filterClauseList,
-				batchPriorities, getUserName(), allBatchClassByUserRoles);
-
+				batchPriorities, getUserName(), userRoles,ephesoftUser);
 		BatchInstanceDTO batchInstanceDTO = null;
 		ArrayList<BatchInstanceDTO> batches = new ArrayList<BatchInstanceDTO>();
 
@@ -250,8 +249,11 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 		List<BatchPriority> batchPriorities = getPriorityList(dataFilters);
 		int rowCount = 0;
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		rowCount = batchInstanceService.getCount(statusList, batchPriorities, allBatchClassByUserRoles, getUserName());
+		EphesoftUser ephesoftUser=EphesoftUser.ADMIN_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
+			rowCount = batchInstanceService.getCount(statusList, batchPriorities, true, getUserName(), getUserRoles(), ephesoftUser);
 		return rowCount;
 	}
 
@@ -290,7 +292,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 		boolean deleted = true;
 
 		if (null != systemFolderFile) {
-			deleted &= FileUtils.deleteDirectoryAndContents(systemFolderFile);
+			deleted &= FileUtils.cleanUpDirectory(systemFolderFile);
 		}
 		if (null != propertiesFile) {
 			deleted &= propertiesFile.delete();
@@ -324,11 +326,12 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
 			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 			BatchClassModuleService batchClassModuleService = this.getSingleBeanOfType(BatchClassModuleService.class);
+			ImportBatchService imService = this.getSingleBeanOfType(ImportBatchService.class);
 			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(identifier);
 			if (batchInstance != null && batchClassService != null && batchSchemaService != null && batchClassModuleService != null
 					&& batchInstanceService != null) {
 				result = processRestartingBatch(identifier, moduleName, jbpmService, batchInstanceService, batchClassService,
-						batchSchemaService, batchClassModuleService, batchInstance, true);
+						batchSchemaService, batchClassModuleService, batchInstance, true, imService);
 			}
 		}
 		return result;
@@ -336,7 +339,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 
 	private Results processRestartingBatch(String identifier, String moduleName, JbpmService jbpmService,
 			BatchInstanceService batchInstanceService, BatchClassService batchClassService, BatchSchemaService batchSchemaService,
-			BatchClassModuleService batchClassModuleService, BatchInstance batchInstance, boolean throwException) throws GWTException {
+			BatchClassModuleService batchClassModuleService, BatchInstance batchInstance, boolean throwException, ImportBatchService imService) throws GWTException {
 		Results result;
 		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
 		log.info("Zipped Batch XML switch is:" + isZipSwitchOn);
@@ -356,7 +359,8 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			}
 
 			if (moduleName != null) {
-				updateBatchFolders(batchInstance, moduleName, isZipSwitchOn);
+				Properties properties = fetchConfig();
+				imService.updateBatchFolders(properties,batchInstance, moduleName, isZipSwitchOn);
 			} else {
 				deleteBatchFolder(batchInstance);
 				moduleName = BatchInstanceConstants.FOLDER_IMPORT_MODULE;
@@ -421,7 +425,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 	private void deleteBatchFolder(BatchInstance batchInstance) {
 		File batchInstanceFolder = new File(batchInstance.getLocalFolder() + File.separator + batchInstance.getIdentifier());
 		if (batchInstanceFolder.exists()) {
-			FileUtils.deleteDirectoryAndContents(batchInstanceFolder);
+			FileUtils.deleteDirectoryAndContentsRecursive(batchInstanceFolder);
 		}
 	}
 
@@ -448,162 +452,22 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 		return properties;
 	}
 
-	private void updateBatchFolders(BatchInstance batchInstance, String moduleName, boolean isZipSwitchOn) throws GWTException {
-		Properties properties = fetchConfig();
-		String batchXmlExtension = ICommonConstants.UNDERSCORE_BATCH_XML;
-		if (properties != null) {
-			batchXmlExtension = properties.getProperty(INPUT_BATCH_XML);
-		}
-		File batchInstanceFolder = new File(batchInstance.getLocalFolder() + File.separator + batchInstance.getIdentifier());
-		String batchXmlPath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-				+ batchXmlExtension;
-
-		File batchZipFile = null;
-		File batchXmlFile = null;
-		boolean isZip = false;
-		if (isZipSwitchOn) {
-			if (FileUtils.isZipFileExists(batchXmlPath)) {
-				isZip = true;
-			}
-		} else {
-			batchXmlFile = new File(batchXmlPath);
-			if (batchXmlFile.exists()) {
-				isZip = false;
-
-			} else {
-				isZip = true;
-			}
-		}
-
-		log.info("isZip in restarting batch is : " + isZip);
-		if (isZip) {
-			batchXmlExtension = ICommonConstants.UNDERSCORE_BATCH_XML_ZIP;
-			if (properties != null) {
-				batchXmlExtension = properties.getProperty(INPUT_BATCH_XML_ZIP);
-			}
-			String batchZipPath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ batchXmlExtension;
-			batchZipFile = new File(batchZipPath);
-			File backupXmlZipFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML_ZIP);
-			try {
-				FileUtils.copyFile(batchZipFile, backupXmlZipFile);
-			} catch (Exception e) {
-				log.error("Unable to create backup copy of batch file for batch instance : " + batchInstance.getIdentifier());
-				throw new GWTException("Unable to create backup copy of batch file for batch instance : "
-						+ batchInstance.getIdentifier());
-			}
-		} else {
-			batchXmlFile = new File(batchXmlPath);
-			File backupXmlFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML);
-			try {
-				if (batchXmlFile.exists()) {
-					FileUtils.copyFile(batchXmlFile, backupXmlFile);
-				}
-			} catch (Exception e) {
-				log.error("Unable to create backup copy of batch file for batch instance : " + batchInstance.getIdentifier());
-				throw new GWTException("Unable to create backup copy of batch file for batch instance : "
-						+ batchInstance.getIdentifier());
-			}
-
-		}
-
-		List<BatchClassModule> batchClassModuleList = batchInstance.getBatchClass().getBatchClassModules();
-		BatchClassModule currentBatchClassModule = null;
-		for (BatchClassModule batchClassModule : batchClassModuleList) {
-			if (moduleName.equalsIgnoreCase(batchClassModule.getWorkflowName())) {
-				currentBatchClassModule = batchClassModule;
-				break;
-			}
-		}
-		if (currentBatchClassModule != null) {
-			BatchClassModule previousBatchClassModule = null;
-			for (BatchClassModule batchClassModule : batchClassModuleList) {
-				if (previousBatchClassModule == null && batchClassModule.getOrderNumber() < currentBatchClassModule.getOrderNumber()) {
-					previousBatchClassModule = batchClassModule;
-				} else {
-					if (previousBatchClassModule != null
-							&& batchClassModule.getOrderNumber() > previousBatchClassModule.getOrderNumber()
-							&& batchClassModule.getOrderNumber() < currentBatchClassModule.getOrderNumber()) {
-						previousBatchClassModule = batchClassModule;
-					}
-				}
-			}
-
-			String batchBakXml = ICommonConstants.UNDERSCORE_BATCH_BAK_XML;
-			if (properties != null) {
-				batchBakXml = properties.getProperty(OUTPUT_BATCH_XML);
-			}
-
-			if (previousBatchClassModule != null) {
-				BatchClassPlugin prevBatchClassPlugin = getLastPluginFor(previousBatchClassModule);
-				String prevPluginFilePath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-						+ "_" + prevBatchClassPlugin.getPlugin().getWorkflowName() + batchBakXml;
-				File prevPluginBatchXml = new File(prevPluginFilePath);
-
-				if (!prevPluginBatchXml.exists() && !FileUtils.isZipFileExists(prevPluginFilePath)) {
-					String prevPath = prevPluginBatchXml.getAbsolutePath();
-					prevPluginFilePath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier() + "_"
-							+ previousBatchClassModule.getWorkflowName() + "_" + SCRIPTING_PLUGIN + batchBakXml;
-					prevPluginBatchXml = new File(prevPluginFilePath);
-					if (!prevPluginBatchXml.exists() && !FileUtils.isZipFileExists(prevPluginFilePath)) {
-						log.error("Unable to find backup batch xml for batch instance : " + batchInstance.getIdentifier()
-								+ "with file : " + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
-						throw new GWTException("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier()
-								+ "with file : " + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
-					}
-				}
-
-				try {
-					if (batchZipFile != null && batchZipFile.exists()) {
-						prevPluginFilePath = prevPluginBatchXml + FileType.ZIP.getExtensionWithDot();
-						FileUtils.copyFile(new File(prevPluginFilePath), batchZipFile);
-					} else {
-						FileUtils.copyFile(prevPluginBatchXml, batchXmlFile);
-					}
-				} catch (Exception e) {
-					log.error("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier() + "with file : "
-							+ prevPluginBatchXml.getAbsolutePath());
-					throw new GWTException("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier()
-							+ "with file : " + prevPluginBatchXml.getAbsolutePath());
-				}
-			}
-		} else {
-			log.error("Could not find restart option for batch instance : " + batchInstance.getIdentifier() + "restart option "
-					+ moduleName);
-			throw new GWTException("Could not find restart option for batch instance : " + batchInstance.getIdentifier()
-					+ "restart option " + moduleName);
-		}
-	}
-
-	private BatchClassPlugin getLastPluginFor(BatchClassModule previousBatchClassModule) {
-		List<BatchClassPlugin> batchClassPlugins = previousBatchClassModule.getBatchClassPlugins();
-		BatchClassPlugin lastBatchClassPlugin = null;
-		for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
-			if (lastBatchClassPlugin == null) {
-				lastBatchClassPlugin = batchClassPlugin;
-			} else {
-				if (batchClassPlugin.getOrderNumber() > lastBatchClassPlugin.getOrderNumber()) {
-					lastBatchClassPlugin = batchClassPlugin;
-				}
-			}
-		}
-		return lastBatchClassPlugin;
-	}
 
 	@Override
 	public Integer[] getIndividualRowCount() {
 		Integer[] resultList = new Integer[3];
+		EphesoftUser ephesoftUser=EphesoftUser.ADMIN_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		resultList[0] = batchInstanceService.getAllCount(getUserName(), allBatchClassByUserRoles);
+		resultList[0] = batchInstanceService.getAllCount(getUserName(), getUserRoles(), ephesoftUser);
 		List<BatchInstanceStatus> batchInstanceStatus = new ArrayList<BatchInstanceStatus>();
 		batchInstanceStatus.add(BatchInstanceStatus.DELETED);
-		resultList[1] = batchInstanceService.getCount(batchInstanceStatus, null, true, getUserName(), allBatchClassByUserRoles);
+		resultList[1] = batchInstanceService.getCount(batchInstanceStatus, null, true, getUserName(), getUserRoles(), ephesoftUser);
 		batchInstanceStatus.clear();
 		batchInstanceStatus.add(BatchInstanceStatus.RESTARTED);
-		resultList[2] = batchInstanceService.getCount(batchInstanceStatus, null, true, getUserName(), allBatchClassByUserRoles);
+		resultList[2] = batchInstanceService.getCount(batchInstanceStatus, null, true, getUserName(), getUserRoles(), ephesoftUser);
 		return resultList;
 	}
 
@@ -612,19 +476,12 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 	public List<BatchInstanceDTO> getBatchInstanceDTOs(String batchName) throws GWTException {
 		List<BatchInstanceDTO> batchInstanceDTOs = new ArrayList<BatchInstanceDTO>();
 		if (batchName != null && !batchName.isEmpty()) {
-			BatchClassGroupsDaoImpl batchClassGroupsDaoImpl = this.getSingleBeanOfType(BatchClassGroupsDaoImpl.class);
-			Set<String> batchClassList = batchClassGroupsDaoImpl.getBatchClassIdentifierForUsers(getUserRoles());
 			BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-			List<BatchInstance> batchInstances = batchInstanceService.getBatchInstanceByBatchName(batchName);
+			List<BatchInstance> batchInstances = batchInstanceService.getBatchInstanceByBatchName(batchName, getUserRoles());
 			if (batchInstances != null && !batchInstances.isEmpty()) {
 				for (BatchInstance batchInstance : batchInstances) {
 					if (batchInstance != null) {
-						BatchClass batchClass = batchInstance.getBatchClass();
-						if (batchClassList != null) {
-							if (batchClassList.contains(batchClass.getIdentifier())) {
-								batchInstanceDTOs.add(convertBatchInstanceToBatchInstanceDTO(batchInstance));
-							}
-						}
+						batchInstanceDTOs.add(convertBatchInstanceToBatchInstanceDTO(batchInstance));
 					}
 				}
 			}
@@ -642,8 +499,8 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(identifier);
 			if (batchInstance != null) {
 				BatchClass batchClass = batchInstance.getBatchClass();
-				BatchClassGroupsDaoImpl batchClassGroupsDaoImpl = this.getSingleBeanOfType(BatchClassGroupsDaoImpl.class);
-				Set<String> batchClassList = batchClassGroupsDaoImpl.getBatchClassIdentifierForUsers(getUserRoles());
+				BatchClassGroupsService batchClassGroupsService = this.getSingleBeanOfType(BatchClassGroupsService.class);
+				Set<String> batchClassList = batchClassGroupsService.getBatchClassIdentifierForUserRoles(getUserRoles());
 				if (batchClassList != null) {
 					if (batchClassList.contains(batchClass.getIdentifier())) {
 						batchInstanceDTO = convertBatchInstanceToBatchInstanceDTO(batchInstance);
@@ -708,7 +565,7 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			removeFolders(batchInstance);
 		} catch (Exception e) {
 			deleteResult = Results.FAILURE;
-			throw new GWTException("Error while deleting the batch instance folders.");
+			throw new GWTException("Error while deleting the batch instance folders for batch instance:" + batchInstanceIdentifier);
 		}
 		return deleteResult;
 	}
@@ -727,7 +584,8 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 		JbpmService jbpmService = this.getSingleBeanOfType(JbpmService.class);
 		WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
 		BatchClassModuleService batchClassModuleService = this.getSingleBeanOfType(BatchClassModuleService.class);
-
+		ImportBatchService imService = this.getSingleBeanOfType(ImportBatchService.class);
+		
 		List<BatchInstanceStatus> batchStatusList = new ArrayList<BatchInstanceStatus>();
 		batchStatusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
 		batchStatusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
@@ -742,9 +600,54 @@ public class BatchInstanceManagementServiceImpl extends DCMARemoteServiceServlet
 			String moduleName = activityName.substring(0, indexOf);
 			try {
 				processRestartingBatch(batchInstanceIdentifier, moduleName, jbpmService, batchInstanceService, batchClassService,
-						batchSchemaService, batchClassModuleService, batchInstance, false);
+						batchSchemaService, batchClassModuleService, batchInstance, false, imService);
 			} catch (GWTException e) {
 				log.error("Error while restarting batch instance: " + batchInstanceIdentifier);
+			}
+		}
+	}
+
+	@Override
+	public List<String> deleteAllBatchInstancesByStatus(final List<DataFilter> batchInstanceFilters) {
+		List<String> batchInstanceId = new ArrayList<String>();
+		log.info("Deleting all batch instances of given status and priority.");
+
+		List<BatchPriority> batchPriorities = getPriorityList(batchInstanceFilters);
+		List<BatchInstanceStatus> statusList = getStatusList(batchInstanceFilters);
+
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+
+		List<BatchInstance> batchInstanceList = batchInstanceService.getBatchInstancesForStatusPriority(statusList, batchPriorities,
+				getUserRoles());
+
+		int numOfBatches = batchInstanceList.size();
+		log.info("Number of batch instances deleted:" + numOfBatches);
+		if (numOfBatches == 0) {
+			log.info("Either some of the batches are locked for processing or no batches exist for the matching criteria.");
+		} else {
+			for (BatchInstance batchInstance : batchInstanceList) {
+				String batchInstanceIdentifier = batchInstance.getIdentifier();
+				log.info("Deleting batch instance : " + batchInstanceIdentifier);
+				try {
+					Results deleteResult = deleteBatchInstance(batchInstanceIdentifier);
+					if (Results.SUCCESSFUL.name().equalsIgnoreCase(deleteResult.name())) {
+						batchInstanceId.add(batchInstanceIdentifier);
+					}
+				} catch (GWTException e) {
+					log.error("Error while deleting batch instance: " + batchInstanceIdentifier);
+				}
+			}
+		}
+		return batchInstanceId;
+	}
+
+	@Override
+	public void deleteAllBatchInstancesFolders(List<String> batchInstanceIds) {
+		for (String batchInstanceId : batchInstanceIds) {
+			try {
+				deleteBatchFolders(batchInstanceId);
+			} catch (GWTException gwte) {
+				log.info("Error while deleting the batch instance folders for batchInstanceId:" + batchInstanceId);
 			}
 		}
 	}

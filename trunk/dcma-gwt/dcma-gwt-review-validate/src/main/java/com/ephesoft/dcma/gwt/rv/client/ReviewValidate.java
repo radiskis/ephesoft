@@ -52,18 +52,20 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync> {
-	
+
 	@Override
 	public void onLoad() {
-		
+		defineBridgeMethod();
 		Document.get().setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.rv_title));
-		ReviewValidateController controller = new ReviewValidateController(rpcService, eventBus);
-		
+		final ReviewValidateController controller = new ReviewValidateController(rpcService, eventBus);
+
 		ReviewValidateView view = controller.getPresenter().getView();
 		
 		final RootPanel rootPanel = new RootPanel(view.getOuter());
@@ -71,7 +73,7 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 		rootPanel.getHeader().setShowDialogBoxOnTabClick(true);
 		rootPanel.getHeader().setDialogMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_backButton_confm));
 		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_home), "BatchList.html",true);
-		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_batch_detail), "ReviewValidate.html",true);
+		rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_batch_detail), "ReviewValidate.html");
 		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_web_scanner),"WebScanner.html",true);
 		
 		rpcService.isUploadBatchEnabled(new AsyncCallback<Boolean>() {
@@ -145,7 +147,16 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 		});
 		
 		com.google.gwt.user.client.ui.RootPanel.get().add(focusPanel);
-		
+
+		Window.addWindowClosingHandler(new Window.ClosingHandler() {
+
+			@Override
+			public void onWindowClosing(ClosingEvent arg0) {
+				onWindowClose();
+
+			}
+		});
+
 		controller.go(null);
 		
 	}
@@ -163,5 +174,36 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 	@Override
 	public LocaleInfo createLocaleInfo(String locale) {
 		return new LocaleInfo(locale, "rvConstants", "rvMessages");
+	}
+	
+	public native void defineBridgeMethod() /*-{
+	var _this = this;
+	$wnd.onunload = function() {
+	return _this.@com.ephesoft.dcma.gwt.rv.client.ReviewValidate::onWindowClose()();
+	}
+	}-*/;
+
+	private void onWindowClose() {
+		String title = Window.getTitle();
+		if (title != null && !title.isEmpty()) {
+			int index = title.indexOf(ReviewValidateConstants.BATCH_INSTANCE_ABBREVIATION);
+			if (index != -1) {
+				String batchInstanceIdentifier = title.substring(index);
+				if (batchInstanceIdentifier != null && !batchInstanceIdentifier.isEmpty()) {
+					rpcService.cleanUpCurrentBatch(batchInstanceIdentifier, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+
+						}
+
+						@Override
+						public void onSuccess(Void arg0) {
+
+						}
+					});
+				}
+			}
+		}
 	}
 }

@@ -2,73 +2,85 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editBatchClassViewPanel">
-			<g:HorizontalPanel width="100%">
-				<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Label ui:field="descLabel"></g:Label>
-				</g:cell>
-				<g:cell width="1%">
-					<g:Label ui:field="descStar"></g:Label>
-				</g:cell>
-				<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-					<g:TextBox ui:field="description" />
-				</g:cell>
-			</g:HorizontalPanel>
 
-			<g:HorizontalPanel width="100%">
-				<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Label ui:field="priorityLabel"></g:Label>
-				</g:cell>
-				<g:cell width="1%">
-					<g:Label ui:field="star"></g:Label>
-				</g:cell>
-				<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-					<g:TextBox ui:field="priority" maxLength='3' />
-				</g:cell>
-			</g:HorizontalPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="nameLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="name" />
+			</g:cell>
+		</g:HorizontalPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="descLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label ui:field="descStar"></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:TextBox ui:field="description" />
+			</g:cell>
+		</g:HorizontalPanel>
 
-			<g:HorizontalPanel width="100%">
-				<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Label ui:field="uncLabel"></g:Label>
-				</g:cell>
-				<g:cell width="1%">
-					<g:Label></g:Label>
-				</g:cell>
-				<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-					<g:Label ui:field="uncFolder" />
-				</g:cell>
-			</g:HorizontalPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="priorityLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label ui:field="star"></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:TextBox ui:field="priority" maxLength='3' />
+			</g:cell>
+		</g:HorizontalPanel>
 
-			<g:HorizontalPanel width="100%">
-				<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Label ui:field="versionLabel"></g:Label>
-				</g:cell>
-				<g:cell width="1%">
-					<g:Label></g:Label>
-				</g:cell>
-				<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-					<g:Label ui:field="version" />
-				</g:cell>
-			</g:HorizontalPanel>
-			
-			<g:HorizontalPanel width="100%">
-				<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-					<g:Label ui:field="roleLabel"></g:Label>
-				</g:cell>
-				<g:cell width="1%">
-					<g:Label></g:Label>
-				</g:cell>
-				<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-					<g:HorizontalPanel ui:field="listBoxPanel">
-					</g:HorizontalPanel>
-				</g:cell>
-			</g:HorizontalPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="uncLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="uncFolder" />
+			</g:cell>
+		</g:HorizontalPanel>
 
-			<g:HorizontalPanel ui:field="editBatchPanel">
-				<g:Button ui:field="saveButton" />
-				<g:cell width="7%">
-					<g:Label></g:Label>
-				</g:cell>
-				<g:Button ui:field="cancelButton" />
-			</g:HorizontalPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="versionLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="version" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="roleLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:HorizontalPanel ui:field="listBoxPanel">
+				</g:HorizontalPanel>
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel ui:field="editBatchPanel">
+			<g:Button ui:field="saveButton" />
+			<g:cell width="7%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:Button ui:field="cancelButton" />
+		</g:HorizontalPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>

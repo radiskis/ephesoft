@@ -101,10 +101,13 @@ class NavBar extends Composite {
 
 	private Integer totalPageCount;
 
+	private Table table;
+
 	private ValidatableTextBox searchPageTextBox;
 
-	public NavBar() {
+	public NavBar(final Table table) {
 		initWidget(binder.createAndBindUi(this));
+		this.table = table;
 		Images images = GWT.create(Images.class);
 		DOM.setInnerHTML(newerButton.getElement(), AbstractImagePrototype.create(images.previousPage()).getHTML());
 		DOM.setInnerHTML(olderButton.getElement(), AbstractImagePrototype.create(images.nextPage()).getHTML());
@@ -212,6 +215,7 @@ class NavBar extends Composite {
 		}
 		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.VISIBLE_RECORD_COUNT).toString());
 		listner.onPagination(startIndex, Table.VISIBLE_RECORD_COUNT, order);
+		table.scrollPanel.scrollToTop();
 	}
 
 	@UiHandler("olderButton")
@@ -220,6 +224,7 @@ class NavBar extends Composite {
 		startIndex = startIndex + Table.VISIBLE_RECORD_COUNT;
 		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.VISIBLE_RECORD_COUNT).toString());
 		listner.onPagination(startIndex, Table.VISIBLE_RECORD_COUNT, order);
+		table.scrollPanel.scrollToTop();
 	}
 
 	private void setVisibility(Widget widget, boolean visible) {

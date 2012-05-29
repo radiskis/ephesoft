@@ -1,0 +1,14 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:HorizontalPanel width="100%" ui:field="breadCrumbPanel">
+		<g:cell width="80%" horizontalAlignment="ALIGN_LEFT">
+			<g:Label ui:field="breadCrumbs" />
+		</g:cell>
+		<g:cell width="80%"  horizontalAlignment="ALIGN_RIGHT">
+			<g:Button ui:field="previousButton"></g:Button>
+		</g:cell>
+
+	</g:HorizontalPanel>
+
+</ui:UiBinder>

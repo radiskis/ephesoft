@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
+import java.util.List;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class PluginDetailsDTO implements IsSerializable {
@@ -42,6 +44,25 @@ public class PluginDetailsDTO implements IsSerializable {
 	private String identifier;
 	private String pluginName;
 	private String pluginDescription;
+	private String pluginWorkflowName;
+	private String scriptName;
+	private List<DependencyDTO> dependencies;
+	private boolean isDirty;
+	
+	/**
+	 * @return the dependencies
+	 */
+	public List<DependencyDTO> getDependencies() {
+		return dependencies;
+	}
+
+	
+	/**
+	 * @param dependencies the dependencies to set
+	 */
+	public void setDependencies(List<DependencyDTO> dependencies) {
+		this.dependencies = dependencies;
+	}
 
 	public String getIdentifier() {
 		return identifier;
@@ -70,4 +91,61 @@ public class PluginDetailsDTO implements IsSerializable {
 		this.pluginDescription = pluginDescription;
 	}
 
+	/**
+	 * @return the pluginWorkflowName
+	 */
+	public String getPluginWorkflowName() {
+		return pluginWorkflowName;
+	}
+
+	/**
+	 * @param pluginWorkflowName the pluginWorkflowName to set
+	 */
+	public void setPluginWorkflowName(String pluginWorkflowName) {
+		this.pluginWorkflowName = pluginWorkflowName;
+	}
+
+	/**
+	 * @return the scriptName
+	 */
+	public String getScriptName() {
+		return scriptName;
+	}
+
+	/**
+	 * @param scriptName the scriptName to set
+	 */
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
+	}
+
+	public DependencyDTO getDependencyDTOByIdentifier(PluginDetailsDTO pluginDetailsDTO, String identifier)
+	{
+		DependencyDTO dependencyDTO = new DependencyDTO();
+		for (DependencyDTO dependency : pluginDetailsDTO.getDependencies()) {
+			if (dependency.getIdentifier().equals(identifier)) {
+				dependencyDTO = dependency;
+				break;
+			}
+		}
+		return dependencyDTO;
+	}
+
+
+	
+	/**
+	 * @return the isDirty
+	 */
+	public boolean isDirty() {
+		return isDirty;
+	}
+
+
+	
+	/**
+	 * @param isDirty the isDirty to set
+	 */
+	public void setDirty(boolean isDirty) {
+		this.isDirty = isDirty;
+	}
 }

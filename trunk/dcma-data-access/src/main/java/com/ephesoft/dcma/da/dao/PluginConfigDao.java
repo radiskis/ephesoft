@@ -35,14 +35,23 @@
 
 package com.ephesoft.dcma.da.dao;
 
+import java.util.List;
+
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.PluginConfig;
 
 public interface PluginConfigDao extends CacheableDao<PluginConfig> {
-	
+
 	/**
 	 * @param configName
 	 * @return
 	 */
-	PluginConfig getPluginConfigByName(String configName); 
+	PluginConfig getPluginConfigByName(String configName);
+
+	/**
+	 * 
+	 * @param pluginId
+	 * @return
+	 */
+	List<PluginConfig> getPluginConfigForPluginId(Long pluginId);
 }

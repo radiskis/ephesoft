@@ -41,16 +41,26 @@ import java.util.Collections;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.da.property.PluginProperty;
+import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
-import com.ephesoft.dcma.gwt.admin.bm.client.util.PluginComparator;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.PluginListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
+import com.ephesoft.dcma.gwt.core.shared.comparator.BatchClassPluginComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListView> implements PaginationListner {
+public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListView> implements PaginationListner, DoubleClickListner {
 
 	private Collection<BatchClassPluginDTO> pluginDetailDTOList;
 
@@ -79,11 +89,42 @@ public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListV
 
 	@Override
 	public void onPagination(int startIndex, int maxResult, Order order) {
-		PluginComparator comparator = new PluginComparator(order);
+		if (order == null) {
+			order = new Order(PluginProperty.ORDER, true);
+		}
+		BatchClassPluginComparator comparator = new BatchClassPluginComparator(order);
 		List<BatchClassPluginDTO> newPluginDetailsDTOList = new ArrayList<BatchClassPluginDTO>(pluginDetailDTOList);
 		Collections.sort(newPluginDetailsDTOList, comparator);
 		List<Record> pluginDetailsRecordList = getController().getView().getModuleView().setPluginList(newPluginDetailsDTOList);
-		getController().getView().getModuleView().getPluginListView().updateRecords(pluginDetailsRecordList, 0);
+		int totalSize = newPluginDetailsDTOList.size();
+		int lastIndex = startIndex + maxResult;
+		int count = Math.min(totalSize, lastIndex);
+		getController().getView().getModuleView().getPluginListView().updateRecords(
+				pluginDetailsRecordList.subList(startIndex, count), startIndex, totalSize);
 	}
 
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+	}
+
+	public void onEditButtonClicked() {
+		String identifier = view.getPluginListView().getSelectedRowIndex();
+		if (identifier == null || identifier.isEmpty()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.NONE_SELECTED_WARNING));
+
+		} else {
+			if (getController().getMainPresenter().getModuleViewPresenter().getView().getEditPlugin().isEnabled()) {
+				BatchClassPluginDTO pluginDTO = controller.getSelectedModule().getPluginByIdentifier(identifier);
+				if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.FUZZYDB_PLUGIN)) {
+					controller.getMainPresenter().showFuzzyDBPluginView(pluginDTO);
+				} else if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.KV_PAGE_PROCESS_PLUGIN)) {
+					controller.getMainPresenter().showKVppPluginView(pluginDTO);
+				} else {
+					controller.getMainPresenter().showPluginView(pluginDTO);
+				}
+			}
+		}
+	}
 }

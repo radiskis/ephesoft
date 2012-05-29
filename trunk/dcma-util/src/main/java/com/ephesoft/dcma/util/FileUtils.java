@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -778,7 +779,23 @@ public class FileUtils implements IUtilCommonConstants {
 				}
 			}
 		}
-		srcPath.delete();
+		isDeleted &= srcPath.delete();
 		return isDeleted;
 	}
+	
+	public static String createOSIndependentPath(String path) {
+		
+		StringTokenizer t = new StringTokenizer(path, "/\\");
+		StringBuffer OSIndependentfilePath = new StringBuffer();
+		boolean isFirst = true;
+		while(t.hasMoreTokens()) {
+			if(!isFirst) {
+				OSIndependentfilePath.append(File.separator);
+			}
+			OSIndependentfilePath.append(t.nextToken());
+			isFirst = false;
+		}
+		return OSIndependentfilePath.toString();
+	}
+	
 }

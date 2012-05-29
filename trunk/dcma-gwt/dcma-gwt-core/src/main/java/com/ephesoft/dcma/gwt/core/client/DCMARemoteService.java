@@ -71,6 +71,11 @@ public interface DCMARemoteService extends RemoteService {
 	 * API to clean up.
 	 */
 	void cleanup();
+    /**
+     * API to clean up the current user of the current batch
+     * @param batchIdentifier
+     */
+	void cleanUpCurrentBatch(String batchIdentifier);
 
 	/**
 	 * API to get User Name using the remote services on the application.
@@ -163,4 +168,21 @@ public interface DCMARemoteService extends RemoteService {
 	 * @return 
 	 */
 	void disableRestartAllButton();
+	/**
+	 * API to get current user of a batch.
+	 * @param batchInstanceIdentifier
+	 * @return
+	 */
+	String getCurrentUser(String batchInstanceIdentifier);
+	
+	/**
+	 * API to show License expiry message on login.
+	 * 
+	 */
+	void setUpForLicenseExpiryAlert();
+	
+	/**
+	 * API to show License expiry message on login.
+	 */
+	void initRemoteServiceForLicenseAlert()throws Exception;
 }

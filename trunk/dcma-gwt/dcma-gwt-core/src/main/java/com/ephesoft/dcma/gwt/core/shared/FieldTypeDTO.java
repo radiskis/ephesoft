@@ -72,6 +72,8 @@ public class FieldTypeDTO implements IsSerializable {
 
 	private List<String> regexPatternList;
 
+	private boolean isMultiLine;
+
 	private List<KVExtractionDTO> kvExtractionList = new ArrayList<KVExtractionDTO>();
 
 	private List<RegexDTO> regexList = new ArrayList<RegexDTO>();
@@ -291,8 +293,13 @@ public class FieldTypeDTO implements IsSerializable {
 		this.isHidden = isHidden;
 	}
 
-	
-	
+	public void setMultiLine(boolean isMultiLine) {
+		this.isMultiLine = isMultiLine;
+	}
+
+	public boolean isMultiLine() {
+		return isMultiLine;
+	}
 
 	
 }

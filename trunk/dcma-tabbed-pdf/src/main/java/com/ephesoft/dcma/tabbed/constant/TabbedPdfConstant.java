@@ -83,5 +83,7 @@ public interface TabbedPdfConstant {
 	
 	int ERROR_PDF_NUMBER_OF_PAGES=1;
 	
+	String LINE_SEPARATOR="line.separator";
+	
 	
 }

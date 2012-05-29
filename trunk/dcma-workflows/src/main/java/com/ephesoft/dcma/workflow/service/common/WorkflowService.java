@@ -107,12 +107,12 @@ public interface WorkflowService {
 	public void signalWorkflow(final BatchInstance batchInstance);
 
 	/**
-	 * This method is used to signal workflow for a batch setting its user for review/validation user accordingly
+	 * This method is used to signal workflow for a batch with the specified batchId
 	 * 
 	 * @param batchId {@link String}
-	 * @param userName {@link String}
+	 * 
 	 */
-	void signalWorkflow(String batchId, String userName);
+	void signalWorkflow(String batchId);
 
 	void updateBatchInstanceStatusForReviewAndValidation(BatchInstanceID identifier, BatchInstanceStatus status);
 

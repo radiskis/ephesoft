@@ -510,4 +510,10 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		}
 		return allUser;
 	}
+
+	@Override
+	public Set<String> getUserGroups(String userName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

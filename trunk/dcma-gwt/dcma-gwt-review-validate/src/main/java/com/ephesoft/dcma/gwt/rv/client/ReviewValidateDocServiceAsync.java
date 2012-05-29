@@ -156,7 +156,7 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
 	 * @param documentId {@link String}
 	 * @param callback {@link AsyncCallback} < {@link Page} >
 	 */
-	void roatateImage(Batch batch, Page page, String documentId, AsyncCallback<Page> callback);
+	void rotateImage(Batch batch, Page page, String documentId, AsyncCallback<Page> callback);
 
 	/**
 	 * API to get Rows Count for a batch asynchronously.
@@ -169,10 +169,11 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
 	 * API to Text Search using Fuzzy DB for a batch asynchronously.
 	 * 
 	 * @param batch {@link Batch}
+	 * @param documentType {@link String}
 	 * @param searchText {@link String}
 	 * @param callback {@link AsyncCallback} < List< List < {@link String} > > >
 	 */
-	void fuzzyTextSearch(Batch batch, String searchText, AsyncCallback<List<List<String>>> callback);
+	void fuzzyTextSearch(Batch batch, String documentType, String searchText, AsyncCallback<List<List<String>>> callback);
 
 	/**
 	 * API to get FieldTypeDTO objects for a batch asynchronously.
@@ -337,4 +338,12 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
 	 * @param callback {@link AsyncCallback} < {@link String} >
 	 */
 	void getEncodedStringForXMLPath(String pathOfBatchXml, AsyncCallback<String> asyncCallback);
+     
+    /**API to get zoomCount
+     *
+     * @param callback {@link AsyncCallback}< {@link String} >
+     */
+    void getZoomCount(AsyncCallback<String> asyncCallback);
+
+
 }

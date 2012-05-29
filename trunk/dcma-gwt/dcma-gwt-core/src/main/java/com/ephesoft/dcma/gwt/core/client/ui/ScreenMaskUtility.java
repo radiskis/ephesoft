@@ -37,21 +37,46 @@ package com.ephesoft.dcma.gwt.core.client.ui;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.google.gwt.user.client.Window;
 
 public class ScreenMaskUtility {
+
+	private static final String REVIEW_VALIDATE = "ReviewValidate";
 	private static ScreenMask screenMask = new ScreenMask();
-	
-	public static void maskScreen(String message){
-		screenMask.setMessage(message);
-		screenMask.show();
-		screenMask.center();
+	private static String currentBrowser = getUserAgent();
+
+	public static void maskScreen(String message) {
+		if (isMaskingEnabled()) {
+			screenMask.setMessage(message);
+			screenMask.show();
+			screenMask.center();
+		}
 	}
-	public static void maskScreen(){
-		screenMask.setMessage(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
-		screenMask.show();
-		screenMask.center();
+
+	private static boolean isMaskingEnabled() {
+		boolean isMaskingEnabled = true;
+		String href = Window.Location.getHref();
+		if (href.contains(REVIEW_VALIDATE)) {
+			if (currentBrowser != null && currentBrowser.length() > 0
+					&& (currentBrowser.contains("msie") || currentBrowser.contains("chrome"))) {
+				isMaskingEnabled = false;
+			}
+		}
+		return isMaskingEnabled;
+
 	}
-	public static void unmaskScreen(){
-		screenMask.hide();
+
+	public static void maskScreen() {
+		maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
 	}
+
+	public static void unmaskScreen() {
+		if (isMaskingEnabled()) {
+			screenMask.hide();
+		}
+	}
+
+	public static native String getUserAgent() /*-{
+												return navigator.userAgent.toLowerCase();
+												}-*/;
 }

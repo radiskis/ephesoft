@@ -59,6 +59,7 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.service.DocumentTypeService;
 import com.ephesoft.dcma.da.service.PageTypeService;
 import com.ephesoft.dcma.docassembler.DocumentAssemblerProperties;
 import com.ephesoft.dcma.docassembler.constant.DocumentAssemblerConstants;
@@ -89,6 +90,8 @@ public class ImagePageProcess {
 	 */
 	private PluginPropertiesService pluginPropertiesService;
 
+	private DocumentTypeService docTypeService;
+
 	/**
 	 * xmlDocuments List<DocumentType>.
 	 */
@@ -98,6 +101,8 @@ public class ImagePageProcess {
 	 * Batch instance ID.
 	 */
 	private String batchInstanceID;
+
+	private String batchClassID;
 
 	/**
 	 * Reference of BatchSchemaService.
@@ -179,6 +184,10 @@ public class ImagePageProcess {
 		this.batchInstanceID = batchInstanceID;
 	}
 
+	public void setBatchClassID(String batchClassID) {
+		this.batchClassID = batchClassID;
+	}
+
 	/**
 	 * @return the pluginPropertiesService
 	 */
@@ -193,6 +202,10 @@ public class ImagePageProcess {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
+	public void setDocTypeService(DocumentTypeService docTypeService) {
+		this.docTypeService = docTypeService;
+	}
+
 	/**
 	 * This method will set the document type name and ConfidenceThreshold.
 	 * 
@@ -205,8 +218,7 @@ public class ImagePageProcess {
 		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
 		 * batchInstanceID);
 		 */
-		final List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pluginPropertiesService.getDocTypeByPageTypeName(
-				batchInstanceID, pageTypeName);
+		final List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pluginPropertiesService.getDocTypeByPageTypeName(batchInstanceID, pageTypeName);
 
 		String docTypeName = null;
 		float minConfidenceThreshold = 0;
@@ -243,17 +255,18 @@ public class ImagePageProcess {
 	 * @param docPageInfo List<PageType>
 	 * @throws DCMAApplicationException Check for input parameters, create new documents for page found in document type Unknown.
 	 */
-	public final void createDocForPages(final List<Page> docPageInfo) throws DCMAApplicationException {
+	public final void createDocForPages(List<Document> insertAllDocument, final List<Page> docPageInfo, final boolean isFromWebService)
+			throws DCMAApplicationException {
 
 		String errMsg = null;
-
-		if (null == this.xmlDocuments) {
-			throw new DCMAApplicationException("Unable to write pages for the document.");
+		if (!isFromWebService) {
+			if (null == this.xmlDocuments) {
+				throw new DCMAApplicationException("Unable to write pages for the document.");
+			}
 		}
 
 		try {
 
-			List<Document> insertAllDocument = new ArrayList<Document>();
 			List<Integer> removeIndexList = new ArrayList<Integer>();
 			Document document = null;
 			Long idGenerator = 0L;
@@ -342,9 +355,12 @@ public class ImagePageProcess {
 				}
 			}
 
-			// update the xml file.
-			updateBatchXML(insertAllDocument, removeIndexList);
-
+			if (isFromWebService) {
+				updateBatchXMLAPI(insertAllDocument, removeIndexList, isFromWebService);
+			} else {
+				// update the xml file.
+				updateBatchXML(insertAllDocument, removeIndexList);
+			}
 		} catch (Exception e) {
 			errMsg = "Unable to write pages for the document. " + e.getMessage();
 			LOGGER.error(errMsg);
@@ -405,7 +421,7 @@ public class ImagePageProcess {
 
 		// set the confidence score and document type name on the basis of
 		// defined rules.
-		setDocConfAndDocType(xmlDocuments);
+		setDocConfAndDocType(xmlDocuments, false);
 
 		// merge the unknown documents on the basis of a check
 		String mergeSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID,
@@ -448,6 +464,21 @@ public class ImagePageProcess {
 	}
 
 	/**
+	 * Update Batch XML file.
+	 * 
+	 * @param insertAllDocument List<DocumentType>
+	 * @param removeIndexList List<Integer>
+	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
+	 */
+	private void updateBatchXMLAPI(final List<Document> insertAllDocument, final List<Integer> removeIndexList,
+			boolean isFromWebService) throws DCMAApplicationException {
+		// set the confidence score and document type name on the basis of
+		// defined rules.
+		setDocConfAndDocType(insertAllDocument, isFromWebService);
+		LOGGER.info("updateBatchXML for web services done.");
+	}
+
+	/**
 	 * This method will retrieve the page level field type docFieldType for any input page type for current classification name.
 	 * 
 	 * @param pgType PageType
@@ -483,7 +514,7 @@ public class ImagePageProcess {
 	 * @param xmlDocuments List<DocumentType>
 	 */
 	@SuppressWarnings("unchecked")
-	private void setDocConfAndDocType(final List<Document> xmlDocuments) {
+	private void setDocConfAndDocType(final List<Document> xmlDocuments, boolean isFromWebService) {
 
 		Map<String, Object[]> docConfidence = null;
 		float confidenceScoreMax = 0.0f;
@@ -559,11 +590,49 @@ public class ImagePageProcess {
 				stringBuilder.append(checkTypeList.get(0));
 				pageTypeName = stringBuilder.toString();
 			}
-
-			setDocTypeNameAndConfThreshold(docType, pageTypeName);
+			if(isFromWebService) {
+				setDocTypeNameAndConfThresholdAPI(docType, pageTypeName);
+			} else {
+				setDocTypeNameAndConfThreshold(docType, pageTypeName);
+			}
 
 		}
 
+	}
+
+	public void setDocTypeNameAndConfThresholdAPI(final Document docType, final String pageTypeName) {
+
+		/*
+		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
+		 * batchInstanceID);
+		 */
+		List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = docTypeService
+				.getDocTypeByBatchClassIdentifier(batchClassID, -1, -1);
+
+		String docTypeName = null, docTypeNameTemp = null;
+		float minConfidenceThreshold = 0;
+
+		final Iterator<com.ephesoft.dcma.da.domain.DocumentType> itr = docTypes.iterator();
+		while (itr.hasNext()) {
+			final com.ephesoft.dcma.da.domain.DocumentType docTypeDB = itr.next();
+			docTypeNameTemp = docTypeDB.getName();
+			if(pageTypeName.contains(docTypeNameTemp)){
+				docTypeName = docTypeNameTemp;
+				minConfidenceThreshold = docTypeDB.getMinConfidenceThreshold();
+				LOGGER.debug("DocumentType name : " + docTypeName + "  minConfidenceThreshold : " + minConfidenceThreshold);
+				break;
+			}
+		}
+
+		if (null == docTypeName) {
+			final String errMsg = "DocumentType name is not found in the data base " + "for page type name: " + pageTypeName;
+			LOGGER.info(errMsg);
+		} else {
+			docType.setType(docTypeName);
+			final DecimalFormat twoDForm = new DecimalFormat("#.##");
+			minConfidenceThreshold = Float.valueOf(twoDForm.format(minConfidenceThreshold));
+			docType.setConfidenceThreshold(minConfidenceThreshold);
+		}
 	}
 
 	/**

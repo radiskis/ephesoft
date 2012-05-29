@@ -38,6 +38,7 @@ package com.ephesoft.dcma.gwt.admin.bm.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.BatchClassManagementPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.BatchClassManagementView;
@@ -56,6 +57,7 @@ import com.ephesoft.dcma.gwt.core.shared.FieldTypeDTO;
 import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVPageProcessDTO;
+import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
@@ -66,6 +68,7 @@ import com.google.gwt.user.client.ui.Composite;
 public class BatchClassManagementController extends Controller {
 
 	private BatchClassDTO batchClass;
+	private Boolean superAdmin;
 	private List<BatchClassDTO> batchClassList;
 	private BatchClassModuleDTO selectedModule;
 	private BatchClassPluginDTO selectedPlugin;
@@ -98,6 +101,16 @@ public class BatchClassManagementController extends Controller {
 
 	private List<RoleDTO> roleDTOs;
 
+	private Set<String> userRoles;
+
+	private List<String> modulesList;
+
+	private List<String> allModules;
+
+	private List<PluginDetailsDTO> allPluginDetailsDTOs;
+
+	private Map<String, String> pluginIdentifierToNameMap;
+
 	public BatchClassManagementController(HandlerManager eventBus, BatchClassManagementServiceAsync rpcService) {
 		super(eventBus, rpcService);
 		this.dataCheckers = new ArrayList<DataChecker>();
@@ -105,7 +118,7 @@ public class BatchClassManagementController extends Controller {
 
 	@Override
 	public Composite createView() {
-		this.view = new BatchClassManagementView();
+		this.view = new BatchClassManagementView(this.eventBus);
 		this.batchClassManagementPresenter = new BatchClassManagementPresenter(this, view);
 		return this.view;
 	}
@@ -291,10 +304,24 @@ public class BatchClassManagementController extends Controller {
 		return dto;
 	}
 
+	/**
+	 * @return the allPluginDetailsDTOs
+	 */
+	public List<PluginDetailsDTO> getAllPluginDetailsDTOs() {
+		return allPluginDetailsDTOs;
+	}
+
+	/**
+	 * @param allPluginDetailsDTOs the allPluginDetailsDTOs to set
+	 */
+	public void setAllPluginDetailsDTOs(List<PluginDetailsDTO> allPluginDetailsDTOs) {
+		this.allPluginDetailsDTOs = allPluginDetailsDTOs;
+	}
+
 	@Override
 	public void refresh() {
 		if (selectedModule != null) {
-			selectedModule = batchClass.getModuleByName(selectedModule.getModule().getName());
+			selectedModule = batchClass.getModuleByWorkflowName(selectedModule.getWorkflowName());
 		}
 		if (selectedPlugin != null) {
 			selectedPlugin = selectedModule.getPluginByName(selectedPlugin.getPlugin().getPluginName());
@@ -318,29 +345,29 @@ public class BatchClassManagementController extends Controller {
 							.getServerType(), selectedEmailConfiguration.getFolderName());
 		}
 
-		if (selectedField != null) {
+		if (selectedField != null && selectedDocument != null) {
 			selectedField = selectedDocument.getFieldTypeByName(selectedField.getName());
 		}
 
-		if (tableInfoSelectedField != null) {
+		if (tableInfoSelectedField != null && selectedDocument != null) {
 			tableInfoSelectedField = selectedDocument.getTableInfoByName(tableInfoSelectedField.getName());
 		}
 
-		if (selectedFunctionKeyDTO != null) {
+		if (selectedFunctionKeyDTO != null && selectedDocument != null) {
 			selectedFunctionKeyDTO = selectedDocument.getFunctionKeyDTOByShorcutKeyName(selectedFunctionKeyDTO.getShortcutKeyName());
 		}
 
-		if (selectedTableColumnInfoField != null) {
+		if (selectedTableColumnInfoField != null && tableInfoSelectedField != null) {
 			selectedTableColumnInfoField = tableInfoSelectedField.getTCInfoDTOByNameAndPattern(selectedTableColumnInfoField
 					.getColumnName(), selectedTableColumnInfoField.getColumnPattern());
 		}
 
-		if (kvExtractionDTO != null && kvExtractionDTO.isSimpleKVExtraction()) {
+		if (kvExtractionDTO != null && kvExtractionDTO.isSimpleKVExtraction() && selectedField != null) {
 			kvExtractionDTO = selectedField.getKVExtractionByKeyAndDataTypeAndLocation(kvExtractionDTO.getKeyPattern(),
 					kvExtractionDTO.getValuePattern(), kvExtractionDTO.getLocationType());
 		}
 
-		if (regexDTO != null) {
+		if (regexDTO != null && selectedField != null) {
 			regexDTO = selectedField.getRegexDTOByPattern(regexDTO.getPattern());
 		}
 
@@ -418,4 +445,83 @@ public class BatchClassManagementController extends Controller {
 		this.selectedTableType = selectedTableType;
 	}
 
+	/**
+	 * @return the modulesList
+	 */
+	public List<String> getModulesList() {
+		return modulesList;
+	}
+
+	/**
+	 * @param modulesList the modulesList to set
+	 */
+	public void setModulesList(List<String> modulesList) {
+		this.modulesList = modulesList;
+	}
+
+	/**
+	 * @return the allModules
+	 */
+	public List<String> getAllModules() {
+		return allModules;
+	}
+
+	/**
+	 * @param allModules the allModules to set
+	 */
+	public void setAllModules(List<String> allModules) {
+		this.allModules = allModules;
+	}
+
+	/**
+	 * @return the batchClassManagementPresenter
+	 */
+	public BatchClassManagementPresenter getBatchClassManagementPresenter() {
+		return batchClassManagementPresenter;
+	}
+
+	/**
+	 * @return the pluginIdentifierToNameMap
+	 */
+	public Map<String, String> getPluginIdentifierToNameMap() {
+		return pluginIdentifierToNameMap;
+	}
+
+	/**
+	 * @param pluginIdentifierToNameMap the pluginIdentifierToNameMap to set
+	 */
+	public void setPluginIdentifierToNameMap(Map<String, String> pluginIdentifierToNameMap) {
+		this.pluginIdentifierToNameMap = pluginIdentifierToNameMap;
+	}
+
+	/**
+	 * @param userRoles the userRoles to set
+	 */
+	public void setUserRoles(Set<String> userRoles) {
+		this.userRoles = userRoles;
+	}
+
+	/**
+	 * @return the userRoles
+	 */
+	public Set<String> getUserRoles() {
+		return userRoles;
+	}
+
+	/**
+	 * @param isSuperAdmin the isSuperAdmin to set
+	 */
+	public void setSuperAdmin(Boolean isSuperAdmin) {
+		this.superAdmin = isSuperAdmin;
+	}
+
+	/**
+	 * @return the isSuperAdmin
+	 */
+	public Boolean IsSuperAdmin() {
+		if (superAdmin == null) {
+			superAdmin = Boolean.FALSE;
+		}
+		return superAdmin;
+	}
 }

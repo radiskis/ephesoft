@@ -35,13 +35,16 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.tableinfo;
 
-
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo.TableInfoListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class TableInfoListPresenter extends AbstractBatchClassPresenter<TableInfoListView>{
+public class TableInfoListPresenter extends AbstractBatchClassPresenter<TableInfoListView> implements DoubleClickListner {
 
 	public TableInfoListPresenter(BatchClassManagementController controller, TableInfoListView view) {
 		super(controller, view);
@@ -56,6 +59,29 @@ public class TableInfoListPresenter extends AbstractBatchClassPresenter<TableInf
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+	}
+
+	public void onEditButtonClicked() {
+		String identifier = view.getTableInfoListView().getSelectedRowIndex();
+		int rowCount = view.getTableInfoListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
+
+		} else {
+			controller.getMainPresenter().getDocumentTypeViewPresenter().onEditTableInfoFieldButtonClicked(identifier);
+		}
+
 	}
 }

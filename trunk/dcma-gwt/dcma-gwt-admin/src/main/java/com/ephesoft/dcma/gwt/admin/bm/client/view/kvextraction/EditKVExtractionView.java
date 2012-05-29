@@ -96,6 +96,9 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 	@UiField
 	protected Button cancelButton;
 
+	@UiField
+	protected Button samplePatternButton;
+
 	private ValidatableWidget<TextBox> validateKeyPatternTextBox;
 	private ValidatableWidget<TextBox> validateValuePatternTextBox;
 	private ValidatableWidget<TextBox> validateNoOfWordsTextBox;
@@ -110,7 +113,7 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		validateKeyPatternTextBox = new ValidatableWidget<TextBox>(keyPattern);
 		validateKeyPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -171,6 +174,11 @@ public class EditKVExtractionView extends View<EditKVExtractionPresenter> {
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
+	}
+
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
 	public void setKeyPattern(String keyPattern) {

@@ -52,6 +52,7 @@ public class TableColumnInfoDetailPresenter extends AbstractBatchClassPresenter<
 			view.setBetweenLeft(controller.getSelectedTableColumnInfoField().getBetweenLeft());
 			view.setBetweenRight(controller.getSelectedTableColumnInfoField().getBetweenRight());
 			view.setColumnName(controller.getSelectedTableColumnInfoField().getColumnName());
+			view.setColumnHeaderPattern(controller.getSelectedTableColumnInfoField().getColumnHeaderPattern());
 			view.setColumnPattern(controller.getSelectedTableColumnInfoField().getColumnPattern());
 			view.setRequired(controller.getSelectedTableColumnInfoField().isRequired());
 		}

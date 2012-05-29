@@ -35,22 +35,21 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.module;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
-import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
-import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ModuleViewPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.PluginListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.PluginListView;
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -66,6 +65,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ModuleView extends View<ModuleViewPresenter> {
 
+	private static final String _20PX = "20px";
+
 	interface Binder extends UiBinder<DockLayoutPanel, ModuleView> {
 	}
 
@@ -79,12 +80,16 @@ public class ModuleView extends View<ModuleViewPresenter> {
 	protected LayoutPanel pluginListPanel;
 
 	private PluginListView pluginListView;
+
 	private PluginListPresenter pluginListPresenter;
 	@UiField
 	protected CaptionPanel moduleConfigurationCaptionPanel;
 
 	@UiField
 	protected Button editPlugin;
+
+	@UiField
+	protected Button addPlugin;
 
 	@UiField
 	protected HorizontalPanel buttonPanel;
@@ -112,16 +117,23 @@ public class ModuleView extends View<ModuleViewPresenter> {
 		moduleConfigurationCaptionPanel.setCaptionHTML(AdminConstants.MODULE_CONFIGURATION);
 		pluginListPanel.add(pluginListView.listView);
 		editPlugin.setText(AdminConstants.EDIT_BUTTON);
-		editPlugin.setHeight("20px");
+		editPlugin.setHeight(_20PX);
+		addPlugin.setText(AdminConstants.EDIT_LIST_BUTTON);
+		addPlugin.setHeight(_20PX);
 		buttonPanel.setStyleName("topPadd");
 		editModuleButton.setText(AdminConstants.EDIT_BUTTON);
 	}
 
 	public void createPluginList(Collection<BatchClassPluginDTO> plugins) {
-		List<Record> recordList = setPluginList(plugins);
+
+		List<BatchClassPluginDTO> pluginsList = new ArrayList<BatchClassPluginDTO>(plugins);
+
+		presenter.getController().getMainPresenter().sortPluginList(pluginsList);
+		List<Record> recordList = setPluginList(pluginsList);
+
 		pluginListPresenter = new PluginListPresenter(presenter.getController(), pluginListView);
 		pluginListPresenter.setPluginDetailDTO(plugins);
-		pluginListView.listView.initTable(recordList.size(), pluginListPresenter, recordList, true, false);
+		pluginListView.listView.initTable(recordList.size(), pluginListPresenter, recordList, true, false, pluginListPresenter);
 	}
 
 	public List<Record> setPluginList(Collection<BatchClassPluginDTO> plugins) {
@@ -132,10 +144,12 @@ public class ModuleView extends View<ModuleViewPresenter> {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final BatchClassPluginDTO pluginDTO : plugins) {
-			Record record = new Record(pluginDTO.getIdentifier());
-			record.addWidget(pluginListView.name, new Label(pluginDTO.getPlugin().getPluginName()));
-			record.addWidget(pluginListView.description, new Label(pluginDTO.getPlugin().getPluginDescription()));
-			recordList.add(record);
+			if (!pluginDTO.isDeleted()) {
+				Record record = new Record(pluginDTO.getIdentifier());
+				record.addWidget(pluginListView.name, new Label(pluginDTO.getPlugin().getPluginName()));
+				record.addWidget(pluginListView.description, new Label(pluginDTO.getPlugin().getPluginDescription()));
+				recordList.add(record);
+			}
 		}
 		return recordList;
 	}
@@ -154,20 +168,27 @@ public class ModuleView extends View<ModuleViewPresenter> {
 
 	@UiHandler("editPlugin")
 	public void onEditPluginClicked(ClickEvent clickEvent) {
-		String identifier = pluginListView.listView.getSelectedRowIndex();
-		if (identifier == null || identifier.isEmpty()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			return;
+		pluginListPresenter.onEditButtonClicked();
+	}
+
+	@UiHandler("addPlugin")
+	public void onAddPluginClicked(ClickEvent clickEvent) {
+
+		// New Code
+
+		String moduleIdentifier = presenter.getController().getSelectedModule().getIdentifier();
+
+		Map<String, String> pluginIdentifierToNameMap = new LinkedHashMap<String, String>(0);
+		List<BatchClassPluginDTO> batchClassPlugins = new ArrayList<BatchClassPluginDTO>(presenter.getController().getBatchClass()
+				.getModuleByIdentifier(moduleIdentifier).getBatchClassPlugins());
+		presenter.getController().getMainPresenter().sortPluginList(batchClassPlugins);
+		for (BatchClassPluginDTO batchClassPluginDTO : batchClassPlugins) {
+			if (!batchClassPluginDTO.isDeleted()) {
+				pluginIdentifierToNameMap.put(batchClassPluginDTO.getIdentifier(), batchClassPluginDTO.getPlugin().getPluginName());
+			}
 		}
-		BatchClassPluginDTO pluginDTO = presenter.getController().getSelectedModule().getPluginByIdentifier(identifier);
-		if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.FUZZYDB_PLUGIN)) {
-			presenter.getController().getMainPresenter().showFuzzyDBPluginView(pluginDTO);
-		} else if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.KV_PAGE_PROCESS_PLUGIN)) {
-			presenter.getController().getMainPresenter().showKVppPluginView(pluginDTO);
-		} else {
-			presenter.getController().getMainPresenter().showPluginView(pluginDTO);
-		}
+		presenter.getController().setPluginIdentifierToNameMap(pluginIdentifierToNameMap);
+		presenter.getController().getMainPresenter().showAddPluginView();
 	}
 
 	public VerticalPanel getModuleViewPanel() {
@@ -189,5 +210,26 @@ public class ModuleView extends View<ModuleViewPresenter> {
 
 	public EditModuleView getEditModuleView() {
 		return editModuleView;
+	}
+
+	/**
+	 * @return the addPlugin
+	 */
+	public Button getAddPlugin() {
+		return addPlugin;
+	}
+
+	/**
+	 * @param addPlugin the addPlugin to set
+	 */
+	public void setAddPlugin(Button addPlugin) {
+		this.addPlugin = addPlugin;
+	}
+
+	/**
+	 * @return the editPlugin
+	 */
+	public Button getEditPlugin() {
+		return editPlugin;
 	}
 }

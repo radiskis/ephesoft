@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.docassembler.classification.image;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
@@ -50,6 +52,7 @@ import com.ephesoft.dcma.docassembler.DocumentAssemblerProperties;
 import com.ephesoft.dcma.docassembler.classification.DocumentClassification;
 import com.ephesoft.dcma.docassembler.classification.image.process.ImagePageProcess;
 import com.ephesoft.dcma.docassembler.constant.DocumentAssemblerConstants;
+import com.ephesoft.dcma.docassembler.factory.DocumentClassificationFactory;
 
 /**
  * This class does the actual processing on the basis of Image classification for document assembly. It will read all the pages of the
@@ -127,16 +130,64 @@ public class ImageClassification implements DocumentClassification {
 		// Unknown.
 		List<Page> docPageInfo = imagePageProcess.readAllPages();
 
-		if (null == docPageInfo) {
-			String error = "No Pages found for the desired document type.";
-			LOGGER.error(error);
-			throw new DCMAApplicationException(error);
-		} else {
+		if (null != docPageInfo) {
 			// create new document for pages that was found in the
 			// batch.xml file for Unknown type document.
-			imagePageProcess.createDocForPages(docPageInfo);
+			List<Document> insertAllDocument = new ArrayList<Document>();
+			imagePageProcess.createDocForPages(insertAllDocument,docPageInfo, false);
 		}
+	}
+	
+	public final List<Document> processUnclassifiedPagesAPI(List<Page> docPageInfo, final DocumentAssembler documentAssembler, final String batchClassID,
+			final PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException {
+		LOGGER.info("Setting all the fields for ImagePageProcess.");
 
+		ImagePageProcess imagePageProcess = new ImagePageProcess();
+
+		imagePageProcess.setPageTypeService(documentAssembler.getPageTypeService());
+		imagePageProcess.setPluginPropertiesService(documentAssembler.getPluginPropertiesService());
+		imagePageProcess.setDocTypeService(documentAssembler.getDocTypeService());
+		imagePageProcess.setBatchSchemaService(documentAssembler.getBatchSchemaService());
+		imagePageProcess.setBatchClassID(batchClassID);
+
+		Map<String, String> propertyMap = new HashMap<String, String>();
+		propertyMap.put(DocumentAssemblerConstants.IMAGE_CLASSIFICATION, documentAssembler.getImageClassification());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_FIRST_PAGE, documentAssembler.getCheckFirstPage());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE, documentAssembler.getCheckMiddlePage());
+		propertyMap.put(DocumentAssemblerConstants.CHECK_LAST_PAGE, documentAssembler.getCheckLastPage());
+
+		LOGGER.info("Initializing properties...");
+		String factoryClassification = DocumentClassificationFactory.IMAGE.toString();
+		String ruleFMLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_MP_LP);
+		String ruleFPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP);
+		String ruleMPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_MP);
+		String ruleLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_LP);
+		String ruleFLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_LP);
+		String ruleMLPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_MP_LP);
+		String ruleFMPage = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_RULE_FP_MP);
+		LOGGER.info("Properties Initialized Successfully");
+
+		propertyMap.put(DocumentAssemblerConstants.FACTORY_CLASSIFICATION, factoryClassification);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FL_PAGE, ruleFLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FML_PAGE, ruleFMLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_FM_PAGE, ruleFMPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_F_PAGE, ruleFPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_L_PAGE, ruleLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_ML_PAGE, ruleMLPage);
+		propertyMap.put(DocumentAssemblerConstants.RULE_M_PAGE, ruleMPage);
+
+		imagePageProcess.setPropertyMap(propertyMap);
+		
+		List<Document> insertAllDocument = new ArrayList<Document>();
+		imagePageProcess.createDocForPages(insertAllDocument,docPageInfo, true);
+		return insertAllDocument;
 	}
 
 }

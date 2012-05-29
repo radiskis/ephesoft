@@ -156,6 +156,8 @@ public interface BatchInstanceConstants extends LocaleCommonConstants {
 
 	String SEARCH_CRITERIA = "search_criteria";
 
+	String SEARCH_TYPE = "search_type";
+
 	/**
 	 * Folder Import Module Workflow Name
 	 */
@@ -170,18 +172,34 @@ public interface BatchInstanceConstants extends LocaleCommonConstants {
 	String EMPTY_VALUE = "";
 
 	String TEXT_RESTART_IN_PROGRESS = "restart_in_progress";
-	
+
 	/**
 	 * Used in the label for current user for a batch on batch instance management screen.
 	 */
 	String LABEL_CURRENT_USER = "label_current_user";
-	
+
 	String BUTTON_RESTART_ALL = "restart_all_button";
-	
+
+	String BUTTON_DELETE_ALL = "delete_all_button";
+
 	String BUTTON_UNLOCK = "unlock_button";
-	
+
 	String NEXT_TEXT = "next_text";
-	
+
 	String PREVIOUS_TEXT = "previous_text";
+
+	String GRP_PANEL_STYLE_NAME= "groupPanelLayout";
+
+	String SUB_PANEL_STYLE_NAME= "subPanelHeight";
+
+	String BUTTON_DELETE_TOOLTIP = "delete_button_tooltip";
+
+	String BUTTON_OPEN_BATCH = "open_batch";
+
+	String BUTTON_OPEN_BATCH_TITLE = "open_batch_button_title";
+
+	String BUTTON_RESTART_BATCH_TITLE = "restart_batch_button_title";
+
+	String TEXT_LIMIT_CSS = "text-limit";
 
 }

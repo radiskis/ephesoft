@@ -35,13 +35,19 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey;
 
-
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class FunctionKeyListPresenter extends AbstractBatchClassPresenter<FunctionKeyListView> {
+public class FunctionKeyListPresenter extends AbstractBatchClassPresenter<FunctionKeyListView> implements DoubleClickListner {
 
 	public FunctionKeyListPresenter(BatchClassManagementController controller, FunctionKeyListView view) {
 		super(controller, view);
@@ -49,11 +55,38 @@ public class FunctionKeyListPresenter extends AbstractBatchClassPresenter<Functi
 
 	@Override
 	public void bind() {
-		//Processing to be done on load of this presenter.
+		// Processing to be done on load of this presenter.
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+
+	}
+
+	public void onEditButtonClicked() {
+
+		String identifier = view.getFieldsListView().getSelectedRowIndex();
+		int rowCount = view.getFieldsListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE), Boolean.TRUE);
+			} else {
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE), Boolean.TRUE);
+			}
+
+		} else {
+			controller.getMainPresenter().getDocumentTypeViewPresenter().onEditFunctionKeyButtonClicked(identifier);
+		}
+
 	}
 }

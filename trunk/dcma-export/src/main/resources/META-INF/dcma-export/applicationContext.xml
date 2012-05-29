@@ -25,9 +25,9 @@
 		</property>
 	</bean>
 
-
-
-	<bean id="folderExporter" class="com.ephesoft.dcma.export.FolderExporter">
+	<bean id="folderExporter" class="com.ephesoft.dcma.export.FolderExporter"
+		p:invalidChars="$export{export.invalid_file_name_characters}"
+		p:replaceChar="$export{export.replace_char}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.export" />

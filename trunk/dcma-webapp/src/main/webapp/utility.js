@@ -145,7 +145,7 @@ function getViewPortHeightForIE() {
 }
 
 function loginSubmit() {
-	document.login.submit();
+	document.getElementById("loginForm").submit();
 }
 
 function getViewPortWidth() {

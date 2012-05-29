@@ -74,5 +74,10 @@ public interface BatchListMessages extends LocaleCommonMessages {
 	 * Message displayed when error occurs while searching for a batch.
 	 */
 	String MSG_SEARCH_ERROR = "search_error";
+	
+	/**
+	 * Message displayed when error occurs retaining batch list priority.
+	 */
+	String ERROR_WHILE_RETAINING_BATCH_LIST_PRIORITY="error_while_retaining_the_batch_list_priority";
 
 }

@@ -45,6 +45,7 @@ import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.batchInstance.client.BatchInstanceController;
 import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceConstants;
 import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceMessages;
+import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceListView;
 import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -55,8 +56,8 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.DataFilter;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
-import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class BatchInstancePresenter extends AbstractBatchInstancePresenter<BatchInstanceView> implements PaginationListner,
@@ -65,7 +66,8 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	private List<DataFilter> filters = new ArrayList<DataFilter>();
 
 	private static int TABLE_ROW_COUNT = 15;
-
+	private static final String REVIEW_VALIDATE_HTML = "/ReviewValidate.html";
+	private static final String BATCH_ID_URL = "?batch_id=";
 	private int startIndex;
 	private int maxResult;
 	private Order order;
@@ -119,7 +121,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				
+
 			}
 
 			@Override
@@ -142,7 +144,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			@Override
 			public void onFailure(Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE));
+						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
 			}
 
 			@Override
@@ -161,7 +163,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			public void onFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE));
+						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
 			}
 
 			@Override
@@ -172,7 +174,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 					public void onFailure(Throwable paramThrowable) {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE));
+								BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
 					}
 
 					@Override
@@ -240,43 +242,41 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 	public void onDeleteBatchButtonClicked(final String identifier) {
 		// ScreenMaskUtility.maskScreen();
-		try {
-			controller.getRpcService().deleteBatchInstance(identifier, new AsyncCallback<Results>() {
 
-				@Override
-				public void onFailure(Throwable arg0) {
-					// ScreenMaskUtility.unmaskScreen();
+		controller.getRpcService().deleteBatchInstance(identifier, new AsyncCallback<Results>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				// ScreenMaskUtility.unmaskScreen();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_DELETE_FAILURE), Boolean.TRUE);
+			}
+
+			@Override
+			public void onSuccess(Results arg0) {
+				if (arg0.name().equals(Results.SUCCESSFUL.name())) {
+					showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_SUCCESSFUL,
+							identifier), startIndex, maxResult, order);
+					controller.getRpcService().deleteBatchFolders(identifier, new AsyncCallback<Results>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+							// ScreenMaskUtility.unmaskScreen();
+						}
+
+						@Override
+						public void onSuccess(Results arg0) {
+
+						}
+					});
+				} else {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchInstanceMessages.MSG_DELETE_FAILURE));
+							BatchInstanceMessages.MSG_DELETE_FAILURE), Boolean.TRUE);
 				}
-
-				@Override
-				public void onSuccess(Results arg0) {
-					if (arg0.name().equals(Results.SUCCESSFUL.name())) {
-						showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_SUCCESSFUL,
-								identifier), startIndex, maxResult, order);
-						controller.getRpcService().deleteBatchFolders(identifier, new AsyncCallback<Results>() {
-							@Override
-							public void onFailure(Throwable arg0) {
-								// ScreenMaskUtility.unmaskScreen();
-							}
-							@Override
-							public void onSuccess(Results arg0) {
-								
-							}
-						});
-					} else {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_DELETE_FAILURE));
-					}
-				}
-			});
-		} catch (GWTException e) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchInstanceMessages.MSG_DELETE_ERROR, e.getMessage()));
-		}
+			}
+		});
 	}
-	
+
 	public void onUnlockButtonClicked(final String identifier) {
 		ScreenMaskUtility.maskScreen();
 		controller.getRpcService().clearCurrentUser(identifier, new AsyncCallback<Void>() {
@@ -309,9 +309,9 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	}
 
 	private void showSuccessConfirmation(final String messageValue, final int startIndex, final int maxResult, final Order order) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(Boolean.TRUE);
-		confirmationDialog.setMessage(messageValue);
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.SUCCESS));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(messageValue, LocaleDictionary
+				.get().getMessageValue(BatchInstanceMessages.SUCCESS), Boolean.TRUE, Boolean.TRUE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -325,9 +325,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 				ScreenMaskUtility.unmaskScreen();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	public void onRestartBatchButtonClicked(final String identifier, final String module) {
@@ -337,31 +335,27 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 					@Override
 					public void onFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_RESTART_FAILURE, identifier));
+								BatchInstanceMessages.MSG_RESTART_FAILURE, identifier), Boolean.TRUE);
 					}
 
 					@Override
 					public void onSuccess(Results arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_RESTART_SUCCESSFUL, identifier));
+								BatchInstanceMessages.MSG_RESTART_SUCCESSFUL, identifier), Boolean.TRUE);
 
-						try {
-							controller.getRpcService().restartBatchInstance(identifier, module, new AsyncCallback<Results>() {
+						controller.getRpcService().restartBatchInstance(identifier, module, new AsyncCallback<Results>() {
 
-								@Override
-								public void onFailure(Throwable arg0) {
+							@Override
+							public void onFailure(Throwable arg0) {
 
-								}
+							}
 
-								@Override
-								public void onSuccess(Results arg0) {
-									updateTable(startIndex, maxResult, order);
+							@Override
+							public void onSuccess(Results arg0) {
+								updateTable(startIndex, maxResult, order);
 
-								}
-							});
-						} catch (GWTException e) {
-
-						}
+							}
+						});
 
 					}
 				});
@@ -383,34 +377,30 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 	public void onSearchButtonClicked(String identifier) {
 		ScreenMaskUtility.maskScreen();
-		try {
-			controller.getRpcService().getBatchInstanceDTOs(identifier, new AsyncCallback<List<BatchInstanceDTO>>() {
 
-				@Override
-				public void onSuccess(List<BatchInstanceDTO> batchInstanceDTOs) {
-					view.clearFilters();
-					for (BatchInstanceDTO batchInstanceDTO : batchInstanceDTOs) {
-						if (null != batchInstanceDTO) {
-							view.setPriorityListBox(batchInstanceDTO.getPriority());
-							view.setBatchInstanceListBox(batchInstanceDTO.getStatus());
-						}
+		controller.getRpcService().getBatchInstanceDTOs(identifier, new AsyncCallback<List<BatchInstanceDTO>>() {
+
+			@Override
+			public void onSuccess(List<BatchInstanceDTO> batchInstanceDTOs) {
+				view.clearFilters();
+				for (BatchInstanceDTO batchInstanceDTO : batchInstanceDTOs) {
+					if (null != batchInstanceDTO) {
+						view.setPriorityListBox(batchInstanceDTO.getPriority());
+						view.setBatchInstanceListBox(batchInstanceDTO.getStatus());
 					}
-					ScreenMaskUtility.unmaskScreen();
-					view.updateBatchInstanceList(batchInstanceDTOs, 0, batchInstanceDTOs.size());
 				}
+				ScreenMaskUtility.unmaskScreen();
+				view.updateBatchInstanceList(batchInstanceDTOs, 0, batchInstanceDTOs.size());
+			}
 
-				@Override
-				public void onFailure(Throwable arg0) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchInstanceMessages.MSG_SEARCH_FAILURE));
-					ScreenMaskUtility.unmaskScreen();
-				}
+			@Override
+			public void onFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_SEARCH_FAILURE));
+				ScreenMaskUtility.unmaskScreen();
+			}
 
-			});
-		} catch (GWTException e) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchInstanceMessages.MSG_SEARCH_ERROR, e.getMessage()));
-		}
+		});
 
 	}
 
@@ -437,7 +427,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			@Override
 			public void onFailure(Throwable paramThrowable) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_RESTART_ALL_FAILURE));
+						BatchInstanceMessages.MSG_RESTART_ALL_FAILURE), Boolean.TRUE);
 				ScreenMaskUtility.unmaskScreen();
 				view.enableRestartAllButton();
 			}
@@ -457,6 +447,169 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 						ScreenMaskUtility.unmaskScreen();
 					}
 				});
+			}
+		});
+	}
+
+	public void getBatchInstanceDTO(final boolean isDelete, final String batchIdentifier) {
+		controller.getRpcService().getBatchInstanceDTO(batchIdentifier, new AsyncCallback<BatchInstanceDTO>() {
+
+			@Override
+			public void onFailure(Throwable paramThrowable) {
+				if (isDelete) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchInstanceMessages.MSG_DELETE_FAILURE));
+				} else {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchInstanceMessages.MSG_RESTART_FAILURE, batchIdentifier));
+				}
+			}
+
+			@Override
+			public void onSuccess(BatchInstanceDTO batchInstanceDTO) {
+				view.isBatchInstanceLocked(isDelete, batchInstanceDTO);
+			}
+		});
+	}
+
+	/**
+	 * API for redirecting user to batch detail page for selected batch.
+	 * 
+	 * @param batchInstanceIdentifier
+	 */
+	public void redirectToBatchDetailPage(String batchInstanceIdentifier) {
+		if (batchInstanceIdentifier != null && !batchInstanceIdentifier.isEmpty()) {
+			String href = Window.Location.getHref();
+			String baseUrl = href.substring(0, href.lastIndexOf('/'));
+			StringBuffer newUrl = new StringBuffer();
+			newUrl.append(baseUrl).append(REVIEW_VALIDATE_HTML);
+			newUrl.append(BATCH_ID_URL).append(batchInstanceIdentifier);
+		    Window.open(newUrl.toString(),"_blank","");
+		}
+	}
+
+	public void onDeleteAllBatchButtonClick(List<DataFilter> statusFilters) {
+		ScreenMaskUtility.maskScreen();
+		controller.getRpcService().deleteAllBatchInstancesByStatus(statusFilters, new AsyncCallback<List<String>>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				ScreenMaskUtility.unmaskScreen();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_DELETE_ALL_FAILURE));
+			}
+
+			@Override
+			public void onSuccess(List<String> batchInstanceId) {
+				view.clearSearchBatchBox();
+				if (!batchInstanceId.isEmpty()) {
+					showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_ALL_SUCCESS),
+							startIndex, maxResult, order);
+					ScreenMaskUtility.unmaskScreen();
+					controller.getRpcService().deleteAllBatchInstancesFolders(batchInstanceId, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+						}
+
+						@Override
+						public void onSuccess(Void arg0) {
+
+						}
+					});
+				} else {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchInstanceMessages.MSG_DEL_LOCKED_BATCHES));
+					ScreenMaskUtility.unmaskScreen();
+				}
+			}
+
+		});
+	}
+
+	public void clearUser(String batchInstanceIdentifier) {
+		controller.getRpcService().clearCurrentUser(batchInstanceIdentifier, new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+
+			}
+		});
+
+	}
+
+	/**
+	 * This API is for showing confirmation dialog box for opening batch.
+	 * 
+	 * @param batchInstanceIdentifier
+	 * @param batchInstanceDTO
+	 */
+	private void openingBatchConfirmationDialog(final String batchInstanceIdentifier, final BatchInstanceDTO batchInstanceDTO) {
+
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchInstanceMessages.MSG_PRESS_OK_TO_NEVIGATE), LocaleDictionary.get().getMessageValue(
+				BatchInstanceMessages.MSG_NAVIGATE_TO_REVIEW_VALIDATE_SCREEN), Boolean.FALSE);
+		confirmationDialog.addDialogListener(new DialogListener() {
+
+			@Override
+			public void onOkClick() {
+				confirmationDialog.hide();
+				redirectToBatchDetailPage(batchInstanceIdentifier);
+			}
+
+			@Override
+			public void onCancelClick() {
+				confirmationDialog.hide();
+				batchInstanceDTO.setCurrentUser(null);
+				clearUser(batchInstanceIdentifier);
+			}
+		});
+	}
+
+	/**
+	 * This API is for getting batch instance DTO and lock the selected batch.
+	 * 
+	 * @param batchInstanceIdentifier
+	 * @param batchInstanceDTOMap
+	 * @param batchInstanceListView
+	 */
+	public void getBatchDtoAndAcquireLock(final String batchInstanceIdentifier,
+			final Map<String, BatchInstanceDTO> batchInstanceDTOMap, final BatchInstanceListView batchInstanceListView) {
+		controller.getRpcService().getBatchInstanceDTO(batchInstanceIdentifier, new AsyncCallback<BatchInstanceDTO>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchInstanceMessages.MSG_UNABLE_TO_RETRIEVE_BATCH));
+			}
+
+			@Override
+			public void onSuccess(final BatchInstanceDTO batchInstanceDTO) {
+				batchInstanceDTOMap.put(batchInstanceDTO.getBatchIdentifier(), batchInstanceDTO);
+				if (batchInstanceDTO.getCurrentUser() != null && !batchInstanceDTO.getCurrentUser().isEmpty()) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchInstanceMessages.MSG_LOCKED_BATCH));
+				} else {
+					controller.getRpcService().acquireLock(batchInstanceIdentifier, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable arg0) {
+
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									BatchInstanceMessages.MSG_UNABLE_TO_GET_LOCK));
+						}
+
+						@Override
+						public void onSuccess(Void arg0) {
+							openingBatchConfirmationDialog(batchInstanceListView.listView.getSelectedRowIndex(), batchInstanceDTO);
+						}
+					});
+				}
 			}
 		});
 	}

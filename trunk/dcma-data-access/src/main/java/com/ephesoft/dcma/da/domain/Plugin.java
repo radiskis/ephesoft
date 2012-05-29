@@ -35,10 +35,17 @@
 
 package com.ephesoft.dcma.da.domain;
 
+import java.io.Serializable;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.NaturalId;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
@@ -46,7 +53,7 @@ import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 @Entity
 @Table(name = "plugin")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class Plugin extends AbstractChangeableEntity {
+public class Plugin extends AbstractChangeableEntity implements Serializable {
 
 	private static final long serialVersionUID = 5694761325202724778L;
 	
@@ -63,6 +70,14 @@ public class Plugin extends AbstractChangeableEntity {
 
 	@Column(name = "workflow_name")
 	private String workflowName;
+
+	@Column(name = "script_name")
+	private String scriptName;
+
+	@OneToMany
+	@JoinColumn(name = "plugin_id")
+	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
+	private List<Dependency> dependencies;
 
 	public String getPluginName() {
 		return pluginName;
@@ -94,5 +109,46 @@ public class Plugin extends AbstractChangeableEntity {
 
 	public void setWorkflowName(String workflowName) {
 		this.workflowName = workflowName;
+	}
+
+	/**
+	 * @return the scriptName
+	 */
+	public String getScriptName() {
+		return scriptName;
+	}
+
+	/**
+	 * @param scriptName the scriptName to set
+	 */
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
+	}
+
+	/**
+	 * @return the dependencies
+	 */
+	public List<Dependency> getDependencies() {
+		return dependencies;
+	}
+
+	/**
+	 * @param dependencies the dependencies to set
+	 */
+	public void setDependencies(List<Dependency> dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public Dependency getDependencyById(Long identifier) {
+		Dependency dependency = null;
+
+		for (Dependency dependencyObject : dependencies) {
+
+			if (dependencyObject.getId() == identifier) {
+				dependency = dependencyObject;
+				break;
+			}
+		}
+		return dependency;
 	}
 }

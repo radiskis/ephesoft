@@ -36,8 +36,10 @@
 package com.ephesoft.dcma.gwt.rv.client.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Coordinates;
@@ -45,6 +47,7 @@ import com.ephesoft.dcma.batch.schema.Direction;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.RotatableImage;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -127,7 +130,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 	private double x0, x1, y0, y1;
 	private Integer originalWidth;
 	private double zoomFactor = 1.25;
-	private int zoomCount = 1;
+	private int zoomCount;
 	private int zoomCountLimit = 3;
 	private boolean fitToPageImage;
 	private Integer heightBeforeFitToHeight;
@@ -145,7 +148,8 @@ public class ImageOverlayPanel extends RVBasePanel {
 	private ZoomLock zoomLock;
 	private boolean isFirstClick = true;
 	private double crosshairReductionFactor = 5;
-
+	private Map<String, ArrayList<Integer>> initialPageDimensions = new HashMap<String, ArrayList<Integer>>();
+    public static final String EMPTY_STRING="";
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ImageOverlayPanel() {
@@ -170,8 +174,8 @@ public class ImageOverlayPanel extends RVBasePanel {
 		rotate.setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tooltip_rotate));
 		tempImage.setVisible(false);
 		zoomLock = new ZoomLock(this);
-		pageImage.setUrl("");
-		tempImage.addLoadHandler(new LoadHandler() {
+		pageImage.setUrl(EMPTY_STRING);
+	    tempImage.addLoadHandler(new LoadHandler() {
 
 			@Override
 			public void onLoad(LoadEvent arg0) {
@@ -183,9 +187,14 @@ public class ImageOverlayPanel extends RVBasePanel {
 						width = screenWidth.intValue();
 					}
 				}
-				pageImage.setWidth(String.valueOf(width));
 				int height = tempImage.getHeight();
-				pageImage.setHeight(String.valueOf(height));
+				if (!(initialPageDimensions.containsKey(presenter.page.getIdentifier()))) {
+					ArrayList<Integer> dimensions = new ArrayList<Integer>();
+					dimensions.add(width);
+					dimensions.add(height);
+
+					initialPageDimensions.put(presenter.page.getIdentifier(), dimensions);
+				}
 				pageImage.setVisible(false);
 				removeOverlays();
 				pageImage.setUrl(tempImage.getUrl().substring(0, tempImage.getUrl().indexOf("?")), presenter.page.getDirection());
@@ -196,46 +205,18 @@ public class ImageOverlayPanel extends RVBasePanel {
 
 			@Override
 			public void onMouseUp(MouseUpEvent mouseUp) {
-				double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
-				int xCoordinate = (int) Math.round(mouseUp.getX() / aspectRatio);
-				int yCoordinate = (int) Math.round(mouseUp.getY() / aspectRatio);
-				if (presenter.isTableView() && presenter.isManualTableExtraction()) {
-					if (isFirstClick) {
-						pageImage.setStyleName("pointer");
-						pointCoordinate1.setxCoordinate(xCoordinate);
-						pointCoordinate1.setyCoordinate(yCoordinate);
-						isFirstClick = false;
-					} else {
-						pageImage.removeStyleName("pointer");
-						if (xCoordinate < pointCoordinate1.getxCoordinate()) {
-							int temp = pointCoordinate1.getxCoordinate();
-							pointCoordinate1.setxCoordinate(xCoordinate);
-							xCoordinate = temp;
-						}
-						if (yCoordinate < pointCoordinate1.getyCoordinate()) {
-							int temp = pointCoordinate1.getyCoordinate();
-							pointCoordinate1.setyCoordinate(yCoordinate);
-							yCoordinate = temp;
-						}
-						pointCoordinate2.setxCoordinate(xCoordinate);
-						pointCoordinate2.setyCoordinate(yCoordinate);
-
-						if (presenter.getView().getTableExtractionView().isValidCoordinate(pointCoordinate1, pointCoordinate2)) {
-							presenter.getTableHOCRContent(pointCoordinate1, pointCoordinate2);
-						}
-						isFirstClick = true;
-					}
-				} else if (!presenter.isManualTableExtraction()) {
-					if (mouseUp.getNativeButton() == Event.BUTTON_RIGHT) {
-						clickCount = 0;
-						ctrlKeyPressed = false;
-						shiftKeyPressed = false;
-						if (!rightMouseFirstClickDone) {
-							pageImage.addStyleName("pointer");
+				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+					double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
+					int xCoordinate = (int) Math.round(mouseUp.getX() / aspectRatio);
+					int yCoordinate = (int) Math.round(mouseUp.getY() / aspectRatio);
+					if (presenter.isTableView() && presenter.isManualTableExtraction()) {
+						if (isFirstClick) {
+							pageImage.setStyleName("pointer");
 							pointCoordinate1.setxCoordinate(xCoordinate);
 							pointCoordinate1.setyCoordinate(yCoordinate);
-							rightMouseFirstClickDone = true;
+							isFirstClick = false;
 						} else {
+							pageImage.removeStyleName("pointer");
 							if (xCoordinate < pointCoordinate1.getxCoordinate()) {
 								int temp = pointCoordinate1.getxCoordinate();
 								pointCoordinate1.setxCoordinate(xCoordinate);
@@ -246,43 +227,73 @@ public class ImageOverlayPanel extends RVBasePanel {
 								pointCoordinate1.setyCoordinate(yCoordinate);
 								yCoordinate = temp;
 							}
-							pageImage.removeStyleName("pointer");
 							pointCoordinate2.setxCoordinate(xCoordinate);
 							pointCoordinate2.setyCoordinate(yCoordinate);
-							rightMouseFirstClickDone = false;
-							presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, true);
-						}
-					}
 
-					else {
-						rightMouseFirstClickDone = false;
-						if (shiftKeyPressed) {
-							if (clickCount == 0) {
+							if (presenter.getView().getTableExtractionView().isValidCoordinate(pointCoordinate1, pointCoordinate2)) {
+								presenter.getTableHOCRContent(pointCoordinate1, pointCoordinate2);
+							}
+							isFirstClick = true;
+						}
+					} else if (!presenter.isManualTableExtraction()) {
+						if (mouseUp.getNativeButton() == Event.BUTTON_RIGHT) {
+							clickCount = 0;
+							ctrlKeyPressed = false;
+							shiftKeyPressed = false;
+							if (!rightMouseFirstClickDone) {
+								pageImage.addStyleName("pointer");
 								pointCoordinate1.setxCoordinate(xCoordinate);
 								pointCoordinate1.setyCoordinate(yCoordinate);
-								clickCount = 1;
+								rightMouseFirstClickDone = true;
 							} else {
+								if (xCoordinate < pointCoordinate1.getxCoordinate()) {
+									int temp = pointCoordinate1.getxCoordinate();
+									pointCoordinate1.setxCoordinate(xCoordinate);
+									xCoordinate = temp;
+								}
+								if (yCoordinate < pointCoordinate1.getyCoordinate()) {
+									int temp = pointCoordinate1.getyCoordinate();
+									pointCoordinate1.setyCoordinate(yCoordinate);
+									yCoordinate = temp;
+								}
+								pageImage.removeStyleName("pointer");
 								pointCoordinate2.setxCoordinate(xCoordinate);
 								pointCoordinate2.setyCoordinate(yCoordinate);
-								presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, false);
+								rightMouseFirstClickDone = false;
+								presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, true);
 							}
-						} else if (ctrlKeyPressed) {
-							if (clickCount == 0 || pointCoordinates == null) {
-								pointCoordinates = new ArrayList<PointCoordinate>();
+						}
+
+						else {
+							rightMouseFirstClickDone = false;
+							if (shiftKeyPressed) {
+								if (clickCount == 0) {
+									pointCoordinate1.setxCoordinate(xCoordinate);
+									pointCoordinate1.setyCoordinate(yCoordinate);
+									clickCount = 1;
+								} else {
+									pointCoordinate2.setxCoordinate(xCoordinate);
+									pointCoordinate2.setyCoordinate(yCoordinate);
+									presenter.getHOCRContent(pointCoordinate1, pointCoordinate2, false);
+								}
+							} else if (ctrlKeyPressed) {
+								if (clickCount == 0 || pointCoordinates == null) {
+									pointCoordinates = new ArrayList<PointCoordinate>();
+								}
+								PointCoordinate pointCoordinate = new PointCoordinate();
+								pointCoordinate.setxCoordinate(xCoordinate);
+								pointCoordinate.setyCoordinate(yCoordinate);
+								pointCoordinates.add(pointCoordinate);
+								presenter.getHOCRContent(pointCoordinates);
+								clickCount++;
+							} else {
+								pointCoordinates = new ArrayList<PointCoordinate>(1);
+								PointCoordinate pointCoordinate = new PointCoordinate();
+								pointCoordinate.setxCoordinate(xCoordinate);
+								pointCoordinate.setyCoordinate(yCoordinate);
+								pointCoordinates.add(pointCoordinate);
+								presenter.getHOCRContent(pointCoordinates);
 							}
-							PointCoordinate pointCoordinate = new PointCoordinate();
-							pointCoordinate.setxCoordinate(xCoordinate);
-							pointCoordinate.setyCoordinate(yCoordinate);
-							pointCoordinates.add(pointCoordinate);
-							presenter.getHOCRContent(pointCoordinates);
-							clickCount++;
-						} else {
-							pointCoordinates = new ArrayList<PointCoordinate>(1);
-							PointCoordinate pointCoordinate = new PointCoordinate();
-							pointCoordinate.setxCoordinate(xCoordinate);
-							pointCoordinate.setyCoordinate(yCoordinate);
-							pointCoordinates.add(pointCoordinate);
-							presenter.getHOCRContent(pointCoordinates);
 						}
 					}
 				}
@@ -332,19 +343,21 @@ public class ImageOverlayPanel extends RVBasePanel {
 
 			@Override
 			public void onMouseMove(final MouseMoveEvent paramMouseMoveEvent) {
-				if (presenter.isManualTableExtraction() || (!presenter.isManualTableExtraction() && rightMouseFirstClickDone)) {
-					double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
-					int xCoordinate = (int) Math.round(paramMouseMoveEvent.getX() / aspectRatio);
-					int yCoordinate = (int) Math.round(paramMouseMoveEvent.getY() / aspectRatio);
-					pointCoordinate2.setxCoordinate(xCoordinate);
-					pointCoordinate2.setyCoordinate(yCoordinate);
-					if ((presenter.isManualTableExtraction() && !isFirstClick)
-							|| (rightMouseFirstClickDone && !presenter.isManualTableExtraction())) {
-						// pageImage.addStyleName("pointer");
-						doOverlay(pointCoordinate1, pointCoordinate2);
+				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+					if (presenter.isManualTableExtraction() || (!presenter.isManualTableExtraction() && rightMouseFirstClickDone)) {
+						double aspectRatio = (double) (pageImage.getWidth()) / (double) (originalWidth);
+						int xCoordinate = (int) Math.round(paramMouseMoveEvent.getX() / aspectRatio);
+						int yCoordinate = (int) Math.round(paramMouseMoveEvent.getY() / aspectRatio);
+						pointCoordinate2.setxCoordinate(xCoordinate);
+						pointCoordinate2.setyCoordinate(yCoordinate);
+						if ((presenter.isManualTableExtraction() && !isFirstClick)
+								|| (rightMouseFirstClickDone && !presenter.isManualTableExtraction())) {
+							// pageImage.addStyleName("pointer");
+							doOverlay(pointCoordinate1, pointCoordinate2);
+						}
+					} else {
+						pageImage.removeStyleName("pointer");
 					}
-				} else {
-					pageImage.removeStyleName("pointer");
 				}
 
 			}
@@ -499,10 +512,9 @@ public class ImageOverlayPanel extends RVBasePanel {
 
 	@UiHandler("duplicatePageButton")
 	public void OnDuplicateButtonClicked(ClickEvent event) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_duplicate,
-				presenter.page.getIdentifier()));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_duplicate));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_duplicate,
+				presenter.page.getIdentifier()), LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_duplicate), Boolean.FALSE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -525,8 +537,11 @@ public class ImageOverlayPanel extends RVBasePanel {
 							@Override
 							public void onFailure(Throwable arg0) {
 								ScreenMaskUtility.unmaskScreen();
+								if(!presenter.displayErrorMessage(arg0)){
 								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-										ReviewValidateMessages.msg_overlayPanel_duplicate_error, presenter.page.getIdentifier()));
+										ReviewValidateMessages.msg_overlayPanel_duplicate_error, presenter.page.getIdentifier()),
+										Boolean.TRUE);
+								}
 							}
 						});
 			}
@@ -537,9 +552,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 
 	}
 
@@ -552,10 +565,9 @@ public class ImageOverlayPanel extends RVBasePanel {
 					ReviewValidateMessages.msg_overlayPanel_last_page_delete_error));
 			return;
 		}
-		ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_delete,
-				presenter.page.getIdentifier()));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_delete));
+		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_delete,
+				presenter.page.getIdentifier()), LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_delete), Boolean.FALSE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -568,9 +580,11 @@ public class ImageOverlayPanel extends RVBasePanel {
 							@Override
 							public void onFailure(Throwable caught) {
 								ScreenMaskUtility.unmaskScreen();
-								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-										ReviewValidateMessages.msg_overlayPanel_delete_error, presenter.page.getIdentifier(),
-										caught.getMessage()));
+								if (!presenter.displayErrorMessage(caught)) {
+									ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+											ReviewValidateMessages.msg_overlayPanel_delete_error, presenter.page.getIdentifier(),
+											caught.getMessage()), Boolean.TRUE);
+								}
 							}
 
 							@Override
@@ -591,19 +605,16 @@ public class ImageOverlayPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	@UiHandler("splitButton")
 	public void onSplitButtonClicked(ClickEvent event) {
 		boolean isFirstPage = isFirstPage(presenter.batchDTO.getDocumentForPage(presenter.page));
 		if (isFirstPage) {
-			final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-					ReviewValidateMessages.msg_overlayPanel_split_fst_page));
-			confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_split));
+			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+					ReviewValidateMessages.msg_overlayPanel_split_fst_page), LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_split), Boolean.TRUE);
+			
 			confirmationDialog.addDialogListener(new DialogListener() {
 
 				@Override
@@ -617,15 +628,12 @@ public class ImageOverlayPanel extends RVBasePanel {
 					presenter.setFocus();
 				}
 			});
-			confirmationDialog.center();
-			confirmationDialog.show();
-			confirmationDialog.okButton.setFocus(true);
+			
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_split,
-				presenter.document.getIdentifier(), presenter.page.getIdentifier()));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_split_doc));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_overlayPanel_split,
+				presenter.document.getIdentifier(), presenter.page.getIdentifier()), LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_split_doc), Boolean.FALSE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -642,9 +650,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 
 	}
 
@@ -698,6 +704,8 @@ public class ImageOverlayPanel extends RVBasePanel {
 		int screenWidth = getViewPortWidth();
 		Integer imageWidth = screenWidth * 53 / 100;
 		removeOverlays();
+		pageImage.setHeight(initialPageDimensions.get(presenter.page.getIdentifier()).get(1).toString());
+		pageImage.setWidth(initialPageDimensions.get(presenter.page.getIdentifier()).get(0).toString());
 		originalWidth = pageImage.getWidth();
 		Integer imageHeight = pageImage.getHeight() * imageWidth / pageImage.getWidth();
 		ImageOverlayPanel.this.pageImage.setVisible(true);
@@ -733,17 +741,21 @@ public class ImageOverlayPanel extends RVBasePanel {
 	@UiHandler("zoomin")
 	public void onZoomIn(ClickEvent event) {
 		if (!fitToPageImage) {
-			zoomCount++;
+
+			if (zoomCount >= zoomCountLimit) {
+				zoomin.setEnabled(Boolean.FALSE);
+			} else {
+				zoomCount++;
+
+				pageImage.setSize(EMPTY_STRING + pageImage.getWidth() * zoomFactor, EMPTY_STRING + pageImage.getHeight() * zoomFactor);
+				processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (zoomCount * zoomFactor));
+				setScroll();
+			}
 			if (!zoomout.isEnabled()) {
 				zoomout.setEnabled(Boolean.TRUE);
 			}
-			pageImage.setSize("" + pageImage.getWidth() * zoomFactor, "" + pageImage.getHeight() * zoomFactor);
-			processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (zoomCount * zoomFactor));
-			setScroll();
-			if (zoomCount == zoomCountLimit) {
-				zoomin.setEnabled(Boolean.FALSE);
-				return;
-			}
+
+			return;
 		}
 	}
 
@@ -768,33 +780,38 @@ public class ImageOverlayPanel extends RVBasePanel {
 	@UiHandler("zoomout")
 	public void onZoomOut(ClickEvent event) {
 		if (!fitToPageImage) {
-			zoomCount--;
+			if (zoomCount <= 1)
+				zoomout.setEnabled(Boolean.FALSE);
+			else {
+				zoomCount--;
+
+				pageImage.setSize(EMPTY_STRING + pageImage.getWidth() / zoomFactor, EMPTY_STRING + pageImage.getHeight() / zoomFactor);
+				processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (1 / ((zoomCountLimit - zoomCount) * zoomFactor)));
+				setScroll();
+			}
 			if (!zoomin.isEnabled()) {
 				zoomin.setEnabled(Boolean.TRUE);
 			}
-			pageImage.setSize("" + pageImage.getWidth() / zoomFactor, "" + pageImage.getHeight() / zoomFactor);
-			processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (1 / ((zoomCountLimit - zoomCount) * zoomFactor)));
-			setScroll();
-			if (zoomCount == 1) {
-				zoomout.setEnabled(Boolean.FALSE);
-				return;
-			}
+			return;
 		}
 	}
 
 	@UiHandler("rotate")
 	public void rotateImage(ClickEvent event) {
+		fitToPageImage=Boolean.FALSE;
 		rotate.setEnabled(false);
 		ScreenMaskUtility.maskScreen();
-		presenter.rpcService.roatateImage(presenter.batchDTO.getBatch(), presenter.page, presenter.document.getIdentifier(),
+		presenter.rpcService.rotateImage(presenter.batchDTO.getBatch(), presenter.page, presenter.document.getIdentifier(),
 				new AsyncCallback<Page>() {
 
 					@Override
 					public void onFailure(Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
 						rotate.setEnabled(true);
+						if(!presenter.displayErrorMessage(arg0)){
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								ReviewValidateMessages.msg_overlayPanel_rotate_error));
+						}
 					}
 
 					@Override
@@ -849,10 +866,11 @@ public class ImageOverlayPanel extends RVBasePanel {
 				// Overlay to be removed in case of drop down fields
 				// where no corresponding match is found
 				isRemoveOverlay = event.isRemoveOverlay();
-
+				fitToPageImage = Boolean.FALSE;
 				removeOverlays();
 				coordinatesTypeList = null;
 				coordinatesList = null;
+				imageScrollPanel.scrollToTop();
 				if (event.getPage() == null) {
 					int index = pageImage.getUrl().indexOf("?");
 					if (index == -1) {
@@ -873,7 +891,6 @@ public class ImageOverlayPanel extends RVBasePanel {
 					}
 					return;
 				}
-				// fitToPageImage = false;
 				presenter.page = event.getPage();
 
 				splitButton.setEnabled(true);
@@ -959,51 +976,46 @@ public class ImageOverlayPanel extends RVBasePanel {
 				if (event.getEvent().isControlKeyDown()) {
 					rightMouseFirstClickDone = false;
 					ctrlKeyPressed = true;
-
-					switch (event.getEvent().getNativeEvent().getKeyCode()) {
-
+                    int keyCode=event.getEvent().getNativeEvent().getKeyCode();
+					switch (keyCode) {
 						// Ctrl + t or T
-						case 't':
-						case 'T':
+						case 84:
 							event.getEvent().getNativeEvent().preventDefault();
 							onSplitButtonClicked(null);
 							break;
 
 						// Ctrl + m or M
-						case 'm':
-						case 'M':
+						case 77:
 							event.getEvent().getNativeEvent().preventDefault();
 							onMoveButtonClicked(null);
 							break;
 
 						// Ctrl + d or D
-						case 'd':
-						case 'D':
+						case 68:
 							event.getEvent().getNativeEvent().preventDefault();
 							OnDuplicateButtonClicked(null);
 							break;
 
 						// Ctrl + 1 or !
-						case '1':
-						case '!':
-							event.getEvent().getNativeEvent().preventDefault();
+						case 97: // for numpad key 1
+						case 49: // for standard key 1 and !
+						    event.getEvent().getNativeEvent().preventDefault();
 							if (zoomin.isEnabled()) {
 								onZoomIn(null);
 							}
 							break;
 
 						// Ctrl + 2 or @
-						case '2':
-						case '@':
-							event.getEvent().getNativeEvent().preventDefault();
+						case 98: // for numpad key 2
+						case 50: // for standard key 2 and @
+						    event.getEvent().getNativeEvent().preventDefault();
 							if (zoomout.isEnabled()) {
 								onZoomOut(null);
 							}
 							break;
 
 						// Ctrl + r or R
-						case 'r':
-						case 'R':
+						case 82:
 							event.getEvent().getNativeEvent().preventDefault();
 							rotateImage(null);
 							break;
@@ -1034,8 +1046,8 @@ public class ImageOverlayPanel extends RVBasePanel {
 							break;
 
 						// CTRL + l or L
-						case 'l':
-						case 'L':
+
+						case 76:
 							event.getEvent().getNativeEvent().preventDefault();
 							if (zoomLock.isLocked()) {
 								zoomLock.unlock();
@@ -1086,9 +1098,8 @@ public class ImageOverlayPanel extends RVBasePanel {
 
 	private void getConformationDialog(String title, String message) {
 		ScreenMaskUtility.maskScreen();
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle(title);
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(message, title,Boolean.TRUE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -1105,9 +1116,7 @@ public class ImageOverlayPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	public ScrollPanel getImageScrollPanel() {
@@ -1123,17 +1132,17 @@ public class ImageOverlayPanel extends RVBasePanel {
 		int zoomLockingFactor = zoomLock.getZoomFactor();
 		if (zoomLock.isLocked()) {
 			if (zoomLockingFactor != 1) {
-				this.zoomCount = zoomLockingFactor;
+				zoomCount = zoomLockingFactor;
 				if (!zoomout.isEnabled()) {
 					zoomout.setEnabled(Boolean.TRUE);
 				}
-				pageImage.setSize("" + width * Math.pow(zoomFactor, (zoomCount - 1)), "" + height
+				pageImage.setSize(EMPTY_STRING + width * Math.pow(zoomFactor, (zoomCount - 1)), EMPTY_STRING + height
 						* Math.pow(zoomFactor, (zoomCount - 1)));
 				processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (zoomCount * zoomFactor));
 				if (coordinatesTypeList != null) {
 					setScroll();
 				}
-				if (zoomCount == zoomCountLimit) {
+				if (zoomCount >= zoomCountLimit) {
 					zoomin.setEnabled(Boolean.FALSE);
 				}
 			} else {
@@ -1147,11 +1156,35 @@ public class ImageOverlayPanel extends RVBasePanel {
 				zoomout.setEnabled(Boolean.FALSE);
 			}
 		} else {
-			pageImage.setSize(width.toString(), height.toString());
-			processOverlay(coordinatesTypeList, pageImage, 0, 0, 1);
-			setScroll();
-			zoomin.setEnabled(Boolean.TRUE);
-			zoomout.setEnabled(Boolean.FALSE);
+
+			double pageWidth = width;
+			double pageHeight = height;
+			for (int tempZoomCount = 2; tempZoomCount <= zoomCount; tempZoomCount++) {
+				pageWidth = pageWidth * zoomFactor;
+				pageHeight = pageHeight * zoomFactor;
+			}
+			pageImage.setSize(EMPTY_STRING + pageWidth, EMPTY_STRING + pageHeight);
+			if (zoomCount == 1) {
+				processOverlay(coordinatesTypeList, pageImage, 0, 0, 1);
+			} else {
+				processOverlay(coordinatesTypeList, pageImage, 0, 0, (float) (zoomCount * zoomFactor));
+			}
+			if (coordinatesTypeList != null) {
+				setScroll();
+			}
+			
+
+			if (zoomCount >= zoomCountLimit) {
+				zoomin.setEnabled(Boolean.FALSE);
+
+			} else {
+				zoomin.setEnabled(Boolean.TRUE);
+			}
+			if (zoomCount <= 1) {
+				zoomout.setEnabled(Boolean.FALSE);
+			} else {
+				zoomout.setEnabled(Boolean.TRUE);
+			}
 		}
 		fitToPage.setEnabled(true);
 		zoomLock.lockPosition();

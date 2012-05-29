@@ -97,6 +97,9 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	@Column(name = "is_hidden", columnDefinition = "bit default 0")
 	private boolean isHidden;
 
+	@Column(name = "is_multi_line", columnDefinition = "bit default 0")
+	private boolean isMultiLine;
+
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "field_type_id")
@@ -310,5 +313,13 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 		}
 
 		return regexValidation1;
+	}
+
+	public void setMultiLine(boolean isMultiLine) {
+		this.isMultiLine = isMultiLine;
+	}
+
+	public boolean isMultiLine() {
+		return isMultiLine;
 	}
 }
