@@ -310,6 +310,35 @@ public abstract class XmlDao<T> implements Dao<T> {
 		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn, isFirstTimeUpdate);
 	}
 
+	public void update(final T object, final String filePath) {
+		LOGGER.info("Entering update method.");
+		if (filePath == null || filePath.isEmpty()) {
+			LOGGER.info("File path is either null or empty.");
+		} else {
+			LOGGER.info("Updating file: " + filePath);
+			OutputStream stream = null;
+			try {
+				File xmlFile = new File(filePath);
+				stream = new FileOutputStream(xmlFile);
+				StreamResult result = new StreamResult(stream);
+				getJAXB2Template().getJaxb2Marshaller().marshal(object, result);
+			} catch (FileNotFoundException e) {
+				throw new DCMABusinessException(e.getMessage(), e);
+			} catch (Exception e) {
+				throw new DCMABusinessException(e.getMessage(), e);
+			} finally {
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						LOGGER.info("Exception in closing outputstream in xml dao. File: " + filePath);
+					}
+				}
+			}
+		}
+		LOGGER.info("Exiting update method.");
+	}
+
 	public abstract JAXB2Template getJAXB2Template();
 
 }

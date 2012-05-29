@@ -45,6 +45,13 @@ import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 
+/**
+ * This class used to add the threads in the thread pool.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * 
+ */
 public class BatchInstanceThread {
 
 	/**
@@ -63,42 +70,88 @@ public class BatchInstanceThread {
 	private final List<AbstractRunnable> taskList = new LinkedList<AbstractRunnable>();
 
 	/**
+	 * Boolean to check whether thread pool is used for executing ghost script commands.
+	 */
+	boolean isUsingGhostScript;
+
+	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(BatchInstanceThread.class);
 
+	/**
+	 * @return the batchInstanceId
+	 */
 	public String getBatchInstanceId() {
 		return batchInstanceId;
 	}
 
+	/**
+	 * @param batchInstanceId the batchInstanceId to set
+	 */
 	public void setBatchInstanceId(String batchInstanceId) {
 		this.batchInstanceId = batchInstanceId;
 	}
 
+	/**
+	 * Default construtor for batch instance thread class.
+	 */
 	public BatchInstanceThread() {
-		this.waitThreadSleepTime = 5000;
+		this(null, Boolean.FALSE, 5000);
 	}
 
+	/**
+	 * Constructor for batch instance thread class.
+	 * 
+	 * @param batchInstanceId
+	 */
 	public BatchInstanceThread(String batchInstanceId) {
-		this.waitThreadSleepTime = 5000;
-		this.batchInstanceId = batchInstanceId;
+		this(batchInstanceId, Boolean.FALSE, 5000);
 	}
 
+	/**
+	 * Constructor for batch instance thread class.
+	 * 
+	 * @param waitTime
+	 */
 	public BatchInstanceThread(long waitTime) {
-		this.waitThreadSleepTime = waitTime;
+		this(null, Boolean.FALSE, waitTime);
+	}
+
+	/**
+	 * Constructor for batch instance thread class.
+	 * 
+	 * @param batchInstanceId
+	 * @param isUsingGhostScript
+	 * @param waitThreadSleepTime
+	 */
+	public BatchInstanceThread(String batchInstanceId, boolean isUsingGhostScript, long waitThreadSleepTime) {
+		this.batchInstanceId = batchInstanceId;
+		this.isUsingGhostScript = isUsingGhostScript;
+		this.waitThreadSleepTime = waitThreadSleepTime;
+	}
+
+	/**
+	 * @param isUsingGhostScript the isUsingGhostScript to set
+	 */
+	public void setUsingGhostScript(boolean isUsingGhostScript) {
+		this.isUsingGhostScript = isUsingGhostScript;
 	}
 
 	/**
 	 * This method is used to add a task (command line) that needs execution.
 	 * 
-	 * @param cmds the list of commands that is executed on command line.
-	 * @param environment the working directory.
+	 * @param runnable
 	 */
-
 	public synchronized void add(AbstractRunnable runnable) {
 		this.taskList.add(runnable);
 	}
 
+	/**
+	 * This method is used to add list of task (command line) that needs execution.
+	 * 
+	 * @param runnableList
+	 */
 	public synchronized void addAll(List<AbstractRunnable> runnableList) {
 		this.taskList.addAll(runnableList);
 	}
@@ -109,12 +162,13 @@ public class BatchInstanceThread {
 	 * @throws DCMAApplicationException
 	 */
 	public synchronized void execute() throws DCMAApplicationException {
+		ThreadPool threadPoolInstance = getThreadPoolInstance();
 		if (batchInstanceId != null) {
-			ThreadPool.getInstance().putBatchInstanceThreadMap(batchInstanceId, this);
+			threadPoolInstance.putBatchInstanceThreadMap(batchInstanceId, this);
 		}
 		for (AbstractRunnable runnable : taskList) {
 			try {
-				ThreadPool.getInstance().addTask(runnable);
+				threadPoolInstance.addTask(runnable);
 			} catch (RejectedExecutionException e) {
 				LOG.error("Cannot add any more tasks. Some tasks for this batch instance may not have been added.");
 				runnable.setDcmaApplicationException(new DCMAApplicationException(
@@ -123,21 +177,42 @@ public class BatchInstanceThread {
 		}
 		wait(taskList);
 		if (batchInstanceId != null) {
-			ThreadPool.getInstance().removeBatchInstanceThreadMap(batchInstanceId);
+			threadPoolInstance.removeBatchInstanceThreadMap(batchInstanceId);
 		}
 	}
-
-	public synchronized void remove() throws DCMAApplicationException {
+	
+	/**
+	 * API for the getting the thread pool instance object.
+	 * 
+	 * @return threadPoolInstance
+	 */
+	private ThreadPool getThreadPoolInstance() {
+		ThreadPool threadPoolInstance;
+		if (isUsingGhostScript) {
+			threadPoolInstance = ThreadPool.getInstanceForGhostScript();
+		} else {
+			threadPoolInstance = ThreadPool.getInstance();
+		}
+		return threadPoolInstance;
+	}
+	
+	/**
+	 * API for removing the thread from the threadpool and batch instance thread map.
+	 * 
+	 * @throws DCMAApplicationException
+	 */
+	public void remove() throws DCMAApplicationException {
+		ThreadPool threadPoolInstance = getThreadPoolInstance();
 		for (Iterator<AbstractRunnable> iterator = taskList.iterator(); iterator.hasNext();) {
 			AbstractRunnable runnable = (AbstractRunnable) iterator.next();
 			if (!runnable.isStarted() || runnable.isCompleted()) {
-				ThreadPool.getInstance().removeTask(runnable);
+				threadPoolInstance.removeTask(runnable);
 				iterator.remove();
 			}
 		}
 		waitForCompletion(taskList);
 		if (batchInstanceId != null) {
-			ThreadPool.getInstance().removeBatchInstanceThreadMap(batchInstanceId);
+			threadPoolInstance.removeBatchInstanceThreadMap(batchInstanceId);
 		}
 	}
 

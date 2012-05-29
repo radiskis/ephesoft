@@ -37,9 +37,26 @@ package com.ephesoft.dcma.da.dao;
 
 import java.util.Set;
 
-
-
+/**
+ * This class is responsible to fetch data of batch instance group table from data base.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public interface BatchClassGroupsDao {
 
-	Set<String> getBatchClassIdentifierForUsers(Set<String> userGroups);
+	/**
+	 * API for getting the batch class identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
+	Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles);
+
+	/**
+	 * API for getting the user roles for a batch class.
+	 * @param userRoles Set<String>
+	 * @param batchClassIdentifier
+	 * @return
+	 */
+	Set<String> getRolesForBatchClass(String batchClassIdentifier);
 }

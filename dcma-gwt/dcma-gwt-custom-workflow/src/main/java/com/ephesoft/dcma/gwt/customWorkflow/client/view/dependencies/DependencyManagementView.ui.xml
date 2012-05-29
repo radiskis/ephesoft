@@ -1,0 +1,41 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.customWorkflow.client.view'
+	xmlns:dependency='urn:import:com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies'>
+	<g:DockLayoutPanel ui:field="dependencyLayoutPanel"
+		width="98%" height="100%">
+		<g:north size="50">
+			<g:VerticalPanel width="100%">
+				<cw:CustomWorkflowBreadCrumbView
+					ui:field="workflowBreadCrumbView" visible="true" width="100%">
+				</cw:CustomWorkflowBreadCrumbView>
+			</g:VerticalPanel>
+		</g:north>
+
+		<g:center>
+			<g:LayoutPanel ui:field="layoutPanel">
+				<g:layer>
+					<dependency:DependencyView ui:field="dependencyView"></dependency:DependencyView>
+				</g:layer>
+				<g:layer>
+					<dependency:EditDependencyView
+						ui:field="editDependencyView" visible="false"></dependency:EditDependencyView>
+				</g:layer>
+			</g:LayoutPanel>
+		</g:center>
+
+		<g:south size="50">
+			<g:HorizontalPanel width="99%"
+				ui:field="dependencyBottomButtonsPanel">
+				<g:cell width="1%" horizontalAlignment="ALIGN_LEFT">
+					<g:Button ui:field="saveButton"></g:Button>
+				</g:cell>
+				<g:cell width="1%" horizontalAlignment="ALIGN_LEFT">
+					<g:Button ui:field="applyButton"></g:Button>
+				</g:cell>
+				<g:cell width="96%" horizontalAlignment="ALIGN_LEFT">
+					<g:Button ui:field="cancelButton"></g:Button>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:south>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

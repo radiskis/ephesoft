@@ -35,7 +35,6 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
@@ -44,25 +43,24 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.KVExtractionTestResultViewPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.shared.CoordinatesDTO;
 import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class KVExtractionTestResultView extends View<KVExtractionTestResultViewPresenter> {
 
-	interface Binder extends UiBinder<ScrollPanel, KVExtractionTestResultView> {
+	interface Binder extends UiBinder<VerticalPanel, KVExtractionTestResultView> {
 	}
 
 	private static final Binder binder = GWT.create(Binder.class);
@@ -72,40 +70,30 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 	@UiField
 	FlowPanel kvExtractionListPanel;
 
-	private HorizontalPanel buttonPanel;
-
-	private Button backButton;
+	@UiField
+	protected Button backButton;
 
 	private DialogBox dialogBox;
-	
-	@UiField ScrollPanel scrollPanel;
+
+	@UiField
+	ScrollPanel scrollPanel;
 
 	public KVExtractionTestResultView() {
 		initWidget(binder.createAndBindUi(this));
-		
+
 		scrollPanel.setSize("500px", "300px");
-		
+
 		resultTable = new FlexTable();
 		resultTable.setWidth("100%");
 		resultTable.setCellSpacing(0);
 		resultTable.addStyleName("border-result-table");
-
-		backButton = new Button();
 		backButton.setText(AdminConstants.CLOSE_BUTTON);
-		
-		buttonPanel = new HorizontalPanel();
-		buttonPanel.add(backButton);
-
-		kvExtractionListPanel.add(buttonPanel);
 		kvExtractionListPanel.add(resultTable);
+	}
 
-		backButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				dialogBox.hide(true);
-			}
-		});
+	@UiHandler("backButton")
+	public void onBackButtonClicked(ClickEvent e) {
+		dialogBox.hide();
 	}
 
 	public void createKVFieldList(List<OutputDataCarrierDTO> outputDtos) {
@@ -114,25 +102,30 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 		setResultList(outputDtos);
 	}
 
-	private List<Record> setResultList(List<OutputDataCarrierDTO> outputDtos) {
-
-		List<Record> recordList = new LinkedList<Record>();
+	private void setResultList(List<OutputDataCarrierDTO> outputDtos) {
 		int index = 1;
 		if (outputDtos != null && outputDtos.size() > 0) {
 			for (final OutputDataCarrierDTO outputDataCarrierDTO : outputDtos) {
-
-				resultTable.setWidget(index, 0, new Label(outputDataCarrierDTO.getInputFileName()));
-				resultTable.setWidget(index, 1, new Label(outputDataCarrierDTO.getValue()));
-				resultTable.setWidget(index, 2, new Label(outputDataCarrierDTO.getConfidence() + ""));
-				resultTable.setWidget(index, 3, new Label(generateCoordinates(outputDataCarrierDTO.getCoordinates())));
-				index++;
+				if (outputDataCarrierDTO != null) {
+					String value = outputDataCarrierDTO.getValue();
+					if (value != null && !value.isEmpty()) {
+						resultTable.setWidget(index, 0, new Label(outputDataCarrierDTO.getInputFileName()));
+						resultTable.setWidget(index, 1, new Label(value));
+						resultTable.setWidget(index, 2, new Label(outputDataCarrierDTO.getConfidence() + ""));
+						resultTable.setWidget(index, 3, new Label(generateCoordinates(outputDataCarrierDTO.getCoordinates())));
+						index++;
+					} else {
+						resultTable.getFlexCellFormatter().setColSpan(index, 1, 4);
+						resultTable.setWidget(index, 0, new Label(outputDataCarrierDTO.getInputFileName()));
+						resultTable.setWidget(index, 1, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
+						index++;
+					}
+				}
 			}
 		} else {
 			resultTable.getFlexCellFormatter().setColSpan(1, 0, 4);
 			resultTable.setWidget(index, 0, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 		}
-
-		return recordList;
 	}
 
 	private String generateCoordinates(CoordinatesDTO dto) {
@@ -164,7 +157,7 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
-	
+
 	public Button getBackButton() {
 		return backButton;
 	}

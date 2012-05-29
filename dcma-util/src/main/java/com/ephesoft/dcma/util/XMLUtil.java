@@ -81,7 +81,14 @@ public class XMLUtil {
 	public static final String JTIDY = "1";
 
 	private static DocumentBuilder getBuilder() throws Exception {
+		return getBuilder(false);
+	}
+
+	private static DocumentBuilder getBuilder(boolean isXPATH) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		if (isXPATH) {
+			factory.setNamespaceAware(true);
+		}
 		return factory.newDocumentBuilder();
 	}
 
@@ -91,7 +98,11 @@ public class XMLUtil {
 	}
 
 	public static Document createDocumentFrom(File file) throws Exception {
-		DocumentBuilder builder = getBuilder();
+		return createDocumentFrom(file, false);
+	}
+
+	public static Document createDocumentFrom(File file, boolean isXPATH) throws Exception {
+		DocumentBuilder builder = getBuilder(isXPATH);
 		return builder.parse(file);
 	}
 

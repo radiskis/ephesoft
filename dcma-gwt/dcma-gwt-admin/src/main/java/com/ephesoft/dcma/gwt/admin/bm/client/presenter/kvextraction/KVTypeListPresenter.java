@@ -36,11 +36,15 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVFieldTypeListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class KVTypeListPresenter extends AbstractBatchClassPresenter<KVFieldTypeListView> {
+public class KVTypeListPresenter extends AbstractBatchClassPresenter<KVFieldTypeListView> implements DoubleClickListner {
 
 	public KVTypeListPresenter(BatchClassManagementController controller, KVFieldTypeListView view) {
 		super(controller, view);
@@ -48,11 +52,34 @@ public class KVTypeListPresenter extends AbstractBatchClassPresenter<KVFieldType
 
 	@Override
 	public void bind() {
-		//Processing to be done when initializing this presenter.
+		// Processing to be done when initializing this presenter.
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+
+	}
+
+	public void onEditButtonClicked() {
+		String identifier = view.getKVFieldsListView().getSelectedRowIndex();
+		int rowCount = view.getKVFieldsListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
+
+		} else {
+			controller.getMainPresenter().getFieldTypeViewPresenter().onEditKVButtonClicked(identifier);
+		}
 	}
 }

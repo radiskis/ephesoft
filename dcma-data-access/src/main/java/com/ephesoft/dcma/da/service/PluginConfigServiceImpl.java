@@ -35,10 +35,13 @@
 
 package com.ephesoft.dcma.da.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.da.dao.PluginConfigDao;
 import com.ephesoft.dcma.da.domain.PluginConfig;
@@ -56,7 +59,28 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 
 	@Override
 	public PluginConfig getPluginConfigByName(String configName) {
-		LOGGER.info("plugin config configName : " + configName);
+		LOGGER.info("Getting plugin config object for plugin config name: " + configName);
 		return pluginConfigDao.getPluginConfigByName(configName);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void createNewPluginConfig(PluginConfig pluginConfig) {
+		LOGGER.info("Creating a new plugin config: " + pluginConfig.getDescription());
+		pluginConfigDao.create(pluginConfig);
+	}
+
+	@Override
+	public List<PluginConfig> getPluginConfigForPluginId(String pluginId) {
+		LOGGER.info("Getting plugin configs for pluginid: " + pluginId);
+		List<PluginConfig> pluginConfigs = null;
+
+		try {
+			long pluginIdLong = Long.parseLong(pluginId);
+			pluginConfigs = pluginConfigDao.getPluginConfigForPluginId(pluginIdLong);
+		} catch (NumberFormatException e) {
+			LOGGER.error("Error in getting plugin config for plugin id: " + pluginId + ". " + e.getMessage());
+		}
+		return pluginConfigs;
 	}
 }

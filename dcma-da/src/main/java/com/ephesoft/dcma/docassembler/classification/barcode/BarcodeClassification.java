@@ -35,11 +35,13 @@
 
 package com.ephesoft.dcma.docassembler.classification.barcode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
@@ -100,16 +102,48 @@ public class BarcodeClassification implements DocumentClassification {
 		// Unknown.
 		List<Page> docPageInfo = barcodePageProcess.readAllPages();
 
-		if (null == docPageInfo) {
-			String error = "No Pages found for the desired document type.";
-			LOGGER.error(error);
-			throw new DCMAApplicationException(error);
-		} else {
+		if (null != docPageInfo) {
 			// create new document for pages that was found in the
 			// batch.xml file for Unknown type document.
-			barcodePageProcess.createDocForPages(docPageInfo);
+			List<Document> insertAllDocument = new ArrayList<Document>();
+			barcodePageProcess.createDocForPages(insertAllDocument,docPageInfo,false);
 		}
 
 	}
+	
+	/**
+	 * This method will process all the unclassified pages for web service API.
+	 * 
+	 * @param documentAssembler DocumentAssembler
+	 * @param batchInstanceIdentifier Long
+	 * @throws DCMAApplicationException If any invalid parameter found.
+	 */
 
+	public final List<Document> processUnclassifiedPagesAPI(List<Page> docPageInfo, final DocumentAssembler documentAssembler, final String batchClassID,
+			final PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException {
+
+		LOGGER.info("Setting all the fields for BarcodePageProcess.");
+
+		BarcodePageProcess barcodePageProcess = new BarcodePageProcess();
+
+		barcodePageProcess.setDocTypeService(documentAssembler.getDocTypeService());
+		barcodePageProcess.setPluginPropertiesService(documentAssembler.getPluginPropertiesService());
+		barcodePageProcess.setBatchClassIdentifier(batchClassID);
+		barcodePageProcess.setBatchSchemaService(documentAssembler.getBatchSchemaService());
+		barcodePageProcess.setBarcodeClassification(documentAssembler.getBarcodeClassification());
+
+		LOGGER.info("Initializing properties...");
+		String barcodeConfidence = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_BARCODE_CONFIDENCE);
+		String factoryClassification = pluginPropertiesService.getPropertyValue(batchClassID, DocumentAssemblerConstants.DOCUMENT_ASSEMBLER_PLUGIN,
+				DocumentAssemblerProperties.DA_FACTORY_CLASS);
+		LOGGER.info("Properties Initialized Successfully");
+
+		barcodePageProcess.setBarcodeConfidence(barcodeConfidence);
+		barcodePageProcess.setFactoryClassification(factoryClassification);
+
+		List<Document> insertAllDocument = new ArrayList<Document>();
+		barcodePageProcess.createDocForPages(insertAllDocument,docPageInfo, true);
+		return insertAllDocument;
+	}
 }

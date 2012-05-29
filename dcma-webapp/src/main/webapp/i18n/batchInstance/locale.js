@@ -50,7 +50,13 @@ var batchInstanceConstants = {
 	restart_all_button : "Restart All",
 	unlock_button : "Unlock Batch",
 	next_text : ">>",
-	previous_text : "&lt;&lt;"
+	previous_text : "&lt;&lt;",
+	search_type : "Enter Batch Name",
+	open_batch : "Open",
+	open_batch_button_title : "Open selected batch",
+	restart_batch_button_title : "Restart selected batch",
+	delete_all_button: "Del All",
+	delete_button_tooltip:"Delete all batch instance(s) by status and priority"
 };
 var batchInstanceMessages = {
 	batch_list_retrieve_failure : "Unable to retrieve batch list.",
@@ -80,7 +86,20 @@ var batchInstanceMessages = {
 	restart_all_confirmation_text : "Restart all batches in READY_FOR_REVIEW and READY_FOR_VALIDATION.",
 	restart_all_confirmation_title : "Restart All Batches",
 	restart_all_failure : "Batches could not be restarted.",
-	restart_all_text : "Restarting all batch instances ....."
+	restart_all_text : "Restarting all batch instances .....",
+	status_of_batch_is_neither_review_nor_valiation : "Status of batch is neither Ready for Review nor Ready for Validation.",
+	unable_to_retrieve_batch : "Unable to retrieve batch.",
+	unable_to_get_lock_on_batch_instance : "Unable to get lock on batch instance.",
+	press_ok_button_to_nevigate : "Press ok button to navigate to Batch Detail screen.",
+	navigate_to_review_validate_window : "Navigate to Batch Detail screen",
+	delete_all_confirm : "Are you sure you want to delete all batch instance(s) having selected status(s) and priority(s)?",
+	delete_all_title: "Delete All",
+	delete_all_failure : "All batches could not be deleted. Please check logs for detailed errors.",
+	delete_all_success: "Batch instance(s) deleted successfully.",
+	delete_all_no_record: "No batch instance(s) found to be deleted with the specified status and priority.",
+	delete_all_status_improper: "Only batches with status:ERROR, READY_FOR_REVIEW, READY_FOR_VALIDATION, RUNNING can be deleted.\n Please select at least one of these status(s).",
+	delete_all_locked_batches: "Either some of the batch instance(s) are locked for processing or no batch instance(s) exist for the matching criteria."
+
 };
 /** ************************** Turkish locale (suffix: _tk)****************** */
 var batchInstanceConstants_tk = {
@@ -131,7 +150,13 @@ var batchInstanceConstants_tk = {
 	restart_all_button : "Yeniden Tüm",
 	unlock_button : "Açmaktadõr Toplu",
 	next_text : ">>",
-	previous_text : "&lt;&lt;"
+	previous_text : "&lt;&lt;",
+	search_type : "Enter Toplu Adı",
+	open_batch : "açmak",
+	open_batch_button_title : "Seçilen küme aç",
+	restart_batch_button_title : "Seçilen toplu yeniden başlatın",
+	delete_all_button: "Silmek..",
+	delete_button_tooltip:"Durumuna göre tüm toplu örnek silme"	
 
 };
 var batchInstanceMessages_tk = {
@@ -160,5 +185,17 @@ var batchInstanceMessages_tk = {
 	restart_all_confirmation_text : "READY_FOR_REVIEW ve READY_FOR_VALIDATION tüm partiler yeniden başlatın.",
 	restart_all_confirmation_title : "Tüm seriler yeniden başlatın",
 	restart_all_failure : "Kümeler yeniden başlatılması olamazdı.",
-	restart_all_text : "Bütün küme örnekleri yeniden başlatma ....."
+	restart_all_text : "Bütün küme örnekleri yeniden başlatma .....",
+	status_of_batch_is_neither_review_nor_valiation : "Toplu Durum ne Gözden Geçirmeye Hazır ne Doğrulama için hazır olduğunu.",
+	unable_to_retrieve_batch : "Toplu iş almak için açılamıyor",
+	unable_to_get_lock_on_batch_instance : "Toplu örneği üzerinde kilit alınamıyor",
+	press_ok_button_to_nevigate : "Toplu Detay ekranına gitmek için ok düğmesine basın.",
+	navigate_to_review_validate_window : "Toplu Detay ekranına gidin",
+	delete_all_confirm : "Eğer bu durum için tüm toplu örneklerini silmek istediğinizden emin misiniz?",
+	delete_all_title: "Tümünü Sil",
+	delete_all_failure : "Bütün partiler silinemedi. Ayrıntılı hataları günlüklerini kontrol edin.",
+	delete_all_success: "Batch instance(s) deleted successfully.",
+	delete_all_no_record: "No batch instance(s) found to be deleted with the specified status and priority.",
+	delete_all_status_improper: "Statüsünde Sadece toplu: HATA, READY_FOR_REVIEW, READY_FOR_VALIDATION, ÇALIŞMA silinebilir \ n Bu durumu seçiniz.",
+	delete_all_locked_batches: "Either some of the batch instance(s) are locked for processing or no batch instance(s) exist for the matching criteria."
 };

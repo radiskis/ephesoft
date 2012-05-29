@@ -232,6 +232,7 @@ public interface BatchClassManagementConstants extends LocaleCommonConstants {
 
 	String IS_HIDDEN = "is_hidden";
 
+	String IS_MULTILINE = "is_multiline";
 	/**
 	 * Table Header for Table Info Listing.
 	 */
@@ -359,5 +360,15 @@ public interface BatchClassManagementConstants extends LocaleCommonConstants {
 	String REMOTE_BC_IDENTIFIER = "remote_bc_identifier";
 
 	int DEFAULT_ROW_COUNT = 5;
+
+	String PATTERN_DELIMITER = ";";
+	
+	String WARNING_TITLE="warning_title";
+
+	String TEST_ADV_KV_LABEL = "test_adv_kv";
+
+	String FILE_CONVERSION_SUFFIX = "-0000";
+
+	String KV_PAGE_VALUE_LABEL = "kv_page_value";
 
 }

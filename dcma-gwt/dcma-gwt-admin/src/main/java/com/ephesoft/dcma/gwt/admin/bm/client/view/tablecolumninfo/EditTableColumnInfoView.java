@@ -77,6 +77,11 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 	protected TextBox columnName;
 
 	@UiField
+	protected Label columnHeaderPatternLabel;
+	@UiField
+	protected TextBox columnHeaderPattern;
+
+	@UiField
 	protected Label columnPatternLabel;
 	@UiField
 	protected Label columnPatternStar;
@@ -92,9 +97,15 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 	protected Button saveButton;
 	@UiField
 	protected Button cancelButton;
-
+	
+	@UiField
+	protected Button samplePatternButton;
+	
 	private ValidatableWidget<TextBox> validateColumnNameTextBox;
 	private ValidatableWidget<TextBox> validateColumnPatternTextBox;
+	private ValidatableWidget<TextBox> validateBetweenLeftTextBox;
+	private ValidatableWidget<TextBox> validateBetweenRightTextBox;
+	private ValidatableWidget<TextBox> validateColumnHeaderPatternTextBox;
 
 	@UiField
 	protected VerticalPanel editTableColumnInfoViewPanel;
@@ -106,6 +117,7 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.OK_BUTTON);
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		validateColumnNameTextBox = new ValidatableWidget<TextBox>(columnName);
 		validateColumnNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -124,7 +136,30 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 				validateColumnPatternTextBox.toggleValidDateBox();
 			}
 		});
+		validateBetweenLeftTextBox = new ValidatableWidget<TextBox>(betweenLeft);
+		validateBetweenLeftTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateBetweenLeftTextBox.toggleValidDateBox();
+			}
+		});
+		validateBetweenRightTextBox = new ValidatableWidget<TextBox>(betweenRight);
+		validateBetweenRightTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateBetweenRightTextBox.toggleValidDateBox();
+			}
+		});
+		validateColumnHeaderPatternTextBox = new ValidatableWidget<TextBox>(columnHeaderPattern);
+		validateColumnHeaderPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateColumnHeaderPatternTextBox.toggleValidDateBox();
+			}
+		});
 		editTableColumnInfoViewPanel.setSpacing(5);
 
 		betweenLeftLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BETWEEN_LEFT).toString()
@@ -137,6 +172,7 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 				+ AdminConstants.COLON);
 		isRequiredLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_REQUIRED).toString()
 				+ AdminConstants.COLON);
+		columnHeaderPatternLabel.setText("Column Header Pattern");
 
 		columnNameStar.setText(AdminConstants.STAR);
 		columnPatternStar.setText(AdminConstants.STAR);
@@ -145,6 +181,7 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 		betweenRightLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnNameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		columnHeaderPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isRequiredLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 
 		columnNameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
@@ -152,9 +189,18 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 
 	}
 
+	public ValidatableWidget<TextBox> getValidateColumnHeaderPatternTextBox() {
+		return validateColumnHeaderPatternTextBox;
+	}
+
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
+	}
+	
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
 	@UiHandler("cancelButton")
@@ -202,38 +248,28 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 		return this.isRequired.getValue();
 	}
 
-/*
-	public LocationType getLocation() {
-		String selected = this.location.getItemText(this.location.getSelectedIndex());
-		LocationType[] allLocationTypes = LocationType.values();
-		for (LocationType locationType : allLocationTypes) {
-			if (locationType.name().equals(selected))
-				return locationType;
-		}
-		return allLocationTypes[0];
+	public String getColumnHeaderPattern() {
+		return this.columnHeaderPattern.getValue();
 	}
 
-	private int findIndex(LocationType locationType) {
-		if (locationType == null)
-			return 0;
-		LocationType[] allLocationTypes = LocationType.values();
-		List<LocationType> tempList = Arrays.asList(allLocationTypes);
-		return tempList.indexOf(locationType);
+	public void setColumnHeaderPattern(String columnHeaderPattern) {
+		this.columnHeaderPattern.setValue(columnHeaderPattern);
 	}
 
-	public void setLocation() {
-		this.location.setVisibleItemCount(1);
-		LocationType[] allLocationTypes = LocationType.values();
-		for (LocationType locationType2 : allLocationTypes) {
-			this.location.addItem(locationType2.name());
-		}
-	}
-
-	public void setLocation(LocationType locationType) {
-		if (this.location.getItemCount() == 0)
-			setLocation();
-		this.location.setSelectedIndex(findIndex(locationType));
-	}*/
+	/*
+	 * public LocationType getLocation() { String selected = this.location.getItemText(this.location.getSelectedIndex());
+	 * LocationType[] allLocationTypes = LocationType.values(); for (LocationType locationType : allLocationTypes) { if
+	 * (locationType.name().equals(selected)) return locationType; } return allLocationTypes[0]; }
+	 * 
+	 * private int findIndex(LocationType locationType) { if (locationType == null) return 0; LocationType[] allLocationTypes =
+	 * LocationType.values(); List<LocationType> tempList = Arrays.asList(allLocationTypes); return tempList.indexOf(locationType); }
+	 * 
+	 * public void setLocation() { this.location.setVisibleItemCount(1); LocationType[] allLocationTypes = LocationType.values(); for
+	 * (LocationType locationType2 : allLocationTypes) { this.location.addItem(locationType2.name()); } }
+	 * 
+	 * public void setLocation(LocationType locationType) { if (this.location.getItemCount() == 0) setLocation();
+	 * this.location.setSelectedIndex(findIndex(locationType)); }
+	 */
 	public ValidatableWidget<TextBox> getValidateColumnNameTextBox() {
 		return validateColumnNameTextBox;
 	}
@@ -265,4 +301,21 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 	public TextBox getColumnPatternTextBox() {
 		return columnPattern;
 	}
+
+	public ValidatableWidget<TextBox> getValidateBetweenLeftTextBox() {
+		return validateBetweenLeftTextBox;
+	}
+
+	public void setValidateBetweenLeftTextBox(ValidatableWidget<TextBox> validateBetweenLeftTextBox) {
+		this.validateBetweenLeftTextBox = validateBetweenLeftTextBox;
+	}
+
+	public ValidatableWidget<TextBox> getValidateBetweenRightTextBox() {
+		return validateBetweenRightTextBox;
+	}
+
+	public void setValidateBetweenRightTextBox(ValidatableWidget<TextBox> validateBetweenRightTextBox) {
+		this.validateBetweenRightTextBox = validateBetweenRightTextBox;
+	}
+
 }

@@ -102,7 +102,7 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	@UiField
 	protected Label sampleValueLabel;
 	@UiField
-    Label sampleValueStar;
+	Label sampleValueStar;
 	@UiField
 	protected TextBox sampleValue;
 
@@ -122,8 +122,18 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	protected CheckBox isHidden;
 
 	@UiField
+	protected Label isMultiLineLabel;
+	@UiField
+	protected CheckBox isMultiLine;
+	@UiField
 	protected Button saveButton;
-	
+	@UiField
+	protected Button samplePatternButton;
+
+	public CheckBox getIsMultiLine() {
+		return isMultiLine;
+	}
+
 	public CheckBox getIsHidden() {
 		return isHidden;
 	}
@@ -147,6 +157,7 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
 		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -199,6 +210,8 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		barcodeTypeLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BARCODE_TYPE)
 				+ AdminConstants.COLON);
 		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
+		isMultiLineLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_MULTILINE)
+				+ AdminConstants.COLON);
 		nameStar.setText(AdminConstants.STAR);
 		descStar.setText(AdminConstants.STAR);
 		patternStar.setText(AdminConstants.STAR);
@@ -218,6 +231,7 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		fdOrderStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		barcodeTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		isMultiLineLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 	}
 
 	@UiHandler("saveButton")
@@ -229,6 +243,11 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
+	}
+
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
 	public void setName(TextBox name) {
@@ -263,7 +282,7 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 	}
 
 	public String getBarcodeType() {
-		return  this.barcodeTypeListBox.getItemText(this.barcodeTypeListBox.getSelectedIndex());
+		return this.barcodeTypeListBox.getItemText(this.barcodeTypeListBox.getSelectedIndex());
 	}
 
 	private int findIndex(DataType datatype) {
@@ -413,4 +432,11 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		this.isHidden.setValue(isHidden);
 	}
 
+	public boolean isMultiLine() {
+		return this.isMultiLine.getValue();
+	}
+
+	public void setMultiLine(boolean isMultiLine) {
+		this.isMultiLine.setValue(isMultiLine);
+	}
 }

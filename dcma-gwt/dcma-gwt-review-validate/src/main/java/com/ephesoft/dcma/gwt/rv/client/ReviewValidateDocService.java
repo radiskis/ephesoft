@@ -68,16 +68,18 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * API to get the Highest Priority Batch.
 	 * 
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO getHighestPriortyBatch();
+	BatchDTO getHighestPriortyBatch() throws GWTException;
 
 	/**
 	 * API to get Batch by batch Instance Identifier.
 	 * 
 	 * @param batchInstanceIdentifier {@link String}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO getBatch(String batchInstanceIdentifier);
+	BatchDTO getBatch(String batchInstanceIdentifier) throws GWTException;
 
 	/**
 	 * API to get Document Type of a batch By BatchInstanceID.
@@ -94,8 +96,9 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param documentId {@link String}
 	 * @param documentIdToBeMerged {@link String}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO mergeDocument(Batch batch, String documentId, String documentIdToBeMerged);
+	BatchDTO mergeDocument(Batch batch, String documentId, String documentIdToBeMerged) throws GWTException;
 
 	/**
 	 * API to get Field Type By Document Type Name.
@@ -113,8 +116,9 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param docID {@link String}
 	 * @param duplicatePageID {@link String}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO duplicatePageOfDocument(Batch batch, String docID, String duplicatePageID);
+	BatchDTO duplicatePageOfDocument(Batch batch, String docID, String duplicatePageID) throws GWTException;
 
 	/**
 	 * API to delete Page Of Document for a batch.
@@ -123,8 +127,9 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param docID {@link String}
 	 * @param pageId {@link String}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO deletePageOfDocument(Batch batch, String docID, String pageId);
+	BatchDTO deletePageOfDocument(Batch batch, String docID, String pageId) throws GWTException;
 
 	/**
 	 * API to split Document for a batch.
@@ -133,8 +138,9 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param docID {@link String}
 	 * @param pageId {@link String}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
-	BatchDTO splitDocument(Batch batch, String docID, String pageId);
+	BatchDTO splitDocument(Batch batch, String docID, String pageId) throws GWTException;
 
 	/**
 	 * API to move Page Of Document for a batch.
@@ -146,9 +152,10 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param moveToPageId1 {@link String}
 	 * @param moveAfterchecked {@link Boolean}
 	 * @return {@link BatchDTO}
+	 * @throws GWTException 
 	 */
 	BatchDTO movePageOfDocument(Batch batch, String selectedPageId, String selectedDocumentId, String moveToDocumentId1,
-			String moveToPageId1, Boolean moveAfterchecked);
+			String moveToPageId1, Boolean moveAfterchecked) throws GWTException;
 
 	/**
 	 * API to rotate Image for a batch.
@@ -157,17 +164,19 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @param page {@link Page}
 	 * @param documentId {@link String}
 	 * @return {@link Page}
+	 * @throws GWTException 
 	 */
-	Page roatateImage(Batch batch, Page page, String documentId);
+	Page rotateImage(Batch batch, Page page, String documentId) throws GWTException;
 
 	/**
 	 * API to Text Search using Fuzzy DB for a batch.
 	 * 
 	 * @param batch {@link Batch}
+	 * @param documentType {@link String}
 	 * @param searchText {@link String}
 	 * @return List< List < {@link String}>>
 	 */
-	List<List<String>> fuzzyTextSearch(Batch batch, String searchText);
+	List<List<String>> fuzzyTextSearch(Batch batch, String documentType, String searchText);
 
 	/**
 	 * API to get Rows Count for a batch.
@@ -320,15 +329,17 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * API to signal Workflow for a batch.
 	 * 
 	 * @param batch {@link Batch}
+	 * @throws GWTException 
 	 */
-	void signalWorkflow(Batch batch);
+	void signalWorkflow(Batch batch) throws GWTException;
 
 	/**
 	 * API to save a batch.
 	 * 
 	 * @param batch {@link Batch}
+	 * @throws GWTException 
 	 */
-	void saveBatch(Batch batch);
+	void saveBatch(Batch batch) throws GWTException;
 
 	/**
 	 * API to get Encoded String for the given path Of Batch Xml after checking whether it is a zip or xml format.
@@ -337,4 +348,13 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * @return {@link String}
 	 */
 	String getEncodedStringForXMLPath(String pathOfBatchXml);
+  
+	/**API to get zoomCount value
+	 * 
+	 * 
+	 * @return{@link String}
+	 */
+	String getZoomCount();
+
+
 }

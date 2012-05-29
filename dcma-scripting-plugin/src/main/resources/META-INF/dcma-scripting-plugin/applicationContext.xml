@@ -13,7 +13,7 @@
 
 	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
 	<import resource="classpath:/META-INF/applicationContext-batch.xml" />
-	
+
 	<bean id="scriptConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="placeholderPrefix" value="$script{" />
@@ -25,9 +25,11 @@
 
 	<bean id="scriptService" class="com.ephesoft.dcma.script.service.ScriptServiceImpl" />
 
-	<bean id="scriptExecutor" class="com.ephesoft.dcma.script.ScriptExecutor" p:parserType="$script{script.parser_type}">
+	<bean id="scriptExecutor" class="com.ephesoft.dcma.script.ScriptExecutor"
+		p:parserType="$script{script.parser_type}"
+		p:updateBatchInstFromBatch="$script{script.update_batch_inst_from_batch}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.script" />
-	
+
 </beans>

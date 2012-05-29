@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>jar</packaging>
 
@@ -72,9 +73,18 @@
 							<schemaDirectory>${basedir}/src/main/resources/META-INF/dcma-batch/schema/batch</schemaDirectory>
 							<schemaIncludes>
 								<include>Common.xsd</include>
+								<include>DocumentAPI.xsd</include>
 								<include>Batch.xsd</include>
 								<include>Hocr.xsd</include>
+								<include>Reporting.xsd</include>
+								<include>BatchClass.xsd</include>
+								<include>BatchInstance.xsd</include>
+								<include>ExtractKVParams.xsd</include>
+								<include>ImportBatchClass.xsd</include>
+								<include>WebServiceParams.xsd</include>
+								<include>KVExtractionFieldPattern.xsd</include>
 							</schemaIncludes>
+
 							<removeOldOutput>true</removeOldOutput>
 							<!-- generate lots of output -->
 							<verbose>true</verbose>
@@ -95,7 +105,8 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<copydir dest="${basedir}/target/classes" src="${basedir}/src-generated/main/java" forceoverwrite="true" />
+								<copydir dest="${basedir}/target/classes" src="${basedir}/src-generated/main/java"
+									forceoverwrite="true" />
 							</tasks>
 						</configuration>
 					</execution>

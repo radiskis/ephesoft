@@ -77,4 +77,9 @@ public interface TableExtractionConstants {
 	 * String constant for span tag.
 	 */
 	String SPAN_TAG = "<span";
+	
+	/**
+	 * Default value for confidence.
+	 */
+	int DEFAULT_CONFIDENCE_VALUE = 100;
 }

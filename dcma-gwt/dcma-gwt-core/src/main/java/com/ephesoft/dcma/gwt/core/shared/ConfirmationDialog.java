@@ -37,6 +37,7 @@ package com.ephesoft.dcma.gwt.core.shared;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.shared.listener.ThirdButtonListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -72,6 +73,9 @@ public class ConfirmationDialog extends DialogBox {
 	public Button cancelButton;
 
 	@UiField
+	public Button thirdButton;
+
+	@UiField
 	HTML centerWidget;
 
 	@UiField
@@ -89,18 +93,39 @@ public class ConfirmationDialog extends DialogBox {
 		this.performCancelOnEscape = performCancelOnEscape;
 	}
 
-	public ConfirmationDialog() {
+	public ConfirmationDialog(boolean thirdButtonVisibility) {
 		setWidget(binder.createAndBindUi(this));
 		okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_ok));
 		cancelButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_cancel));
+		thirdButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_discard));
+		thirdButton.setVisible(thirdButtonVisibility);
 		setAnimationEnabled(true);
 		setGlassEnabled(true);
 		setWidth("100%");
+		setDefaultListener();
 	}
 
-	public ConfirmationDialog(boolean removeCancelBtn) {
-		this();
-		cancelButton.setVisible(!removeCancelBtn);
+	public void setDefaultListener() {
+		addDialogListener(new DialogListener() {
+
+			@Override
+			public void onOkClick() {
+				hideConfirmationDialog();
+			}
+
+			@Override
+			public void onCancelClick() {
+				hideConfirmationDialog();
+			}
+		});
+	}
+
+	public ConfirmationDialog() {
+		this(false);
+	}
+
+	private void hideConfirmationDialog() {
+		this.hide();
 	}
 
 	public void setMessage(String message) {
@@ -143,6 +168,14 @@ public class ConfirmationDialog extends DialogBox {
 		hide();
 	}
 
+	@UiHandler("thirdButton")
+	void OnDiscard(ClickEvent event) {
+		if (listener instanceof ThirdButtonListener) {
+			((ThirdButtonListener) listener).onThirdButtonClick();
+			hide();
+		}
+	}
+
 	public void addDialogListener(DialogListener dialogListener) {
 		this.listener = dialogListener;
 	}
@@ -150,4 +183,5 @@ public class ConfirmationDialog extends DialogBox {
 	public HTMLPanel getPanel() {
 		return panel;
 	}
+
 }

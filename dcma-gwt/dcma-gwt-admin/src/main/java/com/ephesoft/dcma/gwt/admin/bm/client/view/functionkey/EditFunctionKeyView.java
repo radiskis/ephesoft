@@ -40,11 +40,13 @@ import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.EditFunctionKeyPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -281,10 +283,8 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 				}
 			}
 		} else {
-			final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-			confirmationDialog.center();
-			confirmationDialog.setDialogTitle("Incomplete Details");
-			confirmationDialog.setMessage("All details are necessary.");
+			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+					LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ALL_DETAILS_NECESSARY), LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.INCOMPLETE_DETAILS), Boolean.TRUE);
 			confirmationDialog.addDialogListener(new DialogListener() {
 
 				@Override
@@ -297,18 +297,14 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 
 				}
 			});
-			confirmationDialog.center();
-			confirmationDialog.show();
-			confirmationDialog.okButton.setFocus(true);
+
 		}
 	}
 
 	private void showKeyErrorDialog(String errorMessage) {
 
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.center();
-		confirmationDialog.setDialogTitle("Key Not Allowed");
-		confirmationDialog.setMessage(errorMessage);
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(errorMessage,
+				LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.KEY_NOT_ALLOWED), Boolean.TRUE);
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -322,9 +318,7 @@ public class EditFunctionKeyView extends View<EditFunctionKeyPresenter> {
 
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 		setKeyName(null);
 	}
 

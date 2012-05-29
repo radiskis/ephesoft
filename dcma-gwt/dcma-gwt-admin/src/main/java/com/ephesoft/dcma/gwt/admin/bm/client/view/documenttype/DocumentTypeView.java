@@ -43,6 +43,10 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.DocumentTypeViewPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.FieldTypeListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.FunctionKeyListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.PluginListPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tableinfo.TableInfoListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo.TableInfoListView;
@@ -157,6 +161,12 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 	@UiField
 	protected Button testTableButton;
 
+	private FieldTypeListPresenter fieldTypeListPresenter;
+	
+	private TableInfoListPresenter tableInfoListPresenter;
+	
+	private FunctionKeyListPresenter functionKeyListPresenter;
+	
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocumentTypeView() {
@@ -213,18 +223,19 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 	public void createPageTypeList(Collection<PageTypeDTO> pageTypes) {
 		List<Record> recordList = setPluginList(pageTypes);
 
-		pageTypeListView.listView.initTable(recordList.size(), recordList);
+		pageTypeListView.listView.initTable(recordList.size(),recordList);
 	}
 
 	public void createFieldTypeList(Collection<FieldTypeDTO> fieldTypes) {
 		List<Record> recordList = setFieldsList(fieldTypes);
-
-		fieldTypeListView.listView.initTable(recordList.size(), recordList, true);
+		fieldTypeListPresenter = new FieldTypeListPresenter(presenter.getController(),fieldTypeListView);
+		fieldTypeListView.listView.initTable(recordList.size(),null,null, recordList, true,false,fieldTypeListPresenter);
 	}
 
 	public void createTableInfoList(Collection<TableInfoDTO> tableInfos) {
 		List<Record> recordList = setTableInfoList(tableInfos);
-		tableInfoListView.listView.initTable(recordList.size(), recordList, true);
+		tableInfoListPresenter = new TableInfoListPresenter(presenter.getController(),tableInfoListView);
+        tableInfoListView.listView.initTable(recordList.size(),null,null, recordList, true,false,tableInfoListPresenter);
 	}
 
 	private List<Record> setFieldsList(Collection<FieldTypeDTO> fields) {
@@ -232,9 +243,12 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 		List<Record> recordList = new LinkedList<Record>();
 		for (final FieldTypeDTO fieldTypeDTO : fields) {
 			CheckBox isHidden = new CheckBox();
+			CheckBox isMultiLine = new CheckBox();
 			isHidden.setValue(fieldTypeDTO.isHidden());
 			isHidden.setEnabled(false);
-			Record record = new Record(fieldTypeDTO.getIdentifier());
+			isMultiLine.setValue(fieldTypeDTO.isMultiLine());
+			isMultiLine.setEnabled(false);
+		    Record record = new Record(fieldTypeDTO.getIdentifier());
 			record.addWidget(fieldTypeListView.name, new Label(fieldTypeDTO.getName()));
 			record.addWidget(fieldTypeListView.description, new Label(fieldTypeDTO.getDescription()));
 			record.addWidget(fieldTypeListView.type, new Label(fieldTypeDTO.getDataType().name()));
@@ -242,6 +256,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 			record.addWidget(fieldTypeListView.sampleValue, new Label(fieldTypeDTO.getSampleValue()));
 			record.addWidget(fieldTypeListView.barcode, new Label(fieldTypeDTO.getBarcodeType()));
 			record.addWidget(fieldTypeListView.isHidden, isHidden);
+			record.addWidget(fieldTypeListView.isMultiLine, isMultiLine);
 			recordList.add(record);
 		}
 
@@ -359,57 +374,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
 	@UiHandler("editFunctionKeyButton")
 	public void onEditFunctionKeyButtonClick(ClickEvent clickEvent) {
-		String identifier = functionKeyListView.listView.getSelectedRowIndex();
-		int rowCount = functionKeyListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE));
-				confirmationDialog.addDialogListener(new DialogListener() {
-
-					@Override
-					public void onOkClick() {
-						confirmationDialog.hide();
-					}
-
-					@Override
-					public void onCancelClick() {
-						confirmationDialog.hide();
-					}
-
-				});
-				confirmationDialog.center();
-				confirmationDialog.show();
-				confirmationDialog.okButton.setFocus(true);
-			} else {
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE));
-				confirmationDialog.addDialogListener(new DialogListener() {
-
-					@Override
-					public void onOkClick() {
-						confirmationDialog.hide();
-					}
-
-					@Override
-					public void onCancelClick() {
-						confirmationDialog.hide();
-					}
-
-				});
-				confirmationDialog.center();
-				confirmationDialog.show();
-				confirmationDialog.okButton.setFocus(true);
-			}
-			return;
-		}
-
-		presenter.onEditFunctionKeyButtonClicked(identifier);
+		functionKeyListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteFunctionKeyButton")
@@ -418,11 +383,9 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 		int rowCount = functionKeyListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-				confirmationDialog
-						.setMessage(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE));
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), Boolean.TRUE);
+				
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -436,16 +399,13 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 					}
 
 				});
-				confirmationDialog.center();
-				confirmationDialog.show();
-				confirmationDialog.okButton.setFocus(true);
+				
 
 			} else {
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE));
+				final ConfirmationDialog confirmationDialog =ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
+						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), Boolean.TRUE);
+				
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -459,17 +419,14 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 					}
 
 				});
-				confirmationDialog.center();
-				confirmationDialog.show();
-				confirmationDialog.okButton.setFocus(true);
+			
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_FUNCTION_KEY_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-				BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+				BatchClassManagementMessages.DELETE_FUNCTION_KEY_CONFORMATION), LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), false);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -483,9 +440,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+	
 	}
 
 	@UiHandler("editDocumentPropertiesButton")
@@ -495,20 +450,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
 	@UiHandler("editFieldButton")
 	public void onEditFieldButtonClicked(ClickEvent clickEvent) {
-		String identifier = fieldTypeListView.listView.getSelectedRowIndex();
-		int rowCount = fieldTypeListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			}
-			return;
-		}
-		presenter.onEditFieldButtonClicked(identifier);
-
+		fieldTypeListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteFieldButton")
@@ -524,10 +466,9 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_FIELD_TYPE_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_FIELD_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+				BatchClassManagementMessages.DELETE_FIELD_TYPE_CONFORMATION), LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_FIELD_TITLE), Boolean.FALSE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -541,9 +482,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	@UiHandler("addTableInfoFieldButton")
@@ -553,20 +492,9 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
 	@UiHandler("editTableInfoFieldButton")
 	public void onEditTableInfoFieldButtonClick(ClickEvent clickEvent) {
-		String identifier = tableInfoListView.listView.getSelectedRowIndex();
-		int rowCount = tableInfoListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			}
-			return;
+		tableInfoListPresenter.onEditButtonClicked();
+
 		}
-		presenter.onEditTableInfoFieldButtonClicked(identifier);
-	}
 
 	@UiHandler("deleteTableInfoFieldButton")
 	public void onDeleteTableInfoFieldButtonClicked(ClickEvent clickEvent) {
@@ -582,10 +510,9 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_TABLE_INFO_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_TABLE_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+				BatchClassManagementMessages.DELETE_TABLE_INFO_CONFORMATION), LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_TABLE_TITLE),Boolean.FALSE);
+		
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -599,9 +526,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	@UiHandler("testTableButton")
@@ -623,6 +548,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
 	public void createDocumentFunctionKeyList(Collection<FunctionKeyDTO> functionKeyInfo) {
 		List<Record> recordList = setFunctionKeyList(functionKeyInfo);
-		functionKeyListView.listView.initTable(recordList.size(), recordList, true);
+		functionKeyListPresenter = new FunctionKeyListPresenter(presenter.getController(),functionKeyListView);
+		functionKeyListView.listView.initTable(recordList.size(),null,null, recordList, true,false,functionKeyListPresenter);
 	}
 }

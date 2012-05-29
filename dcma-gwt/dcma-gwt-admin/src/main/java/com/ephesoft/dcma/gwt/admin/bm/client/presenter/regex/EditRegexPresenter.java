@@ -40,8 +40,9 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.regex.EditRegexView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexView> {
@@ -61,8 +62,13 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 	public void onSave() {
 		boolean validFlag = true;
 		if (validFlag && !view.getValidatePatternTextBox().validate()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+			if (view.getValidatePatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			}
 			validFlag = false;
 		}
 
@@ -87,9 +93,14 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 	public void bind() {
 		if (controller.getSelectedRegex() != null) {
 			view.setPattern(controller.getSelectedRegex().getPattern());
-			view.getValidatePatternTextBox().addValidator(new EmptyStringValidator(view.getPatternTextBox()));
-			view.getValidatePatternTextBox().toggleValidDateBox();
+		} else {
+			RegexDTO regexDTO = controller.getMainPresenter().getFieldTypeViewPresenter().createRegexDTOObject();
+			regexDTO.setPattern(view.getPattern());
+			controller.setAdd(true);
+			controller.setSelectedRegex(regexDTO);
 		}
+		view.getValidatePatternTextBox().addValidator(new RegExValidator(view.getPatternTextBox(), true, false, true, null));
+		view.getValidatePatternTextBox().toggleValidDateBox();
 	}
 
 	@Override

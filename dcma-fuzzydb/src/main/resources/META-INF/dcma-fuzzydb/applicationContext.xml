@@ -13,7 +13,8 @@
 
 	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
 	<import resource="classpath:/META-INF/applicationContext-batch.xml" />
-	
+	<import resource="classpath:/META-INF/dcma-fuzzydb/dcma-learndb-scheduler.xml" />
+
 	<bean id="fuzzyDBConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="placeholderPrefix" value="$fuzzydb{" />
@@ -24,14 +25,17 @@
 		</property>
 	</bean>
 
-	<bean id="fuzzyLuceneEngine" class="com.ephesoft.dcma.fuzzydb.FuzzyLuceneEngine" 
-	      p:rowID="$fuzzydb{fuzzydb.rowId}" >
+	<bean id="fuzzyLuceneEngine" class="com.ephesoft.dcma.fuzzydb.FuzzyLuceneEngine"
+		p:rowID="$fuzzydb{fuzzydb.rowId}" p:batchClassIDList="$fuzzydb{fuzzydb.learndb.batchClassList}"
+		p:ignoreList="$fuzzydb{fuzzydb.ignore_list}">
+
 	</bean>
-	
+
 	<bean id="fuzzyDBService"
 		class="com.ephesoft.dcma.fuzzydb.service.FuzzyDBSearchServiceImpl" />
 
 	<context:component-scan base-package="com.ephesoft.dcma.fuzzydb" />
 	<context:component-scan base-package="com.ephesoft.dcma.fuzzydb.service" />
+
 
 </beans>

@@ -60,7 +60,6 @@ public class BatchClassModuleConfig extends AbstractChangeableEntity implements 
 	private BatchClassModule batchClassModule;
 
 	@OneToOne
-	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "module_config_id")
 	private ModuleConfig moduleConfig;
 

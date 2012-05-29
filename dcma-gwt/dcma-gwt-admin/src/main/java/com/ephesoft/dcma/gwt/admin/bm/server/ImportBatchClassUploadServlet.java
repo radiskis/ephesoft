@@ -56,11 +56,15 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SerializationUtils;
 
+
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
+import com.ephesoft.dcma.batch.service.ImportBatchService;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.util.FileUtils;
+import com.ephesoft.dcma.workflow.service.common.DeploymentService;
 
 public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 
@@ -79,23 +83,29 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
+		DeploymentService deploymentService = this.getSingleBeanOfType(DeploymentService.class);
+		BatchClassService bcService = this.getSingleBeanOfType(BatchClassService.class);
+		ImportBatchService imService = this.getSingleBeanOfType(ImportBatchService.class);
+		
 		String lastAttachedZipSourcePath = req.getParameter("lastAttachedZipSourcePath");
 		if (lastAttachedZipSourcePath != null && !lastAttachedZipSourcePath.isEmpty()) {
 			if (new File(lastAttachedZipSourcePath).exists()) {
 				FileUtils.deleteDirectoryAndContentsRecursive(new File(lastAttachedZipSourcePath));
 			}
 		}
-		attachFile(req, resp, batchSchemaService);
+		attachFile(req, resp, batchSchemaService, deploymentService, bcService, imService);
 	}
 
-	private void attachFile(HttpServletRequest req, HttpServletResponse resp, BatchSchemaService batchSchemaService)
+	private void attachFile(HttpServletRequest req, HttpServletResponse resp, BatchSchemaService batchSchemaService, DeploymentService deploymentService, BatchClassService bcService, ImportBatchService imService)
 			throws IOException {
+	
+		
 		PrintWriter printWriter = resp.getWriter();
 		File tempZipFile = null;
 		InputStream instream = null;
 		OutputStream out = null;
 		String zipWorkFlowName = "", tempOutputUnZipDir = "";
-
+		BatchClass importBatchClass = null; 
 		if (ServletFileUpload.isMultipartContent(req)) {
 			FileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
@@ -108,6 +118,7 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 			String zipFileName = "";
 			String zipPathname = "";
 			List<FileItem> items;
+			
 			try {
 				items = upload.parseRequest(req);
 				for (FileItem item : items) {
@@ -176,9 +187,11 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 
 			String serializableFilePath = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, SERIALIZATION_EXT);
 			InputStream serializableFileStream = null;
+			
+				
 			try {
 				serializableFileStream = new FileInputStream(serializableFilePath);
-				BatchClass importBatchClass = (BatchClass) SerializationUtils.deserialize(serializableFileStream);
+				importBatchClass = (BatchClass) SerializationUtils.deserialize(serializableFileStream);
 				zipWorkFlowName = importBatchClass.getName();
 			} catch (Exception e) {
 				tempZipFile.delete();
@@ -201,11 +214,22 @@ public class ImportBatchClassUploadServlet extends DCMAHttpServlet {
 		if (tempZipFile != null) {
 			tempZipFile.delete();
 		}
+		
+		List<String> uncList = bcService.getAssociatedUNCList(zipWorkFlowName);		
+		boolean isWorkflowDeployed = deploymentService.isDeployed(zipWorkFlowName);
+		boolean isWorkflowEqual = imService.isImportWorkflowEqualDeployedWorkflow(importBatchClass, importBatchClass.getName());
+		
 		printWriter.write("workFlowName:" + zipWorkFlowName);
 		printWriter.append("|");
 		printWriter.append("filePath:").append(tempOutputUnZipDir);
 		printWriter.append("|");
+		printWriter.write("workflowDeployed:" + isWorkflowDeployed);
+		printWriter.append("|");
+		printWriter.write("workflowEqual:" + isWorkflowEqual);
+		printWriter.append("|");
+		printWriter.write("workflowExistInBatchClass:" + ((uncList == null || uncList.size() == 0)? false : true));
+		printWriter.append("|");
 		printWriter.flush();
-
 	}
 }
+

@@ -1,0 +1,23 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
+
+	<g:DockLayoutPanel ui:field="customWorkflowDockLayoutPanel"
+		unit="PCT">
+		<g:center>
+			<g:VerticalPanel>
+				<g:HorizontalPanel ui:field="customHorizontalPanel">
+					<g:VerticalPanel ui:field="leftHandSideListBoxPanel"></g:VerticalPanel>
+					<g:Button ui:field="moveLeftButton" />
+					<g:Button ui:field="moveRightButton" />
+					<g:VerticalPanel ui:field="rightHandSideListBoxPanel"></g:VerticalPanel>
+					<g:VerticalPanel ui:field="customVerticalButtonPanel">
+						<g:Button ui:field="moveUpButton" />
+						<g:Button ui:field="moveDownButton" />
+					</g:VerticalPanel>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:center>
+
+	</g:DockLayoutPanel>
+
+</ui:UiBinder>

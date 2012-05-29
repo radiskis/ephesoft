@@ -46,4 +46,11 @@ public interface LoginRemoteServiceAsync extends DCMARemoteServiceAsync {
 	 */
 	void getProductVersion(AsyncCallback<String> callback);
 
+	/**
+	 * API to get license expiry message.
+	 * 
+	 * @param callback {@link AsyncCallback}<{@link Void}>
+	 */
+	void getLicenseExpiryMsg(AsyncCallback<Void> callback);
+
 }

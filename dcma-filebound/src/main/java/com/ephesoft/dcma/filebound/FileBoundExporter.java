@@ -331,9 +331,9 @@ public class FileBoundExporter implements ICommonConstants {
 		final String[] docLevelFieldsList = docFieldValues.toString().split(";;");
 		boolean notValid = true;
 		for (String docField : docLevelFieldsList) {
-			final String docFieldName = docField.substring(0, docField.lastIndexOf("="));
+			//final String docFieldName = docField.substring(0, docField.lastIndexOf("="));
 			final String docFieldVal = docField.substring(docField.lastIndexOf("=") + 1, docField.length());
-			if (!docFieldName.equals(indexFieldName) && docFieldVal != null && !docFieldVal.isEmpty()) {
+			if (docFieldVal != null && !docFieldVal.isEmpty()) {
 				notValid = false;
 				break;
 			}
@@ -726,5 +726,5 @@ public class FileBoundExporter implements ICommonConstants {
 			}
 		}
 	}
-
+	
 }

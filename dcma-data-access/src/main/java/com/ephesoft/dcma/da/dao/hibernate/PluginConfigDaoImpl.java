@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -51,6 +53,13 @@ public class PluginConfigDaoImpl extends HibernateDao<PluginConfig> implements P
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq("name", configName));
 		return this.findSingle(criteria);
+	}
+
+	@Override
+	public List<PluginConfig> getPluginConfigForPluginId(Long pluginId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq("plugin.id", pluginId));
+		return find(criteria);
 	}
 
 }

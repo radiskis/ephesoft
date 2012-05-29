@@ -83,6 +83,9 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 	protected Button saveButton;
 	@UiField
 	protected Button cancelButton;
+	
+	@UiField
+	protected Button samplePatternButton;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateStartPatternTextBox;
@@ -99,6 +102,7 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
 		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -157,6 +161,10 @@ public class EditTableInfoView extends View<EditTableInfoPresenter> {
 		presenter.onCancel();
 	}
 
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
+	}
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}

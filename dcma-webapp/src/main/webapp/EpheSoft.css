@@ -1,6 +1,6 @@
 /** Most GWT widgets already have a style name defined */
 .configurable-DialogBox {
-	width:auto !important;
+	width: auto !important;
 }
 
 .gwt-DialogBox {
@@ -342,7 +342,7 @@ select,input[type="text"] {
 	background-color: yellow;
 	opacity: 0.4;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-	filter: alpha(opacity =   40);
+	filter: alpha(opacity =     40);
 	position: absolute;
 }
 
@@ -351,7 +351,7 @@ select,input[type="text"] {
 	background-color: green;
 	opacity: 0.4;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-	filter: alpha(opacity =   40);
+	filter: alpha(opacity =     40);
 	position: absolute;
 }
 
@@ -360,7 +360,7 @@ select,input[type="text"] {
 	background-color: red;
 	opacity: 0.4;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-	filter: alpha(opacity =   40);
+	filter: alpha(opacity =     40);
 	position: absolute;
 }
 
@@ -389,6 +389,25 @@ select,input[type="text"] {
 	padding-left: 10px;
 	padding-top: 20px;
 	background: #0061a5 !important;
+}
+
+.custom-button {
+	color: #800080;
+	font-weight: bold;
+	padding-right: 50px;
+	padding-left: 10px;
+	padding-top: 20px;
+	position: relative;
+	z-index: 1000;
+	left: 80px;
+	top: 20px;
+}
+
+.custom-panel {
+	position: relative;
+	z-index: 1000;
+	left: 200px;
+	top: 200px;
 }
 
 .pipe {
@@ -543,6 +562,12 @@ select,input[type="text"] {
 	vertical-align: middle;
 }
 
+.customBreadButton {
+	position: relative;
+	top: 10px;
+	left: 100px;
+}
+
 .leftPadding {
 	left: 5px !important;
 	top: 3px !important;
@@ -554,6 +579,10 @@ select,input[type="text"] {
 
 .wordWrap {
 	word-wrap: break-word;
+}
+
+.wordWrap > div {
+	padding: 5px;
 }
 
 .selectedRow {
@@ -743,4 +772,59 @@ select,input[type="text"] {
 	border: 1px #E0F5FF solid;
 	background-color: #E0F5FF;
 	vertical-align: middle;
+}
+
+.gwt-TabBarItem-selected {
+	cursor: default !important;
+}
+
+.text-limit {
+	-o-text-overflow: ellipsis; /* Opera */
+	text-overflow: ellipsis; /* IE, Safari (WebKit) */
+	overflow: hidden; /* don't show excess chars */
+	white-space: nowrap; /* force single line */
+	width: 60px; /* fixed width */
+}
+
+.subPanelHeight {
+	height: 68px;
+}
+
+.custom-web-scanner-Button {
+	width: 150px !important;
+}
+
+.hyperlinkWithPadding {
+	padding-left: 16px;
+	cursor: pointer !important;
+}
+
+.dependency_color {
+	background-color: #FFFF00;
+}
+
+.custom-workflow-panel {
+	position: relative;
+	left: 200px;
+}
+
+.custom-workflow-listbox {
+	overflow: auto;
+	width: 300px;
+}
+
+.bold-text-black {
+	font-weight: bold;
+	text-align: left;
+	padding-bottom: 8px;
+	padding-top: 0;
+}
+
+.dependencyPanelLayout {
+	border: 1px #92C1F0 solid;
+	background-color: white;
+}
+
+.buttonsPanelLayout {
+	background-color: #C8E0F8;
 }

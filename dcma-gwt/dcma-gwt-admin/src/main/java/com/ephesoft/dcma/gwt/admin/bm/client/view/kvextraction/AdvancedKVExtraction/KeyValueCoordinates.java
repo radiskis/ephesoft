@@ -61,14 +61,14 @@ public class KeyValueCoordinates {
 				keyCoordinates.setInitialCoordinates(xCoordinate, yCoordinate);
 			} else {
 				valueCoordinates.setInitialCoordinates(xCoordinate, yCoordinate);
-				this.valueFinalized=false;
+				this.valueFinalized = false;
 			}
 		} else {
 			if (!this.keyFinalized) {
 				keyCoordinates.setOtherCoordinates(xCoordinate, yCoordinate, true);
 			} else {
 				valueCoordinates.setOtherCoordinates(xCoordinate, yCoordinate, true);
-				this.valueFinalized=false;
+				this.valueFinalized = false;
 			}
 		}
 		mouseStatus = !mouseStatus;
@@ -82,6 +82,10 @@ public class KeyValueCoordinates {
 			}
 		}
 		this.keyFinalized = true;
+	}
+
+	public Coordinates getKeyCoordinates() {
+		return keyCoordinates;
 	}
 
 	public void finalizeValue() {
@@ -102,7 +106,7 @@ public class KeyValueCoordinates {
 	}
 
 	public void createNewOverlay() {
-		valueCoordinates.doOverlay(keyCoordinates,this.valueFinalized);
+		valueCoordinates.doOverlay(keyCoordinates, this.valueFinalized);
 	}
 
 	public boolean isMouseStatus() {
@@ -120,6 +124,18 @@ public class KeyValueCoordinates {
 
 	public void clearFinalizeValues() {
 		this.keyFinalized = false;
-		this.valueFinalized=false;
+		this.valueFinalized = false;
+	}
+
+	public void createKeyValueOverlay(Coordinates keyCoordinates, Coordinates valueCoordinates) {
+		this.keyCoordinates.setCoordinates(keyCoordinates);
+		this.valueCoordinates.setCoordinates(valueCoordinates);
+		this.keyFinalized = true;
+		this.valueFinalized = true;
+		createNewOverlay();
+	}
+
+	public Coordinates getValueCoordinates() {
+		return valueCoordinates;
 	}
 }

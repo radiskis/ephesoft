@@ -110,6 +110,8 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	protected Button saveButton;
 	@UiField
 	protected Button cancelButton;
+	@UiField
+	protected Button samplePatternButton;
 
 	private ValidatableWidget<TextBox> validateNameTextBox;
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
@@ -126,7 +128,7 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		createValidatableWidgets();
 
 		editBatchClassFieldViewPanel.setSpacing(5);
@@ -177,7 +179,10 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
-
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
+	}
 	public String getName() {
 		return this.name.getValue();
 	}
@@ -334,7 +339,13 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		});
 
 		validateValidationPatternTextBox = new ValidatableWidget<TextBox>(validationPattern);
+		validateValidationPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateValidationPatternTextBox.toggleValidDateBox();
+			}
+		});
 	}
 
 }

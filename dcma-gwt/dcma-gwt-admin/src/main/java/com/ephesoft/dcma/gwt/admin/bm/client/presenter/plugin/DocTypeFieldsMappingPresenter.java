@@ -92,7 +92,9 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 				view.setPassword(pluginConfigDTO.getValue());
 			}
 		}
+	}
 
+	public void setColumnsToFuzzyDBView() {
 		controller.getRpcService().getAllColumnsForTable(view.getDriverName(), view.getUrl(), view.getUserName(), view.getPassword(),
 				controller.getSelectedTable(), new AsyncCallback<Map<String, String>>() {
 

@@ -51,20 +51,22 @@ public class KVFieldTypeListView extends View<KVTypeListPresenter> {
 	public HeaderColumn keyPattern = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.KEY_PATTERN), 20);
 	public HeaderColumn location = new HeaderColumn(1,
-			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION), 20);
+			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION), 15);
 	public HeaderColumn valuePattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.VALUE_PATTERN), 20);
 	public HeaderColumn noOfWords = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.NO_OF_WORDS), 10);
 	public HeaderColumn fetchValue = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.FETCH_VALUE), 10);
-	public HeaderColumn multiplier = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
+	public HeaderColumn kvPageValue = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.KV_PAGE_VALUE_LABEL), 10);
+	public HeaderColumn multiplier = new HeaderColumn(6, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.MULTIPLIER_LABEL), 10);
 
 	public ListView listView = new ListView();
 
 	public KVFieldTypeListView() {
 		super();
-		listView.addHeaderColumns(keyPattern, location, valuePattern, noOfWords, fetchValue, multiplier);
+		listView.addHeaderColumns(keyPattern, location, valuePattern, noOfWords, fetchValue, kvPageValue, multiplier);
 	}
 }

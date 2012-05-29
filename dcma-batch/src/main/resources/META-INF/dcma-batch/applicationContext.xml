@@ -70,6 +70,10 @@
 		<constructor-arg type="java.lang.String" value="$batch{batch.test_folder}" />	
 		<constructor-arg type="java.lang.String" value="$batch{batch.script_properties_folder}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.upload_batch_folder}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.test_advanced_kv_extraction_sample_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.webservices_folder_name}" />	
+		<constructor-arg type="java.lang.String" value="$batch{batch.sample_pattern_file_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.sample_pattern_folder_name}" />
 	</bean>
 
 	<bean id="hocrJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">
@@ -79,6 +83,8 @@
 	</bean>
 
 	<bean id="batchSchemaService" class="com.ephesoft.dcma.batch.service.BatchSchemaServiceImpl" />
+	
+	<bean id="importBatchService" class="com.ephesoft.dcma.batch.service.ImportBatchServiceImpl" />
 
 	<context:component-scan base-package="com.ephesoft.dcma.batch.service" />
 	<context:component-scan base-package="com.ephesoft.dcma.batch.dao" />

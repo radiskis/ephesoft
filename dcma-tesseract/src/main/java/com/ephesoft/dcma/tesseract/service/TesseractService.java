@@ -36,13 +36,12 @@
 package com.ephesoft.dcma.tesseract.service;
 
 import com.ephesoft.dcma.core.DCMAException;
+import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
 /**
- * This service is used to generate HOCR files(html files with HOCR text) from
- * image files. The service reads the image files from batch xml and generates
- * HOCR file for each image file.It also updates the batch xml with the name of
- * newly created HOCR file.
+ * This service is used to generate HOCR files(html files with HOCR text) from image files. The service reads the image files from
+ * batch xml and generates HOCR file for each image file.It also updates the batch xml with the name of newly created HOCR file.
  * 
  * @author Ephesoft
  * @version 1.0
@@ -50,13 +49,30 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
  * 
  */
 public interface TesseractService {
+
 	/**
-	 * This method generates the HOCR files for each image file read from batch
-	 * xml and updates the same batch XML with the name of HOCR file.
+	 * This method generates the HOCR files for each image file read from batch xml and updates the same batch XML with the name of
+	 * HOCR file.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param pluginWorkflow {@link String}
 	 * @throws DCMAException
 	 */
 	void generateHOCRFiles(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
+	
+	/**
+	 * This method generates the HOCR files for image file and generates the output hocr file at the output folder location.
+	 * 
+	 * @param actualFolderLocation {@link String}
+	 * @param colorSwitch {@link String}
+	 * @param imageFile {@link String}
+	 * @param batchInstanceThread {@link BatchInstanceThread}
+	 * @param outputFolderLocation {@link String}
+	 * @param cmdLanguage {@link String}
+	 * @param tesseractVersion {@link String}
+	 * @throws DCMAException
+	 */
+	void createOCR(final String actualFolderLocation, String colorSwitch, String imageFile,
+			BatchInstanceThread batchInstanceThread, String outputFolderLocation, String cmdLanguage, String tesseractVersion)
+			throws DCMAException;
 }

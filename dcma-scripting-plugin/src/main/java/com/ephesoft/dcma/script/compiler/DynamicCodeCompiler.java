@@ -56,6 +56,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+
 /**
  * This class will compile the scripts at run time and execute it.
  * 
@@ -145,7 +147,7 @@ public final class DynamicCodeCompiler {
 	 * @return
 	 * @throws ClassNotFoundException if source file not found or compilation error
 	 */
-	public Class<?> loadClass(final String className) throws ClassNotFoundException {
+	public Class<?> loadClass(final String className) throws DCMAApplicationException, ClassNotFoundException {
 
 		LoadedClass loadedClass = null;
 		synchronized (loadedClasses) {
@@ -260,7 +262,7 @@ public final class DynamicCodeCompiler {
 	 * @return
 	 * @throws RuntimeException if an instance cannot be created, because of class not found for example
 	 */
-	public Object newProxyInstance(Class<?> interfaceClass, String implClassName) throws RuntimeException {
+	public Object newProxyInstance(Class<?> interfaceClass, String implClassName) throws DCMAApplicationException, RuntimeException {
 		MyInvocationHandler handler = new MyInvocationHandler(implClassName);
 		return Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] {interfaceClass}, handler);
 	}
@@ -315,7 +317,7 @@ public final class DynamicCodeCompiler {
 
 		long lastModified;
 
-		LoadedClass(String className, SourceDirectory src) {
+		LoadedClass(String className, SourceDirectory src) throws DCMAApplicationException{
 			this.className = className;
 			this.srcDir = src;
 
@@ -330,7 +332,7 @@ public final class DynamicCodeCompiler {
 			return srcFile.lastModified() != lastModified;
 		}
 
-		final void compileAndLoadClass() {
+		final void compileAndLoadClass() throws DCMAApplicationException{
 
 			if (clazz != null) {
 				return; // class already loaded
@@ -339,11 +341,13 @@ public final class DynamicCodeCompiler {
 			// compile, if required
 			String error = null;
 //			if (binFile.lastModified() < srcFile.lastModified()) {
-				error = srcDir.javaCompiler.compile(new File[] {srcFile});
+				if(srcFile.exists()) {
+					error = srcDir.javaCompiler.compile(new File[] {srcFile});
+				}
 //			}
 
 			if (error != null) {
-				throw new RuntimeException("Failed to compile " + srcFile.getAbsolutePath() + ". Error: " + error);
+				throw new DCMAApplicationException("Failed to compile " + srcFile.getAbsolutePath() + ". Error: " + error);
 			}
 
 			try {
@@ -367,7 +371,7 @@ public final class DynamicCodeCompiler {
 
 		Object backend;
 
-		MyInvocationHandler(String className) {
+		MyInvocationHandler(String className) throws DCMAApplicationException {
 			backendClassName = className;
 
 			try {

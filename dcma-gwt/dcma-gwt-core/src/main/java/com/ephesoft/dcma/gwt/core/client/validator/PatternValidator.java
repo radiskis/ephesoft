@@ -73,7 +73,10 @@ public class PatternValidator implements Validator {
 
 	private boolean matchPattern(String inputStr, String patternString) {
 		boolean returnVal = false;
-		returnVal = inputStr.matches(patternString);
+		try {
+			returnVal = inputStr.matches(patternString);
+		} catch (Exception e) {
+		}
 		return returnVal;
 	}
 }

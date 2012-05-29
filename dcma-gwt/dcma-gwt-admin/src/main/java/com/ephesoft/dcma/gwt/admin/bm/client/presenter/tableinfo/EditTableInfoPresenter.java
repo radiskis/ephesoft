@@ -39,9 +39,12 @@ import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo.EditTableInfoView;
+import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditTableInfoPresenter extends AbstractBatchClassPresenter<EditTableInfoView> {
@@ -64,8 +67,16 @@ public class EditTableInfoPresenter extends AbstractBatchClassPresenter<EditTabl
 		if (validFlag
 				&& (!view.getValidateNameTextBox().validate() || !view.getValidateStartPatternTextBox().validate() || !view
 						.getValidateEndPatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+
+			if (view.getValidateStartPatternTextBox().getWidget().getText().isEmpty()
+					|| view.getValidateEndPatternTextBox().getWidget().getText().isEmpty()
+					|| view.getValidateNameTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			}
 			validFlag = false;
 		}
 
@@ -93,16 +104,23 @@ public class EditTableInfoPresenter extends AbstractBatchClassPresenter<EditTabl
 			view.setName(controller.getSelectedTableInfoField().getName());
 			view.setStartPattern(controller.getSelectedTableInfoField().getStartPattern());
 			view.setEndPattern(controller.getSelectedTableInfoField().getEndPattern());
-
-			view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
-			view.getValidateStartPatternTextBox().addValidator(new EmptyStringValidator(view.getStartPatternTextBox()));
-			view.getValidateEndPatternTextBox().addValidator(new EmptyStringValidator(view.getEndPatternTextBox()));
-
-			view.getValidateNameTextBox().toggleValidDateBox();
-			view.getValidateStartPatternTextBox().toggleValidDateBox();
-			view.getValidateEndPatternTextBox().toggleValidDateBox();
-
+		} else {
+			TableInfoDTO tableInfoDTO = controller.getMainPresenter().getDocumentTypeViewPresenter().createTableInfoDTOObject();
+			tableInfoDTO.setName(view.getName());
+			tableInfoDTO.setStartPattern(view.getStartPattern());
+			tableInfoDTO.setEndPattern(view.getEndPattern());
+			tableInfoDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+			controller.setAdd(true);
+			controller.setTableInfoSelectedField(tableInfoDTO);
 		}
+
+		view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
+		view.getValidateStartPatternTextBox().addValidator(new RegExValidator(view.getStartPatternTextBox(), true, false, true, null));
+		view.getValidateEndPatternTextBox().addValidator(new RegExValidator(view.getEndPatternTextBox(), true, false, true, null));
+
+		view.getValidateNameTextBox().toggleValidDateBox();
+		view.getValidateStartPatternTextBox().toggleValidDateBox();
+		view.getValidateEndPatternTextBox().toggleValidDateBox();
 	}
 
 	@Override

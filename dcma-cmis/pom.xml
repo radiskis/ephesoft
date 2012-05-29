@@ -15,7 +15,8 @@
 	<description>The CMIS External Export Plug-in model.</description>
 
 	<properties>
-		<apache.chemistry.version>0.2.0-incubating</apache.chemistry.version>
+		<apache.chemistry.version>0.6.0</apache.chemistry.version>
+		<alfresco.opencmis.extension.version>0.2</alfresco.opencmis.extension.version>
 	</properties>
 
 	<dependencies>
@@ -45,6 +46,11 @@
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-bindings</artifactId>
 			<version>${apache.chemistry.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.alfresco.cmis.client</groupId>
+			<artifactId>alfresco-opencmis-extension</artifactId>
+			<version>${alfresco.opencmis.extension.version}</version>
 		</dependency>
 	</dependencies>
 </project>

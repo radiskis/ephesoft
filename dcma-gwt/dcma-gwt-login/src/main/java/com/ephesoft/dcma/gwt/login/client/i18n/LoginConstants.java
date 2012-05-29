@@ -46,4 +46,5 @@ public interface LoginConstants extends LocaleCommonConstants {
 	String login_forgot_pwd = "login_forgot_pwd";*/
 	String login_button_text = "login_button_text";
 	String version_text = "version_text";
+	String UNABLE_TO_RETRIVE_VERSION_INFO="unable_to_retrive_version_info";
 }

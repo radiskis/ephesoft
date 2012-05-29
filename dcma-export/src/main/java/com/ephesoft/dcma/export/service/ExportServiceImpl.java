@@ -38,6 +38,7 @@ package com.ephesoft.dcma.export.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.Assert;
 
 import com.ephesoft.dcma.core.DCMAException;
@@ -46,6 +47,7 @@ import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.export.FolderExporter;
+import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.ephesoft.dcma.util.BackUpFileService;
 
 public class ExportServiceImpl implements ExportService, ICommonConstants {
@@ -77,4 +79,11 @@ public class ExportServiceImpl implements ExportService, ICommonConstants {
 		}
 	}
 
+	public static void main(String[] args) throws DCMAException {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"classpath:/META-INF/applicationContext-export.xml");
+		context.start();
+		ExportService docushareExportService = ApplicationContextUtil.getSingleBeanOfType(context, ExportService.class);
+		docushareExportService.copyBatchFiles(new BatchInstanceID("BI1"), "aaa");
+	}
 }

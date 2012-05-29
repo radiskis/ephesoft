@@ -56,6 +56,7 @@
 			<xs:element name="OverlayedImageFileName" type="xs:string" />
 			<xs:element name="FieldOrderNumber" type="xs:int" />
 			<xs:element name="FieldValueOptionList" type="xs:string" />
+			<xs:element name="ForceReview" type="xs:boolean"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="docField">

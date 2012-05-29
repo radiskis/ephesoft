@@ -51,6 +51,11 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
+
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Column;
 import com.ephesoft.dcma.batch.schema.Coordinates;
@@ -61,6 +66,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
+import com.ephesoft.dcma.batch.schema.Batch.Documents;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
@@ -70,6 +76,7 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClass;
@@ -96,8 +103,9 @@ import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PointCoordinate;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.ephesoft.dcma.gwt.rv.client.ReviewValidateDocService;
+import com.ephesoft.dcma.gwt.rv.client.constant.ReviewProperties;
 import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
-import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
+import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
 import com.ephesoft.dcma.script.service.ScriptService;
 import com.ephesoft.dcma.tablefinder.service.TableFinderService;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
@@ -106,6 +114,18 @@ import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
 public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet implements ReviewValidateDocService {
 
+	private static final String ERROR_TYPE_1 = "1";
+
+	private static final String ERROR_TYPE_2 = "2";
+
+	private static final String ERROR_TYPE_3 = "3";
+
+	private static final String ERROR_TYPE_4 = "4";
+
+	private static final String ZOOM_COUNT_MIN_VALUE = "1";
+
+	private static final String ZOOM_COUNT_MAX_VALUE = "3";
+
 	private static final long serialVersionUID = 440658407072287974L;
 
 	private static final String LIST_VIEW = "dropdown_list";
@@ -113,6 +133,8 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	private static final String DOCUMENT_DEFAULT_VIEW_PROPERTY_KEY = "document.default_doc_type_view";
 
 	private static final String VALIDATE_DOCUMENT_PLUGIN = "VALIDATE_DOCUMENT";
+
+	private static final String REVIEW_DOCUMENT_PLUGIN = "REVIEW_DOCUMENT";
 
 	private static final String DYNAMIC_FUNCTION_KEY_SCRIPT_NAME = "function_key_script_name";
 
@@ -123,55 +145,145 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	private static final String DEFAULT_SCRIPT_FOR_FIELD_VALUE_CHANGE = "ScriptFieldValueChange";
 
 	private static final String UPDATE_INTERVAL = "update_interval";
-	
+
 	private static final String PRELOADED_IMAGE_COUNT = "preloaded_image_count";
 
 	private static String updateInterval = null;
-	
+
 	private static String preloadedImageCount = null;
+
+	private static String ZOOM_COUNT = "zoom_count";
 	
-	private static String EMPTY_STRING = "";
+	private static final int DOC_TYPE=1;
+	
+	private static final int DOC_SIZE=2;
+	
+	private static final int DOC_CONFIDENCE=3;
+	
+	private static final int DOC_CONFIDENCE_THRESHOLD=4;
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReviewValidateDocServiceImpl.class);
 
 	@Override
-	public BatchDTO getHighestPriortyBatch() {
+	public BatchDTO getHighestPriortyBatch() throws GWTException {
+		BatchDTO batchDTO = null;
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		BatchInstance batch = batchInstanceService.getHighestPriorityBatchInstance(allBatchClassByUserRoles);
-		return getBatch(batch.getIdentifier());
+		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
+		BatchInstance batchInstance = batchInstanceService.getHighestPriorityBatchInstance(getUserRoles(), ephesoftUser);
+		if (batchInstance != null) {
+			String batchInstanceIdentifier = batchInstance.getIdentifier();
+			batchDTO = getBatch(batchInstanceIdentifier);
+			try {
+				acquireLock(batchInstanceIdentifier);
+			} catch (GWTException e) {
+				throw new GWTException(e.getMessage() + ReviewValidateConstants.SPACE + ReviewValidateConstants.ERROR_TYPE_5
+						+ ReviewValidateConstants.SPACE + batchInstanceIdentifier);
+			}
+		}
+		return batchDTO;
+	}
+
+	public String getZoomCount() {
+		String zoomCount = ZOOM_COUNT_MIN_VALUE;
+		try {
+			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			zoomCount = prop.getProperty(ZOOM_COUNT);
+			Integer zoomCountIntVal = Integer.parseInt(zoomCount);
+			if (zoomCountIntVal < 1) {
+				zoomCount = ZOOM_COUNT_MIN_VALUE;
+			} else if (zoomCountIntVal > 3) {
+				zoomCount = ZOOM_COUNT_MAX_VALUE;
+			}
+
+		} catch (NumberFormatException numberFormatException) {
+			String errorMsg = " zoom count value must be of 'Integer' type .Setting the zoom count value to be '1' ";
+			LOGGER.error(errorMsg + numberFormatException.getMessage(), numberFormatException);
+			zoomCount = ZOOM_COUNT_MIN_VALUE;
+		} catch (Exception exception) {
+			String errorMsg = "Unable to read the zoom count value from properties file .Setting the zoom count value to be '1' ";
+			LOGGER.error(errorMsg + exception.getMessage(), exception);
+			zoomCount = ZOOM_COUNT_MIN_VALUE;
+		}
+		return zoomCount;
 	}
 
 	@Override
-	public BatchDTO getBatch(String batchInstanceIdentifier) {
-
+	public BatchDTO getBatch(String batchInstanceIdentifier) throws GWTException {
+		checkCurrentUser(batchInstanceIdentifier);
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
-
+		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
+		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByUserRole(getUserRoles(), batchInstanceIdentifier,
+				getUserName(), ephesoftUser);
+		if (batchInstance == null) {
+			throw new GWTException(ERROR_TYPE_3);
+		}
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 
 		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
 				BatchInstancePluginPropertiesService.class);
-		String validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
-				ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
-
-		String fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
-
-		String fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
-				ValidateProperties.FUZZY_SEARCH_SWITCH);
-
-		String suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
-				ValidateProperties.SUGGESTION_BOX_SWITCH);
-
-		String externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
+		String externalApplicationSwitchState = null;
+		String validateScriptSwitch = null;
+		String fieldValueChangeScriptSwitch = null;
+		String fuzzySearchSwitch = null;
+		String fuzzySearchPopUpXDimension = null;
+		String fuzzySearchPopUpYDimension = null;
+		String suggestionBoxSwitchState = null;
 		Map<String, String> urlAndShortcutMap = null;
 		Map<String, String> dimensionsForPopUp = null;
 		Map<String, String> urlAndTitleMap = null;
-		String fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
-		String fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
-				VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
+		BatchInstanceStatus batchInstanceStatus = batchInstance.getStatus();
+
+		switch (batchInstanceStatus) {
+			case READY_FOR_VALIDATION:
+				validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+						ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
+
+				fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
+
+				fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+						ValidateProperties.FUZZY_SEARCH_SWITCH);
+
+				suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
+						ValidateProperties.SUGGESTION_BOX_SWITCH);
+				fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_X_DIMENSION);
+				fuzzySearchPopUpYDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
+				externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
+				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON)) {
+					dimensionsForPopUp = new HashMap<String, String>();
+					urlAndShortcutMap = new LinkedHashMap<String, String>();
+					urlAndTitleMap = new LinkedHashMap<String, String>();
+					getPropertiesOfExternalApplicationForValidation(pluginPropertiesService, batchInstanceIdentifier,
+							urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap);
+
+				}
+				break;
+
+			case READY_FOR_REVIEW:
+				externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						REVIEW_DOCUMENT_PLUGIN, ReviewProperties.EXTERNAL_APP_SWITCH);
+				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON)) {
+					dimensionsForPopUp = new HashMap<String, String>();
+					urlAndShortcutMap = new LinkedHashMap<String, String>();
+					urlAndTitleMap = new LinkedHashMap<String, String>();
+					getPropertiesOfExternalApplicationForReview(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
+							dimensionsForPopUp, urlAndTitleMap);
+				}
+				break;
+			default:
+
+		}
+
 		if (updateInterval == null) {
 			try {
 				ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
@@ -188,47 +300,46 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 			}
 		}
-		if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals("ON")) {
-			dimensionsForPopUp = new HashMap<String, String>();
-			urlAndShortcutMap = new LinkedHashMap<String, String>();
-			urlAndTitleMap = new LinkedHashMap<String, String>();
-			getPropertiesOfExternalApplication(pluginPropertiesService, batchInstanceIdentifier, urlAndShortcutMap,
-					dimensionsForPopUp, urlAndTitleMap);
-		}
 
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
-		BatchInstanceStatus batchInstanceStatus = batchInstance.getStatus();
+       
+		//displaying document type in tree view
+		
+		int docDisplayName=DOC_TYPE;
+			
+        
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
 				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap,
-				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension, updateInterval, preloadedImageCount, batchInstanceStatus);
+				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension, updateInterval, preloadedImageCount, batchInstanceStatus,docDisplayName);
 	}
 
-	private void getPropertiesOfExternalApplication(PluginPropertiesService pluginPropertiesService, String batchInstanceIdentifier,
-			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp, Map<String, String> urlAndTitleMap) {
-		String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+	private void getPropertiesOfExternalApplicationForValidation(PluginPropertiesService pluginPropertiesService,
+			String batchInstanceIdentifier, Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp,
+			Map<String, String> urlAndTitleMap) {
+		String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_X_DIMENSION);
-		String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_Y_DIMENSION);
 
-		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_X_DIMENSION.getPropertyKey(), xDimension);
-		dimensionsForPopUp.put(ValidateProperties.EXTERNAL_APP_Y_DIMENSION.getPropertyKey(), yDimension);
+		dimensionsForPopUp.put(ReviewValidateConstants.POP_UP_X_DIMENSION, xDimension);
+		dimensionsForPopUp.put(ReviewValidateConstants.POP_UP_Y_DIMENSION, yDimension);
 
-		String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_URL1);
-		String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_URL2);
-		String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_URL3);
-		String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.EXTERNAL_APP_URL4);
 
-		String titleForUrl1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String titleForUrl1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.TITLE_EXTERNAL_APP_URL1);
-		String titleForUrl2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String titleForUrl2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.TITLE_EXTERNAL_APP_URL2);
-		String titleForUrl3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String titleForUrl3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.TITLE_EXTERNAL_APP_URL3);
-		String titleForUrl4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, "VALIDATE_DOCUMENT",
+		String titleForUrl4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 				ValidateProperties.TITLE_EXTERNAL_APP_URL4);
 
 		if (null != url1 && !url1.isEmpty()) {
@@ -255,6 +366,62 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		}
 		if (null != titleForUrl4 && !titleForUrl4.isEmpty()) {
 			urlAndTitleMap.put(ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey(), titleForUrl4);
+		}
+	}
+
+	private void getPropertiesOfExternalApplicationForReview(PluginPropertiesService pluginPropertiesService,
+			String batchInstanceIdentifier, Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp,
+			Map<String, String> urlAndTitleMap) {
+		String xDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_X_DIMENSION);
+		String yDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_Y_DIMENSION);
+
+		dimensionsForPopUp.put(ReviewValidateConstants.POP_UP_X_DIMENSION, xDimension);
+		dimensionsForPopUp.put(ReviewValidateConstants.POP_UP_Y_DIMENSION, yDimension);
+
+		String url1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_URL1);
+		String url2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_URL2);
+		String url3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_URL3);
+		String url4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.EXTERNAL_APP_URL4);
+
+		String titleForUrl1 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.TITLE_EXTERNAL_APP_URL1);
+		String titleForUrl2 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.TITLE_EXTERNAL_APP_URL2);
+		String titleForUrl3 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.TITLE_EXTERNAL_APP_URL3);
+		String titleForUrl4 = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, REVIEW_DOCUMENT_PLUGIN,
+				ReviewProperties.TITLE_EXTERNAL_APP_URL4);
+
+		if (null != url1 && !url1.isEmpty()) {
+			urlAndShortcutMap.put(ReviewProperties.EXTERNAL_APP_URL1.getPropertyKey(), url1);
+		}
+		if (null != url2 && !url2.isEmpty()) {
+			urlAndShortcutMap.put(ReviewProperties.EXTERNAL_APP_URL2.getPropertyKey(), url2);
+		}
+		if (null != url3 && !url3.isEmpty()) {
+			urlAndShortcutMap.put(ReviewProperties.EXTERNAL_APP_URL3.getPropertyKey(), url3);
+		}
+		if (null != url4 && !url4.isEmpty()) {
+			urlAndShortcutMap.put(ReviewProperties.EXTERNAL_APP_URL4.getPropertyKey(), url4);
+		}
+
+		if (null != titleForUrl1 && !titleForUrl1.isEmpty()) {
+			urlAndTitleMap.put(ReviewProperties.EXTERNAL_APP_URL1.getPropertyKey(), titleForUrl1);
+		}
+		if (null != titleForUrl2 && !titleForUrl2.isEmpty()) {
+			urlAndTitleMap.put(ReviewProperties.EXTERNAL_APP_URL2.getPropertyKey(), titleForUrl2);
+		}
+		if (null != titleForUrl3 && !titleForUrl3.isEmpty()) {
+			urlAndTitleMap.put(ReviewProperties.EXTERNAL_APP_URL3.getPropertyKey(), titleForUrl3);
+		}
+		if (null != titleForUrl4 && !titleForUrl4.isEmpty()) {
+			urlAndTitleMap.put(ReviewProperties.EXTERNAL_APP_URL4.getPropertyKey(), titleForUrl4);
 		}
 	}
 
@@ -300,14 +467,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public BatchDTO mergeDocument(Batch batch, String documentId, String documentIdToBeMerged) {
+	public BatchDTO mergeDocument(Batch batch, String documentId, String documentIdToBeMerged) throws GWTException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batch);
+		saveBatch(batch);
 		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		try {
 			batchSchemaService.mergeDocuments(batchInstanceIdentifier, documentId, documentIdToBeMerged);
 		} catch (DCMAApplicationException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return getBatch(batchInstanceIdentifier);
 	}
@@ -338,22 +505,22 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			dDocFieldType.setOverlayedImageFileName(null);
 			dDocFieldType.setPage(null);
 			dDocFieldType.setType(fieldType.getDataType().name());
-			dDocFieldType.setValue(EMPTY_STRING);
+			dDocFieldType.setValue(ReviewValidateConstants.EMPTY_STRING);
 			dDocFieldType.setFieldOrderNumber(fieldType.getFieldOrderNumber());
 			dDocFieldType.setFieldValueOptionList(fieldType.getFieldOptionValueList());
 			documentLevelField.add(dDocFieldType);
 		}
 		documentType.setDocumentLevelFields(documentLevelFields);
 		documentType.setConfidence(0);
-		documentType.setErrorMessage(EMPTY_STRING);
+		documentType.setErrorMessage(ReviewValidateConstants.EMPTY_STRING);
 		return documentType;
 	}
 
-	public BatchDTO duplicatePageOfDocument(Batch batch, String docID, String duplicatePageID) {
+	public BatchDTO duplicatePageOfDocument(Batch batch, String docID, String duplicatePageID) throws GWTException {
 		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		try {
 			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-			batchSchemaService.updateBatch(batch);
+			saveBatch(batch);
 			batchSchemaService.duplicatePageOfDocument(batchInstanceIdentifier, docID, duplicatePageID);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -364,51 +531,52 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public BatchDTO deletePageOfDocument(Batch batch, String docID, String pageId) {
+	public BatchDTO deletePageOfDocument(Batch batch, String docID, String pageId) throws GWTException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		String batchInstanceId = batch.getBatchInstanceIdentifier();
 		try {
-			batchSchemaService.updateBatch(batch);
+			saveBatch(batch);
 			batchSchemaService.removePageOfDocument(batchInstanceId, docID, pageId);
 			// return true;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+
+			LOGGER.error(e.getMessage(), e);
 			// return false;
 		} catch (DCMAApplicationException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			// return false;
 		}
 		return getBatch(batchInstanceId);
 	}
 
 	@Override
-	public List<List<String>> fuzzyTextSearch(Batch batch, String searchText) {
+	public List<List<String>> fuzzyTextSearch(Batch batch, String documentType, String searchText) {
 		FuzzyDBSearchService fuzzyDBSearchService = this.getSingleBeanOfType(FuzzyDBSearchService.class);
 		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		List<List<String>> result = null;
 		try {
-			result = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceIdentifier), searchText);
+			result = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceIdentifier), documentType, searchText);
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} catch (DCMAException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return result;
 	}
 
 	@Override
-	public BatchDTO splitDocument(Batch batch, String docID, String pageId) {
+	public BatchDTO splitDocument(Batch batch, String docID, String pageId) throws GWTException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		try {
-			batchSchemaService.updateBatch(batch);
+			saveBatch(batch);
 			batchSchemaService.splitDocument(batchInstanceIdentifier, docID, pageId);
 			// return true;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			// return false;
 		} catch (DCMAApplicationException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 			// return false;
 		}
 		return getBatch(batchInstanceIdentifier);
@@ -416,31 +584,33 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	@Override
 	public BatchDTO movePageOfDocument(Batch batch, String fromPageID, String fromDocID, String toDocId, String toPageID,
-			Boolean moveAfterchecked) {
+			Boolean moveAfterchecked) throws GWTException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		String batchInstanceID = batch.getBatchInstanceIdentifier();
 		try {
-			batchSchemaService.updateBatch(batch);
+			saveBatch(batch);
 			batchSchemaService.movePageOfDocument(batchInstanceID, fromDocID, fromPageID, toDocId, toPageID, moveAfterchecked
 					.booleanValue());
 		} catch (DCMAApplicationException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return getBatch(batchInstanceID);
 
 	}
 
 	@Override
-	public Page roatateImage(Batch batch, Page page, String documentId) {
+	public Page rotateImage(Batch batch, Page page, String documentId) throws GWTException {
 
 		ImageProcessService imageProcessService = this.getSingleBeanOfType(ImageProcessService.class);
 		try {
-			String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
-			String pageId = page.getIdentifier();
-			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-			batchSchemaService.updateBatch(batch);
-			imageProcessService.rotateImage(new BatchInstanceID(batchInstanceIdentifier), documentId, pageId);
+			String batchFolderName = batch.getBatchLocalPath() + File.separator + batch.getBatchInstanceIdentifier();
+			String displayFilePath = batchFolderName + File.separator + page.getDisplayFileName();
+			String thumbnailFilePath = batchFolderName + File.separator + page.getThumbnailFileName();
+			String inputTiffPath = batchFolderName + File.separator + page.getNewFileName();
+			imageProcessService.rotateImage(displayFilePath);
+			imageProcessService.rotateImage(thumbnailFilePath);
+			imageProcessService.rotateImage(inputTiffPath);
 			Direction direction = page.getDirection();
 			if (null == direction) {
 				direction = Direction.NORTH;
@@ -466,13 +636,13 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			}
 			page.setDirection(newDirection);
 			page.setIsRotated(true);
-			String batchFolderName = batch.getBatchLocalPath() + File.separator + batch.getBatchInstanceIdentifier();
+			saveBatch(batch);
 			File outputFolder = new File(batchFolderName + File.separator + newDirection.toString());
 			if (!outputFolder.exists()) {
 				outputFolder.mkdir();
 			}
-			File inputImage = new File(batchFolderName + File.separator + page.getDisplayFileName());
-			File inputThumbNailImage = new File(batchFolderName + File.separator + page.getThumbnailFileName());
+			File inputImage = new File(displayFilePath);
+			File inputThumbNailImage = new File(thumbnailFilePath);
 			File outputImage = new File(batchFolderName + File.separator + newDirection.toString() + File.separator
 					+ page.getDisplayFileName());
 			File outputThumbNailImage = new File(batchFolderName + File.separator + newDirection.toString() + File.separator
@@ -482,14 +652,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				FileUtils.copyFile(inputThumbNailImage, outputThumbNailImage);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} catch (DCMAException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 
 		return page;
@@ -502,8 +672,11 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
 		int rowCount = 0;
 		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
-		Set<String> allBatchClassByUserRoles = getAllBatchClassByUserRoles();
-		rowCount = batchClassService.getCount(statusList, null, allBatchClassByUserRoles, getUserName());
+		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
+		if(isSuperAdmin()){
+			ephesoftUser=EphesoftUser.SUPER_ADMIN;
+		}
+		rowCount = batchClassService.getCount(statusList, null, getUserRoles(), getUserName(), ephesoftUser);
 		return rowCount;
 	}
 
@@ -541,6 +714,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					fieldTypeDTO.setFieldOptionValueList(fdType.getFieldOptionValueList());
 					fieldTypeDTO.setDescription(fdType.getDescription());
 					fieldTypeDTO.setHidden(fdType.isHidden());
+					fieldTypeDTO.setMultiLine(fdType.isMultiLine());
 					fieldTypeDTOs.add(fieldTypeDTO);
 					continue;
 				}
@@ -565,6 +739,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					fieldTypeDTO.setFieldOptionValueList(fdType.getFieldOptionValueList());
 					fieldTypeDTO.setDescription(fdType.getDescription());
 					fieldTypeDTO.setHidden(fdType.isHidden());
+					fieldTypeDTO.setMultiLine(fdType.isMultiLine());
 					fieldTypeDTOs.add(fieldTypeDTO);
 				}
 			}
@@ -574,9 +749,38 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public void saveBatch(Batch batch) {
+	public void saveBatch(Batch batch) throws GWTException {
+		checkCurrentUser(batch.getBatchInstanceIdentifier());
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		batchSchemaService.updateBatch(batch);
+	}
+
+	private void checkCurrentUser(String batchInstanceIdentifier) throws GWTException {
+
+		String sessionUser = getUserName();
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
+		if (batchInstance != null) {
+			switch (batchInstance.getStatus()) {
+				case READY_FOR_REVIEW:
+				case READY_FOR_VALIDATION:
+					break;
+				default:
+					throw new GWTException(ERROR_TYPE_4);
+			}
+			String currentBatchUser = batchInstance.getCurrentUser();
+			if (sessionUser == null || sessionUser.isEmpty()) {
+				throw new GWTException(ERROR_TYPE_1);
+			} else if (currentBatchUser == null || currentBatchUser.isEmpty()) {
+				acquireLock(batchInstanceIdentifier);
+			} else if (!sessionUser.equals(currentBatchUser)) {
+				throw new GWTException(ERROR_TYPE_2);
+			}
+		} else {
+			String errorMessage = "Could not get batch for batch id: " + batchInstanceIdentifier;
+			log.error(errorMessage);
+			throw new GWTException(errorMessage);
+		}
 	}
 
 	@Override
@@ -590,7 +794,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			columnPatternList = new ArrayList<String>();
 			for (TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
 				if (null == tableColumnsInfo) {
-					columnPatternList.add("");
+					columnPatternList.add(ReviewValidateConstants.EMPTY_STRING);
 				} else {
 					columnPatternList.add(tableColumnsInfo.getColumnPattern());
 				}
@@ -637,13 +841,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	@Override
 	public BatchDTO executeScript(Batch batch) throws GWTException {
 		ScriptService scriptService = this.getSingleBeanOfType(ScriptService.class);
+		saveBatch(batch);
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batch);
 		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
 		String nameOfPluginScript = batchSchemaService.getValidationScriptName();
 		try {
 			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, null, null);
 		} catch (DCMAException e) {
+			LOGGER.error(e.getMessage(), e);
 			throw new GWTException(e.getMessage());
 		}
 		return getBatch(batch.getBatchInstanceIdentifier());
@@ -866,8 +1071,8 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	@Override
 	public BatchDTO executeAddNewTable(Batch batch, String documentIdentifier) throws GWTException {
 		ScriptService scriptService = this.getSingleBeanOfType(ScriptService.class);
+		saveBatch(batch);
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batch);
 		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
 		String nameOfTableScript = batchSchemaService.getAddNewTableScriptName();
 		try {
@@ -880,8 +1085,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	@Override
 	public BatchDTO executeScript(String shortcutKeyName, Batch batch, Document document) throws GWTException {
-		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batch);
+		saveBatch(batch);
 		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
 		String nameOfPluginScript = getDynamicFunctionKeyScriptName();
 		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
@@ -925,6 +1129,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		try {
 			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, docIdentifier, methodName);
 		} catch (DCMAException e) {
+			LOGGER.error(e.getMessage(), e);
 			throw new GWTException(e.getMessage());
 		}
 	}
@@ -1126,7 +1331,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		long currentYCoor = 0;
 		StringBuffer[] colValue = new StringBuffer[columnList.size()];
 		for (int i = 0; i < colValue.length; i++) {
-			colValue[i] = new StringBuffer("");
+			colValue[i] = new StringBuffer(ReviewValidateConstants.EMPTY_STRING);
 		}
 		Coordinates rowCoordinates = new Coordinates();
 		Row row = createNewRow(columnList);
@@ -1173,7 +1378,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					row = createNewRow(columnList);
 				}
 				for (int i = 0; i < colValue.length; i++) {
-					colValue[i] = new StringBuffer("");
+					colValue[i] = new StringBuffer(ReviewValidateConstants.EMPTY_STRING);
 				}
 				currentYCoor = spanY1Coor;
 				rowCoordinates = new Coordinates();
@@ -1231,8 +1436,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	public BatchDTO executeScriptOnFieldChange(Batch batch, Document document, String fieldName) throws GWTException {
 		ScriptService scriptService = this.getSingleBeanOfType(ScriptService.class);
 
-		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		batchSchemaService.updateBatch(batch);
+		saveBatch(batch);
 		String batchInstanceIdentifier = batch.getBatchInstanceIdentifier();
 		BatchInstanceID batchInstanceID = new BatchInstanceID(batchInstanceIdentifier);
 		String nameOfPluginScript = getFieldValueChangeScriptName();
@@ -1269,10 +1473,10 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public void signalWorkflow(Batch batch) {
+	public void signalWorkflow(Batch batch) throws GWTException {
 		saveBatch(batch);
 		WorkflowService workflowService = this.getSingleBeanOfType(WorkflowService.class);
-		workflowService.signalWorkflow(batch.getBatchInstanceIdentifier(), getUserName());
+		workflowService.signalWorkflow(batch.getBatchInstanceIdentifier());
 	}
 
 	@Override

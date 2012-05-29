@@ -46,6 +46,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.EditFieldTypeView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.FieldTypeDTO;
@@ -103,8 +104,14 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 		if (validFlag
 				&& (!view.getValidatePatternTextBox().validate() || !view.getValidateDescriptionTextBox().validate()
 						|| !view.getValidateNameTextBox().validate() || !view.getValidateFdOrderTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+			if (view.getValidatePatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			}
 			validFlag = false;
 		}
 
@@ -129,25 +136,16 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 
 			final List<RegexDTO> regexList = controller.getSelectedDocumentLevelField().getRegexList();
 			if (!regexList.isEmpty()) {
-				if (view.isHidden()) {
-					final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-					confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.DELETE_REGEX_VALIDATION_CONFIRMATION));
-					confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-							BatchClassManagementConstants.DELETE_REGEX_VALIDATION));
+				if (view.isHidden() || view.isMultiLine()) {
+					final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+							.getMessageValue(BatchClassManagementMessages.DELETE_REGEX_VALIDATION_CONFIRMATION), LocaleDictionary
+							.get().getConstantValue(BatchClassManagementConstants.DELETE_REGEX_VALIDATION), Boolean.FALSE);
+
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
 						public void onOkClick() {
-							controller.getSelectedDocumentLevelField().setDescription(view.getDescription());
-							controller.getSelectedDocumentLevelField().setName(view.getName());
-							controller.getSelectedDocumentLevelField().setPattern(view.getPattern());
-							controller.getSelectedDocumentLevelField().setDataType(view.getDataType());
-							controller.getSelectedDocumentLevelField().setFieldOrderNumber(view.getFdOrder());
-							controller.getSelectedDocumentLevelField().setSampleValue(view.getSampleValue());
-							controller.getSelectedDocumentLevelField().setFieldOptionValueList(view.getFieldOptionValueList());
-							controller.getSelectedDocumentLevelField().setBarcodeType(view.getBarcodeType());
-							controller.getSelectedDocumentLevelField().setHidden(view.isHidden());
+							setDocumentLevelAttributes();
 							for (RegexDTO regexObj : regexList) {
 								regexObj.setDeleted(true);
 								controller.getBatchClass().setDirty(true);
@@ -163,24 +161,20 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 
 						@Override
 						public void onCancelClick() {
-							view.setHidden(false);
+							if (view.isHidden()) {
+								view.setHidden(false);
+							}
+							if (view.isMultiLine()) {
+								view.setMultiLine(false);
+							}
 							confirmationDialog.hide();
 						}
 					});
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
-				} else {
-					controller.getSelectedDocumentLevelField().setDescription(view.getDescription());
-					controller.getSelectedDocumentLevelField().setName(view.getName());
-					controller.getSelectedDocumentLevelField().setPattern(view.getPattern());
-					controller.getSelectedDocumentLevelField().setDataType(view.getDataType());
-					controller.getSelectedDocumentLevelField().setFieldOrderNumber(view.getFdOrder());
-					controller.getSelectedDocumentLevelField().setSampleValue(view.getSampleValue());
-					controller.getSelectedDocumentLevelField().setFieldOptionValueList(view.getFieldOptionValueList());
-					controller.getSelectedDocumentLevelField().setBarcodeType(view.getBarcodeType());
-					controller.getSelectedDocumentLevelField().setHidden(view.isHidden());
 
+				}
+
+				else {
+					setDocumentLevelAttributes();
 					controller.getMainPresenter().getFieldTypeViewPresenter().bind();
 					controller.getMainPresenter().getFieldTypeViewPresenter().showFieldTypeView();
 					if (controller.getSelectedDocumentLevelField().isNew()) {
@@ -189,16 +183,7 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 					}
 				}
 			} else {
-				controller.getSelectedDocumentLevelField().setDescription(view.getDescription());
-				controller.getSelectedDocumentLevelField().setName(view.getName());
-				controller.getSelectedDocumentLevelField().setPattern(view.getPattern());
-				controller.getSelectedDocumentLevelField().setDataType(view.getDataType());
-				controller.getSelectedDocumentLevelField().setFieldOrderNumber(view.getFdOrder());
-				controller.getSelectedDocumentLevelField().setSampleValue(view.getSampleValue());
-				controller.getSelectedDocumentLevelField().setFieldOptionValueList(view.getFieldOptionValueList());
-				controller.getSelectedDocumentLevelField().setBarcodeType(view.getBarcodeType());
-				controller.getSelectedDocumentLevelField().setHidden(view.isHidden());
-
+				setDocumentLevelAttributes();
 				controller.getMainPresenter().getFieldTypeViewPresenter().bind();
 				controller.getMainPresenter().getFieldTypeViewPresenter().showFieldTypeView();
 				if (controller.getSelectedDocumentLevelField().isNew()) {
@@ -207,6 +192,19 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 				}
 			}
 		}
+	}
+
+	private void setDocumentLevelAttributes() {
+		controller.getSelectedDocumentLevelField().setDescription(view.getDescription());
+		controller.getSelectedDocumentLevelField().setName(view.getName());
+		controller.getSelectedDocumentLevelField().setPattern(view.getPattern());
+		controller.getSelectedDocumentLevelField().setDataType(view.getDataType());
+		controller.getSelectedDocumentLevelField().setFieldOrderNumber(view.getFdOrder());
+		controller.getSelectedDocumentLevelField().setSampleValue(view.getSampleValue());
+		controller.getSelectedDocumentLevelField().setFieldOptionValueList(view.getFieldOptionValueList());
+		controller.getSelectedDocumentLevelField().setBarcodeType(view.getBarcodeType());
+		controller.getSelectedDocumentLevelField().setHidden(view.isHidden());
+		controller.getSelectedDocumentLevelField().setMultiLine(view.isMultiLine());
 	}
 
 	@Override
@@ -221,19 +219,33 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 			view.setSampleValue(controller.getSelectedDocumentLevelField().getSampleValue());
 			view.setFieldOptionValueList(controller.getSelectedDocumentLevelField().getFieldOptionValueList());
 			view.setHidden(controller.getSelectedDocumentLevelField().isHidden());
+			view.setMultiLine(controller.getSelectedDocumentLevelField().isMultiLine());
 			view.getNameTextBox().setReadOnly(!controller.getSelectedDocumentLevelField().isNew());
-
-			view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
-			view.getValidateDescriptionTextBox().addValidator(new EmptyStringValidator(view.getDescriptionTextBox()));
-			view.getValidatePatternTextBox().addValidator(new EmptyStringValidator(view.getPatternTextBox()));
-			view.getValidateFdOrderTextBox().addValidator(new EmptyStringValidator(view.getFdOrderTextBox()));
-			view.getValidateFdOrderTextBox().addValidator(new NumberValidator(view.getFdOrderTextBox(), false));
-
-			view.getValidatePatternTextBox().toggleValidDateBox();
-			view.getValidateDescriptionTextBox().toggleValidDateBox();
-			view.getValidateNameTextBox().toggleValidDateBox();
-			view.getValidateFdOrderTextBox().toggleValidDateBox();
+		} else {
+			FieldTypeDTO fieldTypeDTO = controller.getMainPresenter().getDocumentTypeViewPresenter().createFieldTypeDTOObject();
+			fieldTypeDTO.setDescription(view.getDescription());
+			fieldTypeDTO.setName(view.getName());
+			fieldTypeDTO.setPattern(view.getPattern());
+			fieldTypeDTO.setFieldOrderNumber(view.getFdOrder());
+			fieldTypeDTO.setSampleValue(view.getSampleValue());
+			fieldTypeDTO.setFieldOptionValueList(view.getFieldOptionValueList());
+			fieldTypeDTO.setHidden(view.isHidden());
+			fieldTypeDTO.setMultiLine(view.isMultiLine());
+			controller.setAdd(true);
+			controller.setSelectedDocumentLevelField(fieldTypeDTO);
 		}
+
+		view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
+		view.getValidateDescriptionTextBox().addValidator(new EmptyStringValidator(view.getDescriptionTextBox()));
+		view.getValidatePatternTextBox().addValidator(
+				new RegExValidator(view.getPatternTextBox(), true, true, true, BatchClassManagementConstants.PATTERN_DELIMITER));
+		view.getValidateFdOrderTextBox().addValidator(new EmptyStringValidator(view.getFdOrderTextBox()));
+		view.getValidateFdOrderTextBox().addValidator(new NumberValidator(view.getFdOrderTextBox(), false));
+
+		view.getValidatePatternTextBox().toggleValidDateBox();
+		view.getValidateDescriptionTextBox().toggleValidDateBox();
+		view.getValidateNameTextBox().toggleValidDateBox();
+		view.getValidateFdOrderTextBox().toggleValidDateBox();
 	}
 
 	@Override
@@ -257,4 +269,6 @@ public class EditFieldTypePresenter extends AbstractBatchClassPresenter<EditFiel
 			}
 		});
 	}
+
+	
 }

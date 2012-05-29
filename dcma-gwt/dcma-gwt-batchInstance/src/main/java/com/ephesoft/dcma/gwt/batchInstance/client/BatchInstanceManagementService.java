@@ -143,4 +143,18 @@ public interface BatchInstanceManagementService extends DCMARemoteService {
 	 * READY_FOR_VALIDATION.
 	 */
 	void restartAllBatchInstances();  
+	
+	
+	/**
+	 * API for deleting all batch instances having given batch status and priority filter.
+	 */
+	List<String> deleteAllBatchInstancesByStatus(List<DataFilter> batchInstanceFilters);
+
+	/**
+	 * API for deleting the batch instance folders for batch instance id's
+	 * @param batchInstanceId
+	 */
+	void deleteAllBatchInstancesFolders(List<String> batchInstanceId) ;
+
+
 }

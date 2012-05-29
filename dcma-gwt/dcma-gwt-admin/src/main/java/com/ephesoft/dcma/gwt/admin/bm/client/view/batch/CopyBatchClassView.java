@@ -87,6 +87,9 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 
 	@UiField
 	protected Label uncStar;
+	
+	@UiField
+	protected Label nameStar;
 
 	@UiField
 	protected HorizontalPanel editBatchPanel;
@@ -97,6 +100,7 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 	private final ValidatableWidget<TextBox> validateTextBox;
 	private final ValidatableWidget<TextBox> validateDescTextBox;
 	private final ValidatableWidget<TextBox> validateUNCTextBox;
+	private final ValidatableWidget<TextBox> validateNameTextBox;
 
 	private DialogBox dialogBox;
 
@@ -111,7 +115,18 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-		
+
+		name.setReadOnly(false);
+		validateNameTextBox = new ValidatableWidget<TextBox>(name);
+		validateNameTextBox.addValidator(new EmptyStringValidator(name));
+		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> arg0) {
+				validateNameTextBox.toggleValidDateBox();
+			}
+		});
+
 		validateTextBox = new ValidatableWidget<TextBox>(priority);
 		validateTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -153,6 +168,7 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 		star.setText(AdminConstants.STAR);
 		descStar.setText(AdminConstants.STAR);
 		uncStar.setText(AdminConstants.STAR);
+		nameStar.setText(AdminConstants.STAR);
 
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		priorityLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -162,7 +178,7 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 		star.setStyleName(AdminConstants.FONT_RED_STYLE);
 		descStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		uncStar.setStyleName(AdminConstants.FONT_RED_STYLE);
-
+		nameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		editBatchPanel.setSpacing(10);
 	}
 
@@ -241,6 +257,14 @@ public class CopyBatchClassView extends View<CopyBatchClassPresenter> {
 	@UiHandler("saveButton")
 	public void onOkClick(ClickEvent clickEvent) {
 		presenter.onOkClicked();
+	}
+
+	
+	/**
+	 * @return the validateNameTextBox
+	 */
+	public ValidatableWidget<TextBox> getValidateNameTextBox() {
+		return validateNameTextBox;
 	}
 
 	@UiHandler("cancelButton")

@@ -46,6 +46,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.KVExtractionTestResu
 import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.AdvancedKVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
@@ -102,25 +103,31 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 					BatchClassManagementMessages.ADD_FIELD_TYPE));
 			return;
 		}
-		KVExtractionDTO kvExtractionDTO = new KVExtractionDTO();
-		kvExtractionDTO.setNew(true);
-		kvExtractionDTO.setFieldTypeDTO(controller.getSelectedDocumentLevelField());
-		kvExtractionDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		KVExtractionDTO kvExtractionDTO = createKVExtractionDTOObject();
+		
 		controller.setAdd(true);
 		controller.setSelectedKVExtraction(kvExtractionDTO);
 		controller.getMainPresenter().showKVExtractionView(true);
 	}
 
+	public KVExtractionDTO createKVExtractionDTOObject() {
+		KVExtractionDTO kvExtractionDTO = new KVExtractionDTO();
+		kvExtractionDTO.setNew(true);
+		kvExtractionDTO.setFieldTypeDTO(controller.getSelectedDocumentLevelField());
+		kvExtractionDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		return kvExtractionDTO;
+	}
+
 	public void onTestKVButtonClicked(String identifier) {
 		ScreenMaskUtility.maskScreen();
 		controller.setSelectedKVExtraction(controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier));
-		controller.getRpcService().testKVExtraction(controller.getBatchClass(), controller.getSelectedKVExtraction(),
+		controller.getRpcService().testKVExtraction(controller.getBatchClass(), controller.getSelectedKVExtraction(), null, false,
 				new AsyncCallback<List<OutputDataCarrierDTO>>() {
 
 					@Override
 					public void onFailure(Throwable throwable) {
 						ScreenMaskUtility.unmaskScreen();
-						final ConfirmationDialog dialog = new ConfirmationDialog(true);
+						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(), MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE);
 						dialog.addDialogListener(new DialogListener() {
 
 							@Override
@@ -133,11 +140,8 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 								// TODO Auto-generated method stub
 							}
 						});
-						dialog.setText(MessageConstants.TITLE_TEST_FAILURE);
-						dialog.setMessage(throwable.getMessage());
-						dialog.center();
-						dialog.show();
-						dialog.okButton.setFocus(true);
+						
+						
 					}
 
 					@Override
@@ -204,13 +208,18 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 					BatchClassManagementMessages.ADD_FIELD_TYPE));
 			return;
 		}
+		RegexDTO regexDTO = createRegexDTOObject();
+		controller.setAdd(true);
+		controller.setSelectedRegex(regexDTO);
+		controller.getMainPresenter().showRegexView(true);
+	}
+
+	public RegexDTO createRegexDTOObject() {
 		RegexDTO regexDTO = new RegexDTO();
 		regexDTO.setNew(true);
 		regexDTO.setFieldTypeDTO(controller.getSelectedDocumentLevelField());
 		regexDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
-		controller.setAdd(true);
-		controller.setSelectedRegex(regexDTO);
-		controller.getMainPresenter().showRegexView(true);
+		return regexDTO;
 	}
 
 	@Override
@@ -224,17 +233,18 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 					BatchClassManagementMessages.ADD_FIELD_TYPE));
 			return;
 		}
-		KVExtractionDTO kvExtractionDTO = new KVExtractionDTO();
-		kvExtractionDTO.setNew(true);
-		kvExtractionDTO.setFieldTypeDTO(controller.getSelectedDocumentLevelField());
-		kvExtractionDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		KVExtractionDTO kvExtractionDTO = createKVExtractionDTOObject();
+		AdvancedKVExtractionDTO advancedKVExtractionDTO = new AdvancedKVExtractionDTO();
+		kvExtractionDTO.setAdvancedKVExtractionDTO(advancedKVExtractionDTO);
 		controller.setAdd(true);
 		controller.setSelectedKVExtraction(kvExtractionDTO);
 		controller.getMainPresenter().showAdvancedKVExtractionView();
+		controller.getMainPresenter().getAdvancedKVExtractionPresenter().setEditAdvancedKV(false);
 	}
 
 	public void onAdvancedEditKVButtonClicked(String identifier) {
 		KVExtractionDTO kvExtractionDTO = controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier);
+		controller.getMainPresenter().getAdvancedKVExtractionPresenter().setEditAdvancedKV(true);
 		if (kvExtractionDTO.isSimpleKVExtraction()) {
 			view.getConformationForKVExtractionView(true, kvExtractionDTO);
 		} else {

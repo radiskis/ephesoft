@@ -39,7 +39,7 @@ import com.ephesoft.dcma.core.common.DomainProperty;
 
 public enum BatchClassProperty implements DomainProperty {
 
-	IDENTIFIER("identifier"), NAME("name"), DESCRIPTION("description");
+	IDENTIFIER("identifier"), NAME("name"), DESCRIPTION("description"),WORKFLOW_NAME("workflowName");
 
 	private String property;
 

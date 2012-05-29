@@ -93,31 +93,33 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 					}
 				}
 			}
-
-			controller.getRpcService().getAllTables(view.getDriverName(), view.getUrl(), view.getUserName(), view.getPassword(),
-					new AsyncCallback<Map<String, List<String>>>() {
-
-						@Override
-						public void onSuccess(Map<String, List<String>> tableNames) {
-							view.clearDetailsTable();
-							controller.setTables(tableNames);
-							Collection<DocumentTypeDTO> documentTypes = controller.getBatchClass().getDocuments();
-							for (DocumentTypeDTO documentTypeDTO : documentTypes) {
-								if (!documentTypeDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE_UNKNOWN)) {
-									CustomWidget widget = new CustomWidget(documentTypeDTO.getName());
-									view.addRow(widget);
-								}
-							}
-
-						}
-
-						@Override
-						public void onFailure(Throwable arg0) {
-							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.INVALID_DB_CONNECTION);
-
-						}
-					});
 		}
+	}
+
+	public void setTablesToFuzzyDBView() {
+		controller.getRpcService().getAllTables(view.getDriverName(), view.getUrl(), view.getUserName(), view.getPassword(),
+				new AsyncCallback<Map<String, List<String>>>() {
+
+					@Override
+					public void onSuccess(Map<String, List<String>> tableNames) {
+						view.clearDetailsTable();
+						controller.setTables(tableNames);
+						Collection<DocumentTypeDTO> documentTypes = controller.getBatchClass().getDocuments();
+						for (DocumentTypeDTO documentTypeDTO : documentTypes) {
+							if (!documentTypeDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE_UNKNOWN)) {
+								CustomWidget widget = new CustomWidget(documentTypeDTO.getName());
+								view.addRow(widget);
+							}
+						}
+
+					}
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.INVALID_DB_CONNECTION);
+
+					}
+				});
 	}
 
 	@Override

@@ -56,6 +56,17 @@
 										<g:ListBox ui:field="fetchValue" width="98%" />
 									</g:cell>
 								</g:HorizontalPanel>
+								<g:HorizontalPanel width="100%">
+									<g:cell width="44%" horizontalAlignment="ALIGN_RIGHT">
+										<g:Label ui:field="kvPageValueLabel"></g:Label>
+									</g:cell>
+									<g:cell width="1%">
+										<g:Label ui:field="kvPageValueStar"></g:Label>
+									</g:cell>
+									<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+										<g:ListBox ui:field="kvPageValue" width="98%" />
+									</g:cell>
+								</g:HorizontalPanel>
 							</g:VerticalPanel>
 						</g:north>
 
@@ -165,6 +176,9 @@
 									<g:cell>
 										<g:Hidden ui:field="batchClassID" name="batchClassID" />
 									</g:cell>
+									<g:cell>
+										<g:Hidden ui:field="docName" name="docName" />
+									</g:cell>
 								</g:HorizontalPanel>
 							</g:FormPanel>
 							<g:HorizontalPanel>
@@ -177,6 +191,7 @@
 								<g:Button ui:field="captureKey" />
 								<g:Button ui:field="captureValue" />
 								<g:Button ui:field="clearButton" />
+								<g:Button ui:field="testAdvKvButton" />
 								<c:RotatableImage ui:field="tempImage" visible="false" />
 							</g:HorizontalPanel>
 						</g:HorizontalPanel>

@@ -82,5 +82,7 @@ public interface IUtilCommonConstants {
 	String TESSERACT_HOCR_PLUGIN = "TESSERACT_HOCR";
 	String RECOSTAR_HOCR_PLUGIN = "RECOSTAR_HOCR";
 	String PAGE_PROCESS_MODULE_NAME = "Page Process";
+	String EXTENSION_TIFF = ".tiff";
+	String EXTENSION_TIF = ".tif";
 
 }

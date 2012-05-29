@@ -53,8 +53,9 @@ public abstract class AdminEntryPoint<R extends DCMARemoteServiceAsync> extends 
 
 		final RootPanel rootPanel = new RootPanel(layoutPanel);
 		rootPanel.getHeader().setEventBus(eventBus);
-		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
+		rootPanel.getHeader().addNonClickableTab("Batch Class Management", "BatchClassManagement.html");
 		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
+		rootPanel.getHeader().addTab("Custom Workflow Management", "CustomWorkflowManagement.html", false);
 		rpcService.isReportingEnabled(new AsyncCallback<Boolean>() {
 
 			@Override

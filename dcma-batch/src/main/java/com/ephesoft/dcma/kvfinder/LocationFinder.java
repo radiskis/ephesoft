@@ -120,7 +120,6 @@ public class LocationFinder {
 		String errMsg = null;
 		OutputDataCarrier dataCarrier = null;
 		final CharSequence inputStr = span.getValue();
-		boolean isFound = false;
 		if (null == inputStr || KVFinderConstants.EMPTY.equals(inputStr)) {
 
 			errMsg = "Invalid input character sequence.";
@@ -143,16 +142,8 @@ public class LocationFinder {
 				// Get all groups for this match
 				for (int i = 0; i <= matcher.groupCount(); i++) {
 					final String groupStr = matcher.group(i);
-					isFound = false;
-					if (patternStr.contains(KVFinderConstants.NOT_SPACE)) {
-						if (groupStr.contains(KVFinderConstants.FULL_STOP)) {
-							isFound = true;
-						}
-					} else {
-						isFound = true;
-					}
 
-					if (isFound) {
+					if (groupStr != null) {
 						int confidenceInt = 100;
 						try {
 							confidenceInt = Integer.parseInt(getConfidenceScore());
@@ -175,15 +166,16 @@ public class LocationFinder {
 	 * 
 	 * @param inputData String
 	 * @param patternStr String
+	 * @param spanList
 	 * @return List<OutputDataCarrier>
 	 * @throws DCMAApplicationException Check for all the input parameters and find the pattern.
 	 */
-	public final List<OutputDataCarrier> findPattern(final String inputData, final String patternStr) throws DCMAApplicationException {
+	public final List<OutputDataCarrier> findPattern(final String inputData, final String patternStr, List<Span> spanList)
+			throws DCMAApplicationException {
 
 		String errMsg = null;
 		List<OutputDataCarrier> dataCarrierList = new ArrayList<OutputDataCarrier>();
 		final CharSequence inputStr = inputData;
-		boolean isFound = false;
 		if (null == inputStr || KVFinderConstants.EMPTY.equals(inputStr)) {
 
 			errMsg = "Invalid input character sequence.";
@@ -205,17 +197,11 @@ public class LocationFinder {
 			while (matcher.find()) {
 				// Get all groups for this match
 				for (int i = 0; i <= matcher.groupCount(); i++) {
-					final String groupStr = matcher.group(i);
-					isFound = false;
-					if (patternStr.contains(KVFinderConstants.NOT_SPACE)) {
-						if (groupStr.contains(KVFinderConstants.FULL_STOP)) {
-							isFound = true;
-						}
-					} else {
-						isFound = true;
-					}
 
-					if (isFound) {
+					final String groupStr = matcher.group(i);
+					final int startIndex = matcher.start();
+					final Span matchedSpan = getMatchedSpan(spanList, startIndex);
+					if (groupStr != null) {
 						int confidenceInt = 100;
 						try {
 							confidenceInt = Integer.parseInt(getConfidenceScore());
@@ -223,7 +209,7 @@ public class LocationFinder {
 							LOGGER.error(nfe.getMessage(), nfe);
 						}
 						final float confidence = (groupStr.length() * confidenceInt) / inputStr.length();
-						OutputDataCarrier dataCarrier = new OutputDataCarrier(null, confidence, groupStr);
+						OutputDataCarrier dataCarrier = new OutputDataCarrier(matchedSpan, confidence, groupStr);
 						dataCarrierList.add(dataCarrier);
 						LOGGER.info(groupStr);
 					}
@@ -232,6 +218,26 @@ public class LocationFinder {
 		}
 
 		return dataCarrierList;
+	}
+
+	private Span getMatchedSpan(final List<Span> spanList, final int startIndex) {
+		int spanIndex = 0;
+		boolean isFirstSpan = Boolean.TRUE;
+		Span matchedSpan = null;
+		for (Span span : spanList) {
+			if (null != span && null != span.getValue()) {
+				spanIndex = spanIndex + span.getValue().length();
+				if (!isFirstSpan) {
+					spanIndex = spanIndex + 1;
+				}
+				if (spanIndex > startIndex) {
+					matchedSpan = span;
+					break;
+				}
+			}
+			isFirstSpan = Boolean.FALSE;
+		}
+		return matchedSpan;
 	}
 
 	/**
@@ -308,31 +314,66 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = lineOutputDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(lineOutputDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
 
+	}
+
+	private void addValues(LineDataCarrier lineOutputDataCarrier, OutputDataCarrier valueOutputDataCarrier, int numberOfWords) {
+		StringBuffer finalValue = new StringBuffer(valueOutputDataCarrier.getValue());
+		Span valueSpan = valueOutputDataCarrier.getSpan();
+		if (null != valueSpan) {
+			Integer spanIndex = lineOutputDataCarrier.getIndexOfSpan(valueSpan);
+			if (spanIndex != null) {
+				Span rightSpan = null;
+				Coordinates coordinates = new Coordinates();
+				if (valueSpan.getCoordinates() != null) {
+					coordinates.setX0(valueSpan.getCoordinates().getX0());
+					coordinates.setY0(valueSpan.getCoordinates().getY0());
+					coordinates.setX1(valueSpan.getCoordinates().getX1());
+					coordinates.setY1(valueSpan.getCoordinates().getY1());
+				}
+				for (int index = 0; index < numberOfWords; index++) {
+					rightSpan = lineOutputDataCarrier.getRightSpan(spanIndex);
+					if (null != rightSpan && rightSpan.getValue() != null) {
+						finalValue.append(KVFinderConstants.SPACE);
+						finalValue.append(rightSpan.getValue());
+						setValueCoordinates(coordinates, rightSpan);
+					}
+					spanIndex = spanIndex + 1;
+				}
+				valueSpan.setCoordinates(coordinates);
+			}
+			valueOutputDataCarrier.setValue(finalValue.toString());
+		}
+	}
+
+	private void setValueCoordinates(Coordinates coordinates, Span span) {
+		BigInteger coordX0 = coordinates.getX0();
+		BigInteger coordY0 = coordinates.getY0();
+		BigInteger coordX1 = coordinates.getX1();
+		BigInteger coordY1 = coordinates.getY1();
+		Coordinates spanCoordinates = span.getCoordinates();
+		if (null != spanCoordinates) {
+			BigInteger spanX0 = span.getCoordinates().getX0();
+			BigInteger spanY0 = span.getCoordinates().getY0();
+			BigInteger spanX1 = span.getCoordinates().getX1();
+			BigInteger spanY1 = span.getCoordinates().getY1();
+			if (spanX0.compareTo(coordX0) == -1) {
+				coordinates.setX0(spanX0);
+			}
+			if (spanY0.compareTo(coordY0) == -1) {
+				coordinates.setY0(spanY0);
+			}
+			if (spanX1.compareTo(coordX1) == 1) {
+				coordinates.setX1(spanX1);
+			}
+			if (spanY1.compareTo(coordY1) == 1) {
+				coordinates.setY1(spanY1);
+			}
+		}
 	}
 
 	/**
@@ -409,27 +450,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = lineOutputDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(lineOutputDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -515,27 +536,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -620,27 +621,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -729,27 +710,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -834,27 +795,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -939,27 +880,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -1047,27 +968,7 @@ public class LocationFinder {
 			}
 
 			if (numberOfWords > 0) {
-				String value = valueOutputDataCarrier.getValue();
-				String rowData = topLineDataCarrier.getLineRowData();
-				if (null != rowData && null != value) {
-					StringBuffer finalValue = new StringBuffer(value);
-					String arr[] = rowData.split(KVFinderConstants.SPACE);
-					if (null != arr) {
-						int index = -1;
-						for (String str : arr) {
-							if (null != str && index == -1 && str.contains(value)) {
-								index = 0;
-								continue;
-							}
-							if (index >= 0 && index < numberOfWords) {
-								index++;
-								finalValue.append(KVFinderConstants.SPACE);
-								finalValue.append(str);
-							}
-						}
-					}
-					valueOutputDataCarrier.setValue(finalValue.toString());
-				}
+				addValues(topLineDataCarrier, valueOutputDataCarrier, numberOfWords);
 			}
 			valueFoundData.add(valueOutputDataCarrier);
 		}
@@ -1694,8 +1595,8 @@ public class LocationFinder {
 			valueFoundData.add(lastDataCarrier);
 		}
 		if (valueFoundData != null && !valueFoundData.isEmpty() && valueFoundData.size() > 1) {
-			List<OutputDataCarrier> soretdList = getSortedList(valueFoundData);
-			concatenateList(valueFoundData, soretdList);
+			List<OutputDataCarrier> sortedList = getSortedList(valueFoundData);
+			concatenateList(valueFoundData, sortedList);
 		}
 	}
 
@@ -1705,18 +1606,19 @@ public class LocationFinder {
 		float confidence = 0;
 		for (int index = 0; index < outputDataCarriers.size(); index++) {
 			OutputDataCarrier outputDataCarrier = outputDataCarriers.get(index);
-			if (index == 0) {
-				// pick x0,y0 coordinates
-				coordinates.setX0(outputDataCarrier.getSpan().getCoordinates().getX0());
-				coordinates.setY0(outputDataCarrier.getSpan().getCoordinates().getY0());
-				confidence = outputDataCarrier.getConfidence();
+			Span span = outputDataCarrier.getSpan();
+			if (null != span && span.getCoordinates() != null) {
+				if (index == 0) {
+					coordinates.setX0(span.getCoordinates().getX0());
+					coordinates.setY0(span.getCoordinates().getY0());
+					coordinates.setX1(span.getCoordinates().getX1());
+					coordinates.setY1(span.getCoordinates().getY1());
+					confidence = outputDataCarrier.getConfidence();
+				} else {
+					setValueCoordinates(coordinates, span);
+				}
 			}
-			valueList.append(" ").append(outputDataCarrier.getValue());
-			if (index == outputDataCarriers.size() - 1) {
-				// pick x1,y1 coordinates
-				coordinates.setX1(outputDataCarrier.getSpan().getCoordinates().getX1());
-				coordinates.setY1(outputDataCarrier.getSpan().getCoordinates().getY1());
-			}
+			valueList.append(KVFinderConstants.SPACE).append(outputDataCarrier.getValue());
 		}
 
 		Span span = new Span();

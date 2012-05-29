@@ -37,7 +37,19 @@
 				<g:Label ui:field="columnName" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="columnHeaderPatternLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:Label ui:field="columnHeaderPattern" />
+			</g:cell>
+		</g:HorizontalPanel>
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="columnPatternLabel"></g:Label>

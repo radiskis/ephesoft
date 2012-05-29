@@ -295,7 +295,12 @@ INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='tabbedPdf.pdf_optimization_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ON',(select id from plugin_config where config_name='createMultipageTif.pdf_optimization_switch'));
 INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'OFF',(select id from plugin_config where config_name='createMultipageTif.pdf_optimization_switch'));
-
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'PDF417',(select id from plugin_config where config_name='barcode.reader_types'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'CODE128',(select id from plugin_config where config_name='barcode.reader_types'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'CODE93',(select id from plugin_config where config_name='barcode.reader_types'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'ITF',(select id from plugin_config where config_name='barcode.reader_types'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'CODABAR',(select id from plugin_config where config_name='barcode.reader_types'));
+INSERT INTO plugin_config_sample_value(creation_date,last_modified,sample_value,plugin_config_id) VALUES (now(),now(),'EAN13',(select id from plugin_config where config_name='barcode.reader_types'));
 
 
 /*Module config update */

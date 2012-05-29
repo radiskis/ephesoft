@@ -41,7 +41,9 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo.EditTableColumnInfoView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class EditTableColumnInfoPresenter extends AbstractBatchClassPresenter<EditTableColumnInfoView> {
@@ -60,9 +62,17 @@ public class EditTableColumnInfoPresenter extends AbstractBatchClassPresenter<Ed
 
 	public void onSave() {
 		boolean validFlag = true;
-		if (validFlag && (!view.getValidateColumnNameTextBox().validate() || !view.getValidateColumnPatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+		if (validFlag && (!view.getValidateColumnNameTextBox().validate() || !view.getValidateColumnPatternTextBox().validate())
+				|| !view.getValidateBetweenLeftTextBox().validate() || !view.getValidateBetweenRightTextBox().validate()
+				|| !view.getValidateColumnHeaderPatternTextBox().validate()) {
+			if (view.getValidateColumnPatternTextBox().getWidget().getText().isEmpty()
+					|| view.getValidateColumnNameTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			}
 			validFlag = false;
 		}
 
@@ -77,6 +87,7 @@ public class EditTableColumnInfoPresenter extends AbstractBatchClassPresenter<Ed
 			controller.getSelectedTableColumnInfoField().setBetweenLeft(view.getBetweenLeft());
 			controller.getSelectedTableColumnInfoField().setBetweenRight(view.getBetweenRight());
 			controller.getSelectedTableColumnInfoField().setRequired(view.isRequired());
+			controller.getSelectedTableColumnInfoField().setColumnHeaderPattern(view.getColumnHeaderPattern());
 
 			controller.getMainPresenter().getTableColumnInfoPresenter().bind();
 			controller.getMainPresenter().getTableColumnInfoPresenter().showTcInfoView();
@@ -91,12 +102,35 @@ public class EditTableColumnInfoPresenter extends AbstractBatchClassPresenter<Ed
 			view.setColumnName(controller.getSelectedTableColumnInfoField().getColumnName());
 			view.setColumnPattern(controller.getSelectedTableColumnInfoField().getColumnPattern());
 			view.setRequired(controller.getSelectedTableColumnInfoField().isRequired());
+			view.setColumnHeaderPattern(controller.getSelectedTableColumnInfoField().getColumnHeaderPattern());
 
-			view.getValidateColumnNameTextBox().addValidator(new EmptyStringValidator(view.getColumnNameTextBox()));
-			view.getValidateColumnNameTextBox().toggleValidDateBox();
-			view.getValidateColumnPatternTextBox().addValidator(new EmptyStringValidator(view.getColumnPatternTextBox()));
-			view.getValidateColumnPatternTextBox().toggleValidDateBox();
+		} else {
+			TableColumnInfoDTO tcColumnInfoDTO = controller.getMainPresenter().getTableInfoViewPresenter()
+					.createTableColumnInfoDTOObject();
+			tcColumnInfoDTO.setBetweenLeft(view.getBetweenLeft());
+			tcColumnInfoDTO.setBetweenRight(view.getBetweenRight());
+			tcColumnInfoDTO.setColumnName(view.getColumnName());
+			tcColumnInfoDTO.setColumnPattern(view.getColumnPattern());
+			tcColumnInfoDTO.setRequired(view.isRequired());
+			tcColumnInfoDTO.setColumnHeaderPattern(view.getColumnHeaderPattern());
+
+			controller.setAdd(true);
+			controller.setSelectedTableColumnInfoField(tcColumnInfoDTO);
 		}
+
+		view.getValidateColumnNameTextBox().addValidator(new EmptyStringValidator(view.getColumnNameTextBox()));
+		view.getValidateColumnNameTextBox().toggleValidDateBox();
+		view.getValidateColumnPatternTextBox().addValidator(
+				new RegExValidator(view.getColumnPatternTextBox(), true, false, true, null));
+		view.getValidateColumnPatternTextBox().toggleValidDateBox();
+		view.getValidateBetweenLeftTextBox().addValidator(new RegExValidator(view.getBetweenLeftTextBox(), false, false, true, null));
+		view.getValidateBetweenLeftTextBox().toggleValidDateBox();
+		view.getValidateBetweenRightTextBox()
+				.addValidator(new RegExValidator(view.getBetweenRightTextBox(), false, false, true, null));
+		view.getValidateBetweenRightTextBox().toggleValidDateBox();
+		view.getValidateColumnHeaderPatternTextBox().addValidator(
+				new RegExValidator(view.getBetweenRightTextBox(), false, false, true, null));
+		view.getValidateColumnHeaderPatternTextBox().toggleValidDateBox();
 	}
 
 	@Override

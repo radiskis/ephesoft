@@ -27,6 +27,7 @@
     <div class='{style.buttons}'>
       <g:Button ui:field='okButton'/>
       <g:Button ui:field='cancelButton'/>
+      <g:Button ui:field='thirdButton' visible='false'/>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>

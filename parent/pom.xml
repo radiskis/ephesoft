@@ -478,6 +478,11 @@
 				<artifactId>poi-contrib</artifactId>
 				<version>3.5-FINAL</version>
 			</dependency>
+			<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.0.6</version>
+		</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -510,7 +515,8 @@
 		<!-- <repository>
 			<id>zxing-repo</id>
 			<url>http://opensaga.org/maven/content/repositories/</url>
-		</repository> -->
+		</repository>
+-->
 	</repositories>
 
 	<!-- <pluginRepositories>
@@ -518,7 +524,8 @@
 			<id>mirrorRepo</id>
 			<url>http://172.16.1.106/repo</url>
 		</pluginRepository>
-	</pluginRepositories> -->
+	</pluginRepositories>
+-->
 
 	<build>
 		<resources>

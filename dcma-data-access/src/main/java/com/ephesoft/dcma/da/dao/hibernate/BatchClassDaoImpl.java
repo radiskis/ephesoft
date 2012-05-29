@@ -44,6 +44,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.common.Order;
@@ -52,17 +53,29 @@ import com.ephesoft.dcma.core.hibernate.EphesoftCriteria;
 import com.ephesoft.dcma.da.dao.BatchClassDao;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
+import com.ephesoft.dcma.da.domain.BatchClassGroups;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 import com.ephesoft.dcma.da.domain.KVPageProcess;
+import com.ephesoft.dcma.da.service.BatchClassGroupsService;
 
 @Repository
 public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements BatchClassDao {
 
 	private static final String IS_DELETED = "isDeleted";
+	private static final String IDENTIFIER = "identifier";
+	private static final String ASSIGNED_GROUPS_NAME="assignedGroups.groupName";
+	private static final String UNC_FOLDER = "uncFolder";
+	private static final String NAME = "name";
+	private static final String CURRENT_USER = "currentUser";
+	private static final String PROCESS_NAME = "processName";
+	private static final String ASSIGNED_GROUPS = "assignedGroups";
 	private static final Logger LOG = LoggerFactory.getLogger(BatchClassDaoImpl.class);
+
+	@Autowired
+	BatchClassGroupsService batchClassGroupsService;
 
 	/**
 	 * An api to getch batch class by unc folder name.
@@ -74,7 +87,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	public BatchClass getBatchClassbyUncFolder(final String folderName) {
 		LOG.info("folder name : " + folderName);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("uncFolder", folderName));
+		criteria.add(Restrictions.eq(UNC_FOLDER, folderName));
 		return this.findSingle(criteria);
 	}
 
@@ -87,7 +100,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public List<BatchClass> getBatchClassbyName(final String batchClassName) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", batchClassName));
+		criteria.add(Restrictions.eq(NAME, batchClassName));
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return this.findSingle(criteria);
 	}
@@ -101,7 +114,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public List<BatchClass> getBatchClassbyProcessName(final String processName) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("processName", processName));
+		criteria.add(Restrictions.eq(PROCESS_NAME, processName));
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return this.findSingle(criteria);
 	}
@@ -111,11 +124,11 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 		DetachedCriteria criteria = criteria();
 		return this.find(criteria);
 	}
-
+	
 	@Override
 	public List<BatchClass> getAllUnlockedBatchClasses() {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.isNull("currentUser"));
+		criteria.add(Restrictions.isNull(CURRENT_USER));
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return this.find(criteria);
 	}
@@ -123,7 +136,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public BatchClass getBatchClassByIdentifier(final String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("identifier", batchClassIdentifier));
+		criteria.add(Restrictions.eq(IDENTIFIER, batchClassIdentifier));
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return this.findSingle(criteria);
 	}
@@ -141,7 +154,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public List<BatchClass> getAllBatchClassesForCurrentUser(final String currentUser) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("currentUser", currentUser));
+		criteria.add(Restrictions.eq(CURRENT_USER, currentUser));
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return find(criteria);
 	}
@@ -154,7 +167,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public List<String> getAllUNCFolderPaths() {
 		DetachedCriteria criteria = criteria();
-		criteria.setProjection(Projections.property("uncFolder"));
+		criteria.setProjection(Projections.property(UNC_FOLDER));
 		return find(criteria);
 	}
 
@@ -179,9 +192,10 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 				}
 				roleList.add(userRole);
 			}
-			criteria.createAlias("assignedGroups", "assignedGroups");
-			criteria.add(Restrictions.in("assignedGroups.groupName", roleList));
+			criteria.createAlias(ASSIGNED_GROUPS, ASSIGNED_GROUPS);
+			criteria.add(Restrictions.in(ASSIGNED_GROUPS_NAME, roleList));
 			criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
+			criteria.addOrder(org.hibernate.criterion.Order.asc(IDENTIFIER));
 			batchClassList = find(criteria);
 		}
 
@@ -189,9 +203,22 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	}
 
 	@Override
-	public int getAllBatchClassCountExcludeDeleted() {
+	public int getAllBatchClassCountExcludeDeleted(Set<String> userRoles) {
 		DetachedCriteria criteria = criteria();
+		if (userRoles != null && !userRoles.isEmpty()) {
+			List<String> roleList = new ArrayList<String>();
+			for (String userRole : userRoles) {
+				if (null == userRole || userRole.isEmpty()) {
+					continue;
+				}
+				roleList.add(userRole);
+			}
+			criteria.createAlias(ASSIGNED_GROUPS,ASSIGNED_GROUPS);
+			criteria.add(Restrictions.in(ASSIGNED_GROUPS_NAME, roleList));
+		}
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(IDENTIFIER));
+
 		return count(criteria);
 	}
 
@@ -208,6 +235,12 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		List<BatchClass> batchClasses = this.find(criteria);
 		for (BatchClass batchClass : batchClasses) {
+			for (BatchClassGroups batchClassGroups : batchClass.getAssignedGroups()) {
+				if (LOG.isDebugEnabled() && batchClassGroups != null) {
+					LOG.debug(batchClassGroups.getGroupName());
+				}
+			}
+
 			for (BatchClassModule mod : batchClass.getBatchClassModules()) {
 				List<BatchClassPlugin> plugins = mod.getBatchClassPlugins();
 				List<BatchClassModuleConfig> batchClassModuleConfig = mod.getBatchClassModuleConfig();
@@ -241,8 +274,10 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public List<String> getAllAssociatedUNCFolders(String batchClassName) {
 		DetachedCriteria criteria = criteria();
-		criteria.setProjection(Projections.property("uncFolder"));
-		criteria.add(Restrictions.eq("name", batchClassName));
+		criteria.setProjection(Projections.property(UNC_FOLDER));
+		criteria.add(Restrictions.eq(NAME, batchClassName));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(IDENTIFIER));	
+		criteria.addOrder(org.hibernate.criterion.Order.asc(IDENTIFIER));	
 		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
 		return this.find(criteria);
 	}
@@ -251,7 +286,7 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	public BatchClass getBatchClassByNameIncludingDeleted(String batchClassName) {
 		BatchClass batchClass = null;
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", batchClassName));
+		criteria.add(Restrictions.eq(NAME, batchClassName));
 		List<BatchClass> batchClasses = this.find(criteria);
 		if (batchClasses != null && !batchClasses.isEmpty()) {
 			batchClass = batchClasses.get(0);
@@ -262,10 +297,22 @@ public class BatchClassDaoImpl extends HibernateDao<BatchClass> implements Batch
 	@Override
 	public String getBatchClassIdentifierByUNCfolder(String uncFolder) {
 		DetachedCriteria criteria = criteria();
-		criteria.setProjection(Projections.property("identifier"));
-		criteria.add(Restrictions.eq("uncFolder", uncFolder));
-		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
+		criteria.setProjection(Projections.property(IDENTIFIER));
+		criteria.add(Restrictions.eq(UNC_FOLDER, uncFolder));
+		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));		
 		return this.findSingle(criteria);
+	}
+	/**
+	 * This API returns list of all batch class identifiers.
+	 * 
+	 * @return List<String>
+	 */
+	@Override
+	public List<String> getAllBatchClassIdentifiers() {
+		DetachedCriteria criteria = criteria();
+		criteria.setProjection(Projections.property(IDENTIFIER));
+		criteria.add(Restrictions.or(Restrictions.isNull(IS_DELETED), Restrictions.eq(IS_DELETED, false)));
+		return this.find(criteria);
 	}
 
 }

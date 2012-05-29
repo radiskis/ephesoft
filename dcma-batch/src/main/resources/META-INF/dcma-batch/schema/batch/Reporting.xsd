@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="ReportingOptions">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="installerPath" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

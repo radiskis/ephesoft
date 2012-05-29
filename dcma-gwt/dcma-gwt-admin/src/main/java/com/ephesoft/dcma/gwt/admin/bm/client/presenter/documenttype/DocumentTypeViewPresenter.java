@@ -108,15 +108,20 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_DOCUMENT_TYPE)); 
 			return;
 		}
+		FieldTypeDTO fieldTypeDTO = createFieldTypeDTOObject();
+		
+		controller.setAdd(true);
+		controller.setSelectedDocumentLevelField(fieldTypeDTO);
+		controller.getMainPresenter().showFieldTypeView(true);
+	}
+
+	public FieldTypeDTO createFieldTypeDTOObject() {
 		FieldTypeDTO fieldTypeDTO = new FieldTypeDTO();
 		fieldTypeDTO.setNew(true);
 		fieldTypeDTO.setDocTypeDTO(controller.getSelectedDocument());
 		fieldTypeDTO.setName("");
 		fieldTypeDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
-		controller.setAdd(true);
-		controller.setSelectedDocumentLevelField(fieldTypeDTO);
-		controller.getMainPresenter().showFieldTypeView(true);
-
+		return fieldTypeDTO;
 	}
 
 	public void onEditDocumentPropertiesButtonClicked() {
@@ -148,15 +153,20 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
 			return;
 		}
+		TableInfoDTO tableInfoDTO = createTableInfoDTOObject();
+		controller.setAdd(true);
+		controller.setTableInfoSelectedField(tableInfoDTO);
+		controller.getMainPresenter().showTableInfoView(true);
+
+	}
+
+	public TableInfoDTO createTableInfoDTOObject() {
 		TableInfoDTO tableInfoDTO = new TableInfoDTO();
 		tableInfoDTO.setNew(true);
 		tableInfoDTO.setDocTypeDTO(controller.getSelectedDocument());
 		tableInfoDTO.setName("");
 		tableInfoDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
-		controller.setAdd(true);
-		controller.setTableInfoSelectedField(tableInfoDTO);
-		controller.getMainPresenter().showTableInfoView(true);
-
+		return tableInfoDTO;
 	}
 
 	public void onEditTableInfoFieldButtonClicked(String identifier) {
@@ -181,7 +191,7 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 					@Override
 					public void onFailure(Throwable throwable) {
 						ScreenMaskUtility.unmaskScreen();
-						final ConfirmationDialog dialog = new ConfirmationDialog(true);
+						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(), MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE,Boolean.TRUE);
 						dialog.addDialogListener(new DialogListener() {
 
 							@Override
@@ -194,12 +204,9 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 								// TODO Auto-generated method stub
 							}
 						});
-						dialog.setText(MessageConstants.TITLE_TEST_FAILURE);
-						dialog.setMessage(throwable.getMessage());
+						
 						dialog.okButton.setStyleName(AdminConstants.BUTTON_STYLE);
-						dialog.center();
-						dialog.show();
-						dialog.okButton.setFocus(true);
+						
 					}
 
 					@Override
@@ -232,13 +239,18 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 			return;
 		}
 		controller.getMainPresenter().getFunctionKeyViewPresenter().getEditFunctionKeyPresenter().clearFields();
+		FunctionKeyDTO functionKeyDTO = createFunctionKeyDTOObject();
+		controller.setAdd(true);
+		controller.setSelectedFunctionKeyDTO(functionKeyDTO);
+		controller.getMainPresenter().showFunctionKeyView(true);
+	}
+
+	public FunctionKeyDTO createFunctionKeyDTOObject() {
 		FunctionKeyDTO functionKeyDTO = new FunctionKeyDTO();
 		functionKeyDTO.setDocTypeDTO(controller.getSelectedDocument());
 		functionKeyDTO.setNew(true);
 		functionKeyDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
-		controller.setAdd(true);
-		controller.setSelectedFunctionKeyDTO(functionKeyDTO);
-		controller.getMainPresenter().showFunctionKeyView(true);
+		return functionKeyDTO;
 	}
 
 	public void onDeleteFunctionKeyButtonClicked(String identifier) {

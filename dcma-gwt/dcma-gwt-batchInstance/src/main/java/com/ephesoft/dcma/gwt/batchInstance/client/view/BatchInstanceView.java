@@ -57,6 +57,7 @@ import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchPriority;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.DataFilter;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -141,9 +142,13 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 	private Button deleteBatchButton;
 
+	private Button openBatchButton;
+
 	private HorizontalPanel filterPanel;
 
 	private HorizontalPanel searchPanel;
+
+	private VerticalPanel refreshButtonPanel;
 
 	private ListBox priorityListBox;
 
@@ -158,6 +163,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	private Label searchBatchLabel;
 
 	private HorizontalPanel deleteButtonPanel;
+
+	private HorizontalPanel openBatchButtonPanel;
 
 	private HorizontalPanel restartPanel;
 
@@ -185,6 +192,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 	private BatchInstanceListView batchInstanceListView;
 
+	private Button deleteAllButton;
+
 	private Map<String, BatchInstanceDTO> batchInstanceDTOMap = new HashMap<String, BatchInstanceDTO>();
 
 	interface Binder extends UiBinder<DockLayoutPanel, BatchInstanceView> {
@@ -199,13 +208,17 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		deleteBatchButton = new Button();
 
+		openBatchButton = new Button();
+
 		filterPanel = new HorizontalPanel();
 
 		searchPanel = new HorizontalPanel();
 
-		priorityListBox = new ListBox();
+		refreshButtonPanel = new VerticalPanel();
 
-		batchInstanceListBox = new ListBox();
+		priorityListBox = new ListBox(Boolean.TRUE);
+
+		batchInstanceListBox = new ListBox(Boolean.TRUE);
 
 		priorityLabel = new Label();
 
@@ -217,6 +230,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		deleteButtonPanel = new HorizontalPanel();
 
+		openBatchButtonPanel = new HorizontalPanel();
+
 		restartPanel = new HorizontalPanel();
 
 		searchBatchTextBox = new TextBox();
@@ -226,6 +241,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		restartOptions = new ListBox();
 
 		restartAllButton = new Button();
+
+		deleteAllButton = new Button();
 
 		unlockButton = new Button();
 
@@ -243,32 +260,45 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		refreshButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_REFRESH));
 		restartAllButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_ALL));
+		deleteAllButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_ALL));
+		deleteAllButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_TOOLTIP));
+		deleteAllButton.setWidth("5.6em");
+
 		unlockButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_UNLOCK));
 		searchBatchLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_SEARCH_BATCH)
 				+ BatchInstanceConstants.COLON);
 		searchBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_SEARCH_BATCH));
 		restartBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_BATCH));
+		restartBatchButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_BATCH_TITLE));
+		restartBatchButton.addStyleName(BatchInstanceConstants.TEXT_LIMIT_CSS);
 		deleteBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_BATCH));
+		openBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_OPEN_BATCH));
+		openBatchButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_OPEN_BATCH_TITLE));
+		openBatchButton.addStyleName(BatchInstanceConstants.TEXT_LIMIT_CSS);
 		totalBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TOTAL_BATCHES));
 		deletedBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.DELETED_BATCHES));
 		// restartedBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.RESTARTED_BATCHES));
 		searchBatchTextBox.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SEARCH_CRITERIA));
+		searchBatchTextBox.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SEARCH_TYPE));
 		batchAlerts.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BATCH_ALERTS));
 		batchInstanceListView = new BatchInstanceListView();
 		batchInstanceLayoutPanel.add(batchInstanceListView.listView);
 		fillPriorityListBox();
-		fillBatchInstanceListBox();
+		fillBatchInstanceListBox(batchInstanceListBox);
+
 		setDefaultFilters();
 		batchInstanceListPanel.addStyleName("mainPanelLayout");
 
-		searchPanel.addStyleName("groupPanelLayout");
-		filterPanel.addStyleName("groupPanelLayout");
-		restartPanel.addStyleName("groupPanelLayout");
-		deleteButtonPanel.addStyleName("groupPanelLayout");
-		restartAllButtonPanel.addStyleName("groupPanelLayout");
-		unlockButtonPanel.addStyleName("groupPanelLayout");
-		nextButtonPanel.addStyleName("groupPanelLayout");
-		previousButtonPanel.addStyleName("groupPanelLayout");
+		searchPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		refreshButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		filterPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		restartPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		deleteButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		restartAllButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		unlockButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		nextButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		previousButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		openBatchButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
 
 		filterAndSearchPanel.addStyleName("compositePanelLayout");
 		actionPanel.addStyleName("compositePanelLayout");
@@ -282,15 +312,21 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		filterPanel.add(priorityListBox);
 		filterPanel.add(batchInstanceLabel);
 		filterPanel.add(batchInstanceListBox);
-		filterPanel.add(refreshButton);
+
+		refreshButtonPanel.add(refreshButton);
+		refreshButtonPanel.add(deleteAllButton);
+
+		filterPanel.add(refreshButtonPanel);
 		filterPanel.setCellVerticalAlignment(priorityLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		filterPanel.setCellVerticalAlignment(batchInstanceLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		filterPanel.setCellVerticalAlignment(refreshButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		filterPanel.setCellVerticalAlignment(deleteAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		filterPanel.setSpacing(5);
 
 		searchPanel.add(searchBatchLabel);
 		searchPanel.add(searchBatchTextBox);
 		searchPanel.add(searchBatchButton);
+		searchPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 		searchPanel.setCellVerticalAlignment(searchBatchLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -299,6 +335,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		restartPanel.add(restartOptions);
 		restartPanel.setCellWidth(restartOptions, "200px");
 		restartPanel.add(restartBatchButton);
+		restartPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 		restartPanel.setCellVerticalAlignment(restartBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		restartPanel.setCellVerticalAlignment(restartOptions, HasVerticalAlignment.ALIGN_MIDDLE);
 		restartPanel.setSpacing(5);
@@ -306,24 +343,34 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		deleteButtonPanel.add(deleteBatchButton);
 		deleteButtonPanel.setCellVerticalAlignment(deleteBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		deleteButtonPanel.setSpacing(5);
+		deleteButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
+
+		openBatchButtonPanel.add(openBatchButton);
+		openBatchButtonPanel.setCellVerticalAlignment(openBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		openBatchButtonPanel.setSpacing(5);
+		openBatchButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 
 		nextButtonPanel.add(nextButton);
 		nextButtonPanel.setCellVerticalAlignment(nextButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		nextButtonPanel.setSpacing(5);
+		nextButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 
 		previousButtonPanel.add(previousButton);
 		previousButtonPanel.setCellVerticalAlignment(previousButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		previousButtonPanel.setSpacing(5);
+		previousButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 
 		restartAllButton.setEnabled(false);
 
 		restartAllButtonPanel.add(restartAllButton);
 		restartAllButtonPanel.setCellVerticalAlignment(restartAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		restartAllButtonPanel.setSpacing(5);
+		restartAllButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 
 		unlockButtonPanel.add(unlockButton);
 		unlockButtonPanel.setCellVerticalAlignment(unlockButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		unlockButtonPanel.setSpacing(5);
+		unlockButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 
 		filterAndSearchPanel.add(filterPanel);
 		filterAndSearchPanel.add(searchPanel);
@@ -335,6 +382,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		controlPanel.setWidth("100%");
 		controlPanel.add(unlockButtonPanel);
 		controlPanel.add(restartAllButtonPanel);
+		controlPanel.add(openBatchButtonPanel);
 		controlPanel.add(previousButtonPanel);
 		controlPanel.setCellHorizontalAlignment(unlockButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
 		controlPanel.setCellHorizontalAlignment(restartAllButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
@@ -368,6 +416,71 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			}
 		});
 
+		deleteAllButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				final List<DataFilter> statusFilters = new ArrayList<DataFilter>();
+
+				List<String> selectedBatchInstanceStatus = getBatchInstanceSelected();
+
+				// Status for which a batch can be deleted:
+				// ERROR(4), READY_FOR_REVIEW(9), READY_FOR_VALIDATION(10), RUNNING(8)
+
+				statusFilters.clear();
+				boolean isValidSelection = true;
+				boolean foundInAllStatusList = false;
+				BatchInstanceStatus[] allStatusList = BatchInstanceStatus.values();
+
+				for (String batchInstanceStat : selectedBatchInstanceStatus) {
+					for (BatchInstanceStatus batchInstanceStatus : allStatusList) {
+						if (batchInstanceStatus.getId() == Integer.parseInt(batchInstanceStat)) {
+							foundInAllStatusList = true;
+							if (!ActionableStatus.valuesAsString().contains(batchInstanceStatus.name())) {
+								isValidSelection = false;
+								break;
+							}
+						}
+					}
+				}
+
+				if (!isValidSelection || !foundInAllStatusList) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchInstanceMessages.MSG_DELETE_ALL_STATUS_IMPROPER));
+				} else {
+					if (batchInstanceDTOMap == null || batchInstanceDTOMap.size() == 0) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								BatchInstanceMessages.MSG_DELETE_ALL_NO_RECORD));
+					} else {
+						for (String batchInstance : selectedBatchInstanceStatus) {
+							statusFilters.add(new DataFilter(BatchInstanceConstants.STATUS, batchInstance));
+						}
+						List<String> priorities = getPrioritySelected();
+						for (String priority : priorities) {
+							statusFilters.add(new DataFilter(BatchInstanceConstants.PRIORITY, priority));
+						}
+
+						final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary
+								.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_ALL_CONFIRM), LocaleDictionary.get()
+								.getMessageValue(BatchInstanceMessages.MSG_DELETE_ALL_TITLE), false);
+						confirmationDialog.addDialogListener(new DialogListener() {
+
+							@Override
+							public void onOkClick() {
+								presenter.onDeleteAllBatchButtonClick(statusFilters);
+							}
+
+							@Override
+							public void onCancelClick() {
+								confirmationDialog.hide();
+							}
+						});
+					}
+				}
+
+			}
+		});
+
 		restartAllButton.setEnabled(false);
 
 		deleteBatchButton.addClickHandler(new ClickHandler() {
@@ -385,7 +498,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 									BatchInstanceMessages.MSG_LOCKED_BATCH));
 						} else {
-							showConfirmationDialog(true, batchInstanceListView.listView.getSelectedRowIndex());
+							presenter.getBatchInstanceDTO(true, batchInstanceListView.listView.getSelectedRowIndex());
 						}
 					}
 				}
@@ -393,15 +506,30 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			}
 		});
 
+		openBatchButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if (checkRowSelection()) {
+					if (!checkStatus(batchInstanceListView.listView.getSelectedRowIndex())) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								BatchInstanceMessages.MSG_STATUS_NEITHER_REVIEW_NOR_VALIDATION));
+					} else {
+						final String batchInstanceIdentifier = batchInstanceListView.listView.getSelectedRowIndex();
+						presenter.getBatchDtoAndAcquireLock(batchInstanceIdentifier, batchInstanceDTOMap, batchInstanceListView);
+					}
+				}
+			}
+		});
+
 		restartAllButton.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TEXT));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TITLE));
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TEXT), LocaleDictionary.get()
+						.getMessageValue(BatchInstanceMessages.MSG_RESTART_ALL_CONFIRMATION_TITLE), Boolean.FALSE);
+
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -416,9 +544,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 						confirmationDialog.hide();
 					}
 				});
-				confirmationDialog.center();
-				confirmationDialog.show();
-				confirmationDialog.okButton.setFocus(true);
+
 			}
 		});
 
@@ -427,32 +553,17 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			@Override
 			public void onClick(ClickEvent arg0) {
 				if (checkRowSelection()) {
-					if (!checkRowSelectedIsValid(batchInstanceListView.listView.getSelectedRowIndex())) {
+					String batchInstanceIdentifier = batchInstanceListView.listView.getSelectedRowIndex();
+					if (!checkRowSelectedIsValid(batchInstanceIdentifier)) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_NON_RESTARTABLE));
 					} else {
-						BatchInstanceDTO batchInstanceDTO1 = batchInstanceDTOMap.get(batchInstanceListView.listView
-								.getSelectedRowIndex());
-						if (batchInstanceDTO1.getCurrentUser() != null && !batchInstanceDTO1.getCurrentUser().isEmpty()) {
+						BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(batchInstanceIdentifier);
+						if (batchInstanceDTO.getCurrentUser() != null && !batchInstanceDTO.getCurrentUser().isEmpty()) {
 							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 									BatchInstanceMessages.MSG_LOCKED_BATCH));
 						} else {
-							String identifier = batchInstanceListView.listView.getSelectedRowIndex();
-							int selectedOptionIndex = restartOptions.getSelectedIndex();
-							if (restartOptions.getItemText(selectedOptionIndex).equalsIgnoreCase(
-									LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SELECT))) {
-								BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifier);
-								if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
-									String remoteModuleName = batchInstanceDTO.getRemoteBatchInstanceDTO().getSourceModule();
-									showRestartConfirmationDialog(identifier, remoteModuleName, remoteModuleName.replace(UNDER_SCORE,
-											SPACE));
-								} else {
-									showRestartConfirmationDialog(identifier, null, null);
-								}
-							} else {
-								showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()),
-										restartOptions.getItemText(selectedOptionIndex));
-							}
+							presenter.getBatchInstanceDTO(false, batchInstanceIdentifier);
 						}
 					}
 				}
@@ -536,7 +647,36 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		});
 	}
 
-	private void clearSearchBatchBox() {
+	protected boolean checkStatus(String selectedRowIndex) {
+		boolean statusIsReviewValidate = false;
+		BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(selectedRowIndex);
+		String status = batchInstanceDTO.getStatus();
+		BatchInstanceStatus batchInstanceStatus = BatchInstanceStatus.valueOf(status);
+		if (BatchInstanceStatus.READY_FOR_REVIEW.equals(batchInstanceStatus)
+				|| BatchInstanceStatus.READY_FOR_VALIDATION.equals(batchInstanceStatus)) {
+			statusIsReviewValidate = true;
+		}
+		return statusIsReviewValidate;
+	}
+
+	private void processRestartBatchInstance(final BatchInstanceDTO batchInstanceDTO) {
+		String identifier = batchInstanceListView.listView.getSelectedRowIndex();
+		int selectedOptionIndex = restartOptions.getSelectedIndex();
+		if (restartOptions.getItemText(selectedOptionIndex).equalsIgnoreCase(
+				LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SELECT))) {
+			if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
+				String remoteModuleName = batchInstanceDTO.getRemoteBatchInstanceDTO().getSourceModule();
+				showRestartConfirmationDialog(identifier, remoteModuleName, remoteModuleName.replace(UNDER_SCORE, SPACE));
+			} else {
+				showRestartConfirmationDialog(identifier, null, null);
+			}
+		} else {
+			showRestartConfirmationDialog(identifier, restartOptions.getValue(restartOptions.getSelectedIndex()), restartOptions
+					.getItemText(selectedOptionIndex));
+		}
+	}
+
+	public void clearSearchBatchBox() {
 		searchBatchTextBox.setText("");
 	}
 
@@ -549,35 +689,32 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		restartedBatchesLabel.setStyleName(styleName);
 	}
 
-	private void fillBatchInstanceListBox() {
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_DEFAULT), "-2");
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_ALL), "-1");
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_NEW),
-				BatchInstanceStatus.NEW.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_LOCKED),
-				BatchInstanceStatus.LOCKED.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_READY),
-				BatchInstanceStatus.READY.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_ERROR),
-				BatchInstanceStatus.ERROR.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_FINISHED),
-				BatchInstanceStatus.FINISHED.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_RUNNING),
-				BatchInstanceStatus.RUNNING.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get()
-				.getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_READY_FOR_REVIEW), BatchInstanceStatus.READY_FOR_REVIEW
+	private void fillBatchInstanceListBox(ListBox listBox) {
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_DEFAULT), "-2");
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_ALL), "-1");
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_NEW), BatchInstanceStatus.NEW
 				.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(
-				BatchInstanceConstants.TEXT_BATCH_STATUS_READY_FOR_VALIDATION), BatchInstanceStatus.READY_FOR_VALIDATION.getId()
-				.toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_RESTARTED),
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_LOCKED),
+				BatchInstanceStatus.LOCKED.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_READY),
+				BatchInstanceStatus.READY.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_ERROR),
+				BatchInstanceStatus.ERROR.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_FINISHED),
+				BatchInstanceStatus.FINISHED.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_RUNNING),
+				BatchInstanceStatus.RUNNING.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_READY_FOR_REVIEW),
+				BatchInstanceStatus.READY_FOR_REVIEW.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_READY_FOR_VALIDATION),
+				BatchInstanceStatus.READY_FOR_VALIDATION.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_RESTARTED),
 				BatchInstanceStatus.RESTARTED.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_DELETED),
-				BatchInstanceStatus.DELETED.getId().toString());
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_TRANSFERRED),
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_TRANSFERRED),
 				BatchInstanceStatus.TRANSFERRED.getId().toString());
-
-		batchInstanceListBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_RESTART_IN_PROGRESS),
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_BATCH_STATUS_DELETED),
+				BatchInstanceStatus.DELETED.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_RESTART_IN_PROGRESS),
 				BatchInstanceStatus.RESTART_IN_PROGRESS.getId().toString());
 	}
 
@@ -642,6 +779,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		for (int i = 0; i < batchInstanceListBox.getItemCount(); i++) {
 			if (batchInstanceListBox.isItemSelected(i)) {
 				batchInstances.add(this.batchInstanceListBox.getValue(i));
+
 			}
 		}
 		return batchInstances;
@@ -687,33 +825,34 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	}
 
 	private void showRestartConfirmationDialog(final String identifier, final String moduleName, final String moduleDesc) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		if (moduleDesc == null) {
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_FROM_MODULE_NAME) + " "
-					+ BatchInstanceConstants.FOLDER_IMPORT_MODULE.replace(UNDER_SCORE, SPACE));
+
+		ConfirmationDialog confirmationDialog = null;
+
+		if (moduleDesc != null) {
+			confirmationDialog = ConfirmationDialogUtil
+					.showConfirmationDialog(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_FROM_MODULE_NAME)
+							+ SPACE + moduleDesc, LocaleDictionary.get().getConstantValue(BatchInstanceConstants.RESTART_TITLE),
+							Boolean.FALSE);
 		} else {
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_FROM_MODULE_NAME) + " "
-					+ moduleDesc);
+			confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+					BatchInstanceMessages.RESTART_FROM_MODULE_NAME)
+					+ SPACE + BatchInstanceConstants.FOLDER_IMPORT_MODULE.replace(UNDER_SCORE, SPACE), LocaleDictionary.get()
+					.getConstantValue(BatchInstanceConstants.RESTART_TITLE), Boolean.FALSE);
 		}
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.RESTART_TITLE));
-		confirmationDialog.addDialogListener(new DialogListener() {
+		final ConfirmationDialog confirmDialog = confirmationDialog;
+		confirmDialog.addDialogListener(new DialogListener() {
 
 			@Override
 			public void onOkClick() {
-				confirmationDialog.hide();
+				confirmDialog.hide();
 				presenter.onRestartBatchButtonClicked(identifier, moduleName);
-
 			}
 
 			@Override
 			public void onCancelClick() {
-				confirmationDialog.hide();
-
+				confirmDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
 	}
 
 	private boolean checkTextEntered() {
@@ -725,15 +864,14 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	}
 
 	private void showConfirmationDialog(final boolean isDelete, final String identifier) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		if (isDelete) {
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_CONFIRMATION_TEXT));
-			confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(
-					BatchInstanceMessages.MSG_DELETE_CONFIRMATION_TITLE));
-		} else {
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_RESTART_CONFIRMATION_TEXT));
-			confirmationDialog.setDialogTitle(LocaleDictionary.get().getMessageValue(
-					BatchInstanceMessages.MSG_RESTART_CONFIRMATION_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchInstanceMessages.MSG_DELETE_CONFIRMATION_TEXT), LocaleDictionary.get().getMessageValue(
+				BatchInstanceMessages.MSG_DELETE_CONFIRMATION_TITLE), Boolean.FALSE);
+		if (!isDelete) {
+			ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+					BatchInstanceMessages.MSG_RESTART_CONFIRMATION_TEXT), LocaleDictionary.get().getMessageValue(
+					BatchInstanceMessages.MSG_RESTART_CONFIRMATION_TITLE), Boolean.FALSE);
+
 		}
 		confirmationDialog.addDialogListener(new DialogListener() {
 
@@ -752,9 +890,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
 	}
 
 	private boolean checkRowSelection() {
@@ -905,16 +1040,15 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	}
 
 	public void showErrorRetrievingRestartOptions(String batchInstanceIdentifier) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(Boolean.TRUE);
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.RESTART_OPTIONS_FAILURE,
-				batchInstanceIdentifier));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.FAILURE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchInstanceMessages.RESTART_OPTIONS_FAILURE, batchInstanceIdentifier), LocaleDictionary.get()
+				.getConstantValue(BatchInstanceConstants.FAILURE), Boolean.TRUE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
 			public void onOkClick() {
 				confirmationDialog.hide();
-
 			}
 
 			@Override
@@ -922,9 +1056,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+
 		ScreenMaskUtility.unmaskScreen();
 	}
 
@@ -940,6 +1072,17 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		}
 	}
 
+	public void isBatchInstanceLocked(boolean isDelete, BatchInstanceDTO batchInstanceDTO) {
+		if (batchInstanceDTO.getCurrentUser() != null && !batchInstanceDTO.getCurrentUser().isEmpty()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchInstanceMessages.MSG_LOCKED_BATCH));
+		} else if (isDelete) {
+			showConfirmationDialog(isDelete, batchInstanceDTO.getBatchIdentifier());
+		} else {
+			processRestartBatchInstance(batchInstanceDTO);
+		}
+	}
+
 	public void clearFilters() {
 		priorityListBox.setSelectedIndex(-1);
 		batchInstanceListBox.setSelectedIndex(-1);
@@ -948,7 +1091,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public void setDefaultFilters() {
 		priorityListBox.setSelectedIndex(0);
 		batchInstanceListBox.setSelectedIndex(0);
-
 	}
 
 	public void performRestartOptionsPopulate() {

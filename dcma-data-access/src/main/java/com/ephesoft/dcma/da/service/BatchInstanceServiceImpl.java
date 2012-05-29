@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.da.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,10 +50,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
 import com.ephesoft.dcma.da.dao.BatchInstanceDao;
+import com.ephesoft.dcma.da.dao.BatchInstanceGroupsDao;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.domain.BatchClassGroups;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.ServerRegistry;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
@@ -81,6 +85,11 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Autowired
 	private BatchInstanceDao batchInstanceDao;
 
+	/**
+	 * Reference of BatchInstanceDao.
+	 */
+	@Autowired
+	private BatchInstanceGroupsDao batchInstanceGrpDao;
 	/**
 	 * An api to fetch all batch instance by batch class.
 	 * 
@@ -154,24 +163,26 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance status.
+	 * An api to fetch count of the batch instance table for batch instance status and batch priority. API will return those batch
+	 * instance having access by the user roles on the basis of ephesoft user.
 	 * 
-	 * @param batchName
-	 * @param batchInstanceStatus
-	 * @param userName
-	 * @param priority
-	 * @param userRole
-	 * @return count of the batch instance present for the batch instance status.
+	 * @param batchName {@link String}
+	 * @param batchInstanceStatus {@link BatchInstanceStatus}
+	 * @param userName {@link String}
+	 * @param priority {@link BatchPriority}
+	 * @param userRoles Set<{@link String}>
+	 * @param ephesoftUser {@link EphesoftUser}
+	 * @return int, count of the batch instance present for the batch instance status.
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public int getCount(String batchName, BatchInstanceStatus batchInstanceStatus, String userName, BatchPriority priority,
-			Set<String> userRole) {
+			Set<String> userRoles, EphesoftUser ephesoftUser) {
 		int count = -1;
 		if (null == batchInstanceStatus) {
 			LOGGER.info("batchInstanceStatus is null.");
 		} else {
-			count = batchInstanceDao.getCount(batchName, batchInstanceStatus, userName, priority, userRole);
+			count = batchInstanceDao.getCount(batchName, batchInstanceStatus, userName, priority, userRoles, ephesoftUser);
 		}
 		return count;
 	}
@@ -190,20 +201,21 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 * @param currentUserRoles current user.
+	 * @param userRoles current user.
+     * @param ephesoftUser current Ephesoft-user.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, Set<String> currentUserRoles) {
+			String userName, Set<String> userRoles,EphesoftUser ephesoftUser) {
 		List<BatchInstance> batchInstance = null;
 		if (null == statusList || statusList.isEmpty()) {
 			LOGGER.info("batchInstanceStatus is null or empty.");
 		} else {
 			batchInstance = batchInstanceDao.getBatchInstances(statusList, firstResult, maxResults, orderList, filterClauseList,
-					batchPriorities, userName, currentUserRoles);
+					batchPriorities, userName, userRoles,ephesoftUser);
 		}
 		return batchInstance;
 	}
@@ -222,20 +234,45 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 		if (null == batchInstanceFilters || batchInstanceFilters.isEmpty()) {
 			LOGGER.info("batchInstanceFilters is null or empty.");
 		} else {
-			batchInstance = batchInstanceDao.getBatchInstances(null, -1, -1, null, batchInstanceFilters, null, null, null);
+			batchInstance = batchInstanceDao.getBatchInstances(null, -1, -1, null, batchInstanceFilters, null, null,null,null);
 		}
 		return batchInstance;
 	}
 
+	@Transactional(readOnly = true)
+	@Override
+	public List<BatchInstance> getBatchInstancesForStatusPriority(final List<BatchInstanceStatus> statusList,
+			final List<BatchPriority> batchPriorities, Set<String> userRoles) {
+		return batchInstanceDao.getBatchInstancesForStatusPriority(statusList, batchPriorities, userRoles);
+	}
+	
+	@Override
+	public Set<String> getRolesForBatchInstance(BatchInstance batchInstance) {
+		Set<String> roles = new HashSet<String>();
+		// add all the groups of the batch class
+		List<BatchClassGroups> bcGrps = batchInstance.getBatchClass().getAssignedGroups();
+		for (BatchClassGroups grp : bcGrps) {
+			roles.add(grp.getGroupName());
+		}
+		
+		// add all the groups of the batch instance
+		roles.addAll(batchInstanceGrpDao.getRolesForBatchInstance(batchInstance.getIdentifier()));
+		return roles;
+	}
+
 	/**
 	 * An api to fetch next batch instance from batch instance table for status READY_FOR_REVIEW and READY_FOR_VALIDATION. This will
-	 * have minimum priority with above restrictions.
+	 * have minimum priority with above restrictions and result of the query will be order by last modified. API will return those
+	 * batch instance having the access by the user role on the basis of ephesoft user.
 	 * 
-	 * @return BatchInstance batch instance for status READY_FOR_REVIEW and READY_FOR_VALIDATION.
+	 * @param userRoles Set<{@link String}>
+	 * @param ephesoftUser {@link EphesoftUser}
+	 * @return {@link BatchInstance} batch instance for status READY_FOR_REVIEW and READY_FOR_VALIDATION and result of the query will
+	 *         be order by last modified.
 	 */
 	@Transactional(readOnly = true)
 	@Override
-	public BatchInstance getHighestPriorityBatchInstance(final Set<String> userRole) {
+	public BatchInstance getHighestPriorityBatchInstance(final Set<String> userRoles, EphesoftUser ephesoftUser) {
 		BatchInstance batchInstance = null;
 		int firstResult = 0;
 		int maxResults = 1;
@@ -243,7 +280,8 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 		statusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
 
-		List<BatchInstance> batchInstanceList = batchInstanceDao.getBatchInstances(statusList, firstResult, maxResults, userRole);
+		List<BatchInstance> batchInstanceList = batchInstanceDao.getBatchInstances(statusList, firstResult, maxResults, userRoles,
+				ephesoftUser);
 
 		if (null != batchInstanceList && !batchInstanceList.isEmpty()) {
 			batchInstance = batchInstanceList.get(0);
@@ -271,46 +309,62 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for a given status list and batch priority and current user required
+	 * An api to fetch count of the batch instances for a given status list and batch priority and isCurrUsrNotReq is used for adding
+	 * the batch instance access by the current user. This API will return the batch instance having access by the user roles on the
+	 * basis of ephesoft user.
 	 * 
-	 * @param batchInstStatusList List<BatchInstanceStatus>
+	 * @param batchInstStatusList List<{@link BatchInstanceStatus}>
 	 * @param batchPriorities the priority list of the batches
 	 * @param isCurrUsrNotReq true if the current user can be anyone. False if current user cannot be null.
-	 * @return the count satisfying the above requirements
+	 * @param currentUser {@link String}
+	 * @param userRoles Set<{@link String}>
+	 * @param ephesoftUser {@link EphesoftUser}
+	 * @return int, the count satisfying the above requirements
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final boolean isCurrUsrNotReq, final String currentUser, final Set<String> currentRole) {
-		return batchInstanceDao.getCount(batchInstStatusList, batchPriorities, isCurrUsrNotReq, currentRole, currentUser);
+			final boolean isCurrUsrNotReq, final String currentUser, final Set<String> userRoles, EphesoftUser ephesoftUser) {
+		return batchInstanceDao
+				.getCount(batchInstStatusList, batchPriorities, isCurrUsrNotReq, userRoles, currentUser, ephesoftUser);
 	}
 
 	/**
-	 * An api to return total count of batches in the batch instance table.
+	 * An api to return total count of batches from the batch instance table having access by the user roles on the basis of ephesoft
+	 * user.
 	 * 
-	 * @return total count
+	 * @param currentUser {@link String}
+	 * @param userRoles Set<{@link String}>
+	 * @param ephesoftUser {@link EphesoftUser}
+	 * @return int, total count
 	 */
 	@Transactional(readOnly = true)
 	@Override
-	public int getAllCount(final String currentUser, final Set<String> currentRole) {
-		return batchInstanceDao.getAllCount(currentUser, currentRole);
+	public int getAllCount(final String currentUser, final Set<String> userRoles, EphesoftUser ephesoftUser) {
+		return batchInstanceDao.getAllCount(currentUser, userRoles, ephesoftUser);
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance status list and batch priority list.
+	 * An api to fetch count of the batch instance table for batch instance status list, batch priority list on the basis of the user
+	 * roles. API will return the count for the batch instance having access by the user roles and current user name on the basis of
+	 * the ephesoft user.
 	 * 
-	 * @param batchInstStatusList List<BatchInstanceStatus>
-	 * @return count of the batch instance present for the batch instance status list and batch priority list.
+	 * @param batchInstStatusList List<{@link BatchInstanceStatus}>
+	 * @param batchPriorities List<{@link BatchPriority}>
+	 * @param userRoles Set<{@link String}>
+	 * @param currentUserName {@link String} current logged in user name.
+	 * @param ephesoftUser Enum for ephesoft user.
+	 * @return int,count of the batch instance present for the batch instance status list and batch priority list.
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final Set<String> currentRole, final String currentUserName) {
+			final Set<String> userRoles, final String currentUserName, EphesoftUser ephesoftUser) {
 		int count = -1;
 		if (null == batchInstStatusList || batchInstStatusList.isEmpty()) {
 			LOGGER.info("filterClauseList is null or empty.");
 		} else {
-			count = batchInstanceDao.getCount(batchInstStatusList, batchPriorities, currentRole, currentUserName);
+			count = batchInstanceDao.getCount(batchInstStatusList, batchPriorities, userRoles, currentUserName, ephesoftUser);
 		}
 		return count;
 	}
@@ -549,9 +603,9 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 
 	@Transactional
 	@Override
-	public List<BatchInstance> getBatchInstanceByBatchName(String batchName) {
+	public List<BatchInstance> getBatchInstanceByBatchName(String batchName, Set<String> userRoles) {
 		List<BatchInstance> batchInstances = null;
-		batchInstances = batchInstanceDao.getBatchInstancesByBatchName(batchName);
+		batchInstances = batchInstanceDao.getBatchInstancesByBatchName(batchName, userRoles);
 		return batchInstances;
 	}
 
@@ -570,7 +624,16 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 				// database.
 				LOGGER.info(currentUser + " is getting lock on batch " + batchInstanceIdentifier);
 				if (!currentUser.trim().isEmpty()) {
-					batchInstance.setCurrentUser(currentUser);
+					switch (batchInstance.getStatus()) {
+						case READY_FOR_REVIEW:
+							batchInstance.setReviewUserName(currentUser);
+							batchInstance.setCurrentUser(currentUser);
+							break;
+						case READY_FOR_VALIDATION:
+							batchInstance.setValidationUserName(currentUser);
+							batchInstance.setCurrentUser(currentUser);
+							break;
+					}
 				}
 				batchInstanceDao.updateBatchInstance(batchInstance);
 			}
@@ -696,34 +759,38 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	}
 
 	/**
-	 * An api to fetch all the batch instances excluded remotely executing batches by status list. Parameter firstResult set a limit
+	 * An api to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit
 	 * upon the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set
-	 * the sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided.
+	 * the sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided. This will
+	 * return only those batch instance which having access by the user roles on the basis of the ephesoft user.
 	 * 
-	 * @param statusList List<BatchInstanceStatus> status list of batch instance status.
+	 * @param batchNameToBeSearched {@link String}
+	 * @param statusList List<{@link BatchInstanceStatus}> status list of batch instance status.
 	 * @param firstResult the first result to retrieve, numbered from <tt>0</tt>
 	 * @param maxResults maxResults the maximum number of results
-	 * @param orderList List<Order> orderList set the sort property and order of that property. If orderList parameter is null or empty
-	 *            then this parameter is avoided.
-	 * @param filterClauseList List<BatchInstanceFilter> this will add the where clause to the criteria query based on the property
-	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
-	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
-	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 * @param currentUserRoles current user.
-	 * @return List<BatchInstance> return the batch instance list.
+	 * @param orderList List<{@link Order}> orderList set the sort property and order of that property. If orderList parameter is null
+	 *            or empty then this parameter is avoided.
+	 * @param filterClauseList List<{@link BatchInstanceFilter}> this will add the where clause to the criteria query based on the
+	 *            property name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
+	 * @param batchPriorities List<{@link BatchPriority}> this will add the where clause to the criteria query based on the priority
+	 *            list selected. If batchPriorities parameter is null or empty then this parameter is avoided.
+	 * @param currentUser {@link String}
+	 * @param userRoles Set<{@link String}>
+	 * @param ephesoftUser {@link EphesoftUser}
+	 * @return List<{@link BatchInstance}> return the batch instance list.
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String batchNameToBeSearched,
 			List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults, final List<Order> orderList,
 			final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities, String userName,
-			Set<String> currentUserRoles) {
+			Set<String> userRoles, EphesoftUser ephesoftUser) {
 		List<BatchInstance> batchInstance = null;
 		if (null == statusList || statusList.isEmpty()) {
 			LOGGER.info("batchInstanceStatus is null or empty.");
 		} else {
 			batchInstance = batchInstanceDao.getBatchInstancesExcludedRemoteBatch(batchNameToBeSearched, statusList, firstResult,
-					maxResults, orderList, filterClauseList, batchPriorities, userName, currentUserRoles);
+					maxResults, orderList, filterClauseList, batchPriorities, userName, userRoles, ephesoftUser);
 		}
 		return batchInstance;
 	}
@@ -742,20 +809,20 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 * @param currentUserRoles current user.
+	 * @param userRoles current user.
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult,
 			final int maxResults, final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList,
-			final List<BatchPriority> batchPriorities, String userName, Set<String> currentUserRoles) {
+			final List<BatchPriority> batchPriorities, String userName, Set<String> userRoles) {
 		List<BatchInstance> batchInstance = null;
 		if (null == statusList || statusList.isEmpty()) {
 			LOGGER.info("batchInstanceStatus is null or empty.");
 		} else {
 			batchInstance = batchInstanceDao.getRemoteBatchInstances(statusList, firstResult, maxResults, orderList, filterClauseList,
-					batchPriorities, userName, currentUserRoles);
+					batchPriorities, userName, userRoles);
 		}
 		return batchInstance;
 	}
@@ -780,23 +847,23 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 
 	@Override
 	public List<BatchInstance> getBatchInstanceListByBatchNameAndStatus(String batchName, BatchInstanceStatus batchStatus,
-			String userName, Set<String> allBatchClassByUserRoles) {
+			String userName, Set<String> userRoles) {
 		List<BatchInstance> batchInstanceList = null;
 		if (null == batchStatus) {
 			LOGGER.info("batchInstanceStatus is null.");
 		} else {
 			batchInstanceList = batchInstanceDao.getBatchInstanceListByBatchNameAndStatus(batchName, batchStatus, userName,
-					allBatchClassByUserRoles);
+					userRoles);
 		}
 		return batchInstanceList;
 	}
-	
+
 	@Transactional
 	@Override
 	public void clearCurrentUser(String batchInstanceIdentifier) {
 		batchInstanceDao.clearCurrentUser(batchInstanceIdentifier);
 	}
-	
+
 	/**
 	 * This API fetches all the batch instances on the basis of batch status list passed.
 	 * 
@@ -806,10 +873,25 @@ public class BatchInstanceServiceImpl implements BatchInstanceService {
 	@Override
 	public List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList) {
 		List<BatchInstance> batchInstanceList = null;
-		if(null != batchStatusList && ! batchStatusList.isEmpty()){
+		if (null != batchStatusList && !batchStatusList.isEmpty()) {
 			batchInstanceList = batchInstanceDao.getBatchInstanceByStatusList(batchStatusList);
 		}
 		return batchInstanceList;
 	}
 
+	/**
+	 * This API fetches batch instances which having access by the user roles on the basis of ephesoft user.
+	 * 
+	 * @param userRoles
+	 * @param batchInstanceIdentifier
+	 * @param currentUserName
+	 * @param ephesoftUser
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	@Override
+	public BatchInstance getBatchInstanceByUserRole(Set<String> userRoles, String batchInstanceIdentifier, String currentUserName,
+			EphesoftUser ephesoftUser) {
+		return batchInstanceDao.getBatchInstanceByUserRole(userRoles, batchInstanceIdentifier, currentUserName, ephesoftUser);
+	}
 }

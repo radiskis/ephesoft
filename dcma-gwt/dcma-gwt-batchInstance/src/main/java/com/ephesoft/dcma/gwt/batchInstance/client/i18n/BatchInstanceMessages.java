@@ -67,4 +67,18 @@ public interface BatchInstanceMessages extends LocaleCommonMessages {
 	String MSG_RESTART_ALL_CONFIRMATION_TITLE = "restart_all_confirmation_title";
 	String MSG_RESTART_ALL_FAILURE = "restart_all_failure";
 	String MSG_RESTART_ALL_TEXT = "restart_all_text";
+	String MSG_DELETE_ALL_CONFIRM = "delete_all_confirm";
+	String MSG_DELETE_ALL_TITLE = "delete_all_title";
+	String MSG_DELETE_ALL_FAILURE = "delete_all_failure";
+	String MSG_DELETE_ALL_SUCCESS = "delete_all_success";
+	String MSG_DELETE_ALL_STATUS_IMPROPER = "delete_all_status_improper";
+
+	String MSG_STATUS_NEITHER_REVIEW_NOR_VALIDATION = "status_of_batch_is_neither_review_nor_valiation";
+	String MSG_UNABLE_TO_RETRIEVE_BATCH = "unable_to_retrieve_batch";
+	String MSG_UNABLE_TO_GET_LOCK = "unable_to_get_lock_on_batch_instance";
+	String MSG_PRESS_OK_TO_NEVIGATE = "press_ok_button_to_nevigate";
+	String MSG_NAVIGATE_TO_REVIEW_VALIDATE_SCREEN = "navigate_to_review_validate_window";
+	String MSG_DEL_LOCKED_BATCHES = "delete_all_locked_batches";
+	String MSG_DELETE_ALL_NO_RECORD = "delete_all_no_record";
+
 }

@@ -35,7 +35,11 @@
 
 package com.ephesoft.dcma.kvfieldcreation.service;
 
+import java.util.List;
+
+import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.core.DCMAException;
+import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
 /**
@@ -55,4 +59,14 @@ public interface KVFieldCreatorService {
 	 * @throws DCMAException if any error or exception occurs
 	 */
 	void createKeyValueField(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
+
+	/**
+	 * Method to give the list of possible KV Field patterns from the given HOCR and the Value.
+	 * 
+	 * @param value
+	 * @param hocrPage
+	 * @return
+	 * @throws DCMAException
+	 */
+	List<KVExtraction> createKeyValueFieldAPI(String value, HocrPage hocrPage) throws DCMAException;
 }

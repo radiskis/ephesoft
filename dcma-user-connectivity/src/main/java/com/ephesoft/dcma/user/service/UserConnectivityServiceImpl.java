@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.user.service;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ephesoft.dcma.user.connectivity.UserConnectivity;
+import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
 import com.ephesoft.dcma.user.connectivity.factory.UserConnectivityFactory;
 
 /**
@@ -65,6 +67,11 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 	 */
 	@Autowired
 	private UserConnectivityFactory factory;
+	
+	/**
+	 * This value get from the user.super_admin in user-connectivity.properties file.
+	 */
+	private String superAdmins;
 
 	@Override
 	public Set<String> getAllGroups() {
@@ -117,5 +124,80 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		LOG.info("Successfully returning users.");
 		return resultAllUser;
 	}
+	
+	@Override
+	public Set<String> getUserGroups(String userName) {
+		LOG.info("Inside get all groups.");
+		boolean isValid = true;
+		Set<String> userGroups = null;
+		Set<String> resultAllgroups = null;
+		if (factory == null) {
+			LOG.error("User Connectivity Factory is null. Hence returning");
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userGroups = userConnectivity.getUserGroups(userName);
+				resultAllgroups = performAddtionToResultSet(userGroups);
+			}
+		}
+		LOG.info("Successfully returning groups.");
+		return resultAllgroups;
+	}
+	
+	@Override
+	public Set<String> getAllSuperAdminGroups(){
+		LOG.info("Inside get all super admin groups.");
+		Set<String> allSuperAdminGroups = null;
+		Set<String> resultAllSuperAdminGroups = null;
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error("User Connectivity Factory is null. Hence returning");
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				//userConnectivity.setSuperAdminGroups(groups);
+				allSuperAdminGroups = getAllSuperAdminRoles();
+				resultAllSuperAdminGroups = performAddtionToResultSet(allSuperAdminGroups);
+			}
+		}
+		LOG.info("Successfully returning super admin groups.");
+		return resultAllSuperAdminGroups;
+		
+	}
+	
+	public Set<String> getAllSuperAdminRoles() {
+		String superAdminGroups = getSuperAdmins();
+		Set<String> superAdminGroupSet = new HashSet<String>();
+		if(superAdminGroups!=null && !superAdminGroups.isEmpty()){
+			String delimiter = UserConnectivityConstant.DOUBLE_SEMICOLON_DELIMITER;
+			String[] superAdmins = superAdminGroups.split(delimiter);
+			if(superAdmins != null){
+			for(String superAdmin : superAdmins){
+				if(superAdmin != null && !superAdmin.isEmpty())
+						superAdminGroupSet.add(superAdmin);
+				}
+			}
+		  }
+		return superAdminGroupSet;
+	}
+	
+	/**
+	 * @param superAdmins the superAdmins to set
+	 */
+	public void setSuperAdmins(String superAdmins) {
+		this.superAdmins = superAdmins;
+	}
 
+	/**
+	 * @return the superAdmins
+	 */
+	public String getSuperAdmins() {
+		return superAdmins;
+	}
+	
+	
 }

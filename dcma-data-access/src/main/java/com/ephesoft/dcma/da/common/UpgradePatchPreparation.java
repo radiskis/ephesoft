@@ -274,11 +274,13 @@ public class UpgradePatchPreparation {
 				BatchClass createdBatchClass = createPatchForBatchClass(batchClassName, service);
 				if (createdBatchClass != null) {
 					BatchClass batchClass = service.getBatchClassByIdentifier(batchClassName);
+
 					ArrayList<BatchClass> batchClassList = batchClassNameVsBatchClassMap.get(batchClass.getName());
 					if (batchClassList == null) {
 						batchClassList = new ArrayList<BatchClass>();
 						batchClassNameVsBatchClassMap.put(batchClass.getName(), batchClassList);
 					}
+
 					batchClassList.add(createdBatchClass);
 				}
 
@@ -368,12 +370,10 @@ public class UpgradePatchPreparation {
 				prepareFunctionKeyForSerialization(documentType);
 			}
 			batchClass.setDocumentTypes(newDocumentType);
-
 			createdBatchClass = batchClass;
 			if (createdBatchClass != null) {
 				prepareBatchClassForSerialization(createdBatchClass, batchClassModules, newDocumentType);
 			}
-
 		} catch (NumberFormatException e) {
 			LOG.error("Module Id should be numeric." + e.getMessage(), e);
 		}
@@ -425,6 +425,7 @@ public class UpgradePatchPreparation {
 		createdBatchClass.setAssignedGroups(null);
 		createdBatchClass.setBatchClassModules(batchClassModules);
 		createdBatchClass.setDocumentTypes(documentTypes);
+		createdBatchClass.setCurrentUser(null);
 	}
 
 	private static void preparePluginForSerialization(BatchClassPlugin createdPlugin) {

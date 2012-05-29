@@ -67,7 +67,13 @@ public class OCREngineUtil {
 		XPath xpath = xFactory.newXPath();
 		XPathExpression pageExpr = xpath.compile("//div[@class=\"ocr_page\"]");
 		XPathExpression wordExpr = xpath.compile("//span[@class=\"ocr_word\"]");
+		
+		// Output format supported by Tesseract 3.00
 		XPathExpression xOcrWordExpr = xpath.compile("//span[@class=\"xocr_word\"]");
+		
+		// Output format supported by Tesseract 3.01
+		XPathExpression ocrXWordExpr = xpath.compile("//span[@class=\"ocrx_word\"]");
+		
 		org.w3c.dom.Document doc2 = null;
 		try {
 			doc2 = XMLUtil.createDocumentFrom(inputStream);
@@ -87,6 +93,11 @@ public class OCREngineUtil {
 					Node word = (Node) xOcrWordExpr.evaluate(wordNode, XPathConstants.NODE);
 					if (word != null) {
 						wordNode.setTextContent(word.getTextContent());
+					} else {
+						word = (Node) ocrXWordExpr.evaluate(wordNode, XPathConstants.NODE);
+						if (word != null) {
+							wordNode.setTextContent(word.getTextContent());
+						}
 					}
 				}
 			}

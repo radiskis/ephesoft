@@ -35,7 +35,10 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.batch;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,6 +55,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield.BatchClassFiel
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.CopyDocumentView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.DocumentTypeListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.email.EmailListView;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ConfigureModuleView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ModuleListView;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
@@ -74,6 +78,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -121,6 +126,8 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	private final EmailListView emailListView;
 
+	private final ConfigureModuleView addModuleView;
+
 	@UiField
 	protected LayoutPanel docTypeLayoutPanel;
 
@@ -141,6 +148,9 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	@UiField
 	protected Button editModuleButton;
+
+	@UiField
+	protected Button addModuleButton;
 
 	@UiField
 	protected HorizontalPanel buttonPanel;
@@ -221,8 +231,14 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		editEmailButton.setHeight(TWENTY_PIXEL);
 		deleteDocumentButton.setHeight(TWENTY_PIXEL);
 		deleteEmailButton.setHeight(TWENTY_PIXEL);
+
+		addModuleView = new ConfigureModuleView();
 		editModuleButton.setText(AdminConstants.EDIT_BUTTON);
 		editModuleButton.setHeight(TWENTY_PIXEL);
+		addModuleButton.setText(AdminConstants.EDIT_LIST_BUTTON);
+		addModuleButton.setHeight(TWENTY_PIXEL);
+		buttonPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+
 		buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		documentButtonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		emailButtonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -248,21 +264,52 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 	}
 
 	public void createModuleList(Collection<BatchClassModuleDTO> modules) {
-		List<Record> recordList = setModuleList(modules);
-		moduleListPresenter = new ModuleListPresenter(presenter.getController(), moduleListView);
-		moduleListPresenter.setModuleDTOList(modules);
 
-		moduleListView.listView.initTable(recordList.size(), moduleListPresenter, recordList, true, false);
+		List<BatchClassModuleDTO> modulesList = new ArrayList<BatchClassModuleDTO>(modules);
+		// Sort modules
+		presenter.getController().getMainPresenter().sortModulesList(modulesList);
+		List<Record> recordList = setModuleList(modulesList);
+		moduleListPresenter = new ModuleListPresenter(presenter.getController(), moduleListView);
+		moduleListPresenter.setModuleDTOList(modulesList);
+
+		moduleListView.listView.initTable(recordList.size(), moduleListPresenter, recordList, true, false, moduleListPresenter);
+	}
+
+	/**
+	 * @param modulesList
+	 */
+	private void sortModulesList(List<BatchClassModuleDTO> modulesList) {
+		Collections.sort(modulesList, new Comparator<BatchClassModuleDTO>() {
+
+			@Override
+			public int compare(BatchClassModuleDTO batchClassModuleDTO1, BatchClassModuleDTO batchClassModuleDTO2) {
+				int result;
+				Integer orderNumberOne = batchClassModuleDTO1.getOrderNumber();
+				Integer orderNumberTwo = batchClassModuleDTO2.getOrderNumber();
+				if (orderNumberOne != null && orderNumberTwo != null) {
+					result = orderNumberOne.compareTo(orderNumberTwo);
+				} else if (orderNumberOne == null && orderNumberTwo == null) {
+					result = 0;
+				} else if (orderNumberOne == null) {
+					result = -1;
+				} else {
+					result = 1;
+				}
+				return result;
+			}
+		});
 	}
 
 	public List<Record> setModuleList(Collection<BatchClassModuleDTO> modules) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final BatchClassModuleDTO batchClassModuleDTO : modules) {
-			Record record = new Record(batchClassModuleDTO.getIdentifier());
-			record.addWidget(moduleListView.name, new Label(batchClassModuleDTO.getModule().getName()));
-			record.addWidget(moduleListView.description, new Label(batchClassModuleDTO.getModule().getDescription()));
-			recordList.add(record);
+			if (!batchClassModuleDTO.isDeleted()) {
+				Record record = new Record(batchClassModuleDTO.getIdentifier());
+				record.addWidget(moduleListView.name, new Label(batchClassModuleDTO.getModule().getName()));
+				record.addWidget(moduleListView.description, new Label(batchClassModuleDTO.getModule().getDescription()));
+				recordList.add(record);
+			}
 		}
 		return recordList;
 	}
@@ -271,7 +318,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		List<Record> recordList = setEmailList(emailConfigurationDTOs);
 		emailListPresenter = new EmailListPresenter(presenter.getController(), emailListView);
 		emailListPresenter.setEmailConfigurationDTOList(emailConfigurationDTOs);
-		emailListView.listView.initTable(recordList.size(), emailListPresenter, recordList, true, false);
+		emailListView.listView.initTable(recordList.size(), emailListPresenter, recordList, true, false, emailListPresenter);
 	}
 
 	public List<Record> setEmailList(Collection<EmailConfigurationDTO> emailConfigurationDTOs) {
@@ -307,7 +354,8 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		List<Record> recordList = setBatchClassFieldList(batchClassFieldDTOs);
 		batchClassFieldListPresenter = new BatchClassFieldListPresenter(presenter.getController(), batchClassFieldListView);
 		batchClassFieldListPresenter.setBatchClassFieldDTOList(batchClassFieldDTOs);
-		batchClassFieldListView.listView.initTable(recordList.size(), batchClassFieldListPresenter, recordList, true, false);
+		batchClassFieldListView.listView.initTable(recordList.size(), batchClassFieldListPresenter, recordList, true, false,
+				batchClassFieldListPresenter);
 	}
 
 	public List<Record> setBatchClassFieldList(Collection<BatchClassFieldDTO> batchClassFieldDTOs) {
@@ -330,7 +378,8 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 		List<Record> recordList = setDocumentTypeList(documentTypeDTOs);
 		documentTypeListPresenter = new DocumentTypeListPresenter(presenter.getController(), docTypeListView);
 		documentTypeListPresenter.setDocumentTypeDTOList(documentTypeDTOs);
-		docTypeListView.listView.initTable(recordList.size(), documentTypeListPresenter, recordList, true, false);
+		docTypeListView.listView.initTable(recordList.size(), documentTypeListPresenter, recordList, true, false,
+				documentTypeListPresenter);
 	}
 
 	public List<Record> setDocumentTypeList(Collection<DocumentTypeDTO> documentTypeDTOs) {
@@ -399,21 +448,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	@UiHandler("editDocumentButton")
 	public void onEditDocumentButtonClicked(ClickEvent clickEvent) {
-		String rowIndex = docTypeListView.listView.getSelectedRowIndex();
-		int rowCount = docTypeListView.listView.getTableRecordCount();
-		if (rowIndex == null || rowIndex.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getMessageValue(
-						BatchClassManagementConstants.EDIT_DOCUMENT_TITLE));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getMessageValue(
-						BatchClassManagementConstants.EDIT_DOCUMENT_TITLE));
-			}
-			return;
-		}
-		presenter.onEditDocumentButtonClicked(rowIndex);
+		documentTypeListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("copyDocumentButton")
@@ -424,11 +459,11 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 			if (rowCount == 0) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NO_RECORD_TO_COPY), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.COPY_DOCUMENT_TITLE));
+						BatchClassManagementConstants.COPY_DOCUMENT_TITLE),Boolean.TRUE);
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.COPY_DOCUMENT_TITLE));
+						BatchClassManagementConstants.COPY_DOCUMENT_TITLE),Boolean.TRUE);
 			}
 			return;
 		}
@@ -451,19 +486,18 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 			if (rowCount == 0) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_DOCUMENT_TITLE));
+						BatchClassManagementConstants.DELETE_DOCUMENT_TITLE),Boolean.TRUE);
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_DOCUMENT_TITLE));
+						BatchClassManagementConstants.DELETE_DOCUMENT_TITLE),Boolean.TRUE);
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_DOCUMENT_TYPE_CONFORMATION));
-		confirmationDialog
-				.setDialogTitle(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_DOCUMENT_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_DOCUMENT_TYPE_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_DOCUMENT_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -477,28 +511,39 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	@UiHandler("editModuleButton")
 	public void onEditModuleButtonClicked(ClickEvent clickEvent) {
-		String identifier = moduleListView.listView.getSelectedRowIndex();
+		moduleListPresenter.onEditButtonClicked();
+	}
+
+	
+	@UiHandler("addModuleButton")
+	public void onAddModuleButtonClicked(ClickEvent clickEvent) {
+
+		//presenter.getController().getBatchClassManagementPresenter().getView().toggleDeployButtonEnable(false);
+		String identifier = presenter.getController().getBatchClass().getIdentifier();
+
 		if (identifier == null || identifier.isEmpty()) {
 			ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-					BatchClassManagementConstants.EDIT_MODULE_TITLE));
+					BatchClassManagementConstants.EDIT_MODULE_TITLE), true);
 			return;
 		}
-		BatchClassModuleDTO batchClassModuleDTO = presenter.getController().getBatchClass().getModuleByIdentifier(identifier);
-		/*
-		 * if (batchClassModuleDTO.getModule().getName().contains( AdminConstants.REVIEW_DOCUMENT)) {
-		 * ConfirmationDialogUtil.showConfirmationDialog (LocaleDictionary.get().getMessageValue(
-		 * BatchClassManagementMessages.NOT_EDITABLE_WARNING), LocaleDictionary.get().getConstantValue(
-		 * BatchClassManagementConstants.EDIT_MODULE_TITLE)); return; }
-		 */
-		presenter.getController().getMainPresenter().showModuleView(batchClassModuleDTO);
+
+		List<String> modulesList = new ArrayList<String>(0);
+		List<BatchClassModuleDTO> batchClassModuleDTOs = new ArrayList<BatchClassModuleDTO>(presenter.getController().getBatchClass()
+				.getModules());
+
+		presenter.getController().getMainPresenter().sortModulesList(batchClassModuleDTOs);
+		for (BatchClassModuleDTO batchClassModule : batchClassModuleDTOs) {
+			modulesList.add(batchClassModule.getWorkflowName());
+
+		}
+
+		presenter.getController().getMainPresenter().showAddModuleView(modulesList);
 	}
 
 	@UiHandler("addEmailButton")
@@ -508,21 +553,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	@UiHandler("editEmailButton")
 	public void onEditEmailButtonClicked(ClickEvent clickEvent) {
-		String rowIndex = emailListView.listView.getSelectedRowIndex();
-		int rowCount = emailListView.listView.getTableRecordCount();
-		if (rowIndex == null || rowIndex.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE));
-			}
-			return;
-		}
-		presenter.onEditEmailButtonClicked(rowIndex);
+		emailListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteEmailButton")
@@ -533,19 +564,18 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 			if (rowCount == 0) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE));
+						BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE),Boolean.TRUE);
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE));
+						BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE),Boolean.TRUE);
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_EMAIL_CONFIGURATION_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-				BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_EMAIL_CONFIGURATION_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_EMAIL_CONFIGURATION_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -559,9 +589,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+	
 	}
 
 	@UiHandler("addBatchClassFieldButton")
@@ -571,21 +599,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 
 	@UiHandler("editBatchClassFieldButton")
 	public void onEditBatchClassFieldButtonClicked(ClickEvent clickEvent) {
-		String rowIndex = batchClassFieldListView.listView.getSelectedRowIndex();
-		int rowCount = batchClassFieldListView.listView.getTableRecordCount();
-		if (rowIndex == null || rowIndex.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE));
-			}
-			return;
-		}
-		presenter.onEditBatchClassFieldButtonClicked(rowIndex);
+		batchClassFieldListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteBatchClassFieldButton")
@@ -596,19 +610,18 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 			if (rowCount == 0) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE));
+						BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE),Boolean.TRUE);
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE));
+						BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE),Boolean.TRUE);
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_BATCH_CLASS_FIELD_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-				BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_BATCH_CLASS_FIELD_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_BATCH_CLASS_FIELD_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -622,9 +635,7 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 	public LayoutPanel getViewEditLayoutPanel() {
@@ -662,7 +673,19 @@ public class BatchClassView extends View<BatchClassViewPresenter> {
 	public BatchClassFieldListView getBatchClassFieldListView() {
 		return batchClassFieldListView;
 	}
+
 	/*
 	 * public BatchClassFieldListPresenter getBatchClassFieldListPresenter() { return batchClassFieldListPresenter; }
 	 */
+
+	/**
+	 * @return the addModuleView
+	 */
+	public ConfigureModuleView getAddModuleView() {
+		return addModuleView;
+	}
+
+	public void setAddModuleButtonVisibility(boolean visibility) {
+		addModuleButton.setEnabled(visibility);
+	}
 }

@@ -35,11 +35,11 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,18 +54,26 @@ public class BatchClassPluginDTO implements IsSerializable {
 	private String identifier;
 
 	private int orderNumber;
+	
+	private boolean isDeleted;
+	
+	private boolean isNew;
+	
+	
 
-	private Map<String, BatchClassPluginConfigDTO> batchClassPluginConfigsMap = new LinkedHashMap<String, BatchClassPluginConfigDTO>();
+	private List<BatchClassPluginConfigDTO> batchClassPluginConfigsList = new LinkedList<BatchClassPluginConfigDTO>();
 
 	private Map<String, BatchClassDynamicPluginConfigDTO> batchClassDynamicPluginConfigsMap = new LinkedHashMap<String, BatchClassDynamicPluginConfigDTO>();
 
 	// getting the sorted list of plugin configs sorted by order number of
 	// plugin_configs
 	public Collection<BatchClassPluginConfigDTO> getBatchClassPluginConfigs() {
+		return batchClassPluginConfigsList;
+	}
 
-		List<BatchClassPluginConfigDTO> pluginConfigs = new ArrayList<BatchClassPluginConfigDTO>(batchClassPluginConfigsMap.values());
+	public void sortBatchClassPluginConfigList() {
 
-		Collections.sort(pluginConfigs, new Comparator<BatchClassPluginConfigDTO>() {
+		Collections.sort(batchClassPluginConfigsList, new Comparator<BatchClassPluginConfigDTO>() {
 
 			@Override
 			public int compare(BatchClassPluginConfigDTO batchClassPluginConfigDTOOne,
@@ -86,23 +94,15 @@ public class BatchClassPluginDTO implements IsSerializable {
 			}
 
 		});
-		return pluginConfigs;
+
 	}
 
 	public void addBatchClassPluginConfig(BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
-		this.batchClassPluginConfigsMap.put(batchClassPluginConfigDTO.getIdentifier(), batchClassPluginConfigDTO);
-	}
-
-	public void addBatchClassPluginConfig(String identifier, BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
-		this.batchClassPluginConfigsMap.put(identifier, batchClassPluginConfigDTO);
-	}
-
-	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOById(String identifier) {
-		return batchClassPluginConfigsMap.get(identifier);
+		this.batchClassPluginConfigsList.add(batchClassPluginConfigDTO);
 	}
 
 	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByName(String name) {
-		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsMap.values()) {
+		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
 			if (dto != null && dto.getName() != null && dto.getName().equals(name)) {
 				return dto;
 			}
@@ -111,7 +111,7 @@ public class BatchClassPluginDTO implements IsSerializable {
 	}
 
 	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByQualifier(String qualifier) {
-		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsMap.values()) {
+		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
 			if (dto.getQualifier() != null && dto.getQualifier().equals(qualifier)) {
 				return dto;
 			}
@@ -174,6 +174,38 @@ public class BatchClassPluginDTO implements IsSerializable {
 
 	public BatchClassDynamicPluginConfigDTO getBatchClassDynamicPluginConfigDTOById(String identifier) {
 		return batchClassDynamicPluginConfigsMap.get(identifier);
+	}
+
+	
+	/**
+	 * @return the isDeleted
+	 */
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	
+	/**
+	 * @param isDeleted the isDeleted to set
+	 */
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
+	
+	/**
+	 * @return the isNew
+	 */
+	public boolean isNew() {
+		return isNew;
+	}
+
+	
+	/**
+	 * @param isNew the isNew to set
+	 */
+	public void setNew(boolean isNew) {
+		this.isNew = isNew;
 	}
 
 }

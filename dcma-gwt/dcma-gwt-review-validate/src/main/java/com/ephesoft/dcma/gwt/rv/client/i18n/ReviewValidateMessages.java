@@ -125,20 +125,20 @@ public interface ReviewValidateMessages extends LocaleCommonMessages {
 
 	String DOCUMENT_TYPE_ERROR = "document_type_error";
 
-	String error_batch_status = "error_batch_status";
-	
+	String ERROR_BATCH_STATUS = "error_batch_status";
+
 	String NONE_SELECTED_TEXT = "none_selected";
-	
+
 	String msg_script_execution_failed = "msg_script_execution_failed";
-	
+
 	String ERROR_MESSAGE = "error_value";
 
 	String DELETE_ALL_ROW_CONFIRMATION = "delete_all_row_confirmation";
-	
+
 	String DELETE_ALL_ROW_TITLE = "delete_all_row_title";
 
 	String ADD_NEW_TABLE_FAIL = "add_new_table_fail";
-	
+
 	String COMPLETE_MANUAL_EXTRACTION = "first_complete_manual_extraction";
 
 	String MANUAL_EXTRACTION_TITLE = "manual_extraction_title";
@@ -153,7 +153,7 @@ public interface ReviewValidateMessages extends LocaleCommonMessages {
 
 	String UNABLE_TO_FETCH_DATA = "unable_to_fetch_data";
 
-	String EXIT_MANUAL_EXTARCTION_CONFIRMATION= "exit_manual_extracion";
+	String EXIT_MANUAL_EXTARCTION_CONFIRMATION = "exit_manual_extracion";
 
 	String INVALID_TABLE = "invalid_table";
 
@@ -168,5 +168,17 @@ public interface ReviewValidateMessages extends LocaleCommonMessages {
 	String UNABLE_TO_CREATE_AUTHENTICATION_FOR_EXTERNAL_APP = "unable_to_create_authentication_for_external_application";
 
 	String UNABLE_TO_EXECUTE_SCRIPT_AND_SAVE = "unable_to_execute_script_and_save";
+
+	String SCRIPT_EXECUTION_ERROR = "script_execution_error";
+
+	String SELECT_DOC_TYPE = "select_document_type";
+
+	String UNABLE_TO_GET_ZOOM_COUNT = "unable_to_get_zoom_count";
+
+	String SESSION_TIME_OUT = "session_time_out";
+
+	String UNABLE_TO_ACQUIRE_LOCK = "unable_to_acquire_lock";
+
+	String NO_RIGHT_TO_OPEN_BATCH = "no_right_to_open_batch";
 
 }

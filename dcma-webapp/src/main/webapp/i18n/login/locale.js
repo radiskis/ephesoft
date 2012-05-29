@@ -6,7 +6,8 @@ var loginConstants = {
 		//login_remember_me: "Remember Me",
 		//login_forgot_pwd: "Forgot password?",
 		login_button_text: "Login",
-		version_text: "Version:"
+		version_text: "Version:",
+		unable_to_retrive_version_info:"Unable to retrive version info"
 };
 
 /**************************** Turkish locale (suffix: _tk)*******************/
@@ -17,5 +18,6 @@ var loginConstants_tk = {
 		//login_remember_me: "Beni hatirla",
 		//login_forgot_pwd: "Sifrenizi mi unuttunuz?",
 		login_button_text: "Giris",
-		version_text: "Yorum:"
+		version_text: "Yorum:",
+		unable_to_retrive_version_info:"Sürüm bilgisi alınamadı açılamıyor"
 };

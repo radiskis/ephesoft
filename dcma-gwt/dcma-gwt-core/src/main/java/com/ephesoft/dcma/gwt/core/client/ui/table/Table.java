@@ -44,14 +44,23 @@ import java.util.Map;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.RowSelectionListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -61,16 +70,18 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
-public class Table extends ResizeComposite {
+public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 
 	interface Binder extends UiBinder<Widget, Table> {
 	}
@@ -101,7 +112,7 @@ public class Table extends ResizeComposite {
 	public static int VISIBLE_RECORD_COUNT = 5;
 
 	@UiField
-	FlexTable table;
+	FocusPanel focusPanel;
 
 	@UiField
 	FlexTable headerTable;
@@ -112,6 +123,12 @@ public class Table extends ResizeComposite {
 	@UiField
 	FlexTable navBarTable;
 
+	@UiField
+	ScrollPanel scrollPanel;
+
+	@UiField
+	FlexTable table;
+	
 	private TableData tableData;
 
 	private int totalCount;
@@ -124,18 +141,56 @@ public class Table extends ResizeComposite {
 
 	private RowSelectionListner listner;
 
+	private DoubleClickListner doubleClickListner;
+
 	private Order order;
+
+	boolean mouseOn;
 
 	private Map<Integer, RadioButtonContainer> radioButtons = new HashMap<Integer, RadioButtonContainer>();
 
-	public Table(int totalCount, TableHeader header, boolean requireRadioButton, boolean fireEventForFirstRow) {
+	public Table(int totalCount, TableHeader header, boolean requireRadioButton, boolean fireEventForFirstRow,
+			final DoubleClickListner doubleClickListner) {
 		initWidget(binder.createAndBindUi(this));
 		this.totalCount = totalCount;
 		this.fireEventForFirstRow = fireEventForFirstRow;
 		tableData = new TableData();
 		tableData.setHeader(header);
 		this.requireRadioButton = requireRadioButton;
-		navBar = new NavBar();
+		navBar = new NavBar(this);
+		this.doubleClickListner = doubleClickListner;
+		mouseOn = false;
+		if (doubleClickListner != null && totalCount != 0) {
+			focusPanel.addMouseOutHandler(new MouseOutHandler() {
+
+				@Override
+				public void onMouseOut(MouseOutEvent arg0) {
+					mouseOn = false;
+				}
+			});
+
+			focusPanel.addMouseOverHandler(new MouseOverHandler() {
+
+				@Override
+				public void onMouseOver(MouseOverEvent arg0) {
+					mouseOn = true;
+				}
+			});
+
+			addDoubleClickHandler(new DoubleClickHandler() {
+
+				@Override
+				public void onDoubleClick(DoubleClickEvent arg0) {
+					if (mouseOn) {
+						doubleClickListner.onDoubleClickTable();
+					}
+				}
+			});
+		}
+	}
+
+	public Table(int totalCount, TableHeader header, boolean requireRadioButton, boolean fireEventForFirstRow) {
+		this(totalCount, header, requireRadioButton, fireEventForFirstRow, null);
 	}
 
 	public void setPaginationListner(PaginationListner paginationListner) {
@@ -144,6 +199,10 @@ public class Table extends ResizeComposite {
 
 	public void setRowSelectionListener(RowSelectionListner rowSelectionListner) {
 		this.listner = rowSelectionListner;
+	}
+
+	public void setDoubleClickListener(DoubleClickListner doubleClickListner) {
+		this.doubleClickListner = doubleClickListner;
 	}
 
 	@Override
@@ -228,6 +287,7 @@ public class Table extends ResizeComposite {
 		HeaderColumn[] columns = header.getHeaderColumns();
 		String width = null;
 		int i = 0;
+		String radioName = null;
 		if (tableData.getRecordList() != null) {
 			if (!tableData.getRecordList().isEmpty()) {
 				for (final Record record : tableData.getRecordList()) {
@@ -241,7 +301,10 @@ public class Table extends ResizeComposite {
 						table.getCellFormatter().addStyleName(i, j, "wordWrap");
 					}
 					if (isRadioButton) {
-						final RadioButton radioButton = new RadioButton(String.valueOf(new Date().getTime()));
+						if (i == 0) {
+							radioName = String.valueOf(new Date().getTime());
+						}
+						final RadioButton radioButton = new RadioButton(radioName);
 						if (i == 0) {
 							radioButton.setValue(true);
 							selectedRowId = record.getIdentifier();
@@ -393,6 +456,17 @@ public class Table extends ResizeComposite {
 
 	public int getTableRecordCount() {
 		return tableData.getRecordList().size();
+	}
+
+
+	@Override
+	public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
+		return addDomHandler(handler, DoubleClickEvent.getType());
+	}
+
+
+	public int getStartIndex() {
+		return navBar.getStartIndex();
 	}
 
 }

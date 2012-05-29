@@ -35,9 +35,12 @@
 
 package com.ephesoft.dcma.da.dao;
 
+import java.util.List;
+
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 
 public interface BatchClassPluginDao extends CacheableDao<BatchClassPlugin> {
 
+	List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId);
 }

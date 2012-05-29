@@ -57,9 +57,12 @@
 package org.jbpm.pvm.internal.hibernate;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -139,8 +142,19 @@ public class DbSessionImpl implements DbSession {
 		return session;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void setSession(Session session) {
 		this.session = session;
+		// explicitly set the transactional level.
+		try {
+			if (this.session != null) {
+				this.session.connection().setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+			}
+		} catch (HibernateException hbe) {
+			log.info("Unable to set the transactional level.This is a warning message.");
+		} catch (SQLException sqle) {
+			log.info("Unable to set the transactional level.This is a warning message.");
+		}
 	}
 
 	public List<String> findProcessDefinitionKeys() {
@@ -150,7 +164,7 @@ public class DbSessionImpl implements DbSession {
 	public ClientProcessDefinition findLatestProcessDefinitionByKey(String processDefinitionKey) {
 		Query query = session.getNamedQuery("findProcessDefinitionsByKey");
 		query.setString("key", processDefinitionKey);
-		query.setMaxResults(1);
+		query.setMaxResults(1);		
 		ClientProcessDefinition processDefinition = (ClientProcessDefinition) query.uniqueResult();
 		return processDefinition;
 	}
@@ -221,7 +235,8 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.getNamedQuery("findExecutionById");
 		query.setString("id", executionId);
 		query.setMaxResults(1);
-		query.setLockMode("execution", LockMode.READ);
+		//query.setLockMode("execution", LockMode.READ);
+		query.setLockMode("execution", LockMode.NONE);
 		return (ClientExecution) query.uniqueResult();
 	}
 
@@ -229,7 +244,8 @@ public class DbSessionImpl implements DbSession {
 		// query definition can be found at the bottom of resource jbpm.pvm.execution.hbm.xml
 		Query query = session.getNamedQuery("findProcessInstanceById");
 		query.setString("processInstanceId", processInstanceId);
-		query.setLockMode("processInstance", LockMode.READ);
+		//query.setLockMode("processInstance", LockMode.READ);	
+		query.setLockMode("processInstance", LockMode.NONE);
 		query.setMaxResults(1);
 		return (ClientExecution) query.uniqueResult();
 	}
@@ -238,7 +254,8 @@ public class DbSessionImpl implements DbSession {
 		// query definition can be found at the bottom of resource jbpm.pvm.execution.hbm.xml
 		Query query = session.getNamedQuery("findProcessInstanceByIdIgnoreSuspended");
 		query.setString("processInstanceId", processInstanceId);
-		query.setLockMode("processInstance", LockMode.READ);
+		//query.setLockMode("processInstance", LockMode.READ);
+		query.setLockMode("processInstance", LockMode.NONE);
 		query.setMaxResults(1);
 		return (ClientExecution) query.uniqueResult();
 	}
@@ -249,7 +266,8 @@ public class DbSessionImpl implements DbSession {
 				+ "from org.jbpm.pvm.internal.model.ExecutionImpl as processInstance "
 				+ "where processInstance.processDefinitionId = :processDefinitionId " + "  and processInstance.parent is null");
 		query.setString("processDefinitionId", processDefinitionId);
-		query.setLockMode("processInstance", LockMode.READ);
+		//query.setLockMode("processInstance", LockMode.READ);
+		query.setLockMode("processInstance", LockMode.NONE);
 		return query.list();
 	}
 
@@ -327,7 +345,8 @@ public class DbSessionImpl implements DbSession {
 	List<TaskImpl> findTasks(String processInstanceId) {
 		Query query = session.createQuery("select task " + "from " + TaskImpl.class.getName() + " as task "
 				+ "where task.processInstance.id = :processInstanceId");
-		query.setLockMode("task", LockMode.READ);
+		//query.setLockMode("task", LockMode.READ);
+		query.setLockMode("task", LockMode.NONE);
 		query.setString("processInstanceId", processInstanceId);
 		return query.list();
 	}
@@ -336,7 +355,8 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.createQuery("select job " + "from " + JobImpl.class.getName() + " as job "
 				+ "where job.processInstance.id = :processInstanceId");
 		query.setString("processInstanceId", processInstanceId);
-		query.setLockMode("job", LockMode.READ);
+		//query.setLockMode("job", LockMode.READ);
+		query.setLockMode("job", LockMode.NONE);
 		return query.list();
 	}
 
@@ -345,6 +365,8 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.createQuery("select job " + "from " + JobImpl.class.getName() + " as job "
 				+ "where job.execution = :execution " + "  and job.state != '" + JobImpl.STATE_SUSPENDED + "' ");
 		query.setEntity("execution", execution);
+		query.setLockMode("job", LockMode.NONE);
+		
 		List<JobImpl> jobs = query.list();
 		for (JobImpl job : jobs) {
 			job.suspend();
@@ -354,6 +376,8 @@ public class DbSessionImpl implements DbSession {
 		query = session.createQuery("select task " + "from " + TaskImpl.class.getName() + " as task "
 				+ "where task.execution = :execution " + "  and task.state != '" + Task.STATE_SUSPENDED + "' ");
 		query.setEntity("execution", execution);
+		query.setLockMode("task", LockMode.NONE);
+		
 		List<TaskImpl> tasks = query.list();
 		for (TaskImpl task : tasks) {
 			task.suspend();
@@ -365,6 +389,8 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.createQuery("select job " + "from " + JobImpl.class.getName() + " as job "
 				+ "where job.execution = :execution " + "  and job.state = '" + Task.STATE_SUSPENDED + "' ");
 		query.setEntity("execution", execution);
+		query.setLockMode("job", LockMode.NONE);
+		
 		List<JobImpl> jobs = query.list();
 		for (JobImpl job : jobs) {
 			job.resume();
@@ -374,6 +400,8 @@ public class DbSessionImpl implements DbSession {
 		query = session.createQuery("select task " + "from " + TaskImpl.class.getName() + " as task "
 				+ "where task.execution = :execution " + "  and task.state = '" + Task.STATE_SUSPENDED + "' ");
 		query.setEntity("execution", execution);
+		query.setLockMode("task", LockMode.NONE);
+		
 		List<TaskImpl> tasks = query.list();
 		for (TaskImpl task : tasks) {
 			task.resume();
@@ -402,6 +430,8 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.createQuery("select task " + "from " + TaskImpl.class.getName() + " as task "
 				+ "where task.execution = :execution");
 		query.setEntity("execution", execution);
+		query.setLockMode("task", LockMode.NONE);
+		
 		return (TaskImpl) query.uniqueResult();
 	}
 
@@ -409,13 +439,16 @@ public class DbSessionImpl implements DbSession {
 		Query query = session.getNamedQuery("findFirstAcquirableJob");
 		query.setTimestamp("now", Clock.getCurrentTime());
 		query.setMaxResults(1);
-		query.setLockMode("job", LockMode.READ);
+		//query.setLockMode("job", LockMode.READ);
+		query.setLockMode("job", LockMode.NONE);
 		return (JobImpl<?>) query.uniqueResult();
 	}
 
 	public List<JobImpl<?>> findExclusiveJobs(Execution processInstance) {
 		Query query = session.getNamedQuery("findExclusiveJobs");
 		query.setTimestamp("now", Clock.getCurrentTime());
+		query.setLockMode("job",LockMode.NONE);
+		
 		query.setEntity("processInstance", processInstance);
 		return query.list();
 	}
@@ -423,7 +456,8 @@ public class DbSessionImpl implements DbSession {
 	public JobImpl<?> findFirstDueJob() {
 		Query query = session.getNamedQuery("findFirstDueJob");
 		query.setMaxResults(1);
-		query.setLockMode("job", LockMode.READ);
+		//query.setLockMode("job", LockMode.READ);
+		query.setLockMode("job", LockMode.NONE);
 		return (JobImpl<?>) query.uniqueResult();
 	}
 

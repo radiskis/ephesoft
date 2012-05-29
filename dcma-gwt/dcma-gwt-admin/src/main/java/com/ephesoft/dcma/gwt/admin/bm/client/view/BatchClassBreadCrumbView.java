@@ -39,13 +39,20 @@ import java.util.LinkedList;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.ViewType;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.BatchClassBreadCrumbPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -76,10 +83,38 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				breadCrumbViews.removeLast();
+				if (breadCrumbViews.size() != 2) {
+					breadCrumbViews.removeLast();
+				} else {
+					boolean isClassChanged = false;
+					isClassChanged = presenter.getController().getBatchClass().isDirty();
+					if (isClassChanged) {
+						final ConfirmationDialog backConfirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+								LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.UNSAVED_DATA_WILL_LOST),
+								LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.WARNING_TITLE), false);
+						backConfirmationDialog.addDialogListener(new DialogListener() {
+
+							@Override
+							public void onOkClick() {
+								breadCrumbViews.removeLast();
+								Window.Location.reload();
+							}
+
+							@Override
+							public void onCancelClick() {
+							}
+						});
+
+					} else {
+						breadCrumbViews.removeLast();
+					}
+				}
 				presenter.getController().setAdd(false);
 				BreadCrumbView breadCrumbView = breadCrumbViews.getLast();
 				switch (breadCrumbView.viewType) {
+					case BATCH_CLASS_LISTING:
+						Window.Location.reload();
+						break;
 					case BATCH_CLASS:
 						presenter.getController().getMainPresenter().showBatchClassView();
 						break;
@@ -115,8 +150,8 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 					case BATCH_CLASS_FIELD:
 						presenter.getController().getMainPresenter().showBatchClassFieldView(false);
 						break;
-					case KV_PAGE_PROCESS:
-						presenter.getController().getMainPresenter().showKVPPAddEditPluginView();
+					case KV_PP_PLUGIN_CONFIG_ADD_EDIT:
+						presenter.getController().getMainPresenter().showKVppPluginConfigAddEditView();
 						break;
 					case TABLE_INFO:
 						presenter.getController().getMainPresenter().showTableInfoView(false);
@@ -126,22 +161,35 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 						break;
 					case FUNCTION_KEY:
 						presenter.getController().getMainPresenter().showFunctionKeyView(false);
+						break;
+					case KV_PP_PLUGIN_CONFIG:
+						presenter.getController().getMainPresenter().showKVppPluginConfigView();
+						break;
+					case CONFIGURE_MODULE:
+						presenter.getController().getMainPresenter().showAddModuleView();
+						break;
+					case CONFIGURE_PLUGIN:
+						presenter.getController().getMainPresenter().showAddPluginView();
+						break;
 					default:
 						break;
 				}
 				createBreadCrumbView();
+
 			}
 		});
+
 	}
 
 	private LinkedList<BreadCrumbView> breadCrumbViews = new LinkedList<BreadCrumbView>();
 
 	private void createBreadCrumbView() {
 		if (breadCrumbViews.size() == 1) {
-			previousButton.setEnabled(false);
+			previousButton.setVisible(false);
 			previousButton.removeStyleName(AdminConstants.BUTTON_STYLE);
 			previousButton.addStyleName(AdminConstants.DISABLED_BUTTON_STYLE);
 		} else {
+			previousButton.setVisible(true);
 			previousButton.setEnabled(true);
 			previousButton.removeStyleName(AdminConstants.DISABLED_BUTTON_STYLE);
 			previousButton.addStyleName(AdminConstants.BUTTON_STYLE);
@@ -176,7 +224,7 @@ public class BatchClassBreadCrumbView extends View<BatchClassBreadCrumbPresenter
 
 		private ViewType viewType;
 		private String breadCrumbName;
-	   String identifier;
+		String identifier;
 
 		public BreadCrumbView(ViewType viewType, String breadCrumbName, String identifier) {
 			this.viewType = viewType;

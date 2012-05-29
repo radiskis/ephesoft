@@ -36,11 +36,15 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTypeListView> {
+public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTypeListView> implements DoubleClickListner {
 
 	public FieldTypeListPresenter(BatchClassManagementController controller, FieldTypeListView view) {
 		super(controller, view);
@@ -54,5 +58,27 @@ public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTyp
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		//Event handling is done here.
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+	}
+
+	public void onEditButtonClicked() {
+		String identifier = view.getFieldsListView().getSelectedRowIndex();
+		int rowCount = view.getFieldsListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
+
+		} else {
+			controller.getMainPresenter().getDocumentTypeViewPresenter().onEditFieldButtonClicked(identifier);
+		}
 	}
 }

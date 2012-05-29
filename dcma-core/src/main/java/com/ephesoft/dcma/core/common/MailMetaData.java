@@ -132,8 +132,6 @@ public class MailMetaData {
 			for (int i = 0; i < bccAddresses.size(); i++) {
 				bccAddress.append(bccAddresses.get(i));
 				bccAddress.append(';');
-				
-				
 			}
 		}
 		return bccAddress.toString();
@@ -165,26 +163,26 @@ public class MailMetaData {
 
 	public String toString() {
 		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("From:");
+		stringBuffer.append("From: ");
 		stringBuffer.append(fromAddress);
 		stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
 		if (toAddresses != null) {
-			stringBuffer.append("To:");
+			stringBuffer.append("To: ");
 			stringBuffer.append(getToAddressesAsString());
 			stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
 		}
 		if (ccAddresses != null) {
-			stringBuffer.append("CC:");
+			stringBuffer.append("CC: ");
 			stringBuffer.append(getCcAddressesAsString());
 			stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
 		}
 		if (bccAddresses != null) {
-			stringBuffer.append("BCC:");
+			stringBuffer.append("BCC: ");
 			stringBuffer.append(getBccAddressesAsString());
 			stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
 		}
 		stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
-		stringBuffer.append("Subject:");
+		stringBuffer.append("Subject: ");
 		stringBuffer.append(subject);
 		stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);
 		stringBuffer.append(CARRIAGE_RETUN_NEW_LINE);

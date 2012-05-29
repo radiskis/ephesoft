@@ -73,4 +73,13 @@ public class LoginServiceImpl extends DCMARemoteServiceServlet implements LoginR
 		return properties;
 	}
 
+	/**
+	 * API to get license expiry message.
+	 */
+	@Override
+	public void getLicenseExpiryMsg() throws Exception {
+		initRemoteServiceForLicenseAlert();
+
+	}
+
 }

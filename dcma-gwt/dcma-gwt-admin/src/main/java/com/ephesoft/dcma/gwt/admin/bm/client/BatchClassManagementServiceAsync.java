@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,9 @@ import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassSuperConfig;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassUserOptionDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
+import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
+import com.ephesoft.dcma.gwt.core.shared.SamplePatternDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -86,8 +89,8 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 
 	void getProjectFilesForDocumentType(String batchClassIdentifier, String documentTypeName, AsyncCallback<List<String>> callback);
 
-	void testKVExtraction(BatchClassDTO batchClassDTO, KVExtractionDTO kvExtractionDTO,
-			AsyncCallback<List<OutputDataCarrierDTO>> callback);
+	void testKVExtraction(BatchClassDTO batchClassDTO, KVExtractionDTO kvExtractionDTO, String testImageFilePath,
+			boolean isTestAdvancedKV, AsyncCallback<List<OutputDataCarrierDTO>> callback);
 
 	void getAllRoles(AsyncCallback<List<RoleDTO>> callback);
 
@@ -99,7 +102,7 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 
 	void copyDocument(DocumentTypeDTO documentTypeDTO, AsyncCallback<Void> asyncCallback);
 
-	void getAdvancedKVImageUploadPath(String batchClassId, String imageName, AsyncCallback<String> asyncCallback);
+	void getAdvancedKVImageUploadPath(String batchClassId, String docName, String imageName, AsyncCallback<String> asyncCallback);
 
 	void testTablePattern(BatchClassDTO batchClassDTO, TableInfoDTO tableInfoDTO, AsyncCallback<List<TestTableResultDTO>> asyncCallback);
 
@@ -117,4 +120,25 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 
 	void getBatchClassRowCount(AsyncCallback<String> callback);
 
+	void isUserSuperAdmin(AsyncCallback<Boolean> callback);
+	
+	void getAllRolesOfUser(AsyncCallback<HashSet<String>> callback);
+
+	void getAllPluginDetailDTOs(AsyncCallback<List<PluginDetailsDTO>> callback);
+
+	void createAndDeployWorkflowJPDL(String workflowName, BatchClassDTO batchClassDTO, AsyncCallback<BatchClassDTO> callback);
+
+	void getAllBatchClassModulesWorkflowName(AsyncCallback<List<String>> callback);
+
+	void setBatchClassDTOModulesList(BatchClassDTO batchClassDTO, List<String> moduleNames, AsyncCallback<BatchClassDTO> callback);
+
+	void isWorkflowContentEqual(ImportBatchClassUserOptionDTO userOptions, String workflowName,
+			AsyncCallback<java.util.Map<String, Boolean>> asyncCallback);
+
+	void testAdvancedKVExtraction(BatchClassDTO batchClassDTO, KVExtractionDTO kvExtractionDTO, String docName, String imageName,
+			AsyncCallback<List<OutputDataCarrierDTO>> callback);
+
+	void getUpdatedTestFileName(String batchClassIdentifier, String docName, String fileName, AsyncCallback<String> asyncCallback);
+
+	void getSamplePatterns(AsyncCallback<SamplePatternDTO> callback);
 }

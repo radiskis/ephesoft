@@ -85,7 +85,8 @@ public class LoginEntryPoint extends DCMAEntryPoint<DCMARemoteServiceAsync> {
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError("Unable to retrive version info");
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						LoginConstants.UNABLE_TO_RETRIVE_VERSION_INFO));
 
 			}
 		});
@@ -105,12 +106,26 @@ public class LoginEntryPoint extends DCMAEntryPoint<DCMARemoteServiceAsync> {
 
 		submitButton.setStyleName("btn_blue");
 		RootPanel.get("buttonLogin").add(submitButton);
+		final Label expiryMsg = new Label();
 
+		((LoginRemoteServiceAsync) createRpcService()).getLicenseExpiryMsg(new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable arg0) {
+				expiryMsg.setText(arg0.getLocalizedMessage());
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+
+			}
+		});
+		expiryMsg.setStyleName("license-text");
+		RootPanel.get("expiryMsgLabel").add(expiryMsg);
 		final HorizontalPanel horPanel = new HorizontalPanel();
 		horPanel.setWidth("100%");
 		RootPanel.get().add(horPanel);
-		final Anchor footerInfo = new Anchor(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.footer_information),
-				LocaleDictionary.get().getConstantValue(LocaleCommonConstants.ephesoft_url));
+		final Anchor footerInfo = new Anchor(LocaleCommonConstants.footer_information, LocaleCommonConstants.ephesoft_url);
 		footerInfo.setStyleName("footer");
 		horPanel.add(footerInfo);
 		horPanel.setCellHorizontalAlignment(footerInfo, HasHorizontalAlignment.ALIGN_CENTER);

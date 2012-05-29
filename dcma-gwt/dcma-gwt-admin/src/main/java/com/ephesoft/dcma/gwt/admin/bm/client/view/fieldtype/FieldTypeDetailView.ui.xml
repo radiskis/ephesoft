@@ -110,6 +110,16 @@
 				<g:CheckBox ui:field="isHidden" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+		<g:HorizontalPanel width="100%">
+			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="isMultiLineLabel"></g:Label>
+			</g:cell>
+			<g:cell width="1%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+				<g:CheckBox ui:field="isMultiLine" />
+			</g:cell>
+		</g:HorizontalPanel>
 	</g:VerticalPanel>
 </ui:UiBinder>   

@@ -94,6 +94,7 @@ public class PluginViewPresenter extends AbstractBatchClassPresenter<PluginView>
 				public void onClick(ClickEvent arg0) {
 					view.getPluginViewVerticalPanel().setVisible(Boolean.FALSE);
 					view.getPluginConfigVerticalPanel().setVisible(Boolean.TRUE);
+					controller.getBatchClass().setDirty(Boolean.TRUE);
 				}
 			});
 			// rpc calls

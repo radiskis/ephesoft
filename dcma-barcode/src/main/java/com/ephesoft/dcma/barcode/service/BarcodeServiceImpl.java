@@ -35,12 +35,17 @@
 
 package com.ephesoft.dcma.barcode.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.barcode.BarcodeProperties;
 import com.ephesoft.dcma.barcode.BarcodeReader;
+import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
@@ -70,6 +75,16 @@ public class BarcodeServiceImpl implements BarcodeService {
 	public void extractPageBarCode(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
 			barcodeReader.readBarcode(batchInstanceID.getID(), pluginWorkflow);
+		} catch (Exception e) {
+			LOGGER.error("Uncaught Exception in readBarcode method " + e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+	
+	@Override
+	public void extractPageBarCodeAPI(final List<Document> xmlDocuments, final String batchInstanceIdentifier, final String workingDir, final Map<BarcodeProperties, String> propertyMap) throws DCMAException {
+		try {
+			barcodeReader.readBarcodeAPI(batchInstanceIdentifier, xmlDocuments, workingDir, propertyMap);
 		} catch (Exception e) {
 			LOGGER.error("Uncaught Exception in readBarcode method " + e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);

@@ -137,4 +137,12 @@ public interface ReportDataService {
 	 */
 	public Map<String,String> getCustomReportButtonPopUpConfigs() throws DCMAException;
 
+	/**
+	 * Method to run reporting Sync DB option.
+	 * 
+	 * @param antPath
+	 * @throws Exception
+	 */
+	public void syncDatabase(String antPath) throws Exception;
+
 }

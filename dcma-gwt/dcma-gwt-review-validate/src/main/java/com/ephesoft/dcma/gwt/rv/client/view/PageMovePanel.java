@@ -179,8 +179,10 @@ public class PageMovePanel extends VerticalPanel {
 							@Override
 							public void onFailure(Throwable arg0) {
 								ScreenMaskUtility.unmaskScreen();
+								if(!reviewValidatePresenter.displayErrorMessage(arg0)){
 								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_movePanel_move_error,
 										PageMovePanel.this.selectedPageId, moveToDocumentId1, arg0.getMessage()));
+								}
 							}
 
 							@Override

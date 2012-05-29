@@ -190,13 +190,41 @@ public interface BatchClassManagementMessages extends LocaleCommonMessages {
 	String ADVANCED_KV_ERROR = "advanced_kv_error";
 
 	String NO_RECORD_TO_COPY = "no_record_to_copy";
+	
+	String NO_RECORD_TO_EXPORT = "no_record_to_export";
 
 	String ERROR_UPLOAD_IMAGE = "error_upload_image";
-	
+
 	String DELETE_REGEX_VALIDATION_CONFIRMATION = "delete_regex_validation_confirmation";
-	
+
 	String ADD_REGEX_FAILURE = "add_regex_failure";
 
 	String NO_TABLE_TO_TEST = "no_table_to_test";
+
+	String MANDATORY_FIELDS_BLANK = "mandatory_fields_cannot_be_blank";
+
+	String REMOTE_BATCH_CLASSIDENTIFIER_CANT_EMPTY = "remote_batch_class_identifier_cannot_be_empty";
+
+	String ERROR_WHILE_RETAINING_THE_BATCH_LIST_PRIORITY = "error_while_retaining_the_batch_list_priority";
+
+	String REMOTE_URL_CANT_BE_EMPTY = "remote_url_cannot_be_empty";
+
+	String ALL_DETAILS_NECESSARY = "all_details_are_necessary";
+
+	String INCOMPLETE_DETAILS = "incomplete_details";
+
+	String KEY_NOT_ALLOWED = "key_is_not_allowed";
+
+	String UNABLE_TO_DETERMINE_LOCATION = "unable_to_determine_location";
+
+	String VALUE_OVERLAPS_WITH_KEY = "value_overlaps_with_key";
+
+	String INVALID_REGEX_PATTERN = "invalid_regex_pattern";
+	
+	String CANT_DELETE_OWN_ROLE = "cant_delete_own_role";
+	
+	String NO_UNC_FOLDER_EXISTS = "no_unc_folder_exists";
+	
+	String UNSAVED_DATA_WILL_LOST = "unsaved_data_will_lost";
 
 }

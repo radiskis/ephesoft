@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.Documents;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
@@ -83,6 +85,11 @@ public class FuzzyDBSearchServiceImpl implements FuzzyDBSearchService {
 	}
 
 	@Override
+	public void learnDataBaseForMultipleBatchClasses() {
+		fuzzyLuceneEngine.learnDataBaseForMultipleBatchClasses();
+	}
+
+	@Override
 	public void extractDataBaseFields(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
 			fuzzyLuceneEngine.extractDataBaseFields(batchInstanceID.getID());
@@ -92,13 +99,22 @@ public class FuzzyDBSearchServiceImpl implements FuzzyDBSearchService {
 	}
 
 	@Override
-	public List<List<String>> fuzzyTextSearch(final BatchInstanceID batchInstanceID, String searchText) throws DCMAException {
+	public List<List<String>> fuzzyTextSearch(BatchInstanceID batchInstanceID, String documentType, String searchText)
+			throws DCMAException {
 		try {
-			return fuzzyLuceneEngine.fuzzyTextSearch(batchInstanceID.getID(), searchText);
+			return fuzzyLuceneEngine.fuzzyTextSearch(batchInstanceID.getID(), documentType, searchText);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
 
+	@Override
+	public Documents extractDataBaseFields(String batchClassIdentifier, String documentType, HocrPages hocrPage) throws DCMAException {
+		try {
+			return fuzzyLuceneEngine.extractDataBaseFields(batchClassIdentifier, documentType, hocrPage);
+		} catch (Exception e) {
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
 }

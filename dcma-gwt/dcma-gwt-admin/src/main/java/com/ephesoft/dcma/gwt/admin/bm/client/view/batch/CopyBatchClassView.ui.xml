@@ -9,11 +9,11 @@
 				<g:Label ui:field="nameLabel"></g:Label>
 			</g:cell>
 			<g:cell width="3%">
-				<g:Label />
+				<g:Label ui:field="nameStar"></g:Label>
 			</g:cell>
 
 			<g:cell width="68%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="name" width="60%" readOnly="true" />
+				<g:TextBox ui:field="name" width="60%" />
 			</g:cell>
 		</g:HorizontalPanel>
 

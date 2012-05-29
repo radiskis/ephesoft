@@ -37,6 +37,7 @@ package com.ephesoft.dcma.gwt.admin.bm.client;
 
 public interface MessageConstants {
 
+	String FIELD_NOT_VALID_ERROR_MSG = "Value is not compliant with the field type.Please enter a valid value.";
 	String MANDATORY_FIELDS_ERROR_MSG = "Mandatory fields cannot be blank.";
 	String BATCH_CLASS_LIST_ERROR_MSG = "Error retrieving Batch Class List.";
 	String BATCH_CLASS_ERROR_MSG = "Error retrieving batch class.";
@@ -61,15 +62,20 @@ public interface MessageConstants {
 	String INVALID_DB_CONNECTION = "Invalid Database connection settings.";
 	String ROWID_SET_INCORRECTLY = "RowId should be mapped to a Primary Key field";
 
+	String BATCH_CLASS_NAME_NOT_UNIQUE = "Batch Class name is either not unique or is empty";
 	String UNC_PATH_NOT_UNIQUE = "UNC Path is either not unique or is empty.";
 	String UNC_PATH_NOT_VERIFIED = "Unable to verify UNC Path.";
 	String BATCH_CLASS_COPY_CREATED_SUCCESSFULLY = "Copy of Batch Class created successfully.";
 	String UNABLE_TO_CREATE_COPY = "Unable to create the copy.";
 	String BATCH_CLASS_COPY = "Copy Batch Class";
 	String PRIORITY_SHOULD_BE_NUMERIC = "Priority should be numeric.";
+	String WORKFLOW_IMPROPER_CHARACTER = "Workflow name should not contain hyphen or space character.";
+	String CONFIRM_IMPORT = "Do you want to continue ? Zip contains a workflow name that is already deployed. It may be possible that the zip contains different configuration.";
+	String WORKFLOWNAME_EXISTS = "Workflow name specified exists with different configuration. Please change the workflow name.";
 	String CONFIDENCE_SHOULD_BE_NUMERIC = "Confidence should be numeric.";
 	String PRIORITY_SHOULD_BE_BETWEEN_1_AND_100 = "Priority should be between 1 to 100.";
 	String COPY_SUCCESSFUL = "Copy Successfull";
+	String BATCH_CLASS_NAME_ERROR = "Batch class name must not contain a space or a hyphen";
 
 	String TITLE_TEST_SUCCESS = "Test Successful";
 	String TITLE_TEST_FAILURE = "Test Failed";
@@ -77,7 +83,7 @@ public interface MessageConstants {
 	String MSG_TEST_KV_FAILURE = "Testing KV Extraction Failed. Please see logs for more details.";
 
 	String MSG_NO_RESULTS_FOUND = "No Results Found.";
-
+	String MSG_NO_RESULTS_FOUND_FOR_FILE = "No Results Found for file.";
 	String NOTHING_SELECTED = "Please select atleast one user group";
 
 	String BATCH_CLASS_EXPORT_SUCCESSFULLY = "Batch class exported successfully.";
@@ -106,4 +112,13 @@ public interface MessageConstants {
 	String ERROR_FIELD_TYPE_MAPPING = "Atleast one field type should be mapped";
 	String NO_CONFIG_SELEDCTED = "Atleast one configuration should be selected to be overriden from zip file.Please try again.";
 	String NO_ZIP_ATTACHED = "Please attach a zip batch file first.";
+
+	String ERROR_OCCURED_WHILE_SAVING_MODULES = "Error occured while saving modules";
+	String MODULES_LIST_UPDATED_SUCCESSFULLY = "Modules list updated successfully";
+
+	String PLUGINS_LIST_UPDATED_SUCCESSFULLY = "Plugins list updated successfully";
+	String UPDATING_PLUGINS_LIST = "Updating Plugins list";
+	String LOADING_PLUGINS = "Loading Plugins";
+	String WARNING = "Warning";
+	String HIGHLIGHT_DEPENDENCY_ADD_MESSAGE = "Selected Plug-in has dependencies on the highlighted plugins. Would you like to add them as well ? ";
 }

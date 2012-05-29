@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jbpm.api.NewDeployment;
+import org.jbpm.api.ProcessDefinition;
 import org.jbpm.api.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,25 +85,35 @@ public class DeploymentServiceImpl implements DeploymentService {
 	}
 
 	@Override
+	public boolean isDeployed(String activityName) {
+		List<ProcessDefinition> deployment = repositoryService.createProcessDefinitionQuery().processDefinitionKey(activityName)
+				.list();
+		boolean isWorkFlowDeployed = false;
+		if (deployment != null && deployment.size() > 0) {
+			isWorkFlowDeployed = true;
+		}
+		return isWorkFlowDeployed;
+	}
+
+	@Override
 	@PostConstruct
 	public void deployAll() {
-		
-		if (!delpoy){
+
+		if (!delpoy) {
 			return;
 		}
-		
+
 		try {
 			for (String processDefinition : workflowsDefinitionList) {
 				NewDeployment deployment = repositoryService.createDeployment();
-				deployment.addResourceFromUrl(new ClassPathResource(
-						processDefinition).getURL());
+				deployment.addResourceFromUrl(new ClassPathResource(processDefinition).getURL());
 
 				deployment.deploy();
 			}
 
 		} catch (IOException e) {
 			LOGGER.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
-			throw new RuntimeException( "An error occured while trying to deploy a process definition", e);
+			throw new RuntimeException("An error occured while trying to deploy a process definition", e);
 		}
 
 		ClassPathResource classPathResource = new ClassPathResource("META-INF/dcma-workflows/dcma-workflows.properties");
@@ -110,16 +121,16 @@ public class DeploymentServiceImpl implements DeploymentService {
 			File propertyFile = classPathResource.getFile();
 			Map<String, String> propertyMap = new HashMap<String, String>();
 			propertyMap.put("workflow.deploy", "false");
-			
+
 			String comments = "Workflow deploy property changed.";
-			
+
 			FileUtils.updateProperty(propertyFile, propertyMap, comments);
-			
+
 		} catch (IOException e) {
 			LOGGER.error("IOException occurred: " + ExceptionUtils.getFullStackTrace(e));
-			//Continuing without throwing exception.
+			// Continuing without throwing exception.
 		}
-			
+
 	}
 
 	public void setWorkflowsDefinitionList(List<String> workflowsDefinitionList) {
@@ -128,5 +139,5 @@ public class DeploymentServiceImpl implements DeploymentService {
 
 	public void setDelpoy(Boolean delpoy) {
 		this.delpoy = delpoy;
-	}
+	}	
 }

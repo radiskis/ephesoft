@@ -31,7 +31,7 @@
 <!-- you can leave the body empty if you want  -->
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
-<body onload="document.login.j_username.focus()">
+<body onload="document.getElementById('j_username').focus();">
 
 <!-- OPTIONAL: include this if you want history support -->
 <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
@@ -44,7 +44,13 @@
 Your web browser must have JavaScript enabled in order for this
 application to display correctly.</div>
 </noscript>
-<form name="login" method="post" action="j_security_check">
+<table align="center">
+<tr>&nbsp;</tr>
+<tr> <font size=2 color=red><td id="expiryMsgLabel"></font>
+</tr>
+</table>
+<form name="loginForm" id="loginForm" method="post" action="j_security_check">
+
 <table border="0" align="center" cellpadding="0" cellspacing="0"
 	class="tableWidth">
 	<tr>
@@ -55,10 +61,19 @@ application to display correctly.</div>
 		<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			<tr>
 				<td><img src="images/loginPage_left.png" width="9" height="196" /></td>
-				
+
 				<td width="98%" valign="top" class="loginBody_bg">
 
 				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		            <tr>
+                        <script type="text/javascript">
+                                  if (location.href.match(/\j_security_check/i)) 
+                                     {
+                                          document.write("<font size=2 color=red>Invalid username or password</font>")
+                                     }
+                       </script>
+					</tr>
+					<br>
 					<tr>
 						<td id="userName"></td>
 					</tr>
@@ -90,13 +105,14 @@ application to display correctly.</div>
 								<td id="version" class="alignRight"></td>
 								<td id="versionLabel" class="alignLeft"></td>
 							</tr>
+							
 						</table>
 						</td>
 					</tr>
 				</table>
 
 				</td>
-				
+
 				<td><img src="images/loginPage_right.png" width="9"
 					height="196" /></td>
 			</tr>

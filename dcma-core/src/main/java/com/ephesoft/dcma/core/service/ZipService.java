@@ -42,7 +42,8 @@ import java.io.IOException;
 public interface ZipService {
 
 	/**
-	 * This API unzips files in specified destination directory. Destination directory is created if it doesn't exist.
+	 * This API unzips files in specified destination directory. Destination directory is created if it doesn't exist. If destination
+	 * directory passed is null, zip will be extracted in its parent directory.
 	 * 
 	 * @param zipFile {@link File} Zip File to be unzipped.
 	 * @param destinationDir {@link String} Directory where file is to be unzipped.

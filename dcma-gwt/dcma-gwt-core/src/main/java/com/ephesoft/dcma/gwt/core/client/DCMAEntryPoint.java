@@ -103,7 +103,7 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 
 			@Override
 			public void onSuccess(Void arg0) {
-				defineBridgeMethod();
+				//defineBridgeMethod();
 				onLoad();
 			}
 		});
@@ -145,7 +145,7 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 	}
 
 	public void onCloseWindow() {
-		rpcService.cleanup(new AsyncCallback<Void>() {
+		/*rpcService.cleanup(new AsyncCallback<Void>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -154,7 +154,7 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 			@Override
 			public void onSuccess(Void arg0) {
 			}
-		});
+		});*/
 	}
 
 	public native void defineBridgeMethod() /*-{

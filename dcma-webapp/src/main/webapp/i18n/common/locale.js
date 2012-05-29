@@ -99,6 +99,12 @@ var commonConstants_tk = {
 
 	title_confirmation_discard : "Atmak",
 	
-	title_go_to_page : "Içeri Sayfa:"
+	title_go_to_page : "Içeri Sayfa:",
+	
+	title_previous : "önceki",
+	
+	title_next : "sonraki",
+	
+	title_displaying : "Görünen " 
 
 };

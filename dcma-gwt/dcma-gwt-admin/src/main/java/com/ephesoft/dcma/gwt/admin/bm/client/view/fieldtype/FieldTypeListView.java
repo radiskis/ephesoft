@@ -46,18 +46,19 @@ public class FieldTypeListView extends View<FieldTypeListPresenter> {
 		return listView;
 	}
 
-	public HeaderColumn name = new HeaderColumn(0, "Name", 20);
-	public HeaderColumn description = new HeaderColumn(1, "Description", 20);
-	public HeaderColumn type = new HeaderColumn(2, "Type", 10);
+	public HeaderColumn name = new HeaderColumn(0, "Name", 19);
+	public HeaderColumn description = new HeaderColumn(1, "Description", 16);
+	public HeaderColumn type = new HeaderColumn(2, "Type", 7);
 	public HeaderColumn fdOrder = new HeaderColumn(3, "Field Order", 10);
-	public HeaderColumn sampleValue = new HeaderColumn(4, "Sample Value", 10);
-	public HeaderColumn barcode = new HeaderColumn(5, "Barcode", 10);
-	public HeaderColumn isHidden = new HeaderColumn(6,"Hidden" , 15);
+	public HeaderColumn sampleValue = new HeaderColumn(4, "Sample Value", 13);
+	public HeaderColumn barcode = new HeaderColumn(5, "Barcode", 8);
+	public HeaderColumn isHidden = new HeaderColumn(6, "Hidden", 9);
+	public HeaderColumn isMultiLine = new HeaderColumn(6, "MultiLine", 12);
 
 	public ListView listView = new ListView();
 
 	public FieldTypeListView() {
 		super();
-		listView.addHeaderColumns(name, description, type, fdOrder,sampleValue, barcode,isHidden);
+		listView.addHeaderColumns(name, description, type, fdOrder, sampleValue, barcode, isHidden, isMultiLine);
 	}
 }

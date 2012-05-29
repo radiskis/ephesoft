@@ -207,7 +207,9 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	public BatchClass getLoadedBatchClassByIdentifier(String batchClassIdentifier) {
 		BatchClass batchClass = null;
 		batchClass = batchClassDao.getBatchClassByIdentifier(batchClassIdentifier);
-		loadBatchClass(batchClass);
+		if (null != batchClass) {
+			loadBatchClass(batchClass);
+		}
 		return batchClass;
 	}
 
@@ -216,7 +218,9 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	public BatchClass getLoadedBatchClassByUNC(String folderName) {
 		BatchClass batchClass = null;
 		batchClass = batchClassDao.getBatchClassbyUncFolder(folderName);
-		loadBatchClass(batchClass);
+		if (null != batchClass) {
+			loadBatchClass(batchClass);
+		}
 		return batchClass;
 	}
 
@@ -305,8 +309,8 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	}
 
 	@Override
-	public int countAllBatchClassesExcludeDeleted() {
-		return batchClassDao.getAllBatchClassCountExcludeDeleted();
+	public int countAllBatchClassesExcludeDeleted(Set<String> userRoles) {
+		return batchClassDao.getAllBatchClassCountExcludeDeleted(userRoles);
 	}
 
 	@Override
@@ -380,7 +384,6 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 				}
 			}
 		}
-
 		return batchClass;
 	}
 
@@ -478,7 +481,25 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 
 	@Override
 	public BatchClass getBatchClassByNameIncludingDeleted(String batchClassName) {
-		return batchClassDao.getBatchClassByNameIncludingDeleted(batchClassName);
+		BatchClass batchClass = batchClassDao.getBatchClassByNameIncludingDeleted(batchClassName);
+
+		if (batchClass != null) {
+			for (BatchClassModule mod : batchClass.getBatchClassModules()) {
+				for (BatchClassModuleConfig importConfig : mod.getBatchClassModuleConfig()) {
+					if (LOGGER.isDebugEnabled() && importConfig != null) {
+						LOGGER.debug(importConfig.toString());
+					}
+				}
+				List<BatchClassPlugin> plugins = mod.getBatchClassPlugins();
+				for (BatchClassPlugin plugin : plugins) {
+					if (LOGGER.isDebugEnabled() && plugin != null) {
+						LOGGER.debug(plugin.toString());
+					}
+
+				}
+			}
+		}
+		return batchClass;
 	}
 
 	@Override
@@ -494,7 +515,9 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 	public BatchClass getLoadedBatchClassByNameIncludingDeleted(String batchClassName) {
 		BatchClass batchClass = null;
 		batchClass = batchClassDao.getBatchClassByNameIncludingDeleted(batchClassName);
-		loadBatchClass(batchClass);
+		if (null != batchClass) {
+			loadBatchClass(batchClass);
+		}
 		return batchClass;
 	}
 
@@ -504,4 +527,18 @@ public class BatchClassServiceImpl implements BatchClassService, ApplicationCont
 		identifier = batchClassDao.getBatchClassIdentifierByUNCfolder(uncFolder);
 		return identifier;
 	}
+
+	/**
+	 * This API returns list of all batch class identifiers.
+	 * 
+	 * @return List<String>
+	 */
+	@Override
+	public List<String> getAllBatchClassIdentifier() {
+		List<String> allBatchClassIdentifiers=null;
+		allBatchClassIdentifiers=batchClassDao.getAllBatchClassIdentifiers();
+		return allBatchClassIdentifiers;
+	}
+	
+	
 }

@@ -37,6 +37,8 @@ package com.ephesoft.dcma.fuzzydb.service;
 
 import java.util.List;
 
+import com.ephesoft.dcma.batch.schema.Documents;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
@@ -63,6 +65,14 @@ public interface FuzzyDBSearchService {
 	void learnDataBase(final BatchClassID batchClassID, boolean createIndex) throws DCMAException;
 
 	/**
+	 * This method is used to generate the indexes for the tables mapped for each document type in database. The indexes are stored in
+	 * a hierarchical structure: batch class id >> database name >> table name. This API learns DB for list of batch classes given in
+	 * properties file
+	 * 
+	 */
+	void learnDataBaseForMultipleBatchClasses();
+
+	/**
 	 * This method creates/updates the value of document level fields for each document by searching for similarities in HOCR content
 	 * with the data in database tables mapped for each document type.
 	 * 
@@ -77,9 +87,14 @@ public interface FuzzyDBSearchService {
 	 * the data in database tables mapped for each document type.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param documentType {@link String}
 	 * @param searchText {@link String}
 	 * @return List< List< {@link String} > >
 	 * @throws DCMAException
 	 */
-	List<List<String>> fuzzyTextSearch(final BatchInstanceID batchInstanceID, String searchText) throws DCMAException;
+	List<List<String>> fuzzyTextSearch(final BatchInstanceID batchInstanceID, String documentType, String searchText)
+			throws DCMAException;
+	
+	public Documents extractDataBaseFields(final String batchClassIdentifier, String documentType, HocrPages hocrPage)
+	throws DCMAException;
 }

@@ -69,7 +69,9 @@ public class EditRegexView extends View<EditRegexPresenter> {
 	protected Button saveButton;
 	@UiField
 	protected Button cancelButton;
-	
+	@UiField
+	protected Button samplePatternButton;
+
 	private final ValidatableWidget<TextBox> validatePatternTextBox;
 	
 	@UiField
@@ -82,6 +84,7 @@ public class EditRegexView extends View<EditRegexPresenter> {
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
+		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
 		validatePatternTextBox = new ValidatableWidget<TextBox>(pattern);
 		validatePatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 		
@@ -106,6 +109,11 @@ public class EditRegexView extends View<EditRegexPresenter> {
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
+	}
+
+	@UiHandler("samplePatternButton")
+	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
+		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
 	public void setPattern(String keyPattern) {

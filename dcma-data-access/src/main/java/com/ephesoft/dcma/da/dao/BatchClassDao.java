@@ -134,7 +134,7 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * 
 	 * @return batchClass size
 	 */
-	int getAllBatchClassCountExcludeDeleted();
+	int getAllBatchClassCountExcludeDeleted(Set<String> userRoles);
 
 	/**
 	 * This API will fetch the batch class list excluding the deleted batch class
@@ -171,6 +171,13 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * @return
 	 */
 	String getBatchClassIdentifierByUNCfolder(String uncFolder);
+	
+	/**
+	 * API to get all batch class identifiers.
+	 * 
+	 * @return
+	 */
+	List<String> getAllBatchClassIdentifiers();
 	
 
 }

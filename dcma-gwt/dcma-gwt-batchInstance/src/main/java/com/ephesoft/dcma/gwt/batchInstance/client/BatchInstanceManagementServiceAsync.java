@@ -44,7 +44,6 @@ import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstancePresent
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
 import com.ephesoft.dcma.gwt.core.shared.DataFilter;
-import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface BatchInstanceManagementServiceAsync extends DCMARemoteServiceAsync {
@@ -54,24 +53,29 @@ public interface BatchInstanceManagementServiceAsync extends DCMARemoteServiceAs
 
 	void getRowCount(List<DataFilter> filters, AsyncCallback<Integer> asyncCallback);
 
-	void deleteBatchInstance(String identifier, AsyncCallback<Results> asyncCallback) throws GWTException;
+	void deleteBatchInstance(String identifier, AsyncCallback<Results> asyncCallback);
 
-	void restartBatchInstance(String identifier, String moduleName, AsyncCallback<Results> asyncCallback) throws GWTException;
+	void restartBatchInstance(String identifier, String moduleName, AsyncCallback<Results> asyncCallback);
 
 	void getIndividualRowCount(AsyncCallback<Integer[]> asyncCallback);
 
-	void getBatchInstanceDTO(String identifier, AsyncCallback<BatchInstanceDTO> asyncCallback) throws GWTException;
+	void getBatchInstanceDTO(String identifier, AsyncCallback<BatchInstanceDTO> asyncCallback);
 
 	void getRestartOptions(String batchInstanceIdentifier, AsyncCallback<Map<String, String>> asyncCallback);
 
-	void getBatchInstanceDTOs(String batchName, AsyncCallback <List<BatchInstanceDTO>> asyncCallback) throws GWTException;
+	void getBatchInstanceDTOs(String batchName, AsyncCallback<List<BatchInstanceDTO>> asyncCallback);
 
 	void updateBatchInstanceStatus(String identifier, BatchInstanceStatus restartInProgress, AsyncCallback<Results> asyncCallback);
 
 	void deleteBatchFolders(String identifier, AsyncCallback<Results> asyncCallback);
-	
+
 	void clearCurrentUser(String batchInstanceIdentifier, AsyncCallback<Void> asyncCallback);
-	
+
 	void restartAllBatchInstances(AsyncCallback<Void> asyncCallback);
+	
+	void deleteAllBatchInstancesByStatus(List<DataFilter> statusFilters, AsyncCallback<List<String>> asyncCallback);
+	
+	void deleteAllBatchInstancesFolders(List<String> batchInstanceId, AsyncCallback<Void> asyncCallback);
+
 
 }

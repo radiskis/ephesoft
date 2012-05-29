@@ -1,7 +1,7 @@
-﻿﻿﻿/**
- * ******************************* Default locale
- * **************************************************
- */
+﻿﻿﻿﻿﻿﻿﻿/**
+	 * ******************************* Default locale
+	 * **************************************************
+	 */
 var rvConstants = {
 	rv_title : "Review and Validate Document",
 	tabLabel_home : "Home",
@@ -12,7 +12,7 @@ var rvConstants = {
 	title_revVal_nextButton : "Save and Show Next Batch",
 	title_document : "DOCUMENT-",
 	title_select_doc : "Select Document",
-	title_mege_confirm : "Merge Confirmation",
+	title_merge_confirm : "Merge Confirmation",
 	tooltip_split : "Split(Ctrl + t)",
 	tooltip_delete : "Delete(Shift + DEL)",
 	tooltip_duplicate : "Duplicate(Ctrl + d)",
@@ -126,7 +126,8 @@ var rvConstants = {
 	disclosure_panel_shortcut : "Review Panel Open or Close",
 	review_panel : "Review Panel",
 	save_button_tooltip : "Save(Ctrl + s)",
-	title_topPanel_save_anchor : "Save Batch"
+	title_topPanel_save_anchor : "Save Batch",
+	regex_activate_deactivate_toggle_shortcut: "Regex Activate/Deactivate"
 };
 
 var rvMessages = {
@@ -139,10 +140,10 @@ var rvMessages = {
 	error_ret_next_batch : "Error retrieving next batch",
 	error_batch_already_locked : "Batch- {0} is already locked by some other user",
 	error_ret_batch : "Error retrieving a Batch for processing",
-	error_ret_specific_batch : "Error retrieving Batch with BatchId: {0}",
+	error_ret_specific_batch : "Error retrieving Batch with BatchId: {0}. It is not of status READY_FOR_REVIEW or READY_FOR_VALIDATION.",
 	error_save_batch : "Unable to save batch: {0}",
-	msg_review_confirm : "Review of the batch is done. Please press OK to move to listing page to select another batch.",
-	msg_validation_confirm : "Validation of the batch is done. Please press OK to move to listing page to select another batch.",
+	msg_review_confirm : "Review of the batch is done. Please press OK to process another batch.",
+	msg_validation_confirm : "Validation of the batch is done.Please press OK to process another batch.",
 	msg_tree_merge_doc : "Do you want to Merge Document- {0} into Document- {1} ?",
 	msg_tree_merge_doc_failure : "Merging of Document{0} into Document{1}  Failed. Exception-> {2}",
 	msg_overlayPanel_duplicate : "Do you want to Duplicate the page {0} ?",
@@ -173,7 +174,7 @@ var rvMessages = {
 	zoom_unlock_success : "Scroll unlocked successfully",
 	default_doc_type_view_failure : "Failed to retrieve default document type view",
 	document_type_error : "No such document type exists",
-	error_batch_status : "The batch {0} is of status {1}. Cannot open this batch.",
+	error_batch_status : "The batch {0} is not of status READY_FOR_REVIEW or READY_FOR_VALIDATION. Cannot open this batch.",
 	none_selected : "",
 	error_value : "Error",
 	delete_all_row_confirmation : "Are you sure you want to delete all rows of selected table.",
@@ -192,7 +193,13 @@ var rvMessages = {
 	unable_to_retrieve_field_value_script_switch_state : "Unable to fetch field value script switch state.",
 	unable_to_display_external_application : "Unable to display external application.",
 	unable_to_create_authentication_for_external_application : "Unable to create authentication mechanism for external application.",
-	unable_to_execute_script_and_save : "Unable to save changes due to  failure of script execution on field value change."
+	unable_to_execute_script_and_save : "Unable to save changes due to  failure of script execution on field value change.",
+	script_execution_error : "Script execution error",
+	select_document_type : "\"Unknown\" document type selected.\nPlease select some other document type.",
+	unable_to_get_zoom_count : "Unable to get zoom count value from properties file",
+	session_time_out : "Your session has timed out.",
+	unable_to_acquire_lock : "Batch is locked by some other user for editing.",
+	no_right_to_open_batch : "You do not have the rights to open this batch."
 
 };
 
@@ -207,7 +214,7 @@ var rvConstants_tk = {
 	title_revVal_nextButton : "Kaydet ve Baska İş Göster",
 	title_document : "Döküman-",
 	title_select_doc : "Döküman seç",
-	title_mege_confirm : "Birleştirme Onayı",
+	title_merge_confirm : "Birleştirme Onayı",
 	tooltip_split : "Böl(Ctrl + t)",
 	tooltip_delete : "Sil(Shift + DEL)",
 	tooltip_duplicate : "Kopya(Ctrl + d)",
@@ -320,7 +327,8 @@ var rvConstants_tk = {
 	zoom_locked : "Yakınlaştırma Kilitli",
 	zoom_unlocked : "Yakınlaştırma kilidi",
 	save_button_tooltip : "Sakla(Ctrl + s)",
-	title_topPanel_save_anchor : "Sakla Toplu"
+	title_topPanel_save_anchor : "Sakla Toplu",
+	regex_activate_deactivate_toggle_shortcut: "Düzenli ifade aktif / deaktif"
 };
 
 var rvMessages_tk = {
@@ -333,10 +341,10 @@ var rvMessages_tk = {
 	error_ret_next_batch : "Sonraki işi alırken Hata olustu",
 	error_batch_already_locked : "İş- {0} başka bir kullanıcı tarafından kilitlenmiştir",
 	error_ret_batch : "Hata işleme için Toplu almak",
-	error_ret_specific_batch : "Toplu Id ile Hata almak Küme: {0}",
+	error_ret_specific_batch : "BatchId ile Toplu alınırken hata: {0}. Bu durum READY_FOR_REVIEW veya READY_FOR_VALIDATION sayılmazdı.",
 	error_save_batch : "toplu kaydedilemiyor: {0}",
-	msg_review_confirm : "İnceleme Bitmiştir. İş listesini gormek icin Tamam\'\'a basınız.",
-	msg_validation_confirm : "Doğrulamaya Bitmiştir. İş listesini gormek icin Tamam\'\'a basınız.",
+	msg_review_confirm : "Toplu İnceleme yapılır. Başka bir toplu işlemek için OK tuşuna basınız.",
+	msg_validation_confirm : "Toplu Doğrulama başka bir toplu işlemek için OK tuşuna basın done.Please olduğunu.",
 	msg_tree_merge_doc : "olmak ister misiniz Merge Belge {0} içine Belge {1}?",
 	msg_tree_merge_doc_failure : "Doküman {0} Belge içine birleştirme {1} Başarısız. İstisna-> {2}",
 	msg_overlayPanel_duplicate : "Eğer Duplicate istiyor musunuz sayfa {0}?",
@@ -365,7 +373,7 @@ var rvMessages_tk = {
 	regex_pattern_compliant : "desen ile uyumlu olmalÄ±dÄ±r",
 	default_doc_type_view_failure : "VarsayÄ±lan belge tÃ¼rÃ¼nÃ¼ gÃ¶rÃ¼ntÃ¼lemek alÄ±namadÄ±",
 	document_type_error : "BÃ¶yle bir belge tÃ¼rÃ¼ var",
-	error_batch_status : "Toplu durumu {1} {0}. Bu toplu iş açılamıyor.",
+	error_batch_status : "Toplu iş {0} durumu READY_FOR_REVIEW veya READY_FOR_VALIDATION sayılmazdı. Bu toplu açılamıyor.",
 	none_selected : "",
 	error_value : "Hata",
 	delete_all_row_confirmation : "Seçtiğiniz tablonun tüm satırları silmek istediğinizden emin misiniz.",
@@ -384,5 +392,11 @@ var rvMessages_tk = {
 	unable_to_retrieve_field_value_script_switch_state : "Alan değeri komut dosyası anahtarı devlet alınamıyor.",
 	unable_to_display_external_application : "Dış uygulama görüntülemek için açılamıyor.",
 	unable_to_create_authentication_for_external_application : "Dış uygulama için kimlik doğrulama mekanizması oluşturulamadı.",
-	unable_to_execute_script_and_save : "Alan değerini değiştirmek betik çalıştırma hatası nedeniyle değişiklikler kaydedilemiyor."
+	unable_to_execute_script_and_save : "Alan değerini değiştirmek betik çalıştırma hatası nedeniyle değişiklikler kaydedilemiyor.",
+	script_execution_error : "Komut yürütme hatası",
+	select_document_type : "\"Bilinmeyen\"belge türü seçilir.\nBaşka bir belge türü seçin.",
+	unable_to_get_zoom_count : "Kıtlıklarını karşılamak zum kont değer özellikleri dosya.",
+	session_time_out : "Oturumunuz zaman aşımına uğradı.",
+	unable_to_acquire_lock : "Toplu düzenleme için başka bir kullanıcı tarafından kilitlenmiş durumda.",
+	no_right_to_open_batch : "Bu toplu iş açmak için haklara sahip değilsiniz."
 };

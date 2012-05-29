@@ -76,6 +76,7 @@ public class FuzzyDBPluginPresenter extends AbstractBatchClassPresenter<FuzzyDBP
 				public void onClick(ClickEvent arg0) {
 					view.getPropertyDetailsViewPanel().setVisible(false);
 					view.getEditPropertyDetailPanel().setVisible(true);
+					controller.getBatchClass().setDirty(Boolean.TRUE);
 				}
 			});
 		}

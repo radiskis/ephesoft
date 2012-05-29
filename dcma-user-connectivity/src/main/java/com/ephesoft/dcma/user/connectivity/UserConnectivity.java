@@ -62,4 +62,12 @@ public interface UserConnectivity {
 	 */
 	Set<String> getAllUser();
 
+	/**
+	 * This method is used to return set of string of all superAdmin groups.
+	 * 
+	 * @return Set<String> if result is found else return null
+	 */
+	
+	Set<String> getUserGroups(String userName);
+
 }

@@ -23,7 +23,7 @@
 
 
 		<g:DockLayoutPanel unit="PCT" ui:field="importPanel"
-			height="33em" width="100%">
+			height="40em" width="100%">
 
 			<g:north size="30">
 				<g:VerticalPanel width="100%">
@@ -42,7 +42,15 @@
 							</g:CheckBox>
 						</g:cell>
 					</g:HorizontalPanel>
-
+					<g:HorizontalPanel width="100%">
+						<g:cell width="29%" horizontalAlignment="ALIGN_RIGHT">
+							<g:HorizontalPanel width="100%" height="1em">
+								<g:cell horizontalAlignment="ALIGN_LEFT">
+									<g:Label ui:field="errorMessage"></g:Label>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:cell>
+					</g:HorizontalPanel>
 					<g:HorizontalPanel width="100%">
 						<g:cell width="29%" horizontalAlignment="ALIGN_RIGHT">
 							<g:HorizontalPanel width="100%" height="1em"></g:HorizontalPanel>

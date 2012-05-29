@@ -51,13 +51,17 @@ import com.ephesoft.dcma.da.domain.BatchClassGroups;
 @Repository
 public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups> implements BatchClassGroupsDao {
 
+	private static final String GROUP_NAME = "groupName";
+	private static final String BATCH_CLASS = "batchClass";
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+
 	@Override
-	public Set<String> getBatchClassIdentifierForUsers(Set<String> userGroups) {
+	public Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles) {
 		boolean isValid = true;
-		if (userGroups == null || userGroups.size() == 0) {
+		if (userRoles == null || userRoles.size() == 0) {
 			isValid = false;
 		}
-		Set<String> batchIdentifiers = null;
+		Set<String> batchClassIdentifiers = null;
 
 //		Old version of fetching.
 //				
@@ -73,18 +77,32 @@ public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups> impl
 
 		// New version of fetching.
 		if (isValid) {
-			batchIdentifiers = new HashSet<String>();
+			batchClassIdentifiers = new HashSet<String>();
 			DetachedCriteria criteria = criteria();
 			Disjunction disjunction = Restrictions.disjunction();
-			for (String string : userGroups) {
-				disjunction.add(Restrictions.eq("groupName", string));
+			for (String userRole : userRoles) {
+				disjunction.add(Restrictions.eq(GROUP_NAME, userRole));
 			}
 			criteria.add(disjunction);
 			List<BatchClassGroups> batchClassGroups = find(criteria);
-			for (BatchClassGroups batchClassGroups2 : batchClassGroups) {
-				batchIdentifiers.add(batchClassGroups2.getBatchClass().getIdentifier());
+			for (BatchClassGroups batchClassGroup : batchClassGroups) {
+				batchClassIdentifiers.add(batchClassGroup.getBatchClass().getIdentifier());
 			}
 		}
-		return batchIdentifiers;
+		return batchClassIdentifiers;
+	}
+	
+		
+	@Override
+	public Set<String> getRolesForBatchClass(String batchClassIdentifier) {
+		Set<String> userGroups = new HashSet<String>();
+		DetachedCriteria criteria = criteria();
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+		List<BatchClassGroups> batchClassGroups = find(criteria);
+		for (BatchClassGroups batchClassGroup : batchClassGroups) {
+			userGroups.add(batchClassGroup.getGroupName());
+		}
+		return userGroups;
 	}
 }

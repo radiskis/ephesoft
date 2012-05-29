@@ -104,5 +104,11 @@ public interface KVFieldCreatorConstants {
 	 * Minimum number of characters required in a key. 
 	 */
 	Integer MIN_KEY_CHAR_COUNT = 3;
+	
+	/**
+	 * Default gap between words that is to be used while key pattern generation. 
+	 * Value to be specified in pixels.
+	 */
+	Integer DEFAULT_GAP_BETWEEN_KEYS = 50;
 
 }

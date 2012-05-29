@@ -152,47 +152,31 @@ public class KVFinderServiceImpl implements KVFinderService {
 							continue;
 						}
 
-						final List<OutputDataCarrier> dataCarrierList = locationFinder.findPattern(lineRowData, pattern);
+						final List<Span> spanList = lineDataCarrier.getSpanList();
+						final List<OutputDataCarrier> dataCarrierList = locationFinder.findPattern(lineRowData, pattern, spanList);
 						// TODO check for all possible return value and get the span
 						// from the original list and then get the xox1 values for span
 						// write method to get the span coordinates for this.
 						if (null != dataCarrierList) {
 							for (OutputDataCarrier dataCarrier : dataCarrierList) {
 								String foundValue = dataCarrier.getValue();
-								if (null == foundValue || foundValue.isEmpty()) {
+								Span span = dataCarrier.getSpan();
+								if (null == foundValue || foundValue.isEmpty() || null == span) {
 									continue;
 								}
 
 								String[] foundValArr = foundValue.split(KVFinderConstants.SPACE);
 								List<Coordinates> keyCoordinates = new ArrayList<Coordinates>();
-								if (null != foundValArr && foundValArr.length >= 0) {
-									String firstKeyValue = foundValArr[0];
-									List<Integer> indexList = lineDataCarrier.getIndexOfSpan(firstKeyValue);
-									if (null != indexList) {
-										List<Span> spanList = lineDataCarrier.getSpanList();
-										for (Integer integer : indexList) {
-											List<Coordinates> local = new ArrayList<Coordinates>();
-											for (int p = 0; p < foundValArr.length; p++) {
-												if (integer < spanList.size()) {
-													Span span = spanList.get(integer);
-													if (null == span) {
-														continue;
-													}
-													String value = span.getValue();
-													if (null == value) {
-														continue;
-													}
-													integer++;
-													String fdVal = foundValArr[p];
-													if (value.contains(fdVal)) {
-														local.add(span.getCoordinates());
-													}
-												}
-											}
-											if (local.size() == foundValArr.length) {
-												keyCoordinates.addAll(local);
-											}
+								keyCoordinates.add(span.getCoordinates());
+								Integer spanIndex = lineDataCarrier.getIndexOfSpan(span);
+								Span rightSpan = null;
+								if (null != spanIndex && null != foundValArr && foundValArr.length > 1) {
+									for (int p = 0; p < foundValArr.length - 1; p++) {
+										rightSpan = lineDataCarrier.getRightSpan(spanIndex);
+										if (null != rightSpan) {
+											keyCoordinates.add(rightSpan.getCoordinates());
 										}
+										spanIndex = spanIndex + 1;
 									}
 								}
 
@@ -201,10 +185,9 @@ public class KVFinderServiceImpl implements KVFinderService {
 								BigInteger minY0 = BigInteger.ZERO;
 								BigInteger maxX1 = BigInteger.ZERO;
 								BigInteger maxY1 = BigInteger.ZERO;
+								boolean isFirst = true;
+
 								for (Coordinates coordinates1 : keyCoordinates) {
-
-									boolean isFirst = true;
-
 									BigInteger hocrX0 = coordinates1.getX0();
 									BigInteger hocrY0 = coordinates1.getY0();
 									BigInteger hocrX1 = coordinates1.getX1();
@@ -249,7 +232,6 @@ public class KVFinderServiceImpl implements KVFinderService {
 				}
 			}
 		}
-
 		return outputDataCarrierList.getList();
 	}
 

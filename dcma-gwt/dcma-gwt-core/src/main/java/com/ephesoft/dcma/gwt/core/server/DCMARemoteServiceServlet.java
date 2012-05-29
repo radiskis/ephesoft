@@ -38,6 +38,7 @@ package com.ephesoft.dcma.gwt.core.server;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +55,10 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
-import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
+import com.ephesoft.dcma.da.domain.BatchInstance;
+import com.ephesoft.dcma.da.service.BatchClassGroupsService;
+import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.da.service.BatchInstanceGroupsService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
@@ -68,6 +72,8 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	private static final String ALL_GROUPS = "allGroups";
 
+	private static final String ALL_SUPER_ADMIN_GROUPS = "allSuperAdminGroups";
+
 	private static final String ALL_USERS = "allUsers";
 
 	private static final String REVIEW_BATCH_LIST_PRIORITY_FILTER = "reviewBatchListPriorityFilter";
@@ -76,12 +82,21 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	private static final String RESTART_ALL_STATUS = "restartAllStatus";
 
+	private static final String COULD_NOT_CLEAR_CURRENT_USER_ERROR_MSG = "Could not clear current user for batch id: ";
+
 	private static final long serialVersionUID = 1L;
+
+	private static final String IS_SUPER_ADMIN = "isSuperAdmin";
 
 	protected Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Override
 	public void setup() {
+
+	}
+
+	@Override
+	public void setUpForLicenseExpiryAlert() {
 
 	}
 
@@ -94,6 +109,16 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw new GWTException(e.getCause().getMessage());
+		}
+	}
+
+	@Override
+	public void initRemoteServiceForLicenseAlert() throws Exception {
+		try {
+			setUpForLicenseExpiryAlert();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new GWTException(e.getMessage());
 		}
 	}
 
@@ -113,6 +138,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			return StringUtils.EMPTY;
 
 		return this.getThreadLocalRequest().getUserPrincipal().getName();
+
 	}
 
 	@Override
@@ -144,6 +170,40 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		return this.getThreadLocalRequest().isUserInRole("ADMIN");
 	}
 
+	public Boolean isSuperAdmin() {
+		Boolean isSuperAdmin = (Boolean) this.getThreadLocalRequest().getSession().getAttribute(IS_SUPER_ADMIN);
+		if (isSuperAdmin == null) {
+			Set<String> allSuperAdminGroups = getAllSuperAdminGroup();
+			for (String superAdminGroup : allSuperAdminGroups) {
+				if (this.getThreadLocalRequest().isUserInRole(superAdminGroup)) {
+					isSuperAdmin = Boolean.TRUE;
+					break;
+				}
+			}
+			if (isSuperAdmin == null) {
+				isSuperAdmin = Boolean.FALSE;
+			}
+
+			this.getThreadLocalRequest().getSession().setAttribute(IS_SUPER_ADMIN, isSuperAdmin);
+
+		}
+		return isSuperAdmin;
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public Set<String> getAllSuperAdminGroup() {
+		Object allSuperAdminGroups = this.getThreadLocalRequest().getSession().getAttribute(ALL_SUPER_ADMIN_GROUPS);
+		if (allSuperAdminGroups == null) {
+			Set<String> allGroupsSet = null;
+			UserConnectivityService userConnectivityService = this.getSingleBeanOfType(UserConnectivityService.class);
+			allGroupsSet = userConnectivityService.getAllSuperAdminGroups();
+			this.getThreadLocalRequest().getSession().setAttribute(ALL_SUPER_ADMIN_GROUPS, allGroupsSet);
+			allSuperAdminGroups = allGroupsSet;
+		}
+		return (Set<String>) allSuperAdminGroups;
+	}
+
 	protected void invalidateSession() {
 		cleanup();
 		this.getThreadLocalRequest().getSession().invalidate();
@@ -163,10 +223,19 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	}
 
 	@Override
-	public void acquireLock(String batchClassIdentifier) throws GWTException {
+	public void acquireLock(String batchInstanceIdentifier) throws GWTException {
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		try {
-			batchInstanceService.acquireBatchInstance(batchClassIdentifier, getUserName());
+
+			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
+			String batchClassIdentifier = batchInstance.getBatchClass().getIdentifier();
+			Set<String> batchClassIdentifiers = getAllBatchClassByUserRoles();
+			Set<String> batchInstanceIdentifiers = getAllBatchInstanceByUserRoles();
+			if (batchClassIdentifiers.contains(batchClassIdentifier)) {
+				batchInstanceService.acquireBatchInstance(batchInstanceIdentifier, getUserName());
+			} else if (batchInstanceIdentifiers.contains(batchInstanceIdentifier)) {
+				batchInstanceService.acquireBatchInstance(batchInstanceIdentifier, getUserName());
+			}
 		} catch (BatchAlreadyLockedException e) {
 			throw new GWTException(e.getMessage());
 		}
@@ -176,6 +245,21 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	public void cleanup() {
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		batchInstanceService.unlockAllBatchInstancesForCurrentUser(getUserName());
+	}
+
+	@Override
+	public void cleanUpCurrentBatch(String batchIdentifier) {
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+
+		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchIdentifier);
+		if (batchInstance != null) {
+			String currentUser = batchInstance.getCurrentUser();
+			if (currentUser != null && currentUser.equals(getUserName())) {
+				batchInstanceService.unlockCurrentBatchInstance(batchIdentifier);
+			}
+		} else {
+			log.error(COULD_NOT_CLEAR_CURRENT_USER_ERROR_MSG + batchIdentifier);
+		}
 	}
 
 	@Override
@@ -245,9 +329,31 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	}
 
 	public Set<String> getAllBatchClassByUserRoles() {
-		BatchClassGroupsDao batchClassGroupsDao = this.getSingleBeanOfType(BatchClassGroupsDao.class);
+		BatchClassGroupsService batchClassGroupsService = this.getSingleBeanOfType(BatchClassGroupsService.class);
+		boolean isSuperAdmin = isSuperAdmin().booleanValue();
 		Set<String> userRoles = getUserRoles();
-		return batchClassGroupsDao.getBatchClassIdentifierForUsers(userRoles);
+		Set<String> batchClassIdentifiersSet = new HashSet<String>();
+		if (!isSuperAdmin) {
+			Set<String> batchClassIdentifiers = batchClassGroupsService.getBatchClassIdentifierForUserRoles(userRoles);
+			if (batchClassIdentifiers != null) {
+				batchClassIdentifiersSet = batchClassIdentifiers;
+			}
+		} else {
+			BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
+			List<String> allBatchClassIdentifiers = batchClassService.getAllBatchClassIdentifier();
+			if (allBatchClassIdentifiers != null && allBatchClassIdentifiers.size() > 0) {
+				for (String batchClassIdentifier : allBatchClassIdentifiers) {
+					batchClassIdentifiersSet.add(batchClassIdentifier);
+				}
+			}
+		}
+		return batchClassIdentifiersSet;
+	}
+
+	private Set<String> getAllBatchInstanceByUserRoles() {
+		BatchInstanceGroupsService batchInstanceGroupsService = this.getSingleBeanOfType(BatchInstanceGroupsService.class);
+		Set<String> userRoles = getUserRoles();
+		return batchInstanceGroupsService.getBatchInstanceIdentifierForUserRoles(userRoles);
 	}
 
 	@Override
@@ -271,7 +377,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		this.getThreadLocalRequest().getSession().setAttribute(REVIEW_BATCH_LIST_PRIORITY_FILTER, reviewBatchListPriority);
 		this.getThreadLocalRequest().getSession().setAttribute(VALIDATE_BATCH_LIST_PRIORITY_FILTER, validateBatchListPriority);
 	}
-	
+
 	@Override
 	public Boolean isRestartAllBatchEnabled() {
 		boolean isRestartAllBatchEnabled = false;
@@ -298,7 +404,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			rowCount = Integer.parseInt(configProperties.getProperty("batchlist.table_row_count"));
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			log.info("batchlist.table_row_count is invalid or not exist in application.properties.Using default value: 15");
 		}
 		return rowCount;
 
@@ -319,5 +425,12 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 	@Override
 	public void disableRestartAllButton() {
 		this.getThreadLocalRequest().getSession().setAttribute(RESTART_ALL_STATUS, Boolean.FALSE);
+	}
+
+	@Override
+	public String getCurrentUser(String batchInstanceIdentifier) {
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
+		return batchInstance.getCurrentUser();
 	}
 }

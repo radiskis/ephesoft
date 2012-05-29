@@ -1,0 +1,27 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:DockLayoutPanel ui:field="pluginsLayoutPanel"
+		height="100%">
+		<g:north size="60">
+			<g:HorizontalPanel width="99%" ui:field="pluginButtonsPanel">
+				<g:cell width="45%" horizontalAlignment="ALIGN_LEFT">
+					<g:Label ui:field="pluginsListingLabel"></g:Label>
+				</g:cell>
+				<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="addNewPluginButton"></g:Button>
+				</g:cell>
+				<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="dependenciesButton"></g:Button>
+				</g:cell>
+				<g:cell horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="addNewPluginHelpButton"></g:Button>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:north>
+		<g:center>
+			<g:LayoutPanel ui:field="allPluginsListPanel">
+			</g:LayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

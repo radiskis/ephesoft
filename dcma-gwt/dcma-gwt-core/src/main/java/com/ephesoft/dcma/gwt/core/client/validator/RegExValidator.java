@@ -41,17 +41,78 @@ public class RegExValidator implements Validator {
 
 	private HasValue<String> _value;
 	private String _pattern;
+	private boolean isOnlyPatternValidator;
+	private boolean isMandatory;
+	private boolean isMultiplePattern;
+	private String patternDelimiter;
 
 	public RegExValidator(String pattern, HasValue<String> value) {
 		_pattern = pattern;
 		_value = value;
+		isOnlyPatternValidator = false;
+		isMandatory = true;
+		isMultiplePattern = false;
+	}
+
+	public RegExValidator(HasValue<String> value, boolean isMandatory, boolean isMultiplePattern, boolean isPatternValidator,
+			String patternDelimiter) {
+		_value = value;
+		this.isMandatory = isMandatory;
+		this.isMultiplePattern = isMultiplePattern;
+		this.isOnlyPatternValidator = isPatternValidator;
+		this.patternDelimiter = patternDelimiter;
 	}
 
 	@Override
 	public boolean validate() {
-		if (_value.getValue() == null || _value.getValue().trim().isEmpty()) {
-			return false;
+		boolean isPatternValid = true;
+		if (isOnlyPatternValidator) {
+			String pattern = _value.getValue();
+			if (pattern.isEmpty() && isMandatory) {
+				isPatternValid = false;
+			} else {
+				if (isMultiplePattern) {
+					isPatternValid = validateMultiplePattern(pattern);
+				} else {
+					isPatternValid = validatePattern(pattern);
+				}
+			}
+		} else {
+			if (_value.getValue() == null || _value.getValue().trim().isEmpty()) {
+				isPatternValid = false;
+			} else {
+				isPatternValid = _value.getValue().matches(_pattern);
+			}
 		}
-		return _value.getValue().matches(_pattern);
+		return isPatternValid;
+	}
+
+	public boolean validateMultiplePattern(String multiplePattern) {
+		boolean isPatternValid = true;
+		String[] patternArr = null;
+		if (multiplePattern.contains(patternDelimiter)) {
+			patternArr = multiplePattern.split(patternDelimiter);
+			for (String pattern : patternArr) {
+				if (!validatePattern(pattern)) {
+					isPatternValid = false;
+					break;
+				}
+			}
+		} else {
+			isPatternValid = validatePattern(multiplePattern);
+		}
+		return isPatternValid;
+	}
+
+	public boolean validatePattern(String pattern) {
+		boolean isPatternValid = true;
+		try {
+			String dummyString = "";
+			dummyString.matches(pattern);
+		} catch (Exception e) {
+			isPatternValid = false;
+		}
+
+		return isPatternValid;
 	}
 }

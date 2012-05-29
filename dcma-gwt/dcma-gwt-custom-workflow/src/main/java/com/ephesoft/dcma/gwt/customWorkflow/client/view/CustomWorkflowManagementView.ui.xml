@@ -1,0 +1,32 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.customWorkflow.client.view'
+	xmlns:dependency='urn:import:com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies'>
+
+	<g:DockLayoutPanel ui:field="customWorkflowLayoutPanel"
+		width="98%" height="98%" unit="PCT">
+
+		<g:center>
+			<g:LayoutPanel ui:field="layoutPanel">
+				<g:layer>
+					<cw:CustomWorkflowEntryView ui:field="customWorkflowEntryView"
+						visible="false"></cw:CustomWorkflowEntryView>
+				</g:layer>
+				<g:layer>
+					<dependency:DependencyView ui:field="dependencyView"
+						visible="false"></dependency:DependencyView>
+
+				</g:layer>
+				<g:layer>
+					<dependency:EditDependencyView
+						ui:field="editDependencyView" visible="false"></dependency:EditDependencyView>
+
+				</g:layer>
+				<g:layer>
+					<dependency:DependencyManagementView
+						ui:field="dependencyManagementView" visible="false"></dependency:DependencyManagementView>
+
+				</g:layer>
+			</g:LayoutPanel>
+		</g:center>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

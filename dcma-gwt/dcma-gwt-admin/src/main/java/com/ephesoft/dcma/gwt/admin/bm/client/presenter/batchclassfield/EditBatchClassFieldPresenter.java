@@ -45,6 +45,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield.EditBatchClass
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
@@ -66,6 +67,11 @@ public class EditBatchClassFieldPresenter extends AbstractBatchClassPresenter<Ed
 
 	public void onSave() {
 		boolean validFlag = true;
+		if (validFlag && !view.getValidateValidationPatternTextBox().validate()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+			validFlag = false;
+		}
 		if (validFlag && view.getFieldOrderNumber() != null && !view.getFieldOrderNumber().isEmpty()) {
 			try {
 				Integer.parseInt(view.getFieldOrderNumber());
@@ -78,14 +84,15 @@ public class EditBatchClassFieldPresenter extends AbstractBatchClassPresenter<Ed
 							+ " "
 							+ view.getFieldOrderNumberLabel().getText().subSequence(0,
 									view.getFieldOrderNumberLabel().getText().length() - 1), LocaleDictionary.get().getConstantValue(
-							BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE));
+							BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
 				} else {
 					ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 							BatchClassManagementMessages.NUMBER_ERROR)
 							+ " "
 							+ view.getFieldOrderNumberLabel().getText().subSequence(0,
 									view.getFieldOrderNumberLabel().getText().length() - 1), LocaleDictionary.get().getConstantValue(
-							BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE));
+							BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
+
 				}
 			}
 		}
@@ -101,15 +108,17 @@ public class EditBatchClassFieldPresenter extends AbstractBatchClassPresenter<Ed
 					if (batchClassFieldDTO.getFieldOrderNumber().equals(view.getFieldOrderNumber())) {
 						validFlag = false;
 						if (controller.isAdd()) {
-							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-									BatchClassManagementMessages.FIELD_ORDER_DUPLICATE_ERROR, view.getFieldOrderNumber()),
-									LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE));
-						} else {
 							ConfirmationDialogUtil
 									.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 											BatchClassManagementMessages.FIELD_ORDER_DUPLICATE_ERROR, view.getFieldOrderNumber()),
 											LocaleDictionary.get().getConstantValue(
-													BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE));
+													BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
+						} else {
+							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+									BatchClassManagementMessages.FIELD_ORDER_DUPLICATE_ERROR, view.getFieldOrderNumber()),
+									LocaleDictionary.get()
+											.getConstantValue(BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE),
+									Boolean.TRUE);
 						}
 						break;
 					}
@@ -123,11 +132,11 @@ public class EditBatchClassFieldPresenter extends AbstractBatchClassPresenter<Ed
 			if (controller.isAdd()) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE));
+						BatchClassManagementConstants.ADD_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
 			} else {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE));
+						BatchClassManagementConstants.EDIT_BATCH_CLASS_FIELD_TITLE), Boolean.TRUE);
 			}
 			validFlag = false;
 		}
@@ -166,7 +175,8 @@ public class EditBatchClassFieldPresenter extends AbstractBatchClassPresenter<Ed
 			view.getValidateNameTextBox().addValidator(new EmptyStringValidator(view.getNameTextBox()));
 			view.getValidateDescriptionTextBox().addValidator(new EmptyStringValidator(view.getDescriptionTextBox()));
 			view.getValidateFieldOrderNumberTextBox().addValidator(new NumberValidator(view.getFieldOrderNumberTextBox(), false));
-
+			view.getValidateValidationPatternTextBox().addValidator(
+					new RegExValidator(view.getValidationPatternTextBox(), false, false, true, null));
 			view.getValidateNameTextBox().toggleValidDateBox();
 			view.getValidateDescriptionTextBox().toggleValidDateBox();
 			view.getValidateFieldOrderNumberTextBox().toggleValidDateBox();

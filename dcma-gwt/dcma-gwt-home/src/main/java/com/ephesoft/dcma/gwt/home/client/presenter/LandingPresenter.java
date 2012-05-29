@@ -43,6 +43,7 @@ import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.RowSelectionListner;
@@ -125,12 +126,12 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				
+
 			}
 
 			@Override
 			public void onSuccess(Integer arg0) {
-				if(arg0 != null && arg0 > 0) {
+				if (arg0 != null && arg0 > 0) {
 					reviewTable.getListView().setTableRowCount(arg0);
 				}
 			}
@@ -219,7 +220,10 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	private void refreshTable() {
 		reviewTable.getSearchBatchTextBox().setText(EMPTY_STRING);
 		validateTable.getSearchBatchTextBox().setText(EMPTY_STRING);
-		loadDefaultData();
+		ReviewValidateTable rvTable = getSelectedTable();
+		populateFilters(rvTable);
+		ListView listView = rvTable.getListView();
+		getRowCount(listView.getStartIndex(), listView.getTableRowCount(), listView.getTableOrder(), null);
 	}
 
 	private boolean checkTextEntered(TextBox searchBatchTextBox) {
@@ -274,7 +278,8 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			public void onFailure(final Throwable caught) {
 				// Priority filter cannot be saved in HTTP session.
-				ConfirmationDialogUtil.showConfirmationDialogError("Error while retaining the batch list priority");
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchListMessages.ERROR_WHILE_RETAINING_BATCH_LIST_PRIORITY));
 			}
 
 			public void onSuccess(Void result) {
@@ -316,18 +321,19 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	public void updateTable(final ReviewValidateTable table, final int rowCount) {
 		ScreenMaskUtility.maskScreen();
-		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
+		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, table.getListView().getTableOrder(),
+				new AsyncCallback<List<BatchInstanceDTO>>() {
 
-			public void onFailure(final Throwable caught) {
-				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialogError(caught.getMessage());
-			}
+					public void onFailure(final Throwable caught) {
+						ScreenMaskUtility.unmaskScreen();
+						ConfirmationDialogUtil.showConfirmationDialogError(caught.getMessage());
+					}
 
-			public void onSuccess(final List<BatchInstanceDTO> result) {
-				updateTable(result, 0, table, rowCount);
-				ScreenMaskUtility.unmaskScreen();
-			}
-		});
+					public void onSuccess(final List<BatchInstanceDTO> result) {
+						updateTable(result, 0, table, rowCount);
+						ScreenMaskUtility.unmaskScreen();
+					}
+				});
 	}
 
 	public void loadDefaultData() {
@@ -479,6 +485,10 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		ReviewValidateTable rvTable = getSelectedTable();
 		populateFilters(rvTable);
 		final String batchName = rvTable.getSearchBatchTextBox().getText();
+		getRowCount(startIndex, maxResult, order, batchName);
+	}
+
+	private void getRowCount(final int startIndex, final int maxResult, final Order order, final String batchName) {
 		service.getRowsCount(batchName, filters, new AsyncCallback<Integer>() {
 
 			@Override

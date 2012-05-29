@@ -212,6 +212,7 @@ public class BatchPluginPropertyContainer implements Serializable {
 						fieldType.setSampleValue(tempField.getSampleValue());
 						fieldType.setFieldOptionValueList(tempField.getFieldOptionValueList());
 						fieldType.setHidden(tempField.isHidden());
+						fieldType.setMultiLine(tempField.isMultiLine());
 						Map<String, KVExtraction> tempKVExtraction = new HashMap<String, KVExtraction>();
 						List<com.ephesoft.dcma.da.domain.KVExtraction> tempList = tempField.getKvExtraction();
 						if (tempList != null && !tempList.isEmpty()) {
@@ -778,7 +779,7 @@ public class BatchPluginPropertyContainer implements Serializable {
 		public void setLastModified(Date lastModified) {
 			this.lastModified = lastModified;
 		}
-		
+
 		/**
 		 * 
 		 * @return isHidden
@@ -794,7 +795,6 @@ public class BatchPluginPropertyContainer implements Serializable {
 		public void setHidden(boolean isHidden) {
 			this.isHidden = isHidden;
 		}
-
 
 		/**
 		 * @return the batchClass
@@ -966,6 +966,7 @@ public class BatchPluginPropertyContainer implements Serializable {
 		private String barcodeType;
 		private String fieldOptionValueList;
 		private boolean isHidden;
+		private boolean isMultiLine;
 		private String sampleValue;
 		private Map<String, RegexValidation> regexValidation = new HashMap<String, RegexValidation>();
 		private com.ephesoft.dcma.da.domain.DocumentType docType;
@@ -1153,6 +1154,22 @@ public class BatchPluginPropertyContainer implements Serializable {
 		 */
 		public boolean isHidden() {
 			return isHidden;
+		}
+
+		/**
+		 * 
+		 * @param isMultiLine
+		 */
+		public void setMultiLine(boolean isMultiLine) {
+			this.isMultiLine = isMultiLine;
+		}
+
+		/**
+		 * 
+		 * @return isMultiLine
+		 */
+		public boolean isMultiLine() {
+			return isMultiLine;
 		}
 
 		/**

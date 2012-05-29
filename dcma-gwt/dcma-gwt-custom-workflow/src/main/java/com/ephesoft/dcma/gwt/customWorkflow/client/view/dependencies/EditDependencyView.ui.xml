@@ -1,0 +1,53 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:DockLayoutPanel ui:field="editDependencyDockLayoutPanel"
+		width="98%" height="92%" unit="PCT">
+		<g:north size="80">
+			<g:VerticalPanel ui:field="editDependencyPanel"
+				width="100%" spacing="10">
+				<g:HorizontalPanel spacing="20">
+					<g:VerticalPanel spacing="30">
+						<g:Label ui:field="pluginLabel"></g:Label>
+						<g:Label ui:field="dependencyTypeLabel"></g:Label>
+						<g:Label ui:field="dependenciesLabel"></g:Label>
+					</g:VerticalPanel>
+					<g:VerticalPanel spacing="30">
+						<g:Label ui:field="pluginNamesList"></g:Label>
+						<g:ListBox ui:field="dependencyTypeList"></g:ListBox>
+						<g:HorizontalPanel>
+							<g:cell width="30%">
+								<g:HorizontalPanel ui:field="dependenciesListHorizontalPanel"></g:HorizontalPanel>
+							</g:cell>
+							<g:cell width="10%">
+								<g:Label></g:Label>
+							</g:cell>
+							<g:cell width="40%">
+								<g:VerticalPanel ui:field="buttonsPanel" width="100%">
+									<g:Button ui:field="andButton"></g:Button>
+									<g:Button ui:field="orButton"></g:Button>
+								</g:VerticalPanel>
+							</g:cell>
+							<g:cell width="10%">
+								<g:Label></g:Label>
+							</g:cell>
+							<g:cell width="100%">
+								<g:TextArea ui:field="dependenciesTextArea"></g:TextArea>
+							</g:cell>
+
+						</g:HorizontalPanel>
+					</g:VerticalPanel>
+				</g:HorizontalPanel>
+
+
+			</g:VerticalPanel>
+
+		</g:north>
+		<g:south size="20">
+			<g:HorizontalPanel spacing="10">
+				<g:Button ui:field="okButton"></g:Button>
+				<g:Button ui:field="cancelButton"></g:Button>
+			</g:HorizontalPanel>
+		</g:south>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

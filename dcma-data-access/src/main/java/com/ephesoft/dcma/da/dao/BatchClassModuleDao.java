@@ -37,6 +37,7 @@ package com.ephesoft.dcma.da.dao;
 
 import java.util.List;
 
+import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.Module;
@@ -86,5 +87,12 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	 * @return batch class module object
 	 */
 	BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName);
+
+	/**
+	 * 
+	 * @param order
+	 * @return
+	 */
+	List<BatchClassModule> getAllBatchClassModulesInOrder(Order order);
 
 }

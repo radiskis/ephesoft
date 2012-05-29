@@ -63,4 +63,7 @@ public interface ICommonConstants {
 	public final String FIRST_PAGE = "_First_Page";
 	public final String MIDDLE_PAGE = "_Middle_Page";
 	public final String LAST_PAGE = "_Last_Page";
+	
+	public final String SEARCH_CLASSIFICATION_PLUGIN = "SEARCH_CLASSIFICATION";
+	public final String BARCODE_READER_PLUGIN = "BARCODE_READER";
 }

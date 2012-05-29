@@ -59,6 +59,7 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.service.DocumentTypeService;
 import com.ephesoft.dcma.da.service.PageTypeService;
 import com.ephesoft.dcma.docassembler.DocumentAssemblerProperties;
 import com.ephesoft.dcma.docassembler.constant.DocumentAssemblerConstants;
@@ -71,6 +72,10 @@ import com.ephesoft.dcma.docassembler.constant.PlaceHolder;
  * @author Ephesoft
  * @version 1.0
  * @see com.ephesoft.dcma.docassembler.DocumentAssembler
+ */
+/**
+ * @author chhavi1470
+ * 
  */
 public class LucenePageProcess {
 
@@ -90,6 +95,11 @@ public class LucenePageProcess {
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
+	 * Instance of DocType Service
+	 */
+	private DocumentTypeService docTypeService;
+
+	/**
 	 * xmlDocuments List<DocumentType>.
 	 */
 	private List<Document> xmlDocuments;
@@ -98,6 +108,11 @@ public class LucenePageProcess {
 	 * Batch instance ID.
 	 */
 	private String batchInstanceIdentifier;
+
+	/**
+	 * Batch Class ID.
+	 */
+	private String batchClassIdentifier;
 
 	/**
 	 * Reference of BatchSchemaService.
@@ -175,6 +190,20 @@ public class LucenePageProcess {
 	/**
 	 * @param batchInstanceIdentifier Long
 	 */
+	public final void setBatchClassIdentifier(String batchClassIdentifier) {
+		this.batchClassIdentifier = batchClassIdentifier;
+	}
+
+	/**
+	 * @return batchClassIdentifier
+	 */
+	public final String getBatchClassIdentifier() {
+		return this.batchClassIdentifier;
+	}
+
+	/**
+	 * @param batchInstanceIdentifier Long
+	 */
 	public final void setBatchInstanceIdentifier(String batchInstanceIdentifier) {
 		this.batchInstanceIdentifier = batchInstanceIdentifier;
 	}
@@ -191,6 +220,56 @@ public class LucenePageProcess {
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
+	}
+
+	/**
+	 * @param docTypeService the doc type service to be set
+	 */
+	public void setDocTypeService(DocumentTypeService docTypeService) {
+		this.docTypeService = docTypeService;
+	}
+
+	/**
+	 * @param docType
+	 * @param pageTypeName
+	 */
+	public void setDocTypeNameAndConfThresholdAPI(final Document docType, final String pageTypeName) {
+
+		/*
+		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
+		 * batchInstanceID);
+		 */
+		List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = docTypeService.getDocTypeByBatchClassIdentifier(
+				batchClassIdentifier, -1, -1);
+
+		String docTypeName = null, docTypeNameTemp = null;
+		float minConfidenceThreshold = 0;
+
+		if (null == docTypes || docTypes.isEmpty()) {
+			LOGGER.info("No Document Type found for the input page type name.");
+		} else {
+			Iterator<com.ephesoft.dcma.da.domain.DocumentType> itr = docTypes.iterator();
+			while (itr.hasNext()) {
+				com.ephesoft.dcma.da.domain.DocumentType docTypeDB = itr.next();
+				docTypeNameTemp = docTypeDB.getName();
+				if (pageTypeName.contains(docTypeNameTemp)) {
+					docTypeName = docTypeNameTemp;
+					minConfidenceThreshold = docTypeDB.getMinConfidenceThreshold();
+					LOGGER.debug("DocumentType name : " + docTypeName + "  minConfidenceThreshold : " + minConfidenceThreshold);
+					break;
+				}
+			}
+		}
+
+		if (null != docTypeName) {
+			docType.setType(docTypeName);
+			DecimalFormat twoDForm = new DecimalFormat("#.##");
+			minConfidenceThreshold = Float.valueOf(twoDForm.format(minConfidenceThreshold));
+			docType.setConfidenceThreshold(minConfidenceThreshold);
+		} else {
+			String errMsg = "DocumentType name is not found in the data base " + "for page type name: " + pageTypeName;
+			LOGGER.info(errMsg);
+		}
 	}
 
 	/**
@@ -238,118 +317,18 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * This method will create new document for pages that was found in the batch.xml file for Unknown type document.
+	 * Update Batch XML file.
 	 * 
-	 * @param docPageInfo List<PageType>
-	 * @throws DCMAApplicationException Check for input parameters, create new documents for page found in document type Unknown.
+	 * @param insertAllDocument List<DocumentType>
+	 * @param removeIndexList List<Integer>
+	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
 	 */
-	public final void createDocForPages(final List<Page> docPageInfo) throws DCMAApplicationException {
-
-		String errMsg = null;
-
-		if (null == this.xmlDocuments) {
-			throw new DCMAApplicationException("Unable to write pages for the document.");
-		}
-
-		try {
-
-			List<Document> insertAllDocument = new ArrayList<Document>();
-			List<Integer> removeIndexList = new ArrayList<Integer>();
-			Document document = null;
-			Long idGenerator = 0L;
-
-			boolean isLast = true;
-			boolean isFirst = true;
-
-			for (int index = 0; index < docPageInfo.size(); index++) {
-
-				Page pgType = docPageInfo.get(index);
-				DocField docFieldType = getPgLevelField(pgType);
-				if (null == docFieldType) {
-					errMsg = "Invalid format of page level fields. DocFieldType found for "
-							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
-					throw new DCMAApplicationException(errMsg);
-				}
-
-				String value = docFieldType.getValue();
-				float confidenceScore = docFieldType.getConfidence();
-
-				if (null == value) {
-					errMsg = "Invalid format of page level fields. Value found for "
-							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
-					throw new DCMAApplicationException(errMsg);
-				}
-
-				// check for zero confidence score value
-				// for zero value just leave the page to unknown type.
-
-				if (confidenceScore == 0) {
-					document = new Document();
-					Pages pages = new Pages();
-					idGenerator++;
-					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
-					document.setPages(pages);
-					insertAllDocument.add(document);
-					document.getPages().getPage().add(pgType);
-					document.setType(EphesoftProperty.UNKNOWN.getProperty());
-					removeIndexList.add(index);
-					continue;
-				}
-
-				if (isLast) {
-					document = new Document();
-					Pages pages = new Pages();
-					idGenerator++;
-					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
-					document.setPages(pages);
-					insertAllDocument.add(document);
-					isLast = false;
-					isFirst = false;
-				}
-
-				if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE))) {
-					if (isFirst) {
-						document = new Document();
-						Pages pages = new Pages();
-						idGenerator++;
-						document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
-						document.setPages(pages);
-						insertAllDocument.add(document);
-					}
-					isFirst = true;
-					document.getPages().getPage().add(pgType);
-					removeIndexList.add(index);
-				} else {
-					if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE))) {
-						document.getPages().getPage().add(pgType);
-						removeIndexList.add(index);
-						isFirst = true;
-					} else {
-						if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_LAST_PAGE))) {
-							document.getPages().getPage().add(pgType);
-							removeIndexList.add(index);
-							isLast = true;
-						} else {
-							errMsg = "For page type value: " + value + "  and page ID : " + pgType.getIdentifier()
-									+ " , Data format is not correct in the batch.xml file. "
-									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE) + " , "
-									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE) + " and "
-									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_LAST_PAGE)
-									+ " any of the three are not present to the name <Value> tag.";
-							LOGGER.info(errMsg);
-						}
-					}
-				}
-			}
-
-			// update the xml file.
-			updateBatchXML(insertAllDocument, removeIndexList);
-
-		} catch (Exception e) {
-			errMsg = "Unable to write pages for the document. " + e.getMessage();
-			LOGGER.error(errMsg, e);
-			throw new DCMAApplicationException(errMsg, e);
-		}
+	private void updateBatchXMLAPI(final List<Document> insertAllDocument, final List<Integer> removeIndexList,
+			boolean isFromWebService) throws DCMAApplicationException {
+		// set the confidence score and document type name on the basis of
+		// defined rules.
+		setDocConfAndDocType(insertAllDocument, isFromWebService);
+		LOGGER.info("updateBatchXML for web services done.");
 	}
 
 	/**
@@ -406,7 +385,7 @@ public class LucenePageProcess {
 
 		// set the confidence score and document type name on the basis of
 		// defined rules.
-		setDocConfAndDocType(xmlDocuments);
+		setDocConfAndDocType(xmlDocuments, false);
 
 		// merge the unknown documents on the basis of a check
 		String mergeSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
@@ -485,7 +464,7 @@ public class LucenePageProcess {
 	 * @param xmlDocuments List<DocumentType>
 	 */
 	@SuppressWarnings("unchecked")
-	private void setDocConfAndDocType(final List<Document> xmlDocuments) throws DCMAApplicationException {
+	private void setDocConfAndDocType(final List<Document> xmlDocuments, boolean isFromWebService) throws DCMAApplicationException {
 
 		Map<String, Object[]> docConfidence = null;
 		float confidenceScoreMax = 0.0f;
@@ -567,9 +546,11 @@ public class LucenePageProcess {
 				stringBuilder.append(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE));
 				pageTypeName = stringBuilder.toString();
 			}
-
-			setDocTypeNameAndConfThreshold(docType, pageTypeName);
-
+			if (isFromWebService) {
+				setDocTypeNameAndConfThresholdAPI(docType, pageTypeName);
+			} else {
+				setDocTypeNameAndConfThreshold(docType, pageTypeName);
+			}
 		}
 
 	}
@@ -754,6 +735,120 @@ public class LucenePageProcess {
 		}
 
 		return docPageInfo;
+	}
+
+	public void createDocForPages(List<Document> insertAllDocument, List<Page> docPageInfo, boolean isFromWebService)
+			throws DCMAApplicationException {
+
+		String errMsg = null;
+
+		if (!isFromWebService) {
+			if (null == this.xmlDocuments) {
+				throw new DCMAApplicationException("Unable to write pages for the document.");
+			}
+		}
+
+		try {
+			List<Integer> removeIndexList = new ArrayList<Integer>();
+			Document document = null;
+			Long idGenerator = 0L;
+
+			boolean isLast = true;
+			boolean isFirst = true;
+
+			for (int index = 0; index < docPageInfo.size(); index++) {
+
+				Page pgType = docPageInfo.get(index);
+				DocField docFieldType = getPgLevelField(pgType);
+				if (null == docFieldType) {
+					errMsg = "Invalid format of page level fields. DocFieldType found for "
+							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
+					throw new DCMAApplicationException(errMsg);
+				}
+
+				String value = docFieldType.getValue();
+				float confidenceScore = docFieldType.getConfidence();
+
+				if (null == value) {
+					errMsg = "Invalid format of page level fields. Value found for "
+							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
+					throw new DCMAApplicationException(errMsg);
+				}
+
+				// check for zero confidence score value
+				// for zero value just leave the page to unknown type.
+
+				if (confidenceScore == 0) {
+					document = new Document();
+					Pages pages = new Pages();
+					idGenerator++;
+					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
+					document.setPages(pages);
+					insertAllDocument.add(document);
+					document.getPages().getPage().add(pgType);
+					document.setType(EphesoftProperty.UNKNOWN.getProperty());
+					removeIndexList.add(index);
+					continue;
+				}
+
+				if (isLast) {
+					document = new Document();
+					Pages pages = new Pages();
+					idGenerator++;
+					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
+					document.setPages(pages);
+					insertAllDocument.add(document);
+					isLast = false;
+					isFirst = false;
+				}
+
+				if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE))) {
+					if (isFirst) {
+						document = new Document();
+						Pages pages = new Pages();
+						idGenerator++;
+						document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
+						document.setPages(pages);
+						insertAllDocument.add(document);
+					}
+					isFirst = true;
+					document.getPages().getPage().add(pgType);
+					removeIndexList.add(index);
+				} else {
+					if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE))) {
+						document.getPages().getPage().add(pgType);
+						removeIndexList.add(index);
+						isFirst = true;
+					} else {
+						if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_LAST_PAGE))) {
+							document.getPages().getPage().add(pgType);
+							removeIndexList.add(index);
+							isLast = true;
+						} else {
+							errMsg = "For page type value: " + value + "  and page ID : " + pgType.getIdentifier()
+									+ " , Data format is not correct in the batch.xml file. "
+									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE) + " , "
+									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_MIDDLE_PAGE) + " and "
+									+ getPropertyMap().get(DocumentAssemblerConstants.CHECK_LAST_PAGE)
+									+ " any of the three are not present to the name <Value> tag.";
+							LOGGER.info(errMsg);
+						}
+					}
+				}
+			}
+
+			if (isFromWebService) {
+				updateBatchXMLAPI(insertAllDocument, removeIndexList, isFromWebService);
+			} else {
+				// update the xml file.
+				updateBatchXML(insertAllDocument, removeIndexList);
+			}
+
+		} catch (Exception e) {
+			errMsg = "Unable to write pages for the document. " + e.getMessage();
+			LOGGER.error(errMsg, e);
+			throw new DCMAApplicationException(errMsg, e);
+		}
 	}
 
 }

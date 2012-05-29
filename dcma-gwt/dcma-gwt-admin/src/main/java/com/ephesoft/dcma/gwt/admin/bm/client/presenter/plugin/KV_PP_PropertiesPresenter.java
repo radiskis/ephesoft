@@ -76,7 +76,7 @@ public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP
 			this.kvPPEditPresenter.bind();
 			view.getKvppPluginViewVerticalPanel().setVisible(Boolean.TRUE);
 			view.getKvppPluginConfigVerticalPanel().setVisible(Boolean.FALSE);
-			showKvPPPluginView();
+			showKVppPluginView();
 			Collection<BatchClassPluginConfigDTO> values = controller.getSelectedPlugin().getBatchClassPluginConfigs();
 			if (values == null || values.isEmpty()) {
 				view.getEditButton().setVisible(false);
@@ -98,21 +98,23 @@ public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP
 		}
 	}
 
-	public void showKvPPPluginView() {
+	public void showKVppPluginView() {
 		view.getKvppViewEditPluginPanel().clear();
 		view.getKvppViewEditPluginPanel().add(view.getScrollPanel());
 	}
 
-	public void showKvPPConfigView() {
+	public void showKVppPluginConfigView() {
 		view.getKvppViewEditPluginPanel().clear();
 		this.kvPPConfigPresenter.bind();
 		view.getKvppViewEditPluginPanel().add(view.getConfigView());
 		view.getConfigView().setVisible(Boolean.TRUE);
 	}
 
-	public void onconfigButtonClicked() {
+	public void onConfigButtonClicked() {
+		this.controller.getMainPresenter().getBatchClassBreadCrumbPresenter().createBreadCrumbForKVPPPluginConfig(
+				controller.getSelectedPlugin());
 		this.kvPPConfigPresenter.bind();
-		showKvPPConfigView();
+		showKVppPluginConfigView();
 	}
 	
 	public KV_PP_ConfigPresenter getKvPPConfigPresenter() {

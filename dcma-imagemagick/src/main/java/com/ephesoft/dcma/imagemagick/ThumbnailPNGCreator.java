@@ -360,6 +360,34 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 			throw new DCMAApplicationException("Problem generating list of files", e);
 
 		}
+		BatchInstanceThread batchInstanceThread = generateThumbnailInternal(batchInstanceIdentifier, thumbnailType, thumbnailH,
+				thumbnailW, outputImageParameters, sListOfTiffFiles);
+		try {
+			LOGGER.info("Executing thumbnail generation by thread pool for " + batchInstanceIdentifier);
+			batchInstanceThread.execute();
+			LOGGER.info("Finished thumbnail generation by thread pool for " + batchInstanceIdentifier);
+		} catch (DCMAApplicationException dcmae) {
+			LOGGER.error("Error in generating thumbnails");
+			batchInstanceThread.remove();
+			batchSchemaService.updateBatch(batch);
+
+			// Throw the exception to set the batch status to Error by Application aspect
+			LOGGER.error("Error in generating thumbnails" + dcmae.getMessage(), dcmae);
+			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+		}
+
+		for (int i = 0; i < sListOfTiffFiles.length; i++) {
+			addFileToPageSchema(batch, sListOfTiffFiles[i][2], sListOfTiffFiles[i][1], thumbnailType);
+			LOGGER.debug("thumbnail " + sListOfTiffFiles[i][1] + " sucsesfully generated");
+		}
+		LOGGER.info("Persisting all thumbnail info to batch.xml file");
+		batchSchemaService.updateBatch(batch);
+		LOGGER.info(sListOfTiffFiles.length + " thumbnails succesfully generated");
+
+	}
+
+	public BatchInstanceThread generateThumbnailInternal(final String batchInstanceIdentifier, String thumbnailType,
+			String thumbnailH, String thumbnailW, final String outputImageParameters, String[][] sListOfTiffFiles) {
 		LOGGER.info("Generating thumbnais");
 		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 
@@ -437,28 +465,7 @@ public class ThumbnailPNGCreator implements ICommonConstants, IImageMagickCommon
 				}
 			});
 		}
-		try {
-			LOGGER.info("Executing thumbnail generation by thread pool for " + batchInstanceIdentifier);
-			batchInstanceThread.execute();
-			LOGGER.info("Finished thumbnail generation by thread pool for " + batchInstanceIdentifier);
-		} catch (DCMAApplicationException dcmae) {
-			LOGGER.error("Error in generating thumbnails");
-			batchInstanceThread.remove();
-			batchSchemaService.updateBatch(batch);
-
-			// Throw the exception to set the batch status to Error by Application aspect
-			LOGGER.error("Error in generating thumbnails" + dcmae.getMessage(), dcmae);
-			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-		}
-
-		for (int i = 0; i < sListOfTiffFiles.length; i++) {
-			addFileToPageSchema(batch, sListOfTiffFiles[i][2], sListOfTiffFiles[i][1], thumbnailType);
-			LOGGER.debug("thumbnail " + sListOfTiffFiles[i][1] + " sucsesfully generated");
-		}
-		LOGGER.info("Persisting all thumbnail info to batch.xml file");
-		batchSchemaService.updateBatch(batch);
-		LOGGER.info(sListOfTiffFiles.length + " thumbnails succesfully generated");
-
+		return batchInstanceThread;
 	}
 
 	/**

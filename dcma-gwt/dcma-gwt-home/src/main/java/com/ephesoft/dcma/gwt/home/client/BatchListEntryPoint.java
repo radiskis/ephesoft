@@ -81,8 +81,7 @@ public class BatchListEntryPoint extends DCMAEntryPoint<TableModelServiceAsync> 
 
 		rootPanel.addStyleName("set_position");
 		rootPanel.getHeader().setEventBus(eventBus);
-		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(BatchListConstants.TAB_LABEL_HOME), "BatchList.html",
-				false);
+		rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(BatchListConstants.TAB_LABEL_HOME), "BatchList.html");
 		rootPanel.getHeader().getTabBar().selectTab(0);
 		
 		rpcService.getUserName(new AsyncCallback<String>() {
@@ -122,8 +121,8 @@ public class BatchListEntryPoint extends DCMAEntryPoint<TableModelServiceAsync> 
 
 			public void onSuccess(final Integer result) {
 				if (result == null || result.intValue() == 0) {
-					rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(BatchListConstants.TAB_LABEL_BATCH_DETAIL),
-							"BatchList.html", false);
+					rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(BatchListConstants.TAB_LABEL_BATCH_DETAIL),
+							"BatchList.html");
 					rootPanel.getHeader().getTabBar().setTabEnabled(1, false);
 				} else {
 					rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(BatchListConstants.TAB_LABEL_BATCH_DETAIL),

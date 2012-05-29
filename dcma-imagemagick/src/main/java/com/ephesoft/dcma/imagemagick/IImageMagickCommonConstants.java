@@ -37,26 +37,31 @@ package com.ephesoft.dcma.imagemagick;
 
 public interface IImageMagickCommonConstants {
 
-	public static int THUMBNAIL_LENGTH = 200;
-	public static int THUMBNAIL_BREDTH = 150;
-	public static String THUMBNAIL = "thumbnail";
-	public static String THUMBS = "thumbs";
-	public static String PNG = "png";
-	public static String TIF = "tif";
-	public static String EXT_PNG = ".png";
-	public static String EXT_TIF = ".tif";
-	public static String SUFFIX_THUMBNAIL_SAMPLE_PNG = "_thumb.png";
-	public static String SUFFIX_THUMBNAIL_SAMPLE_TIF = "_thumb.tif";
-	public static String IMAGEMAGICK_ENV_VARIABLE = "IM4JAVA_TOOLPATH";
-	public static String IMAGE_COMPARE_CLASSIFICATION = "Image_Compare_Classification";
-	public static String DEFAULT_IM_COMP_METRIC = "RMSE";
-	public static String DEFAULT_IM_COMP_FUZZ = "10";
-	public static String THUMB_TYPE_DISP = "displayThumbnail";
-	public static String THUMB_TYPE_COMP = "compareThumbnail";
-	public static String OCR_INPUT_FILE = "ocrInputFile";
-	public static String DISPLAY_IMAGE = "displayImage";
-	public static String REPAIR_FILES_THROUGH_GHOSTSCIPT_ENV_VARIABLE = "REPAIR_FILES_UTILITY_PATH";
-	public static String GHOSTSCRIPT_ENV_VARIABLE = "GHOSTSCRIPT_HOME";
-	public static String REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE="REPAIR_IMAGE_MAGICK_UTILITY_PATH";
-	
+	int THUMBNAIL_LENGTH = 200;
+	int THUMBNAIL_BREDTH = 150;
+	String THUMBNAIL = "thumbnail";
+	String THUMBS = "thumbs";
+	String PNG = "png";
+	String TIF = "tif";
+	String EXT_PNG = ".png";
+	String EXT_TIF = ".tif";
+	String SUFFIX_THUMBNAIL_SAMPLE_PNG = "_thumb.png";
+	String SUFFIX_THUMBNAIL_SAMPLE_TIF = "_thumb.tif";
+	String IMAGEMAGICK_ENV_VARIABLE = "IM4JAVA_TOOLPATH";
+	String IMAGE_COMPARE_CLASSIFICATION = "Image_Compare_Classification";
+	String DEFAULT_IM_COMP_METRIC = "RMSE";
+	String DEFAULT_IM_COMP_FUZZ = "10";
+	String THUMB_TYPE_DISP = "displayThumbnail";
+	String THUMB_TYPE_COMP = "compareThumbnail";
+	String OCR_INPUT_FILE = "ocrInputFile";
+	String DISPLAY_IMAGE = "displayImage";
+	String REPAIR_FILES_THROUGH_GHOSTSCIPT_ENV_VARIABLE = "REPAIR_FILES_UTILITY_PATH";
+	String GHOSTSCRIPT_ENV_VARIABLE = "GHOSTSCRIPT_HOME";
+	String REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE = "REPAIR_IMAGE_MAGICK_UTILITY_PATH";
+	String EMPTY_STRING = "";
+	String QUOTES = "\"";
+	String SPACE = " ";
+	String GHOSTSCRIPT_EXECUTOR = "EphesoftExecutor.exe";
+	String IMAGEMAGICK_EXECUTOR = "EphesoftImageMagickExecutor.exe";
+	String IM4JAVA_TOOLPATH = "IM4JAVA_TOOLPATH";
 }

@@ -53,16 +53,17 @@ public class TableColumnInfoListView extends View<TableColumnInfoListPresenter> 
 	public HeaderColumn betweenRight = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
 			BatchClassManagementConstants.BETWEEN_RIGHT), 20);
 	public HeaderColumn columnName = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.COLUMN_NAME), 20);
+			BatchClassManagementConstants.COLUMN_NAME), 15);
+	public HeaderColumn columnHeaderPattern = new HeaderColumn(2, "Column Header Pattern", 20);
 	public HeaderColumn columnPattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.COLUMN_PATTERN), 20);
+			BatchClassManagementConstants.COLUMN_PATTERN), 15);
 	public HeaderColumn isRequired = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.IS_REQUIRED), 20);
+			BatchClassManagementConstants.IS_REQUIRED), 15);
 
 	public ListView listView = new ListView();
 
 	public TableColumnInfoListView() {
 		super();
-		listView.addHeaderColumns(betweenLeft, betweenRight, columnName, columnPattern, isRequired);
+		listView.addHeaderColumns(betweenLeft, betweenRight, columnName, columnHeaderPattern, columnPattern, isRequired);
 	}
 }

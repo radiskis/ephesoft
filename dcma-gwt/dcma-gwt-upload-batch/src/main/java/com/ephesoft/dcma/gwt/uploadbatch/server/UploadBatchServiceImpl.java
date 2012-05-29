@@ -51,6 +51,7 @@ import org.apache.commons.lang.SerializationUtils;
 
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassField;
@@ -74,10 +75,9 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 		List<BatchInstanceStatus> statusList = new ArrayList<BatchInstanceStatus>();
 		statusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
-		int rowCount = 0;
+		
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		rowCount = batchInstanceService.getCount(statusList, null, getUserRoles(), getUserName());
-		return rowCount;
+		return batchInstanceService.getCount(statusList, null, getUserRoles(), getUserName(), EphesoftUser.NORMAL_USER);
 	}
 
 	@Override

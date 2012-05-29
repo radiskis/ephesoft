@@ -35,26 +35,35 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 
 public class ConfirmationDialogUtil {
 
-	public static ConfirmationDialog showConfirmationDialog(String message, String title) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
+	private static ConfirmationDialog confirmationDialog;
+
+	public static ConfirmationDialog showConfirmationDialog(String message, String title, Boolean removeCancelButton) {
+		return showConfirmationDialog(message, title, removeCancelButton, false);
+	}
+
+	public static ConfirmationDialog showConfirmationDialog(String message, String title, Boolean removeCancelButton,
+			boolean createNewDialogInstance) {
+		if (createNewDialogInstance || confirmationDialog == null) {
+			confirmationDialog = new ConfirmationDialog();
+		} else {
+			confirmationDialog.setDefaultListener();
+		}
+		confirmationDialog.hide();
+		confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_ok));
+		confirmationDialog.cancelButton.setText(LocaleDictionary.get().getConstantValue(
+				LocaleCommonConstants.title_confirmation_cancel));
 		confirmationDialog.setMessage(message);
 		confirmationDialog.setDialogTitle(title);
-		confirmationDialog.addDialogListener(new DialogListener() {
-
-			@Override
-			public void onOkClick() {
-				confirmationDialog.hide(true);
-			}
-
-			@Override
-			public void onCancelClick() {
-				// Auto-generated method stub
-			}
-		});
+		if (removeCancelButton) {
+			confirmationDialog.cancelButton.setVisible(false);
+		} else {
+			confirmationDialog.cancelButton.setVisible(true);
+		}
 		confirmationDialog.show();
 		confirmationDialog.center();
 		confirmationDialog.okButton.setFocus(true);
@@ -62,68 +71,18 @@ public class ConfirmationDialogUtil {
 	}
 
 	public static ConfirmationDialog showConfirmationDialogSuccess(String message) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle("Success");
-		confirmationDialog.addDialogListener(new DialogListener() {
+		return showConfirmationDialogSuccess(message, false);
+	}
 
-			@Override
-			public void onOkClick() {
-				confirmationDialog.hide(true);
-			}
-
-			@Override
-			public void onCancelClick() {
-				// Auto-generated method stub
-			}
-		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
-		return confirmationDialog;
+	public static ConfirmationDialog showConfirmationDialogSuccess(String message, boolean createNewConfirmationDialog) {
+		return showConfirmationDialog(message, "Success", true, createNewConfirmationDialog);
 	}
 
 	public static ConfirmationDialog showConfirmationDialogError(String message) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle("Error");
-		confirmationDialog.addDialogListener(new DialogListener() {
-
-			@Override
-			public void onOkClick() {
-				confirmationDialog.hide(true);
-			}
-
-			@Override
-			public void onCancelClick() {
-				// Auto-generated method stub
-			}
-		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
-		return confirmationDialog;
+		return showConfirmationDialogError(message, false);
 	}
 
-	public static ConfirmationDialog confirmationDialog(String message, String title) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle(title);
-		confirmationDialog.addDialogListener(new DialogListener() {
-
-			@Override
-			public void onOkClick() {
-				confirmationDialog.hide(true);
-			}
-
-			@Override
-			public void onCancelClick() {
-				// Auto-generated method stub
-			}
-		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
-		return confirmationDialog;
+	public static ConfirmationDialog showConfirmationDialogError(String message, boolean createNewConfirmationDialog) {
+		return showConfirmationDialog(message, "Error", true, createNewConfirmationDialog);
 	}
 }

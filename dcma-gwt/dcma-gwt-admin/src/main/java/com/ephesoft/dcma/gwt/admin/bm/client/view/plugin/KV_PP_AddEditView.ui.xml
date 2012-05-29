@@ -48,7 +48,7 @@
 				<g:TextBox ui:field="noOfWords" />
 			</g:cell>
 		</g:HorizontalPanel>
-		
+
 		<g:HorizontalPanel width="100%">
 			<g:cell width="30%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="pageLevelFieldNameLabel"></g:Label>
@@ -67,6 +67,10 @@
 				<g:Label></g:Label>
 			</g:cell>
 			<g:Button ui:field="cancelButton" />
+			<g:cell width="7%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:Button ui:field="samplePatternButton" />
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

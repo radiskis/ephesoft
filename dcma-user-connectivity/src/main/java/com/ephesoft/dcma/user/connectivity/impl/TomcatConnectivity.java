@@ -146,13 +146,36 @@ public class TomcatConnectivity implements UserConnectivity {
 		if (roleList != null & roleList.getLength() > 0) {
 			for (int index = 0; index < roleList.getLength(); index++) {
 				Element role = (Element) roleList.item(index);
-				String roleAttribute = role.getAttribute(UserConnectivityConstant.TOMCAT_USERNAME);
-				if (roleAttribute != null && !roleAttribute.isEmpty()) {
-					allUsers.add(roleAttribute);
+				String userAttribute = role.getAttribute(UserConnectivityConstant.TOMCAT_USERNAME);
+				if (userAttribute != null && !userAttribute.isEmpty()) {
+					allUsers.add(userAttribute);
 				}
 			}
 		}
 		return allUsers;
+	}
+
+	@Override
+	public Set<String> getUserGroups(String userName) {
+		Set<String> userGroupsSet = new HashSet<String>();;
+		Document document = getDocument(tomcatUserXmlPath);
+		NodeList roleList = document.getElementsByTagName(UserConnectivityConstant.TOMCAT_USER);
+		if (roleList != null & roleList.getLength() > 0) {
+			for (int index = 0; index < roleList.getLength(); index++) {
+				Element user = (Element) roleList.item(index);
+				String userAttribute = user.getAttribute(UserConnectivityConstant.TOMCAT_USERNAME);
+				if(userAttribute.equals(userName)) {
+					String userRoles = user.getAttribute(UserConnectivityConstant.ROLES);
+					String[] userRolesArray = userRoles.split(UserConnectivityConstant.COMMA_SYMBOL);
+					for (String userRole : userRolesArray) {
+						if(userRole != null && !userRole.isEmpty()) {
+							userGroupsSet.add(userRole);
+						}
+					}
+				}
+			}
+		}
+		return userGroupsSet;
 	}
 
 }

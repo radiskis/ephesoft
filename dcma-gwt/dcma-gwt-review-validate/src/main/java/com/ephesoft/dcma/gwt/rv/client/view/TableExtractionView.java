@@ -576,9 +576,8 @@ public class TableExtractionView extends RVBasePanel {
 	 * @param button {@link Button} clicked button. Focus is set on this button after exiting manual extraction.
 	 */
 	private void exitManualExtractionConfirmation(final String message, final String title, final Button button) {
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(message);
-		confirmationDialog.setDialogTitle(title);
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(message, title, Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -598,9 +597,7 @@ public class TableExtractionView extends RVBasePanel {
 				confirmationDialog.hide(true);
 			}
 		});
-		confirmationDialog.show();
-		confirmationDialog.center();
-		confirmationDialog.okButton.setFocus(true);
+
 	}
 
 	public void undoManualExtractionChanges() {
@@ -982,7 +979,8 @@ public class TableExtractionView extends RVBasePanel {
 		if (title == null || title.isEmpty()) {
 			confirmationTitle = "error";
 		}
-		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.confirmationDialog(message, confirmationTitle);
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(message, confirmationTitle,
+				Boolean.TRUE);
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -1001,9 +999,10 @@ public class TableExtractionView extends RVBasePanel {
 
 	public void deleteRowAction(final Button button) {
 		if (selectedRowNumber != 0) {
-			final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.DELETE_ROW_CONFIRMATION));
-			confirmationDialog.setText(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.DELETE_ROW_TITLE));
+			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.DELETE_ROW_CONFIRMATION), LocaleDictionary.get().getMessageValue(
+					ReviewValidateMessages.DELETE_ROW_TITLE), Boolean.FALSE);
+
 			confirmationDialog.addDialogListener(new DialogListener() {
 
 				@Override
@@ -1018,9 +1017,7 @@ public class TableExtractionView extends RVBasePanel {
 					setFocus();
 				}
 			});
-			confirmationDialog.center();
-			confirmationDialog.show();
-			confirmationDialog.okButton.setFocus(true);
+
 		} else {
 			if (!checkDataPresent()) {
 				showConfirmationDialog(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.NO_DATA_TO_DELETE),
@@ -1034,9 +1031,10 @@ public class TableExtractionView extends RVBasePanel {
 
 	public void deleteAllRowAction(final Button button) {
 		if (checkDataPresent()) {
-			final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.DELETE_ALL_ROW_CONFIRMATION));
-			confirmationDialog.setText(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.DELETE_ALL_ROW_TITLE));
+			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+					.getMessageValue(ReviewValidateMessages.DELETE_ALL_ROW_CONFIRMATION), LocaleDictionary.get().getMessageValue(
+					ReviewValidateMessages.DELETE_ALL_ROW_TITLE), Boolean.FALSE);
+
 			confirmationDialog.addDialogListener(new DialogListener() {
 
 				@Override
@@ -1051,9 +1049,7 @@ public class TableExtractionView extends RVBasePanel {
 					setFocus(button);
 				}
 			});
-			confirmationDialog.center();
-			confirmationDialog.show();
-			confirmationDialog.okButton.setFocus(true);
+
 		} else {
 			showConfirmationDialog(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.NO_DATA_TO_DELETE), LocaleDictionary
 					.get().getMessageValue(ReviewValidateMessages.DELETE_ALL_ROW_TITLE), button);
@@ -1223,9 +1219,11 @@ public class TableExtractionView extends RVBasePanel {
 						@Override
 						public void onFailure(final Throwable arg0) {
 							ScreenMaskUtility.unmaskScreen();
+							if(!presenter.displayErrorMessage(arg0)){
 							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
 									ReviewValidateConstants.ADD_NEW_TABLE_FAIL_TITLE), LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.ADD_NEW_TABLE_FAIL));
+									ReviewValidateMessages.ADD_NEW_TABLE_FAIL), Boolean.TRUE);
+							}
 							setFocusAfterAddNewTable();
 						}
 					});
@@ -1289,11 +1287,11 @@ public class TableExtractionView extends RVBasePanel {
 
 									@Override
 									public void onFailure(final Throwable arg0) {
-										final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-										confirmationDialog.setText(LocaleDictionary.get().getConstantValue(
-												ReviewValidateConstants.REGEX_RETRIEVAL_FAIL));
-										confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-												ReviewValidateMessages.REGEX_RETRIEVAL_FAIL));
+										final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+												LocaleDictionary.get().getMessageValue(ReviewValidateMessages.REGEX_RETRIEVAL_FAIL),
+												LocaleDictionary.get().getConstantValue(ReviewValidateConstants.REGEX_RETRIEVAL_FAIL),
+												Boolean.TRUE);
+
 										confirmationDialog.addDialogListener(new DialogListener() {
 
 											@Override
@@ -1309,9 +1307,6 @@ public class TableExtractionView extends RVBasePanel {
 											}
 										});
 
-										confirmationDialog.center();
-										confirmationDialog.show();
-										confirmationDialog.okButton.setFocus(true);
 									}
 								});
 					}

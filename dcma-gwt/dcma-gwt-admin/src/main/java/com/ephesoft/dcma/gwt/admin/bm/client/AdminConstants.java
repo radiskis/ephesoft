@@ -82,6 +82,8 @@ public interface AdminConstants {
 	String IMPORT_BUTTON = "Import";
 	String IMPORT_FILE = "Import File";
 	String ERROR_CODE_TEXT = "error";
+	String DEPLOY_BUTTON = "Deploy Workflow";
+	String EDIT_LIST_BUTTON = "Configure";
 
 	String DATABASE_DRIVER = "fuzzydb.database.driver";
 	String DATABASE_URL = "fuzzydb.database.connectionURL";
@@ -93,6 +95,12 @@ public interface AdminConstants {
 	String DOCUMENT_TYPE_UNKNOWN = "unknown";
 
 	String EMPTY_STRING = "";
+
+	String NO = "No";
+	String YES = "Yes";
+	
+	String AND = ",";
+	String OR = "/";
 
 	String PLUGIN_CONFIGURATION_HTML = "<b>Plugin Configuration</b>";
 	String DATABASE_MAPPING_HTML = "<b>Database Mapping</b>";
@@ -216,4 +224,15 @@ public interface AdminConstants {
 	 * Maximum length of text that can be shown in listBox beyond which it will be trimmed.
 	 */
 	int MAX_TEXT_LENGTH = 26;
+
+	int INITIAL_ORDER_NUMBER = 1;
+	
+	int ORDER_NUMBER_OFFSET = 10;
+	
+	String SWITCH_OFF = "OFF";
+	String SWITCH_ON = "ON";
+	
+	String SAMPLE_REGEX_BUTTON="Sample Regex";
+	String SAMPLE_REGEX_PATTRENS="Sample Regular Expression Patterns";
+	String SAMPLE_REGEX_PATTERN_TITLE="Sample Regular Expressions";
 }

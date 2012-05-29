@@ -39,12 +39,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.KVFetchValue;
+import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction.AdvancedKVExtraction.AdvancedKVExtractionPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.KVExtractionTestResultView;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.RotatableImage;
@@ -89,6 +91,10 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter> {
 
+	private static final String EXTENSION_PNG = "png";
+
+	private static final String EXTENSION_CHAR = ".";
+
 	interface Binder extends UiBinder<DockLayoutPanel, AdvancedKVExtractionView> {
 	}
 
@@ -124,6 +130,13 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	protected ListBox fetchValue;
 	@UiField
 	protected Label fetchValueStar;
+
+	@UiField
+	protected Label kvPageValueLabel;
+	@UiField
+	protected ListBox kvPageValue;
+	@UiField
+	protected Label kvPageValueStar;
 
 	@UiField
 	protected Label lengthLabel;
@@ -182,6 +195,9 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	protected Hidden batchClassID;
 
 	@UiField
+	protected Hidden docName;
+
+	@UiField
 	protected RotatableImage pageImage;
 
 	@UiField
@@ -194,9 +210,14 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	protected Button clearButton;
 
 	@UiField
+	protected Button testAdvKvButton;
+
+	@UiField
 	protected HorizontalPanel captureValues;
 
 	private KeyValueCoordinates keyValueCoordinates = null;
+
+	private final KVExtractionTestResultView kvExtractionTestResultView;
 
 	private Integer originalWidth = 0;
 	private Integer originalHeight = 0;
@@ -211,10 +232,12 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	private ValidatableWidget<TextBox> validateValuePatternTextBox;
 	private ValidatableWidget<TextBox> validateMultiplierTextBox;
 
+	private String fileName;
+
 	public AdvancedKVExtractionView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-
+		this.kvExtractionTestResultView = new KVExtractionTestResultView();
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 
@@ -240,6 +263,12 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		fetchValueLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		fetchValueStar.setText(AdminConstants.STAR);
 		fetchValueStar.setStyleName(AdminConstants.FONT_RED_STYLE);
+
+		kvPageValueLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.KV_PAGE_VALUE_LABEL)
+				+ AdminConstants.COLON);
+		kvPageValueLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		kvPageValueStar.setText(AdminConstants.STAR);
+		kvPageValueStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 
 		lengthLabel
 				.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LENGTH_LABEL) + AdminConstants.COLON);
@@ -284,6 +313,7 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		captureKey.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.CAPTURE_KEY_BUTTON));
 		captureValue.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.CAPTURE_VALUE_BUTTON));
 		clearButton.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.CLEAR_BUTTON));
+		testAdvKvButton.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.TEST_ADV_KV_LABEL));
 
 		validateKeyPatternTextBox = new ValidatableWidget<TextBox>(keyPattern);
 		validateKeyPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -348,6 +378,8 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 			@Override
 			public void onError(ErrorEvent arg0) {
 				ScreenMaskUtility.unmaskScreen();
+				removeAllOverlays();
+				presenter.setEditAdvancedKV(false);
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
 			}
@@ -364,8 +396,6 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 
 			@Override
 			public void onChange(ChangeEvent arg0) {
-				// ScreenMaskUtility.maskScreen();
-				batchClassID.setValue(presenter.getController().getBatchClass().getIdentifier());
 				imageUpload.submit();
 			}
 		});
@@ -380,6 +410,8 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UPLOAD_IMAGE_INVALID_TYPE);
 					event.cancel();
 				}
+				batchClassID.setValue(presenter.getController().getBatchClass().getIdentifier());
+				docName.setValue(presenter.getController().getSelectedDocument().getName());
 			}
 		});
 		imageUpload.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -389,6 +421,7 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 				String result = arg0.getResults();
 				if (result.toLowerCase().indexOf(AdminConstants.ERROR_CODE_TEXT) > -1) {
 					ScreenMaskUtility.unmaskScreen();
+					presenter.setEditAdvancedKV(false);
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 							BatchClassManagementMessages.ERROR_UPLOAD_IMAGE));
 					return;
@@ -408,8 +441,10 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 				if (fileName != null && fileSeparator != null) {
 					fileName = fileName.substring(fileName.lastIndexOf(fileSeparator) + 1);
 				}
-				String pngFileName = fileName.substring(0, fileName.lastIndexOf(".") + 1) + "png";
-				presenter.getPageImageUrl(presenter.getController().getBatchClass().getIdentifier(), pngFileName);
+				setFileName(fileName);
+				String pngFileName = fileName.substring(0, fileName.lastIndexOf(EXTENSION_CHAR) + 1) + EXTENSION_PNG;
+				presenter.setEditAdvancedKV(false);
+				presenter.getPageImageUrl(batchClassID.getValue(), docName.getValue(), pngFileName);
 			}
 		});
 
@@ -442,6 +477,10 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 
 		pageImage.setVisible(false);
 
+	}
+
+	private void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 	public void createOverlay(double x0, double x1, double y0, double y1, double zoomFactor) {
@@ -493,8 +532,8 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	}
 
 	public native void doOverlay(double x0, double x1, double y0, double y1, double zoomFactor) /*-{
-																									return $wnd.doOverlay(x0, x1, y0, y1, zoomFactor);
-																									}-*/;
+																								return $wnd.doOverlay(x0, x1, y0, y1, zoomFactor);
+																								}-*/;
 
 	public native void doOverlayForKey(double x0, double x1, double y0, double y1, double zoomFactor) /*-{
 																										return $wnd.doOverlayForKey(x0, x1, y0, y1, zoomFactor);
@@ -524,6 +563,10 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		}
 		pageImage.setWidth(imageWidth.toString() + "px");
 		pageImage.setHeight(imageHeight.toString() + "px");
+		// presenter.setEditAdvancedKV(false);
+		if (presenter.isEditAdvancedKV()) {
+			presenter.createKeyValueOverlay();
+		}
 		ScreenMaskUtility.unmaskScreen();
 	}
 
@@ -560,6 +603,10 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	public void setPageImageUrl(final String pageImageUrl) {
 		DOM.setElementAttribute(this.tempImage.getElement(), "src", pageImageUrl);
 		this.tempImage.setUrl(pageImageUrl);
+	}
+
+	public String getPageImageUrl() {
+		return this.tempImage.getUrl();
 	}
 
 	public String getMultiplier() {
@@ -764,6 +811,11 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		presenter.clearValues();
 	}
 
+	@UiHandler("testAdvKvButton")
+	public void testAdvKvButtonClicked(ClickEvent clickEvent) {
+		presenter.onTestAdvancedKvButtonClicked();
+	}
+
 	public void findLocation(Coordinates keyCoordinates, Coordinates valueCoordinates) {
 
 		if (keyCoordinates.getY0() >= valueCoordinates.getY1()) {
@@ -931,14 +983,24 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 		this.yOffset.setValue(String.valueOf(yOffsetInInt));
 	}
 
+	public Coordinates getKeyCoordinates() {
+		Coordinates coordinates = new Coordinates();
+		Coordinates keyCoordinates = keyValueCoordinates.getKeyCoordinates();
+		if (null != keyCoordinates) {
+			coordinates.set(keyCoordinates.getX0(), keyCoordinates.getY0(), keyCoordinates.getX1(), keyCoordinates.getY1());
+		}
+		return coordinates;
+	}
+
 	private void errorInFindingLocation() {
-		ConfirmationDialogUtil.showConfirmationDialogError("Unable to determine location.");
+		ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+				BatchClassManagementMessages.UNABLE_TO_DETERMINE_LOCATION));
 
 	}
 
 	private void errorInKey() {
-		ConfirmationDialogUtil
-				.showConfirmationDialogError("The value overlaps with key. Please choose some different location for value.");
+		ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+				BatchClassManagementMessages.VALUE_OVERLAPS_WITH_KEY));
 
 	}
 
@@ -973,4 +1035,83 @@ public class AdvancedKVExtractionView extends View<AdvancedKVExtractionPresenter
 	public void togglePageImageShowHide(boolean visibile) {
 		pageImage.setVisible(visibile);
 	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void createKeyValueOverlay(Coordinates keyCoordinates, Coordinates valueCoordinates) {
+		keyValueCoordinates.createKeyValueOverlay(keyCoordinates, valueCoordinates);
+	}
+
+	public Coordinates getValueCoordinates() {
+		Coordinates coordinates = new Coordinates();
+		Coordinates valueCoordinates = keyValueCoordinates.getValueCoordinates();
+		if (null != valueCoordinates) {
+			coordinates.set(valueCoordinates.getX0(), valueCoordinates.getY0(), valueCoordinates.getX1(), valueCoordinates.getY1());
+		}
+		return coordinates;
+	}
+
+	public KVExtractionTestResultView getKvExtractionTestResultView() {
+		return kvExtractionTestResultView;
+	}
+
+	public void setDocName(String docName) {
+		this.docName.setValue(docName);
+	}
+
+	public String getDocName() {
+		return this.docName.getValue();
+	}
+
+	public String getBatchClassID() {
+		return this.batchClassID.getValue();
+	}
+
+	public void setBatchClassID(String batchClassID) {
+		this.batchClassID.setValue(batchClassID);
+	}
+
+	public void setKVPageValue(final KVPageValue kvPageValue) {
+		if (this.kvPageValue.getItemCount() == 0) {
+			setKVPageValues();
+		}
+		int kvIndex = findKVIndex(kvPageValue);
+		this.kvPageValue.setSelectedIndex(kvIndex);
+	}
+
+	public void setKVPageValues() {
+		this.kvPageValue.setVisibleItemCount(1);
+		KVPageValue[] kvPageValues = KVPageValue.values();
+		for (KVPageValue kvPageValue : kvPageValues) {
+			this.kvPageValue.addItem(kvPageValue.name());
+		}
+	}
+
+	private int findKVIndex(final KVPageValue kvPageRange) {
+		int kvIndex = 0;
+		if (kvPageRange != null) {
+			KVPageValue[] allLocationTypes = KVPageValue.values();
+			List<KVPageValue> tempList = Arrays.asList(allLocationTypes);
+			kvIndex = tempList.indexOf(kvPageRange);
+		}
+		return kvIndex;
+	}
+
+	public KVPageValue getKVPageValue() {
+		KVPageValue selectedKVPageValue = null;
+		String selected = this.kvPageValue.getItemText(this.kvPageValue.getSelectedIndex());
+		KVPageValue[] allKVPageValue = KVPageValue.values();
+		for (KVPageValue kvPageValue : allKVPageValue) {
+			if (kvPageValue.name().equals(selected)) {
+				selectedKVPageValue = kvPageValue;
+			}
+		}
+		if (selectedKVPageValue == null) {
+			selectedKVPageValue = allKVPageValue[0];
+		}
+		return selectedKVPageValue;
+	}
+
 }

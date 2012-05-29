@@ -41,6 +41,7 @@ import java.util.List;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
+import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tablecolumninfo.TableColumnInfoListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tableinfo.TableInfoViewPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo.TableColumnInfoListView;
 import com.ephesoft.dcma.gwt.core.client.View;
@@ -72,6 +73,8 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private final TableColumnInfoListView tableColumnInfoListView;
+	
+	private TableColumnInfoListPresenter tableColumnInfoListPresenter;
 
 	@UiField
 	protected LayoutPanel tableColumnInfoListPanel;
@@ -141,8 +144,9 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 
 	public void createTableColumnInfoList(List<TableColumnInfoDTO> fields) {
 		List<Record> recordList = setFieldsList(fields);
-
-		tableColumnInfoListView.listView.initTable(recordList.size(), recordList, true);
+		tableColumnInfoListPresenter = new TableColumnInfoListPresenter(presenter.getController(), tableColumnInfoListView);
+		tableColumnInfoListView.listView.initTable(recordList.size(), null, null, recordList, true, false,
+				tableColumnInfoListPresenter);
 	}
 
 	private List<Record> setFieldsList(List<TableColumnInfoDTO> fields) {
@@ -156,6 +160,7 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 			record.addWidget(tableColumnInfoListView.betweenLeft, new Label(tcInfoDTO.getBetweenLeft()));
 			record.addWidget(tableColumnInfoListView.betweenRight, new Label(tcInfoDTO.getBetweenRight()));
 			record.addWidget(tableColumnInfoListView.columnName, new Label(tcInfoDTO.getColumnName()));
+			record.addWidget(tableColumnInfoListView.columnHeaderPattern, new Label(tcInfoDTO.getColumnHeaderPattern()));
 			record.addWidget(tableColumnInfoListView.columnPattern, new Label(tcInfoDTO.getColumnPattern()));
 			record.addWidget(tableColumnInfoListView.isRequired, isRequired);
 			recordList.add(record);
@@ -196,20 +201,7 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 
 	@UiHandler("editTCButton")
 	public void onEditTCButtonClicked(ClickEvent clickEvent) {
-		String identifier = tableColumnInfoListView.listView.getSelectedRowIndex();
-		int rowCount = tableColumnInfoListView.listView.getTableRecordCount();
-		if (identifier == null || identifier.isEmpty()) {
-			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
-			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING));
-			}
-			return;
-		}
-		presenter.onEditTCButtonClicked(identifier);
-
+		tableColumnInfoListPresenter.onEditButtonClicked();
 	}
 
 	@UiHandler("deleteTCButton")
@@ -226,11 +218,10 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-		confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_TABLE_COLUMN_INFO_CONFORMATION));
-		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-				BatchClassManagementConstants.DELETE_TABLE_COLUMN_INFO_TITLE));
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_TABLE_COLUMN_INFO_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_TABLE_COLUMN_INFO_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -244,9 +235,7 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		confirmationDialog.center();
-		confirmationDialog.show();
-		confirmationDialog.okButton.setFocus(true);
+		
 	}
 
 }

@@ -39,11 +39,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -60,6 +63,7 @@ import com.ephesoft.dcma.da.dao.ModuleDao;
 import com.ephesoft.dcma.da.dao.PluginConfigDao;
 import com.ephesoft.dcma.da.dao.PluginDao;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.domain.BatchClassGroups;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
@@ -80,6 +84,8 @@ public class ExecuteUpdatePatch {
 	private static final String ERROR_DURING_READING_THE_SERIALIZED_FILE = "Error during reading the serialized file. ";
 
 	private static final String UPDATING_BATCH_CLASSES = "Updating Batch Classes....";
+
+	private static final String PROPERTY_FILE_DELIMITER = ";";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExecuteUpdatePatch.class);
 
@@ -159,6 +165,10 @@ public class ExecuteUpdatePatch {
 
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/post-schema.sql"));
 
+			LOG.info("Assigning default roles to all batch classes.==========");
+
+			assignDefaultRolesToBatchClasses();
+
 			LOG.info("==========Upgrade Patch finished successfully.==========");
 
 			updateSQLFiles();
@@ -166,6 +176,76 @@ public class ExecuteUpdatePatch {
 		} catch (Exception e) {
 			LOG.error("An Exception occurred while executing the patch." + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Assigning default roles to all batch classes
+	 * 
+	 */
+	private void assignDefaultRolesToBatchClasses() {
+		List<BatchClass> batchClasses = batchClassService.getAllLoadedBatchClassExcludeDeleted();
+		String defaultRoles = fetchPropertyFromPropertiesFile("upgradePatch.defaultBatchClassRoles",
+				"META-INF/dcma-data-access/dcma-db.properties");
+		if (defaultRoles != null) {
+			String[] defaultRolesArray = defaultRoles.split(PROPERTY_FILE_DELIMITER);
+
+			Set<String> defaultRolesSet = new HashSet<String>(Arrays.asList(defaultRolesArray));
+
+			for (BatchClass userBatchClasses : batchClasses) {
+				List<BatchClassGroups> batchClassGroups = userBatchClasses.getAssignedGroups();
+				if (batchClassGroups == null) {
+					batchClassGroups = new ArrayList<BatchClassGroups>();
+
+				}
+				for (String role : defaultRolesSet) {
+					boolean isDefaultRoleExists = false;
+					if (!role.trim().isEmpty()) {
+						for (BatchClassGroups batchClassGroup : batchClassGroups) {
+							if (role.equals(batchClassGroup.getGroupName())) {
+								isDefaultRoleExists = true;
+								break;
+							}
+						}
+						if (!isDefaultRoleExists) {
+							BatchClassGroups defaultBatchClassGroup = new BatchClassGroups();
+							defaultBatchClassGroup.setGroupName(role);
+							defaultBatchClassGroup.setBatchClass(userBatchClasses);
+							batchClassGroups.add(defaultBatchClassGroup);
+							userBatchClasses.setAssignedGroups(batchClassGroups);
+						}
+					}
+				}
+			}
+			LOG.info(UPDATING_BATCH_CLASSES);
+			for (BatchClass batchClass : batchClasses) {
+				batchClassService.merge(batchClass);
+			}
+		}
+	}
+
+	/**This method fetches the specified property from the given property file
+	 * @param propertyName: property to be fetched
+	 * @param propertyFileName: property file name
+	 * @return property
+	 */
+	private String fetchPropertyFromPropertiesFile(String propertyName, String propertyFileName) {
+		ClassPathResource classPathResource = new ClassPathResource(propertyFileName);
+
+		FileInputStream fileInputStream = null;
+		File propertyFile = null;
+		String property = null;
+		try {
+			propertyFile = classPathResource.getFile();
+			Properties properties = new Properties();
+			fileInputStream = new FileInputStream(propertyFile);
+			properties.load(fileInputStream);
+			property = properties.getProperty(propertyName);
+		} catch (IOException e) {
+			LOG.error("An Exception occurred while executing the patch." + e.getMessage(), e);
+		}
+
+		return property;
+
 	}
 
 	private void updateSQLFiles() {
@@ -251,7 +331,7 @@ public class ExecuteUpdatePatch {
 			try {
 				batchClassName = pluginConfigTokens.nextToken();
 				moduleName = pluginConfigTokens.nextToken();
-				
+
 				List<BatchClass> batchClasses = nameVsBatchClassListMap.get(batchClassName);
 				List<BatchClassPlugin> newPlugins = batchClassNameVsBatchClassPluginMap.get(key);
 				if (batchClasses != null) {
@@ -354,7 +434,8 @@ public class ExecuteUpdatePatch {
 
 	private void createUNCFolder(StringBuffer uncFolderLocation, BatchClass batchClass) {
 		uncFolderLocation.append(File.separator);
-		uncFolderLocation.append(new File(batchClass.getUncFolder()).getName());
+		String OSIndependentUncFolderPath = FileUtils.createOSIndependentPath(batchClass.getUncFolder());
+		uncFolderLocation.append((new File(OSIndependentUncFolderPath)).getName());
 		batchClass.setUncFolder(uncFolderLocation.toString());
 		File file = new File(uncFolderLocation.toString());
 		if (!file.exists()) {
@@ -778,4 +859,5 @@ public class ExecuteUpdatePatch {
 		}
 		return isPresent;
 	}
+
 }

@@ -54,11 +54,14 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVExtractionView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction.AdvancedKVExtractionView;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ConfigureModuleView;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ConfigureModulesPluginSelectView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ModuleView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.DocTypeFieldsMappingView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.DocTypeMappingView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.FuzzyDBPluginView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_AddEditListView;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_ConfigView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_PropertiesView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.PluginView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.regex.RegexView;
@@ -74,6 +77,7 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -89,6 +93,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class BatchClassManagementView extends View<BatchClassManagementPresenter> {
 
+	private static final String VALIDATE = "Validate";
+	
+	private static final String BUTTON_STYLE = "button-style";
+	
 	interface Binder extends UiBinder<DockLayoutPanel, BatchClassManagementView> {
 	}
 
@@ -150,10 +158,23 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 	protected KV_PP_PropertiesView kvPPPropertiesView;
 
 	@UiField
+	protected KV_PP_ConfigView kvPPConfigView;
+
+	@UiField
 	protected KV_PP_AddEditListView kvPPAddEditListView;
 
 	@UiField
 	protected AdvancedKVExtractionView advancedKVExtractionView;
+
+	protected ConfigureModuleView addModuleView;
+
+	@UiField
+	protected LayoutPanel editModulesPluginSelectViewLayoutPanel;
+
+	@UiField
+	protected LayoutPanel addModulesViewLayoutPanel;
+
+	protected ConfigureModulesPluginSelectView editModulesPluginSelectView;
 
 	protected final LayoutPanel batchListPanel;
 
@@ -170,6 +191,12 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 
 	@UiField
 	protected Button cancel;
+
+	@UiField
+	protected Button deploy;
+
+	@UiField
+	protected Button validate;
 
 	@UiField
 	protected Button sample;
@@ -192,6 +219,7 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 	@UiField
 	protected HorizontalPanel rightButtons;
 
+
 	private Button edit;
 	private Button copy;
 	private Button delete;
@@ -201,9 +229,20 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	private HandlerManager eventBus;
+
 	public BatchClassManagementView() {
+		this(null);
+	}
+
+	public BatchClassManagementView(HandlerManager eventBus) {
 		initWidget(BINDER.createAndBindUi(this));
 
+		editModulesPluginSelectView = new ConfigureModulesPluginSelectView(eventBus);
+		addModuleView = new ConfigureModuleView(eventBus);
+
+		editModulesPluginSelectViewLayoutPanel.add(editModulesPluginSelectView);
+		addModulesViewLayoutPanel.add(addModuleView);
 		edit = new Button();
 		copy = new Button();
 		delete = new Button();
@@ -217,6 +256,10 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		export.setText(AdminConstants.EXPORT_BUTTON);
 		importButton.setText(AdminConstants.IMPORT_BUTTON);
 		apply.setText(AdminConstants.APPLY_BUTTON);
+		
+		validate.setText(VALIDATE);
+		validate.addStyleName(BUTTON_STYLE);
+		
 		buttonPanel = new HorizontalPanel();
 		buttonPanel.setWidth("100%");
 		buttonPanel.setSpacing(5);
@@ -237,20 +280,18 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		batchListPanel.add(batchClassListView.listView);
 		submit.setText(AdminConstants.SAVE_BUTTON);
 		cancel.setText(AdminConstants.CANCEL_BUTTON);
+		deploy.setText(AdminConstants.DEPLOY_BUTTON);
 		learn.setText(AdminConstants.LEARN_FILES_BUTTON);
 		sample.setText(AdminConstants.GENERATE_FOLDERS_BUTTON);
 		learnDB.setText(AdminConstants.LEARN_DB_BUTTON);
+		
+		toggleDeployButtonEnable(false);
+		
 		edit.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				String identifier = batchClassListView.listView.getSelectedRowIndex();
-				if (identifier == null || identifier.isEmpty()) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.NONE_SELECTED_WARNING));
-					return;
-				}
-				presenter.onEditButtonClicked(identifier);
+				presenter.onEditButtonClicked();
 			}
 		});
 
@@ -261,7 +302,7 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 				String identifier = batchClassListView.listView.getSelectedRowIndex();
 				if (identifier == null || identifier.isEmpty()) {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.NONE_SELECTED_WARNING));
+							BatchClassManagementMessages.NO_RECORD_TO_COPY));
 					return;
 				}
 				final DialogBox dialogBox = new DialogBox();
@@ -292,7 +333,7 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 				String identifier = batchClassListView.listView.getSelectedRowIndex();
 				if (identifier == null || identifier.isEmpty()) {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.NONE_SELECTED_WARNING));
+							BatchClassManagementMessages.NO_RECORD_TO_EXPORT));
 					return;
 				}
 				presenter.onExportButtonClicked(identifier);
@@ -306,16 +347,13 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 				final String identifier = batchClassListView.listView.getSelectedRowIndex();
 				if (identifier == null || identifier.isEmpty()) {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.NONE_SELECTED_WARNING));
+							BatchClassManagementMessages.NO_RECORD_TO_DELETE));
 					return;
 				}
-				final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
-				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.DELETE_BATCH_CLASS_CONFORMATION));
-				confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(
-						BatchClassManagementConstants.DELETE_BATCH_CLASS_TITLE));
-				confirmationDialog.center();
-				confirmationDialog.show();
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchClassManagementMessages.DELETE_BATCH_CLASS_CONFORMATION), LocaleDictionary.get()
+						.getConstantValue(BatchClassManagementConstants.DELETE_BATCH_CLASS_TITLE), Boolean.FALSE);
+
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -329,7 +367,7 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 						confirmationDialog.hide();
 					}
 				});
-				confirmationDialog.okButton.setFocus(true);
+
 			}
 		});
 	}
@@ -392,8 +430,19 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		return functionKeyView;
 	}
 
+	/**
+	 * @return the editModulesPluginSelectView
+	 */
+	public ConfigureModulesPluginSelectView getEditModulesPluginSelectView() {
+		return editModulesPluginSelectView;
+	}
+
 	public FieldTypeView getFieldTypeView() {
 		return fieldTypeView;
+	}
+
+	public KV_PP_ConfigView getKVPPConfigView() {
+		return kvPPConfigView;
 	}
 
 	public DocTypeMappingView getDocTypeMappingView() {
@@ -424,14 +473,14 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		return kvPPPropertiesView;
 	}
 
-	public void createBatchList(List<BatchClassDTO> batches) {
+	public void createBatchClassList(List<BatchClassDTO> batches) {
 		List<Record> recordList = setBatchList(batches);
-		batchClassListView.listView.initTable(recordList.size(), presenter, recordList, true, false);
+		batchClassListView.listView.initTable(recordList.size(), presenter, recordList, true, false, presenter);
 	}
 
-	public void createBatchList(List<BatchClassDTO> batches, int totalCount) {
-		List<Record> recordList = setBatchList(batches);
-		batchClassListView.listView.initTable(totalCount, presenter, recordList, true, false);
+	public void createBatchClassList(List<BatchClassDTO> batches, int totalCount) {
+		List<Record> recordList =  setBatchList(batches);
+		batchClassListView.listView.initTable(totalCount, presenter, recordList, true, false, presenter);
 	}
 
 	public List<Record> setBatchList(List<BatchClassDTO> batches) {
@@ -471,6 +520,18 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		tabLayoutPanel.add(moduleView);
 	}
 
+	public void showAddModuleView() {
+		tabLayoutPanel.clear();
+		addModuleView.setVisible(true);
+		tabLayoutPanel.add(addModuleView);
+	}
+
+	public void showEditModuleView() {
+		tabLayoutPanel.clear();
+		editModulesPluginSelectView.setVisible(true);
+		tabLayoutPanel.add(editModulesPluginSelectView);
+	}
+
 	public void showPluginView() {
 		tabLayoutPanel.clear();
 		pluginView.setVisible(true);
@@ -502,12 +563,33 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		mainPanel.add(batchListPanel);
 		mainPanel.setStyleName("mainPanelLayout");
 		bottomButtons.setVisible(false);
+		mainDockPanel.clear();
+		presenter.getBatchClassBreadCrumbPresenter().createBreadCrumb();
+		mainDockPanel.addNorth(batchClassBreadCrumbView, 6.0);
+		presenter.getBatchClassBreadCrumbPresenter().getView().getBreadCrumbPanel().setWidth("100%");
+		mainDockPanel.add(mainPanel);
 	}
 
 	public void showKVExtractionView() {
 		tabLayoutPanel.clear();
 		kvExtractionView.setVisible(true);
 		tabLayoutPanel.add(kvExtractionView);
+	}
+
+	
+	/**
+	 * @return the deploy
+	 */
+	public Button getDeploy() {
+		return deploy;
+	}
+
+	
+	/**
+	 * @return the validate
+	 */
+	public Button getValidate() {
+		return validate;
 	}
 
 	public void showAdvancedKVExtractionView() {
@@ -566,6 +648,12 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		tabLayoutPanel.add(docTypeMappingView);
 	}
 
+	public void showKVPPPluginConfigView() {
+		presenter.getKvPPPropertiesPresenter().getView().getKvppViewEditPluginPanel().clear();
+		presenter.getKvPPPropertiesPresenter().getView().getKvppViewEditPluginPanel().add(kvPPConfigView);
+		kvPPConfigView.setVisible(true);
+	}
+
 	public void showKvPPPropertiesView() {
 		tabLayoutPanel.clear();
 		kvPPPropertiesView.setVisible(true);
@@ -578,6 +666,13 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 
 	public Button getCancelButton() {
 		return cancel;
+	}
+
+	/**
+	 * @return the addModuleView
+	 */
+	public ConfigureModuleView getAddModuleView() {
+		return addModuleView;
 	}
 
 	public Button getSampleButton() {
@@ -618,6 +713,17 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		presenter.onCancelClicked();
 	}
 
+	@UiHandler("deploy")
+	public void onDeployClicked(ClickEvent event) {
+		presenter.onDeployClicked();
+	}
+
+	
+	@UiHandler("validate")
+	public void onValidateClicked(ClickEvent event) {
+		presenter.onValidateClicked();
+	}
+	
 	@UiHandler("sample")
 	public void onSampleFoldersClicked(ClickEvent event) {
 		presenter.onSampleFoldersClicked();
@@ -668,8 +774,33 @@ public class BatchClassManagementView extends View<BatchClassManagementPresenter
 		batchClassListView.listView.setTableRowCount(rowCount);
 	}
 
+	
+	public void toggleDeployButtonEnable(boolean enable) {
+		deploy.setEnabled(enable);
+		validate.setEnabled(!enable);
+
+	}
+	
 	public BatchClassFieldListView getBatchClassFieldListView() {
 		return batchClassFieldListView;
 	}
 
+	public void setDeployAndValidateButtonEnable(boolean enable) {
+		deploy.setEnabled(enable);
+		validate.setEnabled(enable);
+	}
+
+	/**
+	 * @return the eventBus
+	 */
+	public HandlerManager getEventBus() {
+		return eventBus;
+	}
+
+	/**
+	 * @param eventBus the eventBus to set
+	 */
+	public void setEventBus(HandlerManager eventBus) {
+		this.eventBus = eventBus;
+	}
 }

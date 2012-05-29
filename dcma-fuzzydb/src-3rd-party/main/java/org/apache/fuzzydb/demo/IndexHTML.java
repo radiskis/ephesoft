@@ -97,12 +97,20 @@ public class IndexHTML {
 			indexDocs(allRows, index, create, indexRowId); // add new docs
 			System.out.println("Optimizing index...");
 			writer.optimize();
-			writer.close();
 			Date end = new Date();
 			System.out.print(end.getTime() - start.getTime());
 			System.out.println(" total milliseconds");
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (Exception e) {
+					System.out.println("Exception while closing the IndexWriter stream.");
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -112,29 +120,45 @@ public class IndexHTML {
 	 */
 
 	private static void indexDocs(List<String> allRows, File index, boolean create, int indexRowId) throws Exception {
-		if (!create) { // incrementally update
+		try {
+			if (!create) { // incrementally update
 
-			reader = IndexReader.open(FSDirectory.open(index), false); // open existing index
-			uidIter = reader.terms(new Term("rowData", "")); // init uid iterator
+				reader = IndexReader.open(FSDirectory.open(index), false); // open existing index
+				uidIter = reader.terms(new Term("rowData", "")); // init uid iterator
 
-			indexDocs(allRows, indexRowId);
+				indexDocs(allRows, indexRowId);
 
-			if (deleting) { // delete rest of stale docs
-				while (uidIter.term() != null && uidIter.term().field() == "uid") {
-					System.out.println("deleting " + HTMLDocument.uid2url(uidIter.term().text()));
-					reader.deleteDocuments(uidIter.term());
-					uidIter.next();
+				if (deleting) { // delete rest of stale docs
+					while (uidIter.term() != null && uidIter.term().field() == "uid") {
+						System.out.println("deleting " + HTMLDocument.uid2url(uidIter.term().text()));
+						reader.deleteDocuments(uidIter.term());
+						uidIter.next();
+					}
+					deleting = false;
 				}
-				deleting = false;
+
+				uidIter.close(); // close uid iterator
+				reader.close(); // close existing index
+
+			} else {
+				reader = IndexReader.open(FSDirectory.open(index), false); // open existing index
+				indexDocs(allRows, indexRowId);
+				reader.close(); // close existing index
 			}
+		} catch (Exception e) {
 
-			uidIter.close(); // close uid iterator
-			reader.close(); // close existing index
-
-		} else {
-			reader = IndexReader.open(FSDirectory.open(index), false); // open existing index
-			indexDocs(allRows, indexRowId);
-			reader.close(); // close existing index
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+				if (uidIter != null) {
+					uidIter.close();
+				}
+			} catch (Exception e) {
+				System.out.println("Exception while closing the IndexWriter stream.");
+				e.printStackTrace();
+			}
 		}
 
 	}

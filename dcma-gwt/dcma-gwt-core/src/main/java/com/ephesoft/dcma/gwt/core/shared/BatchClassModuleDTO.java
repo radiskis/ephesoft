@@ -55,14 +55,38 @@ public class BatchClassModuleDTO implements IsSerializable {
 
 	private String remoteBatchClassIdentifier;
 
+	private String workflowName;
+
+	private boolean isDeleted;
+
+	private boolean isNew;
+
 	private Map<String, BatchClassPluginDTO> batchClassPluginsMap = new LinkedHashMap<String, BatchClassPluginDTO>();
 
 	public Collection<BatchClassPluginDTO> getBatchClassPlugins() {
-		return batchClassPluginsMap.values();
+		return getBatchClassPlugins(false);
+	}
+
+	public Collection<BatchClassPluginDTO> getBatchClassPlugins(boolean includingDeleted) {
+		Collection<BatchClassPluginDTO> values = batchClassPluginsMap.values();
+		if (!includingDeleted) {
+			Map<String, BatchClassPluginDTO> pluginsMap = new LinkedHashMap<String, BatchClassPluginDTO>();
+			for (BatchClassPluginDTO batchClassPluginDTO : values) {
+				if (!batchClassPluginDTO.isDeleted()) {
+					pluginsMap.put(batchClassPluginDTO.getIdentifier(), batchClassPluginDTO);
+				}
+			}
+			values = pluginsMap.values();
+		}
+		return values;
 	}
 
 	public void addBatchClassPlugin(BatchClassPluginDTO batchClassPluginDTO) {
 		this.batchClassPluginsMap.put(batchClassPluginDTO.getIdentifier(), batchClassPluginDTO);
+	}
+
+	public void removeBatchClassPlugin(BatchClassPluginDTO batchClassPluginDTO) {
+		this.batchClassPluginsMap.remove(batchClassPluginDTO.getIdentifier());
 	}
 
 	public int getOrderNumber() {
@@ -127,5 +151,61 @@ public class BatchClassModuleDTO implements IsSerializable {
 
 	public void setRemoteURL(String remoteURL) {
 		this.remoteURL = remoteURL;
+	}
+
+	/**
+	 * @return the workflowName
+	 */
+	public String getWorkflowName() {
+		return workflowName;
+	}
+
+	/**
+	 * @param workflowName the workflowName to set
+	 */
+	public void setWorkflowName(String workflowName) {
+		this.workflowName = workflowName;
+	}
+
+	/**
+	 * @return the batchClassPluginsMap
+	 */
+	public Map<String, BatchClassPluginDTO> getBatchClassPluginsMap() {
+		return batchClassPluginsMap;
+	}
+
+	/**
+	 * @param batchClassPluginsMap the batchClassPluginsMap to set
+	 */
+	public void setBatchClassPluginsMap(Map<String, BatchClassPluginDTO> batchClassPluginsMap) {
+		this.batchClassPluginsMap = batchClassPluginsMap;
+	}
+
+	/**
+	 * @return the isDeleted
+	 */
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	/**
+	 * @param isDeleted the isDeleted to set
+	 */
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
+	/**
+	 * @return the isNew
+	 */
+	public boolean isNew() {
+		return isNew;
+	}
+
+	/**
+	 * @param isNew the isNew to set
+	 */
+	public void setNew(boolean isNew) {
+		this.isNew = isNew;
 	}
 }

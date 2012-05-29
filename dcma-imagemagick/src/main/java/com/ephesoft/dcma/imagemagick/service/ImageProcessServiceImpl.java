@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.DCMAException;
@@ -66,8 +67,11 @@ import com.ephesoft.dcma.imagemagick.MultiPageToSinglePageConverter;
 import com.ephesoft.dcma.imagemagick.ThumbnailPNGCreator;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.imagemagick.imageClassifier.ImageClassifier;
+import com.ephesoft.dcma.imagemagick.impl.HOCRtoPDFCreator;
+import com.ephesoft.dcma.imagemagick.impl.ITextPDFCreator;
 import com.ephesoft.dcma.util.BackUpFileService;
 import com.ephesoft.dcma.util.CustomFileFilter;
+import com.ephesoft.dcma.util.FileUtils;
 
 public class ImageProcessServiceImpl implements ImageProcessService {
 
@@ -104,6 +108,12 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	@Autowired
 	private BatchClassService batchClassService;
 
+	@Autowired
+	private HOCRtoPDFCreator hocrToPDFCreator;
+
+	@Autowired
+	private ITextPDFCreator iTextPDFCreator;
+
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) throws DCMAApplicationException {
 		Assert.notNull(batchInstanceID);
@@ -135,6 +145,17 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	}
 
 	@Override
+	public BatchInstanceThread createCompThumbForImage(final String batchInstanceIdentifier, final String folderPath, final String[][] sListOfTiffFiles, final String outputImageParameters, final String compareThumbnailH, final String compareThumbnailW) throws DCMAException {
+		try {
+			BatchInstanceThread batchInstanceThread = thumbnailPNGCreator.generateThumbnailInternal(batchInstanceIdentifier, IImageMagickCommonConstants.THUMB_TYPE_COMP, compareThumbnailH, compareThumbnailW, outputImageParameters, sListOfTiffFiles);
+			return batchInstanceThread;
+		} catch (Exception ex) {
+			LOGGER.error("Problem generating thumbnalis exception->" + ex.getMessage(), ex);
+			throw new DCMAException("Problem generating thumbnalis exception->" + ex.getMessage(), ex);
+		}
+	}
+
+	@Override
 	public void createThumbnails(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
 			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
@@ -155,32 +176,37 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 
 	@Override
 	public void createMultiPageFiles(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
+
 		String multipageTifSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CREATE_MULTIPAGE_TIFF_SWITCH);
 		String checkPDFExportProcess = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_PDF_EXPORT_PROCESS);
-		String checkColouredPDF = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
-				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_COLOURED_PDF);
-		String checkSearchablePDF = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
-				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_SEARCHABLE_PDF);
-		String ghostscriptPdfParameters = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
-				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GHOSTSCRIPT_COMMAND_PDF_PARAMETERS);
 		String pdfOptimizationParams = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.PDF_OPTIMIZATION_PARAMETERS);
 		String pdfOptimizationSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.PDF_OPTIMIZATION_SWITCH);
-		try {
-			String sBatchFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
-			multipageTiffPdfCreator.createMultiPageFiles(sBatchFolder, batchInstanceID.getID(), batchSchemaService,
-					pdfOptimizationParams, multipageTifSwitch, checkPDFExportProcess, checkColouredPDF, checkSearchablePDF,
-					ghostscriptPdfParameters, pluginWorkflow, pdfOptimizationSwitch);
+		String ghostscriptPdfParameters = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(),
+				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GHOSTSCRIPT_COMMAND_PDF_PARAMETERS);
 
+		try {
+			multipageTiffPdfCreator.createMultiPageFiles(ghostscriptPdfParameters, batchInstanceID.getID(), pdfOptimizationParams, multipageTifSwitch,
+					checkPDFExportProcess, pluginWorkflow, pdfOptimizationSwitch);
 		} catch (Exception ex) {
 			LOGGER.error("Problem generating overlayed Images exception->" + ex.getMessage());
 			throw new DCMAException("Problem generating overlayed Images " + ex.getMessage(), ex);
 		}
-
 	}
+	@Override
+	public void createMultiPageFilesAPI(String ghostscriptPdfParameters, String pdfOptimizationParams, String multipageTifSwitch, String toolName, String pdfOptimizationSwitch, String workingDir, String outputDir, List<File> singlePageFiles, String batchInstanceIdentifier) throws DCMAException {
+		try {
+			multipageTiffPdfCreator.createMultiPageFilesAPI(ghostscriptPdfParameters, pdfOptimizationParams, multipageTifSwitch, toolName, pdfOptimizationSwitch, workingDir, outputDir, singlePageFiles, batchInstanceIdentifier);
+		} catch (Exception ex) {
+			LOGGER.error("Problem generating overlayed Images exception->" + ex.getMessage());
+			throw new DCMAException("Problem generating overlayed Images " + ex.getMessage(), ex);
+		}
+	}
+		
+	
 
 	@Override
 	public void createDisplayImages(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
@@ -193,9 +219,20 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 					IImageMagickCommonConstants.DISPLAY_IMAGE, ImageMagicKConstants.CREATE_DISPLAY_IMAGE_PLUGIN, pluginWorkflow,
 					generateDisplayPng, inputParameters, outputParameters);
 		} catch (Exception ex) {
-			LOGGER.error("Problem in generating Display File");
+			LOGGER.error("Problem in generating Display File", ex);
 			throw new DCMAException("Problem in generating Display File", ex);
 		}
+	}
+
+	@Override
+	public void classifyImagesAPI(String maxVal, String imMetric, String imFuzz,String batchInstanceIdentifier, String batchClassIdentifier, String sBatchFolder, List<Page> listOfPages) throws DCMAException {
+			try {
+				imageClassifier.classifyAllImgsOfBatchInternal(maxVal, imMetric, imFuzz,batchInstanceIdentifier, batchClassIdentifier, sBatchFolder, listOfPages);
+			} catch (Exception ex) {
+				LOGGER.error("Problem in Image Classification" + ex.getMessage(), ex);
+				throw new DCMAException("Problem in Image Classification" + ex.getMessage(), ex);
+			}
+		
 	}
 
 	@Override
@@ -207,8 +244,8 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 				LOGGER.info("sBatchFolder = " + sBatchFolder);
 				imageClassifier.classifyAllImgsOfBatch(batchInstanceID.getID(), sBatchFolder);
 			} catch (Exception ex) {
-				LOGGER.error("Problem in Image Classification");
-				throw new DCMAException("Problem in Image Classification", ex);
+				LOGGER.error("Problem in Image Classification" + ex.getMessage(), ex);
+				throw new DCMAException("Problem in Image Classification" + ex.getMessage(), ex);
 			}
 		} else {
 			LOGGER.info("Skipping image magic classification. Switch set as OFF");
@@ -273,19 +310,59 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 	}
 
 	@Override
-	public List<File> convertPdfOrMultiPageTiffToTiff(BatchClassID batchClassID, String folderPath, BatchInstanceThread thread)
-			throws DCMAException {
-		File folder = new File(folderPath);
-		String[] folderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
-				FileType.TIFF.getExtension(), FileType.HTML.getExtensionWithDot(), FileType.XML.getExtensionWithDot()));
-		for (String string : folderList) {
-			File file = new File(folder.getAbsolutePath() + File.separator + string);
-			replaceSubStringInFile(file, "-%04d", "");
+	public void convertPdfOrMultiPageTiffToTiffUsingIM(String inputParams, File imagePath, String outputParams, File outputFilePath,
+			BatchInstanceThread thread) throws DCMAException {
+		try {
+			String imageName = imagePath.getAbsolutePath();
+			int indexOf = imageName.toLowerCase().indexOf(FileType.TIF.getExtensionWithDot());
+			if (indexOf == -1) {
+				indexOf = imageName.toLowerCase().indexOf(FileType.TIFF.getExtensionWithDot());
+				if (indexOf == -1) {
+					indexOf = imageName.toLowerCase().indexOf(FileType.PDF.getExtensionWithDot());
+				}					
+			}
+			if (indexOf == -1) {
+				throw new DCMAException("Unsupported file format");
+			}
+			multiPageToSinglePageConverter.convertPdfOrMultiPageTiffToTiffUsingIM(inputParams, imagePath, outputParams,
+					outputFilePath, thread, indexOf);
+		} catch (DCMAApplicationException e) {
+			throw new DCMAException(e.getMessage());
 		}
+	}
+
+	@Override
+	public List<File> convertPdfOrMultiPageTiffToTiff(BatchClassID batchClassID, String folderPath, File testImageFile,
+			Boolean isTestAdvancedKV, BatchInstanceThread thread) throws DCMAException {
+		File folder = new File(folderPath);
 		BatchClass batchClass = batchClassService.get(batchClassID.getID());
-		List<File> allImageFiles = getAllImagesPathInFolder(folderPath);
-		for (File imageFile : allImageFiles) {
-			convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, null, thread, true);
+		List<File> allImageFiles = new ArrayList<File>();
+		if (isTestAdvancedKV) {
+			if (testImageFile.exists()) {
+				replaceSubStringInFile(testImageFile, "-%04d", "");
+				File htmlFile = new File(folderPath + File.separator
+						+ FileUtils.changeFileExtension(testImageFile.getName(), FileType.HTML.getExtension()));
+				File xmlFile = new File(folderPath + File.separator
+						+ FileUtils.changeFileExtension(testImageFile.getName(), FileType.HTML.getExtension()));
+				if (!htmlFile.exists() || !xmlFile.exists()) {
+					allImageFiles.add(testImageFile);
+					convertPdfOrMultiPageTiffToTiff(batchClass, testImageFile, null, thread, true);
+				}
+
+			} else {
+				LOGGER.info("File doesn't exist = " + testImageFile.getAbsolutePath());
+			}
+		} else {
+			String[] folderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
+					FileType.TIFF.getExtension(), FileType.HTML.getExtensionWithDot(), FileType.XML.getExtensionWithDot()));
+			for (String string : folderList) {
+				File file = new File(folder.getAbsolutePath() + File.separator + string);
+				replaceSubStringInFile(file, "-%04d", "");
+			}
+			allImageFiles = getAllImagesPathInFolder(folderPath);
+			for (File imageFile : allImageFiles) {
+				convertPdfOrMultiPageTiffToTiff(batchClass, imageFile, null, thread, true);
+			}
 		}
 		return allImageFiles;
 	}
@@ -298,27 +375,31 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		String[] htmlFiles = folder.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
 		String[] xmlFiles = folder.list(new CustomFileFilter(false, FileType.XML.getExtensionWithDot()));
 		for (String fileName : imageNames) {
-			boolean htmlFilesGenerated = false;
-			// boolean xmlFilesGenerated = false;
-			for (String htmlFile : htmlFiles) {
-				if (htmlFile.substring(0, htmlFile.lastIndexOf("."))
-						.equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
-					htmlFilesGenerated = true;
-					break;
-				}
-			}
-			for (String xmlFile : xmlFiles) {
-				if (xmlFile.substring(0, xmlFile.lastIndexOf(".")).equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
-					// xmlFilesGenerated = true;
-					break;
-				}
-			}
-			if (!(htmlFilesGenerated)) {
-				File file = new File(testKvExtractionFolderPath + File.separator + fileName);
-				allImageFiles.add(file);
-			}
+			isHtmlFilesGenerated(testKvExtractionFolderPath, allImageFiles, htmlFiles, xmlFiles, fileName);
 		}
 		return allImageFiles;
+	}
+
+	private void isHtmlFilesGenerated(String testKvExtractionFolderPath, List<File> allImageFiles, String[] htmlFiles,
+			String[] xmlFiles, String fileName) {
+		boolean htmlFilesGenerated = false;
+		// boolean xmlFilesGenerated = false;
+		for (String htmlFile : htmlFiles) {
+			if (htmlFile.substring(0, htmlFile.lastIndexOf(".")).equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
+				htmlFilesGenerated = true;
+				break;
+			}
+		}
+		for (String xmlFile : xmlFiles) {
+			if (xmlFile.substring(0, xmlFile.lastIndexOf(".")).equalsIgnoreCase(fileName.substring(0, fileName.lastIndexOf(".")))) {
+				// xmlFilesGenerated = true;
+				break;
+			}
+		}
+		if (!(htmlFilesGenerated)) {
+			File file = new File(testKvExtractionFolderPath + File.separator + fileName);
+			allImageFiles.add(file);
+		}
 	}
 
 	private void replaceSubStringInFile(File inputFile, String toBeReplaced, String newValue) {
@@ -348,7 +429,46 @@ public class ImageProcessServiceImpl implements ImageProcessService {
 		} catch (DCMAApplicationException e) {
 			throw new DCMAException(e.getMessage());
 		}
-
 	}
 
+	@Override
+	public void convertPdfToSinglePageTiffsUsingGSAPI(String inputParams, File imagePath, String outputParams, File outputFilePath,
+			BatchInstanceThread thread) throws DCMAException {
+		try {
+			multiPageToSinglePageConverter.convertPdfToSinglePageTiffsUsingGSAPI(inputParams, imagePath, outputParams, outputFilePath,
+					thread);
+		} catch (DCMAApplicationException e) {
+			throw new DCMAException(e.getMessage());
+		}
+	}
+
+	@Override
+	public void createSearchablePDF(String checkColorImage, String checkSearchableImage, String batchInstanceFolder, String[] pages,
+			BatchInstanceThread batchInstanceThread, String documentId) throws DCMAException {
+		try {
+			hocrToPDFCreator.createPDFFromHOCR(checkColorImage, checkSearchableImage, batchInstanceFolder, pages, batchInstanceThread,
+					documentId);
+		} catch (DCMAApplicationException e) {
+			throw new DCMAException("Error in creating searchable pdf file" + e.getMessage() , e);
+		}
+		
+	}
+	
+		@Override
+	public void createTifToPDF(String pdfGeneratorEngine, String[] files, BatchInstanceThread pdfBatchInstanceThread,
+			String inputParams, String outputParams) throws DCMAException {
+		if (ImageMagicKConstants.IMAGE_MAGICK.equalsIgnoreCase(pdfGeneratorEngine)) {
+			try {
+				String inputFilePath = files[0];
+				String outputFilePath = files[1];
+				multiPageToSinglePageConverter.convertInputFileToOutputFileUsingIM(inputParams, inputFilePath, outputParams,
+						outputFilePath, pdfBatchInstanceThread);
+			} catch (DCMAApplicationException e) {
+				throw new DCMAException("Error while generating output file", e);
+			}
+		} else if (ImageMagicKConstants.ITEXT.equalsIgnoreCase(pdfGeneratorEngine)) {
+			iTextPDFCreator.createPDFUsingIText(files, pdfBatchInstanceThread);
+		}
+
+	}
 }

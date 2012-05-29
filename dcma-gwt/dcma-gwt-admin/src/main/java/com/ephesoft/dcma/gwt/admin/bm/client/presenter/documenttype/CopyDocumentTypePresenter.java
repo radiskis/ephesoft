@@ -134,9 +134,8 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 				@Override
 				public void onFailure(Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-					confirmationDialog.setText(MessageConstants.COPY_FAILURE);
-					confirmationDialog.setMessage(MessageConstants.DOCUMENT_COPY_FAILURE + arg0.getMessage());
+					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.DOCUMENT_COPY_FAILURE + arg0.getMessage(), MessageConstants.COPY_FAILURE, Boolean.TRUE);
+					
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
@@ -151,17 +150,14 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 						}
 					});
 
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
+					
 				}
 
 				@Override
 				public void onSuccess(Void arg0) {
 					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-					confirmationDialog.setText(MessageConstants.COPY_SUCCESSFUL);
-					confirmationDialog.setMessage(MessageConstants.DOCUMENT_COPY_CREATED_SUCCESSFULLY);
+					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.DOCUMENT_COPY_CREATED_SUCCESSFULLY, MessageConstants.COPY_SUCCESSFUL, Boolean.TRUE);
+					
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
@@ -176,9 +172,7 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 						}
 					});
 
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
+					
 				}
 
 			});

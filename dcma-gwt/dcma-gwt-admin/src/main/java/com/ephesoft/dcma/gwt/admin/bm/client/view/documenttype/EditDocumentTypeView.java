@@ -105,11 +105,11 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 	@UiField
 	VerticalPanel editDocumentTypeViewPanel;
 
-	private static final Binder BNIDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditDocumentTypeView() {
 		super();
-		initWidget(BNIDER.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 

@@ -81,7 +81,9 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 	 */
 	public void convertPdfOrMultiPageTiffToTiff(BatchClass batchClass, File imagePath, File outputFilePath,
 			BatchInstanceThread thread, Boolean allowPdfConversion) throws DCMAApplicationException {
-		String repairImageMagickFileUtilityPath = System.getenv(REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE);
+		String inputParams = getInputPluginConfigForIM(batchClass);
+		String outputParams = getOutputPluginConfigForIM(batchClass);
+		
 		String imageName = imagePath.getAbsolutePath();
 		int indexOf = imageName.toLowerCase().indexOf(FileType.TIF.getExtensionWithDot());
 		if (indexOf == -1) {
@@ -95,6 +97,15 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			logger.error("Unsupported file format");
 			return;
 		}
+		
+		convertPdfOrMultiPageTiffToTiffUsingIM(inputParams, imagePath, outputParams, outputFilePath, thread, indexOf);
+	}
+	
+	public void convertPdfOrMultiPageTiffToTiffUsingIM(String inputParams,File imagePath, String outputParams, File outputFilePath, BatchInstanceThread thread, int indexOf)
+	throws DCMAApplicationException {
+		String repairImageMagickFileUtilityPath = System.getenv(REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE);
+		String imageName = imagePath.getAbsolutePath();
+		
 		String outputImagePath = imageName.substring(0, indexOf);
 		String fileExtension = MULTIPAGE_COMMAND_PARAMETER + FileType.TIF.getExtensionWithDot();
 		if (outputFilePath != null) {
@@ -108,15 +119,13 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			ArrayList<String> commandList = new ArrayList<String>();
 			if (OSUtil.isWindows()) {
 				commandList.add(repairImageMagickFileUtilityPath + File.separator + IMAGEMAGICK_EXECUTOR);
-				createImageMagickCommandforWindows(commandList, batchClass, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
-						+ "convert\"", QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
+				createImageMagickCommandforWindows(commandList, inputParams, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
+						+ "convert\"", QUOTES + imageName + QUOTES, outputParams, QUOTES + outputImagePath + fileExtension + QUOTES);
 
 			} else {
-				String outputImageName = outputImagePath + fileExtension; // OSUtil.escapeSpacesForUnixLinux(outputImagePath +
-				// fileExtension);
+				String outputImageName = outputImagePath + fileExtension; 
 				commandList.add("convert");
-				createCommandForLinux(commandList, batchClass, SPACE + imageName + SPACE, SPACE + outputImageName + SPACE);
-				// commandList.add(command);
+				createCommandForLinux(commandList, inputParams, SPACE + imageName + SPACE, outputParams, SPACE + outputImageName + SPACE);
 			}
 			String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
 
@@ -139,49 +148,29 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			logger.error("Problem generating tiffs");
 			throw new DCMAApplicationException("Problem generating tiffs", ex);
 		}
+	
 	}
 
-	private String createImageMagickCommandforWindows(ArrayList<String> commandList, BatchClass batchClass, String environment,
-			String inputImageName, String outputImageName) {
+	private String createImageMagickCommandforWindows(ArrayList<String> commandList, String inputParams, String environment,
+			String inputImageName, String outputParams, String outputImageName) {
 		if (environment != null) {
 			commandList.add(environment);
 		}
 		StringBuffer command = new StringBuffer(EMPTY_STRING);
-		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
-				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_INPUT_IMAGE_PARAMETERS);
-		String inputParams = EMPTY_STRING;
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			inputParams = pluginConfiguration[0].getValue();
-		}
+		
 		commandList.add(QUOTES + inputParams.trim() + QUOTES);
 		commandList.add(inputImageName.trim());
-		pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
-				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_OUTPUT_IMAGE_PARAMETERS);
-		String outputParams = EMPTY_STRING;
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			outputParams = pluginConfiguration[0].getValue();
-		}
+		
 		commandList.add(QUOTES + outputParams.trim() + QUOTES);
 		commandList.add(outputImageName.trim());
 		return command.toString();
 	}
 
-	private String createGhostScriptCommandforWindows(ArrayList<String> commandList, BatchClass batchClass, String environment,
-			String inputImageName, String outputImageName) {
+	private String createGhostScriptCommandforWindows(ArrayList<String> commandList, final String imageParams, final String environment,
+			final String inputImageName, final String outputImageName) {
 
 		StringBuffer command = new StringBuffer(EMPTY_STRING);
-		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
-				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GS_IMAGE_PARAMETERS);
-		String imageParams = EMPTY_STRING;
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			imageParams = pluginConfiguration[0].getValue();
-			if (imageParams != null) {
-				imageParams = imageParams.trim();
-			}
-		}
+
 		String splitParams[] = imageParams.split(" ");
 		StringBuffer inputParameterBuffer = new StringBuffer();
 		for (int i = 0; i < splitParams.length; i++) {
@@ -200,40 +189,42 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		return command.toString();
 	}
 
-	private String createCommandForLinux(ArrayList<String> commandList, BatchClass batchClass, String inputImageName,
-			String outputImageName) {
+	private String createCommandForLinux(ArrayList<String> commandList, final String inputParams, final String inputImageName,
+			final String outputParams, final String outputImageName) {
 		StringBuffer command = new StringBuffer(EMPTY_STRING);
-		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
-				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_INPUT_IMAGE_PARAMETERS);
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			// command.append(pluginConfiguration[0].getValue() + " ");
-			String inputParams = pluginConfiguration[0].getValue();
+		if(!inputParams.isEmpty()){
 			String inputParamsArr[] = inputParams.split(SPACE);
 			for (String string : inputParamsArr) {
 				commandList.add(string.trim());
 			}
+		
 		}
 		commandList.add(inputImageName.trim());
-		// command.append(inputImageName + " ");
-		pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
-				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_OUTPUT_IMAGE_PARAMETERS);
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			// command.append(pluginConfiguration[0].getValue() + " ");
-			String outputParams = pluginConfiguration[0].getValue();
+		
+		if(!outputParams.isEmpty()){
 			String outputParamsArr[] = outputParams.split(SPACE);
 			for (String string : outputParamsArr) {
 				commandList.add(string.trim());
 			}
 		}
 		commandList.add(outputImageName.trim());
-		// command.append(outputImageName);
 		return command.toString();
 	}
 
 	public void convertPdfToSinglePageTiffs(BatchClass batchClass, File imagePath, File outputFilePath, BatchInstanceThread thread)
 			throws DCMAApplicationException {
+		
+		String outputParams = getOutputPluginConfigForIM(batchClass);
+		String gsParams = getPluginConfigForGS(batchClass);
+		if (!OSUtil.isWindows()) {
+			gsParams = getInputPluginConfigForIM(batchClass);
+		}
+		convertPdfToSinglePageTiffsUsingGSAPI(gsParams, imagePath, outputParams, outputFilePath, thread);
+	}
+
+	public void convertPdfToSinglePageTiffsUsingGSAPI(String inputParams, File imagePath, String outputParams, File outputFilePath, BatchInstanceThread thread)
+			throws DCMAApplicationException {
+
 		String repairGhostScriptFileUtilityPath = System.getenv(REPAIR_FILES_THROUGH_GHOSTSCIPT_ENV_VARIABLE);
 		String imageName = imagePath.getAbsolutePath();
 		int indexOf = imageName.toLowerCase().indexOf(FileType.PDF.getExtensionWithDot());
@@ -255,15 +246,14 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 			ArrayList<String> commandList = new ArrayList<String>();
 			if (OSUtil.isWindows()) {
 				commandList.add(repairGhostScriptFileUtilityPath + File.separator + GHOSTSCRIPT_EXECUTOR);
-				createGhostScriptCommandforWindows(commandList, batchClass, System.getenv(GHOSTSCRIPT_ENV_VARIABLE) + File.separator,
-						QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
+				createGhostScriptCommandforWindows(commandList, inputParams, System
+						.getenv(GHOSTSCRIPT_ENV_VARIABLE)
+						+ File.separator, QUOTES + imageName + QUOTES, QUOTES + outputImagePath + fileExtension + QUOTES);
 
 			} else {
-				String outputImageName = outputImagePath + fileExtension; // OSUtil.escapeSpacesForUnixLinux(outputImagePath +
-				// fileExtension);
+				String outputImageName = outputImagePath + fileExtension;
 				commandList.add("convert");
-				createCommandForLinux(commandList, batchClass, SPACE + imageName + SPACE, SPACE + outputImageName + SPACE);
-				// commandList.add(command);
+				createCommandForLinux(commandList, inputParams, SPACE + imageName + SPACE, outputParams, SPACE + outputImageName + SPACE);
 			}
 			String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
 
@@ -288,5 +278,88 @@ public class MultiPageToSinglePageConverter implements ICommonConstants, IImageM
 		}
 
 	}
+	
+	private String getOutputPluginConfigForIM(BatchClass batchClass){
+		String outputParams = "";
+		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
+				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_OUTPUT_IMAGE_PARAMETERS);
+		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
+				&& pluginConfiguration[0].getValue().length() > 0) {
+			outputParams = pluginConfiguration[0].getValue();
+		}
+		return outputParams;
+	}
+	private String getInputPluginConfigForIM(BatchClass batchClass) {
+		String inputParams = "";
+		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
+				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.IM_CONVERT_INPUT_IMAGE_PARAMETERS);
+		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
+				&& pluginConfiguration[0].getValue().length() > 0) {
+			inputParams = pluginConfiguration[0].getValue();
+		}
+		return inputParams;
+	}
+	private String getPluginConfigForGS(BatchClass batchClass) {
+		BatchPluginConfiguration[] pluginConfiguration = pluginPropertiesService.getPluginProperties(batchClass.getIdentifier(),
+				ImageMagicKConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, ImageMagicProperties.GS_IMAGE_PARAMETERS);
+		String imageParams = EMPTY_STRING;
+		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
+				&& pluginConfiguration[0].getValue().length() > 0) {
+			imageParams = pluginConfiguration[0].getValue();
+			if (imageParams != null) {
+				imageParams = imageParams.trim();
+			}
+		}
+		return imageParams;
+	}
+	
+	
+	/**
+	 * This API will convert the input file to output file using image magic on the basis of input params and output params provided.
+	 * 
+	 * @param inputParams {@link String}
+	 * @param inputImagePath {@link String} absoulte path of input image.
+	 * @param outputParams {@link String}
+	 * @param outputImagePath {@link String} absoulte path of output image.
+	 * @param batchInstanceThread
+	 * @throws DCMAApplicationException
+	 */
+	public void convertInputFileToOutputFileUsingIM(String inputParams, String inputImagePath, String outputParams,
+			String outputImagePath, BatchInstanceThread batchInstanceThread) throws DCMAApplicationException {
+		String repairImageMagickFileUtilityPath = System.getenv(REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE);
+		try {
+			String command = EMPTY_STRING;
+			ArrayList<String> commandList = new ArrayList<String>();
+			if (OSUtil.isWindows()) {
+				commandList.add(repairImageMagickFileUtilityPath + File.separator + IMAGEMAGICK_EXECUTOR);
+				createImageMagickCommandforWindows(commandList, inputParams, QUOTES + System.getenv(IM4JAVA_TOOLPATH) + File.separator
+						+ "convert\"", QUOTES + inputImagePath + QUOTES, outputParams, QUOTES + outputImagePath + QUOTES);
 
+			} else {
+				commandList.add("convert");
+				createCommandForLinux(commandList, inputParams, SPACE + inputImagePath + SPACE, outputParams, SPACE + outputImagePath
+						+ SPACE);
+			}
+			String[] cmds = (String[]) commandList.toArray(new String[commandList.size()]);
+
+			if (batchInstanceThread != null) {
+				logger.info("Adding generated command to thread pool. Command is : ");
+				for (int ind = 0; ind < cmds.length; ind++) {
+					logger.info(cmds[ind] + SPACE);
+				}
+				if (OSUtil.isWindows()) {
+					batchInstanceThread.add(new ProcessExecutor(cmds, null));
+				} else {
+					batchInstanceThread.add(new ProcessExecutor(cmds, new File(System.getenv(IM4JAVA_TOOLPATH))));
+				}
+			} else {
+				logger.error("Command " + command + " cannot be run");
+				throw new DCMAApplicationException("Command " + command + " cannot be run");
+			}
+
+		} catch (Exception ex) {
+			logger.error("Problem generating tiffs");
+			throw new DCMAApplicationException("Problem generating tiffs", ex);
+		}
+	}
 }

@@ -59,6 +59,9 @@ public class TableColumnsInfo extends AbstractChangeableEntity implements Serial
 	@Column(name = "column_name")
 	private String columnName;
 
+	@Column(name = "column_header_pattern")
+	private String columnHeaderPattern;
+
 	@Column(name = "column_pattern")
 	private String columnPattern;
 
@@ -117,6 +120,14 @@ public class TableColumnsInfo extends AbstractChangeableEntity implements Serial
 
 	public void setRequired(boolean isRequired) {
 		this.isRequired = isRequired;
+	}
+
+	public String getColumnHeaderPattern() {
+		return columnHeaderPattern;
+	}
+
+	public void setColumnHeaderPattern(String columnHeaderPattern) {
+		this.columnHeaderPattern = columnHeaderPattern;
 	}
 
 }

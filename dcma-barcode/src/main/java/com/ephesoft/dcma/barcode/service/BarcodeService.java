@@ -35,6 +35,11 @@
 
 package com.ephesoft.dcma.barcode.service;
 
+import java.util.List;
+import java.util.Map;
+
+import com.ephesoft.dcma.barcode.BarcodeProperties;
+import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
@@ -60,4 +65,18 @@ public interface BarcodeService {
 	 * @throws DCMAException
 	 */
 	void extractPageBarCode(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
+
+	/**
+	 *  This method extracts the Barcode values, co-ordinates and confidence for each image file for web service.
+	 * 
+	 * @param xmlDocuments
+	 * @param batchInstanceIdentifier
+	 * @param workingDir
+	 * @param propertyMap
+	 * @throws DCMAException
+	 */
+	void extractPageBarCodeAPI(List<Document> xmlDocuments, String batchInstanceIdentifier, String workingDir,
+			Map<BarcodeProperties, String> propertyMap) throws DCMAException;
+
+
 }

@@ -105,7 +105,7 @@ public class KV_PP_ConfigView extends View<KV_PP_ConfigPresenter> {
 
 	public void createKVPageProcessList(Collection<KVPageProcessDTO> fields) {
 		List<Record> recordList = (List<Record>) setKVPageProcessList(fields);
-		kvPPConfigListView.listView.initTable(recordList.size(), recordList, true);
+		kvPPConfigListView.listView.initTable(recordList.size(), null, recordList, true, false, presenter);
 	}
 
 	public Collection<Record> setKVPageProcessList(Collection<KVPageProcessDTO> fields) {

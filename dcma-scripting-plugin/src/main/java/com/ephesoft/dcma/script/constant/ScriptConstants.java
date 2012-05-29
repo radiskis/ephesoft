@@ -102,4 +102,9 @@ public interface ScriptConstants {
 	 * JDOM type parser.
 	 */
 	String JDOM_PARSER_TYPE = "jdom";
+	
+	/**
+	 * String constant for ON.
+	 */
+	String ON_STRING = "ON";
 }

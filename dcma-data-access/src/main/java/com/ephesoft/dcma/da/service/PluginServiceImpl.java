@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.da.dao.PluginDao;
 import com.ephesoft.dcma.da.domain.Plugin;
@@ -84,4 +85,26 @@ public class PluginServiceImpl implements PluginService {
 		}
 		return pluginList;
 	}
+
+	@Override
+	public List<Plugin> getAllPluginsNames() {
+		LOGGER.info("Getting list of all plugins");
+		List<Plugin> allPluginsNames = pluginDao.getAll();
+		return allPluginsNames;
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void createNewPlugin(Plugin plugin) {
+		LOGGER.info("Creating a new plugin: " + plugin.getPluginName());
+		pluginDao.create(plugin);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void mergePlugin(Plugin plugin) {
+		LOGGER.info("Updating plugin: " + plugin.getPluginName());
+		pluginDao.saveOrUpdate(plugin);
+	}
+
 }

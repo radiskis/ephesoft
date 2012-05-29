@@ -2234,76 +2234,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				pathOfHOCRFile = actualFolderLocation + hocrFileName;
 				logger.info("Creating hOCR for page : " + pageID);
 				try {
-					// if (isTesseractBatch
-					// && tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
-					XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-					OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageID);
-					// } else {
-					// XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-					// }
-					inputStream = new FileInputStream(outputFilePath);
-					org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
-					NodeList titleNodeList = doc.getElementsByTagName("title");
-					if (null != titleNodeList) {
-						for (int index = 0; index < titleNodeList.getLength(); index++) {
-							Node node = titleNodeList.item(index);
-							NodeList childNodeList = node.getChildNodes();
-							Node n = childNodeList.item(0);
-							if (null != n) {
-								String value = n.getNodeValue();
-								if (value != null) {
-									hocrPage.setTitle(value);
-									break;
-								}
-							}
-						}
-					}
-
-					NodeList spanNodeList = doc.getElementsByTagName("span");
-					Spans spans = new Spans();
-					hocrPage.setSpans(spans);
-					List<Span> spanList = spans.getSpan();
-					if (null != spanNodeList) {
-						StringBuilder hocrContent = new StringBuilder();
-						for (int index = 0; index < spanNodeList.getLength(); index++) {
-							Node node = spanNodeList.item(index);
-							NodeList childNodeList = node.getChildNodes();
-							Node n = childNodeList.item(0);
-							Span span = new Span();
-							if (null != n) {
-								String value = n.getNodeValue();
-								span.setValue(value);
-								hocrContent.append(value);
-								hocrContent.append(" ");
-							}
-							spanList.add(span);
-							NamedNodeMap map = node.getAttributes();
-							Node nMap = map.getNamedItem("title");
-							Coordinates hocrCoordinates = null;
-							try {
-								String coordinates = nMap.getNodeValue();
-								String[] arr = coordinates.split(" ");
-								if (null != arr && arr.length >= 4) {
-									hocrCoordinates = new Coordinates();
-									hocrCoordinates.setX0(new BigInteger(arr[1]));
-									hocrCoordinates.setX1(new BigInteger(arr[3]));
-									hocrCoordinates.setY0(new BigInteger(arr[2]));
-									hocrCoordinates.setY1(new BigInteger(arr[4]));
-								}
-							} catch (Exception e) {
-								logger.error(e.getMessage(), e);
-							}
-							if (null == hocrCoordinates) {
-								hocrCoordinates = new Coordinates();
-								hocrCoordinates.setX0(BigInteger.ZERO);
-								hocrCoordinates.setX1(BigInteger.ZERO);
-								hocrCoordinates.setY0(BigInteger.ZERO);
-								hocrCoordinates.setY1(BigInteger.ZERO);
-							}
-							span.setCoordinates(hocrCoordinates);
-						}
-						hocrPage.setHocrContent(hocrContent.toString());
-					}
+					inputStream = hocrGenerationInternal(actualFolderLocation, outputFilePath, pageID, pathOfHOCRFile, hocrPage);
 				} catch (IOException e) {
 					logger.error(e.getMessage(), e);
 				} catch (Exception e) {
@@ -2317,9 +2248,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 						logger.error(e.getMessage(), e);
 					}
 				}
-
 				createHocr(hocrPages, batchInstanceIdentifier, pageID);
-
 				try {
 					logger.info("Deleting temp file : " + outputFilePath);
 					FileUtils.forceDelete(new File(outputFilePath));
@@ -2327,9 +2256,106 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 					logger.info("Deleting the temp file." + e.getMessage());
 				}
 			}
+
+
 		});
 	}
 
+	@Override
+	public void hocrGenerationAPI(final String workingDir, String pageID, String pathOfHOCRFile, HocrPage hocrPage) throws FileNotFoundException, IOException, Exception {
+		String outputFilePath = workingDir + File.separator + "tempFile" + pageID;
+		hocrGenerationInternal(workingDir, outputFilePath, pageID, pathOfHOCRFile, hocrPage);
+	}
+			
+	/**
+	 * Method extracted to be reused for Ephesoft Web Services.
+	 * 
+	 * @param actualFolderLocation
+	 * @param outputFilePath
+	 * @param pageID
+	 * @param pathOfHOCRFile
+	 * @param hocrPage
+	 * @return
+	 * @throws IOException
+	 * @throws Exception
+	 * @throws FileNotFoundException
+	 */
+	private FileInputStream hocrGenerationInternal(final String actualFolderLocation, final String outputFilePath,
+			String pageID, String pathOfHOCRFile, HocrPage hocrPage) throws IOException, Exception, FileNotFoundException {
+		
+		// if (isTesseractBatch
+		// && tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+		XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+		OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageID);
+		// } else {
+		// XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
+		// }
+		FileInputStream inputStream = new FileInputStream(outputFilePath);
+		org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
+		NodeList titleNodeList = doc.getElementsByTagName("title");
+		if (null != titleNodeList) {
+			for (int index = 0; index < titleNodeList.getLength(); index++) {
+				Node node = titleNodeList.item(index);
+				NodeList childNodeList = node.getChildNodes();
+				Node n = childNodeList.item(0);
+				if (null != n) {
+					String value = n.getNodeValue();
+					if (value != null) {
+						hocrPage.setTitle(value);
+						break;
+					}
+				}
+			}
+		}
+
+		NodeList spanNodeList = doc.getElementsByTagName("span");
+		Spans spans = new Spans();
+		hocrPage.setSpans(spans);
+		List<Span> spanList = spans.getSpan();
+		if (null != spanNodeList) {
+			StringBuilder hocrContent = new StringBuilder();
+			for (int index = 0; index < spanNodeList.getLength(); index++) {
+				Node node = spanNodeList.item(index);
+				NodeList childNodeList = node.getChildNodes();
+				Node n = childNodeList.item(0);
+				Span span = new Span();
+				if (null != n) {
+					String value = n.getNodeValue();
+					span.setValue(value);
+					hocrContent.append(value);
+					hocrContent.append(" ");
+				}
+				spanList.add(span);
+				NamedNodeMap map = node.getAttributes();
+				Node nMap = map.getNamedItem("title");
+				Coordinates hocrCoordinates = null;
+				try {
+					String coordinates = nMap.getNodeValue();
+					String[] arr = coordinates.split(" ");
+					if (null != arr && arr.length >= 4) {
+						hocrCoordinates = new Coordinates();
+						hocrCoordinates.setX0(new BigInteger(arr[1]));
+						hocrCoordinates.setX1(new BigInteger(arr[3]));
+						hocrCoordinates.setY0(new BigInteger(arr[2]));
+						hocrCoordinates.setY1(new BigInteger(arr[4]));
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				if (null == hocrCoordinates) {
+					hocrCoordinates = new Coordinates();
+					hocrCoordinates.setX0(BigInteger.ZERO);
+					hocrCoordinates.setX1(BigInteger.ZERO);
+					hocrCoordinates.setY0(BigInteger.ZERO);
+					hocrCoordinates.setY1(BigInteger.ZERO);
+				}
+				span.setCoordinates(hocrCoordinates);
+			}
+			hocrPage.setHocrContent(hocrContent.toString());
+		}
+		return inputStream;
+	}
+	
 	/**
 	 * This api is used to generate the HocrPage object for input hocr file.
 	 * 
@@ -2339,7 +2365,8 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return {@link HocrPage}
 	 */
 	@Override
-	public HocrPage generateHocrPage(String pageName, String pathOfHOCRFile, String outputFilePath, String batchClassIdentifier) {
+	public HocrPage generateHocrPage(String pageName, String pathOfHOCRFile, String outputFilePath, String batchClassIdentifier,
+			String ocrEngineName) {
 
 		if (null == pathOfHOCRFile || null == outputFilePath) {
 			return null;
@@ -2355,7 +2382,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		hocrPage.setPageID(pageName);
 		FileInputStream inputStream = null;
 		try {
-			if (isTesseractHocrPlugin(batchClassIdentifier)
+			if (ocrEngineName.equalsIgnoreCase(IUtilCommonConstants.TESSERACT_HOCR_PLUGIN)
 					&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 				String actualFolderLocation = new File(outputFilePath).getParent();
@@ -2442,7 +2469,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		return hocrPage;
 	}
 
-	private boolean isTesseractHocrPlugin(String batchClassIdentifier) {
+		/*private boolean isTesseractHocrPlugin(String batchClassIdentifier) {
 		boolean isTesseractBatch = false;
 		if (batchClassIdentifier != null && !batchClassIdentifier.isEmpty()) {
 			BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByName(batchClassIdentifier,
@@ -2465,7 +2492,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			}
 		}
 		return isTesseractBatch;
-	}
+	}*/
 
 	@Override
 	public String getWebScannerScannedImagesURL() {
@@ -2494,12 +2521,24 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public void copyFolder(String sourcePath, String folderName, String batchClassID) throws DCMAApplicationException {
 		String scannedImagesPath = sourcePath + File.separator + folderName;
 		File scannedImagesDirectory = new File(scannedImagesPath);
-		CustomFileFilter fileFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+		CustomFileFilter validFilesFilter = new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+				.getExtensionWithDot());
+		List<File> validFilesToBeCopied = null;
+		try {
+			validFilesToBeCopied = getFiles(scannedImagesPath, validFilesFilter);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+		if (validFilesToBeCopied == null || validFilesToBeCopied.isEmpty()) {
+			throw new DCMAApplicationException("Error: No files scanned.");
+		}
+
+		CustomFileFilter filesToBeDeletedFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
 				.getExtensionWithDot(), FileType.SER.getExtensionWithDot());
 		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
 		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
-			for (File file : getFilesToBeDeleted(scannedImagesPath, fileFilter)) {
+			for (File file : getFiles(scannedImagesPath, filesToBeDeletedFilter)) {
 				try {
 					FileUtils.forceDelete(file);
 					logger.info("Deleting File : " + file.getAbsolutePath());
@@ -2525,7 +2564,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
 		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
-			for (File file : getFilesToBeDeleted(scannedImagesPath, fileFilter)) {
+			for (File file : getFiles(scannedImagesPath, fileFilter)) {
 				try {
 					FileUtils.forceDelete(file);
 					logger.info("Deleting File : " + file.getAbsolutePath());
@@ -2543,7 +2582,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 	}
 
-	private List<File> getFilesToBeDeleted(String srcPath, CustomFileFilter fileFilter) throws IOException {
+	private List<File> getFiles(String srcPath, CustomFileFilter fileFilter) throws IOException {
 		File srcDir = new File(srcPath);
 		List<File> fileList = new ArrayList<File>();
 		if (srcDir != null && srcDir.list(fileFilter) != null) {
@@ -2755,79 +2794,118 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	@Override
-	public BatchClassModule getDetachedBatchClassModuleByName(String batchClassIdentifier, String moduleName) {
-		BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByName(batchClassIdentifier, moduleName);
-		batchClassModuleService.evict(batchClassModule);
-		BatchClassModule detachedBatchClassModule = new BatchClassModule();
-
-		detachedBatchClassModule.setId(0);
-		detachedBatchClassModule.setBatchClass(null);
-
-		detachedBatchClassModule.setModule(batchClassModule.getModule());
-		detachedBatchClassModule.setWorkflowName(batchClassModule.getWorkflowName());
-		detachedBatchClassModule.setOrderNumber(batchClassModule.getOrderNumber());
-		detachedBatchClassModule.setRemoteBatchClassIdentifier(batchClassModule.getRemoteBatchClassIdentifier());
-		detachedBatchClassModule.setRemoteURL(batchClassModule.getRemoteURL());
-
-		List<BatchClassModuleConfig> moduleConfigs = batchClassModule.getBatchClassModuleConfig();
-		List<BatchClassModuleConfig> newModuleConfigList = new ArrayList<BatchClassModuleConfig>();
-		for (BatchClassModuleConfig moduleConfig : moduleConfigs) {
-			newModuleConfigList.add(moduleConfig);
-			moduleConfig.setId(0);
-			moduleConfig.setBatchClassModule(null);
-		}
-		detachedBatchClassModule.setBatchClassModuleConfig(newModuleConfigList);
-
-		List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
-		List<BatchClassPlugin> newBatchClassPluginsList = new ArrayList<BatchClassPlugin>();
-		for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
-			newBatchClassPluginsList.add(batchClassPlugin);
-			batchClassPlugin.setId(0);
-			batchClassPlugin.setBatchClassModule(null);
-
-			List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPlugin.getBatchClassPluginConfigs();
-			List<BatchClassPluginConfig> newBatchClassPluginConfigsList = new ArrayList<BatchClassPluginConfig>();
-			for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
-				newBatchClassPluginConfigsList.add(batchClassPluginConfig);
-				batchClassPluginConfig.setId(0);
-				batchClassPluginConfig.setBatchClassPlugin(null);
-
-				List<KVPageProcess> kvPageProcess = batchClassPluginConfig.getKvPageProcesses();
-				List<KVPageProcess> newKvPageProcessList = new ArrayList<KVPageProcess>();
-				for (KVPageProcess kVPageProcessChild : kvPageProcess) {
-					kVPageProcessChild.setId(0);
-					newKvPageProcessList.add(kVPageProcessChild);
-					kVPageProcessChild.setBatchClassPluginConfig(null);
-				}
-				batchClassPluginConfig.setKvPageProcesses(newKvPageProcessList);
+	public BatchClassModule getDetachedBatchClassModuleByName(String batchClassIdentifier, String workflowName) {
+		BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByWorkflowName(batchClassIdentifier, workflowName);
+		BatchClassModule detachedBatchClassModule = null;
+		if(batchClassModule == null) {
+			logger.info("No module found with workflowName:" + workflowName + " in batch class id:" + batchClassIdentifier + ". Skipping the updates for this module.");
+		} else {
+			batchClassModuleService.evict(batchClassModule);
+			detachedBatchClassModule = new BatchClassModule();
+			
+			detachedBatchClassModule.setId(0);
+			detachedBatchClassModule.setBatchClass(null);
+			
+			detachedBatchClassModule.setModule(batchClassModule.getModule());
+			detachedBatchClassModule.setWorkflowName(batchClassModule.getWorkflowName());
+			detachedBatchClassModule.setOrderNumber(batchClassModule.getOrderNumber());
+			detachedBatchClassModule.setRemoteBatchClassIdentifier(batchClassModule.getRemoteBatchClassIdentifier());
+			detachedBatchClassModule.setRemoteURL(batchClassModule.getRemoteURL());
+			
+			List<BatchClassModuleConfig> moduleConfigs = batchClassModule.getBatchClassModuleConfig();
+			List<BatchClassModuleConfig> newModuleConfigList = new ArrayList<BatchClassModuleConfig>();
+			for (BatchClassModuleConfig moduleConfig : moduleConfigs) {
+				newModuleConfigList.add(moduleConfig);
+				moduleConfig.setId(0);
+				moduleConfig.setBatchClassModule(null);
 			}
-			batchClassPlugin.setBatchClassPluginConfigs(newBatchClassPluginConfigsList);
-
-			List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassPlugin.getBatchClassDynamicPluginConfigs();
-			List<BatchClassDynamicPluginConfig> newBatchClassDynamicPluginConfigsList = new ArrayList<BatchClassDynamicPluginConfig>();
-			for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
-				newBatchClassDynamicPluginConfigsList.add(batchClassDynamicPluginConfig);
-				batchClassDynamicPluginConfig.setId(0);
-				batchClassDynamicPluginConfig.setBatchClassPlugin(null);
-
-				List<BatchClassDynamicPluginConfig> children = batchClassDynamicPluginConfig.getChildren();
-				List<BatchClassDynamicPluginConfig> newChildrenList = new ArrayList<BatchClassDynamicPluginConfig>();
-				for (BatchClassDynamicPluginConfig child : children) {
-					child.setId(0);
-					newChildrenList.add(child);
-					child.setBatchClassPlugin(null);
-					child.setParent(null);
+			detachedBatchClassModule.setBatchClassModuleConfig(newModuleConfigList);
+			
+			List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
+			List<BatchClassPlugin> newBatchClassPluginsList = new ArrayList<BatchClassPlugin>();
+			for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
+				newBatchClassPluginsList.add(batchClassPlugin);
+				batchClassPlugin.setId(0);
+				batchClassPlugin.setBatchClassModule(null);
+				
+				List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPlugin.getBatchClassPluginConfigs();
+				List<BatchClassPluginConfig> newBatchClassPluginConfigsList = new ArrayList<BatchClassPluginConfig>();
+				for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
+					newBatchClassPluginConfigsList.add(batchClassPluginConfig);
+					batchClassPluginConfig.setId(0);
+					batchClassPluginConfig.setBatchClassPlugin(null);
+					
+					List<KVPageProcess> kvPageProcess = batchClassPluginConfig.getKvPageProcesses();
+					List<KVPageProcess> newKvPageProcessList = new ArrayList<KVPageProcess>();
+					for (KVPageProcess kVPageProcessChild : kvPageProcess) {
+						kVPageProcessChild.setId(0);
+						newKvPageProcessList.add(kVPageProcessChild);
+						kVPageProcessChild.setBatchClassPluginConfig(null);
+					}
+					batchClassPluginConfig.setKvPageProcesses(newKvPageProcessList);
 				}
-				batchClassDynamicPluginConfig.setChildren(newChildrenList);
+				batchClassPlugin.setBatchClassPluginConfigs(newBatchClassPluginConfigsList);
+				
+				List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassPlugin.getBatchClassDynamicPluginConfigs();
+				List<BatchClassDynamicPluginConfig> newBatchClassDynamicPluginConfigsList = new ArrayList<BatchClassDynamicPluginConfig>();
+				for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
+					newBatchClassDynamicPluginConfigsList.add(batchClassDynamicPluginConfig);
+					batchClassDynamicPluginConfig.setId(0);
+					batchClassDynamicPluginConfig.setBatchClassPlugin(null);
+					
+					List<BatchClassDynamicPluginConfig> children = batchClassDynamicPluginConfig.getChildren();
+					List<BatchClassDynamicPluginConfig> newChildrenList = new ArrayList<BatchClassDynamicPluginConfig>();
+					for (BatchClassDynamicPluginConfig child : children) {
+						child.setId(0);
+						newChildrenList.add(child);
+						child.setBatchClassPlugin(null);
+						child.setParent(null);
+					}
+					batchClassDynamicPluginConfig.setChildren(newChildrenList);
+				}
+				batchClassPlugin.setBatchClassDynamicPluginConfigs(newBatchClassDynamicPluginConfigsList);
 			}
-			batchClassPlugin.setBatchClassDynamicPluginConfigs(newBatchClassDynamicPluginConfigsList);
+			detachedBatchClassModule.setBatchClassPlugins(newBatchClassPluginsList);
+			
 		}
-		detachedBatchClassModule.setBatchClassPlugins(newBatchClassPluginsList);
 		return detachedBatchClassModule;
 	}
 
 	@Override
 	public String getUploadBatchFolder() {
 		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getUploadBatchFolder();
+	}
+
+	@Override
+	public String getWebServicesFolderPath() {
+		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getWebServicesFolderPath();
+	}
+
+	@Override
+	public String getTestAdvancedKvExtractionFolderPath(String batchClassIdentifier, boolean createDirectory) {
+		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getTestAdvancedKvExtractionFolderName(),
+				createDirectory);
+	}
+
+	@Override
+	public String getTestAdvancedKVExtractionFolderName() {
+		return batchSchemaDao.getJAXB2Template().getTestAdvancedKvExtractionFolderName();
+	}
+	@Override
+	public String getSamplePatternFilePath() {
+		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getSamplePatternFolder() + File.separator
+				+ batchSchemaDao.getJAXB2Template().getSamplePatternFileName();
+
+	}
+	
+	@Override
+	public void update(final Batch batch, final String filePath) {
+		if (null == batch) {
+			logger.info("batch class is null.");
+		} else if (null == filePath || filePath.isEmpty()) {
+			logger.info("File path is either null or empty.");
+		} else {
+			this.batchSchemaDao.update(batch, filePath);
+		}
 	}
 }

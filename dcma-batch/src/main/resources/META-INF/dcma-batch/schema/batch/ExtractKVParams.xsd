@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+	<!--
+		Created with Liquid XML Studio Developer Edition (Trial) 8.0.11.2171
+		(http://www.liquid-technologies.com)
+	-->
+<xs:schema elementFormDefault="qualified"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="ExtractKVParams" minOccurs="0" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Params" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="AdvancedKV" type="xs:boolean" />
+							<xs:element name="LocationType" type="xs:string" />
+							<xs:element name="NoOfWords" type="xs:int" />
+							<xs:element name="Multiplier" type="xs:float" />
+							<xs:element name="KeyPattern" type="xs:string" />
+							<xs:element name="ValuePattern" type="xs:string" />
+							<xs:element name="KVFetchValue" type="xs:string" />
+							<xs:element name="Length" type="xs:int" />
+							<xs:element name="Width" type="xs:int" />
+							<xs:element name="Xoffset" type="xs:int" />
+							<xs:element name="Yoffset" type="xs:int" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>
+

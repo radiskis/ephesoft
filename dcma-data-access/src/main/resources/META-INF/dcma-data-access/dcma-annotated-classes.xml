@@ -36,6 +36,9 @@
 				<value>com.ephesoft.dcma.da.domain.BatchClassModuleConfig</value>			
 				<value>com.ephesoft.dcma.da.domain.RemoteBatchInstance</value>
 				<value>com.ephesoft.dcma.da.domain.ModuleConfig</value>
+				<value>com.ephesoft.dcma.da.domain.BatchInstanceGroups</value>
+				<value>com.ephesoft.dcma.da.domain.AdvancedKVExtraction</value>
+				<value>com.ephesoft.dcma.da.domain.Dependency</value>
 			</list>
 		</property>
 	</bean>

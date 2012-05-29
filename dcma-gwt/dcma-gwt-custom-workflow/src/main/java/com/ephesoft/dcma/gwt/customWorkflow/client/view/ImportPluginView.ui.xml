@@ -1,0 +1,30 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:core='com.ephesoft.dcma.gwt.core.client.validator'
+	xmlns:v="urn:import:com.ephesoft.dcma.gwt.core.client.validator">
+
+	<g:VerticalPanel width="100%" ui:field="importBatchClassViewPanel">
+		<g:FormPanel ui:field="attachZipFilePanel">
+			<g:HorizontalPanel width="100%">
+				<g:cell width="30%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Label ui:field="importLabel"></g:Label>
+				</g:cell>
+				<g:cell width="3%">
+					<g:Label ui:field="importStar"></g:Label>
+				</g:cell>
+				<g:cell width="75%" horizontalAlignment="ALIGN_LEFT">
+					<g:FileUpload ui:field="importFile" name="importFile">
+					</g:FileUpload>
+				</g:cell>
+			</g:HorizontalPanel>
+		</g:FormPanel>
+
+		<g:HorizontalPanel width="100%" ui:field="importBatchPanel">
+			<g:cell width="50%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
+			</g:cell>
+			<g:cell width="50%" horizontalAlignment="ALIGN_LEFT">
+				<g:Button ui:field="cancelButton" />
+			</g:cell>
+		</g:HorizontalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>

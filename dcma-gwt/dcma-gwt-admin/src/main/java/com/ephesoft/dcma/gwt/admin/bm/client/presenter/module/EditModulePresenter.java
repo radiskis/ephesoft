@@ -36,8 +36,10 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.module;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.module.EditModuleView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
@@ -79,9 +81,9 @@ public class EditModulePresenter extends AbstractBatchClassPresenter<EditModuleV
 			controller.getMainPresenter().getModuleViewPresenter().showModuleDetailView();
 		} else {
 			if (remoteBCId.isEmpty()) {
-				ConfirmationDialogUtil.showConfirmationDialogError("Remote Batch Class Identifier cannot be empty");
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.REMOTE_BATCH_CLASSIDENTIFIER_CANT_EMPTY));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError("Remote URL cannot be empty");
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.REMOTE_URL_CANT_BE_EMPTY));
 			}
 		}
 	}

@@ -102,4 +102,12 @@ public interface DocumentTypeDao extends CacheableDao<DocumentType> {
 	 * @return DocumentType
 	 */
 	DocumentType getDocTypeByIdentifier(String identifier);
+	
+	/**
+	 * An api to fetch all DocumentType by batch class id.
+	 * 
+	 * @param batchClassID Long
+	 * @return List<DocumentType>
+	 */
+	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassID);
 }

@@ -46,4 +46,14 @@ update plugin_config set is_mandatory = 0 where config_name = 'filebound.separat
 
 update plugin_config set is_mandatory = 0 where config_name = 'filebound.division';
 
-update batch_class_plugin_config set plugin_config_value='HOCRtoPDF' where batch_class_plugin_id = (select id from batch_class_plugin where batch_class_module_id = (select id from batch_class_module where batch_class_id = (select id from batch_class where batch_class_name='SearchablePDFGenerator') and module_id=(select id from module where module_name = 'Export')) and plugin_id =(select id from plugin where plugin_name='CREATEMULTIPAGE_FILES')) and plugin_config_id = (select id from plugin_config where config_name = 'createMultipageTif.export_process')
+update batch_class_plugin_config set plugin_config_value='HOCRtoPDF' where batch_class_plugin_id = (select id from batch_class_plugin where batch_class_module_id = (select id from batch_class_module where batch_class_id = (select id from batch_class where batch_class_name='SearchablePDFGenerator') and module_id=(select id from module where module_name = 'Export')) and plugin_id =(select id from plugin where plugin_name='CREATEMULTIPAGE_FILES')) and plugin_config_id = (select id from plugin_config where config_name = 'createMultipageTif.export_process');
+
+update plugin_config set config_datatype = 'INTEGER' where config_name = 'regular.regex.confidence_score';
+
+update plugin_config set config_datatype = 'INTEGER' where config_name = 'validation.x_dimension';
+
+update plugin_config set config_datatype = 'INTEGER' where config_name = 'validation.y_dimension';
+
+update plugin_config set config_datatype = 'INTEGER' where config_name = 'validation.fuzzy_search_pop_up_x_dimension';
+
+update plugin_config set config_datatype = 'INTEGER' where config_name = 'validation.fuzzy_search_pop_up_y_dimension';

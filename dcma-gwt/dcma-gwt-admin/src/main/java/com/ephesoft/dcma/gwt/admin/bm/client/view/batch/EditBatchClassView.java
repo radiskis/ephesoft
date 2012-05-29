@@ -69,6 +69,8 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	@UiField
 	protected Label uncFolder;
 	@UiField
+	protected Label name;
+	@UiField
 	protected TextBox description;
 	@UiField
 	protected Label version;
@@ -77,6 +79,8 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	@UiField
 	protected Button cancelButton;
 
+	@UiField
+	protected Label nameLabel;
 	@UiField
 	protected Label priorityLabel;
 	@UiField
@@ -137,14 +141,16 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 
 		editBatchClassViewPanel.setSpacing(5);
 
+		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		priorityLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PRIORITY) + AdminConstants.COLON);
-		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
+		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + AdminConstants.COLON);
 		uncLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.UNC_FOLDER) + AdminConstants.COLON);
 		versionLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.VERSION) + AdminConstants.COLON);
 		roleLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.ROLE) + AdminConstants.COLON);
 		star.setText(AdminConstants.STAR);
 		descStar.setText(AdminConstants.STAR);
 
+		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		priorityLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		uncLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -185,6 +191,14 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 		return description.getValue();
 	}
 
+	public String getname() {
+		return name.getText();
+	}
+
+	public void setName(String name) {
+		this.name.setText(name);
+	}
+
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
@@ -215,7 +229,7 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 
 	public String getRole() {
 		int numberOfRole = role.getItemCount();
-		StringBuffer selected = new  StringBuffer("");
+		StringBuffer selected = new StringBuffer("");
 		if (role.getSelectedIndex() >= 0) {
 			for (int index = 0; index < numberOfRole; index++) {
 				if (role.isItemSelected(index)) {
@@ -239,6 +253,20 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 			}
 		}
 		return assignedRole;
+	}
+
+	/**
+	 * @return the nameLabel
+	 */
+	public Label getNameLabel() {
+		return nameLabel;
+	}
+
+	/**
+	 * @param nameLabel the nameLabel to set
+	 */
+	public void setNameLabel(Label nameLabel) {
+		this.nameLabel = nameLabel;
 	}
 
 	public void setRole(List<RoleDTO> assignedRole, List<RoleDTO> roleList) {

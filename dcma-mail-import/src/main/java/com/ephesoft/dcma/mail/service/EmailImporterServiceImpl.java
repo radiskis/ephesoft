@@ -186,8 +186,7 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 				};
 				String wantedAttachments[] = file.list(filter);
 				if (wantedAttachments != null && wantedAttachments.length > 0) {
-					for (String str : wantedAttachments) {
-						String fileName = str;
+					for (String fileName : wantedAttachments) {
 						checkExtensionsAndConvertAttachments(fileName, folderPath);
 					}
 				}
@@ -203,13 +202,15 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		if (fileName != null && !fileName.isEmpty()) {
 			isFileValid = fileValidityCheck(fileName);
 			if (!isFileValid
-					&& !(fileName.toLowerCase(Locale.getDefault()).contains(FileType.TIF.getExtension()))
-					&& !(fileName.toLowerCase(Locale.getDefault()).contains(FileType.PDF.getExtension()))
+					&& !(fileName.toLowerCase(Locale.getDefault()).endsWith(FileType.TIF.getExtension()))
+					&& !(fileName.toLowerCase(Locale.getDefault()).endsWith(FileType.PDF.getExtension()))
 					&& !(fileName.toLowerCase(Locale.getDefault()).equalsIgnoreCase(MailConstants.TEMP_FILE_NAME
 							+ FileType.TXT.getExtensionWithDot()))) {
 				File errorPDFFile = new File(defaultFolderLocation + File.separator + MailConstants.ERROR_FILE);
 				try {
-					FileUtils.copyFile(errorPDFFile, new File(outputFilePath + File.separator + MailConstants.ZZZZZ_ATTACHMENT_PDF));
+					String newErrorPdfFilePath = outputFilePath + File.separator + MailConstants.ZZZZZ_ATTACHMENT + fileName
+							+ FileType.PDF.getExtensionWithDot();
+					FileUtils.copyFile(errorPDFFile, new File(newErrorPdfFilePath));
 				} catch (Exception e) {
 					logger.error("Unable to copy file.", e);
 				}
@@ -222,8 +223,9 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 		}
 		File file = new File(outputFilePath + File.separator + fileName);
 		String newFileName = fileName.toLowerCase(Locale.getDefault());
-		if (!(newFileName.contains(FileType.TIFF.getExtension()) || newFileName.contains(FileType.TIF.getExtension())
-				|| newFileName.contains(FileType.PDF.getExtension()) || newFileName.endsWith(FileType.ZIP.getExtensionWithDot()))) {
+		if (!(newFileName.endsWith(FileType.TIFF.getExtensionWithDot()) || newFileName.endsWith(FileType.TIF.getExtensionWithDot())
+				|| newFileName.endsWith(FileType.PDF.getExtensionWithDot()) || newFileName
+				.endsWith(FileType.ZIP.getExtensionWithDot()))) {
 			if (isFileValid) {
 				outputFilePath = file.getPath();
 				outputFilePath = FileUtils.changeFileExtension(outputFilePath, FileType.PDF.getExtension());
@@ -273,7 +275,7 @@ public class EmailImporterServiceImpl implements EmailImporterService {
 	}
 
 	private void moveToUNCFolder(BatchClass batchClass, String folderPath, String folderName) throws Exception {
-		convertPdfOrMultiPageTiffToTiff(batchClass, folderPath);
+		// convertPdfOrMultiPageTiffToTiff(batchClass, folderPath);
 		batchSchemaService.copyEmailFolderToUNC(defaultFolderLocation, folderName, batchClass.getIdentifier());
 	}
 

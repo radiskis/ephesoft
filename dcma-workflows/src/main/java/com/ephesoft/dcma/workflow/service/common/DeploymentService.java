@@ -64,4 +64,12 @@ public interface DeploymentService {
 	 */
 	void deployAll();
 
+	/**
+	 * API to check if a worklow is deployed.
+	 * 
+	 * @param activityName
+	 * @return
+	 */
+	boolean isDeployed(String activityName);
+
 }

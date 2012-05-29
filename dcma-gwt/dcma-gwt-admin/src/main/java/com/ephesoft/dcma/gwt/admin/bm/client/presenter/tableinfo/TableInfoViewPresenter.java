@@ -84,14 +84,19 @@ public class TableInfoViewPresenter extends AbstractBatchClassPresenter<TableInf
 					BatchClassManagementMessages.ADD_TABLE_INFO));
 			return;
 		}
-		TableColumnInfoDTO tcColumnInfoDTO = new TableColumnInfoDTO();
-		tcColumnInfoDTO.setNew(true);
-		tcColumnInfoDTO.setTableInfoDTO(controller.getSelectedTableInfoField());
-		tcColumnInfoDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		TableColumnInfoDTO tcColumnInfoDTO = createTableColumnInfoDTOObject();
 
 		controller.setAdd(true);
 		controller.setSelectedTableColumnInfoField(tcColumnInfoDTO);
 		controller.getMainPresenter().showTableColumnInfoView(true);
+	}
+
+	public TableColumnInfoDTO createTableColumnInfoDTOObject() {
+		TableColumnInfoDTO tcColumnInfoDTO = new TableColumnInfoDTO();
+		tcColumnInfoDTO.setNew(true);
+		tcColumnInfoDTO.setTableInfoDTO(controller.getSelectedTableInfoField());
+		tcColumnInfoDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		return tcColumnInfoDTO;
 	}
 
 	public void onEditTableInfoPropertiesButtonClicked() {

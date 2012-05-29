@@ -43,6 +43,9 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 	private String zipFileLocation;
 	private String uncFolder;
 	private boolean isImportExisting;
+	private boolean isWorkflowDeployed;
+	private boolean isWorkflowExistsInBatchClass;
+	private boolean isWorkflowEqual;
 	private String name;
 	private String description;
 	private String priority;
@@ -132,5 +135,31 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 
 	public void setUncFolder(String uncFolder) {
 		this.uncFolder = uncFolder;
+	}
+	
+	
+	public void setWorkflowDeployed(boolean isWorkflowDeployed) {
+		this.isWorkflowDeployed = isWorkflowDeployed;
+	}
+	
+	public boolean isWorkflowDeployed() {
+		return isWorkflowDeployed;
+	}
+	
+	public void setWorkflowExistsInBatchClass(boolean isWorkflowExistsInBatchClass) {
+		this.isWorkflowExistsInBatchClass = isWorkflowExistsInBatchClass;
+	}
+	
+	public boolean isWorkflowExistsInBatchClass() {
+		return isWorkflowExistsInBatchClass;
+	}
+	
+	
+	public void setWorkflowEqual(boolean isWorkflowEqual) {
+		this.isWorkflowEqual = isWorkflowEqual;
+	}
+	
+	public boolean isWorkflowEqual() {
+		return isWorkflowEqual;
 	}
 }

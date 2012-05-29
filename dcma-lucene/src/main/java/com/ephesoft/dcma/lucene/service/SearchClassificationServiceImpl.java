@@ -35,13 +35,17 @@
 
 package com.ephesoft.dcma.lucene.service;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
@@ -49,6 +53,7 @@ import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.lucene.LuceneEngine;
+import com.ephesoft.dcma.lucene.LuceneProperties;
 import com.ephesoft.dcma.util.BackUpFileService;
 
 public class SearchClassificationServiceImpl implements SearchClassificationService {
@@ -81,6 +86,16 @@ public class SearchClassificationServiceImpl implements SearchClassificationServ
 	}
 
 	@Override
+	public void generateConfidenceScoreAPI(final List<Document> xmlDocuments, final HocrPages hocrPages, final String workingDir, final Map<LuceneProperties, String> propertyMap, final String batchClassIdentifier) throws DCMAException {
+		try {
+			luceneEngine.generateConfidenceAPI(xmlDocuments, hocrPages, workingDir, propertyMap, batchClassIdentifier);
+		} catch (Exception e) {
+			LOGGER.error("Uncaught Exception in generateConfidence method " + e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+
+	@Override
 	public void learnSampleHOCR(final BatchClassID batchClassID, final boolean createIndex) throws DCMAException {
 		try {
 			luceneEngine.learnSampleHocrFiles(batchClassID.getID(), createIndex);
@@ -101,11 +116,12 @@ public class SearchClassificationServiceImpl implements SearchClassificationServ
 	}
 
 	@Override
-	public List<String> generateHOCRForKVExtractionTest(String imageFolder, String ocrEngineName, String batchClassIdentifer)
-			throws DCMAException {
+	public List<String> generateHOCRForKVExtractionTest(String imageFolder, String ocrEngineName, String batchClassIdentifer,
+			File testImageFile, boolean isAdvancedKVExtraction) throws DCMAException {
 		List<String> outputFilePaths = null;
 		try {
-			outputFilePaths = luceneEngine.generateHOCRForKVExtractionTest(imageFolder, ocrEngineName, batchClassIdentifer);
+			outputFilePaths = luceneEngine.generateHOCRForKVExtractionTest(imageFolder, ocrEngineName, batchClassIdentifer,
+					testImageFile, isAdvancedKVExtraction);
 			luceneEngine.cleanUpIntrmediatePngs(imageFolder);
 		} catch (Exception e) {
 			LOGGER.error("Uncaught Exception in generateHOCRForKVExtractionTest method " + e.getMessage(), e);

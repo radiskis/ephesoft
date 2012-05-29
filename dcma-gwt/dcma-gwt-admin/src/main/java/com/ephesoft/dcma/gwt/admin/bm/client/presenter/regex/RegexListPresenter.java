@@ -36,11 +36,15 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.regex;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.regex.RegexListView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class RegexListPresenter extends AbstractBatchClassPresenter<RegexListView> {
+public class RegexListPresenter extends AbstractBatchClassPresenter<RegexListView> implements DoubleClickListner {
 
 	public RegexListPresenter(BatchClassManagementController controller, RegexListView view) {
 		super(controller, view);
@@ -48,11 +52,35 @@ public class RegexListPresenter extends AbstractBatchClassPresenter<RegexListVie
 
 	@Override
 	public void bind() {
-		//processing to be done when this presenter is loaded.
+		// processing to be done when this presenter is loaded.
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//event handling code goes here.
+		// event handling code goes here.
+	}
+
+	@Override
+	public void onDoubleClickTable() {
+		onEditButtonClicked();
+
+	}
+
+	public void onEditButtonClicked() {
+		String identifier = view.getRegexListView().getSelectedRowIndex();
+		int rowCount = view.getRegexListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
+
+		} else {
+			controller.getMainPresenter().getFieldTypeViewPresenter().onEditRegexButtonClicked(identifier);
+		}
+
 	}
 }
