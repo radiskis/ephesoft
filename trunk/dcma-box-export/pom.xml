@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<artifactId>dcma-box-export</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<artifactId>dcma-parent</artifactId>
+		<groupId>com.ephesoft.dcma</groupId>
+		<version>0.0.14-SNAPSHOT</version>
+		<relativePath>../parent</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+
+	<name>DCMA: 'box' Export model</name>
+	<description>The 'box' API export model.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-batch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-data-access</artifactId>
+		</dependency>
+	</dependencies>
+	
+</project>
