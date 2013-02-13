@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,6 +44,7 @@ import com.ephesoft.dcma.da.domain.TableInfo;
 
 /**
  * This service provides APIs for retrieving table data from HOCR page.
+ * 
  * @author Ephesoft
  * @version 1.0
  * @see com.ephesoft.dcma.tablefinder.service.TableFinderServiceImpl
@@ -52,22 +53,32 @@ public interface TableFinderService {
 
 	/**
 	 * This method returns the width of a table row.
+	 * 
 	 * @return {@link String}
 	 */
-	public String getWidthOfLine();
-	
+	String getWidthOfLine();
+
 	/**
 	 * This method returns the confidence score.
-	 * @return {@link String}
+	 * 
+	 * @return String
 	 */
-	public String getConfidenceScore();
-	
+	String getConfidenceScore();
+
+	/**
+	 * Method to get the gap between words for a single table column.
+	 * 
+	 * @return int
+	 */
+	int getGapBetweenColumnWords();
+
 	/**
 	 * This method returns table data for provided hocr page.
+	 * 
 	 * @param inputDataCarrier List<{@link TableInfo}>
 	 * @param hocrPage {@link HocrPage}
-	 * @param maxResults int
-	 * @return {@link DataTable}
+	 * @param maxResults {@link int}
+	 * @return DataTable
 	 * @throws DCMAApplicationException
 	 */
 	DataTable findTableData(final List<TableInfo> inputDataCarrier, final HocrPage hocrPage, final int maxResults)

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,13 +51,23 @@ public class TableColumnInfoDTO implements IsSerializable {
 
 	private String columnPattern;
 
-	private boolean isRequired;
+	private boolean required;
 
-	private boolean isNew;
+	private boolean mandatory;
 
-	private boolean isDeleted;
+	private boolean newTableColumnInfo;
+
+	private boolean deleted;
 
 	private String columnHeaderPattern;
+
+	private String columnStartCoordinate;
+
+	private String columnEndCoordinate;
+
+	private String columnCoordY0;
+
+	private String columnCoordY1;
 
 	public TableInfoDTO getTableInfoDTO() {
 		return tableInfoDTO;
@@ -107,28 +117,28 @@ public class TableColumnInfoDTO implements IsSerializable {
 		this.columnPattern = columnPattern;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newTableColumnInfo) {
+		this.newTableColumnInfo = newTableColumnInfo;
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return newTableColumnInfo;
 	}
 
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	public boolean isRequired() {
-		return isRequired;
+		return required;
 	}
 
-	public void setRequired(boolean isRequired) {
-		this.isRequired = isRequired;
+	public void setRequired(boolean required) {
+		this.required = required;
 	}
 
 	public String getColumnHeaderPattern() {
@@ -138,4 +148,53 @@ public class TableColumnInfoDTO implements IsSerializable {
 	public void setColumnHeaderPattern(String columnHeaderPattern) {
 		this.columnHeaderPattern = columnHeaderPattern;
 	}
+
+	public String getColumnStartCoordinate() {
+		return columnStartCoordinate;
+	}
+
+	public void setColumnStartCoordinate(String columnStartCoordinate) {
+		this.columnStartCoordinate = columnStartCoordinate;
+	}
+
+	public String getColumnEndCoordinate() {
+		return columnEndCoordinate;
+	}
+
+	public void setColumnEndCoordinate(String columnEndCoordinate) {
+		this.columnEndCoordinate = columnEndCoordinate;
+	}
+
+	public String getColumnCoordY0() {
+		return columnCoordY0;
+	}
+
+	public void setColumnCoordY0(String columnCoordY0) {
+		this.columnCoordY0 = columnCoordY0;
+	}
+
+	public String getColumnCoordY1() {
+		return columnCoordY1;
+	}
+
+	public void setColumnCoordY1(String columnCoordY1) {
+		this.columnCoordY1 = columnCoordY1;
+	}
+
+	public boolean isMandatory() {
+		return mandatory;
+	}
+
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
+	}
+
+	public boolean isNewTableColumnInfo() {
+		return newTableColumnInfo;
+	}
+
+	public void setNewTableColumnInfo(boolean newTableColumnInfo) {
+		this.newTableColumnInfo = newTableColumnInfo;
+	}
+
 }

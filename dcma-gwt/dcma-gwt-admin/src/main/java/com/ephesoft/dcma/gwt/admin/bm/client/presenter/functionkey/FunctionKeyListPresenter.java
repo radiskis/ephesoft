@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,45 +42,70 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyListView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the function key list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class FunctionKeyListPresenter extends AbstractBatchClassPresenter<FunctionKeyListView> implements DoubleClickListner {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FunctionKeyListView
+	 */
 	public FunctionKeyListPresenter(BatchClassManagementController controller, FunctionKeyListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// Processing to be done on load of this presenter.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 
 		String identifier = view.getFieldsListView().getSelectedRowIndex();
 		int rowCount = view.getFieldsListView().getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
-						.getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
+				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT), LocaleDictionary.get().getConstantValue(
 						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE), Boolean.TRUE);
 			} else {
-				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
-						.getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
+				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
 						BatchClassManagementConstants.EDIT_FUNCTION_KEY_TITLE), Boolean.TRUE);
 			}
 

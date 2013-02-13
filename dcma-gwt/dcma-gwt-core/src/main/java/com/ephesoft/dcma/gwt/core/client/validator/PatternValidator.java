@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,26 +41,26 @@ import com.google.gwt.user.client.ui.HasValue;
 
 public class PatternValidator implements Validator {
 
-	private HasValue<String> _value;
-	private List<String> patternStr;
+	private HasValue<String> value;
+	private final List<String> patternStr;
 
 	public static final String EMPTY = "";
 
 	public PatternValidator(HasValue<String> value, List<String> patternStr) {
-		_value = value;
+		this.value = value;
 		this.patternStr = patternStr;
 	}
 
 	public void setValue(HasValue<String> value) {
-		_value = value;
+		this.value = value;
 	}
 
 	@Override
 	public boolean validate() {
-		String inputStr = _value.getValue();
+		String inputStr = value.getValue();
 		boolean allPatternMatched = false;
 		if (null == patternStr || patternStr.size() == 0) {
-			return true;
+			allPatternMatched = true;
 		}
 		if (null == inputStr) {
 			inputStr = "";
@@ -73,10 +73,7 @@ public class PatternValidator implements Validator {
 
 	private boolean matchPattern(String inputStr, String patternString) {
 		boolean returnVal = false;
-		try {
-			returnVal = inputStr.matches(patternString);
-		} catch (Exception e) {
-		}
+		returnVal = inputStr.matches(patternString);
 		return returnVal;
 	}
 }

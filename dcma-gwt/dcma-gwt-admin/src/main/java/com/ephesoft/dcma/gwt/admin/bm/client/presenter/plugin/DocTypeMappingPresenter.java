@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,10 +43,12 @@ import java.util.Map;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.DocTypeMappingView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.FuzzyDBPluginView.Id;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDynamicPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
@@ -55,22 +57,40 @@ import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 
+/**
+ * The presenter for view that shows document type mappings.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocTypeMappingView> {
 
+	/**
+	 * pluginDataPresenter PluginDataPresenter.
+	 */
 	private final PluginDataPresenter pluginDataPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view DocTypeMappingView
+	 */
 	public DocTypeMappingPresenter(BatchClassManagementController controller, DocTypeMappingView view) {
 		super(controller, view);
 		this.pluginDataPresenter = new PluginDataPresenter(controller, view.getPluginDataView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null
@@ -82,23 +102,30 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 				if (!(pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE)
 						|| pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.FIELD_TYPE) || pluginConfigDTO.getName()
 						.equalsIgnoreCase(AdminConstants.ROW_TYPE))) {
-					if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_DRIVER)) {
-						view.setDriverName(pluginConfigDTO.getValue());
-					} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_URL)) {
-						view.setUrl(pluginConfigDTO.getValue());
-					} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_USERNAME)) {
-						view.setUserName(pluginConfigDTO.getValue());
-					} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_PASSWORD)) {
-						view.setPassword(pluginConfigDTO.getValue());
-					}
+					setViewProperties(pluginConfigDTO);
 				}
 			}
 		}
 	}
 
+	private void setViewProperties(BatchClassPluginConfigDTO pluginConfigDTO) {
+		if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_DRIVER)) {
+			view.setDriverName(pluginConfigDTO.getValue());
+		} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_URL)) {
+			view.setUrl(pluginConfigDTO.getValue());
+		} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_USERNAME)) {
+			view.setUserName(pluginConfigDTO.getValue());
+		} else if (pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DATABASE_PASSWORD)) {
+			view.setPassword(pluginConfigDTO.getValue());
+		}
+	}
+
+	/**
+	 * To set tables to Fuzzy DB View.
+	 */
 	public void setTablesToFuzzyDBView() {
 		controller.getRpcService().getAllTables(view.getDriverName(), view.getUrl(), view.getUserName(), view.getPassword(),
-				new AsyncCallback<Map<String, List<String>>>() {
+				new EphesoftAsyncCallback<Map<String, List<String>>>() {
 
 					@Override
 					public void onSuccess(Map<String, List<String>> tableNames) {
@@ -115,26 +142,61 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 					}
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.INVALID_DB_CONNECTION);
 
 					}
 				});
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * This is class for custom widget.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class CustomWidget extends Composite {
 
+		/**
+		 * panel HorizontalPanel.
+		 */
 		private final HorizontalPanel panel;
+
+		/**
+		 * associateAndVerify Button.
+		 */
 		private final Button associateAndVerify;
+
+		/**
+		 * tables ListBox.
+		 */
 		private final ListBox tables;
+
+		/**
+		 * documentTypeLabel Label.
+		 */
 		private final Label documentTypeLabel;
+
+		/**
+		 * editButton Button.
+		 */
 		private final Button editButton;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param documentType String
+		 */
 		public CustomWidget(final String documentType) {
 			super();
 			panel = new HorizontalPanel();
@@ -145,13 +207,13 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 			associateAndVerify.setText(AdminConstants.MAP_BUTTON);
 			tables = new ListBox();
 			tables.addItem(AdminConstants.EMPTY_STRING);
-			List<String> tableList = controller.getTables().get("TABLE");
-			List<String> viewList = controller.getTables().get("VIEW");
+			List<String> tableList = controller.getTables().get(BatchClassManagementConstants.TABLE);
+			List<String> viewList = controller.getTables().get(BatchClassManagementConstants.VIEW);
 			for (String tableName : tableList) {
-				tables.addItem(tableName, "TABLE");
+				tables.addItem(tableName, BatchClassManagementConstants.TABLE);
 			}
 			for (String viewName : viewList) {
-				tables.addItem(viewName, "VIEW");
+				tables.addItem(viewName, BatchClassManagementConstants.VIEW);
 			}
 			Collection<BatchClassDynamicPluginConfigDTO> batchClassPluginConfigDTOs = controller.getSelectedPlugin()
 					.getBatchClassDynamicPluginConfigs();
@@ -195,7 +257,8 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 					BatchClassDynamicPluginConfigDTO batchClassDynamicConfigDTO = new BatchClassDynamicPluginConfigDTO();
 					for (BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO : dynamicPluginConfigDTOs) {
 						if (batchClassDynamicPluginConfigDTO.getDescription() != null
-								&& batchClassDynamicPluginConfigDTO.getDescription().equals(documentType)) {
+								&& batchClassDynamicPluginConfigDTO.getDescription().equals(documentType)
+								&& batchClassDynamicPluginConfigDTO.getName().equals(AdminConstants.DOCUMENT_TYPE)) {
 							if (batchClassDynamicPluginConfigDTO.getChildren() != null
 									&& !batchClassDynamicPluginConfigDTO.getValue().equalsIgnoreCase(
 											tables.getItemText(tables.getSelectedIndex()))) {
@@ -211,7 +274,7 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 						}
 
 					}
-					// remove childs...
+					// remove childs.
 
 					if (childIds != null) {
 						controller.getBatchClass().setDirty(true);
@@ -260,7 +323,7 @@ public class DocTypeMappingPresenter extends AbstractBatchClassPresenter<DocType
 			panel.setCellWidth(associateAndVerify, "30%");
 			panel.add(editButton);
 			panel.setCellWidth(editButton, "10%");
-			panel.setSpacing(20);
+			panel.setSpacing(BatchClassManagementConstants.TWENTY);
 			initWidget(panel);
 		}
 

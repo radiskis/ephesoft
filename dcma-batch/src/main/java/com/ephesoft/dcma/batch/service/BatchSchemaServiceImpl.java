@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,8 +46,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +61,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchPluginConfiguration;
@@ -79,11 +86,13 @@ import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.TesseractVersionProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.FileType;
+import com.ephesoft.dcma.core.common.UserType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.domain.BatchClassCloudConfig;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
@@ -92,15 +101,21 @@ import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 import com.ephesoft.dcma.da.domain.KVPageProcess;
 import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchClassCloudConfigService;
 import com.ephesoft.dcma.da.service.BatchClassModuleService;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.BackUpFileService;
 import com.ephesoft.dcma.util.CustomFileFilter;
+import com.ephesoft.dcma.util.FileFormatException;
 import com.ephesoft.dcma.util.FileNameFormatter;
 import com.ephesoft.dcma.util.IUtilCommonConstants;
 import com.ephesoft.dcma.util.OCREngineUtil;
+import com.ephesoft.dcma.util.PDFUtil;
+import com.ephesoft.dcma.util.TIFFUtil;
 import com.ephesoft.dcma.util.XMLUtil;
+import com.itextpdf.text.DocumentException;
 
 /**
  * This is a service to read and write data required by Batch Schema. Api's are present to move, rearrange, delete, create, swap the
@@ -117,10 +132,10 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	/**
 	 * LOGGER to print the logging information.
 	 */
-	private Logger logger = LoggerFactory.getLogger(BatchSchemaServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchSchemaServiceImpl.class);
 
 	/**
-	 * Name of TESSERACT HOCR Plugin
+	 * Name of TESSERACT HOCR Plugin.
 	 */
 	private static final String TESSERACT_HOCR_PLUGIN = "TESSERACT_HOCR";
 
@@ -130,9 +145,9 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public static final String HOCR_FILE_NAME = "_HOCR.xml";
 
 	/**
-	 * Radix base.
+	 * The USER_TYPE {@link String} is a constant for user type property key.
 	 */
-	public static final int RADIX_BASE = 10;
+	private static final String USER_TYPE = "user_type";
 
 	/**
 	 * Reference of BatchSchemaDao.
@@ -146,8 +161,17 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	@Autowired
 	private HocrSchemaDao hocrSchemaDao;
 
+	/**
+	 * Reference of BatchClassService.
+	 */
 	@Autowired
 	private BatchClassService batchClassService;
+
+	/**
+	 * The batchClassCloudService {@link BatchClassCloudConfigService} is used for using batch class cloud service.
+	 */
+	@Autowired
+	private BatchClassCloudConfigService batchClassCloudService;
 
 	/**
 	 * Instance of BatchClassPluginPropertiesService.
@@ -163,14 +187,13 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	private BatchClassModuleService batchClassModuleService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of BatchInstanceService.
 	 */
 	@Autowired
-	@Qualifier("batchInstancePluginPropertiesService")
-	private PluginPropertiesService pluginPropertiesService;
+	private BatchInstanceService batchInstanceService;
 
 	/**
-	 * An api to return the complete local folder location path.
+	 * An API to return the complete local folder location path.
 	 * 
 	 * @return String localFolderLocation
 	 */
@@ -178,17 +201,17 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public boolean isZipSwitchOn() {
 		boolean isZipSwitchOn = true;
 		try {
-			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			final ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
 			isZipSwitchOn = Boolean.parseBoolean(prop.getProperty(ICommonConstants.ZIP_SWITCH));
-		} catch (IOException ioe) {
-			logger.error("Unable to read the zip switch value. Taking default value as false.Exception thrown is:" + ioe.getMessage(),
+		} catch (final IOException ioe) {
+			LOGGER.error("Unable to read the zip switch value. Taking default value as false.Exception thrown is:" + ioe.getMessage(),
 					ioe);
 		}
 		return isZipSwitchOn;
 	}
 
 	/**
-	 * An api to return the complete local folder location path.
+	 * An API to return the complete local folder location path.
 	 * 
 	 * @return String localFolderLocation
 	 */
@@ -197,79 +220,99 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		return batchSchemaDao.getJAXB2Template().getLocalFolderLocation();
 	}
 
+	/**
+	 * To set the local folder location.
+	 * 
+	 * @param localFolderLocation String
+	 */
 	@Override
-	public void setLocalFolderLocation(String localFolderLocation) {
+	public void setLocalFolderLocation(final String localFolderLocation) {
 		if (null != localFolderLocation && !localFolderLocation.isEmpty()) {
 			batchSchemaDao.getJAXB2Template().setLocalFolderLocation(localFolderLocation);
 			hocrSchemaDao.getJAXB2Template().setLocalFolderLocation(localFolderLocation);
 		}
 	}
 
+	/**
+	 * To get Base Sample FD Lock.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getBaseSampleFDLock() {
 		return batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc();
 	}
 
+	/**
+	 * To get Script Folder Name.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getScriptFolderName() {
 		return batchSchemaDao.getJAXB2Template().getScriptFolderName();
 	}
 
+	/**
+	 * To get Cmis Plugin Mapping Folder Name.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getCmisPluginMappingFolderName() {
 		return batchSchemaDao.getJAXB2Template().getCmisPluginMappingFolderName();
 	}
 
 	/**
-	 * An api to return the sample path for search classification.
+	 * An API to return the sample path for search classification.
 	 * 
 	 * @param batchClassIdentifier String
 	 * @param createDir boolean
 	 * @return String searchClassSamplePath
 	 */
 	@Override
-	public String getSearchClassSamplePath(String batchClassIdentifier, boolean createDir) {
+	public String getSearchClassSamplePath(final String batchClassIdentifier, final boolean createDir) {
 		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getSearchSampleName(), createDir);
 	}
 
 	/**
-	 * An api to return the index folder for search classification.
+	 * An API to return the index folder for search classification.
 	 * 
 	 * @param batchClassIdentifier String
 	 * @param createDir boolean
 	 * @return String searchClassSamplePath
 	 */
 	@Override
-	public String getSearchClassIndexFolder(String batchClassIdentifier, boolean createDir) {
+	public String getSearchClassIndexFolder(final String batchClassIdentifier, final boolean createDir) {
 		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getSearchIndexFolderName(), createDir);
 	}
 
 	/**
-	 * An api to return the base folder path for imagemagick.
+	 * An API to return the base folder path for imagemagick.
 	 * 
 	 * @param batchClassIdentifier String
 	 * @param createDir boolean
 	 * @return String searchClassSamplePath
 	 */
 	@Override
-	public String getImageMagickBaseFolderPath(String batchClassIdentifier, boolean createDir) {
+	public String getImageMagickBaseFolderPath(final String batchClassIdentifier, final boolean createDir) {
 		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getImageMagickBaseFolderName(), createDir);
 	}
 
 	/**
-	 * An api to return the Index folder for fuzzy db.
+	 * An API to return the Index folder for fuzzy db.
 	 * 
 	 * @param batchClassIdentifier String
 	 * @param createDir boolean
 	 * @return String searchClassSamplePath
 	 */
 	@Override
-	public String getFuzzyDBIndexFolder(String batchClassIdentifier, boolean createDir) {
+	public String getFuzzyDBIndexFolder(final String batchClassIdentifier, final boolean createDir) {
 		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getFuzzyDBIndexFolderName(), createDir);
 	}
 
 	/**
-	 * An api to return the complete export folder location path.
+	 * An API to return the complete export folder location path.
 	 * 
 	 * @return String exportFolderLocation.
 	 */
@@ -279,7 +322,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to return the base http url path.
+	 * An API to return the base http url path.
 	 * 
 	 * @return String base http url path.
 	 */
@@ -289,7 +332,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to get the absolute path of the directory. It will create the directory if it is not exits and createDir boolean is true
+	 * An API to get the absolute path of the directory. It will create the directory if it is not exits and createDir boolean is true
 	 * otherwise not.
 	 * 
 	 * @param batchClassIdentifier String
@@ -298,26 +341,26 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return absolute path of the directory.
 	 */
 	@Override
-	public String getAbsolutePath(String batchClassIdentifier, String directoryName, boolean createDir) {
+	public String getAbsolutePath(final String batchClassIdentifier, final String directoryName, final boolean createDir) {
 
 		String absolutePath = null;
 		if (null == batchClassIdentifier || null == directoryName || "".equals(batchClassIdentifier) || "".equals(directoryName)) {
-			logger.error("batchClassIdentifier/directoryName is null or empty.");
+			LOGGER.error("batchClassIdentifier/directoryName is null or empty.");
 		} else {
 			absolutePath = batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc() + File.separator + batchClassIdentifier
 					+ File.separator + directoryName;
 			if (createDir) {
 				try {
 					// Create multiple directories
-					boolean success = (new File(absolutePath)).mkdirs();
+					final boolean success = new File(absolutePath).mkdirs();
 					if (success) {
-						logger.info("Directories: " + absolutePath + " created.");
+						LOGGER.info(BatchConstants.DIRECTORIES + absolutePath + BatchConstants.CREATED);
 					} else {
-						logger.info("Directories: " + absolutePath + " not created.");
+						LOGGER.info(BatchConstants.DIRECTORIES + absolutePath + BatchConstants.NOT_CREATED);
 					}
-				} catch (Exception e) {
-					logger.error("Directories: " + absolutePath + " not created.");
-					logger.error(e.getMessage());
+				} catch (final Exception e) {
+					LOGGER.error(BatchConstants.DIRECTORIES + absolutePath + BatchConstants.NOT_CREATED);
+					LOGGER.error(e.getMessage());
 				}
 			}
 		}
@@ -326,175 +369,187 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to create the Batch object.
+	 * An API to create the Batch object.
 	 * 
 	 * @param batch Batch
 	 */
 	@Override
-	public void createBatch(Batch batch) {
+	public void createBatch(final Batch batch) {
 		if (null == batch) {
-			logger.info("batch class is null.");
+			LOGGER.info(BatchConstants.BATCH_CLASS_NULL);
 		} else {
-			this.batchSchemaDao.create(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn());
+			this.batchSchemaDao.create(batch, batch.getBatchInstanceIdentifier(), null, ICommonConstants.UNDERSCORE_BATCH_XML, false,
+					batch.getBatchLocalPath());
 		}
 	}
 
 	/**
-	 * An api to create the hocrPages object.
+	 * An API to create the hocrPages object.
 	 * 
 	 * @param batch {@link Batch}
 	 * @param batchInstanceIdentifier {@link String}
 	 * @param pageId {@link String}
 	 */
 	@Override
-	public void createHocr(HocrPages hocrPages, String batchInstanceIdentifier, String pageId) {
+	public void createHocr(final HocrPages hocrPages, final String batchInstanceIdentifier, final String pageId) {
 		if (null == hocrPages) {
-			logger.info("hocrPages is null.");
+			LOGGER.info(BatchConstants.HOCR_PAGES_NULL);
 		} else {
-			this.hocrSchemaDao.create(hocrPages, batchInstanceIdentifier, pageId, HOCR_FILE_NAME, isZipSwitchOn(), true);
+			this.hocrSchemaDao.create(hocrPages, batchInstanceIdentifier, pageId, HOCR_FILE_NAME, true, batchInstanceService
+					.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 		}
 	}
 
 	/**
-	 * An api to get the HocrPages object for an input of HOCR.XML.
+	 * An API to get the HocrPages object for an input of HOCR.XML.
 	 * 
 	 * @param batchInstanceIdentifier Serializable
 	 * @param pageId {@link String}
 	 * @return {@link HocrPages}
 	 */
 	@Override
-	public HocrPages getHocrPages(Serializable batchInstanceIdentifier, String pageId) {
+	public HocrPages getHocrPages(final Serializable batchInstanceIdentifier, final String pageId) {
 		HocrPages hocrPages = null;
 		if (null == batchInstanceIdentifier) {
-			logger.info("batchInstanceIdentifier is null.");
+			LOGGER.info(BatchConstants.BATCH_INSTANCE_ID_NULL);
 		} else {
-			hocrPages = this.hocrSchemaDao.get(batchInstanceIdentifier, pageId, HOCR_FILE_NAME, isZipSwitchOn());
+			hocrPages = this.hocrSchemaDao.get(batchInstanceIdentifier, pageId, HOCR_FILE_NAME, batchInstanceService
+					.getSystemFolderForBatchInstanceId(batchInstanceIdentifier.toString()));
 		}
 		return hocrPages;
 	}
 
-	public void update(HocrPages hocrPages, Serializable batchInstanceIdentifier, String pageId) {
+	/**
+	 * API to update the batch object.
+	 * 
+	 * @param hocrPages {@link HocrPages}
+	 * @param batchInstanceIdentifier Serializable
+	 * @param pageId {@link String}
+	 */
+	public void update(final HocrPages hocrPages, final Serializable batchInstanceIdentifier, final String pageId) {
 		if (null == batchInstanceIdentifier) {
-			logger.info("batchInstanceIdentifier is null.");
+			LOGGER.info(BatchConstants.BATCH_INSTANCE_ID_NULL);
 		} else {
-			this.hocrSchemaDao.update(hocrPages, batchInstanceIdentifier, HOCR_FILE_NAME, pageId, isZipSwitchOn(), false);
+			this.hocrSchemaDao.update(hocrPages, batchInstanceIdentifier, HOCR_FILE_NAME, pageId, false, batchInstanceService
+					.getSystemFolderForBatchInstanceId(batchInstanceIdentifier.toString()));
 		}
 	}
 
 	/**
-	 * An api to get the Batch object for an input of batchInstanceIdentifier.
+	 * An API to get the Batch object for an input of batchInstanceIdentifier.
 	 * 
 	 * @param batchInstanceIdentifier Serializable
-	 * @return
+	 * @return Batch
 	 */
 	@Override
-	public Batch getBatch(Serializable batchInstanceIdentifier) {
+	public Batch getBatch(final Serializable batchInstanceIdentifier) {
 		Batch batch = null;
 		if (null == batchInstanceIdentifier) {
-			logger.info("batchInstanceIdentifier is null.");
+			LOGGER.info(BatchConstants.BATCH_INSTANCE_ID_NULL);
 		} else {
-			batch = this.batchSchemaDao.get(batchInstanceIdentifier, isZipSwitchOn());
+			batch = this.batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+					.getSystemFolderForBatchInstanceId(batchInstanceIdentifier.toString()));
 		}
 		return batch;
 	}
 
 	/**
-	 * An api to update the Batch object.
+	 * An API to update the Batch object.
 	 * 
 	 * @param batch Batch
 	 */
 	@Override
-	public void updateBatch(Batch batch) {
+	public void updateBatch(final Batch batch) {
 		if (null == batch) {
-			logger.info("batch class is null.");
+			LOGGER.info(BatchConstants.BATCH_CLASS_NULL);
 		} else {
-			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn());
+			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), false, batch.getBatchLocalPath());
 		}
 	}
 
 	/**
-	 * An api to update the Batch object.
+	 * An API to update the Batch object.
 	 * 
 	 * @param batch Batch
 	 * @param isFirstTimeUpdate
 	 * 
 	 */
 	@Override
-	public void updateBatch(Batch batch, boolean isFirstTimeUpdate) {
+	public void updateBatch(final Batch batch, final boolean isFirstTimeUpdate) {
 		if (null == batch) {
-			logger.info("batch class is null.");
+			LOGGER.info(BatchConstants.BATCH_CLASS_NULL);
 		} else {
-			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), isZipSwitchOn(), isFirstTimeUpdate);
+			this.batchSchemaDao.update(batch, batch.getBatchInstanceIdentifier(), isFirstTimeUpdate, batch.getBatchLocalPath());
 		}
 	}
 
 	/**
-	 * An api to store all files to base folder location.
+	 * An API to store all files to base folder location.
 	 * 
-	 * @param id Serializable
+	 * @param identifier Serializable
 	 * @param files File[]
 	 */
-	public void storeFiles(Serializable id, File[] files) {
+	public void storeFiles(final Serializable identifier, final File[] files) {
 
 		String errMsg = null;
 
-		if (null == id || null == files) {
+		if (null == identifier || null == files) {
 			errMsg = "Input parameters id/files are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg);
 		}
 
 		boolean preserveFileDate = false;
 		String newPath = null;
-		String localFolderLocation = batchSchemaDao.getJAXB2Template().getLocalFolderLocation();
+		final String localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(identifier.toString());
 
-		for (File srcFile : files) {
+		for (final File srcFile : files) {
 
-			String path = srcFile.getPath();
+			final String path = srcFile.getPath();
 
-			newPath = localFolderLocation + File.separator + id + BatchConstants.UNDER_SCORE + path;
+			newPath = localFolderLocation + File.separator + identifier + BatchConstants.UNDER_SCORE + path;
 			// The target file name to which the source file will be copied.
-			File destFile = new File(newPath);
+			final File destFile = new File(newPath);
 
 			try {
 				FileUtils.copyFile(srcFile, destFile, preserveFileDate);
-				errMsg = "Successfully copy of the file for the batch Instance Id : " + id;
-				logger.info(errMsg);
-			} catch (IOException e) {
-				errMsg = "Unable to copy the file for the batch Instance Id : " + id;
-				logger.error(errMsg);
-				logger.error(e.getMessage());
+				errMsg = "Successfully copy of the file for the batch Instance Id : " + identifier;
+				LOGGER.info(errMsg);
+			} catch (final IOException e) {
+				errMsg = "Unable to copy the file for the batch Instance Id : " + identifier;
+				LOGGER.error(errMsg);
+				LOGGER.error(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * An api to create backup of all files to input folder location.
+	 * An API to create backup of all files to input folder location.
 	 * 
-	 * @param id Serializable
+	 * @param identifier Serializable
 	 * @param files File[]
 	 */
-	public void backUpFiles(Serializable id, File[] files) {
+	public void backUpFiles(final Serializable identifier, final File[] files) {
 
 		String errMsg = null;
 
-		if (null == id || null == files) {
+		if (null == identifier || null == files) {
 			errMsg = "Input parameters id/files are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg);
 		}
 
 		boolean preserveFileDate = false;
 		String newAbsPath = null;
 
-		for (File srcFile : files) {
+		for (final File srcFile : files) {
 
-			String absPath = srcFile.getAbsolutePath();
-			String path = srcFile.getPath();
+			final String absPath = srcFile.getAbsolutePath();
+			final String path = srcFile.getPath();
 
-			String[] arr = absPath.split(path);
-			if (null != arr && arr.length >= 0) {
-				newAbsPath = arr[0] + BatchConstants.UNDER_SCORE + id + "_backUp_" + path;
+			final String[] arr = absPath.split(path);
+			if (null != arr && arr.length >= BatchConstants.ZERO) {
+				newAbsPath = arr[BatchConstants.ZERO] + BatchConstants.UNDER_SCORE + identifier + "_backUp_" + path;
 			}
 
 			if (null == newAbsPath) {
@@ -502,46 +557,47 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			}
 
 			// The target file name to which the source file will be copied.
-			File destFile = new File(newAbsPath);
+			final File destFile = new File(newAbsPath);
 
 			try {
 				FileUtils.copyFile(srcFile, destFile, preserveFileDate);
-				errMsg = "Successfully copy of the file for the batch Instance Id : " + id;
-				logger.info(errMsg);
-			} catch (IOException e) {
-				errMsg = "Unable to copy the file for the batch Instance Id : " + id;
-				logger.error(errMsg);
-				logger.error(e.getMessage());
+				errMsg = "Successfully copy of the file for the batch Instance Id : " + identifier;
+				LOGGER.info(errMsg);
+			} catch (final IOException e) {
+				errMsg = "Unable to copy the file for the batch Instance Id : " + identifier;
+				LOGGER.error(errMsg);
+				LOGGER.error(e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * An api to get the URL object for the specified file name.
+	 * An API to get the URL object for the specified file name.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param fileName String
 	 * @return URL object.
 	 */
 	@Override
-	public URL getURL(String batchInstanceIdentifier, String fileName) {
+	public URL getURL(final String batchInstanceIdentifier, final String fileName) {
 
 		String errMsg = null;
 
 		if (null == fileName || "".equals(fileName)) {
 			errMsg = "File name is null or empty.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg);
 		}
 
 		URL url = null;
-		String pathName = getBatchFolderURL() + "/" + batchInstanceIdentifier + "/" + fileName;
+		final String pathName = getBatchFolderURL(batchInstanceIdentifier) + BatchConstants.SLASH + batchInstanceIdentifier
+				+ BatchConstants.SLASH + fileName;
 
 		try {
 			url = new URL(pathName);
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			errMsg = "File name does not exists at the specified path location.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg, e);
 		}
 
@@ -549,78 +605,75 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to get the File object for the specified file name.
+	 * An API to get the File object for the specified file name.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param fileName String
 	 * @return File object.
 	 */
 	@Override
-	public File getFile(String batchInstanceIdentifier, String fileName) {
+	public File getFile(final String batchInstanceIdentifier, final String fileName) {
 
 		String errMsg = null;
 
 		if (null == fileName || "".equals(fileName)) {
 			errMsg = "File name is null or empty.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg);
 		}
 
 		File file = null;
-		String pathName = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator + fileName;
+		final String pathName = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier) + File.separator
+				+ batchInstanceIdentifier + File.separator + fileName;
 		file = new File(pathName);
 		FileInputStream fileInputStream = null;
 		try {
 			fileInputStream = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			errMsg = "File name does not exists at the specified path location. file : " + file.getName() + " , filepath : "
 					+ file.getAbsolutePath();
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg + e.getMessage(), e);
 		} finally {
 			if (fileInputStream != null) {
 				try {
 					fileInputStream.close();
-				} catch (IOException e) {
-					logger.error("could not cloose the fileInputStream . file + " + file.getAbsolutePath() + e.getMessage(), e);
+				} catch (final IOException e) {
+					LOGGER.error("could not cloose the fileInputStream . file + " + file.getAbsolutePath() + e.getMessage(), e);
 				}
 			}
 		}
-
-		/*
-		 * if (!file.exists()) { errMsg = "File name does not exists at the specified path location."; logger.error(errMsg); throw new
-		 * DCMABusinessException(errMsg); }
-		 */
 
 		return file;
 	}
 
 	/**
-	 * An api to get the input stream object for the specified file name.
+	 * An API to get the input stream object for the specified file name.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param fileName String
 	 * @return InputStream object.
 	 */
 	@Override
-	public InputStream getInputStream(String batchInstanceIdentifier, String fileName) {
+	public InputStream getInputStream(final String batchInstanceIdentifier, final String fileName) {
 
 		String errMsg = null;
 
 		InputStream inputStream = null;
-		String pathName = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator + fileName;
+		final String pathName = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier) + File.separator
+				+ batchInstanceIdentifier + File.separator + fileName;
 
 		// Open the file that is the first
 		// command line parameter
 		try {
 			inputStream = new FileInputStream(pathName);
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			errMsg = e.getMessage();
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg, e);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			errMsg = e.getMessage();
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMABusinessException(errMsg, e);
 		}
 
@@ -628,9 +681,9 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to move the page of one document to to another document. Position of the page in new document will depend on the to page
+	 * An API to move the page of one document to to another document. Position of the page in new document will depend on the to page
 	 * ID. If the isAfterToPageID boolean is true then from page ID is added after the to page ID other wise before the to page ID.
-	 * After the movement api will delete the from page ID from the from doc ID.
+	 * After the movement API will delete the from page ID from the from doc ID.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param fromDocID String
@@ -642,51 +695,48 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 *             fromDocID.
 	 */
 	@Override
-	public void movePageOfDocument(String batchInstanceIdentifier, String fromDocID, String fromPageID, String toDocID,
-			String toPageID, boolean isAfterToPageID) throws DCMAApplicationException {
+	public void movePageOfDocument(final String batchInstanceIdentifier, final String fromDocID, final String fromPageID,
+			final String toDocID, final String toPageID, final boolean isAfterToPageID) throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == fromDocID || null == fromPageID || null == toDocID || null == toPageID) {
 			errMsg = "Input parameters batchInstanceIdentifier/fromDocID/fromPageID/toDocID/toPageID are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int fromDocIndex = getDocumentTypeIndex(docTypesList, fromDocID);
+		final int fromDocIndex = getDocumentTypeIndex(docTypesList, fromDocID);
 
-		int fromPageIndex = getPageTypeIndex(docTypesList, fromDocIndex, fromPageID);
+		final int fromPageIndex = getPageTypeIndex(docTypesList, fromDocIndex, fromPageID);
 
-		Document fromDocType = docTypesList.get(fromDocIndex);
-		Pages fromPages = fromDocType.getPages();
-		List<Page> fromPageTypeList = fromPages.getPage();
-		Page fromPgType = fromPageTypeList.get(fromPageIndex);
+		final Document fromDocType = docTypesList.get(fromDocIndex);
+		final Pages fromPages = fromDocType.getPages();
+		final List<Page> fromPageTypeList = fromPages.getPage();
+		final Page fromPgType = fromPageTypeList.get(fromPageIndex);
 
-		int toDocIndex = getDocumentTypeIndex(docTypesList, toDocID);
-		int toPageIndex = getPageTypeIndex(docTypesList, toDocIndex, toPageID);
-		int newPageIndex = -1;
+		final int toDocIndex = getDocumentTypeIndex(docTypesList, toDocID);
+		final int toPageIndex = getPageTypeIndex(docTypesList, toDocIndex, toPageID);
+		int newPageIndex = -BatchConstants.ONE;
 		if (isAfterToPageID) {
-			newPageIndex = toPageIndex + 1;
+			newPageIndex = toPageIndex + BatchConstants.ONE;
 		} else {
 			newPageIndex = toPageIndex;
 		}
-		Document toDocType = docTypesList.get(toDocIndex);
-		Pages toPages = toDocType.getPages();
-		List<Page> toPageTypeList = toPages.getPage();
+		final Document toDocType = docTypesList.get(toDocIndex);
+		final Pages toPages = toDocType.getPages();
+		final List<Page> toPageTypeList = toPages.getPage();
 
-		if (newPageIndex < 0) {
+		if (newPageIndex < BatchConstants.ZERO) {
 			errMsg = "newPageIndex is not valid for toDocID : " + toDocID + " and toPageID" + toPageID;
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
@@ -706,12 +756,12 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			docTypesList.remove(fromDocIndex);
 		}
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
 
 	}
 
 	/**
-	 * An api to remove the page of document. This will remove all the information available to page. This will delete all the files
+	 * An API to remove the page of document. This will remove all the information available to page. This will delete all the files
 	 * present at page level fields. If a document have single page and we are deleting that page means delete the whole document.
 	 * 
 	 * @param batchInstanceIdentifier String
@@ -720,30 +770,27 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @throws DCMAApplicationException If not able to find docID, removePageID. If not able to find removePageID within docID.
 	 */
 	@Override
-	public void removePageOfDocument(String batchInstanceIdentifier, String docID, String removePageID)
+	public void removePageOfDocument(final String batchInstanceIdentifier, final String docID, final String removePageID)
 			throws DCMAApplicationException {
-
+		LOGGER.info("inside removePageOfDocument method.");
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == docID || null == removePageID) {
 			errMsg = "Input parameters batchInstanceIdentifier/docID/removePageID are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		DocPageCarrier docPageCarrier = getDocPageCarrier(batch, docID, removePageID);
+		final DocPageCarrier docPageCarrier = getDocPageCarrier(batch, docID, removePageID);
 
-		int pageIndex = docPageCarrier.getPageIndex();
-		int docIndex = docPageCarrier.getDocIndex();
-		List<Document> docTypesList = docPageCarrier.getDocTypesList();
+		final int pageIndex = docPageCarrier.getPageIndex();
+		final int docIndex = docPageCarrier.getDocIndex();
+		final List<Document> docTypesList = docPageCarrier.getDocTypesList();
 
-		List<Page> pageTypeList = docTypesList.get(docIndex).getPages().getPage();
-
-		Page removePageType = pageTypeList.get(pageIndex);
-
-		deletePageFiles(removePageType, batchInstanceIdentifier);
+		final List<Page> pageTypeList = docTypesList.get(docIndex).getPages().getPage();
 
 		// Remove the page from the document.
 		pageTypeList.remove(pageIndex);
@@ -754,57 +801,63 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		if (pageTypeList.isEmpty()) {
 			docTypesList.remove(docIndex);
 		}
-
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
-
+		LOGGER.info("updating batch xml.");
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		LOGGER.info("Exiting method removePageOfDocument.");
 	}
 
 	/**
-	 * An api to create duplicate page of document. This will create duplicate for all the information available to page. This will
+	 * An API to create duplicate page of document. This will create duplicate for all the information available to page. This will
 	 * create duplicate for all the files present at page level fields.
 	 * 
-	 * @param batchInstanceIdentifier String
+	 * @param batchInstanceId String
 	 * @param docID String
 	 * @param duplicatePageID String
 	 * @throws DCMAApplicationException If not able to find docID, duplicatePageID. If not able to find removePageID within
 	 *             duplicatePageID.
 	 */
 	@Override
-	public void duplicatePageOfDocument(String batchInstanceIdentifier, String docID, String duplicatePageID)
+	public void duplicatePageOfDocument(final String batchInstanceId, final String docID, final String duplicatePageID)
 			throws DCMAApplicationException {
 
 		String errMsg = null;
 
-		if (null == batchInstanceIdentifier || null == docID || null == duplicatePageID) {
+		if (null == batchInstanceId || null == docID || null == duplicatePageID) {
 			errMsg = "Input parameters batchInstanceIdentifier/docID/duplicatePageID are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceId, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceId));
 
-		DocPageCarrier docPageCarrier = getDocPageCarrier(batch, docID, duplicatePageID);
+		final DocPageCarrier docPageCarrier = getDocPageCarrier(batch, docID, duplicatePageID);
 
-		int pageIndex = docPageCarrier.getPageIndex();
-		logger.info("pageIndex : " + pageIndex);
-		int docIndex = docPageCarrier.getDocIndex();
-		List<Document> docTypesList = docPageCarrier.getDocTypesList();
+		final String localFolLoc = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceId);
+		final String batchInstanceFolderPath = localFolLoc + File.separator + batchInstanceId;
 
-		Page duplicatePageType = docTypesList.get(docIndex).getPages().getPage().get(pageIndex);
+		final int pageIndex = docPageCarrier.getPageIndex();
+		LOGGER.info("pageIndex : " + pageIndex);
+		final int docIndex = docPageCarrier.getDocIndex();
+		final List<Document> docTypesList = docPageCarrier.getDocTypesList();
 
-		String newPageTypeID = getNewPageTypeID(docTypesList);
+		checkDocTypeList(docTypesList);
 
-		Page duplicateCopyPageType = duplicatePageFiles(duplicatePageType, batchInstanceIdentifier, newPageTypeID);
+		final Page duplicatePageType = docTypesList.get(docIndex).getPages().getPage().get(pageIndex);
+
+		final String newPageTypeID = getNewPageTypeID(batchInstanceFolderPath);
+
+		final Page duplicateCopyPage = duplicatePageFiles(duplicatePageType, batchInstanceId, newPageTypeID, batchInstanceFolderPath);
 
 		// Add the duplicate page type to the end of the document.
-		docTypesList.get(docIndex).getPages().getPage().add(duplicateCopyPageType);
+		docTypesList.get(docIndex).getPages().getPage().add(duplicateCopyPage);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceId);
 
 	}
 
 	/**
-	 * An api to re order pages of document. This will re order the pages for the input document id.
+	 * An API to re order pages of document. This will re order the pages for the input document id.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param docID String
@@ -813,46 +866,47 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 *             duplicatePageID.
 	 */
 	@Override
-	public void reOrderPagesOfDocument(String batchInstanceIdentifier, String docID, List<String> reOrderOfPageIDs)
+	public void reOrderPagesOfDocument(final String batchInstanceIdentifier, final String docID, final List<String> reOrderOfPageIDs)
 			throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == docID || null == reOrderOfPageIDs) {
 			errMsg = "Input parameters batchInstanceIdentifier/docID/reOrderOfPageIDs are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = validateParams(batch, docID, reOrderOfPageIDs);
+		final List<Document> docTypesList = validateParams(batch);
 
-		int docIndex = getDocumentTypeIndex(docTypesList, docID);
-		logger.info("Document type index : " + docIndex);
+		final int docIndex = getDocumentTypeIndex(docTypesList, docID);
+		LOGGER.info("Document type index : " + docIndex);
 
-		Document docType = docTypesList.get(docIndex);
-		Pages pages = docType.getPages();
+		final Document docType = docTypesList.get(docIndex);
+		final Pages pages = docType.getPages();
 		if (null == pages) {
 			errMsg = "There are zero pages for document ID : " + docID;
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		List<Page> pageTypeList = pages.getPage();
+		final List<Page> pageTypeList = pages.getPage();
 
 		if (reOrderOfPageIDs.size() != pageTypeList.size()) {
 			errMsg = "ReOrderOfPageID's list are not valid for document ID : " + docID;
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Pages reOrdPages = new Pages();
-		List<Page> reOrderPageTypeList = reOrdPages.getPage();
+		final Pages reOrdPages = new Pages();
+		final List<Page> reOrderPageTypeList = reOrdPages.getPage();
 
-		for (String reOrderPgID : reOrderOfPageIDs) {
-			for (Page pgLt : pageTypeList) {
-				String pgID = pgLt.getIdentifier();
+		for (final String reOrderPgID : reOrderOfPageIDs) {
+			for (final Page pgLt : pageTypeList) {
+				final String pgID = pgLt.getIdentifier();
 				if (null != pgID && null != reOrderPgID && pgID.equals(reOrderPgID)) {
 					reOrderPageTypeList.add(pgLt);
 					break;
@@ -862,11 +916,11 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		docType.setPages(reOrdPages);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
 	}
 
 	/**
-	 * An api to swap pages of document. This will swap the pages for the input document id.
+	 * An API to swap pages of document. This will swap the pages for the input document id.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param docID String
@@ -876,47 +930,44 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 *             swapPageIDOne and swapPageIDTwo within docID.
 	 */
 	@Override
-	public void swapPageOfDocument(String batchInstanceIdentifier, String docID, String swapPageIDOne, String swapPageIDTwo)
-			throws DCMAApplicationException {
+	public void swapPageOfDocument(final String batchInstanceIdentifier, final String docID, final String swapPageIDOne,
+			final String swapPageIDTwo) throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == docID || null == swapPageIDOne || null == swapPageIDTwo) {
 			errMsg = "Input parameters batchInstanceIdentifier/docID/pageID are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int docIndex = getDocumentTypeIndex(docTypesList, docID);
+		final int docIndex = getDocumentTypeIndex(docTypesList, docID);
 
-		int swapPageIndexOne = getPageTypeIndex(docTypesList, docIndex, swapPageIDOne);
+		final int swapPageIndexOne = getPageTypeIndex(docTypesList, docIndex, swapPageIDOne);
 
-		int swapPageIndexTwo = getPageTypeIndex(docTypesList, docIndex, swapPageIDTwo);
+		final int swapPageIndexTwo = getPageTypeIndex(docTypesList, docIndex, swapPageIDTwo);
 
-		Document docType = docTypesList.get(docIndex);
-		Pages pages = docType.getPages();
-		List<Page> pageTypeList = pages.getPage();
-		Page swapPageTypeOne = pageTypeList.get(swapPageIndexOne);
-		Page swapPageTypeTwo = pageTypeList.get(swapPageIndexTwo);
+		final Document docType = docTypesList.get(docIndex);
+		final Pages pages = docType.getPages();
+		final List<Page> pageTypeList = pages.getPage();
+		final Page swapPageTypeOne = pageTypeList.get(swapPageIndexOne);
+		final Page swapPageTypeTwo = pageTypeList.get(swapPageIndexTwo);
 
 		pageTypeList.set(swapPageIndexOne, swapPageTypeTwo);
 		pageTypeList.set(swapPageIndexTwo, swapPageTypeOne);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
 	}
 
 	/**
-	 * An api to swap one page of one document to second page of other document.
+	 * An API to swap one page of one document to second page of other document.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param swapDocIDOne String
@@ -927,54 +978,51 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 *             find all swapPageIDOne and swapPageIDTwo within swapDocIDOne and swapDocIDTwo respectively.
 	 */
 	@Override
-	public void swapPageOfDocuments(String batchInstanceIdentifier, String swapDocIDOne, String swapPageIDOne, String swapDocIDTwo,
-			String swapPageIDTwo) throws DCMAApplicationException {
+	public void swapPageOfDocuments(final String batchInstanceIdentifier, final String swapDocIDOne, final String swapPageIDOne,
+			final String swapDocIDTwo, final String swapPageIDTwo) throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == swapDocIDOne || null == swapPageIDOne || null == swapDocIDTwo
 				|| null == swapPageIDTwo) {
 			errMsg = "Input parameters batchInstanceIdentifier/swapDocIDOne/swapPageIDOne/" + "swapDocIDTwo/swapPageIDTwo are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int swapDocIndexOne = getDocumentTypeIndex(docTypesList, swapDocIDOne);
+		final int swapDocIndexOne = getDocumentTypeIndex(docTypesList, swapDocIDOne);
 
-		int swapPageIndexOne = getPageTypeIndex(docTypesList, swapDocIndexOne, swapPageIDOne);
+		final int swapPageIndexOne = getPageTypeIndex(docTypesList, swapDocIndexOne, swapPageIDOne);
 
-		int swapDocIndexTwo = getDocumentTypeIndex(docTypesList, swapDocIDTwo);
+		final int swapDocIndexTwo = getDocumentTypeIndex(docTypesList, swapDocIDTwo);
 
-		int swapPageIndexTwo = getPageTypeIndex(docTypesList, swapDocIndexTwo, swapPageIDTwo);
+		final int swapPageIndexTwo = getPageTypeIndex(docTypesList, swapDocIndexTwo, swapPageIDTwo);
 
-		Document docTypeOne = docTypesList.get(swapDocIndexOne);
-		Pages pagesOne = docTypeOne.getPages();
-		List<Page> pageTypeListOne = pagesOne.getPage();
-		Page swapPageTypeOne = pageTypeListOne.get(swapPageIndexOne);
+		final Document docTypeOne = docTypesList.get(swapDocIndexOne);
+		final Pages pagesOne = docTypeOne.getPages();
+		final List<Page> pageTypeListOne = pagesOne.getPage();
+		final Page swapPageTypeOne = pageTypeListOne.get(swapPageIndexOne);
 
-		Document docTypeTwo = docTypesList.get(swapDocIndexTwo);
-		Pages pagesTwo = docTypeTwo.getPages();
-		List<Page> pageTypeListTwo = pagesTwo.getPage();
-		Page swapPageTypeTwo = pageTypeListTwo.get(swapPageIndexTwo);
+		final Document docTypeTwo = docTypesList.get(swapDocIndexTwo);
+		final Pages pagesTwo = docTypeTwo.getPages();
+		final List<Page> pageTypeListTwo = pagesTwo.getPage();
+		final Page swapPageTypeTwo = pageTypeListTwo.get(swapPageIndexTwo);
 
 		pageTypeListOne.set(swapPageIndexOne, swapPageTypeTwo);
 		pageTypeListTwo.set(swapPageIndexTwo, swapPageTypeOne);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
 	}
 
 	/**
-	 * An api to merge two different documents to a single document. This will merge all the pages of second document to first
+	 * An API to merge two different documents to a single document. This will merge all the pages of second document to first
 	 * document.
 	 * 
 	 * @param batchInstanceIdentifier String
@@ -983,47 +1031,46 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @throws DCMAApplicationException If any of the input parameter is null.
 	 */
 	@Override
-	public Batch mergeDocuments(String batchInstanceIdentifier, String docIDOne, String mergeDocID) throws DCMAApplicationException {
+	public Batch mergeDocuments(final String batchInstanceIdentifier, final String docIDOne, final String mergeDocID)
+			throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == docIDOne || null == mergeDocID) {
 			errMsg = "Input parameters batchInstanceIdentifier/docIDOne/mergeDocID" + " are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int mergeDocIndexOne = getDocumentTypeIndex(docTypesList, docIDOne);
+		final int mergeDocIndexOne = getDocumentTypeIndex(docTypesList, docIDOne);
 
-		int mergeDocIndexTwo = getDocumentTypeIndex(docTypesList, mergeDocID);
+		final int mergeDocIndexTwo = getDocumentTypeIndex(docTypesList, mergeDocID);
 
-		Document mergeDocTypeOne = docTypesList.get(mergeDocIndexOne);
-		Pages mergePagesOne = mergeDocTypeOne.getPages();
-		List<Page> mergePageTypeListOne = mergePagesOne.getPage();
+		final Document mergeDocTypeOne = docTypesList.get(mergeDocIndexOne);
+		final Pages mergePagesOne = mergeDocTypeOne.getPages();
+		final List<Page> mergePageTypeListOne = mergePagesOne.getPage();
 
-		Document mergeDocTypeTwo = docTypesList.get(mergeDocIndexTwo);
-		Pages mergePagesTwo = mergeDocTypeTwo.getPages();
-		List<Page> pageTypeListTwo = mergePagesTwo.getPage();
+		final Document mergeDocTypeTwo = docTypesList.get(mergeDocIndexTwo);
+		final Pages mergePagesTwo = mergeDocTypeTwo.getPages();
+		final List<Page> pageTypeListTwo = mergePagesTwo.getPage();
 
 		mergePageTypeListOne.addAll(pageTypeListTwo);
 		docTypesList.remove(mergeDocTypeTwo);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
-		return batchSchemaDao.get(batchInstanceIdentifier);
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
+		return batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
 	/**
-	 * An api to split the document for given input page id. This will create a new document starting from input page id to the last
+	 * An API to split the document for given input page id. This will create a new document starting from input page id to the last
 	 * page id.
 	 * 
 	 * @param batchInstanceIdentifier String
@@ -1032,53 +1079,30 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @throws DCMAApplicationException If any one of the parameter is null or pageID is not present in docID.
 	 */
 	@Override
-	public void splitDocument(String batchInstanceIdentifier, String docID, String pageID) throws DCMAApplicationException {
+	public void splitDocument(final String batchInstanceIdentifier, final String docID, final String pageID)
+			throws DCMAApplicationException {
+		validatingArgumentsInfo(batchInstanceIdentifier, docID, pageID);
 
-		String errMsg = null;
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == batchInstanceIdentifier || null == docID || null == pageID) {
-			errMsg = "Input parameters batchInstanceIdentifier/docID/pageID are null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
-
-		List<Document> docTypesList = batch.getDocuments().getDocument();
-
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
-
-		int docIndex = getDocumentTypeIndex(docTypesList, docID);
-
-		int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageID);
-
-		Document docType = docTypesList.get(docIndex);
-		Pages pages = docType.getPages();
-		List<Page> pageTypeList = pages.getPage();
+		final int docIndex = getDocumentTypeIndex(docTypesList, docID);
+		final int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageID);
+		final Document docType = docTypesList.get(docIndex);
+		final Pages pages = docType.getPages();
+		final List<Page> pageTypeList = pages.getPage();
 
 		// create new document.
-		String newDocID = getNewDocumentTypeID(docTypesList);
+		final String newDocID = getNewDocumentTypeID(docTypesList);
+		final Document newDocType = createNewDocument(docType, newDocID);
 
-		Document newDocType = new Document();
-		newDocType.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + newDocID);
-		newDocType.setType(docType.getType());
-		newDocType.setConfidence(docType.getConfidence());
-		newDocType.setMultiPagePdfFile(docType.getMultiPagePdfFile());
-		newDocType.setMultiPageTiffFile(docType.getMultiPageTiffFile());
-		newDocType.setValid(docType.isValid());
-		newDocType.setReviewed(docType.isReviewed());
-		newDocType.setErrorMessage("");
-
-		Pages newPages = new Pages();
-		List<Page> listOfNewPages = newPages.getPage();
-		List<String> listOfNewPageIdentifiers = new ArrayList<String>();
+		final Pages newPages = new Pages();
+		final List<Page> listOfNewPages = newPages.getPage();
+		final List<String> listOfNewPageIdentifiers = new ArrayList<String>();
 		// create the new document for split pages.
-		for (int index = pageIndex; index < pageTypeList.size(); index++) {
-			Page pgType = pageTypeList.get(index);
+		for (Page pgType : pageTypeList) {
 			listOfNewPages.add(pgType);
 			listOfNewPageIdentifiers.add(pgType.getIdentifier());
 		}
@@ -1090,86 +1114,122 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			pageTypeList.remove(index);
 		}
 
-		DocumentLevelFields documentLevelFields = docType.getDocumentLevelFields();
+		final DocumentLevelFields documentLevelFields = docType.getDocumentLevelFields();
 		if (documentLevelFields != null) {
-			List<DocField> docFields = documentLevelFields.getDocumentLevelField();
-			DocumentLevelFields documentLevelFieldsForNewDoc = new DocumentLevelFields();
-			List<DocField> docFieldsForNewDoc = documentLevelFieldsForNewDoc.getDocumentLevelField();
-			if (docFields != null) {
-				for (DocField docField : docFields) {
-					DocField docFieldForNewDoc = new DocField();
-					docFieldForNewDoc.setConfidence(docField.getConfidence());
-					docFieldForNewDoc.setFieldOrderNumber(docField.getFieldOrderNumber());
-					docFieldForNewDoc.setFieldValueOptionList(docField.getFieldValueOptionList());
-					docFieldForNewDoc.setName(docField.getName());
-					docFieldForNewDoc.setType(docField.getType());
-					docFieldForNewDoc.setValue(docField.getValue());
-					if (listOfNewPageIdentifiers.contains(docField.getPage())) {
-						docFieldForNewDoc.setCoordinatesList(docField.getCoordinatesList());
-						docFieldForNewDoc.setOverlayedImageFileName(docField.getOverlayedImageFileName());
-						docFieldForNewDoc.setPage(docField.getPage());
-						docField.setPage(pageTypeList.get(0).getIdentifier());
-						docField.setCoordinatesList(null);
-						docField.setOverlayedImageFileName(null);
-					} else {
-						docFieldForNewDoc.setCoordinatesList(null);
-						docFieldForNewDoc.setOverlayedImageFileName(null);
-						if (docField.getPage() != null && !docField.getPage().isEmpty()) {
-							docFieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
-						} else {
-							docFieldForNewDoc.setPage(docField.getPage());
-						}
-					}
-					AlternateValues alternateValuesForNewDoc = new AlternateValues();
-					List<Field> fieldsForNewDoc = alternateValuesForNewDoc.getAlternateValue();
-					AlternateValues alternateValues = docField.getAlternateValues();
-					if (alternateValues != null) {
-						List<Field> alternateValueFields = alternateValues.getAlternateValue();
-						if (alternateValueFields != null) {
-							for (Field field : alternateValueFields) {
-								Field fieldForNewDoc = new Field();
-								fieldForNewDoc.setConfidence(field.getConfidence());
-								fieldForNewDoc.setFieldOrderNumber(field.getFieldOrderNumber());
-								fieldForNewDoc.setFieldValueOptionList(field.getFieldValueOptionList());
-								fieldForNewDoc.setName(field.getName());
-								fieldForNewDoc.setType(field.getType());
-								fieldForNewDoc.setValue(field.getValue());
-								if (listOfNewPageIdentifiers.contains(field.getPage())) {
-									fieldForNewDoc.setCoordinatesList(field.getCoordinatesList());
-									fieldForNewDoc.setOverlayedImageFileName(field.getOverlayedImageFileName());
-									fieldForNewDoc.setPage(field.getPage());
-									field.setCoordinatesList(null);
-									field.setOverlayedImageFileName(null);
-									field.setPage(pageTypeList.get(0).getIdentifier());
-								} else {
-									fieldForNewDoc.setCoordinatesList(null);
-									fieldForNewDoc.setOverlayedImageFileName(null);
-									if (field.getPage() != null && !field.getPage().isEmpty()) {
-										fieldForNewDoc.setPage(listOfNewPages.get(0).getIdentifier());
-									} else {
-										fieldForNewDoc.setPage(field.getPage());
-									}
-								}
-								fieldsForNewDoc.add(fieldForNewDoc);
-							}
-						}
-					}
-					docFieldForNewDoc.setAlternateValues(alternateValuesForNewDoc);
-					docFieldsForNewDoc.add(docFieldForNewDoc);
-				}
-			}
-
+			final List<DocField> docFields = documentLevelFields.getDocumentLevelField();
+			final DocumentLevelFields documentLevelFieldsForNewDoc = new DocumentLevelFields();
+			final List<DocField> docFieldsForNewDoc = documentLevelFieldsForNewDoc.getDocumentLevelField();
+			setDocLevelFieldsInfo(pageTypeList, listOfNewPages, listOfNewPageIdentifiers, docFields, docFieldsForNewDoc);
 			newDocType.setDocumentLevelFields(documentLevelFieldsForNewDoc);
 		} else {
 			newDocType.setDocumentLevelFields(null);
 		}
 		docTypesList.add(docIndex + 1, newDocType);
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
+	}
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+	private void setDocLevelFieldsInfo(final List<Page> pageTypeList, final List<Page> listOfNewPages,
+			final List<String> listOfNewPageIdentifiers, final List<DocField> docFields, final List<DocField> docFieldsForNewDoc) {
+		if (docFields != null) {
+			for (final DocField docField : docFields) {
+				final DocField docFieldForNewDoc = new DocField();
+				docFieldForNewDoc.setConfidence(docField.getConfidence());
+				docFieldForNewDoc.setFieldOrderNumber(docField.getFieldOrderNumber());
+				docFieldForNewDoc.setFieldValueOptionList(docField.getFieldValueOptionList());
+				docFieldForNewDoc.setName(docField.getName());
+				docFieldForNewDoc.setType(docField.getType());
+				docFieldForNewDoc.setValue(docField.getValue());
+				if (listOfNewPageIdentifiers.contains(docField.getPage())) {
+					docFieldForNewDoc.setCoordinatesList(docField.getCoordinatesList());
+					docFieldForNewDoc.setOverlayedImageFileName(docField.getOverlayedImageFileName());
+					docFieldForNewDoc.setPage(docField.getPage());
+					docField.setPage(pageTypeList.get(BatchConstants.ZERO).getIdentifier());
+					docField.setCoordinatesList(null);
+					docField.setOverlayedImageFileName(null);
+				} else {
+					docFieldForNewDoc.setCoordinatesList(null);
+					docFieldForNewDoc.setOverlayedImageFileName(null);
+					if (docField.getPage() != null && !docField.getPage().isEmpty()) {
+						docFieldForNewDoc.setPage(listOfNewPages.get(BatchConstants.ZERO).getIdentifier());
+					} else {
+						docFieldForNewDoc.setPage(docField.getPage());
+					}
+				}
+				final AlternateValues alternateValuesForNewDoc = new AlternateValues();
+				final List<Field> fieldsForNewDoc = alternateValuesForNewDoc.getAlternateValue();
+				final AlternateValues alternateValues = docField.getAlternateValues();
+				if (alternateValues != null) {
+					final List<Field> alternateValueFields = alternateValues.getAlternateValue();
+					if (alternateValueFields != null) {
+						for (final Field field : alternateValueFields) {
+							final Field fieldForNewDoc = new Field();
+							fieldForNewDoc.setConfidence(field.getConfidence());
+							fieldForNewDoc.setFieldOrderNumber(field.getFieldOrderNumber());
+							fieldForNewDoc.setFieldValueOptionList(field.getFieldValueOptionList());
+							fieldForNewDoc.setName(field.getName());
+							fieldForNewDoc.setType(field.getType());
+							fieldForNewDoc.setValue(field.getValue());
+							if (listOfNewPageIdentifiers.contains(field.getPage())) {
+								fieldForNewDoc.setCoordinatesList(field.getCoordinatesList());
+								fieldForNewDoc.setOverlayedImageFileName(field.getOverlayedImageFileName());
+								fieldForNewDoc.setPage(field.getPage());
+								field.setCoordinatesList(null);
+								field.setOverlayedImageFileName(null);
+								field.setPage(pageTypeList.get(0).getIdentifier());
+							} else {
+								fieldForNewDoc.setCoordinatesList(null);
+								fieldForNewDoc.setOverlayedImageFileName(null);
+								if (field.getPage() != null && !field.getPage().isEmpty()) {
+									fieldForNewDoc.setPage(listOfNewPages.get(BatchConstants.ZERO).getIdentifier());
+								} else {
+									fieldForNewDoc.setPage(field.getPage());
+								}
+							}
+							fieldsForNewDoc.add(fieldForNewDoc);
+						}
+					}
+				}
+				docFieldForNewDoc.setAlternateValues(alternateValuesForNewDoc);
+				docFieldsForNewDoc.add(docFieldForNewDoc);
+			}
+		}
+	}
+
+	private void validatingArgumentsInfo(final String batchInstanceIdentifier, final String docID, final String pageID)
+			throws DCMAApplicationException {
+		String errMsg = null;
+		if (null == batchInstanceIdentifier || null == docID || null == pageID) {
+			errMsg = "Input parameters batchInstanceIdentifier/docID/pageID are null.";
+			LOGGER.error(errMsg);
+			throw new DCMAApplicationException(errMsg);
+		}
+	}
+
+	private void checkDocTypeList(final List<Document> docTypesList) throws DCMAApplicationException {
+		String errMsg;
+		if (null == docTypesList) {
+			errMsg = BatchConstants.DOC_TYPE_LIST_NULL;
+			LOGGER.error(errMsg);
+			throw new DCMAApplicationException(errMsg);
+		}
+	}
+
+	private Document createNewDocument(final Document docType, final String newDocID) {
+		final Document newDocType = new Document();
+		newDocType.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + newDocID);
+		newDocType.setType(docType.getType());
+		newDocType.setConfidence(docType.getConfidence());
+		newDocType.setMultiPagePdfFile(docType.getMultiPagePdfFile());
+		newDocType.setMultiPageTiffFile(docType.getMultiPageTiffFile());
+		newDocType.setValid(docType.isValid());
+		newDocType.setReviewed(docType.isReviewed());
+		newDocType.setErrorMessage(BatchConstants.EMPTY);
+		newDocType.setDocumentDisplayInfo(BatchConstants.EMPTY);
+		return newDocType;
 	}
 
 	/**
-	 * An api to update the document type name and document level fields for the input doc type ID.
+	 * An API to update the document type name and document level fields for the input doc type ID.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @param docID String
@@ -1178,34 +1238,31 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @throws DCMAApplicationException If any one of the parameter is null or docID is not present in batch.
 	 */
 	@Override
-	public void updateDocTypeName(String batchInstanceIdentifier, String docID, String docTypeName,
-			DocumentLevelFields documentLevelFields) throws DCMAApplicationException {
+	public void updateDocTypeName(final String batchInstanceIdentifier, final String docID, final String docTypeName,
+			final DocumentLevelFields documentLevelFields) throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == docID || null == docTypeName || null == documentLevelFields) {
 			errMsg = "Input parameters batchInstanceIdentifier/docID/docTypeName/" + "documentLevelFields are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int docIndex = getDocumentTypeIndex(docTypesList, docID);
+		final int docIndex = getDocumentTypeIndex(docTypesList, docID);
 
-		Document docType = docTypesList.get(docIndex);
+		final Document docType = docTypesList.get(docIndex);
 		docType.setType(docTypeName);
 		docType.setDocumentLevelFields(documentLevelFields);
 
-		batchSchemaDao.update(batch, batchInstanceIdentifier, isZipSwitchOn());
+		batchSchemaDao.update(batch, batchInstanceIdentifier);
 	}
 
 	/**
@@ -1215,18 +1272,9 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return List<DocumentType>
 	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
 	 */
-	private List<Document> validateParams(Batch batch, String docID, List<String> reOrderOfPageIDs) throws DCMAApplicationException {
-
-		String errMsg = null;
-
-		List<Document> docTypesList = batch.getDocuments().getDocument();
-
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
-
+	private List<Document> validateParams(final Batch batch) throws DCMAApplicationException {
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
+		checkDocTypeList(docTypesList);
 		return docTypesList;
 	}
 
@@ -1238,22 +1286,15 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return DocPageCarrier
 	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
 	 */
-	private DocPageCarrier getDocPageCarrier(Batch batch, String docID, String pageID) throws DCMAApplicationException {
-		String errMsg = null;
+	private DocPageCarrier getDocPageCarrier(final Batch batch, final String docID, final String pageID)
+			throws DCMAApplicationException {
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
+		checkDocTypeList(docTypesList);
+		final int docIndex = getDocumentTypeIndex(docTypesList, docID);
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageID);
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
-
-		int docIndex = getDocumentTypeIndex(docTypesList, docID);
-
-		int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageID);
-
-		DocPageCarrier docPageCarrier = new DocPageCarrier();
+		final DocPageCarrier docPageCarrier = new DocPageCarrier();
 		docPageCarrier.setDocIndex(docIndex);
 		docPageCarrier.setPageIndex(pageIndex);
 		docPageCarrier.setDocTypesList(docTypesList);
@@ -1268,26 +1309,27 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return int page type index.
 	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
 	 */
-	private int getPageTypeIndex(List<Document> docTypesList, int docIndex, String pageID) throws DCMAApplicationException {
+	private int getPageTypeIndex(final List<Document> docTypesList, final int docIndex, final String pageID)
+			throws DCMAApplicationException {
 
 		String errMsg = null;
-		Pages pages = docTypesList.get(docIndex).getPages();
+		final Pages pages = docTypesList.get(docIndex).getPages();
 
 		if (null == pages) {
 			errMsg = "Page id not found for the input document id.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		List<Page> pageTypeList = pages.getPage();
+		final List<Page> pageTypeList = pages.getPage();
 
 		int pageIndex = 0;
 		// PageType removePageType = null;
-		for (Page pageType : pageTypeList) {
-			String curPageID = pageType.getIdentifier();
+		for (final Page pageType : pageTypeList) {
+			final String curPageID = pageType.getIdentifier();
 			if (null == curPageID) {
 				errMsg = "Page ID is null.";
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				throw new DCMAApplicationException(errMsg);
 			}
 			if (curPageID.equals(pageID)) {
@@ -1299,7 +1341,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (pageIndex >= pageTypeList.size()) {
 			errMsg = "Page id is not found for the input page id : " + pageID;
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
@@ -1312,14 +1354,14 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return int document type index.
 	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
 	 */
-	private int getDocumentTypeIndex(List<Document> docTypesList, String docID) throws DCMAApplicationException {
+	private int getDocumentTypeIndex(final List<Document> docTypesList, final String docID) throws DCMAApplicationException {
 		String errMsg = null;
 		int docIndex = 0;
-		for (Document docType : docTypesList) {
-			String curDocID = docType.getIdentifier();
+		for (final Document docType : docTypesList) {
+			final String curDocID = docType.getIdentifier();
 			if (null == curDocID) {
 				errMsg = "Document ID is null.";
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				throw new DCMAApplicationException(errMsg);
 			}
 			if (curDocID.equals(docID)) {
@@ -1330,7 +1372,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (docIndex >= docTypesList.size()) {
 			errMsg = "Document id is not found for the input document id : " + docID;
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
@@ -1338,45 +1380,27 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * @param docTypesList List<DocumentType>
+	 * An internal method to get unique page id.
+	 * 
+	 * @param batchInstanceFolderPath String
 	 * @return String next page type id.
-	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
+	 * @throws DCMAApplicationException
 	 */
-	private String getNewPageTypeID(List<Document> docTypesList) throws DCMAApplicationException {
-
+	private String getNewPageTypeID(final String batchInstanceFolderPath) throws DCMAApplicationException {
 		String errMsg = null;
-
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
-
-		Long maxPageTypeID = 1L;
-
-		for (Document docType : docTypesList) {
-			Pages pages = docType.getPages();
-			if (null != pages) {
-				List<Page> pageTypeList = pages.getPage();
-				for (Page pageType : pageTypeList) {
-					String curPageID = pageType.getIdentifier();
-					if (null == curPageID) {
-						errMsg = "Page ID is null.";
-						logger.error(errMsg);
-						throw new DCMAApplicationException(errMsg);
-					}
-					curPageID = curPageID.replaceAll(EphesoftProperty.PAGE.getProperty(), "");
-					Long curPageIDLg = Long.parseLong(curPageID, RADIX_BASE);
-					if (curPageIDLg > maxPageTypeID) {
-						maxPageTypeID = curPageIDLg;
-					}
-				}
+		String maxPageTypeID = null;
+		if (batchInstanceFolderPath != null) {
+			final File folderToCheck = new File(batchInstanceFolderPath);
+			if (folderToCheck != null && folderToCheck.exists() && folderToCheck.isDirectory()) {
+				final String[] listOfHtmlFiles = folderToCheck.list(new CustomFileFilter(false, BatchConstants.HTML_EXTENSION));
+				maxPageTypeID = String.valueOf(listOfHtmlFiles.length);
+			} else {
+				errMsg = BatchConstants.UNABLE_TO_GET_UNIQUE_PAGE_ID;
+				LOGGER.error(errMsg);
+				throw new DCMAApplicationException(errMsg);
 			}
 		}
-
-		String maxPgStr = Long.toString(maxPageTypeID + 1L);
-
-		return maxPgStr;
+		return maxPageTypeID;
 	}
 
 	/**
@@ -1384,151 +1408,33 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @return String next document type id.
 	 * @throws DCMAApplicationException If any one of the parameter is null or empty.
 	 */
-	private String getNewDocumentTypeID(List<Document> docTypesList) throws DCMAApplicationException {
+	private String getNewDocumentTypeID(final List<Document> docTypesList) throws DCMAApplicationException {
 
 		String errMsg = null;
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
 		Long maxDocumentTypeID = 1L;
 
-		for (Document docType : docTypesList) {
+		for (final Document docType : docTypesList) {
 			String curDocID = docType.getIdentifier();
 			if (null == curDocID) {
 				errMsg = "Document ID is null.";
-				logger.error(errMsg);
+				LOGGER.error(errMsg);
 				throw new DCMAApplicationException(errMsg);
 			}
 
 			curDocID = curDocID.replaceAll(EphesoftProperty.DOCUMENT.getProperty(), "");
-			Long curPageIDLg = Long.parseLong(curDocID, RADIX_BASE);
+			final Long curPageIDLg = Long.parseLong(curDocID, BatchConstants.RADIX_BASE);
 
 			if (curPageIDLg > maxDocumentTypeID) {
 				maxDocumentTypeID = curPageIDLg;
 			}
 		}
 
-		String maxDocStr = Long.toString(maxDocumentTypeID + 1L);
+		final String maxDocStr = Long.toString(maxDocumentTypeID + 1L);
 
 		return maxDocStr;
-	}
-
-	/**
-	 * An internal method to delete the pages and it physical content.
-	 * 
-	 * @param removePageType PageType
-	 * @param batchInstanceIdentifier String
-	 */
-	private void deletePageFiles(Page removePageType, String batchInstanceIdentifier) {
-		// Delete all the images present at this page type.
-		String errMsg = null;
-
-		String localFolLoc = batchSchemaDao.getJAXB2Template().getLocalFolderLocation();
-
-		String folderToExe = localFolLoc + File.separator + batchInstanceIdentifier;
-		String newFileName = removePageType.getNewFileName();
-		String displayFileName = removePageType.getDisplayFileName();
-		String hocrFileName = removePageType.getHocrFileName();
-		String thumbnailFileName = removePageType.getThumbnailFileName();
-		String oCRInputFileName = removePageType.getOCRInputFileName();
-		String originalXmlFile = folderToExe + File.separator + batchInstanceIdentifier + "_" + removePageType.getIdentifier()
-				+ HOCR_FILE_NAME;
-
-		// Delete the newFileName file.
-		if (null != newFileName) {
-			newFileName = newFileName.trim();
-			try {
-				File fileNewFileName = new File(folderToExe + File.separator + newFileName);
-				logger.info("fileNewFileName : " + fileNewFileName);
-				FileUtils.forceDelete(fileNewFileName);
-			} catch (IOException e) {
-				errMsg = "Not able to delete the file newFileName: " + newFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
-
-		// Delete the displayFileName file.
-		if (null != displayFileName) {
-			displayFileName = displayFileName.trim();
-			try {
-				File fileDisplayFileName = new File(folderToExe + File.separator + displayFileName);
-				logger.info("fileDisplayFileName : " + fileDisplayFileName);
-				FileUtils.forceDelete(fileDisplayFileName);
-				if (removePageType.isIsRotated()) {
-					File fileDisplayDirectionFileName = new File(folderToExe + File.separator + removePageType.getDirection()
-							+ File.separator + displayFileName);
-					FileUtils.forceDelete(fileDisplayDirectionFileName);
-				}
-			} catch (IOException e) {
-				errMsg = "Not able to delete the file displayFileName: " + displayFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
-
-		// Delete the hocrFileName file.
-		if (null != hocrFileName) {
-			hocrFileName = hocrFileName.trim();
-			try {
-				File fileHocrFileName = new File(folderToExe + File.separator + hocrFileName);
-				logger.info("fileHocrFileName : " + fileHocrFileName);
-				FileUtils.forceDelete(fileHocrFileName);
-			} catch (IOException e) {
-				errMsg = "Not able to delete the file hocrFileName: " + hocrFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
-
-		// Delete the thumbnailFileName file.
-		if (null != thumbnailFileName) {
-			thumbnailFileName = thumbnailFileName.trim();
-			try {
-				File fileThumbnailFileName = new File(folderToExe + File.separator + thumbnailFileName);
-				logger.info("fileThumbnailFileName : " + fileThumbnailFileName);
-				FileUtils.forceDelete(fileThumbnailFileName);
-				if (removePageType.isIsRotated()) {
-					File fileThumbnailDirectionFileName = new File(folderToExe + File.separator + removePageType.getDirection()
-							+ File.separator + thumbnailFileName);
-					FileUtils.forceDelete(fileThumbnailDirectionFileName);
-				}
-			} catch (IOException e) {
-				errMsg = "Not able to delete the file thumbnailFileName: " + thumbnailFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
-
-		// Delete the oCRInputFileName file.
-		if (null != oCRInputFileName && !oCRInputFileName.equals(displayFileName)) {
-			oCRInputFileName = oCRInputFileName.trim();
-			try {
-				File fileOCRInputFileName = new File(folderToExe + File.separator + oCRInputFileName);
-				logger.info("fileOCRInputFileName : " + fileOCRInputFileName);
-				FileUtils.forceDelete(fileOCRInputFileName);
-			} catch (IOException e) {
-				errMsg = "Not able to delete the file oCRInputFileName: " + oCRInputFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
-
-		if (null != originalXmlFile) {
-			try {
-				String zipFileName = originalXmlFile + FileType.ZIP.getExtensionWithDot();
-				File srcFileHocrFileName = new File(zipFileName);
-				if (!srcFileHocrFileName.exists()) {
-					srcFileHocrFileName = new File(originalXmlFile);
-				} else {
-					originalXmlFile = zipFileName;
-				}
-				logger.info("srcFileHocrFileName : " + srcFileHocrFileName);
-				FileUtils.forceDelete(srcFileHocrFileName);
-			} catch (IOException e) {
-				errMsg = "Not able to delete the xml file  " + originalXmlFile + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-		}
 	}
 
 	/**
@@ -1537,222 +1443,89 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @param duplicatePageType PageType
 	 * @param batchInstanceIdentifier String
 	 * @param newPageTypeID String
+	 * @param batchInstanceFolderPath String
 	 * @return PageType
+	 * @throws DCMAApplicationException
 	 */
-	private Page duplicatePageFiles(Page duplicatePageType, String batchInstanceIdentifier, String newPageTypeID) {
+	private Page duplicatePageFiles(final Page duplicatePageType, final String batchInstanceIdentifier, final String newPageTypeID,
+			final String batchInstanceFolderPath) throws DCMAApplicationException {
 		// Create duplicatePageType for all the images present at this page
 		// type.
 		String errMsg = null;
-
-		String localFolLoc = batchSchemaDao.getJAXB2Template().getLocalFolderLocation();
-
-		String folderToExe = localFolLoc + File.separator + batchInstanceIdentifier;
-
-		Page duplicateCopyPageType = new Page();
-
+		final Page duplicateCopyPageType = new Page();
 		duplicateCopyPageType.setIdentifier(EphesoftProperty.PAGE.getProperty() + newPageTypeID);
 		duplicateCopyPageType.setOldFileName(newPageTypeID + BatchConstants.UNDER_SCORE + duplicatePageType.getOldFileName());
 		duplicateCopyPageType.setDirection(duplicatePageType.getDirection());
 		duplicateCopyPageType.setIsRotated(duplicatePageType.isIsRotated());
-		PageLevelFields pPageLevelFields = duplicatePageType.getPageLevelFields();
-		PageLevelFields copyPageLevelFields = new PageLevelFields();
-		List<DocField> pageLevelField = pPageLevelFields.getPageLevelField();
-		List<DocField> copyPageLevelField = copyPageLevelFields.getPageLevelField();
-
-		// TODO check for clone method we have to make a copy of each object.
+		final PageLevelFields pPageLevelFields = duplicatePageType.getPageLevelFields();
+		final PageLevelFields copyPageLevelFields = new PageLevelFields();
+		final List<DocField> pageLevelField = pPageLevelFields.getPageLevelField();
+		final List<DocField> copyPageLevelField = copyPageLevelFields.getPageLevelField();
 		copyPageLevelField.addAll(pageLevelField);
 		duplicateCopyPageType.setPageLevelFields(copyPageLevelFields);
 
-		String newFileName = duplicatePageType.getNewFileName();
+		final String newFileName = duplicatePageType.getNewFileName();
 		String displayFileName = duplicatePageType.getDisplayFileName();
-		String hocrFileName = duplicatePageType.getHocrFileName();
-		String thumbnailFileName = duplicatePageType.getThumbnailFileName();
-		String oCRInputFileName = duplicatePageType.getOCRInputFileName();
-		String originalXmlFile = folderToExe + File.separator + batchInstanceIdentifier + "_" + duplicatePageType.getIdentifier()
-				+ HOCR_FILE_NAME;
+		final String hocrFileName = duplicatePageType.getHocrFileName();
+		final String thumbnailFileName = duplicatePageType.getThumbnailFileName();
+		final String oCRInputFileName = duplicatePageType.getOCRInputFileName();
+		String originalXmlFile = batchInstanceFolderPath + File.separator + batchInstanceIdentifier + BatchConstants.UNDER_SCORE
+				+ duplicatePageType.getIdentifier() + HOCR_FILE_NAME;
 
-		FileNameFormatter fnf = null;
+		FileNameFormatter fileNameFormatter = null;
 		try {
-			fnf = new FileNameFormatter();
-		} catch (Exception e) {
-			logger.error(e.getMessage());
+			fileNameFormatter = new FileNameFormatter();
+		} catch (IOException e) {
+			errMsg = BatchConstants.FILE_NAME_FORMATTER_NOT_CREATED;
+			LOGGER.error(errMsg);
+			throw new DCMAApplicationException(errMsg, e);
 		}
+		setDuplicateNewFileName(batchInstanceFolderPath, duplicateCopyPageType, newFileName, fileNameFormatter,
+				batchInstanceIdentifier, newPageTypeID);
 
-		if (null != newFileName) {
-			newFileName = newFileName.trim();
-			try {
-				String newFileNameFormatter = fnf.getNewFileName(String.valueOf(batchInstanceIdentifier), null, String
-						.valueOf(newPageTypeID), ".tif");
-				duplicateCopyPageType.setNewFileName(newFileNameFormatter);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				duplicateCopyPageType.setNewFileName(newPageTypeID + BatchConstants.UNDER_SCORE + newFileName);
-			}
+		setDuplicateDisplayFileName(batchInstanceFolderPath, duplicateCopyPageType, displayFileName, fileNameFormatter,
+				batchInstanceIdentifier, newPageTypeID);
 
-			// create the copy of each file.
-			try {
-				File srcFileNewFileName = new File(folderToExe + File.separator + newFileName);
-				File destFileNewFileName = new File(folderToExe + File.separator + duplicateCopyPageType.getNewFileName());
-				logger.info("srcFileNewFileName : " + srcFileNewFileName);
-				logger.info("destFileNewFileName : " + destFileNewFileName);
-				FileUtils.copyFile(srcFileNewFileName, destFileNewFileName, false);
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the file newFileName: " + newFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
+		setDuplicateHocrFileName(batchInstanceFolderPath, duplicateCopyPageType, hocrFileName, fileNameFormatter,
+				batchInstanceIdentifier, newPageTypeID);
 
-		}
+		setDupliateThumbnailFileName(batchInstanceFolderPath, duplicateCopyPageType, thumbnailFileName, fileNameFormatter,
+				batchInstanceIdentifier, newPageTypeID);
 
-		if (null != displayFileName) {
-			displayFileName = displayFileName.trim();
-
-			try {
-				String displayFileNameFormatter = fnf.getOCRInputFileName(String.valueOf(batchInstanceIdentifier), null, null, ".png",
-						String.valueOf(newPageTypeID));
-				duplicateCopyPageType.setDisplayFileName(displayFileNameFormatter);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				duplicateCopyPageType.setDisplayFileName(newPageTypeID + BatchConstants.UNDER_SCORE + displayFileName);
-			}
-
-			// create the copy of each file.
-			try {
-
-				File srcFileDisplayFileName = new File(folderToExe + File.separator + displayFileName);
-				File destFileDisplayFileName = new File(folderToExe + File.separator + duplicateCopyPageType.getDisplayFileName());
-				logger.info("srcFileDisplayFileName : " + srcFileDisplayFileName);
-				logger.info("destFileDisplayFileName : " + destFileDisplayFileName);
-				FileUtils.copyFile(srcFileDisplayFileName, destFileDisplayFileName, false);
-				if (duplicateCopyPageType.isIsRotated()) {
-					File destFileDisplayDirectionFileName = new File(folderToExe + File.separator
-							+ duplicateCopyPageType.getDirection().toString() + File.separator
-							+ duplicateCopyPageType.getDisplayFileName());
-					FileUtils.copyFile(srcFileDisplayFileName, destFileDisplayDirectionFileName, false);
-				}
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the file displayFileName: " + displayFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-
-		}
-
-		if (null != hocrFileName) {
-
-			hocrFileName = hocrFileName.trim();
-
-			try {
-				String hocrFileNameFormatter = fnf.getHocrFileName(String.valueOf(batchInstanceIdentifier), null, null, null, ".html",
-						String.valueOf(newPageTypeID), false);
-				duplicateCopyPageType.setHocrFileName(hocrFileNameFormatter);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				duplicateCopyPageType.setHocrFileName(newPageTypeID + BatchConstants.UNDER_SCORE + hocrFileName);
-			}
-
-			// create the copy of each file.
-			try {
-				File srcFileHocrFileName = new File(folderToExe + File.separator + hocrFileName);
-				File destFileHocrFileName = new File(folderToExe + File.separator + duplicateCopyPageType.getHocrFileName());
-				logger.info("srcFileHocrFileName : " + srcFileHocrFileName);
-				logger.info("destFileHocrFileName : " + destFileHocrFileName);
-				FileUtils.copyFile(srcFileHocrFileName, destFileHocrFileName, false);
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the file hocrFileName: " + hocrFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-
-		}
-
-		if (null != thumbnailFileName) {
-
-			thumbnailFileName = thumbnailFileName.trim();
-
-			try {
-				String thumbnailFileNameFormatter = fnf.getDisplayThumbnailFileName(String.valueOf(batchInstanceIdentifier), null,
-						null, null, ".png", String.valueOf(newPageTypeID));
-				duplicateCopyPageType.setThumbnailFileName(thumbnailFileNameFormatter);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				duplicateCopyPageType.setThumbnailFileName(newPageTypeID + BatchConstants.UNDER_SCORE + thumbnailFileName);
-			}
-
-			try {
-				File srcFileThumbnailFileName = new File(folderToExe + File.separator + thumbnailFileName);
-				File destFileThumbnailFileName = new File(folderToExe + File.separator + duplicateCopyPageType.getThumbnailFileName());
-				logger.info("srcFileThumbnailFileName : " + srcFileThumbnailFileName);
-				logger.info("destFileThumbnailFileName : " + destFileThumbnailFileName);
-				FileUtils.copyFile(srcFileThumbnailFileName, destFileThumbnailFileName, false);
-				if (duplicateCopyPageType.isIsRotated()) {
-					File destFileThumbnailDirectionFileName = new File(folderToExe + File.separator
-							+ duplicateCopyPageType.getDirection().toString() + File.separator
-							+ duplicateCopyPageType.getThumbnailFileName());
-					FileUtils.copyFile(srcFileThumbnailFileName, destFileThumbnailDirectionFileName, false);
-				}
-
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the file thumbnailFileName: " + thumbnailFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-
-		}
-
-		if (null != oCRInputFileName) {
-			oCRInputFileName = oCRInputFileName.trim();
-
-			try {
-				String oCRInputFileNameFormatter = fnf.getOCRInputFileName(String.valueOf(batchInstanceIdentifier), null, null,
-						".png", String.valueOf(newPageTypeID));
-				duplicateCopyPageType.setOCRInputFileName(oCRInputFileNameFormatter);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				duplicateCopyPageType.setOCRInputFileName(newPageTypeID + BatchConstants.UNDER_SCORE + oCRInputFileName);
-			}
-
-			try {
-				File srcFileOCRInputFileName = new File(folderToExe + File.separator + oCRInputFileName);
-				File destFileOCRInputFileName = new File(folderToExe + File.separator + duplicateCopyPageType.getOCRInputFileName());
-				logger.info("srcFileOCRInputFileName : " + srcFileOCRInputFileName);
-				logger.info("destFileOCRInputFileName : " + destFileOCRInputFileName);
-				FileUtils.copyFile(srcFileOCRInputFileName, destFileOCRInputFileName, false);
-
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the file oCRInputFileName: " + oCRInputFileName + " " + e.getMessage();
-				logger.error(errMsg);
-			}
-
-		}
+		setDuplicateOCRFileName(batchInstanceFolderPath, duplicateCopyPageType, oCRInputFileName, fileNameFormatter,
+				batchInstanceIdentifier, newPageTypeID);
 
 		if (null != originalXmlFile) {
 			try {
-				String xmlFileName = folderToExe + File.separator + batchInstanceIdentifier + "_"
-						+ duplicateCopyPageType.getIdentifier() + HOCR_FILE_NAME;
-				String zipFileName = originalXmlFile + FileType.ZIP.getExtensionWithDot();
+				StringBuilder xmlFileName = new StringBuilder(batchInstanceFolderPath + File.separator + batchInstanceIdentifier
+						+ BatchConstants.UNDER_SCORE + duplicateCopyPageType.getIdentifier() + HOCR_FILE_NAME);
+				final String zipFileName = originalXmlFile + FileType.ZIP.getExtensionWithDot();
 				File srcFileHocrFileName = new File(zipFileName);
-				if (!srcFileHocrFileName.exists()) {
-					srcFileHocrFileName = new File(originalXmlFile);
-				} else {
+				if (srcFileHocrFileName.exists()) {
 					originalXmlFile = zipFileName;
-					xmlFileName += FileType.ZIP.getExtensionWithDot();
+					xmlFileName.append(FileType.ZIP.getExtensionWithDot());
+				} else {
+					srcFileHocrFileName = new File(originalXmlFile);
 				}
-				File destFileHocrFileName = new File(xmlFileName);
-				logger.info("srcFileHocrFileName : " + srcFileHocrFileName);
-				logger.info("destFileHocrFileName : " + destFileHocrFileName);
+				final File destFileHocrFileName = new File(xmlFileName.toString());
+				LOGGER.info("srcFileHocrFileName : " + srcFileHocrFileName);
+				LOGGER.info("destFileHocrFileName : " + destFileHocrFileName);
 				FileUtils.copyFile(srcFileHocrFileName, destFileHocrFileName, false);
-			} catch (IOException e) {
-				errMsg = "Not able to create duplicate the xml file  " + originalXmlFile + " " + e.getMessage();
-				logger.error(errMsg);
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the xml file  " + originalXmlFile + BatchConstants.SPACE + e.getMessage();
+				LOGGER.error(errMsg);
 			}
 			try {
-				HocrPages hocrPages = getHocrPages(batchInstanceIdentifier, duplicateCopyPageType.getIdentifier());
+				final HocrPages hocrPages = getHocrPages(batchInstanceIdentifier, duplicateCopyPageType.getIdentifier());
 				if (null != hocrPages) {
-					HocrPage pages = hocrPages.getHocrPage().get(0);
+					final HocrPage pages = hocrPages.getHocrPage().get(BatchConstants.ZERO);
 					if (pages != null) {
 						pages.setPageID(duplicateCopyPageType.getIdentifier());
 						update(hocrPages, batchInstanceIdentifier, duplicateCopyPageType.getIdentifier());
 					}
 				}
-			} catch (Exception e) {
-				logger.error("Error in updating the xml file for new page type " + e.getMessage());
+			} catch (final Exception e) {
+				LOGGER.error("Error in updating the xml file for new page type " + e.getMessage());
 			}
 		}
 
@@ -1760,91 +1533,323 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
+	 * API to set Duplicate OCR file name.
+	 * 
+	 * @param batchInstanceFolderPath {@link String}
+	 * @param duplicateCopyPage {@link Page}
+	 * @param oCRInputFileName {@link String}
+	 * @param fileNameFormatter {@link FileNameFormatter}
+	 * @param batchInstanceId {@link String}
+	 * @param newPageTypeID {@link String}
+	 */
+	private void setDuplicateOCRFileName(final String batchInstanceFolderPath, final Page duplicateCopyPage,
+			final String oCRInputFileName, final FileNameFormatter fileNameFormatter, final String batchInstanceId,
+			final String newPageTypeID) {
+		String errMsg;
+		if (null != oCRInputFileName) {
+			final String localOCRInputFileName = oCRInputFileName.trim();
+
+			try {
+				final String oCRInputFileNameFormatter = fileNameFormatter.getOCRInputFileName(String.valueOf(batchInstanceId), null,
+						null, BatchConstants.PNG_EXTENSION, String.valueOf(newPageTypeID));
+				duplicateCopyPage.setOCRInputFileName(oCRInputFileNameFormatter);
+			} catch (final FileFormatException e) {
+				LOGGER.error(e.getMessage());
+				duplicateCopyPage.setOCRInputFileName(newPageTypeID + BatchConstants.UNDER_SCORE + localOCRInputFileName);
+			}
+			try {
+				final File srcFileOCRInputFileName = new File(batchInstanceFolderPath + File.separator + localOCRInputFileName);
+				final File destFileOCRInputFileName = new File(batchInstanceFolderPath + File.separator
+						+ duplicateCopyPage.getOCRInputFileName());
+				LOGGER.info("srcFileOCRInputFileName : " + srcFileOCRInputFileName);
+				LOGGER.info("destFileOCRInputFileName : " + destFileOCRInputFileName);
+				FileUtils.copyFile(srcFileOCRInputFileName, destFileOCRInputFileName, false);
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the file oCRInputFileName: " + localOCRInputFileName + " " + e.getMessage();
+				LOGGER.error(errMsg);
+			}
+		}
+	}
+
+	/**
+	 * API to set Duplicate Thumbnail file name.
+	 * 
+	 * @param batchInstanceFolderPath {@link String}
+	 * @param duplicateCopyPageType {@link Page}
+	 * @param thumbnailFileName {@link String}
+	 * @param fileNameFormatter {@link FileNameFormatter}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param newPageTypeID {@link String}
+	 */
+	private void setDupliateThumbnailFileName(final String batchInstanceFolderPath, final Page duplicateCopyPageType,
+			final String thumbnailFileName, final FileNameFormatter fileNameFormatter, final String batchInstanceIdentifier,
+			final String newPageTypeID) {
+		String errMsg;
+		if (null != thumbnailFileName) {
+			final String localThumbnailFileName = thumbnailFileName.trim();
+			try {
+				final String thumbnailFileNameFormatter = fileNameFormatter.getDisplayThumbnailFileName(String
+						.valueOf(batchInstanceIdentifier), null, null, null, BatchConstants.PNG_EXTENSION, String
+						.valueOf(newPageTypeID));
+				duplicateCopyPageType.setThumbnailFileName(thumbnailFileNameFormatter);
+			} catch (final FileFormatException e) {
+				LOGGER.error(e.getMessage());
+				duplicateCopyPageType.setThumbnailFileName(newPageTypeID + BatchConstants.UNDER_SCORE + localThumbnailFileName);
+			}
+			try {
+				final File srcFileThumbnailFileName = new File(batchInstanceFolderPath + File.separator + localThumbnailFileName);
+				final File destFileThumbnailFileName = new File(batchInstanceFolderPath + File.separator
+						+ duplicateCopyPageType.getThumbnailFileName());
+				LOGGER.info("srcFileThumbnailFileName : " + srcFileThumbnailFileName);
+				LOGGER.info("destFileThumbnailFileName : " + destFileThumbnailFileName);
+				FileUtils.copyFile(srcFileThumbnailFileName, destFileThumbnailFileName, false);
+				if (duplicateCopyPageType.isIsRotated()) {
+					final File destFileThumbnailDirectionFileName = new File(batchInstanceFolderPath + File.separator
+							+ duplicateCopyPageType.getDirection().toString() + File.separator
+							+ duplicateCopyPageType.getThumbnailFileName());
+					FileUtils.copyFile(srcFileThumbnailFileName, destFileThumbnailDirectionFileName, false);
+				}
+
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the file thumbnailFileName: " + localThumbnailFileName + BatchConstants.SPACE
+						+ e.getMessage();
+				LOGGER.error(errMsg);
+			}
+		}
+	}
+
+	/**
+	 * API to set Duplicate HOCR file name.
+	 * 
+	 * @param batchInstanceFolderPath {@link String}
+	 * @param duplicateCopyPageType {@link Page}
+	 * @param hocrFileName {@link String}
+	 * @param fileNameFormatter {@link FileNameFormatter}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param newPageTypeID {@link String}
+	 */
+	private void setDuplicateHocrFileName(final String batchInstanceFolderPath, final Page duplicateCopyPageType,
+			final String hocrFileName, final FileNameFormatter fileNameFormatter, final String batchInstanceIdentifier,
+			final String newPageTypeID) {
+		String errMsg;
+		if (null != hocrFileName) {
+			final String localHocrFileName = hocrFileName.trim();
+			try {
+				final String hocrFileNameFormatter = fileNameFormatter.getHocrFileName(String.valueOf(batchInstanceIdentifier), null,
+						null, null, BatchConstants.HTML_EXTENSION, String.valueOf(newPageTypeID), false);
+				duplicateCopyPageType.setHocrFileName(hocrFileNameFormatter);
+			} catch (final FileFormatException e) {
+				LOGGER.error(e.getMessage());
+				duplicateCopyPageType.setHocrFileName(newPageTypeID + BatchConstants.UNDER_SCORE + localHocrFileName);
+			}
+			// create the copy of each file.
+			try {
+				final File srcFileHocrFileName = new File(batchInstanceFolderPath + File.separator + localHocrFileName);
+				final File destFileHocrFileName = new File(batchInstanceFolderPath + File.separator
+						+ duplicateCopyPageType.getHocrFileName());
+				LOGGER.info("srcFileHocrFileName : " + srcFileHocrFileName);
+				LOGGER.info("destFileHocrFileName : " + destFileHocrFileName);
+				FileUtils.copyFile(srcFileHocrFileName, destFileHocrFileName, false);
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the file hocrFileName: " + localHocrFileName + " " + e.getMessage();
+				LOGGER.error(errMsg);
+			}
+		}
+	}
+
+	/**
+	 * API to set Duplicate Display file name.
+	 * 
+	 * @param batchInstanceFolderPath {@link String}
+	 * @param duplicateCopyPageType {@link Page}
+	 * @param displayFileName {@link String}
+	 * @param fileNameFormatter {@link FileNameFormatter}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param newPageTypeID {@link String}
+	 */
+	private void setDuplicateDisplayFileName(final String batchInstanceFolderPath, final Page duplicateCopyPageType,
+			final String displayFileName, final FileNameFormatter fileNameFormatter, final String batchInstanceIdentifier,
+			final String newPageTypeID) {
+		String errMsg;
+		if (null != displayFileName) {
+			final String localDisplayFileName = displayFileName.trim();
+			try {
+				final String displayFileNameFormatter = fileNameFormatter.getOCRInputFileName(String.valueOf(batchInstanceIdentifier),
+						null, null, BatchConstants.PNG_EXTENSION, String.valueOf(newPageTypeID));
+				duplicateCopyPageType.setDisplayFileName(displayFileNameFormatter);
+			} catch (final FileFormatException e) {
+				LOGGER.error(e.getMessage());
+				duplicateCopyPageType.setDisplayFileName(newPageTypeID + BatchConstants.UNDER_SCORE + localDisplayFileName);
+			}
+			// create the copy of each file.
+			try {
+				final File srcFileDisplayFileName = new File(batchInstanceFolderPath + File.separator + localDisplayFileName);
+				final File destFileDisplayFileName = new File(batchInstanceFolderPath + File.separator
+						+ duplicateCopyPageType.getDisplayFileName());
+				LOGGER.info("srcFileDisplayFileName : " + srcFileDisplayFileName);
+				LOGGER.info("destFileDisplayFileName : " + destFileDisplayFileName);
+				FileUtils.copyFile(srcFileDisplayFileName, destFileDisplayFileName, false);
+				if (duplicateCopyPageType.isIsRotated()) {
+					final File destFileDisplayDirectionFileName = new File(batchInstanceFolderPath + File.separator
+							+ duplicateCopyPageType.getDirection().toString() + File.separator
+							+ duplicateCopyPageType.getDisplayFileName());
+					FileUtils.copyFile(srcFileDisplayFileName, destFileDisplayDirectionFileName, false);
+				}
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the file displayFileName: " + localDisplayFileName + " " + e.getMessage();
+				LOGGER.error(errMsg);
+			}
+		}
+	}
+
+	/**
+	 * API to set Duplicate new file name.
+	 * 
+	 * @param batchInstanceFolderPath {@link String}
+	 * @param duplicateCopyPageType {@link Page}
+	 * @param newFileName {@link String}
+	 * @param fileNameFormatter {@link FileNameFormatter}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param newPageTypeID {@link String}
+	 */
+	private void setDuplicateNewFileName(final String batchInstanceFolderPath, final Page duplicateCopyPageType,
+			final String newFileName, final FileNameFormatter fileNameFormatter, final String batchInstanceIdentifier,
+			final String newPageTypeID) {
+		String errMsg;
+		if (null != newFileName) {
+			final String localNewFileName = newFileName.trim();
+			try {
+				final String newFileNameFormatter = fileNameFormatter.getNewFileName(String.valueOf(batchInstanceIdentifier), null,
+						String.valueOf(newPageTypeID), BatchConstants.TIF_EXTENSION);
+				duplicateCopyPageType.setNewFileName(newFileNameFormatter);
+			} catch (final FileFormatException e) {
+				LOGGER.error(e.getMessage());
+				duplicateCopyPageType.setNewFileName(newPageTypeID + BatchConstants.UNDER_SCORE + localNewFileName);
+			}
+			// create the copy of each file.
+			try {
+				final File srcFileNewFileName = new File(batchInstanceFolderPath + File.separator + localNewFileName);
+				final File destFileNewFileName = new File(batchInstanceFolderPath + File.separator
+						+ duplicateCopyPageType.getNewFileName());
+				LOGGER.info("srcFileNewFileName : " + srcFileNewFileName);
+				LOGGER.info("destFileNewFileName : " + destFileNewFileName);
+				FileUtils.copyFile(srcFileNewFileName, destFileNewFileName, false);
+			} catch (final IOException e) {
+				errMsg = "Not able to create duplicate the file newFileName: " + localNewFileName + BatchConstants.SPACE
+						+ e.getMessage();
+				LOGGER.error(errMsg);
+			}
+		}
+	}
+
+	/**
 	 * Data carrier.
 	 * 
-	 * @authorEphesoftft.
+	 * @author Ephesoft.
 	 * 
 	 */
 	private class DocPageCarrier {
 
+		/**
+		 * pageIndex int.
+		 */
 		private int pageIndex;
+		/**
+		 * docIndex int.
+		 */
 		private int docIndex;
+		/**
+		 * docTypesList List<Document>.
+		 */
 		private List<Document> docTypesList;
 
 		/**
-		 * @return the pageIndex
+		 * To get page index.
+		 * 
+		 * @return int
 		 */
 		public int getPageIndex() {
 			return pageIndex;
 		}
 
 		/**
-		 * @param pageIndex the pageIndex to set
+		 * To set page index.
+		 * 
+		 * @param pageIndex int
 		 */
-		public void setPageIndex(int pageIndex) {
+		public void setPageIndex(final int pageIndex) {
 			this.pageIndex = pageIndex;
 		}
 
 		/**
-		 * @return the docIndex
+		 * To get doc index.
+		 * 
+		 * @return int
 		 */
 		public int getDocIndex() {
 			return docIndex;
 		}
 
 		/**
-		 * @param docIndex the docIndex to set
+		 * To set doc index.
+		 * 
+		 * @param docIndex int
 		 */
-		public void setDocIndex(int docIndex) {
+		public void setDocIndex(final int docIndex) {
 			this.docIndex = docIndex;
 		}
 
 		/**
-		 * @return the docTypesList
+		 * To get Doc Types List.
+		 * 
+		 * @return List<Document>
 		 */
 		public List<Document> getDocTypesList() {
 			return docTypesList;
 		}
 
 		/**
-		 * @param docTypesList the docTypesList to set
+		 * To set Doc Types List.
+		 * 
+		 * @param docTypesList List<Document>
 		 */
-		public void setDocTypesList(List<Document> docTypesList) {
+		public void setDocTypesList(final List<Document> docTypesList) {
 			this.docTypesList = docTypesList;
 		}
 
 	}
 
 	/**
-	 * An api to get the URL object for the batch ID.
+	 * An API to get the URL object for the batch ID.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @return URL object.
 	 */
 	@Override
-	public URL getBatchContextURL(String batchInstanceIdentifier) {
+	public URL getBatchContextURL(final String batchInstanceIdentifier) {
 		try {
-			return new URL(this.getBatchFolderURL() + "/" + batchInstanceIdentifier);
-		} catch (MalformedURLException e) {
+			return new URL(this.getBatchFolderURL(batchInstanceIdentifier) + ICommonConstants.FORWARD_SLASH + batchInstanceIdentifier);
+		} catch (final MalformedURLException e) {
 			throw new DCMABusinessException(e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * An api which will return true if the review is required other wise false.
+	 * An API which will return true if the review is required other wise false.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @return boolean true if isReviewRequired other wise false.
 	 * @throws DCMAApplicationException If any of the parameter is not valid.
 	 */
 	@Override
-	public boolean isReviewRequired(final String batchInstanceIdentifier, boolean checkReviewFlag) throws DCMAApplicationException {
+	public boolean isReviewRequired(final String batchInstanceIdentifier, final boolean checkReviewFlag)
+			throws DCMAApplicationException {
 		return isReviewRequired(batchInstanceIdentifier, checkReviewFlag, false);
 
 	}
 
-	private boolean isReviewRequired(String batchInstanceIdentifier, boolean checkReviewFlag, boolean setDocumentReviewStatus)
-			throws DCMAApplicationException {
+	private boolean isReviewRequired(final String batchInstanceIdentifier, final boolean checkReviewFlag,
+			final boolean setDocumentReviewStatus) throws DCMAApplicationException {
 
 		boolean isReviewRequired = false;
 
@@ -1852,21 +1857,18 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (null == batchInstanceIdentifier) {
 			errMsg = "Input parameter batchInstanceIdentifier is null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 		boolean isBatchReviewed = true;
-		for (Document document : docTypesList) {
+		for (final Document document : docTypesList) {
 			if (!document.isReviewed()) {
 				isBatchReviewed = false;
 			}
@@ -1874,19 +1876,20 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (!isBatchReviewed) {
 			if (!setDocumentReviewStatus) {
-				for (Document document : docTypesList) {
-					String docType = document.getType();
+				for (final Document document : docTypesList) {
+					final String docType = document.getType();
 					if (null != docType && docType.equals(EphesoftProperty.UNKNOWN.getProperty())) {
 						isReviewRequired = true;
 						break;
 					}
 					if (checkReviewFlag) {
 						isReviewRequired = !document.isReviewed();
-						if (isReviewRequired)
+						if (isReviewRequired) {
 							break;
+						}
 					} else {
-						float confidence = document.getConfidence();
-						float confidenceThreshold = document.getConfidenceThreshold();
+						final float confidence = document.getConfidence();
+						final float confidenceThreshold = document.getConfidenceThreshold();
 						if (confidenceThreshold >= confidence) {
 							isReviewRequired = true;
 							break;
@@ -1894,14 +1897,14 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 					}
 				}
 			} else {
-				for (Document document : docTypesList) {
-					String docType = document.getType();
+				for (final Document document : docTypesList) {
+					final String docType = document.getType();
 					if (null != docType && docType.equals(EphesoftProperty.UNKNOWN.getProperty())) {
 						document.setReviewed(false);
 						isReviewRequired = true;
 					} else {
-						float confidence = document.getConfidence();
-						float confidenceThreshold = document.getConfidenceThreshold();
+						final float confidence = document.getConfidence();
+						final float confidenceThreshold = document.getConfidenceThreshold();
 						if (confidenceThreshold >= confidence) {
 							document.setReviewed(false);
 							isReviewRequired = true;
@@ -1917,7 +1920,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api which will return true if the review is required other wise false.
+	 * An API which will return true if the review is required other wise false.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @return boolean true if isReviewRequired other wise false.
@@ -1929,7 +1932,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api which will return true if the validation is required for the document level fields other wise false.
+	 * An API which will return true if the validation is required for the document level fields other wise false.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @return boolean true if isValidationRequired other wise false.
@@ -1944,31 +1947,28 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 		if (null == batchInstanceIdentifier) {
 			errMsg = "Input parameter batchInstanceIdentifier is null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		for (Document document : docTypesList) {
+		for (final Document document : docTypesList) {
 			// Add a check to insure that no document have document type "Unknown"
 			// We can remove this check if isReviewRequired is handled properly.
-			String docType = document.getType();
+			final String docType = document.getType();
 			if (null != docType && docType.equals(EphesoftProperty.UNKNOWN.getProperty())) {
 				isValidationRequired = true;
 				break;
 			}
 			// End of check.
-			boolean b = document.isValid();
-			if (!b) {
+			final boolean boolIsValid = document.isValid();
+			if (!boolIsValid) {
 				isValidationRequired = true;
 				break;
 			}
@@ -1978,7 +1978,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	/**
-	 * An api to generate all the folder structure for samples.
+	 * An API to generate all the folder structure for samples.
 	 * 
 	 * @param batchClassIDList List<List<String>>
 	 * @throws DCMAApplicationException If any of the parameter is not valid.
@@ -1986,24 +1986,24 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	@Override
 	public void sampleGeneration(final List<List<String>> batchIdDocPgNameList) throws DCMAApplicationException {
 		String errMsg = null;
-		String baseSampleFdLoc = batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc();
-		String sampleFolders = batchSchemaDao.getJAXB2Template().getSampleFolders();
+		final String baseSampleFdLoc = batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc();
+		final String sampleFolders = batchSchemaDao.getJAXB2Template().getSampleFolders();
 
 		if (null == batchIdDocPgNameList || batchIdDocPgNameList.isEmpty() || null == baseSampleFdLoc || null == sampleFolders) {
 			errMsg = "Input parameter batchClassIDList are null or empty.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		String[] nameOfFoldersArr = sampleFolders.split(BatchConstants.SEMI_COLON);
+		final String[] nameOfFoldersArr = sampleFolders.split(BatchConstants.SEMI_COLON);
 		boolean isFodlerNameAdded = true;
-		for (String fdName : nameOfFoldersArr) {
-			String dirPath = baseSampleFdLoc;
-			for (List<String> batchIdDocPgName : batchIdDocPgNameList) {
-				StringBuilder subDirPath = new StringBuilder();
+		for (final String fdName : nameOfFoldersArr) {
+			final String dirPath = baseSampleFdLoc;
+			for (final List<String> batchIdDocPgName : batchIdDocPgNameList) {
+				final StringBuilder subDirPath = new StringBuilder();
 				subDirPath.append(dirPath);
 				isFodlerNameAdded = true;
-				for (String dirName : batchIdDocPgName) {
+				for (final String dirName : batchIdDocPgName) {
 					if (null == dirName) {
 						break;
 					}
@@ -2015,55 +2015,63 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 						isFodlerNameAdded = false;
 					}
 				}
-				String strManyDirectories = subDirPath.toString();
+				final String strManyDirectories = subDirPath.toString();
 				try {
 					// Create multiple directories
-					boolean success = (new File(strManyDirectories)).mkdirs();
+					boolean success = new File(strManyDirectories).mkdirs();
 					if (success) {
-						logger.info("Directories: " + strManyDirectories + " created.");
+						LOGGER.info("Directories: " + strManyDirectories + " created.");
 					} else {
-						logger.info("Directories: " + strManyDirectories + " not created.");
+						LOGGER.info("Directories: " + strManyDirectories + " not created.");
 					}
-				} catch (Exception e) {
-					logger.info("Directories: " + strManyDirectories + " not created.");
-					logger.error(e.getMessage());
+				} catch (final Exception e) {
+					LOGGER.info("Directories: " + strManyDirectories + " not created.");
+					LOGGER.error(e.getMessage());
 				}
 			}
 		}
 	}
 
+	/**
+	 * To delete the document type folder.
+	 * 
+	 * @param docTypeNameList List<String>
+	 * @param batchClassIdentifier String
+	 * @throws DCMAApplicationException if input parameter is null or empty
+	 */
 	@Override
-	public void deleteDocTypeFolder(List<String> docTypeNameList, String batchClassIdentifier) throws DCMAApplicationException {
+	public void deleteDocTypeFolder(final List<String> docTypeNameList, final String batchClassIdentifier)
+			throws DCMAApplicationException {
 		String errMsg = null;
-		String baseSampleFdLoc = batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc();
-		String sampleFolders = batchSchemaDao.getJAXB2Template().getSampleFolders();
+		final String baseSampleFdLoc = batchSchemaDao.getJAXB2Template().getBaseSampleFdLoc();
+		final String sampleFolders = batchSchemaDao.getJAXB2Template().getSampleFolders();
 
 		if (null == docTypeNameList || docTypeNameList.isEmpty() || null == baseSampleFdLoc || null == sampleFolders) {
 			errMsg = "Input parameter docTypeNameList are null or empty.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		String[] nameOfFoldersArr = sampleFolders.split(BatchConstants.SEMI_COLON);
-		StringBuilder docTypeDirPath = new StringBuilder(baseSampleFdLoc);
+		final String[] nameOfFoldersArr = sampleFolders.split(BatchConstants.SEMI_COLON);
+		final StringBuilder docTypeDirPath = new StringBuilder(baseSampleFdLoc);
 		docTypeDirPath.append(File.separator);
 		docTypeDirPath.append(batchClassIdentifier);
 
-		String batchClassFolderPath = docTypeDirPath.toString();
+		final String batchClassFolderPath = docTypeDirPath.toString();
 		String docTypePath = null;
 		String baseFolPath = null;
-		for (String fdName : nameOfFoldersArr) {
+		for (final String fdName : nameOfFoldersArr) {
 			baseFolPath = batchClassFolderPath + File.separator + fdName;
-			for (String docTypeName : docTypeNameList) {
+			for (final String docTypeName : docTypeNameList) {
 				docTypePath = baseFolPath + File.separator + docTypeName;
 				docTypePath = docTypePath.trim();
 				try {
-					File docTypeFileName = new File(docTypePath);
-					logger.info("docTypeFileName : " + docTypeFileName);
+					final File docTypeFileName = new File(docTypePath);
+					LOGGER.info("docTypeFileName : " + docTypeFileName);
 					FileUtils.forceDelete(docTypeFileName);
-				} catch (IOException e) {
-					errMsg = "Not able to delete the file docTypeFilePath: " + docTypePath + " " + e.getMessage();
-					logger.info(errMsg);
+				} catch (final IOException e) {
+					errMsg = "Not able to delete the file docTypeFilePath: " + docTypePath + BatchConstants.SPACE + e.getMessage();
+					LOGGER.info(errMsg);
 				}
 			}
 
@@ -2071,84 +2079,96 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 	}
 
+	/**
+	 * To get Thumb nail File Path.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 * @param documentId String
+	 * @param pageId String
+	 * @return String
+	 * @throws DCMAApplicationException if input parameters are null
+	 */
 	@Override
-	public String getThumbnailFilePath(String batchInstanceIdentifier, String documentId, String pageId)
+	public String getThumbnailFilePath(final String batchInstanceIdentifier, final String documentId, final String pageId)
 			throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == documentId || null == pageId) {
 			errMsg = "Input parameters batchInstanceIdentifier/documentId/pageId are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int docIndex = getDocumentTypeIndex(docTypesList, documentId);
+		final int docIndex = getDocumentTypeIndex(docTypesList, documentId);
 
-		int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageId);
+		final int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageId);
 
-		Document docType = docTypesList.get(docIndex);
-		Pages pages = docType.getPages();
-		List<Page> pageTypeList = pages.getPage();
-		Page page = pageTypeList.get(pageIndex);
-		String thumbnailFileName = page.getThumbnailFileName();
+		final Document docType = docTypesList.get(docIndex);
+		final Pages pages = docType.getPages();
+		final List<Page> pageTypeList = pages.getPage();
+		final Page page = pageTypeList.get(pageIndex);
+		final String thumbnailFileName = page.getThumbnailFileName();
 
-		String thumbnailPath = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator
-				+ thumbnailFileName;
+		final String thumbnailPath = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier) + File.separator
+				+ batchInstanceIdentifier + File.separator + thumbnailFileName;
 
 		return thumbnailPath;
 	}
 
+	/**
+	 * To get displayed image file path.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 * @param documentId String
+	 * @param pageId String
+	 * @return String
+	 * @throws DCMAApplicationException if input parameters are null
+	 */
 	@Override
-	public String getDisplayImageFilePath(String batchInstanceIdentifier, String documentId, String pageId)
+	public String getDisplayImageFilePath(final String batchInstanceIdentifier, final String documentId, final String pageId)
 			throws DCMAApplicationException {
 
 		String errMsg = null;
 
 		if (null == batchInstanceIdentifier || null == documentId || null == pageId) {
 			errMsg = "Input parameters batchInstanceIdentifier/documentId/pageId are null.";
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 			throw new DCMAApplicationException(errMsg);
 		}
 
-		Batch batch = batchSchemaDao.get(batchInstanceIdentifier);
+		final Batch batch = batchSchemaDao.get(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 
-		List<Document> docTypesList = batch.getDocuments().getDocument();
+		final List<Document> docTypesList = batch.getDocuments().getDocument();
 
-		if (null == docTypesList) {
-			errMsg = "docTypesList is null.";
-			logger.error(errMsg);
-			throw new DCMAApplicationException(errMsg);
-		}
+		checkDocTypeList(docTypesList);
 
-		int docIndex = getDocumentTypeIndex(docTypesList, documentId);
+		final int docIndex = getDocumentTypeIndex(docTypesList, documentId);
 
-		int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageId);
+		final int pageIndex = getPageTypeIndex(docTypesList, docIndex, pageId);
 
-		Document docType = docTypesList.get(docIndex);
-		Pages pages = docType.getPages();
-		List<Page> pageTypeList = pages.getPage();
-		Page page = pageTypeList.get(pageIndex);
-		String displayFileName = page.getDisplayFileName();
+		final Document docType = docTypesList.get(docIndex);
+		final Pages pages = docType.getPages();
+		final List<Page> pageTypeList = pages.getPage();
+		final Page page = pageTypeList.get(pageIndex);
+		final String displayFileName = page.getDisplayFileName();
 
-		String displayFilePath = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator
-				+ displayFileName;
+		final String displayFilePath = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier)
+				+ File.separator + batchInstanceIdentifier + File.separator + displayFileName;
 
 		return displayFilePath;
 	}
 
 	/**
-	 * An api to generate the xml file for all the htmls generated by image process plug-ins.
+	 * An API to generate the xml file for all the htmls generated by image process plug-ins.
 	 * 
 	 * @return batchInstanceIdentifier String
 	 * @throws DCMAException If any error occurs.
@@ -2156,54 +2176,44 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	public void htmlToXmlGeneration(final String batchInstanceIdentifier) throws DCMAException {
 		try {
 			htmlOutputGeneration(batchInstanceIdentifier);
-		} catch (DCMABusinessException e) {
-			logger.error(e.getMessage());
+		} catch (final DCMABusinessException e) {
+			LOGGER.error(e.getMessage());
 			throw new DCMAException(e.getMessage(), e);
-		} catch (DCMAApplicationException e) {
-			logger.error(e.getMessage());
+		} catch (final DCMAApplicationException e) {
+			LOGGER.error(e.getMessage());
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * @param batchInstanceIdentifier String
-	 * @throws DCMAApplicationException
-	 * @throws DCMABusinessException
-	 */
 	private void htmlOutputGeneration(final String batchInstanceIdentifier) throws DCMAApplicationException, DCMABusinessException {
-		String actualFolderLocation = getLocalFolderLocation() + File.separator + batchInstanceIdentifier + File.separator;
+		final String actualFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier)
+				+ File.separator + batchInstanceIdentifier + File.separator;
 
-		Batch batch = getBatch(batchInstanceIdentifier);
+		final Batch batch = getBatch(batchInstanceIdentifier);
 		String outputFileName = "tempFile";
 		String outputFilePath = null;
-		boolean isTesseractBatch = false;
-		if (batch.getBatchClassName().contains(IUtilCommonConstants.TESSERACT_MAIL_ROOM_NAME)) {
-			isTesseractBatch = true;
-		}
 
-		String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TESSERACT_HOCR_PLUGIN,
-				TesseractVersionProperty.TESSERACT_VERSIONS);
-		List<Document> xmlDocuments = batch.getDocuments().getDocument();
-		BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
+		final List<Document> xmlDocuments = batch.getDocuments().getDocument();
+		final BatchInstanceThread batchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		outputFilePath = actualFolderLocation + outputFileName;
 		String outputFilePathLocal = null;
 		if (null != xmlDocuments) {
-			for (Document document : xmlDocuments) {
-				List<Page> listOfPages = document.getPages().getPage();
+			for (final Document document : xmlDocuments) {
+				final List<Page> listOfPages = document.getPages().getPage();
 				if (null != listOfPages) {
-					for (Page page : listOfPages) {
+					for (final Page page : listOfPages) {
 						outputFilePathLocal = outputFilePath + page.getIdentifier();
 						hOCRGenerationUsingThreadpool(batchInstanceThread, batchInstanceIdentifier, actualFolderLocation,
-								outputFilePathLocal, isTesseractBatch, tesseractVersion, page);
+								outputFilePathLocal, page);
 					}
 				}
 			}
 			try {
-				logger.info("Creating HOCR for all pages using threadpool.");
+				LOGGER.info("Creating HOCR for all pages using threadpool.");
 				batchInstanceThread.execute();
-				logger.info("HOCRgenerated succussfully for all pages.");
-			} catch (DCMAApplicationException dcmae) {
-				logger.error("Error while genmerating hOCR from html using threadpool");
+				LOGGER.info("HOCRgenerated succussfully for all pages.");
+			} catch (final DCMAApplicationException dcmae) {
+				LOGGER.error("Error while genmerating hOCR from html using threadpool");
 				batchInstanceThread.remove();
 				throw new DCMAApplicationException("Error while genmerating hOCR from html using threadpool ." + dcmae.getMessage(),
 						dcmae);
@@ -2213,8 +2223,7 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	}
 
 	private void hOCRGenerationUsingThreadpool(final BatchInstanceThread batchInstanceThread, final String batchInstanceIdentifier,
-			final String actualFolderLocation, final String outputFilePath, final boolean isTesseractBatch,
-			final String tesseractVersion, final Page page) {
+			final String actualFolderLocation, final String outputFilePath, final Page page) {
 		batchInstanceThread.add(new AbstractRunnable() {
 
 			@Override
@@ -2223,50 +2232,72 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				String hocrFileName;
 				String pathOfHOCRFile;
 				FileInputStream inputStream = null;
-				HocrPages hocrPages = new HocrPages();
-				List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+				final HocrPages hocrPages = new HocrPages();
+				final List<HocrPage> hocrPageList = hocrPages.getHocrPage();
 
-				HocrPage hocrPage = new HocrPage();
+				final HocrPage hocrPage = new HocrPage();
 				pageID = page.getIdentifier();
 				hocrPage.setPageID(pageID);
 				hocrPageList.add(hocrPage);
 				hocrFileName = page.getHocrFileName();
 				pathOfHOCRFile = actualFolderLocation + hocrFileName;
-				logger.info("Creating hOCR for page : " + pageID);
+				LOGGER.info("Creating hOCR for page : " + pageID);
 				try {
 					inputStream = hocrGenerationInternal(actualFolderLocation, outputFilePath, pageID, pathOfHOCRFile, hocrPage);
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
+				} catch (final IOException e) {
+					LOGGER.error(e.getMessage(), e);
+				} catch (final Exception e) {
+					LOGGER.error(e.getMessage(), e);
 				} finally {
 					try {
 						if (inputStream != null) {
 							inputStream.close();
 						}
-					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
+					} catch (final IOException e) {
+						LOGGER.error(e.getMessage(), e);
 					}
 				}
 				createHocr(hocrPages, batchInstanceIdentifier, pageID);
 				try {
-					logger.info("Deleting temp file : " + outputFilePath);
+					LOGGER.info("Deleting temp file : " + outputFilePath);
 					FileUtils.forceDelete(new File(outputFilePath));
-				} catch (IOException e) {
-					logger.info("Deleting the temp file." + e.getMessage());
+				} catch (final IOException e) {
+					LOGGER.info("Deleting the temp file." + e.getMessage());
 				}
 			}
-
 
 		});
 	}
 
+	/**
+	 * API to generate HOCR.
+	 * 
+	 * @param workingDir String
+	 * @param pageID String
+	 * @param pathOfHOCRFile String
+	 * @param hocrPage HocrPage
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws XPathExpressionException
+	 * @throws TransformerException
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 */
 	@Override
-	public void hocrGenerationAPI(final String workingDir, String pageID, String pathOfHOCRFile, HocrPage hocrPage) throws FileNotFoundException, IOException, Exception {
-		String outputFilePath = workingDir + File.separator + "tempFile" + pageID;
-		hocrGenerationInternal(workingDir, outputFilePath, pageID, pathOfHOCRFile, hocrPage);
+	public void hocrGenerationAPI(final String workingDir, final String pageID, final String pathOfHOCRFile, final HocrPage hocrPage)
+			throws FileNotFoundException, IOException, XPathExpressionException, TransformerException, ParserConfigurationException,
+			SAXException {
+		final String outputFilePath = workingDir + File.separator + "tempFile" + pageID;
+		FileInputStream fileInputStream = null;
+		try {
+			fileInputStream = hocrGenerationInternal(workingDir, outputFilePath, pageID, pathOfHOCRFile, hocrPage);
+		} finally {
+			if (fileInputStream != null) {
+				fileInputStream.close();
+			}
+		}
 	}
-			
+
 	/**
 	 * Method extracted to be reused for Ephesoft Web Services.
 	 * 
@@ -2275,31 +2306,30 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 	 * @param pageID
 	 * @param pathOfHOCRFile
 	 * @param hocrPage
-	 * @return
+	 * @return FileInputStream
 	 * @throws IOException
-	 * @throws Exception
-	 * @throws FileNotFoundException
+	 * @throws TransformerException
+	 * @throws XPathExpressionException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
 	 */
 	private FileInputStream hocrGenerationInternal(final String actualFolderLocation, final String outputFilePath,
-			String pageID, String pathOfHOCRFile, HocrPage hocrPage) throws IOException, Exception, FileNotFoundException {
-		
-		// if (isTesseractBatch
-		// && tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
+			final String pageID, final String pathOfHOCRFile, final HocrPage hocrPage) throws XPathExpressionException,
+			TransformerException, IOException, ParserConfigurationException, SAXException {
+
 		XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 		OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageID);
-		// } else {
-		// XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-		// }
-		FileInputStream inputStream = new FileInputStream(outputFilePath);
-		org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
-		NodeList titleNodeList = doc.getElementsByTagName("title");
+
+		final FileInputStream inputStream = new FileInputStream(outputFilePath);
+		final org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
+		final NodeList titleNodeList = doc.getElementsByTagName(BatchConstants.TITLE);
 		if (null != titleNodeList) {
 			for (int index = 0; index < titleNodeList.getLength(); index++) {
-				Node node = titleNodeList.item(index);
-				NodeList childNodeList = node.getChildNodes();
-				Node n = childNodeList.item(0);
-				if (null != n) {
-					String value = n.getNodeValue();
+				final Node node = titleNodeList.item(index);
+				final NodeList childNodeList = node.getChildNodes();
+				final Node nodeChild = childNodeList.item(BatchConstants.ZERO);
+				if (null != nodeChild) {
+					final String value = nodeChild.getNodeValue();
 					if (value != null) {
 						hocrPage.setTitle(value);
 						break;
@@ -2308,40 +2338,28 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 			}
 		}
 
-		NodeList spanNodeList = doc.getElementsByTagName("span");
-		Spans spans = new Spans();
+		final NodeList spanNodeList = doc.getElementsByTagName("span");
+		final Spans spans = new Spans();
 		hocrPage.setSpans(spans);
-		List<Span> spanList = spans.getSpan();
+		final List<Span> spanList = spans.getSpan();
 		if (null != spanNodeList) {
-			StringBuilder hocrContent = new StringBuilder();
-			for (int index = 0; index < spanNodeList.getLength(); index++) {
-				Node node = spanNodeList.item(index);
-				NodeList childNodeList = node.getChildNodes();
-				Node n = childNodeList.item(0);
-				Span span = new Span();
-				if (null != n) {
-					String value = n.getNodeValue();
+			final StringBuilder hocrContent = new StringBuilder();
+			for (int index = BatchConstants.ZERO; index < spanNodeList.getLength(); index++) {
+				final Node node = spanNodeList.item(index);
+				final NodeList childNodeList = node.getChildNodes();
+				final Node nodeChild = childNodeList.item(BatchConstants.ZERO);
+				final Span span = new Span();
+				if (null != nodeChild) {
+					final String value = nodeChild.getNodeValue();
 					span.setValue(value);
 					hocrContent.append(value);
-					hocrContent.append(" ");
+					hocrContent.append(BatchConstants.SPACE);
 				}
 				spanList.add(span);
-				NamedNodeMap map = node.getAttributes();
-				Node nMap = map.getNamedItem("title");
+				final NamedNodeMap map = node.getAttributes();
+				final Node nMap = map.getNamedItem(BatchConstants.TITLE);
 				Coordinates hocrCoordinates = null;
-				try {
-					String coordinates = nMap.getNodeValue();
-					String[] arr = coordinates.split(" ");
-					if (null != arr && arr.length >= 4) {
-						hocrCoordinates = new Coordinates();
-						hocrCoordinates.setX0(new BigInteger(arr[1]));
-						hocrCoordinates.setX1(new BigInteger(arr[3]));
-						hocrCoordinates.setY0(new BigInteger(arr[2]));
-						hocrCoordinates.setY1(new BigInteger(arr[4]));
-					}
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
+				hocrCoordinates = getHOCRCoordinates(nMap, hocrCoordinates);
 				if (null == hocrCoordinates) {
 					hocrCoordinates = new Coordinates();
 					hocrCoordinates.setX0(BigInteger.ZERO);
@@ -2355,51 +2373,54 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		}
 		return inputStream;
 	}
-	
+
 	/**
-	 * This api is used to generate the HocrPage object for input hocr file.
+	 * This API is used to generate the HocrPage object for input hocr file.
 	 * 
 	 * @param pageName {@link String}
 	 * @param pathOfHOCRFile {@link String}
 	 * @param outputFilePath {@link String}
+	 * @param batchClassIdentifier {@link String}
+	 * @param ocrEngineName {@link String}
 	 * @return {@link HocrPage}
 	 */
 	@Override
-	public HocrPage generateHocrPage(String pageName, String pathOfHOCRFile, String outputFilePath, String batchClassIdentifier,
-			String ocrEngineName) {
+	public HocrPage generateHocrPage(final String pageName, final String pathOfHOCRFile, final String outputFilePath,
+			final String batchClassIdentifier, final String ocrEngineName) {
 
 		if (null == pathOfHOCRFile || null == outputFilePath) {
 			return null;
 		}
-		BatchPluginConfiguration[] pluginConfiguration = batchClassPluginPropertiesService.getPluginProperties(batchClassIdentifier,
-				TESSERACT_HOCR_PLUGIN, TesseractVersionProperty.TESSERACT_VERSIONS);
-		String tesseractVersion = "";
-		if (pluginConfiguration != null && pluginConfiguration.length > 0 && pluginConfiguration[0].getValue() != null
-				&& pluginConfiguration[0].getValue().length() > 0) {
-			tesseractVersion = pluginConfiguration[0].getValue();
+		final BatchPluginConfiguration[] pluginConfiguration = batchClassPluginPropertiesService.getPluginProperties(
+				batchClassIdentifier, TESSERACT_HOCR_PLUGIN, TesseractVersionProperty.TESSERACT_VERSIONS);
+		String tesseractVersion = BatchConstants.EMPTY;
+		if (pluginConfiguration != null && pluginConfiguration.length > BatchConstants.ZERO
+				&& pluginConfiguration[BatchConstants.ZERO].getValue() != null
+				&& pluginConfiguration[BatchConstants.ZERO].getValue().length() > BatchConstants.ZERO) {
+			tesseractVersion = pluginConfiguration[BatchConstants.ZERO].getValue();
 		}
-		HocrPage hocrPage = new HocrPage();
+		final HocrPage hocrPage = new HocrPage();
 		hocrPage.setPageID(pageName);
 		FileInputStream inputStream = null;
 		try {
 			if (ocrEngineName.equalsIgnoreCase(IUtilCommonConstants.TESSERACT_HOCR_PLUGIN)
 					&& tesseractVersion.equalsIgnoreCase(TesseractVersionProperty.TESSERACT_VERSION_3.getPropertyKey())) {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
-				String actualFolderLocation = new File(outputFilePath).getParent();
+				final String actualFolderLocation = new File(outputFilePath).getParent();
 				OCREngineUtil.formatHOCRForTesseract(outputFilePath, actualFolderLocation, pageName);
 			} else {
 				XMLUtil.htmlOutputStream(pathOfHOCRFile, outputFilePath);
 			}
 			inputStream = new FileInputStream(outputFilePath);
-			org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
-			NodeList titleNodeList = doc.getElementsByTagName("title");
+			final org.w3c.dom.Document doc = XMLUtil.createDocumentFrom(inputStream);
+			final NodeList titleNodeList = doc.getElementsByTagName(BatchConstants.TITLE);
 			if (null != titleNodeList) {
-				for (int index = 0; index < titleNodeList.getLength(); index++) {
-					Node node = titleNodeList.item(index);
-					NodeList childNodeList = node.getChildNodes();
-					Node n = childNodeList.item(0);
-					if (null != n) {
-						String value = n.getNodeValue();
+				for (int index = BatchConstants.ZERO; index < titleNodeList.getLength(); index++) {
+					final Node node = titleNodeList.item(index);
+					final NodeList childNodeList = node.getChildNodes();
+					final Node nodeChild = childNodeList.item(BatchConstants.ZERO);
+					if (null != nodeChild) {
+						final String value = nodeChild.getNodeValue();
 						if (value != null) {
 							hocrPage.setTitle(value);
 							break;
@@ -2408,40 +2429,28 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				}
 			}
 
-			NodeList spanNodeList = doc.getElementsByTagName("span");
-			Spans spans = new Spans();
+			final NodeList spanNodeList = doc.getElementsByTagName("span");
+			final Spans spans = new Spans();
 			hocrPage.setSpans(spans);
-			List<Span> spanList = spans.getSpan();
+			final List<Span> spanList = spans.getSpan();
 			if (null != spanNodeList) {
-				StringBuilder hocrContent = new StringBuilder();
+				final StringBuilder hocrContent = new StringBuilder();
 				for (int index = 0; index < spanNodeList.getLength(); index++) {
-					Node node = spanNodeList.item(index);
-					NodeList childNodeList = node.getChildNodes();
-					Node n = childNodeList.item(0);
-					Span span = new Span();
-					if (null != n) {
-						String value = n.getNodeValue();
+					final Node node = spanNodeList.item(index);
+					final NodeList childNodeList = node.getChildNodes();
+					final Node nodeChild = childNodeList.item(BatchConstants.ZERO);
+					final Span span = new Span();
+					if (null != nodeChild) {
+						final String value = nodeChild.getNodeValue();
 						span.setValue(value);
 						hocrContent.append(value);
-						hocrContent.append(" ");
+						hocrContent.append(BatchConstants.SPACE);
 					}
 					spanList.add(span);
-					NamedNodeMap map = node.getAttributes();
-					Node nMap = map.getNamedItem("title");
+					final NamedNodeMap map = node.getAttributes();
+					final Node nMap = map.getNamedItem(BatchConstants.TITLE);
 					Coordinates hocrCoordinates = null;
-					try {
-						String coordinates = nMap.getNodeValue();
-						String[] arr = coordinates.split(" ");
-						if (null != arr && arr.length >= 4) {
-							hocrCoordinates = new Coordinates();
-							hocrCoordinates.setX0(new BigInteger(arr[1]));
-							hocrCoordinates.setX1(new BigInteger(arr[3]));
-							hocrCoordinates.setY0(new BigInteger(arr[2]));
-							hocrCoordinates.setY1(new BigInteger(arr[4]));
-						}
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
+					hocrCoordinates = getHOCRCoordinates(nMap, hocrCoordinates);
 					if (null == hocrCoordinates) {
 						hocrCoordinates = new Coordinates();
 						hocrCoordinates.setX0(BigInteger.ZERO);
@@ -2453,186 +2462,226 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				}
 				hocrPage.setHocrContent(hocrContent.toString());
 			}
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+		} catch (final IOException e) {
+			LOGGER.error(e.getMessage(), e);
+		} catch (final Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		} finally {
-			try {
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 		return hocrPage;
 	}
 
-		/*private boolean isTesseractHocrPlugin(String batchClassIdentifier) {
-		boolean isTesseractBatch = false;
-		if (batchClassIdentifier != null && !batchClassIdentifier.isEmpty()) {
-			BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByName(batchClassIdentifier,
-					IUtilCommonConstants.PAGE_PROCESS_MODULE_NAME);
-			List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
-			if (batchClassPlugins != null) {
-				String pluginName = null;
-				for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
-					if (batchClassPlugin != null) {
-						pluginName = batchClassPlugin.getPlugin().getPluginName();
-					}
-					if (IUtilCommonConstants.TESSERACT_HOCR_PLUGIN.equals(pluginName)) {
-						isTesseractBatch = true;
-						break;
-					} else if (IUtilCommonConstants.RECOSTAR_HOCR_PLUGIN.equals(pluginName)) {
-						isTesseractBatch = false;
-						break;
-					}
-				}
+	private Coordinates getHOCRCoordinates(final Node nMap, Coordinates hocrCoordinates) {
+		Coordinates localHocrCoordinates = hocrCoordinates;
+		try {
+			final String coordinates = nMap.getNodeValue();
+			final String[] arr = coordinates.split(BatchConstants.SPACE);
+			if (null != arr && arr.length >= 4) {
+				localHocrCoordinates = new Coordinates();
+				localHocrCoordinates.setX0(new BigInteger(arr[1]));
+				localHocrCoordinates.setX1(new BigInteger(arr[3]));
+				localHocrCoordinates.setY0(new BigInteger(arr[2]));
+				localHocrCoordinates.setY1(new BigInteger(arr[4]));
 			}
+		} catch (final Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
-		return isTesseractBatch;
-	}*/
-
-	@Override
-	public String getWebScannerScannedImagesURL() {
-		return getBaseHttpURL() + "/" + batchSchemaDao.getJAXB2Template().getWebScannerScannedImagesFolderPath();
+		return localHocrCoordinates;
 	}
 
+	/**
+	 * An API to fetch the image URL's excluding the imagename.
+	 * 
+	 * @return the URL to be appended to the image name.
+	 */
+	@Override
+	public String getWebScannerScannedImagesURL() {
+		return getBaseHttpURL() + BatchConstants.SLASH + batchSchemaDao.getJAXB2Template().getWebScannerScannedImagesFolderPath();
+	}
+
+	/**
+	 * An API to fetch the folder in which the scanned images are being kept.
+	 * 
+	 * @return the scanned images folder path.
+	 */
 	@Override
 	public String getWebScannerScannedImagesFolderPath() {
 		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getWebScannerScannedImagesFolderPath();
 	}
 
+	/**
+	 * API to create a temp folder for scanned images for the given name.
+	 * 
+	 * @param folderName {@link String}
+	 * @throws DCMAApplicationException if file not created
+	 */
 	@Override
-	public void createWebScannerFolder(String folderName) {
+	public void createWebScannerFolder(final String folderName) {
 		String errMsg = null;
-		File newDirectory = new File(getWebScannerScannedImagesFolderPath() + File.separator + folderName);
+		final File newDirectory = new File(getWebScannerScannedImagesFolderPath() + File.separator + folderName);
 		try {
 			FileUtils.forceMkdir(newDirectory);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			errMsg = "Not able to create the file " + folderName + " " + e.getMessage();
-			logger.error(errMsg);
+			LOGGER.error(errMsg);
 		}
-		return;
 	}
 
+	/**
+	 * API to copy all the .tiff and .tif files from the sourcePath+folderName to the batchPath+folderName.
+	 * 
+	 * @param sourcePath {@link String} the path containing the folder to be copied
+	 * @param folderName {@link String} the folder to be copied.
+	 * @param batchClassID {@link String} the identifier of batch to which the batch is to be copied
+	 * @throws DCMAApplicationException if error occurs
+	 */
 	@Override
-	public void copyFolder(String sourcePath, String folderName, String batchClassID) throws DCMAApplicationException {
-		String scannedImagesPath = sourcePath + File.separator + folderName;
-		File scannedImagesDirectory = new File(scannedImagesPath);
-		CustomFileFilter validFilesFilter = new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+	public void copyFolder(final String sourcePath, final String folderName, final String batchClassID)
+			throws DCMAApplicationException {
+		final String scannedImagesPath = sourcePath + File.separator + folderName;
+		final File scannedImagesDirectory = new File(scannedImagesPath);
+		final CustomFileFilter validFilesFilter = new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
 				.getExtensionWithDot());
 		List<File> validFilesToBeCopied = null;
 		try {
 			validFilesToBeCopied = getFiles(scannedImagesPath, validFilesFilter);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+		} catch (final IOException e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 		if (validFilesToBeCopied == null || validFilesToBeCopied.isEmpty()) {
 			throw new DCMAApplicationException("Error: No files scanned.");
 		}
 
-		CustomFileFilter filesToBeDeletedFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
-				.getExtensionWithDot(), FileType.SER.getExtensionWithDot());
-		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
-		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
+		final CustomFileFilter filesToBeDeletedFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+				.getExtensionWithDot(), FileType.SER.getExtensionWithDot(), FileType.XML.getExtensionWithDot());
+		final BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
+		final File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
-			for (File file : getFiles(scannedImagesPath, filesToBeDeletedFilter)) {
+			for (final File file : getFiles(scannedImagesPath, filesToBeDeletedFilter)) {
 				try {
 					FileUtils.forceDelete(file);
-					logger.info("Deleting File : " + file.getAbsolutePath());
-				} catch (Exception e) {
-					logger.error("Unable to delete file : " + file.getAbsolutePath());
+					LOGGER.info("Deleting File : " + file.getAbsolutePath());
+				} catch (final Exception e) {
+					LOGGER.error("Unable to delete file : " + file.getAbsolutePath());
 				}
 			}
 			FileUtils.copyDirectory(scannedImagesDirectory, uncFolder);
-			logger.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
+			LOGGER.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
 			FileUtils.forceDelete(scannedImagesDirectory);
-			logger.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
+		} catch (final Exception e) {
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 	}
 
+	/**
+	 * API to copy all the files from the sourcePath+folderName to the batchPath+folderName. Valid file types are specified by the
+	 * filter.
+	 * 
+	 * @param sourcePath {@link String} the path containing the folder to be copied
+	 * @param folderName {@link String} the folder to be copied.
+	 * @param batchClassID {@link String} the identifier of batch to which the batch is to be copied
+	 * @param fileFilter {@link CustomFileFilter} the file filter specifying the valid file types to copy
+	 * @throws DCMAApplicationException if error occurs in deleting
+	 */
 	@Override
-	public void copyFolderWithFileFilter(String sourcePath, String folderName, String batchClassID, CustomFileFilter fileFilter)
-			throws DCMAApplicationException {
-		String scannedImagesPath = sourcePath + File.separator + folderName;
-		File scannedImagesDirectory = new File(scannedImagesPath);
-		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
-		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
+	public void copyFolderWithFileFilter(final String sourcePath, final String folderName, final String batchClassID,
+			final CustomFileFilter fileFilter) throws DCMAApplicationException {
+		final String scannedImagesPath = sourcePath + File.separator + folderName;
+		final File scannedImagesDirectory = new File(scannedImagesPath);
+		final BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
+		final File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
-			for (File file : getFiles(scannedImagesPath, fileFilter)) {
+			for (final File file : getFiles(scannedImagesPath, fileFilter)) {
 				try {
 					FileUtils.forceDelete(file);
-					logger.info("Deleting File : " + file.getAbsolutePath());
-				} catch (Exception e) {
-					logger.error("Unable to delete file : " + file.getAbsolutePath());
+					LOGGER.info("Deleting File : " + file.getAbsolutePath());
+				} catch (final Exception e) {
+					LOGGER.error("Unable to delete file : " + file.getAbsolutePath());
 				}
 			}
 			FileUtils.copyDirectory(scannedImagesDirectory, uncFolder);
-			logger.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
+			LOGGER.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
 			FileUtils.forceDelete(scannedImagesDirectory);
-			logger.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
+		} catch (final Exception e) {
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 	}
 
-	private List<File> getFiles(String srcPath, CustomFileFilter fileFilter) throws IOException {
-		File srcDir = new File(srcPath);
-		List<File> fileList = new ArrayList<File>();
+	private List<File> getFiles(final String srcPath, final CustomFileFilter fileFilter) throws IOException {
+		final File srcDir = new File(srcPath);
+		final List<File> fileList = new ArrayList<File>();
 		if (srcDir != null && srcDir.list(fileFilter) != null) {
-			for (String imagename : srcDir.list(fileFilter)) {
+			for (final String imagename : srcDir.list(fileFilter)) {
 				fileList.add(new File(srcPath + File.separator + imagename));
 			}
 		}
 		return fileList;
 	}
 
-	/*
-	 * class FileFilter implements FilenameFilter {
+	/**
+	 * API to return base folder location.
 	 * 
-	 * public FileFilter() { super(); }
-	 * 
-	 * public boolean accept(File dir, String name) { return (!(name.endsWith(".tif")|| name.endsWith(".tiff"))); } }
+	 * @return String
 	 */
-
 	@Override
 	public String getBaseFolderLocation() {
 		return batchSchemaDao.getJAXB2Template().getBaseFolderLocation();
 	}
 
+	/**
+	 * An API to generate the xml file for all the htmls generated by image process plug-ins.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @throws DCMAException If any error occurs.
+	 */
 	@Override
-	public void htmlToXmlGeneration(BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
+	public void htmlToXmlGeneration(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
+		final String batchInstanceIdentifier = batchInstanceID.getID();
 		try {
-			this.htmlOutputGeneration(batchInstanceID.getID());
-		} catch (Exception e) {
+			this.htmlOutputGeneration(batchInstanceIdentifier);
+		} catch (final Exception e) {
 			throw new DCMAException(e.getMessage(), e);
 		}
-		logger.info("Copying File : " + batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		LOGGER.info("Copying File : " + batchInstanceID);
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * An API to fetch project File Base Folder location.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getProjectFileBaseFolder() {
 		return batchSchemaDao.getJAXB2Template().getProjectFilesBaseFolder();
 	}
 
+	/**
+	 * An API to get the project files for the given document type and batch class identifier.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param documentType {@link String}
+	 * @return List<String>
+	 * @throws DCMAException if error occurs
+	 */
 	@Override
-	public List<String> getProjectFilesForDocumentType(String batchClassIdentifier, String documentType) throws DCMAException {
-		List<String> returnList = new ArrayList<String>();
-		if (batchClassIdentifier != null && batchClassIdentifier.length() > 0) {
-			String projectFileBaseFolder = batchSchemaDao.getJAXB2Template().getProjectFilesBaseFolder();
-			File projectFilesFolder = new File(getBaseFolderLocation() + File.separator + batchClassIdentifier + File.separator
+	public List<String> getProjectFilesForDocumentType(final String batchClassIdentifier, final String documentType)
+			throws DCMAException {
+		final List<String> returnList = new ArrayList<String>();
+		if (batchClassIdentifier != null && batchClassIdentifier.length() > BatchConstants.ZERO) {
+			final String projectFileBaseFolder = batchSchemaDao.getJAXB2Template().getProjectFilesBaseFolder();
+			final File projectFilesFolder = new File(getBaseFolderLocation() + File.separator + batchClassIdentifier + File.separator
 					+ projectFileBaseFolder);
 			if (projectFilesFolder.exists()) {
-				String[] allProjectFiles = projectFilesFolder.list();
-				if (allProjectFiles != null && allProjectFiles.length > 0) {
-					for (String string : allProjectFiles) {
+				final String[] allProjectFiles = projectFilesFolder.list();
+				if (allProjectFiles != null && allProjectFiles.length > BatchConstants.ZERO) {
+					for (final String string : allProjectFiles) {
 						if (string.endsWith(".rsp")) {
 							returnList.add(string);
 						}
@@ -2643,149 +2692,277 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 		return returnList;
 	}
 
+	/**
+	 * An API to fetch Email Base Folder location using Http protocol.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getHttpEmailFolderPath() {
-		return getBaseHttpURL() + "/" + batchSchemaDao.getJAXB2Template().getEmailFolderName();
+		return getBaseHttpURL() + ICommonConstants.FORWARD_SLASH + batchSchemaDao.getJAXB2Template().getEmailFolderName();
 	}
 
+	/**
+	 * An API to fetch Batches Folder location.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return String
+	 */
 	@Override
-	public String getBatchFolderURL() {
-		File file = new File(getLocalFolderLocation());
-		return getBaseHttpURL() + "/" + file.getName();
+	public String getBatchFolderURL(String batchInstanceIdentifier) {
+		final File file = new File(batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
+		return getBaseHttpURL() + ICommonConstants.FORWARD_SLASH + file.getName();
 	}
 
+	/**
+	 * An API to fetch Email Base Folder location.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getEmailFolderPath() {
 		return getBaseSampleFDLock() + File.separator + batchSchemaDao.getJAXB2Template().getEmailFolderName();
 	}
 
+	/**
+	 * API to get test kv extraction folder path.
+	 * 
+	 * @param batchClassID {@link BatchClassID}
+	 * @param createDirectory boolean
+	 * @return String absolute folder location
+	 */
 	@Override
-	public String getTestKVExtractionFolderPath(BatchClassID batchClassID, boolean createDirectory) {
+	public String getTestKVExtractionFolderPath(final BatchClassID batchClassID, final boolean createDirectory) {
 		return getAbsolutePath(batchClassID.getID(), batchSchemaDao.getJAXB2Template().getTestKVExtractionFolderName(),
 				createDirectory);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * An API to return the complete export batch class folder location path.
 	 * 
-	 * @see com.ephesoft.dcma.batch.service.BatchSchemaService#getBatchExportFolderLocation()
+	 * @return String Batch Export Folder Location
 	 */
 	@Override
 	public String getBatchExportFolderLocation() {
 		return batchSchemaDao.getJAXB2Template().getBatchExportFolder();
 	}
 
+	/**
+	 * An API to return the Index folder name for fuzzy db.
+	 * 
+	 * @return String fuzzyDb Index Folder Path
+	 */
 	@Override
 	public String getFuzzyDBIndexFolderName() {
 		return batchSchemaDao.getJAXB2Template().getFuzzyDBIndexFolderName();
 	}
 
+	/**
+	 * An API to return the Index folder name for fuzzy db.
+	 * 
+	 * @return String fuzzyDb Index Folder Path
+	 */
 	@Override
 	public String getImagemagickBaseFolderName() {
 		return batchSchemaDao.getJAXB2Template().getImageMagickBaseFolderName();
 	}
 
+	/**
+	 * An API to return the Index folder name for fuzzy db.
+	 * 
+	 * @return String fuzzyDb Index Folder Path
+	 */
 	@Override
 	public String getSearchIndexFolderName() {
 		return batchSchemaDao.getJAXB2Template().getSearchIndexFolderName();
 	}
 
+	/**
+	 * An API to return the Index folder name for fuzzy db.
+	 * 
+	 * @return String fuzzyDb Index Folder Path
+	 */
 	@Override
 	public String getSearchSampleName() {
 		return batchSchemaDao.getJAXB2Template().getSearchSampleName();
 	}
 
+	/**
+	 * An API to return the test kv_extraction sample folder name.
+	 * 
+	 * @return String test kv_extraction sample folder name
+	 */
 	@Override
 	public String getTestKVExtractionFolderName() {
 		return batchSchemaDao.getJAXB2Template().getTestKVExtractionFolderName();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * An API to return the Batch Class Serializable File.
 	 * 
-	 * @see com.ephesoft.dcma.batch.service.BatchSchemaService#getBatchClassSerializableFile()
+	 * @return String name of batch Class Serializable Description as appearing on the UI
 	 */
 	@Override
 	public String getBatchClassSerializableFile() {
 		return batchSchemaDao.getJAXB2Template().getBatchClassSerializableFile();
 	}
 
+	/**
+	 * API to get File bound Plugin Mapping Folder Name.
+	 * 
+	 * @return String Name of filebound plugin mapping folder
+	 */
 	@Override
 	public String getFileboundPluginMappingFolderName() {
 		return batchSchemaDao.getJAXB2Template().getFileboundPluginMappingFolderName();
 	}
 
+	/**
+	 * API to get the temp folder location for a batch class.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getTempFolderName() {
 		return batchSchemaDao.getJAXB2Template().getTempFolder();
 	}
 
+	/**
+	 * API to copy all the files from the Email download folder to the UNC Folder.
+	 * 
+	 * @param sourcePath {@link String} the path containing the folder to be copied
+	 * @param folderName {@link String} the folder to be copied.
+	 * @param batchClassID {@link String} the identifier of batch to which the batch is to be copied
+	 * @throws DCMAApplicationException if error occurs.
+	 */
 	@Override
-	public void copyEmailFolderToUNC(String sourcePath, String folderName, String batchClassID) throws DCMAApplicationException {
-		String scannedImagesPath = sourcePath + File.separator + folderName;
-		File scannedImagesDirectory = new File(scannedImagesPath);
-		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
-		File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
+	public void copyEmailFolderToUNC(final String sourcePath, final String folderName, final String batchClassID)
+			throws DCMAApplicationException {
+		// Getting Ephesoft cloud user type
+		final Integer userType = getUserType();
+		final String scannedImagesPath = sourcePath + File.separator + folderName;
+		final File scannedImagesDirectory = new File(scannedImagesPath);
+		// Discard file after limit is crossed
+		discardOutOfLimitFile(scannedImagesDirectory, batchClassID, userType);
+		final BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batchClassID);
+		final File uncFolder = new File(batchClass.getUncFolder() + File.separator + folderName);
 		try {
 			FileUtils.copyDirectory(scannedImagesDirectory, uncFolder);
-			logger.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
+			LOGGER.info("Copying directory " + scannedImagesDirectory.getAbsolutePath() + "to " + uncFolder.getAbsolutePath());
 			FileUtils.forceDelete(scannedImagesDirectory);
-			logger.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LOGGER.info("Deleting directory :" + scannedImagesDirectory.getAbsolutePath());
+		} catch (final Exception e) {
+			LOGGER.error(e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 	}
 
+	/**
+	 * API to get test table folder path.
+	 * 
+	 * @param batchClassID {@link BatchClassID}
+	 * @param createDirectory {@link boolean}
+	 * @return {@link String} absolute folder location
+	 */
 	@Override
-	public String getTestTableFolderPath(BatchClassID batchClassID, boolean createDirectory) {
+	public String getTestTableFolderPath(final BatchClassID batchClassID, final boolean createDirectory) {
 		return getAbsolutePath(batchClassID.getID(), batchSchemaDao.getJAXB2Template().getTestTableFolderName(), createDirectory);
 	}
 
+	/**
+	 * API to create the batch XML at the end of the specified plugin.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@Override
 	public void backUpBatchXML(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
+
+	/**
+	 * An API to return the test table sample folder name.
+	 * 
+	 * @return {@link String} test table sample folder name
+	 */
 
 	@Override
 	public String getTestTableFolderName() {
 		return batchSchemaDao.getJAXB2Template().getTestTableFolderName();
 	}
 
+	/**
+	 * API to return the ValidationScriptName.
+	 * 
+	 * @return {@link String} ValidationScriptName
+	 */
 	@Override
 	public String getValidationScriptName() {
 		return batchSchemaDao.getJAXB2Template().getValidationScriptName();
 	}
 
+	/**
+	 * API to return the threadpool lock folder. This folder signifies if any thread is currently running for this batch instance at
+	 * any point of time.
+	 * 
+	 * @return {@link String} thread pool lock folder name
+	 */
 	@Override
 	public String getThreadpoolLockFolderName() {
 		return batchSchemaDao.getJAXB2Template().getThreadpoolLockFolder();
 	}
 
+	/**
+	 * API to add new table.
+	 * 
+	 * @return {@link String} AddNewTableScriptName
+	 */
 	@Override
 	public String getAddNewTableScriptName() {
 		return batchSchemaDao.getJAXB2Template().getAddNewTableScriptName();
 	}
 
+	/**
+	 * API to set local folder.
+	 * 
+	 * @param testFolderLocation {@link String}
+	 */
 	@Override
-	public void setTestFolderLocation(String testFolderLocation) {
+	public void setTestFolderLocation(final String testFolderLocation) {
 		if (null != testFolderLocation && !testFolderLocation.isEmpty()) {
 			batchSchemaDao.getJAXB2Template().setTestFolderLocation(testFolderLocation);
 		}
 	}
 
+	/**
+	 * API to return test folder.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getTestFolderLocation() {
 		return batchSchemaDao.getJAXB2Template().getTestFolderLocation();
 	}
 
+	/**
+	 * API to get Script Config Folder Name.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getScriptConfigFolderName() {
 		return batchSchemaDao.getJAXB2Template().getScriptConfigFolderName();
 	}
 
+	/**
+	 * API to set base folder of the project.
+	 * 
+	 * @param baseFolderLocation {@link String}
+	 */
 	@Override
-	public void setBaseFolderLocation(String baseFolderLocation) {
+	public void setBaseFolderLocation(final String baseFolderLocation) {
 		if (null != baseFolderLocation && !baseFolderLocation.isEmpty()) {
 			batchSchemaDao.getJAXB2Template().setBaseFolderLocation(baseFolderLocation);
 			batchSchemaDao.getJAXB2Template().setBaseSampleFdLoc(baseFolderLocation);
@@ -2793,70 +2970,80 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 
 	}
 
+	/**
+	 * API to get the detached batch class module object for a batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param moduleName {@link String}
+	 * @return {@link BatchClassModule}
+	 */
 	@Override
-	public BatchClassModule getDetachedBatchClassModuleByName(String batchClassIdentifier, String workflowName) {
-		BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByWorkflowName(batchClassIdentifier, workflowName);
+	public BatchClassModule getDetachedBatchClassModuleByName(final String batchClassIdentifier, final String workflowName) {
+		final BatchClassModule batchClassModule = batchClassModuleService.getBatchClassModuleByWorkflowName(batchClassIdentifier,
+				workflowName);
 		BatchClassModule detachedBatchClassModule = null;
-		if(batchClassModule == null) {
-			logger.info("No module found with workflowName:" + workflowName + " in batch class id:" + batchClassIdentifier + ". Skipping the updates for this module.");
+		if (batchClassModule == null) {
+			LOGGER.info("No module found with workflowName:" + workflowName + " in batch class id:" + batchClassIdentifier
+					+ ". Skipping the updates for this module.");
 		} else {
 			batchClassModuleService.evict(batchClassModule);
 			detachedBatchClassModule = new BatchClassModule();
-			
-			detachedBatchClassModule.setId(0);
+
+			detachedBatchClassModule.setId(BatchConstants.ZERO);
 			detachedBatchClassModule.setBatchClass(null);
-			
+
 			detachedBatchClassModule.setModule(batchClassModule.getModule());
 			detachedBatchClassModule.setWorkflowName(batchClassModule.getWorkflowName());
 			detachedBatchClassModule.setOrderNumber(batchClassModule.getOrderNumber());
 			detachedBatchClassModule.setRemoteBatchClassIdentifier(batchClassModule.getRemoteBatchClassIdentifier());
 			detachedBatchClassModule.setRemoteURL(batchClassModule.getRemoteURL());
-			
-			List<BatchClassModuleConfig> moduleConfigs = batchClassModule.getBatchClassModuleConfig();
-			List<BatchClassModuleConfig> newModuleConfigList = new ArrayList<BatchClassModuleConfig>();
-			for (BatchClassModuleConfig moduleConfig : moduleConfigs) {
+
+			final List<BatchClassModuleConfig> moduleConfigs = batchClassModule.getBatchClassModuleConfig();
+			final List<BatchClassModuleConfig> newModuleConfigList = new ArrayList<BatchClassModuleConfig>();
+			for (final BatchClassModuleConfig moduleConfig : moduleConfigs) {
 				newModuleConfigList.add(moduleConfig);
-				moduleConfig.setId(0);
+				moduleConfig.setId(BatchConstants.ZERO);
 				moduleConfig.setBatchClassModule(null);
 			}
 			detachedBatchClassModule.setBatchClassModuleConfig(newModuleConfigList);
-			
-			List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
-			List<BatchClassPlugin> newBatchClassPluginsList = new ArrayList<BatchClassPlugin>();
-			for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
+
+			final List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
+			final List<BatchClassPlugin> newBatchClassPluginsList = new ArrayList<BatchClassPlugin>();
+			for (final BatchClassPlugin batchClassPlugin : batchClassPlugins) {
 				newBatchClassPluginsList.add(batchClassPlugin);
-				batchClassPlugin.setId(0);
+				batchClassPlugin.setId(BatchConstants.ZERO);
 				batchClassPlugin.setBatchClassModule(null);
-				
-				List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPlugin.getBatchClassPluginConfigs();
-				List<BatchClassPluginConfig> newBatchClassPluginConfigsList = new ArrayList<BatchClassPluginConfig>();
-				for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
+
+				final List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPlugin.getBatchClassPluginConfigs();
+				final List<BatchClassPluginConfig> newBatchClassPluginConfigsList = new ArrayList<BatchClassPluginConfig>();
+				for (final BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
 					newBatchClassPluginConfigsList.add(batchClassPluginConfig);
-					batchClassPluginConfig.setId(0);
+					batchClassPluginConfig.setId(BatchConstants.ZERO);
 					batchClassPluginConfig.setBatchClassPlugin(null);
-					
-					List<KVPageProcess> kvPageProcess = batchClassPluginConfig.getKvPageProcesses();
-					List<KVPageProcess> newKvPageProcessList = new ArrayList<KVPageProcess>();
-					for (KVPageProcess kVPageProcessChild : kvPageProcess) {
-						kVPageProcessChild.setId(0);
+
+					final List<KVPageProcess> kvPageProcess = batchClassPluginConfig.getKvPageProcesses();
+					final List<KVPageProcess> newKvPageProcessList = new ArrayList<KVPageProcess>();
+					for (final KVPageProcess kVPageProcessChild : kvPageProcess) {
+						kVPageProcessChild.setId(BatchConstants.ZERO);
 						newKvPageProcessList.add(kVPageProcessChild);
 						kVPageProcessChild.setBatchClassPluginConfig(null);
 					}
 					batchClassPluginConfig.setKvPageProcesses(newKvPageProcessList);
 				}
 				batchClassPlugin.setBatchClassPluginConfigs(newBatchClassPluginConfigsList);
-				
-				List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassPlugin.getBatchClassDynamicPluginConfigs();
-				List<BatchClassDynamicPluginConfig> newBatchClassDynamicPluginConfigsList = new ArrayList<BatchClassDynamicPluginConfig>();
-				for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
+
+				final List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassPlugin
+						.getBatchClassDynamicPluginConfigs();
+				final List<BatchClassDynamicPluginConfig> newBatchClassDynamicPluginConfigsList = new ArrayList<BatchClassDynamicPluginConfig>();
+				for (final BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
 					newBatchClassDynamicPluginConfigsList.add(batchClassDynamicPluginConfig);
-					batchClassDynamicPluginConfig.setId(0);
+					batchClassDynamicPluginConfig.setId(BatchConstants.ZERO);
 					batchClassDynamicPluginConfig.setBatchClassPlugin(null);
-					
-					List<BatchClassDynamicPluginConfig> children = batchClassDynamicPluginConfig.getChildren();
-					List<BatchClassDynamicPluginConfig> newChildrenList = new ArrayList<BatchClassDynamicPluginConfig>();
-					for (BatchClassDynamicPluginConfig child : children) {
-						child.setId(0);
+
+					final List<BatchClassDynamicPluginConfig> children = batchClassDynamicPluginConfig.getChildren();
+					final List<BatchClassDynamicPluginConfig> newChildrenList = new ArrayList<BatchClassDynamicPluginConfig>();
+					for (final BatchClassDynamicPluginConfig child : children) {
+						child.setId(BatchConstants.ZERO);
 						newChildrenList.add(child);
 						child.setBatchClassPlugin(null);
 						child.setParent(null);
@@ -2866,46 +3053,209 @@ public class BatchSchemaServiceImpl implements BatchSchemaService {
 				batchClassPlugin.setBatchClassDynamicPluginConfigs(newBatchClassDynamicPluginConfigsList);
 			}
 			detachedBatchClassModule.setBatchClassPlugins(newBatchClassPluginsList);
-			
+
 		}
 		return detachedBatchClassModule;
 	}
 
+	/**
+	 * API to get the upload batch folder path.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getUploadBatchFolder() {
 		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getUploadBatchFolder();
 	}
 
+	/**
+	 * API to get the Web services folder name.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getWebServicesFolderPath() {
 		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getWebServicesFolderPath();
 	}
 
+	/**
+	 * API to get advanced test extraction folder path.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param createDirectory {@link boolean}
+	 * @return {@link String}
+	 */
 	@Override
-	public String getTestAdvancedKvExtractionFolderPath(String batchClassIdentifier, boolean createDirectory) {
+	public String getTestAdvancedKvExtractionFolderPath(final String batchClassIdentifier, final boolean createDirectory) {
 		return getAbsolutePath(batchClassIdentifier, batchSchemaDao.getJAXB2Template().getTestAdvancedKvExtractionFolderName(),
 				createDirectory);
 	}
 
+	/**
+	 * API to get advanced test extraction folder name.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getTestAdvancedKVExtractionFolderName() {
 		return batchSchemaDao.getJAXB2Template().getTestAdvancedKvExtractionFolderName();
 	}
-	@Override
-	public String getSamplePatternFilePath() {
-		return getBaseFolderLocation() + File.separator + batchSchemaDao.getJAXB2Template().getSamplePatternFolder() + File.separator
-				+ batchSchemaDao.getJAXB2Template().getSamplePatternFileName();
 
-	}
-	
+	/**
+	 * API to update the batch object to the file path specified.
+	 * 
+	 * @param batch {@link Batch}
+	 * @param filePath {@link String}
+	 */
 	@Override
 	public void update(final Batch batch, final String filePath) {
 		if (null == batch) {
-			logger.info("batch class is null.");
+			LOGGER.info("batch class is null.");
 		} else if (null == filePath || filePath.isEmpty()) {
-			logger.info("File path is either null or empty.");
+			LOGGER.info("File path is either null or empty.");
 		} else {
 			this.batchSchemaDao.update(batch, filePath);
+		}
+	}
+
+	/**
+	 * API to get the HOCR Pages using the file path specified.
+	 * 
+	 * @param xmlFilePath {@link String}
+	 * @return {@link HocrPages}
+	 */
+	@Override
+	public HocrPages getHOCR(final String xmlFilePath) {
+		HocrPages hocrPages = null;
+		hocrPages = this.hocrSchemaDao.getObjectFromFilePath(xmlFilePath);
+		return hocrPages;
+	}
+
+	/**
+	 * API to get the advanced test table folder path.
+	 * 
+	 * @param batchClassId {@link String}
+	 * @param createDir {@link boolean}
+	 * @return String
+	 */
+	@Override
+	public String getAdvancedTestTableFolderPath(final String batchClassId, final boolean createDir) {
+		return getAbsolutePath(batchClassId, batchSchemaDao.getJAXB2Template().getAdvancedTestTableFolder(), createDir);
+	}
+
+	/**
+	 * API to get advanced test table folder name.
+	 * 
+	 * @return {@link String}
+	 */
+	@Override
+	public String getAdvancedTestTableFolderName() {
+		return this.batchSchemaDao.getJAXB2Template().getAdvancedTestTableFolder();
+	}
+
+	/**
+	 * DB Export plugin mapping folder name.
+	 * 
+	 * @return {@link String} DB Export plugin mapping folder name.
+	 */
+	@Override
+	public String getDbExportMappingFolderName() {
+		return batchSchemaDao.getJAXB2Template().getDbExportPluginMappingFolderName();
+	}
+
+	/**
+	 * The <code>getUserType</code> method is used to retrieve user type from properties file.
+	 * 
+	 * @return {@link Integer} Ephesoft Cloud user type
+	 */
+	private Integer getUserType() {
+		Integer userType = null;
+		try {
+			userType = Integer.parseInt(ApplicationConfigProperties.getApplicationConfigProperties().getProperty(USER_TYPE));
+		} catch (NumberFormatException numberFormatException) {
+			userType = UserType.OTHERS.getUserType();
+			LOGGER.error("user type property is in wrong format in property file");
+		} catch (IOException ioException) {
+			userType = UserType.OTHERS.getUserType();
+			LOGGER.error("user type property is missing from property file");
+		}
+		return userType;
+	}
+
+	/**
+	 * The <code>getFileType</code> method is used to get the file type.
+	 * 
+	 * @param file {@link File} file
+	 * @return {@link String} file type
+	 */
+	private String getFileType(File file) {
+		String fileType = null;
+		if (null != file) {
+			String fileName = file.getName().toLowerCase(Locale.getDefault());
+			if (fileName.endsWith(FileType.PDF.getExtensionWithDot())) {
+				fileType = FileType.PDF.getExtension();
+			} else if (fileName.endsWith(FileType.TIF.getExtensionWithDot())) {
+				fileType = FileType.TIF.getExtension();
+			} else if (fileName.endsWith(FileType.TIFF.getExtensionWithDot())) {
+				fileType = FileType.TIFF.getExtension();
+			}
+		}
+		return fileType;
+	}
+
+	/**
+	 * The <code>discardOutOfLimitFile</code> method is used to discard file after limit is crossed.
+	 * 
+	 * @param scannedImagesDirectory {@link File} email download directory file
+	 * @param batchClassID {@link String} batch class identifier
+	 * @param userType {@link Integer} Ephesoft Cloud user type
+	 */
+	private void discardOutOfLimitFile(File scannedImagesDirectory, String batchClassID, Integer userType) {
+		if (userType.intValue() == UserType.LIMITED.getUserType() && null != batchClassID && null != scannedImagesDirectory
+				&& scannedImagesDirectory.exists()) {
+			BatchClassCloudConfig batchClassCloudConfig = batchClassCloudService
+					.getBatchClassCloudConfigByBatchClassIdentifier(batchClassID);
+			Integer pageLimit = null;
+			if (null != batchClassCloudConfig) {
+				pageLimit = batchClassCloudConfig.getPageCount();
+			}
+			if (null != pageLimit) {
+				int currentCounter = BatchConstants.ZERO;
+				for (File file : scannedImagesDirectory.listFiles()) {
+					String fileType = getFileType(file);
+					if (null != fileType && currentCounter < pageLimit) {
+						String filePath = file.getAbsolutePath();
+						int pageCount = fileType.equals(FileType.PDF.getExtension()) ? PDFUtil.getPDFPageCount(filePath) : TIFFUtil
+								.getTIFFPageCount(filePath);
+						if ((currentCounter + pageCount) > pageLimit) {
+							int selectPage = pageLimit - currentCounter;
+							currentCounter = pageLimit;
+							if (fileType.equals(FileType.PDF.getExtension())) {
+								try {
+									PDFUtil.getSelectedPdfFile(file, selectPage);
+								} catch (IOException e) {
+									LOGGER.error("Error occured in reading file: " + filePath);
+								} catch (DocumentException de) {
+									LOGGER.error("Error occurred in creating within limit file");
+								}
+							} else {
+								try {
+									TIFFUtil.getSelectedTiffFile(file, selectPage);
+								} catch (IOException e) {
+									LOGGER.error("Error occured in reading file: " + filePath);
+								}
+							}
+						} else {
+							currentCounter += pageCount;
+						}
+					} else {
+						if (null != fileType) {
+							file.delete();
+						}
+					}
+
+				}
+			}
 		}
 	}
 }

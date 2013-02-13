@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,12 +53,14 @@ import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
 import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
 import com.ephesoft.dcma.gwt.core.shared.DataFilter;
 import com.ephesoft.dcma.gwt.home.client.TableModelService;
+import com.ephesoft.dcma.gwt.home.client.i18n.BatchListConstants;
 
 /**
  * The server side implementation for the calls coming from client side.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.home.client.TableModelService
  */
 public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements TableModelService {
 
@@ -72,6 +74,16 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 	 */
 	private static final String DATE_FORMAT = "dd-MMM-yyyy HH:mm:ss";
 
+	/**
+	 * API to get Rows of the table in the form of BatchInstanceDTO for the given batch and filters.
+	 * 
+	 * @param batchNameToBeSearched {@link String}
+	 * @param startRow int
+	 * @param rowsCount int
+	 * @param filters {@link DataFilter}[ ]
+	 * @param order {@link Order}
+	 * @return List< {@link BatchInstanceDTO}>
+	 */
 	@Override
 	public List<BatchInstanceDTO> getRows(final String batchNameToBeSearched, final int startRow, final int rowsCount,
 			final DataFilter[] filters, final Order order) {
@@ -91,9 +103,6 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		List<BatchPriority> batchPriorities = new ArrayList<BatchPriority>();
 		batchPriorities.add(priority);
 		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
-		if (isSuperAdmin()) {
-			ephesoftUser = EphesoftUser.SUPER_ADMIN;
-		}
 		batchInstanceList = batchInstanceService.getBatchInstancesExcludedRemoteBatch(batchNameToBeSearched, statusList, startRow,
 				rowsCount, orderList, filterClauseList, batchPriorities, getUserName(), getUserRoles(), ephesoftUser);
 
@@ -104,6 +113,7 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		for (BatchInstance instance : batchInstanceList) {
 			batchClass = instance.getBatchClass();
 			Date date = instance.getLastModified();
+			Date creationDate = instance.getCreationDate();
 			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 			// TODO : Data for documents etc need to be calculated.
 			batch = new BatchInstanceDTO();
@@ -112,12 +122,13 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 			batch.setBatchName(instance.getBatchName());
 			batch.setBatchClassName(batchClass.getDescription());
 			batch.setUploadedOn(sdf.format(date));
+			batch.setCreatedOn(sdf.format(creationDate));
 			batch.setNoOfDocuments(null);
 			batch.setReviewStatus(null);
 			batch.setValidationStatus(null);
 			batch.setNoOfPages(null);
 			batch.setStatus(instance.getStatus().name());
-			batch.setCurrentUser(instance.getCurrentUser() != null ? instance.getCurrentUser() : "");
+			batch.setCurrentUser(instance.getCurrentUser() != null ? instance.getCurrentUser() : BatchListConstants.EMPTY_STRING);
 			batches.add(batch);
 		}
 		return batches;
@@ -168,6 +179,12 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		return priorityValue;
 	}
 
+	/**
+	 * API to get total Rows Count for the given data filters.
+	 * 
+	 * @param filters {@link DataFilter}[ ]
+	 * @return {@link Integer}
+	 */
 	@Override
 	public Integer getRowsCount(final DataFilter[] filters) {
 		List<BatchInstanceStatus> statusList = getStatusList(filters);
@@ -177,13 +194,15 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		batchPriorities.add(priority);
 		Integer rowCount = null;
 		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
-		if (isSuperAdmin()) {
-			ephesoftUser = EphesoftUser.SUPER_ADMIN;
-		}
 		rowCount = batchInstanceService.getCount(statusList, batchPriorities, getUserRoles(), getUserName(), ephesoftUser);
 		return rowCount;
 	}
 
+	/**
+	 * API to get Individual Row Counts for each batch.
+	 * 
+	 * @return {@link Integer}[]
+	 */
 	@Override
 	public Integer[] getIndividualRowCounts() {
 		Integer[] countByStatus = new Integer[2];
@@ -191,9 +210,6 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		String userName = getUserName();
 
 		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
-		if (isSuperAdmin()) {
-			ephesoftUser = EphesoftUser.SUPER_ADMIN;
-		}
 		countByStatus[0] = batchInstanceService.getCount(null, BatchInstanceStatus.READY_FOR_REVIEW, userName, null, getUserRoles(),
 				ephesoftUser);
 
@@ -202,6 +218,11 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		return countByStatus;
 	}
 
+	/**
+	 * API to get Next Batch Instance.
+	 * 
+	 * @return {@link String}
+	 */
 	@Override
 	public String getNextBatchInstance() {
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
@@ -214,6 +235,13 @@ public class LandingPageServiceImpl extends DCMARemoteServiceServlet implements 
 		return returnValue;
 	}
 
+	/**
+	 * API to get Rows Count of a batch passing the given data filters.
+	 * 
+	 * @param batchName {@link String}
+	 * @param filters {@link DataFilter}[ ]
+	 * @return {@link Integer}
+	 */
 	@Override
 	public Integer getRowsCount(String batchName, DataFilter[] filters) {
 		BatchInstanceStatus status = BatchInstanceStatus.READY_FOR_REVIEW;

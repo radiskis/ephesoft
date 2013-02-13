@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,15 +44,35 @@ import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 
+/**
+ * This class is used for rotating the images.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public class ImageRotator {
-	private static final double DEFAULT_DEGREE_OF_ROTATION = 90.0;
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * An instance of Logger for logging using slf4j. 
+	 */
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ImageRotator.class);
 
+	/**
+	 * This method is used to rotate the image present at specified path.
+	 * @param imagePath {@link String}
+	 * @throws DCMAApplicationException if any exception occurs during rotation of image.
+	 */
 	public void rotateImage(String imagePath) throws DCMAApplicationException {
-		rotateImage(imagePath, DEFAULT_DEGREE_OF_ROTATION);
+		rotateImage(imagePath, ImageMagicKConstants.DEFAULT_DEGREE_OF_ROTATION);
 	}
-
+	/**
+	 * This method is used to rotate the image present at the image path given with default degree of rotation.
+	 * @param imagePath {@link String}
+	 * @param degreeOfRotation double
+	 * @throws DCMAApplicationException if any exception occurs during rotation of image.
+	 */
 	public void rotateImage(String imagePath, double degreeOfRotation) throws DCMAApplicationException {
 		File fImagePath = new File(imagePath);
 		if(!fImagePath.exists()){
@@ -67,7 +87,7 @@ public class ImageRotator {
 		try {
 			convertcmd.run(operation, listOfFiles);
 		} catch (Exception e) {
-			logger.error("Problem rotating image "+imagePath);
+			LOGGER.error("Problem rotating image "+imagePath);
 			throw new DCMAApplicationException("Unable to rotate Image", e);
 		} 
 		

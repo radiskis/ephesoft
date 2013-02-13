@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,52 +40,66 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.ephesoft.dcma.batch.schema.ImportBatchClassOptions;
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 
 /**
  * Service to import the batch class.
+ * 
  * @author Ephesoft
  * @version 1.0
  * @see com.ephesoft.dcma.batch.service.ImportBatchServiceImpl
  */
 public interface ImportBatchService {
+
 	/**
 	 * Method to import the batch class as specified with the options XML.
 	 * 
-	 * @param optionXML options to import the batch class
-	 * @param isDeployed is the batch class deployed
-	 * @param isFromWebService is the call from web service.
-	 * @return map containing the results if success or not along with the appropriate error message.
+	 * @param optionXML {@link ImportBatchClassOptions}
+	 * @param isDeployed boolean
+	 * @param isFromWebService boolean
+	 * @param gropsToAssign {@link Set<{@link String}>}
+	 * @return {@link Map<{@link Boolean}, {@link String}>}
 	 */
-	Map<Boolean, String> importBatchClass(ImportBatchClassOptions optionXML, boolean isDeployed, boolean isFromWebService, String userRole);
+	Map<Boolean, String> importBatchClass(ImportBatchClassOptions optionXML, boolean isDeployed, boolean isFromWebService,
+			Set<String> gropsToAssign);
 
 	/**
 	 * Method to validate the user provided option XML while calling from Web Service.
 	 * 
-	 * @param option option XML to verify.
-	 * @return map containing the results of validation along with the appropriate error message.
+	 * @param option {@link ImportBatchClassOptions}
+	 * @return {@link Map<{@link Boolean}, {@link String}>}
 	 */
 	Map<Boolean, String> validateInputXML(ImportBatchClassOptions option);
 
 	/**
 	 * Method to determine if the batch class being imported is equal to the batch class of the workflow name specified by user.
 	 * 
-	 * @param importBatchClass batch class being imported.
-	 * @param userInputWorkflowName user inpur workflow name.
-	 * @return true/false
+	 * @param importBatchClass {@link BatchClass}
+	 * @param userInputWorkflowName {@link String}
+	 * @return  boolean
 	 */
 	boolean isImportWorkflowEqualDeployedWorkflow(BatchClass importBatchClass, String userInputWorkflowName);
 
 	/**
 	 * Method to act as utility for Restart Batch API.
 	 * 
-	 * @param properties
-	 * @param batchInstance
-	 * @param moduleName
-	 * @param isZipSwitchOn
-	 * @throws Exception
+	 * @param properties {@link Properties}
+	 * @param batchInstance {@link BatchInstance}
+	 * @param moduleName {@link String}
+	 * @param isZipSwitchOn boolean
+	 * @throws DCMAApplicationException
 	 */
 	void updateBatchFolders(Properties properties, BatchInstance batchInstance, String moduleName, boolean isZipSwitchOn)
-			throws Exception;
+			throws DCMAApplicationException;
+
+	/**
+	 * Method to remove the batch folders and .SER files for batch instances.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 * @return boolean
+	 * 
+	 */
+	boolean removeFolders(BatchInstance batchInstance);
 }

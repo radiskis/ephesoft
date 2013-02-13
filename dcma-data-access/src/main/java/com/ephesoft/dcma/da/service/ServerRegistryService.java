@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,13 +40,20 @@ import java.util.List;
 
 import com.ephesoft.dcma.da.domain.ServerRegistry;
 
+/**
+ * This is a database service to read data required by Server Registry Service.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.ServerRegistryServiceImpl
+ */
 public interface ServerRegistryService {
 
 	/**
 	 * An API to fetch a Server Registry.
 	 * 
 	 * @param identifier {@link Serializable}
-	 * @return ServerRegistry
+	 * @return {@link ServerRegistry}
 	 */
 	ServerRegistry getServerRegistry(Serializable identifier);
 
@@ -58,12 +65,11 @@ public interface ServerRegistryService {
 	List<ServerRegistry> getAllServerRegistry();
 
 	/**
-	 * An api to fetch all the Server Registry by ip address, port number and context.
+	 * An API to fetch all the Server Registry by IP address, port number and context.
 	 * 
 	 * @param ipAddress {@link String}
 	 * @param portNumber {@link String}
-	 * @param context {@link String}
-	 * 
+	 * @param context {@link String} 
 	 * @return {@link ServerRegistry} return the server registry.
 	 */
 	ServerRegistry getServerRegistry(String ipAddress, String portNumber, String context);
@@ -91,6 +97,7 @@ public interface ServerRegistryService {
 	
 	/**
 	 * API to get the inactive servers.
+	 * 
 	 * @return List<{@link ServerRegistry}>
 	 */
 	List<ServerRegistry> getInactiveServers();

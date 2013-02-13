@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿﻿/**
  * ******************************* Default locale
  * **************************************************
  */
@@ -9,7 +9,7 @@ var batchClassManagementConstants = {
 	delete_field_title : "Delete Field Type",
 
 	delete_function_key : "Delete Function Key",
-	
+
 	edit_function_key : "Edit Function Key",
 
 	delete_page_title : "Delete Page Type",
@@ -25,6 +25,8 @@ var batchClassManagementConstants = {
 	method_name : "Method Name",
 
 	description : "Description",
+
+	plugin_information : "Plugin Information",
 
 	minimum_confidence_threshold : "Minimum Confidence Threshold",
 
@@ -71,6 +73,8 @@ var batchClassManagementConstants = {
 	folder_name : "Folder Name",
 
 	delete_email_configuration_title : "Delete email configuration",
+
+	delete_scanner_configuration_title : "Delete scanner profile",
 
 	value : "Value",
 
@@ -165,27 +169,101 @@ var batchClassManagementConstants = {
 	add_email_configuration : "Add Email Configuration",
 
 	is_required : "Required",
-		
-	is_hidden : "Hidden",
-	
-	is_multiline :"MultiLine",
-	
-	key_warning : "Press key F1 to F11 (except F5)",
-	
-	delete_regex_validation : "Delete Regex Validation",
-		
-	add_regex_validation : "Add Regex Validation",
-	
-	remote_url : "Remote URL",
-	
-	test_adv_kv : "Test Adv KV",
-	
-	remote_bc_identifier : "Remote Batch Class Identifier",
-	
-	kv_page_value : "Page Value",
-	
-	warning_title : "Warning"
 
+	is_hidden : "Hidden",
+
+	is_multiline : "MultiLine",
+
+	key_warning : "Press key F1 to F11 (except F5)",
+
+	delete_regex_validation : "Delete Regex Validation",
+
+	add_regex_validation : "Add Regex Validation",
+
+	remote_url : "Remote URL",
+
+	test_adv_kv : "Test Adv KV",
+
+	web_scanner : "Web Scanner",
+
+	profile_name : "Profile Name",
+
+	remote_bc_identifier : "Remote Batch Class Identifier",
+
+	kv_page_value : "Page Value",
+
+	warning_title : "Warning",
+
+	column_header_pattern : "Column Header Pattern",
+
+	no_field_exists : "No Field Exists",
+
+	use_existing_key_label : "Use Existing Field For Key",
+
+	table_extraction_technique : "Table Extraction API",
+
+	col_header_validation : "Column Header",
+
+	col_coordinates_validation : "Column Coordinates",
+
+	regex_validation : "Regex Validation",
+
+	choose_table_column : "Choose Table Column",
+
+	column_start_coordinate_label : "Start Coordinate",
+
+	column_end_coordinate_label : "End Coordinate",
+
+	clear_all_button : "Clear All",
+
+	header_label_help : "Help",
+
+	error_title : "Error",
+
+	identifier : "Identifier",
+
+	plugin_name : "Plugin Name",
+
+	plugin_description : "Plugin Description",
+
+	server_url : "Server URL",
+
+	cmis_username : "Username",
+
+	cmis_password : "Password",
+
+	repository_id : "Repository ID",
+
+	file_extension : "File Extension",
+
+	cmis_folder_name : "Folder",
+
+	cmis_property : "Property",
+
+	cmis_value : "Value",
+
+	cmis_value_to_update : "New Value",
+
+	edit_cmis_configuration_title : "Edit CMIS Configuration",
+
+	add_cmis_configuration : "Add CMIS Configuration",
+
+	delete_cmis_configuration_title : "Delete CMIS Configuration",
+	
+	system_folder : "System Folder",
+	
+	is_readonly: "Readonly",
+	
+	test_email_button: "Test Configuration",
+	
+	email_config_validation_success : "Email configuration validated successfully.",
+	
+	email_config_validation_failure : "Unable to connect to email configuration. See server logs for details.",
+		
+	width_of_multiline : "Width of Multiline",
+
+	is_mandatory : "Mandatory"
+		
 };
 var batchClassManagementMessages = {
 
@@ -212,6 +290,8 @@ var batchClassManagementMessages = {
 	field_order_duplicate_error : "Field order {0} already exists.",
 
 	name_common_error : "Name cannot be same.",
+	
+	batch_class_field_name_common_error : "Batch class fields with same names are not allowed.",
 
 	add_field_type : "Add Field Type First.",
 
@@ -228,10 +308,12 @@ var batchClassManagementMessages = {
 	no_record_to_delete : "No record to delete.",
 
 	no_record_to_edit : "No record to edit.",
-	
+
 	no_table_to_test : "No table to test.",
 
 	delete_email_configuration_conformation : "Are you sure you want to delete this email configuration?",
+
+	delete_scanner_configuration_conformation : "Are you sure you want to delete this scanner profile?",
 
 	already_exists_error : "Entered value already exists.",
 
@@ -270,16 +352,16 @@ var batchClassManagementMessages = {
 	delete_batch_class_field_conformation : "Are you sure you want to delete this batch class field?",
 
 	no_record_to_copy : "No record to copy.",
-	
+
 	no_record_to_export : "No record to export.",
 
 	error_upload_image : "Error uploading image.Please try again.",
-	
+
 	delete_regex_validation_confirmation : "Making field type hidden or multiline will delete Regex Validation for document level field. Are you sure you want to proceed?",
-		
+
 	add_regex_failure : "Regex Validation cannot be added to hidden or multiline document level field.",
-	
-    mandatory_fields_cannot_be_blank : "Mandatory fields cannot be blank",
+
+	mandatory_fields_cannot_be_blank : "Mandatory fields cannot be blank",
 
 	remote_batch_class_identifier_cannot_be_empty : "Remote batch class identifier cannot be empty",
 
@@ -296,14 +378,53 @@ var batchClassManagementMessages = {
 	unable_to_determine_location : "Unable to determine location",
 
 	value_overlaps_with_key : "Value overlaps with key",
+
+	cannot_delete_last_record : "There needs to be at least one scanner profile.",
+
+	invalid_regex_pattern : "Invalid regular expression",
+
+	cant_delete_own_role : "You can’t unmap the role: '{0}' assigned to you by the admin.",
+
+	no_unc_folder_exists : "No Batch Classes found associated with the logged in user.",
+
+	unsaved_data_will_lost : "All unsaved changes will be lost.Do you want to continue?",
+
+	missing_mandatory_fields : "Data for none of the following fields is entered : Column Pattern, Column Header Pattern, Column Start/End Coordinates. Do you want to continue?",
+
+	no_key_field_selected : "No field selected for key.",
+
+	no_extraction_api_selected : "At least one Extraction API must be selected.",
+
+	no_column_to_edit : "No column present to set coordinates.",
+
+	unable_to_get_help_url : "Unable to get help url from property file",
+
+	unable_to_read_sample_pattern_file : "Unable to read sample patterns file.",
+
+	delete_cmis_configuration_conformation : "Are you sure you want to delete this CMIS account configuration?",
+
+	validate_the_regex_pattern : "Please validate the regex pattern for the field: {0}.",
+	
+	invalid_document_name : "Invalid Document name. Document name is either empty or contains",
+	
+	change_and_try_again : "Please change and try again.",
+	
+	
+	negative_field_order : "Field order cannot be nagative.",
+	
+	invalid_system_folder_path : "Invalid system folder path. It is either empty or contains ",
 		
-	invalid_regex_pattern: "Invalid regular expression",
+	cmis_connection_successful: "The cmis connection test is successful.",
+		
+	cmis_authentication_fail: "The cmis connection cannot be established. The username or password authentication failed.",
+		
+	cmis_repository_not_found: "The cmis connection cannot be established. The repository could not be found.",
 	
-	cant_delete_own_role: "You can’t unmap the role: '{0}' assigned to you by the admin.",
+	cmis_connection_fail: "The cmis connection cannot be established. Please refer logger for further information.",
+		
+	cmis_connection_empty_properties: "The cmis connection cannot be established. The cmis connection properties are empty.",
 	
-	no_unc_folder_exists: "No Batch Classes found associated with the logged in user.",
-	
-	unsaved_data_will_lost: "All unsaved changes will be lost.Do you want to continue?"
+	cmis_unauthorized_access: "Unauthorized Access to CMIS server."
 
 };
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -314,7 +435,7 @@ var batchClassManagementConstants_tk = {
 	delete_field_title : "alan silme",
 
 	delete_function_key : "İşlev Tuşu sil",
-	
+
 	edit_function_key : "İşlev Tuşu Düzenle",
 
 	delete_page_title : "Sayfayı Sil",
@@ -330,6 +451,8 @@ var batchClassManagementConstants_tk = {
 	method_name : "Metod Adı",
 
 	description : "tanım",
+
+	plugin_information : "Plugin Bilgi",
 
 	minimum_confidence_threshold : "Minimum Güven Eşik",
 
@@ -374,6 +497,8 @@ var batchClassManagementConstants_tk = {
 	folder_name : "Klasör Adı",
 
 	delete_email_configuration_title : "E-posta yapılandırma sil",
+
+	delete_scanner_configuration_title : "Delete scanner profile",
 
 	value : "değer",
 
@@ -468,26 +593,100 @@ var batchClassManagementConstants_tk = {
 	add_email_configuration : "E-posta Konfigürasyon ekle",
 
 	is_required : "gereken",
-	
+
 	is_hidden : "gizli",
-	
-	is_multiline :"Çok satırlı iskonto",
-	
+
+	is_multiline : "Çok satırlı iskonto",
+
 	key_warning : "F11 (F5 dışında F1 tuşuna basın.)",
-	
+
 	delete_regex_validation : "Regex Doğrulama Sil",
-		
+
 	add_regex_validation : "Regex Doğrulama ekle",
-	
+
 	remote_url : "uzaktan URL",
-		
+
 	remote_bc_identifier : "Uzaktan Toplu Sınıfı Tanımlayıcı",
-	
+
+	web_scanner : "Web Scanner",
+
+	profile_name : "Profile Name",
+
 	test_adv_kv : "Testi İlan KV",
-	
+
 	kv_page_value : "Sayfa Değeri",
+
+	warning_title : "Uyarı",
+
+	column_header_pattern : "Sütun Başlığı Desen",
+
+	no_field_exists : "Hayır Alan Var",
+
+	use_existing_key_label : "Anahtar İçin Mevcut Saha kullanın",
+
+	table_extraction_technique : "Tablo Ekstraksiyon API",
+
+	col_header_validation : "Sütun Başlığı",
+
+	col_coordinates_validation : "Sütun Koordinatlar",
+
+	regex_validation : "regex Doğrulama",
+
+	choose_table_column : "Tablo Sütunu seçin",
+
+	column_start_coordinate_label : "Koordinat Başlat",
+
+	column_end_coordinate_label : "Koordinat End",
+
+	clear_all_button : "Tümünü Temizle",
+
+	header_label_help : "hizmetçi",
+
+	error_title : "hata",
+
+	identifier : "tanımlayıcı",
+
+	plugin_name : "Plugin Adı",
+
+	plugin_description : "Plugin Açıklama",
+
+	server_url : "Sunucu URL",
+
+	cmis_username : "Kullanıcı Adı",
+
+	cmis_password : "parola",
+
+	repository_id : "Veri Havuzu ID",
+
+	file_extension : "Dosya Uzantısı",
+
+	cmis_folder_name : "Klasör",
+
+	cmis_property : "özellik",
+
+	cmis_value : "değer",
+
+	cmis_value_to_update : "Yeni Değer",
+
+	edit_cmis_configuration_title : "Düzen CMIS Yapılandırma",
+
+	add_cmis_configuration : "CMIS Yapılandırma ekle",
+
+	delete_cmis_configuration_title : "CMIS Yapılandırma sil",
 	
-	warning_title : "Uyarı"
+	system_folder : "Sistem Klasörü",
+	
+	is_readonly: "Salt okunur veri tabanları geri yüklenemiyor",
+	
+	test_email_button: "Test Konfigürasyonu",
+	
+	email_config_validation_success : "E-posta yapılandırma başarıyla doğrulandı.",
+	
+	email_config_validation_failure : "Yapılandırma e-posta ile bağlantı kurulamıyor. Ayrıntılar için sunucu günlüklerine bakın.",
+	
+	width_of_multiline : "Multiline Genişliği",
+	
+	is_mandatory : "zorunlu"
 
 };
 
@@ -532,10 +731,12 @@ var batchClassManagementMessages_tk = {
 	no_record_to_delete : "Hiçbir kayıt silmek için.",
 
 	no_record_to_edit : "Hiçbir kayıt düzenlemek için.",
-	
+
 	no_table_to_test : "Yok masa testi.",
 
 	delete_email_configuration_conformation : "Bu e-posta yapılandırma silmek istediğinizden emin misiniz?",
+
+	delete_scanner_configuration_conformation : "Are you sure you want to delete this scanner profile?",
 
 	already_exists_error : "Girilen değeri zaten var.",
 
@@ -572,14 +773,14 @@ var batchClassManagementMessages_tk = {
 	delete_batch_class_field_conformation : "Bu toplu sınıf alan silmek istediğiniz emin misiniz?",
 
 	no_record_to_copy : "hiçbir kayıt kopyalamak için.",
-	
+
 	no_record_to_export : "Hayır rekor ihracat.",
 
 	error_upload_image : "Hata yükleme image.Please tekrar deneyin.",
-	
+
 	delete_regex_validation_confirmation : "Böylece alan tipi gizli veya birden çok satırda sil (regex doğrulaması için belge seviyesi. Devam etmek istediğinizden emin misiniz?",
-	
-	add_regex_failure : "Regex Doğrulama için gizli veya birden çok satırda belge seviyesi.",	
+
+	add_regex_failure : "Regex Doğrulama için gizli veya birden çok satırda belge seviyesi.",
 
 	mandatory_fields_cannot_be_blank : "Zorunlu alanlar boş olamaz",
 
@@ -598,13 +799,50 @@ var batchClassManagementMessages_tk = {
 	unable_to_determine_location : "Konumunu belirlemek için açılamıyor",
 
 	value_overlaps_with_key : "Tuşu ile Değer örtüşmektedir",
-		
-	invalid_regex_pattern :"Geçersiz olağan ifade",
-	
-	cant_delete_own_role:"Bu rolü Eşlemesini Geri Al'ı olamaz: {0} yönetici tarafından atanmış.",
-	
-	no_unc_folder_exists: "Hayır UNC klasörü geçerli kullanıcı için var.",
-	
-	unsaved_data_will_lost: "Kaydedilmemiş tüm değişiklikler devam etmek istiyor lost.Do olacak?"
 
+	cannot_delete_last_record : "There needs to be at least one scanner profile.",
+
+	invalid_regex_pattern : "Geçersiz olağan ifade",
+
+	cant_delete_own_role : "Bu rolü Eşlemesini Geri Al'ı olamaz: {0} yönetici tarafından atanmış.",
+
+	no_unc_folder_exists : "Hayır UNC klasörü geçerli kullanıcı için var.",
+
+	unsaved_data_will_lost : "Kaydedilmemiş tüm değişiklikler devam etmek istiyor lost.Do olacak?",
+
+	missing_mandatory_fields : "Aşağıdaki alanlar hiçbiri için veri girilir: Sütun deseni, Sütun Başlığı Desen, Sütun Başlangıç ​​/ Bitiş Koordinatlar. Devam etmek istiyor musunuz?",
+
+	no_key_field_selected : "Hayır alanı anahtarı için seçilir.",
+
+	no_extraction_api_selected : "En az bir Ekstraksiyon API seçilmesi gerekir.",
+
+	unable_to_get_help_url : "Için yardım alın url dosya propertie",
+
+	unable_to_read_sample_pattern_file : "Okunamıyor örnek şekilleri dosya.",
+
+	delete_cmis_configuration_conformation : "Eğer bu CMIS hesap yapılandırma silmek istediğinizden emin misiniz?",
+		
+	validate_the_regex_pattern : "Alan için regex desen doğrulamak Lütfen: {0}.",
+	
+	invalid_document_name : "Geçersiz Belge adı. Belge adı ya boştur ya da içeriyor",
+	
+	change_and_try_again : "Değiştirin ve tekrar deneyin.",
+	
+	batch_class_field_name_common_error : "Toplu sınıf alanlar aynı adları izin verilmez.",
+	
+	negative_field_order : "Alan sırası nagative olamaz.",
+	
+	invalid_system_folder_path : "Invalid system folder path. It is either empty or contains ",
+		
+	cmis_connection_successful: "CMIS bağlantı testi başarılı olduğunu",
+
+	cmis_authentication_fail: "CMIS bağlantı kurulamıyor.Kullanıcı adı veya şifre doğrulaması başarısız oldu.",
+	
+	cmis_repository_not_found: "CMIS bağlantı kurulamıyor.Depo bulunamadı.",
+	
+	cmis_connection_fail: "CMIS bağlantı kurulamıyor. Daha fazla bilgi için günlüğü bakın.",
+	
+	cmis_connection_empty_properties: "CMIS bağlantı kurulamıyor.CMIS bağlantı özellikleri boştur.",
+	
+	cmis_unauthorized_access: "CMIS sunucuya yetkisiz erişim."
 };

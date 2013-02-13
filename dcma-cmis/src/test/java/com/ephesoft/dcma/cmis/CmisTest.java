@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -244,7 +244,7 @@ public class CmisTest extends AbstractCmisTest {
 		boolean result = false;
 		String testFolderLocation;
 		String actualOutputFolder;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceId);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 
 		try {

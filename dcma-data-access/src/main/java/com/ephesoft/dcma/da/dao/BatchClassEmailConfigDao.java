@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,10 +41,11 @@ import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 
 /**
- * Interface for Dao representing batch_class_email_configuration table in database
+ * Interface for Dao representing batch_class_email_configuration table in database.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassEmailConfigDaoImpl
  */
 public interface BatchClassEmailConfigDao extends CacheableDao<BatchClassEmailConfiguration> {
 

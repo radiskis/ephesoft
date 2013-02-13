@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,49 @@ import org.springframework.stereotype.Service;
 
 import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
 
+/**
+ * This service is used to retrieve the data from the batch class groups table from the database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchClassGroupsService
+ */
 @Service
 public class BatchClassGroupsServiceImpl implements BatchClassGroupsService {
 
+	/**
+	 * batchClassGroupsDao {@link BatchClassGroupsDao}.
+	 */
 	@Autowired
 	private BatchClassGroupsDao batchClassGroupsDao;
 
+	/**
+	 * API for getting the batch class identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles) {
 		return batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
 	}
 
+	/**
+	 * API for getting the user roles for a batch class.
+	 * @param batchClassIdentifier String
+	 * @return Set<String> 
+	 */
 	@Override
 	public Set<String> getRolesForBatchClass(String batchClassIdentifier) {
 		return batchClassGroupsDao.getRolesForBatchClass(batchClassIdentifier);
+	}
+	
+	/** API for getting the batch class for given roles.
+	 * @param userRoles Set<String>
+	 * @param includeDeleted boolean
+	 * @return Set<String>
+	 */
+	@Override
+	public Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles, boolean includeDeleted) {
+		return batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles, includeDeleted);
 	}
 }

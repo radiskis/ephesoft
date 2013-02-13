@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,6 +45,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDBBean;
@@ -214,10 +215,11 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 * API to execute Script for a batch.
 	 * 
 	 * @param batch {@link Batch}
+	 * @param document {@link Document}
 	 * @return {@link BatchDTO}
 	 * @throws GWTException
 	 */
-	BatchDTO executeScript(Batch batch) throws GWTException;
+	BatchDTO executeScript(Batch batch, Document document) throws GWTException;
 
 	/**
 	 * API to get HOCR Content the given coordinates set for a page of a batch.
@@ -356,5 +358,18 @@ public interface ReviewValidateDocService extends DCMARemoteService {
 	 */
 	String getZoomCount();
 
+	/**
+	 * API to update the end time of review or validation of batchInstance
+	 * 
+	 * @param batchInstanceId
+	 */
+	void updateEndTimeAndCalculateDuration(String batchInstanceId);
 
+	/**
+	 * API to record the start time of review or validation of batchInstance
+	 * 
+	 * @param batchInstanceId
+	 * @param batchInstanceStatus
+	 */
+	void recordReviewOrValidateDuration( String batchInstanceId, BatchInstanceStatus batchInstanceStatus);
 }

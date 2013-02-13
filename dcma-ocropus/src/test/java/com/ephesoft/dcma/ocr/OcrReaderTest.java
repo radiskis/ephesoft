@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -60,9 +60,24 @@ import com.ephesoft.dcma.util.FileUtils;
  */
 public class OcrReaderTest extends AbstractOcrTests {
 
+	/**
+	 * Initializing PROPERTIES_FILE_OCR_TEST.
+	 */
 	private static final String PROPERTIES_FILE_OCR_TEST = "test.properties";
+
+	/**
+	 * Initializing ACTUAL_OUTPUT_FOLDER.
+	 */
 	private static final String ACTUAL_OUTPUT_FOLDER = "actual.output.location";
+	
+	/**
+	 * Initializing EXPECTED_OUTPUT_FOLDER.
+	 */
 	private static final String EXPECTED_OUTPUT_FOLDER = "expected.output.location";
+	
+	/**
+	 * Initializing SAMPLES_FOLDER.
+	 */
 	private static final String SAMPLES_FOLDER = "samples.location";
 
 	/**

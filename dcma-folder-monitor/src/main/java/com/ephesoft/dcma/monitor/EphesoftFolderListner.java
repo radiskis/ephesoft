@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,13 +46,26 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * Folder listener class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.monitor.service.FolderMonitorService
+ */
 @Component
 public class EphesoftFolderListner implements JNotifyListener, ApplicationContextAware {
 
+	/**
+	 * An instance of Logger for proper logging.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(EphesoftFolderListner.class);
 	
+	/**
+	 * An instance of {@link ApplicationContext}.
+	 */
 	private ApplicationContext applicationContext;
-
+	
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,70 +39,106 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.FunctionKeyViewPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit function key.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FunctionKeyView extends View<FunctionKeyViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, FunctionKeyView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
+
+	/**
+	 * functionKeyDetailView FunctionKeyDetailView.
+	 */
 	@UiField
 	protected FunctionKeyDetailView functionKeyDetailView;
 
+	/**
+	 * editFunctionKeyView EditFunctionKeyView.
+	 */
 	@UiField
 	protected EditFunctionKeyView editFunctionKeyView;
 
+	/**
+	 * functionKeyVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel functionKeyVerticalPanel;
 
+	/**
+	 * functionKeyConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel functionKeyConfigVerticalPanel;
 
+	/**
+	 * functionKeyCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel functionKeyCaptionPanel;
 
-	@UiField
-	protected Button editFunctionKeyPropertiesButton;
-
+	/**
+	 * Constructor.
+	 */
 	public FunctionKeyView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		functionKeyCaptionPanel.setCaptionHTML(AdminConstants.FUNCTION_KEY_HTML);
-		editFunctionKeyPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
-		functionKeyVerticalPanel.add(editFunctionKeyPropertiesButton);
 	}
 
+	/**
+	 * To get Function Key Detail View.
+	 * 
+	 * @return FunctionKeyDetailView
+	 */
 	public FunctionKeyDetailView getFunctionKeyDetailView() {
 		return functionKeyDetailView;
 	}
 
+	/**
+	 * To get Edit Function Key View.
+	 * 
+	 * @return EditFunctionKeyView
+	 */
 	public EditFunctionKeyView getEditFunctionKeyView() {
 		return editFunctionKeyView;
 	}
 
-	public Button getEditFunctionKeyPropertiesButton() {
-		return editFunctionKeyPropertiesButton;
-	}
-
+	/**
+	 * To get Function Key Config Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getFunctionKeyConfigVerticalPanel() {
 		return functionKeyConfigVerticalPanel;
 	}
 
+	/**
+	 * To get Function Key Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getFunctionKeyVerticalPanel() {
 		return functionKeyVerticalPanel;
 	}
 
-	@UiHandler("editFunctionKeyPropertiesButton")
-	public void onEditFunctionKeyPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditFunctionKeyPropertiesButtonClicked();
-	}
 }

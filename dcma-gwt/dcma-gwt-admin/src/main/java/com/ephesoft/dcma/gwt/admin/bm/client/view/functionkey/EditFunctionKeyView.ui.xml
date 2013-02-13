@@ -2,54 +2,63 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editFunctionKeyViewPanel">
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="methodNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="methodNameStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="methodName" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="methodNameLabel"></g:Label>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="keyNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="keyNameStar"></g:Label>
+					</g:cell>
+					<g:HorizontalPanel width="60%">
+						<g:cell width="10%" horizontalAlignment="ALIGN_LEFT">
+							<g:TextBox ui:field="keyName" />
+						</g:cell>
+						<g:cell width="50%" horizontalAlignment="ALIGN_LEFT">
+							<g:Label ui:field="keyWariningLabel" />
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="methodDescriptionLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="methodDescriptionStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="methodDescription" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+
+		<g:HorizontalPanel width="100%" ui:field="editBatchClassFieldPanel">
+
+			<g:cell width="90%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
 			</g:cell>
 			<g:cell width="1%">
-				<g:Label ui:field="methodNameStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="methodName" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="keyNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="keyNameStar"></g:Label>
-			</g:cell>
-			<g:HorizontalPanel width = "60%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="keyName" />
-			</g:cell>
-			<g:cell width = "50%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="keyWariningLabel" />
-			</g:cell>
-			</g:HorizontalPanel>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="methodDescriptionLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="methodDescriptionStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="methodDescription" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel ui:field="editBatchClassFieldPanel">
-			<g:Button ui:field="saveButton" />
-			<g:cell width="7%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="cancelButton" />
+			<g:cell width="7%">
+				<g:Button ui:field="cancelButton" />
+			</g:cell>
+
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

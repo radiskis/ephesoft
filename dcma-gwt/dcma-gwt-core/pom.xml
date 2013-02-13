@@ -21,5 +21,13 @@
 			<groupId>com.ephesoft.dcma</groupId>
 			<artifactId>dcma-data-access</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-cmis-import</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ephesoft.dcma</groupId>
+			<artifactId>dcma-webservice</artifactId>
+		</dependency>
     </dependencies>
 </project>

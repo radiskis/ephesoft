@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,10 +47,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.dao.PluginPropertiesDao;
-import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.da.dao.BatchClassDynamicPluginConfigDao;
 import com.ephesoft.dcma.da.dao.BatchClassPluginConfigDao;
+import com.ephesoft.dcma.da.dao.BatchInstanceDao;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 import com.ephesoft.dcma.da.domain.DocumentType;
@@ -61,98 +62,153 @@ import com.googlecode.ehcache.annotations.KeyGenerator;
 import com.googlecode.ehcache.annotations.Property;
 import com.googlecode.ehcache.annotations.TriggersRemove;
 
+/**
+ * This class is to get values of batch instance objects from serialized file.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.batch.dao.PluginPropertiesDao
+ */
 @Repository("batchInstancePluginPropertiesDao")
 public class BatchInstancePluginPropertiesDao implements PluginPropertiesDao {
 
+	/**
+	 * EXTN String.
+	 */
 	public static final String EXTN = "ser";
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	private BatchSchemaService batchSchemaService;
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchInstancePluginPropertiesDao.class);
 
+	/**
+	 * boolean field to get if debug mode of logging is enabled.
+	 */
+	private static final boolean IS_DEBUG_ENABLE = LOGGER.isDebugEnabled();
+
+	/**
+	 * Instance of {@link DocumentTypeService}.
+	 */
 	@Autowired
 	private DocumentTypeService documentTypeService;
 
+	/**
+	 * Instance of {@link BatchClassPluginConfigDao}.
+	 */
 	@Autowired
 	private BatchClassPluginConfigDao batchClassPluginConfigDao;
 
+	/**
+	 * Instance of {@link BatchClassDynamicPluginConfigDao}.
+	 */
 	@Autowired
 	private BatchClassDynamicPluginConfigDao batchClassDynamicPluginConfigDao;
 
-	@Cacheable(cacheName = "pluginPropertiesCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator",properties=@Property(name="includeMethod",value="false")))
-	public BatchPluginPropertyContainer getPluginProperties(String batchInstanceIdentifier) {
-		BatchPluginPropertyContainer container = null;
-		String localFolderLocation = batchSchemaService.getLocalFolderLocation();
+	/**
+	 * Instance of {@link batchInstanceDao}.
+	 */
+	@Autowired
+	private BatchInstanceDao batchInstanceDao;
 
+	/**
+	 * This method is to get the plugin properties.
+	 * 
+	 * @param batchInstanceIdentifier String.
+	 * @return {@link BatchPluginPropertyContainer}
+	 */
+	@Cacheable(cacheName = "pluginPropertiesCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator", properties = @Property(name = "includeMethod", value = "false")))
+	public BatchPluginPropertyContainer getPluginProperties(final String batchInstanceIdentifier) {
+		String loggingPrefix = BatchConstants.LOG_AREA + batchInstanceIdentifier;
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix + " : Executing getPluginProperties(String) API of BatchInstancePluginPropertiesDao.");
+		}
+		BatchPluginPropertyContainer container = null;
+		final String localFolderLocation = batchInstanceDao.getSystemFolderForBatchInstanceId(batchInstanceIdentifier);
 		boolean isContainerCreated = false;
-		String pathToPropertiesFolder = localFolderLocation + File.separator + "properties";
-		File file = new File(pathToPropertiesFolder);
+		final String pathToPropertiesFolder = localFolderLocation + File.separator + "properties";
+		final File file = new File(pathToPropertiesFolder);
 		if (!file.exists()) {
 			file.mkdir();
-			log.info(pathToPropertiesFolder + " folder created");
+			if (IS_DEBUG_ENABLE) {
+				LOGGER.debug(loggingPrefix + " : folder created " + pathToPropertiesFolder);
+			}
 		}
-
-		File serializedFile = new File(pathToPropertiesFolder + File.separator + batchInstanceIdentifier + '.' + EXTN);
+		final File serializedFile = new File(pathToPropertiesFolder + File.separator + batchInstanceIdentifier + '.' + EXTN);
 		if (serializedFile.exists()) {
 			FileInputStream fileInputStream = null;
 			try {
 				fileInputStream = new FileInputStream(serializedFile);
 				container = (BatchPluginPropertyContainer) SerializationUtils.deserialize(fileInputStream);
 				isContainerCreated = true;
-			} catch (Exception e) {
-				log.error("Error during de-serializing the properties for Batch instance: " + batchInstanceIdentifier, e);
+			} catch (Exception exception) {
+				LOGGER.error(loggingPrefix + " : Error during de-serializing the properties for this Batch instance: ", exception);
 				isContainerCreated = false;
 			} finally {
 				try {
 					if (fileInputStream != null) {
 						fileInputStream.close();
 					}
-				} catch (IOException e) {
-					log.error("Problem closing stream for file :" + serializedFile.getName(), e);
+				} catch (IOException exception) {
+					LOGGER.error(loggingPrefix + " : Problem closing stream for file : " + serializedFile.getName(), exception);
 				}
 			}
 		}
-
 		if (!isContainerCreated) {
-			List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPluginConfigDao
+			final List<BatchClassPluginConfig> batchClassPluginConfigs = batchClassPluginConfigDao
 					.getAllPluginPropertiesForBatchInstance(batchInstanceIdentifier);
 			// to lazily load KVPageProcess objects
-			for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
-				for (KVPageProcess eachKvPageProcess : batchClassPluginConfig.getKvPageProcesses()) {
-					if (log.isDebugEnabled() && eachKvPageProcess != null) {
-						log.debug(eachKvPageProcess.getKeyPattern());
+			for (final BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
+				for (final KVPageProcess eachKvPageProcess : batchClassPluginConfig.getKvPageProcesses()) {
+					if (IS_DEBUG_ENABLE && eachKvPageProcess != null) {
+						LOGGER.debug(loggingPrefix + " : Key pattern is " + eachKvPageProcess.getKeyPattern());
 					}
 				}
 			}
 
-			List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassDynamicPluginConfigDao
+			final List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs = batchClassDynamicPluginConfigDao
 					.getAllDynamicPluginPropertiesForBatchInstance(batchInstanceIdentifier);
 			container = new BatchPluginPropertyContainer(String.valueOf(batchInstanceIdentifier));
 			container.populate(batchClassPluginConfigs);
 			container.populateDynamicPluginConfigs(batchClassDynamicPluginConfigs);
-			List<DocumentType> documentTypes = documentTypeService.getDocTypeByBatchInstanceIdentifier(batchInstanceIdentifier);
+			final List<DocumentType> documentTypes = documentTypeService.getDocTypeByBatchInstanceIdentifier(batchInstanceIdentifier);
 			container.populateDocumentTypes(documentTypes, batchInstanceIdentifier);
 			FileOutputStream fileOutputStream = null;
 			try {
 				fileOutputStream = new FileOutputStream(serializedFile);
 				SerializationUtils.serialize(container, fileOutputStream);
-			} catch (Exception e) {
-				log.error("Error during serializing the properties for Batch instance: " + batchInstanceIdentifier, e);
+			} catch (Exception exception) {
+				LOGGER.error(loggingPrefix + " : Error during serializing properties for this Batch instance.", exception);
 			} finally {
 				try {
 					if (fileOutputStream != null) {
 						fileOutputStream.close();
 					}
-				} catch (IOException e) {
-					log.error("Problem closing stream for file :" + serializedFile.getName(), e);
+				} catch (IOException exception) {
+					LOGGER.error(loggingPrefix + " : Problem closing stream for file " + serializedFile.getName(), exception);
 				}
 			}
+		}
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix
+					+ " : Executed getPluginProperties(String) API of BatchInstancePluginPropertiesDao successfully.");
 		}
 		return container;
 	}
 
-	@TriggersRemove(cacheName = "pluginPropertiesCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator",properties=@Property(name="includeMethod",value="false")))
-	public void clearPluginProperties(String batchInstanceIdentifier) {
-		log.debug("Cleared the pluginPropertiesCache for batch Instance: " + batchInstanceIdentifier);
+	/**
+	 * This method is to clear the plugin properties.
+	 * 
+	 * @param batchInstanceIdentifier String.
+	 */
+	@TriggersRemove(cacheName = "pluginPropertiesCache", keyGenerator = @KeyGenerator(name = "StringCacheKeyGenerator", properties = @Property(name = "includeMethod", value = "false")))
+	public void clearPluginProperties(final String batchInstanceIdentifier) {
+		if (IS_DEBUG_ENABLE) {
+			String loggingPrefix = BatchConstants.LOG_AREA + batchInstanceIdentifier;
+			LOGGER.debug(loggingPrefix + " : Executing clearPluginProperties(String) API of BatchInstancePluginPropertiesDao.");
+			LOGGER.debug(loggingPrefix + " : Cleared the pluginPropertiesCache for this batch Instance.");
+			LOGGER.debug(loggingPrefix
+					+ " : Executed clearPluginProperties(String) API of BatchInstancePluginPropertiesDao successfully.");
+		}
 	}
 }

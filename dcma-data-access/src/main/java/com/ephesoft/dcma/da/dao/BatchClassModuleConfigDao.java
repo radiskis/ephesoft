@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,16 +35,27 @@
 
 package com.ephesoft.dcma.da.dao;
 
+import java.util.List;
+
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
+import com.ephesoft.dcma.da.domain.ModuleConfig;
 
 /**
- * This class is responsible to fetch data of import class config from data base.
- * This table is from developer's perspective.
+ * This class is responsible to fetch data of import class config from data base. This table is from developer's perspective.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.BatchClassModuleConfigDaoImpl
  */
 public interface BatchClassModuleConfigDao extends CacheableDao<BatchClassModuleConfig> {
+
+	/**
+	 * API for getting the module config using batch class module id.
+	 * 
+	 * @param batchClassModuleId String
+	 * @return List<ModuleConfig>
+	 */
+	List<ModuleConfig> getModuleConfigForBatchClassModule(String batchClassModuleId);
 
 }

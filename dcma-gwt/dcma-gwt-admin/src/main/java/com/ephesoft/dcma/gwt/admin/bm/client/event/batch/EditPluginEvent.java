@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,12 +42,11 @@ import com.ephesoft.dcma.gwt.core.shared.PluginConfigurationDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
+ * Used for handling events on plugin level.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Used for handling events on plugin level.
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
  */
 public class EditPluginEvent extends GwtEvent<EditPluginHandler> {
 
@@ -66,11 +65,22 @@ public class EditPluginEvent extends GwtEvent<EditPluginHandler> {
 	 */
 	private List<PluginConfigurationDTO> properties;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 */
 	public EditPluginEvent(final Action action) {
 		super();
 		this.action = action;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 * @param properties List<PluginConfigurationDTO>
+	 */
 	public EditPluginEvent(final Action action, List<PluginConfigurationDTO> properties) {
 		super();
 		this.properties = properties;
@@ -91,11 +101,21 @@ public class EditPluginEvent extends GwtEvent<EditPluginHandler> {
 		}
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<EditPluginHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<EditPluginHandler> getAssociatedType() {
 		return type;
 	}
 
+	/**
+	 * To get Plugin List.
+	 * 
+	 * @return List<PluginConfigurationDTO>
+	 */
 	public List<PluginConfigurationDTO> getPluginList() {
 		return properties;
 	}

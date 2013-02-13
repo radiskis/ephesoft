@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,27 +42,55 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlexTable;
 
+/**
+ * Class to create UI binding and set plugin data presenter.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ * 
+ */
 public class PluginData extends View<PluginDataPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<FlexTable, PluginData> {
 	}
 
+	/**
+	 * pluginDataTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable pluginDataTable;
 
-	// private PluginDataPresenter presenter;
-
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public PluginData() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
+	/**
+	 * To get View Table.
+	 * 
+	 * @return FlexTable
+	 */
 	public FlexTable getViewTable() {
 		return pluginDataTable;
 	}
 
+	/**
+	 * To set Presenter.
+	 * 
+	 * @param presenter PluginDataPresenter
+	 */
 	public void setPresenter(PluginDataPresenter presenter) {
 		this.presenter = presenter;
 	}

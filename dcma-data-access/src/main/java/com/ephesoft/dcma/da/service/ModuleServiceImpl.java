@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,14 +35,24 @@
 
 package com.ephesoft.dcma.da.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.da.dao.ModuleDao;
 import com.ephesoft.dcma.da.domain.Module;
 
+/**
+ * This is a database service to get the plugin config details for a pluginConfig.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.ModuleService
+ */
 @Service
 public class ModuleServiceImpl implements ModuleService {
 
@@ -51,18 +61,56 @@ public class ModuleServiceImpl implements ModuleService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleServiceImpl.class);
 
+	/**
+	 * moduleDao {@link ModuleDao}.
+	 */
 	@Autowired
 	private ModuleDao moduleDao;
 
+	/**
+	 * API to get the module by name.
+	 * 
+	 * @param moduleName {@link String}is the name of the module
+	 * @return {@link Module}
+	 */
 	@Override
 	public Module getModuleByName(String moduleName) {
 		LOGGER.info("module name : " + moduleName);
 		return moduleDao.getModuleByName(moduleName);
 	}
 
+	/**
+	 * API to get the module by id.
+	 * 
+	 * @param moduleId {@link Long}
+	 * @return {@link Module}
+	 */
 	@Override
 	public Module getModulePropertiesForModuleId(Long moduleId) {
 		LOGGER.debug("module id: " + moduleId);
 		return moduleDao.getModulePropertiesForModuleId(moduleId);
+	}
+
+	/**
+	 * API to get list of all module names.
+	 * 
+	 * @return {@link List}<{@link Module}>
+	 */
+	@Override
+	public List<Module> getAllModules() {
+		LOGGER.info("Retrieving list of all module names.");
+		return moduleDao.getAll();
+	}
+
+	/**
+	 * API to create a new module.
+	 * 
+	 * @param module {@link Module}
+	 */
+	@Override
+	@Transactional(readOnly = false)
+	public void createNewModule(Module module) {
+		LOGGER.info("Creating new module with module name: " + module.getName());
+		moduleDao.create(module);
 	}
 }

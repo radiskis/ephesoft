@@ -4,17 +4,17 @@
 	<g:DockLayoutPanel unit='PCT'>
 		<g:north size='37'>
 			<g:CaptionPanel ui:field="batchClassConfigurationCaptionPanel"
-				height="80%" width="97%">
+				height="88%" width="97%">
 				<g:LayoutPanel ui:field="viewEditLayoutPanel" width="100%"
 					height="100%">
 					<g:layer>
-						<g:ScrollPanel height="100%" width="100%">
+					
 							<g:VerticalPanel height="100%" width="100%">
 								<g:VerticalPanel ui:field="batchClassViewVerticalPanel"
 									width="100%" height="100%">
 									<batch-class:BatchClassDetailView
 										ui:field="batchClassDetailView" width='100%' />
-									<g:HorizontalPanel width="100%">
+									<g:HorizontalPanel width="100%" visible="false">
 										<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
 											<g:Button ui:field="editBatchPropertiesButton"></g:Button>
 										</g:cell>
@@ -26,7 +26,7 @@
 										ui:field="editBatchClassView" width='100%' />
 								</g:VerticalPanel>
 							</g:VerticalPanel>
-						</g:ScrollPanel>
+					
 					</g:layer>
 				</g:LayoutPanel>
 			</g:CaptionPanel>
@@ -153,6 +153,67 @@
 						</g:north>
 						<g:center>
 							<g:LayoutPanel ui:field="batchClassFieldLayoutPanel">
+							</g:LayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>Scanner Profiles</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="scannerListPanel"
+						width="98%" height="92%" unit="PCT">
+						<g:north size="13">
+							<g:HorizontalPanel width="99%" ui:field="scannerButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addScannerButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editScannerButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteScannerButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel height="100%" ui:field="scannerLayoutPanel" />
+						</g:center>
+					</g:DockLayoutPanel>
+				</g:tab>
+				<g:tab>
+					<g:customHeader>
+						<g:Label>CMIS Import</g:Label>
+					</g:customHeader>
+					<g:DockLayoutPanel ui:field="cmisListPanel"
+						width="98%" height="92%">
+						<g:north size="27">
+							<g:HorizontalPanel width="99%" ui:field="cmisButtonPanel">
+								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="addCmisButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="editCmisButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="deleteCmisButton"></g:Button>
+								</g:cell>
+							</g:HorizontalPanel>
+						</g:north>
+						<g:center>
+							<g:LayoutPanel ui:field="cmisLayoutPanel">
 							</g:LayoutPanel>
 						</g:center>
 					</g:DockLayoutPanel>

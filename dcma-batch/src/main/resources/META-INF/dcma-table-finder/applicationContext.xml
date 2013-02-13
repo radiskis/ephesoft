@@ -12,7 +12,7 @@
 	default-autowire="byName">
 
 	<import resource="classpath:/META-INF/applicationContext-data-access.xml" />
-	
+
 	<context:component-scan base-package="com.ephesoft.dcma.tablefinder" />
 	<context:component-scan base-package="com.ephesoft.dcma.tablefinder.service" />
 
@@ -24,10 +24,11 @@
 			value="classpath:/META-INF/dcma-table-finder/dcma-tablefinder.properties">
 		</property>
 	</bean>
-	<bean id="tableFinderService" class="com.ephesoft.dcma.tablefinder.service.TableFinderServiceImpl"
-		p:widthOfLine="$tablefinder{tablefinder.width_of_line}" 
-		p:confidenceScore="$tablefinder{tablefinder.confidence_score}">
+	<bean id="tableFinderService"
+		class="com.ephesoft.dcma.tablefinder.service.TableFinderServiceImpl"
+		p:widthOfLine="$tablefinder{tablefinder.width_of_line}"
+		p:confidenceScore="$tablefinder{tablefinder.confidence_score}"
+		p:gapBetweenColumnWords="$tablefinder{tablefinder.gap_between_column_words}">
 	</bean>
-
 
 </beans>

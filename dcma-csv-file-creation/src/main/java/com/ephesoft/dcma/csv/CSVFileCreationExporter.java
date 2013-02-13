@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -74,16 +74,10 @@ import com.ephesoft.dcma.da.service.BatchInstanceService;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.csv.service.CSVFileCreationService
  */
 @Component
 public class CSVFileCreationExporter implements ICommonConstants {
-
-	/**
-	 * Variable for ON.
-	 */
-	private static final String ON_STRING = "ON";
-
-	private static final String PDF_EXT = ".pdf";
 
 	/**
 	 * Instance of Logger.
@@ -91,32 +85,32 @@ public class CSVFileCreationExporter implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSVFileCreationExporter.class);
 
 	/**
-	 * Instance of BatchSchemaService.
+	 * Instance of {@link BatchSchemaService}.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * Instance of BatchClassService.
+	 * Instance of {@link BatchClassService}.
 	 */
 	@Autowired
 	private BatchClassService batchClassService;
 
 	/**
-	 * Instance of BatchInstanceService.
+	 * Instance of {@link BatchInstanceService}.
 	 */
 	@Autowired
 	private BatchInstanceService batchInstanceService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * @return the batchSchemaService
+	 * @return the {@link BatchSchemaService}.
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
@@ -129,9 +123,6 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		return pluginPropertiesService;
 	}
 
-	/**
-	 * This API adding header columns to the CSV file.
-	 */
 	private void addHeaderColumns(final List<String> headerColumns) {
 		LOGGER.info("Start adding header column type in csv");
 		headerColumns.add(CSVFileCreationConstant.FILE_PROCESS_NAME.getId());
@@ -167,7 +158,7 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		String isCSVFileCreationSwitchON = this.pluginPropertiesService.getPropertyValue(batchInstanceID,
 				CSVFileCreationConstant.CSV_FILE_CREATION_PLUGIN.getId(), CSVFileCreationProperties.CSV_FILE_CREATION_SWITCH);
 
-		if (ON_STRING.equalsIgnoreCase(isCSVFileCreationSwitchON)) {
+		if (CSVFileCreationConstant.ON_STRING.equalsIgnoreCase(isCSVFileCreationSwitchON)) {
 			String exportFolder = this.pluginPropertiesService.getPropertyValue(batchInstanceID,
 					CSVFileCreationConstant.CSV_FILE_CREATION_PLUGIN.getId(),
 					CSVFileCreationProperties.CSV_FILE_CREATION_EXPORT_FOLDER);
@@ -218,13 +209,14 @@ public class CSVFileCreationExporter implements ICommonConstants {
 						+ subPoenaLoanMap.get(CSVFileCreationConstant.LOAN_NUMBER.getId());
 			}
 			for (DocumentType document : batchClassMajorDocumentType) {
-				List<String> addDataToList = addDataToList(batch, document, batchInstance, documentList, batchName);
+				List<String> addDataToList = addDataToList(batch, document, documentList, batchName);
 				dataList.add(addDataToList);
 
 			}
 
 			// Getting export CSV file path
-			String fileName = getTargetFilePath(batchInstanceID, exportFolder, batch, CSVFileCreationConstant.CSV_EXTENSION.getId(),batchName);
+			String fileName = getTargetFilePath(batchInstanceID, exportFolder, batch, CSVFileCreationConstant.CSV_EXTENSION.getId(),
+					batchName);
 
 			if (isExportFoderCreated && fileName != null && batch != null && batchInstance != null) {
 				this.addHeaderColumns(headerColumns);
@@ -240,32 +232,24 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API added data into list.
-	 * 
-	 * @param batch {@link Batch}
-	 * @param document {@link Document}
-	 * @param docField {@link DocField}
-	 * @param batchInstance {@link BatchInstance}
-	 * 
-	 */
-	private List<String> addDataToList(final Batch batch, final DocumentType document, final BatchInstance batchInstance,
-			final List<Document> batchDocumentList, String batchName) {
+	private List<String> addDataToList(final Batch batch, final DocumentType document, final List<Document> batchDocumentList,
+			String batchName) {
 		Document batchDocumtent = null;
 		boolean placeholderSet = false;
 		List<String> list = new ArrayList<String>();
 		String subpoenaNumberValue = "";
+		String newBatchName = batchName;
 		if (batchName == null || batchName.isEmpty()) {
-			batchName = batch.getBatchName();
+			newBatchName = batch.getBatchName();
 		}
-		String[] split = batchName.split(CSVFileCreationConstant.UNDERSCORE.getId());
+		String[] split = newBatchName.split(CSVFileCreationConstant.UNDERSCORE.getId());
 		String loanNumber = split[split.length - 1];
-		int endIndex = batchName.length() - loanNumber.length() - 1;
-		if (endIndex > 3) {
-			subpoenaNumberValue = batchName.substring(0, endIndex);
+		int endIndex = newBatchName.length() - loanNumber.length() - 1;
+		if (endIndex > CSVFileCreationConstant.END_INDEX_VALUE) {
+			subpoenaNumberValue = newBatchName.substring(0, endIndex);
 		}
-		String file_process_name = batchName + CSVFileCreationConstant.UNDERSCORE.getId()
-				+ batch.getBatchInstanceIdentifier() + PDF_EXT;
+		String file_process_name = newBatchName + CSVFileCreationConstant.UNDERSCORE.getId() + batch.getBatchInstanceIdentifier()
+				+ CSVFileCreationConstant.PDF_EXT;
 		list.add(file_process_name);
 		list.add(subpoenaNumberValue);
 		list.add(loanNumber);
@@ -304,12 +288,6 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		return list;
 	}
 
-	/**
-	 * This API is used to create the export folder.
-	 * 
-	 * @param exportFolder {@link String}
-	 * @return isExportFoderCreated
-	 */
 	private boolean createExportFolder(final String exportFolder) {
 		File exportFolderFile = new File(exportFolder);
 		boolean isExportFolderCreated = false;
@@ -321,22 +299,14 @@ public class CSVFileCreationExporter implements ICommonConstants {
 		return isExportFolderCreated;
 	}
 
-	/**
-	 * This API returns the exported CSV file path.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param exportFolder {@link String}
-	 * @param batch {@link Batch}
-	 * @param fileExtension {@link String}
-	 * @return targetFilePath
-	 */
 	private String getTargetFilePath(final String batchInstanceID, final String exportFolder, final Batch batch,
 			final String fileExtension, String batchName) {
 		LOGGER.info("Generating file path to be exported");
-		if(batchName == null || batchName.isEmpty()) {
-			batchName = batch.getBatchName();
+		String newBatchName = batchName;
+		if (batchName == null || batchName.isEmpty()) {
+			newBatchName = batch.getBatchName();
 		}
-		String targetFilePath = exportFolder + File.separator + batchName + CSVFileCreationConstant.UNDERSCORE.getId()
+		String targetFilePath = exportFolder + File.separator + newBatchName + CSVFileCreationConstant.UNDERSCORE.getId()
 				+ batchInstanceID + fileExtension.toLowerCase(Locale.getDefault());
 		LOGGER.info("File path to be exported is :" + targetFilePath);
 		return targetFilePath;
@@ -348,12 +318,12 @@ public class CSVFileCreationExporter implements ICommonConstants {
 			if (resultMap.size() == 2) {
 				break;
 			}
-			
+
 			DocumentLevelFields docFields = document.getDocumentLevelFields();
-			if(docFields == null){
+			if (docFields == null) {
 				continue;
 			}
-			
+
 			List<DocField> docFieldList = docFields.getDocumentLevelField();
 			for (DocField docField : docFieldList) {
 				String name = docField.getName();

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,36 +57,37 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class RadioButtonDialogView extends DialogBox {
 
 	@UiField
-	VerticalPanel radioButtonDialogView;
+	protected VerticalPanel radioButtonDialogViewPanel;
 
 	@UiField
-	Button okButton;
+	protected Button okButton;
 
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	@UiField
-	VerticalPanel radioPanel;
+	protected VerticalPanel radioPanel;
 
 	interface Binder extends UiBinder<HTMLPanel, RadioButtonDialogView> {
 	}
 
 	public interface DialogListener {
 
-		public void onOkClick(int radioButtonNumber);
+		void onOkClick(int radioButtonNumber);
 
-		public void onCancelClick();
+		void onCancelClick();
 	}
 
 	private DialogListener listener;
 
-	List<RadioButton> radioButtonList;
+	private List<RadioButton> radioButtonList;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@SuppressWarnings("deprecation")
 	public RadioButtonDialogView(List<String> radioButtonText, String title) {
-		setWidget(binder.createAndBindUi(this));
+		super();
+		setWidget(BINDER.createAndBindUi(this));
 		setAnimationEnabled(true);
 		setGlassEnabled(true);
 		setText(title);
@@ -107,7 +108,7 @@ public class RadioButtonDialogView extends DialogBox {
 			radioButtonList.get(0).setChecked(true);
 		}
 		radioPanel.setSpacing(5);
-		radioButtonDialogView.setSpacing(5);
+		radioButtonDialogViewPanel.setSpacing(5);
 	}
 
 	@Override
@@ -115,20 +116,15 @@ public class RadioButtonDialogView extends DialogBox {
 		super.onPreviewNativeEvent(preview);
 
 		NativeEvent evt = preview.getNativeEvent();
-		if (evt.getType().equals("keydown")) {
+		if (evt.getType().equals("keydown") && evt.getKeyCode() == KeyCodes.KEY_ESCAPE) {
 			// Use the popup's key preview hooks to close the dialog when either
 			// enter or escape is pressed.
-			switch (evt.getKeyCode()) {
-				// case KeyCodes.KEY_ENTER:
-				case KeyCodes.KEY_ESCAPE:
-					hide();
-					break;
-			}
+			hide();
 		}
 	}
 
 	@UiHandler("okButton")
-	void onOk(ClickEvent event) {
+	protected void onOk(ClickEvent event) {
 		int radioButtonNumber = -1;
 		if (radioButtonList != null) {
 			int index = 0;
@@ -145,7 +141,7 @@ public class RadioButtonDialogView extends DialogBox {
 	}
 
 	@UiHandler("cancelButton")
-	void OnCancel(ClickEvent event) {
+	protected void onCancel(ClickEvent event) {
 		listener.onCancelClick();
 		hide();
 	}

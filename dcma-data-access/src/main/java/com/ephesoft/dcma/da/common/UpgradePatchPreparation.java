@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,8 +40,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -54,12 +56,15 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
 import com.ephesoft.dcma.core.common.FileType;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
+import com.ephesoft.dcma.da.domain.BatchClassScannerConfiguration;
+import com.ephesoft.dcma.da.domain.Dependency;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.FunctionKey;
@@ -69,6 +74,7 @@ import com.ephesoft.dcma.da.domain.Module;
 import com.ephesoft.dcma.da.domain.PageType;
 import com.ephesoft.dcma.da.domain.Plugin;
 import com.ephesoft.dcma.da.domain.RegexValidation;
+import com.ephesoft.dcma.da.domain.ScannerMasterConfiguration;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.service.BatchClassService;
@@ -76,35 +82,89 @@ import com.ephesoft.dcma.da.service.ModuleService;
 import com.ephesoft.dcma.da.service.PluginService;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
+/**
+ * This class upgrade the patch preparation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig
+ */
 public class UpgradePatchPreparation {
 
+	/**
+	 * pluginService PluginService.
+	 */ 
 	private static PluginService pluginService;
 
+	/**
+	 * moduleService ModuleService.
+	 */
 	private static ModuleService moduleService;
-
+	
+	/**
+	 * ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE, constant String.
+	 */
 	private static final String ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE = "Error occurred while creating the serializable file.";
 
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradePatchPreparation.class);
 
-	private static final String PROPERTY_FILE = "db-patch";
-	private static final String META_INF_PATH = "META-INF\\dcma-data-access";
-
+	/**
+	 * SERIALIZATION_EXT String.
+	 */
 	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 
+	/**
+	 * upgradePatchFolderPath String.
+	 */
 	private static String upgradePatchFolderPath = null;
-
+	
+	/**
+	 * pluginNameVsBatchPluginConfigList, HashMap.
+	 */
 	private static HashMap<String, ArrayList<BatchClassPluginConfig>> pluginNameVsBatchPluginConfigList = new HashMap<String, ArrayList<BatchClassPluginConfig>>();
 
+	/**
+	 * batchClassNameVsModulesMap, HashMap.
+	 */
 	private static HashMap<String, ArrayList<BatchClassModule>> batchClassNameVsModulesMap = new HashMap<String, ArrayList<BatchClassModule>>();
 
+	/**
+	 * batchClassNameVsPluginsMap, HashMap.
+	 */
 	private static HashMap<String, ArrayList<BatchClassPlugin>> batchClassNameVsPluginsMap = new HashMap<String, ArrayList<BatchClassPlugin>>();
 
+	/**
+	 * moduleNameVsBatchClassModuleConfigMap, HashMap.
+	 */
 	private static HashMap<String, ArrayList<BatchClassModuleConfig>> moduleNameVsBatchClassModuleConfigMap = new HashMap<String, ArrayList<BatchClassModuleConfig>>();
 
-	private static HashMap<String, ArrayList<BatchClass>> batchClassNameVsBatchClassMap = new HashMap<String, ArrayList<BatchClass>>();
+	/**
+	 * batchClassNameVsBatchClassMap, HashMap.
+	 */
+	private static HashMap<String, BatchClass> batchClassNameVsBatchClassMap = new LinkedHashMap<String, BatchClass>();
 
+	/**
+	 * batchClassScannerConfigList, List.
+	 */
+	private static List<BatchClassScannerConfiguration> batchClassScannerConfigList = new ArrayList<BatchClassScannerConfiguration>();
+
+	/**
+	 * pluginNameVsDependencyMap, HashMap.
+	 */
+	private static HashMap<String, ArrayList<Dependency>> pluginNameVsDependencyMap = new HashMap<String, ArrayList<Dependency>>();
+
+	/**
+	 * This method loads the required properties.
+	 * 
+	 * @param propertyName {@link String}
+	 * @return Properties
+	 * @throws IOException may occur while reading the file.
+	 */
 	private static Properties loadProperties(final String propertyName) throws IOException {
-		final String filePath = META_INF_PATH + File.separator + propertyName + ".properties";
+		final String filePath = DataAccessConstant.META_INF_PATH + File.separator + propertyName + DataAccessConstant.PROPERTIES;
 		final Properties properties = new Properties();
 		InputStream propertyInStream = null;
 		try {
@@ -119,19 +179,30 @@ public class UpgradePatchPreparation {
 		return properties;
 	}
 
+	/**
+	 * This method creates patch for DB.
+	 * 
+	 * @param service {@link BatchClassService}
+	 */
 	public static void createDBPatch(final BatchClassService service) {
 		String pluginInfo = null;
 		String pluginConfigInfo = null;
 		String moduleInfo = null;
 		String batchClassInfo = null;
 		String moduleConfigInfo = null;
+		String scannerConfigInfo = null;
 		try {
-			final Properties props = loadProperties(PROPERTY_FILE);
+			final Properties props = loadProperties(DataAccessConstant.PROPERTY_FILE);
 
 			upgradePatchFolderPath = props.getProperty("upgradePatch.folder");
 			if (upgradePatchFolderPath == null || upgradePatchFolderPath.isEmpty()) {
 				LOG.error("Patch folder not specified. Unable to complete patch creation.");
 				return;
+			}
+
+			scannerConfigInfo = props.getProperty("upgradePatch.scanner_property");
+			if (scannerConfigInfo != null && !scannerConfigInfo.trim().isEmpty()) {
+				createPatchForScannerConfig(service, scannerConfigInfo);
 			}
 
 			moduleInfo = props.getProperty("upgradePatch.module");
@@ -153,23 +224,27 @@ public class UpgradePatchPreparation {
 			if (moduleConfigInfo != null && !moduleConfigInfo.isEmpty()) {
 				createPatchForBatchClassModuleConfigs(service);
 			}
-
 			batchClassInfo = props.getProperty("upgradePatch.batch_class");
 			if (batchClassInfo != null && !batchClassInfo.isEmpty()) {
-				createPatchForBatchClass(service, batchClassInfo);
+				createPatchForBatchClass( service,batchClassInfo);
 			}
-
+			createPatchForDependencies();
 		} catch (IOException e) {
 			LOG.error("Unable to load properties file.", e);
 		}
 	}
 
+	/**
+	 * This method creates patch for plugin.
+	 * 
+	 * @param service {@link BatchClassService}
+	 * @param pluginInfo {@link String}
+	 */
 	private static void createPatchForPlugin(final BatchClassService service, final String pluginInfo) {
-
-		final StringTokenizer pluginTokens = new StringTokenizer(pluginInfo, ";");
+		final StringTokenizer pluginTokens = new StringTokenizer(pluginInfo, DataAccessConstant.SEMI_COLON);
 		while (pluginTokens.hasMoreTokens()) {
 			String pluginToken = pluginTokens.nextToken();
-			StringTokenizer pluginConfigTokens = new StringTokenizer(pluginToken, ",");
+			StringTokenizer pluginConfigTokens = new StringTokenizer(pluginToken, DataAccessConstant.COMMA);
 			String batchClassIdentifier = null;
 			String moduleId = null;
 			String pluginId = null;
@@ -181,7 +256,7 @@ public class UpgradePatchPreparation {
 				if (createdPlugin != null) {
 					BatchClass batchClass = service.getBatchClassByIdentifier(batchClassIdentifier);
 					Module module = moduleService.getModulePropertiesForModuleId(Long.valueOf(moduleId));
-					String key = batchClass.getName() + "," + module.getName();
+					String key = batchClass.getName() + DataAccessConstant.COMMA + module.getName();
 					ArrayList<BatchClassPlugin> pluginsList = batchClassNameVsPluginsMap.get(key);
 					if (pluginsList == null) {
 						pluginsList = new ArrayList<BatchClassPlugin>();
@@ -204,11 +279,17 @@ public class UpgradePatchPreparation {
 		}
 	}
 
+	/**
+	 * This method creates patch for plugin config. 
+	 * 
+	 * @param service {@link BatchClassService}
+	 * @param pluginConfigInfo {@link String}
+	 */
 	private static void createPatchForPluginConfig(BatchClassService service, final String pluginConfigInfo) {
-		StringTokenizer pluginTokens = new StringTokenizer(pluginConfigInfo, ";");
+		StringTokenizer pluginTokens = new StringTokenizer(pluginConfigInfo, DataAccessConstant.SEMI_COLON);
 		while (pluginTokens.hasMoreTokens()) {
 			String pluginToken = pluginTokens.nextToken();
-			StringTokenizer pluginConfigTokens = new StringTokenizer(pluginToken, ",");
+			StringTokenizer pluginConfigTokens = new StringTokenizer(pluginToken, DataAccessConstant.COMMA);
 			String pluginId = null;
 			String pluginConfigId = null;
 			try {
@@ -230,11 +311,17 @@ public class UpgradePatchPreparation {
 		}
 	}
 
+	/**
+	 * This method creates patch for module.
+	 * 
+	 * @param service {@link BatchClassService}
+	 * @param moduleInfo {@link String}
+	 */
 	private static void createPatchForModule(BatchClassService service, String moduleInfo) {
-		StringTokenizer moduleTokens = new StringTokenizer(moduleInfo, ";");
+		StringTokenizer moduleTokens = new StringTokenizer(moduleInfo, DataAccessConstant.SEMI_COLON);
 		while (moduleTokens.hasMoreTokens()) {
 			String moduleToken = moduleTokens.nextToken();
-			StringTokenizer pluginConfigTokens = new StringTokenizer(moduleToken, ",");
+			StringTokenizer pluginConfigTokens = new StringTokenizer(moduleToken, DataAccessConstant.COMMA);
 			String batchClassName = null;
 			String moduleId = null;
 			try {
@@ -266,22 +353,61 @@ public class UpgradePatchPreparation {
 
 	}
 
+	/**
+	 * This method creates patch for scanner config.
+	 * 
+	 * @param service {@link BatchClassService}
+	 * @param scannerConfigInfo {@link String}
+	 */
+	private static void createPatchForScannerConfig(BatchClassService service, String scannerConfigInfo) {
+		String batchClassId = scannerConfigInfo.trim();
+		BatchClass batchClass = service.getLoadedBatchClassByIdentifier(batchClassId);
+		List<BatchClassScannerConfiguration> batchClassScannerConfigs = batchClass.getBatchClassScannerConfiguration();
+		service.evict(batchClass);
+		for (BatchClassScannerConfiguration scannerConfig : batchClassScannerConfigs) {
+			if (scannerConfig.getParent() == null) {
+				scannerConfig.setBatchClass(null);
+				scannerConfig.setId(0);
+				ScannerMasterConfiguration masterConfig=scannerConfig.getScannerMasterConfig();
+				masterConfig.setId(0);
+				scannerConfig.setScannerMasterConfig(masterConfig);
+				for (BatchClassScannerConfiguration childScannerConfig : scannerConfig.getChildren()) {
+					childScannerConfig.setParent(null);
+					childScannerConfig.setBatchClass(null);
+					childScannerConfig.setId(0);
+					ScannerMasterConfiguration childMasterConfig=childScannerConfig.getScannerMasterConfig();
+					childMasterConfig.setId(0);
+					childScannerConfig.setScannerMasterConfig(childMasterConfig);
+					LOG.info("Getting the child configs of parent scanner configs...");
+				}
+				LOG.info("Adding the parent scanner configs to the list...");
+				batchClassScannerConfigList.add(scannerConfig);
+			}
+		}
+		try {
+			File serializedExportFile = new File(upgradePatchFolderPath + File.separator + "ScannerConfigUpdate" + SERIALIZATION_EXT);
+			SerializationUtils.serialize((Serializable) batchClassScannerConfigList, new FileOutputStream(serializedExportFile));
+		} catch (FileNotFoundException e) {
+			// Unable to create serializable file
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
+		}
+
+	}
+
+	/**
+	 * This method creates patch for batch class.
+	 * 
+	 * @param service {@link BatchClassService}
+	 * @param batchClassInfo {@link String}
+	 */
 	private static void createPatchForBatchClass(BatchClassService service, String batchClassInfo) {
-		StringTokenizer batchClassTokens = new StringTokenizer(batchClassInfo, ";");
+		StringTokenizer batchClassTokens = new StringTokenizer(batchClassInfo, DataAccessConstant.SEMI_COLON);
 		while (batchClassTokens.hasMoreTokens()) {
 			String batchClassName = batchClassTokens.nextToken();
 			try {
 				BatchClass createdBatchClass = createPatchForBatchClass(batchClassName, service);
 				if (createdBatchClass != null) {
-					BatchClass batchClass = service.getBatchClassByIdentifier(batchClassName);
-
-					ArrayList<BatchClass> batchClassList = batchClassNameVsBatchClassMap.get(batchClass.getName());
-					if (batchClassList == null) {
-						batchClassList = new ArrayList<BatchClass>();
-						batchClassNameVsBatchClassMap.put(batchClass.getName(), batchClassList);
-					}
-
-					batchClassList.add(createdBatchClass);
+					batchClassNameVsBatchClassMap.put(createdBatchClass.getName(), createdBatchClass);
 				}
 
 			} catch (NoSuchElementException e) {
@@ -298,6 +424,14 @@ public class UpgradePatchPreparation {
 		}
 	}
 
+	/**
+	 * This method creates patch for modules.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param moduleName {@link String}
+	 * @param batchClassService {@link BatchClassService}
+	 * @return {@link BatchClassModule}
+	 */
 	private static BatchClassModule createPatchForModule(String batchClassIdentifier, String moduleName,
 			BatchClassService batchClassService) {
 
@@ -329,8 +463,14 @@ public class UpgradePatchPreparation {
 		return createdModule;
 	}
 
+	/**
+	 * This method creates patch for batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param batchClassService {@link BatchClassService}
+	 * @return {@link BatchClass}
+	 */
 	private static BatchClass createPatchForBatchClass(String batchClassIdentifier, BatchClassService batchClassService) {
-
 		BatchClass createdBatchClass = null;
 		BatchClassModule createdBatchClassModule = null;
 		List<BatchClassModule> batchClassModules = new ArrayList<BatchClassModule>();
@@ -380,6 +520,15 @@ public class UpgradePatchPreparation {
 		return createdBatchClass;
 	}
 
+	/**
+	 * This method is used to create patch.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param moduleId {@link String}
+	 * @param pluginId {@link String}
+	 * @param batchClassService {@link BatchClassService}
+	 * @return {@link BatchClassPlugin}
+	 */
 	private static BatchClassPlugin createPatch(String batchClassIdentifier, String moduleId, String pluginId,
 			BatchClassService batchClassService) {
 		BatchClassPlugin createdPlugin = null;
@@ -418,6 +567,13 @@ public class UpgradePatchPreparation {
 		return createdPlugin;
 	}
 
+	/**
+	 * This method is to prepare Batch Class for serialization.
+	 * 
+	 * @param createdBatchClass {@link BatchClass}
+	 * @param batchClassModules {@link List<BatchClassModule>}
+	 * @param documentTypes {@link List<DocumentType>}
+	 */
 	private static void prepareBatchClassForSerialization(BatchClass createdBatchClass, List<BatchClassModule> batchClassModules,
 			List<DocumentType> documentTypes) {
 		createdBatchClass.setId(0);
@@ -428,6 +584,11 @@ public class UpgradePatchPreparation {
 		createdBatchClass.setCurrentUser(null);
 	}
 
+	/**
+	 * This method prepares plugin for serialization.
+	 * 
+	 * @param createdPlugin {@link BatchClassPlugin}
+	 */
 	private static void preparePluginForSerialization(BatchClassPlugin createdPlugin) {
 		createdPlugin.setBatchClassModule(null);
 		createdPlugin.setId(0);
@@ -443,7 +604,6 @@ public class UpgradePatchPreparation {
 				newKVPageProcess.add(kv);
 			}
 			config.setKvPageProcesses(newKVPageProcess);
-
 		}
 
 		ArrayList<BatchClassDynamicPluginConfig> newDynamicPluginConfigs = new ArrayList<BatchClassDynamicPluginConfig>();
@@ -464,6 +624,11 @@ public class UpgradePatchPreparation {
 		createdPlugin.setBatchClassPluginConfigs(newPluginConfigs);
 	}
 
+	/**
+	 * This method prepares page type for serialization.
+	 * 
+	 * @param documentType {@link DocumentType}
+	 */
 	public static void preparePageTypeForSerialization(DocumentType documentType) {
 		List<PageType> pages = documentType.getPages();
 		List<PageType> newPageTypes = new ArrayList<PageType>();
@@ -476,6 +641,11 @@ public class UpgradePatchPreparation {
 		documentType.setPages(newPageTypes);
 	}
 
+	/**
+	 * This method prepares field type for serialization.
+	 * 
+	 * @param documentType {@link DocumentType}
+	 */
 	public static void prepareFieldTypeForSerialization(DocumentType documentType) {
 		List<FieldType> fieldTypes = documentType.getFieldTypes();
 		List<FieldType> newFieldType = new ArrayList<FieldType>();
@@ -490,6 +660,11 @@ public class UpgradePatchPreparation {
 		documentType.setFieldTypes(newFieldType);
 	}
 
+	/**
+	 * This method prepares table info for serialization.
+	 * 
+	 * @param documentType {@link DocumentType}
+	 */
 	public static void prepareTableInfoForSerialization(DocumentType documentType) {
 		List<TableInfo> tableInfos = documentType.getTableInfos();
 		List<TableInfo> newTableInfo = new ArrayList<TableInfo>();
@@ -502,6 +677,11 @@ public class UpgradePatchPreparation {
 		documentType.setTableInfos(newTableInfo);
 	}
 
+	/**
+	 * This method prepares table columns info for serialization.
+	 * 
+	 * @param tableInfo {@link TableInfo}
+	 */
 	public static void prepareTableColumnsInfoForSerialization(TableInfo tableInfo) {
 		List<TableColumnsInfo> tableColumnsInfos = tableInfo.getTableColumnsInfo();
 		List<TableColumnsInfo> newTableColumnsInfo = new ArrayList<TableColumnsInfo>();
@@ -512,6 +692,11 @@ public class UpgradePatchPreparation {
 		tableInfo.setTableColumnsInfo(newTableColumnsInfo);
 	}
 
+	/**
+	 * This method prepares KV Extraction field info for serialization.
+	 * 
+	 * @param fieldType {@link FieldType}
+	 */
 	public static void prepareKVExtractionFieldForSerialization(FieldType fieldType) {
 		List<KVExtraction> kvExtraction2 = fieldType.getKvExtraction();
 		List<KVExtraction> newKvExtraction = new ArrayList<KVExtraction>();
@@ -523,6 +708,11 @@ public class UpgradePatchPreparation {
 		fieldType.setKvExtraction(newKvExtraction);
 	}
 
+	/**
+	 *  This method prepares Regex for serialization.
+	 * 
+	 * @param fieldType {@link FieldType}
+	 */
 	public static void prepareRegexForSerialization(FieldType fieldType) {
 		List<RegexValidation> regexValidations = fieldType.getRegexValidation();
 		List<RegexValidation> regexValidations2 = new ArrayList<RegexValidation>();
@@ -533,7 +723,12 @@ public class UpgradePatchPreparation {
 		}
 		fieldType.setRegexValidation(regexValidations2);
 	}
-
+	
+	/**
+	 * This method prepares function key for serialization.
+	 * 
+	 * @param documentType {@link DocumentType}
+	 */
 	public static void prepareFunctionKeyForSerialization(DocumentType documentType) {
 		List<FunctionKey> functionKeys = documentType.getFunctionKeys();
 		List<FunctionKey> newFunctionKeys = new ArrayList<FunctionKey>();
@@ -627,6 +822,72 @@ public class UpgradePatchPreparation {
 		}
 	}
 
+	private static void createPatchForDependencies() {
+		List<Plugin> pluginsList = pluginService.getAllPlugins();
+
+		for (Plugin plugin : pluginsList) {
+			ArrayList<Dependency> pluginDependencies = new ArrayList<Dependency>(plugin.getDependencies());
+			changePluginIdToName(pluginDependencies);
+			pluginNameVsDependencyMap.put(plugin.getPluginName(), pluginDependencies);
+		}
+
+		try {
+			File serializedExportFile = new File(upgradePatchFolderPath + File.separator + DataAccessConstant.DEPENDENCY_UPDATE
+					+ SERIALIZATION_EXT);
+			SerializationUtils.serialize(pluginNameVsDependencyMap, new FileOutputStream(serializedExportFile));
+		} catch (FileNotFoundException e) {
+			LOG.error(ERROR_OCCURRED_WHILE_CREATING_THE_SERIALIZABLE_FILE + e.getMessage(), e);
+		}
+	}
+
+
+	private static void changePluginIdToName(List<Dependency> dependencies) {
+		for (Dependency dependency : dependencies) {
+			dependency.setId(0);
+			String dependenciesString = dependency.getDependencies();
+			dependenciesString = changeDependenciesIdentifierToName(dependenciesString);
+			dependency.setDependencies(dependenciesString);
+		}
+	}
+
+	private static String changeDependenciesIdentifierToName(String dependencyNames) {
+
+		String[] andDependencies = dependencyNames.split(DataAccessConstant.AND);
+		StringBuffer andDependenciesNameAsString = new StringBuffer();
+
+		for (String andDependency : andDependencies) {
+
+			if (!andDependenciesNameAsString.toString().isEmpty()) {
+				andDependenciesNameAsString.append(DataAccessConstant.AND);
+			}
+
+			String[] orDependencies = andDependency.split(DataAccessConstant.OR_SYMBOL);
+			StringBuffer orDependenciesNameAsString = new StringBuffer();
+
+			for (String dependencyIdentifier : orDependencies) {
+				if (!orDependenciesNameAsString.toString().isEmpty()) {
+					orDependenciesNameAsString.append(DataAccessConstant.OR_SYMBOL);
+				}
+
+				try {
+					long dependencyId = Long.valueOf(dependencyIdentifier);
+					orDependenciesNameAsString.append(pluginService.getPluginPropertiesForPluginId(dependencyId).getPluginName());
+				} catch (NumberFormatException e) {
+					LOG.error(e.getMessage());
+				}
+			}
+
+			andDependenciesNameAsString.append(orDependenciesNameAsString);
+			orDependenciesNameAsString = new StringBuffer();
+		}
+		return andDependenciesNameAsString.toString();
+	}
+
+	/**
+	 * This is the main method.
+	 * 
+	 * @param args {@link String[]}
+	 */
 	public static void main(String[] args) {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"classpath:/META-INF/applicationContext-data-access.xml");

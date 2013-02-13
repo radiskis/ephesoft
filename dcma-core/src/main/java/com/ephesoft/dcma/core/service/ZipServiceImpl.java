@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -50,12 +51,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.ephesoft.dcma.core.common.FileType;
+import com.ephesoft.dcma.core.constant.CoreConstants;
 import com.ephesoft.dcma.util.FileUtils;
 
+/**
+ * This class unzips files in specified destination directory.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.service.ZipService
+ */
 @Service
 public class ZipServiceImpl implements ZipService {
 
-	private static final char DOT = '.';
+	/**
+	 * DEFAULT_LOCALE Locale.
+	 */
+	private static final Locale DEFAULT_LOCALE = Locale.getDefault();
+
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ZipServiceImpl.class);
 
 	/**
@@ -69,24 +85,25 @@ public class ZipServiceImpl implements ZipService {
 	 */
 	@Override
 	public void unzipFiles(File fSourceZip, String destinationDir) throws FileNotFoundException, IOException {
+		String finalDestinationDir = destinationDir;
 		LOG.info("Extracting zip file = " + fSourceZip.getAbsolutePath());
 		BufferedInputStream bis = null;
 		FileOutputStream fos = null;
 		BufferedOutputStream bos = null;
 		ZipFile zipFile = null;
-		if (null == fSourceZip || fSourceZip.getName().endsWith(FileType.ZIP.getExtensionWithDot())) {
+		if (null == fSourceZip || !fSourceZip.getName().toLowerCase(DEFAULT_LOCALE).endsWith(FileType.ZIP.getExtensionWithDot())) {
 			LOG.info("File is either null or not a valid zip file. File passed = " + fSourceZip);
 		} else {
 			// Create destination directory if it doesn't exists
 			try {
-				if (null == destinationDir) {
-					destinationDir = fSourceZip.getParent();
-					LOG.info("destination Directory null, extracting files to directory = " + destinationDir);
+				if (null == finalDestinationDir) {
+					finalDestinationDir = fSourceZip.getParent();
+					LOG.info("destination Directory null, extracting files to directory = " + finalDestinationDir);
 				}
-				File destDir = new File(destinationDir);
+				File destDir = new File(finalDestinationDir);
 				if (!destDir.exists()) {
 					destDir.mkdir();
-					LOG.info("destination directory " + destinationDir + " created");
+					LOG.info("destination directory " + finalDestinationDir + " created");
 				}
 				zipFile = new ZipFile(fSourceZip);
 
@@ -99,15 +116,15 @@ public class ZipServiceImpl implements ZipService {
 						String outputFileName = entry.getName();
 
 						// if the entry is directory, leave it.
-						if (entry.isDirectory() || outputFileName.endsWith(FileType.ZIP.getExtensionWithDot())) {
+						if (entry.isDirectory() || outputFileName.toLowerCase(DEFAULT_LOCALE).endsWith(FileType.ZIP.getExtensionWithDot())) {
 							LOG.info("Cann't import entry within zip file. Entry is either a directory or a zip file. Entry : "
 									+ outputFileName);
 							continue;
 
 						} else {
-							File destinationFilePath = new File(destinationDir, outputFileName);
-							String newFileName = updateFileName(destinationFilePath.getName(), destinationDir);
-							destinationFilePath = new File(destinationDir, newFileName);
+							File destinationFilePath = new File(finalDestinationDir, outputFileName);
+							String newFileName = updateFileName(destinationFilePath.getName(), finalDestinationDir);
+							destinationFilePath = new File(finalDestinationDir, newFileName);
 
 							LOG.info("Extracting file = " + outputFileName);
 
@@ -116,13 +133,16 @@ public class ZipServiceImpl implements ZipService {
 
 							// read the current entry from the zip file, extract it and write the extracted file.
 							fos = new FileOutputStream(destinationFilePath);
-							bos = new BufferedOutputStream(fos, 1024);
+							bos = new BufferedOutputStream(fos, CoreConstants.BUFFER_BYTES);
 
 							int data;
-							byte buffer[] = new byte[1024];
-							while ((data = bis.read(buffer, 0, 1024)) != -1) {
+							byte buffer[] = new byte[CoreConstants.BUFFER_BYTES];
+							boolean endOfFile = (data = bis.read(buffer, 0, CoreConstants.BUFFER_BYTES)) != -1;
+							while (endOfFile) {
 								bos.write(buffer, 0, data);
+								endOfFile = (data = bis.read(buffer, 0, CoreConstants.BUFFER_BYTES)) != -1;
 							}
+							bos.flush();
 						}
 					}
 				}
@@ -149,16 +169,17 @@ public class ZipServiceImpl implements ZipService {
 	}
 
 	private String updateFileName(String fileName, String folderPath) {
+		String finalFileName = fileName;
 		if (fileName != null) {
-			int extensionIndex = fileName.indexOf(DOT);
+			int extensionIndex = fileName.indexOf(CoreConstants.DOT);
 			extensionIndex = extensionIndex == -1 ? fileName.length() : extensionIndex;
 			File parentFile = new File(folderPath);
 			LOG.info("Updating file name if any file with the same name exists. File : " + fileName);
-			fileName = FileUtils.getUpdatedFileNameForDuplicateFile(fileName.substring(0, extensionIndex), parentFile, -1)
+			finalFileName = FileUtils.getUpdatedFileNameForDuplicateFile(fileName.substring(0, extensionIndex), parentFile, -1)
 					+ fileName.substring(extensionIndex);
-			LOG.info("Updated file name : " + fileName);
+			LOG.info("Updated file name : " + finalFileName);
 		}
-		return fileName;
+		return finalFileName;
 	}
 
 }

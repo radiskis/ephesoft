@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,29 +42,74 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show field type list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KVFieldTypeListView extends View<KVTypeListPresenter> {
 
+	/**
+	 * To get KV Fields List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getKVFieldsListView() {
 		return listView;
 	}
 
+	/**
+	 * keyPattern HeaderColumn.
+	 */
 	public HeaderColumn keyPattern = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.KEY_PATTERN), 20);
-	public HeaderColumn location = new HeaderColumn(1,
-			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION), 15);
-	public HeaderColumn valuePattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.VALUE_PATTERN), 20);
-	public HeaderColumn noOfWords = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.NO_OF_WORDS), 10);
-	public HeaderColumn fetchValue = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.FETCH_VALUE), 10);
-	public HeaderColumn kvPageValue = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.KV_PAGE_VALUE_LABEL), 10);
-	public HeaderColumn multiplier = new HeaderColumn(6, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.MULTIPLIER_LABEL), 10);
+			BatchClassManagementConstants.KEY_PATTERN), BatchClassManagementConstants.TWENTY);
 
+	/**
+	 * location HeaderColumn.
+	 */
+	public HeaderColumn location = new HeaderColumn(1,
+			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.LOCATION), BatchClassManagementConstants.FIFTEEN);
+
+	/**
+	 * valuePattern HeaderColumn.
+	 */
+	public HeaderColumn valuePattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.VALUE_PATTERN), BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * noOfWords HeaderColumn.
+	 */
+	public HeaderColumn noOfWords = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.NO_OF_WORDS), BatchClassManagementConstants.TEN);
+
+	/**
+	 * fetchValue HeaderColumn.
+	 */
+	public HeaderColumn fetchValue = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.FETCH_VALUE), BatchClassManagementConstants.TEN);
+
+	/**
+	 * kvPageValue HeaderColumn.
+	 */
+	public HeaderColumn kvPageValue = new HeaderColumn(BatchClassManagementConstants.FIVE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.KV_PAGE_VALUE_LABEL), BatchClassManagementConstants.TEN);
+
+	/**
+	 * multiplier HeaderColumn.
+	 */
+	public HeaderColumn multiplier = new HeaderColumn(BatchClassManagementConstants.SIX, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.MULTIPLIER_LABEL), BatchClassManagementConstants.TEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public KVFieldTypeListView() {
 		super();
 		listView.addHeaderColumns(keyPattern, location, valuePattern, noOfWords, fetchValue, kvPageValue, multiplier);

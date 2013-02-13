@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,15 +35,38 @@
 
 package com.ephesoft.dcma.util;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+
+import javax.media.jai.NullOpImage;
+import javax.media.jai.OpImage;
+import javax.media.jai.PlanarImage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 import com.itextpdf.text.pdf.codec.TiffImage;
+import com.sun.media.jai.codec.FileSeekableStream;
+import com.sun.media.jai.codec.ImageCodec;
+import com.sun.media.jai.codec.ImageDecoder;
+import com.sun.media.jai.codec.ImageEncoder;
+import com.sun.media.jai.codec.SeekableStream;
+import com.sun.media.jai.codec.TIFFEncodeParam;
 
+/**
+ * This is util class for TIFF.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.itextpdf.text.pdf.codec.TiffImage
+ */
 public class TIFFUtil {
 
 	/**
@@ -56,7 +79,6 @@ public class TIFFUtil {
 	 * 
 	 * @param filePath file path {@link String}
 	 * @return numberOfPage
-	 * @throws IOException
 	 */
 	public static int getTIFFPageCount(String filePath) {
 		LOG.info("Counting number of pages in a tiff file = " + filePath);
@@ -85,5 +107,54 @@ public class TIFFUtil {
 		}
 		return numberOfPages;
 
+	}
+	
+	/**
+	 * The <code>getSelectedTiffFile</code> method is used to limit the file
+	 * to the page limit given.
+	 * 
+	 * @param tiffFile {@link File} tiff file from which limit has to be applied
+	 * @param pageLimit int
+	 * @throws IOException if file is not found
+	 */
+	public static void getSelectedTiffFile(final File tiffFile, final int pageLimit) throws IOException {
+		OutputStream out = null;
+		File newTiffFile = null;
+		if (null != tiffFile && getTIFFPageCount(tiffFile.getAbsolutePath()) > pageLimit) {
+			try {
+				final List<BufferedImage> imageList = new ArrayList<BufferedImage>();
+				final SeekableStream seekableStream = new FileSeekableStream(tiffFile);
+				final ImageDecoder decoder = ImageCodec.createImageDecoder("tiff", seekableStream, null);
+				for (int i = 1; i < pageLimit; i++) {
+					final PlanarImage planarImage = new NullOpImage(decoder.decodeAsRenderedImage(i), null, null, OpImage.OP_IO_BOUND);
+					imageList.add(planarImage.getAsBufferedImage());
+				}
+				seekableStream.close();
+				final TIFFEncodeParam params = new TIFFEncodeParam();
+				params.setCompression(TIFFEncodeParam.COMPRESSION_GROUP4);
+				String name = tiffFile.getName();
+				final int indexOf = name.lastIndexOf(IUtilCommonConstants.DOT);
+				name = name.substring(0, indexOf);
+				final String finalPath = tiffFile.getParent() + File.separator + name
+						+ System.currentTimeMillis() + IUtilCommonConstants.EXTENSION_TIF;
+				newTiffFile = new File(finalPath);
+				out = new FileOutputStream(finalPath); 
+				final ImageEncoder encoder = ImageCodec.createImageEncoder("tiff", out, params);
+	            params.setExtraImages(imageList.iterator()); 
+	            encoder.encode(imageList.get(0));
+			} finally {
+				if (null != out) {
+					out.flush();
+					out.close();
+				}
+			}
+            if (tiffFile.delete() && null != newTiffFile) {
+            	newTiffFile.renameTo(tiffFile);
+			} else {
+				if (null != newTiffFile) {
+					newTiffFile.delete();
+				}
+			}
+		}
 	}
 }

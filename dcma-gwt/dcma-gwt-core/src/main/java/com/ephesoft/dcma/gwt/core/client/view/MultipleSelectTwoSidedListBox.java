@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import com.ephesoft.dcma.gwt.core.client.event.ItemsAddedEvent;
+import com.ephesoft.dcma.gwt.core.client.event.ModuleItemsAddedEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -62,6 +63,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class MultipleSelectTwoSidedListBox extends Composite {
 
+	private static final String OPTION = "option";
+
 	private static final String _200PX = "200px";
 
 	private static final String BOLD_TEXT = "bold-text-black";
@@ -72,47 +75,50 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 
 	private static final String ADD = "Add";
 
-	private static final String UP = "UP";
+	private static final String UP_BUTTON = "UP";
 
-	private static final String DOWN = "DOWN";
+	private static final String DOWN_BUTTON = "DOWN";
 
 	private static final int SPACING_CONSTANT_30 = 30;
 
-	private static final int VISIBLE_COUNT_20 = 15;
+	private static final int VISIBLE_COUNT_13 = 13;
 
 	private static final int SPACING_CONSTANT_5 = 5;
 
-	Label availableLabel;
+	private Label availableLabel;
 
-	Label selectedLabel;
+	private Label selectedLabel;
 
-	ListBox leftHandSideListBox;
+	private ListBox leftHandSideListBox;
 
-	ListBox rightHandSideListBox;
-
-	@UiField
-	VerticalPanel leftHandSideListBoxPanel;
+	private ListBox rightHandSideListBox;
 
 	@UiField
-	VerticalPanel rightHandSideListBoxPanel;
+	protected VerticalPanel leftHandSideListBoxPanel;
 
 	@UiField
-	HorizontalPanel customHorizontalPanel;
+	protected VerticalPanel rightHandSideListBoxPanel;
 
 	@UiField
-	VerticalPanel customVerticalButtonPanel;
+	protected HorizontalPanel customHorizontalPanel;
 
 	@UiField
-	Button moveLeftButton;
+	protected VerticalPanel customVerticalButtonPanel;
 
 	@UiField
-	Button moveRightButton;
+	protected VerticalPanel addRemoveButtonVerticalPanel;
 
 	@UiField
-	Button moveUpButton;
+	protected Button moveLeftButton;
 
 	@UiField
-	Button moveDownButton;
+	protected Button moveRightButton;
+
+	@UiField
+	protected Button moveUpButton;
+
+	@UiField
+	protected Button moveDownButton;
 
 	private HandlerManager eventBus;
 
@@ -123,7 +129,7 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 			int index = 0;
 			for (String value : values) {
 				listBox.addItem(value);
-				listBox.getElement().getElementsByTagName("option").getItem(index++).setTitle(value);
+				listBox.getElement().getElementsByTagName(OPTION).getItem(index++).setTitle(value);
 			}
 		}
 	}
@@ -133,15 +139,29 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 			int index = 0;
 			for (Entry<String, String> value : values.entrySet()) {
 				listBox.addItem(value.getValue(), value.getKey());
-				listBox.getElement().getElementsByTagName("option").getItem(index++).setTitle(value.getValue());
+				listBox.getElement().getElementsByTagName(OPTION).getItem(index++).setTitle(value.getValue());
 			}
 		}
 	}
 
-	private List<String> addToLeftButtonHandler(final Button button, final ListBox fromList, final ListBox toList) {
+	public List<Integer> getAllSelectedIndexes(ListBox fromList) {
+		List<Integer> selectedValuesList = new ArrayList<Integer>(0);
+		final int LIST_LENGTH = fromList.getItemCount();
+		if (LIST_LENGTH > 0) {
+			// populate all selected indexes from the list
+			for (int index = 0; index < LIST_LENGTH; index++) {
+				if (fromList.isItemSelected(index)) {
+					selectedValuesList.add(index);
+				}
+			}
+		}
+		return selectedValuesList;
+	}
+
+	private List<String> addToLeftButtonHandler(final ListBox fromList) {
 		Map<Integer, String> selectedValues = new LinkedHashMap<Integer, String>(0);
 		List<String> selectedValuesList = new ArrayList<String>(0);
-		//toList.setSelectedIndex(-1);
+		// toList.setSelectedIndex(-1);
 		final int LIST_LENGTH = fromList.getItemCount();
 		if (LIST_LENGTH > 0) {
 
@@ -174,7 +194,7 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 	public List<String> addToRightButtonHandler(final Button button, final ListBox fromList, final ListBox toList) {
 		Map<Integer, String> selectedValues = new LinkedHashMap<Integer, String>(0);
 		List<String> selectedValuesList = new ArrayList<String>(0);
-		//toList.setSelectedIndex(-1);
+		// toList.setSelectedIndex(-1);
 		final int LIST_LENGTH = fromList.getItemCount();
 		if (LIST_LENGTH > 0) {
 
@@ -194,7 +214,7 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 				// add to the other list
 				String selectedValue = selectedValues.get(index);
 				toList.addItem(selectedValue);
-				toList.getElement().getElementsByTagName("option").getItem(index).setTitle(selectedValue);
+				toList.getElement().getElementsByTagName(OPTION).getItem(index).setTitle(selectedValue);
 				// set focus on the transferred values
 				toList.setItemSelected(toList.getItemCount() - 1, true);
 			}
@@ -209,49 +229,47 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 			@Override
 			public void onClick(ClickEvent clickEvent) {
 				final int LIST_LENGTH = list.getItemCount();
-				if (list != null && LIST_LENGTH > 0) {
-					if (!list.isItemSelected(0)) {
+				if (list != null && LIST_LENGTH > 0 && !list.isItemSelected(0)) {
 						// Map<Integer, String> selectedValues = new HashMap<Integer, String>();
 						String tempItemTextString;
 						String tempItemValueString;
 						List<Integer> selectedValuesIndex = new ArrayList<Integer>(0);
 
-						for (int index = 0; index < LIST_LENGTH; index++) {
-							if (list.isItemSelected(index)) {
+					for (int index = 0; index < LIST_LENGTH; index++) {
+						if (list.isItemSelected(index)) {
 
-								tempItemTextString = list.getItemText(index);
-								tempItemValueString = list.getValue(index);
-								if (index != 0) {
-
-									// swap with the previous value in the list, exception being the the first value in the list
-									list.setItemText(index, list.getItemText(index - 1));
-									list.setItemText(index - 1, tempItemTextString);
-									list.setValue(index, list.getValue(index - 1));
-									list.setValue(index - 1, tempItemValueString);
-									// populate the indexes of selected values, required to bring focus on them later
-									selectedValuesIndex.add(index - 1);
-								} else {
-									selectedValuesIndex.add(0);
-								}
-							}
-						}
-
-						// remove current focus
-						list.setSelectedIndex(-1);
-
-						// set focus on selected indexes after swapping
-						for (Integer index : selectedValuesIndex) {
+							tempItemTextString = list.getItemText(index);
+							tempItemValueString = list.getValue(index);
 							if (index != 0) {
-								list.setItemSelected(index, true);
+
+								// swap with the previous value in the list, exception being the the first value in the list
+								list.setItemText(index, list.getItemText(index - 1));
+								list.setItemText(index - 1, tempItemTextString);
+								list.setValue(index, list.getValue(index - 1));
+								list.setValue(index - 1, tempItemValueString);
+								// populate the indexes of selected values, required to bring focus on them later
+								selectedValuesIndex.add(index - 1);
 							} else {
-								list.setItemSelected(0, true);
+								selectedValuesIndex.add(0);
 							}
 						}
-
 					}
-				}
 
+					// remove current focus
+					list.setSelectedIndex(-1);
+
+					// set focus on selected indexes after swapping
+					for (Integer index : selectedValuesIndex) {
+						if (index != 0) {
+							list.setItemSelected(index, true);
+						} else {
+							list.setItemSelected(0, true);
+						}
+					}
+
+				}
 			}
+
 		});
 	}
 
@@ -261,47 +279,45 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 			@Override
 			public void onClick(ClickEvent clickEvent) {
 				final int LIST_LENGTH = listBox.getItemCount();
-				if (listBox != null && LIST_LENGTH > 0) {
-					if (!listBox.isItemSelected(listBox.getItemCount() - 1)) {
-						// Map<Integer, String> selectedValues = new HashMap<Integer, String>();
-						String tempString;
-						String tempItemValueString;
-						List<Integer> selectedValuesIndex = new ArrayList<Integer>(0);
+				if (listBox != null && LIST_LENGTH > 0 && !listBox.isItemSelected(listBox.getItemCount() - 1)) {
+					// Map<Integer, String> selectedValues = new HashMap<Integer, String>();
+					String tempString;
+					String tempItemValueString;
+					List<Integer> selectedValuesIndex = new ArrayList<Integer>(0);
 
-						for (int index = LIST_LENGTH - 1; index > -1; index--) {
-							if (listBox.isItemSelected(index)) {
+					for (int index = LIST_LENGTH - 1; index > -1; index--) {
+						if (listBox.isItemSelected(index)) {
 
-								tempString = listBox.getItemText(index);
-								tempItemValueString = listBox.getValue(index);
-								if (index != LIST_LENGTH - 1) {
-									// swap with the next value in the list, exception being the the last value in the list
-									listBox.setItemText(index, listBox.getItemText(index + 1));
-									listBox.setItemText(index + 1, tempString);
-									listBox.setValue(index, listBox.getValue(index + 1));
-									listBox.setValue(index + 1, tempItemValueString);
-									// populate the indexes of selected values, required to bring focus on them later
-									selectedValuesIndex.add(index + 1);
-								}
-
+							tempString = listBox.getItemText(index);
+							tempItemValueString = listBox.getValue(index);
+							if (index != LIST_LENGTH - 1) {
+								// swap with the next value in the list, exception being the the last value in the list
+								listBox.setItemText(index, listBox.getItemText(index + 1));
+								listBox.setItemText(index + 1, tempString);
+								listBox.setValue(index, listBox.getValue(index + 1));
+								listBox.setValue(index + 1, tempItemValueString);
+								// populate the indexes of selected values, required to bring focus on them later
+								selectedValuesIndex.add(index + 1);
 							}
-						}
 
-						// remove current focus
-						listBox.setSelectedIndex(-1);
-						// set focus on selected indexes after swapping
-						for (Integer index : selectedValuesIndex) {
-							// boolean firstSelected = false;
-							if (index != 0) {
-								listBox.setItemSelected(index, true);
-							} else {
-								listBox.setItemSelected(0, true);
-							}
 						}
-
 					}
-				}
 
+					// remove current focus
+					listBox.setSelectedIndex(-1);
+					// set focus on selected indexes after swapping
+					for (Integer index : selectedValuesIndex) {
+						// boolean firstSelected = false;
+						if (index != 0) {
+							listBox.setItemSelected(index, true);
+						} else {
+							listBox.setItemSelected(0, true);
+						}
+					}
+
+				}
 			}
+
 		});
 	}
 
@@ -311,8 +327,8 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 			String value = fromList.getItemText(fromListIndex);
 			toList.addItem(value);
 			// fromList.removeItem(fromListIndex);
-			int newIndex = toList.getItemCount() -1;
-			toList.getElement().getElementsByTagName("option").getItem(newIndex).setTitle(value);
+			int newIndex = toList.getItemCount() - 1;
+			toList.getElement().getElementsByTagName(OPTION).getItem(newIndex).setTitle(value);
 		}
 	}
 
@@ -355,14 +371,17 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 
 		customHorizontalPanel.setSpacing(SPACING_CONSTANT_30);
 		customVerticalButtonPanel.setSpacing(SPACING_CONSTANT_30);
+		addRemoveButtonVerticalPanel.setSpacing(SPACING_CONSTANT_30);
 
 		customVerticalButtonPanel.setCellVerticalAlignment(moveUpButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		customVerticalButtonPanel.setCellVerticalAlignment(moveDownButton, HasVerticalAlignment.ALIGN_MIDDLE);
 
+		addRemoveButtonVerticalPanel.setCellVerticalAlignment(moveUpButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		addRemoveButtonVerticalPanel.setCellVerticalAlignment(moveDownButton, HasVerticalAlignment.ALIGN_MIDDLE);
+
 		customHorizontalPanel.setCellVerticalAlignment(leftHandSideListBoxPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 		customHorizontalPanel.setCellVerticalAlignment(rightHandSideListBoxPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-		customHorizontalPanel.setCellVerticalAlignment(moveRightButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		customHorizontalPanel.setCellVerticalAlignment(moveLeftButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		customHorizontalPanel.setCellVerticalAlignment(addRemoveButtonVerticalPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 		customHorizontalPanel.setCellVerticalAlignment(customVerticalButtonPanel, HasVerticalAlignment.ALIGN_MIDDLE);
 
 	}
@@ -373,6 +392,7 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public MultipleSelectTwoSidedListBox(HandlerManager eventBus) {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		leftHandSideListBox = new ListBox(true);
@@ -397,11 +417,11 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 		moveLeftButton.setText(REMOVE);
 		moveRightButton.setText(ADD);
 		
-		moveUpButton.setText(UP);
-		moveDownButton.setText(DOWN);
+		moveUpButton.setText(UP_BUTTON);
+		moveDownButton.setText(DOWN_BUTTON);
 
-		leftHandSideListBox.setVisibleItemCount(VISIBLE_COUNT_20);
-		rightHandSideListBox.setVisibleItemCount(VISIBLE_COUNT_20);
+		leftHandSideListBox.setVisibleItemCount(VISIBLE_COUNT_13);
+		rightHandSideListBox.setVisibleItemCount(VISIBLE_COUNT_13);
 		this.setEventBus(eventBus);
 
 	}
@@ -428,6 +448,7 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 	public void addToRight(ClickEvent clickEvent) {
 		if (eventBus != null) {
 			eventBus.fireEvent(new ItemsAddedEvent(null, getLeftHandSideListBox()));
+			eventBus.fireEvent(new ModuleItemsAddedEvent(null, getLeftHandSideListBox()));
 		} else {
 			addToRightButtonHandler(moveRightButton, leftHandSideListBox, rightHandSideListBox);
 		}
@@ -435,11 +456,11 @@ public class MultipleSelectTwoSidedListBox extends Composite {
 
 	@UiHandler("moveLeftButton")
 	public void addToLeft(ClickEvent clickEvent) {
-		addToLeftButtonHandler(moveLeftButton, rightHandSideListBox, leftHandSideListBox);
+		addToLeftButtonHandler(rightHandSideListBox);
 
 	}
 
-	public void setEventBus(HandlerManager eventBus) {
+	public final void setEventBus(HandlerManager eventBus) {
 		this.eventBus = eventBus;
 	}
 

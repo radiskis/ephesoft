@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,34 +47,49 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.encryption.constants.EncryptionConstants;
 import com.ephesoft.dcma.encryption.core.EncryptorDecryptor;
 import com.ephesoft.dcma.encryption.exception.CryptographyException;
 
+/**
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.encryption.core.EncryptorDecryptor
+ */
 public class SecurityTokenHandler {
 
-	private static final int MILLISECONDS_IN_ONE_HOUR = 1 * 60 * 60 * 1000;
-	private static List<String> tokenList;
-	private static Random rand;
-	private static final Logger log = LoggerFactory.getLogger(SecurityTokenHandler.class);
+	/**
+	 * A token list of type String.
+	 */
+	private static List<String> tokenList = new ArrayList<String>(0);
+	/**
+	 * An instance of Random.
+	 */
+	private static Random rand = new Random();
+	/**
+	 * An instance of Logger for logging.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityTokenHandler.class);
 
+	/**
+	 * This method is used for generating the tokens according to the scheduled time.
+	 * @return {@link String}
+	 */
 	public static String generateToken() {
-		if (tokenList == null) {
-			tokenList = new ArrayList<String>();
-		}
-		if (rand == null) {
-			rand = new Random();
-		}
-		final String generatedToken = getEncryptedAndDecodedString(rand.nextLong() + "");
-		tokenList.add(generatedToken);
-		TimerTask timerTask = new TimerTask() {
+		final String generatedToken = getEncryptedAndDecodedString(String.valueOf(rand.nextLong()));
+		synchronized (tokenList) {
+			tokenList.add(generatedToken);
+			TimerTask timerTask = new TimerTask() {
 
-			@Override
-			public void run() {
-				tokenList.remove(generatedToken);
-			}
-		};
-		Timer timer = new Timer();
-		timer.schedule(timerTask, MILLISECONDS_IN_ONE_HOUR);
+				@Override
+				public void run() {
+					tokenList.remove(generatedToken);
+				}
+			};
+			Timer timer = new Timer();
+			timer.schedule(timerTask, EncryptionConstants.MILLISECONDS_IN_ONE_HOUR);
+		}
 		return generatedToken;
 	}
 
@@ -83,7 +98,7 @@ public class SecurityTokenHandler {
 		try {
 			encryptString = EncryptorDecryptor.getEncryptorDecryptor().encryptString(toEncryptString);
 		} catch (CryptographyException e) {
-			e.printStackTrace();
+			LOGGER.error("Exception in encrypting string:", e);
 		}
 		return getEncodedString(encryptString);
 	}
@@ -92,6 +107,11 @@ public class SecurityTokenHandler {
 		tokenList.remove(encryptedToken);
 	}
 
+	/**
+	 * This method is used to authorize the token and check if it is valid or not.
+	 * @param encryptedToken {@link String}
+	 * @return boolean
+	 */
 	public static boolean isTokenAuthorized(String encryptedToken) {
 		boolean isTokenAuthorized = false;
 		if (tokenList.contains(encryptedToken)) {
@@ -101,22 +121,32 @@ public class SecurityTokenHandler {
 		return isTokenAuthorized;
 	}
 
+	/**
+	 * This method is used to convert the given string into encoded string.
+	 * @param toEncodeString {@link String}
+	 * @return {@link String}
+	 */
 	public static String getEncodedString(String toEncodeString) {
 		String encodedString = null;
 		try {
 			encodedString = URLEncoder.encode(toEncodeString, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			log.error("Unsupported encoding :", e);
+			LOGGER.error("Unsupported encoding :", e);
 		}
 		return encodedString;
 	}
 
+	/**
+	 * This method is used to convert the given string into decoded string.
+	 * @param toDecodeString {@link String}
+	 * @return {@link String}
+	 */
 	public static String getDecodedString(String toDecodeString) {
 		String decodedString = null;
 		try {
 			decodedString = URLDecoder.decode(toDecodeString, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			log.error("Unsupported encoding :", e);
+			LOGGER.error("Unsupported encoding :", e);
 		}
 		return decodedString;
 	}

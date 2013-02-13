@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,22 +35,23 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
-import com.ephesoft.dcma.gwt.core.shared.importTree.Node;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Node;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ImportBatchClassUserOptionDTO implements IsSerializable {
 
 	private String zipFileLocation;
 	private String uncFolder;
-	private boolean isImportExisting;
-	private boolean isWorkflowDeployed;
-	private boolean isWorkflowExistsInBatchClass;
-	private boolean isWorkflowEqual;
+	private boolean importExisting;
+	private boolean workflowDeployed;
+	private boolean workflowExistsInBatchClass;
+	private boolean workflowEqual;
 	private String name;
 	private String description;
 	private String priority;
-	private boolean isUseSource;
+	private boolean useSource;
 	private Node uiConfigRoot;
+	private String systemFolder;
 
 	public ImportBatchClassUserOptionDTO() {
 		super();
@@ -62,15 +63,16 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 	}
 
 	public ImportBatchClassUserOptionDTO(String zipFileName, boolean isImportExisting, String name, String description,
-			String priority, boolean isUseSource, Node uiConfigRoot) {
+			String priority, boolean isUseSource, Node uiConfigRoot, String systemFolder) {
 		super();
 		this.zipFileLocation = zipFileName;
-		this.isImportExisting = isImportExisting;
+		this.importExisting = isImportExisting;
 		this.name = name;
 		this.description = description;
 		this.priority = priority;
-		this.isUseSource = isUseSource;
+		this.useSource = isUseSource;
 		this.uiConfigRoot = uiConfigRoot;
+		this.systemFolder = systemFolder;
 	}
 
 	public Node getUiConfigRoot() {
@@ -90,11 +92,11 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 	}
 
 	public boolean isImportExisting() {
-		return isImportExisting;
+		return importExisting;
 	}
 
-	public void setImportExisting(boolean isImportExisting) {
-		this.isImportExisting = isImportExisting;
+	public void setImportExisting(boolean importExisting) {
+		this.importExisting = importExisting;
 	}
 
 	public String getName() {
@@ -122,11 +124,11 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 	}
 
 	public boolean isUseSource() {
-		return isUseSource;
+		return useSource;
 	}
 
-	public void setUseSource(boolean isUseSource) {
-		this.isUseSource = isUseSource;
+	public void setUseSource(boolean useSource) {
+		this.useSource = useSource;
 	}
 
 	public String getUncFolder() {
@@ -138,28 +140,44 @@ public class ImportBatchClassUserOptionDTO implements IsSerializable {
 	}
 	
 	
-	public void setWorkflowDeployed(boolean isWorkflowDeployed) {
-		this.isWorkflowDeployed = isWorkflowDeployed;
+	public void setWorkflowDeployed(boolean workflowDeployed) {
+		this.workflowDeployed = workflowDeployed;
 	}
 	
 	public boolean isWorkflowDeployed() {
-		return isWorkflowDeployed;
+		return workflowDeployed;
 	}
 	
-	public void setWorkflowExistsInBatchClass(boolean isWorkflowExistsInBatchClass) {
-		this.isWorkflowExistsInBatchClass = isWorkflowExistsInBatchClass;
+	public void setWorkflowExistsInBatchClass(boolean workflowExistsInBatchClass) {
+		this.workflowExistsInBatchClass = workflowExistsInBatchClass;
 	}
 	
 	public boolean isWorkflowExistsInBatchClass() {
-		return isWorkflowExistsInBatchClass;
+		return workflowExistsInBatchClass;
 	}
 	
 	
-	public void setWorkflowEqual(boolean isWorkflowEqual) {
-		this.isWorkflowEqual = isWorkflowEqual;
+	public void setWorkflowEqual(boolean workflowEqual) {
+		this.workflowEqual = workflowEqual;
 	}
 	
 	public boolean isWorkflowEqual() {
-		return isWorkflowEqual;
+		return workflowEqual;
+	}
+
+	
+	/**
+	 * @return the systemFolder
+	 */
+	public String getSystemFolder() {
+		return systemFolder;
+	}
+
+	
+	/**
+	 * @param systemFolder the systemFolder to set
+	 */
+	public void setSystemFolder(String systemFolder) {
+		this.systemFolder = systemFolder;
 	}
 }

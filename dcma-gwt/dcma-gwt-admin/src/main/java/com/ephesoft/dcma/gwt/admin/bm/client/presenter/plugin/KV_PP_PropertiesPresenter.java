@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,17 +45,50 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows KV_PP properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP_PropertiesView> {
 
+	/**
+	 * pluginDataPresenter PluginDataPresenter.
+	 */
 	private final PluginDataPresenter pluginDataPresenter;
+
+	/**
+	 * kvPPDetailPresenter KV_PP_DetailPresenter.
+	 */
 	private final KV_PP_DetailPresenter kvPPDetailPresenter;
+
+	/**
+	 * kvPPEditPresenter KV_PP_EditPresenter.
+	 */
 	private final KV_PP_EditPresenter kvPPEditPresenter;
+
+	/**
+	 * kvPPConfigPresenter KV_PP_ConfigPresenter.
+	 */
 	private final KV_PP_ConfigPresenter kvPPConfigPresenter;
 
+	/**
+	 * To get Plugin Data Presenter.
+	 * 
+	 * @return PluginDataPresenter
+	 */
 	public PluginDataPresenter getPluginDataPresenter() {
 		return pluginDataPresenter;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_PropertiesView
+	 */
 	public KV_PP_PropertiesPresenter(BatchClassManagementController controller, KV_PP_PropertiesView view) {
 		super(controller, view);
 		this.pluginDataPresenter = new PluginDataPresenter(controller, view.getPluginDataView());
@@ -64,10 +97,19 @@ public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP
 		this.kvPPConfigPresenter = new KV_PP_ConfigPresenter(controller, view.getConfigView());
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
+		// No implementation
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {
@@ -93,16 +135,23 @@ public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP
 					view.getConfigButton().setVisible(Boolean.TRUE);
 					view.getKvppPluginConfigVerticalPanel().setVisible(Boolean.TRUE);
 					view.getConfigView().setVisible(Boolean.FALSE);
+					kvPPEditPresenter.bind();
 				}
 			});
 		}
 	}
 
+	/**
+	 * To show KV_PP plugin view.
+	 */
 	public void showKVppPluginView() {
 		view.getKvppViewEditPluginPanel().clear();
 		view.getKvppViewEditPluginPanel().add(view.getScrollPanel());
 	}
 
+	/**
+	 * To show KV_PP plugin configuration view.
+	 */
 	public void showKVppPluginConfigView() {
 		view.getKvppViewEditPluginPanel().clear();
 		this.kvPPConfigPresenter.bind();
@@ -110,13 +159,21 @@ public class KV_PP_PropertiesPresenter extends AbstractBatchClassPresenter<KV_PP
 		view.getConfigView().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To show KV_PP plugin configuration view on configuration button click.
+	 */
 	public void onConfigButtonClicked() {
 		this.controller.getMainPresenter().getBatchClassBreadCrumbPresenter().createBreadCrumbForKVPPPluginConfig(
 				controller.getSelectedPlugin());
 		this.kvPPConfigPresenter.bind();
 		showKVppPluginConfigView();
 	}
-	
+
+	/**
+	 * To get KV_PP Config Presenter.
+	 * 
+	 * @return KV_PP_ConfigPresenter
+	 */
 	public KV_PP_ConfigPresenter getKvPPConfigPresenter() {
 		return kvPPConfigPresenter;
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,31 +35,78 @@
 
 package com.ephesoft.dcma.core;
 
+/**
+ * Enum class for Ephesoft Property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public enum EphesoftProperty {
 
-	BATCH_CLASS("BC"),
+	/**
+	 * BATCH_CLASS.
+	 */
+	BATCH_CLASS("BC"),	
+	/**
+	 * BATCH_INSTANCE.
+	 */
 	BATCH_INSTANCE("BI"),
+	/**
+	 * DOCUMENT.
+	 */
 	DOCUMENT("DOC"),
+	/**
+	 * FIELD.
+	 */
 	FIELD("FD"),
+	/**
+	 * PAGE.
+	 */
 	PAGE("PG"),
+	/**
+	 * DOCUMENT_TYPE.
+	 */
 	DOCUMENT_TYPE("DT"),
+	/**
+	 * FIELD_TYPE.
+	 */
 	FIELD_TYPE("FT"),
+	/**
+	 * BATCH_CLASS_FIELD.
+	 */
 	BATCH_CLASS_FIELD("BCF"),
+	/**
+	 * PAGE_TYPE.
+	 */
 	PAGE_TYPE("PT"),
+	/**
+	 * EPHESOFT_APP_NAME.
+	 */
 	EPHESOFT_APP_NAME("EPHESOFT"),
+	/**
+	 * FUNCTION_KEY.
+	 */
 	FUNCTION_KEY("FK"),
+	/**
+	 * UNKNOWN.
+	 */
 	UNKNOWN("Unknown");
 	
+	/**
+	 * property String.
+	 */
 	private String property;
 
 	/**
-	 * @param property
+	 * Constructor.
+	 * @param property String
 	 */
 	EphesoftProperty(String property) {
 		this.property = property;
 	}
 
 	/**
+	 * To get property.
 	 * @return the property
 	 */
 	public String getProperty() {

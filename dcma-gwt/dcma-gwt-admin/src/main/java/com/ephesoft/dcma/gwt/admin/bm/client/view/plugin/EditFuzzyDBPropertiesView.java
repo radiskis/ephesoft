@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,11 +39,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.EditFuzzyDBPropertiesPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -53,37 +56,83 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit fuzzy DB properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresenter> {
 
-	interface Binder extends UiBinder<FlexTable, EditFuzzyDBPropertiesView> {
+	/**
+	 * UI binder.
+	 */
+	interface Binder extends UiBinder<VerticalPanel, EditFuzzyDBPropertiesView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * editTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable editTable;
 
-	private FlexTable flextable;
+	/**
+	 * flextable FlexTable.
+	 */
+	private final FlexTable flextable;
 
-	private Button cancel;
-	private Button ok;
+	/**
+	 * cancel Button.
+	 */
+	@UiField
+	protected Button cancel;
 
+	/**
+	 * okButton Button.
+	 */
+	@UiField
+	protected Button okButton;
+
+	/**
+	 * mappingButton Button.
+	 */
+	@UiField
+	protected Button mappingButton;
+
+	/**
+	 * MAX_VISIBLE_ITEM_COUNT int.
+	 */
 	public static final int MAX_VISIBLE_ITEM_COUNT = 4;
 
+	/**
+	 * FUZZYDB_THRESHOLD_VALUE String.
+	 */
 	public static final String FUZZYDB_THRESHOLD_VALUE = "fuzzydb.thresholdValue";
 
-	List<EditableWidgetStorage> docFieldWidgets;
+	/**
+	 * docFieldWidgets List<EditableWidgetStorage>.
+	 */
+	private final List<EditableWidgetStorage> docFieldWidgets;
 
+	/**
+	 * Constructor.
+	 */
 	public EditFuzzyDBPropertiesView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
-		cancel = new Button();
 		cancel.setText(AdminConstants.CANCEL_BUTTON);
+		okButton.setText(AdminConstants.OK_BUTTON);
 
-		ok = new Button();
-		ok.setText(AdminConstants.OK_BUTTON);
+		mappingButton.setText(AdminConstants.MAPPING_BUTTON);
 
 		flextable = new FlexTable();
 		flextable.setWidth("100%");
@@ -94,8 +143,21 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 		editTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
 
 		docFieldWidgets = new ArrayList<EditableWidgetStorage>();
+		mappingButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				presenter.getController().getMainPresenter().showDocTypeMappingView();
+			}
+		});
 	}
 
+	/**
+	 * To set properties.
+	 * 
+	 * @param pluginConfigDTO BatchClassPluginConfigDTO
+	 * @param row int
+	 */
 	public void setProperties(BatchClassPluginConfigDTO pluginConfigDTO, int row) {
 		EditPluginView editPluginView = presenter.getController().getMainPresenter().getView().getPluginView().getEditPluginView();
 		if (pluginConfigDTO.getSampleValue() != null && !pluginConfigDTO.getSampleValue().isEmpty()
@@ -104,7 +166,7 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 				// Create a listBox
 				if (pluginConfigDTO.isMultivalue()) {
 					// Create a multiple select list box
-					Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
+					Label propertyName = new Label(pluginConfigDTO.getDescription() + BatchClassManagementConstants.COLON);
 					List<String> sampleValueList = pluginConfigDTO.getSampleValue();
 					int max_visible_item_count = MAX_VISIBLE_ITEM_COUNT;
 					if (sampleValueList.size() < MAX_VISIBLE_ITEM_COUNT) {
@@ -113,40 +175,47 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 					ListBox fieldValue = editPluginView.addMultipleSelectListBox(row, sampleValueList, max_visible_item_count,
 							pluginConfigDTO.getValue());
 					flextable.setWidget(row, 0, propertyName);
-					addWidgetStar(row, 1);
+					if (pluginConfigDTO.isMandatory()) {
+						addWidgetStar(row, 1);
+					}
 					flextable.setWidget(row, 2, fieldValue);
 					docFieldWidgets.add(new EditableWidgetStorage(pluginConfigDTO, fieldValue));
 				} else {
 					// Create a drop down
-					Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
+					Label propertyName = new Label(pluginConfigDTO.getDescription() + BatchClassManagementConstants.COLON);
 					ListBox fieldValue = editPluginView.addDropDown(row, pluginConfigDTO.getSampleValue(), pluginConfigDTO.getValue());
 					EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(pluginConfigDTO, fieldValue);
 					editableWidgetStorage.setValidatable(Boolean.FALSE);
 					flextable.setWidget(row, 0, propertyName);
-					addWidgetStar(row, 1);
+					if (pluginConfigDTO.isMandatory()) {
+						addWidgetStar(row, 1);
+					}
 					flextable.setWidget(row, 2, fieldValue);
 					docFieldWidgets.add(editableWidgetStorage);
 				}
-
 			} else {
 				// Create a read only text box
-				Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
+				Label propertyName = new Label(pluginConfigDTO.getDescription() + BatchClassManagementConstants.COLON);
 				TextBox fieldValue = new TextBox();
 				fieldValue.setText(pluginConfigDTO.getValue());
 				final ValidatableWidget<TextBox> validatableTextBox = editPluginView.addTextBox(row, pluginConfigDTO, Boolean.TRUE);
 				EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(pluginConfigDTO, validatableTextBox);
 				editableWidgetStorage.setValidatable(Boolean.FALSE);
 				flextable.setWidget(row, 0, propertyName);
-				addWidgetStar(row, 1);
+				if (pluginConfigDTO.isMandatory()) {
+					addWidgetStar(row, 1);
+				}
 				flextable.setWidget(row, 2, validatableTextBox.getWidget());
 				docFieldWidgets.add(editableWidgetStorage);
 			}
 		} else {
 			// Create a text box
-			Label propertyName = new Label(pluginConfigDTO.getDescription() + ":");
+			Label propertyName = new Label(pluginConfigDTO.getDescription() + BatchClassManagementConstants.COLON);
 			final ValidatableWidget<TextBox> validatableTextBox = editPluginView.addTextBox(row, pluginConfigDTO, Boolean.FALSE);
 			flextable.setWidget(row, 0, propertyName);
-			addWidgetStar(row, 1);
+			if (pluginConfigDTO.isMandatory()) {
+				addWidgetStar(row, 1);
+			}
 			flextable.setWidget(row, 2, validatableTextBox.getWidget());
 			docFieldWidgets.add(new EditableWidgetStorage(pluginConfigDTO, validatableTextBox));
 		}
@@ -154,74 +223,187 @@ public class EditFuzzyDBPropertiesView extends View<EditFuzzyDBPropertiesPresent
 		flextable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
+	/**
+	 * To add buttons.
+	 * 
+	 * @param row int
+	 */
 	public void addButtons(int row) {
-		flextable.setWidget(row, 1, ok);
-		flextable.setWidget(row, 2, cancel);
 	}
 
+	/**
+	 * Class for Editable Widget Storage.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public static class EditableWidgetStorage {
 
-		private BatchClassPluginConfigDTO data;
-		private ValidatableWidget<TextBox> widget;
-		private boolean isListBox;
-		private ListBox listBoxwidget;
-		private boolean isValidatable;
+		/**
+		 * data BatchClassPluginConfigDTO.
+		 */
+		private final BatchClassPluginConfigDTO data;
 
+		/**
+		 * widget ValidatableWidget<TextBox>.
+		 */
+		private final ValidatableWidget<TextBox> widget;
+
+		/**
+		 * listBox boolean.
+		 */
+		private final boolean listBox;
+
+		/**
+		 * listBoxwidget ListBox.
+		 */
+		private final ListBox listBoxwidget;
+
+		/**
+		 * validatable boolean.
+		 */
+		private boolean validatable;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param batchClassPluginConfigDTO BatchClassPluginConfigDTO
+		 * @param widget ValidatableWidget<TextBox>
+		 */
 		public EditableWidgetStorage(BatchClassPluginConfigDTO batchClassPluginConfigDTO, ValidatableWidget<TextBox> widget) {
-			this.data = batchClassPluginConfigDTO;
-			this.widget = widget;
-			this.isListBox = false;
-			this.isValidatable = true;
+			this(batchClassPluginConfigDTO, widget, false, null, true);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param batchClassPluginConfigDTO BatchClassPluginConfigDTO
+		 * @param listBoxwidget ListBox
+		 */
 		public EditableWidgetStorage(BatchClassPluginConfigDTO batchClassPluginConfigDTO, ListBox listBoxwidget) {
-			this.data = batchClassPluginConfigDTO;
-			this.listBoxwidget = listBoxwidget;
-			this.isListBox = true;
-			this.isValidatable = true;
+			this(batchClassPluginConfigDTO, null, true, listBoxwidget, true);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param data BatchClassPluginConfigDTO
+		 * @param widget ValidatableWidget<TextBox>
+		 * @param listBox boolean
+		 * @param listBoxwidget ListBox
+		 * @param validatable boolean
+		 */
+		public EditableWidgetStorage(BatchClassPluginConfigDTO data, ValidatableWidget<TextBox> widget, boolean listBox,
+				ListBox listBoxwidget, boolean validatable) {
+			super();
+			this.data = data;
+			this.widget = widget;
+			this.listBox = listBox;
+			this.listBoxwidget = listBoxwidget;
+			this.validatable = validatable;
+		}
+
+		/**
+		 * To get Text Box Widget.
+		 * 
+		 * @return ValidatableWidget<TextBox>
+		 */
 		public ValidatableWidget<TextBox> getTextBoxWidget() {
 			return widget;
 		}
 
+		/**
+		 * To get List Box widget.
+		 * 
+		 * @return ListBox
+		 */
 		public ListBox getListBoxwidget() {
 			return listBoxwidget;
 		}
 
+		/**
+		 * To check whether it is list box.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isListBox() {
-			return isListBox;
+			return listBox;
 		}
 
+		/**
+		 * To check whether it is validatable.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isValidatable() {
-			return isValidatable;
+			return validatable;
 		}
 
+		/**
+		 * To set Validatable.
+		 * 
+		 * @param isValidatable boolean
+		 */
 		public void setValidatable(boolean isValidatable) {
-			this.isValidatable = isValidatable;
+			this.validatable = isValidatable;
 		}
 
+		/**
+		 * To get Data.
+		 * 
+		 * @return BatchClassPluginConfigDTO
+		 */
 		public BatchClassPluginConfigDTO getData() {
 			return data;
 		}
 	}
 
+	/**
+	 * To get Ok Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getOkButton() {
-		return ok;
+		return okButton;
 	}
 
+	/**
+	 * To get cancel Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getCancelButton() {
 		return cancel;
 	}
 
+	/**
+	 * To get Document Field Widgets.
+	 * 
+	 * @return List<EditableWidgetStorage>
+	 */
 	public List<EditableWidgetStorage> getDocFieldWidgets() {
 		return docFieldWidgets;
 	}
 
+	/**
+	 * To add Widget Star.
+	 * 
+	 * @param row int
+	 * @param column int
+	 */
 	public void addWidgetStar(int row, int column) {
-		Label star = new Label("*");
+		Label star = new Label(BatchClassManagementConstants.STAR);
 		flextable.setWidget(row, column, star);
-		star.setStyleName("font_red");
+		star.setStyleName(BatchClassManagementConstants.FONT_RED);
+	}
+
+	/**
+	 * To get Mapping Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getMappingButton() {
+		return mappingButton;
 	}
 
 }

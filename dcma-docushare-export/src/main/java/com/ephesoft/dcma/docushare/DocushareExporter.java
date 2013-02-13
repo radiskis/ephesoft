@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,22 +54,43 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.FileUtils;
 
+/**
+ * This method transforms the batch.xml to another xml acceptable by docushare and zip it along with multi page tif and multi page
+ * pdf to docushare export location.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.docushare.service.DocushareExportServiceImpl
+ */
 @Component
 public class DocushareExporter implements ICommonConstants {
 
+	/**
+	 * An instance of Logger for logging.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocushareExporter.class);
 
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
+	
+	/**
+	 * An instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
 
 	/**
 	 * Final Export Folder for Docushare.
@@ -97,42 +118,42 @@ public class DocushareExporter implements ICommonConstants {
 	private ClassPathResource xslResource;
 
 	/**
-	 * @return the batchSchemaService
+	 * @return the {@link BatchSchemaService}
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * @param batchSchemaService {@link BatchSchemaService}
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
-	 * @return the finalExportFolder
+	 * @return {@link String}
 	 */
 	public String getFinalExportFolder() {
 		return finalExportFolder;
 	}
 
 	/**
-	 * @param finalExportFolder the finalExportFolder to set
+	 * @param finalExportFolder {@link String}
 	 */
 	public void setFinalExportFolder(String finalExportFolder) {
 		this.finalExportFolder = finalExportFolder;
@@ -146,61 +167,61 @@ public class DocushareExporter implements ICommonConstants {
 	}
 
 	/**
-	 * @param finalXmlName the finalXmlName to set
+	 * @param finalXmlName {@link String}
 	 */
 	public void setFinalXmlName(String finalXmlName) {
 		this.finalXmlName = finalXmlName;
 	}
 
 	/**
-	 * @return the zipFileName
+	 * @return {@link String}
 	 */
 	public String getZipFileName() {
 		return zipFileName;
 	}
 
 	/**
-	 * @param zipFileName the zipFileName to set
+	 * @param zipFileName {@link String}
 	 */
 	public void setZipFileName(String zipFileName) {
 		this.zipFileName = zipFileName;
 	}
 
 	/**
-	 * @return the docushareSwitch
+	 * @return {@link String}
 	 */
 	public String getDocushareSwitch() {
 		return docushareSwitch;
 	}
 
 	/**
-	 * @param docushareSwitch the docushareSwitch to set
+	 * @param docushareSwitch {@link String}
 	 */
 	public void setDocushareSwitch(String docushareSwitch) {
 		this.docushareSwitch = docushareSwitch;
 	}
 
 	/**
-	 * @return the xslResource
+	 * @return {@link ClassPathResource}
 	 */
 	public ClassPathResource getXslResource() {
 		return xslResource;
 	}
 
 	/**
-	 * @param xslResource the xslResource to set
+	 * @param xslResource {@link ClassPathResource}
 	 */
 	public void setXslResource(ClassPathResource xslResource) {
 		this.xslResource = xslResource;
 	}
 
 	/**
-	 * This method transforms the batch.xml to another xml acceptable by docushare and zip it along with multipage tif and multipage
+	 * This method transforms the batch.xml to another xml acceptable by docushare and zip it along with multi page tif and multi page
 	 * pdf to docushare export location.
 	 * 
-	 * @param batchInstanceID
-	 * @throws JAXBException
-	 * @throws DCMAApplicationException
+	 * @param batchInstanceID {@link String}
+	 * @throws JAXBException {@link JAXBException} root exception class for all JAXB exceptions 
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} if any file is not found.
 	 */
 	public void exportFiles(String batchInstanceID) throws JAXBException, DCMAApplicationException {
 
@@ -209,12 +230,8 @@ public class DocushareExporter implements ICommonConstants {
 			return;
 		}
 		LOGGER.info("Initializing properties...");
-		/*
-		 * String exportToFolder = pluginPropertiesService.getPropertyValue(batchInstanceID, DCMAPlugin.COPY_BATCH_XML,
-		 * DocushareExportProperties.EXPORT_FOLDER);
-		 */
-		final String temp_var_to = " to ";
-		String exportToFolder = batchSchemaService.getLocalFolderLocation();
+		String temp_var_to = " to ";
+		String exportToFolder = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID);
 		LOGGER.info("Properties Initialized Successfully");
 
 		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
@@ -285,7 +302,7 @@ public class DocushareExporter implements ICommonConstants {
 
 		String finalZipFileName = pathToDocShareExportFolder + File.separator + batchInstanceID + zipFileName;
 		LOGGER.debug("Exporting zip file " + finalZipFileName);
-		final String temp_var_zip = "Problem in zipping directory ";
+		String temp_var_zip = "Problem in zipping directory ";
 		try {
 			FileUtils.zipDirectory(baseDocsFolder, finalZipFileName, true);
 		} catch (IllegalArgumentException e) {

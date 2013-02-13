@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,27 +39,58 @@ import com.ephesoft.dcma.core.common.PluginProperty;
 
 /**
  * This class states the properties of Tabbed PDF plugin.
+ * 
  * @author Ephesoft
- *
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.PluginProperty
  */
 public enum TabbedPdfProperties implements PluginProperty {
 
-	TABBED_PDF_EXPORT_FOLDER("tabbedPdf.final_export_folder"), TABBED_PDF_SWITCH("tabbedPdf.switch"), TABBED_PDF_PLACEHOLDER(
-			"tabbedPdf.placeholder"), TABBED_PDF_PROPERTY_FILE("tabbedPdf.property_file"), TABBED_PDF_CREATION_PARAMETERS(
-			"tabbedPdf.creation_parameters"), TABBED_PDF_OPTIMIZATION_PARAMETERS("tabbedPdf.optimization_parameters"), 
-			TABBED_PDF_OPTIMIZATION_SWITCH("tabbedPdf.pdf_optimization_switch");
+	/**
+	 * TABBED_PDF_EXPORT_FOLDER.
+	 */
+	TABBED_PDF_EXPORT_FOLDER("tabbedPdf.final_export_folder"),
+	/**
+	 * TABBED_PDF_SWITCH.
+	 */
+	TABBED_PDF_SWITCH("tabbedPdf.switch"),
+	/**
+	 * TABBED_PDF_PLACEHOLDER.
+	 */
+	TABBED_PDF_PLACEHOLDER("tabbedPdf.placeholder"),
+	/**
+	 * TABBED_PDF_PROPERTY_FILE.
+	 */
+	TABBED_PDF_PROPERTY_FILE("tabbedPdf.property_file"),
+	/**
+	 * TABBED_PDF_CREATION_PARAMETERS.
+	 */
+	TABBED_PDF_CREATION_PARAMETERS("tabbedPdf.creation_parameters"),
+	/**
+	 * TABBED_PDF_OPTIMIZATION_PARAMETERS.	
+	 */
+	TABBED_PDF_OPTIMIZATION_PARAMETERS("tabbedPdf.optimization_parameters"), 
+	/**
+	 * TABBED_PDF_OPTIMIZATION_SWITCH.
+	 */
+	TABBED_PDF_OPTIMIZATION_SWITCH("tabbedPdf.pdf_optimization_switch");
 
+	/**
+	 * key String.
+	 */
 	String key;
 
 	/**
+	 * Constructor.
 	 * @param key {@link String}
 	 */
 	TabbedPdfProperties(String key) {
 		this.key = key;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ephesoft.dcma.core.common.PluginProperty#getPropertyKey()
+	/**
+	 * To get property key.
+	 * @return String
 	 */
 	@Override
 	public String getPropertyKey() {

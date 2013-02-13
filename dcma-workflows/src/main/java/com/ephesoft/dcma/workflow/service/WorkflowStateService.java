@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,9 +40,8 @@ import java.util.List;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 
 /**
- * This service will provide work flow state management. If the state of the
- * process instance is given as a input to these api's. Api's will return all
- * the batch instance which are present at this state.
+ * This service will provide work flow state management. If the state of the process instance is given as a input to these api's. Api's
+ * will return all the batch instance which are present at this state.
  * 
  * @author Ephesoft
  * @version 1.0
@@ -51,12 +50,10 @@ import com.ephesoft.dcma.da.domain.BatchInstance;
 public interface WorkflowStateService {
 
 	/**
-	 * An api to fetch all the batch instance id for input process instance
-	 * state.
+	 * An API to fetch all the batch instance id for input process instance state.
 	 * 
 	 * @param state {@link String}
-	 * @return List<{@link BatchInstance}>, list of all the batch instance id for input of process instance
-	 *         state.
+	 * @return List<{@link BatchInstance}>, list of all the batch instance id for input of process instance state.
 	 */
 	List<BatchInstance> getAllBatchInstanceForState(String state);
 

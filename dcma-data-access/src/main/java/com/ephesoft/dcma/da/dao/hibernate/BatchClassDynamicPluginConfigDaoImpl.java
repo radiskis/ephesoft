@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,15 +50,45 @@ import com.ephesoft.dcma.da.dao.BatchClassDynamicPluginConfigDao;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 
+/**
+ * This Dao deals with batch class dynamic plugin configuration.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassDynamicPluginConfigDao
+ */
 @Repository
 public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClassDynamicPluginConfig> implements
 		BatchClassDynamicPluginConfigDao {
 
+	/**
+	 * BATCH_CLASS_MODULE String.
+	 */
 	private static final String BATCH_CLASS_MODULE = "batchClassModule";
+
+	/**
+	 * BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE String.
+	 */
 	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE = "batchClassPlugin.batchClassModule";
+
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+
+	/**
+	 * BATCH_CLASS_PLUGIN String.
+	 */
 	private static final String BATCH_CLASS_PLUGIN = "batchClassPlugin";
 
+	/**
+	 * To get Dynamic Plugin Properties for Batch Class.
+	 * 
+	 * @param batchClassIdentifier String
+	 * @param pluginName String
+	 * @param pluginProperty PluginProperty
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	@Override
 	public List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty) {
@@ -78,6 +108,12 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 		return find(criteria);
 	}
 
+	/**
+	 * To get all Dynamic Plugin Properties for Batch instance.
+	 * 
+	 * @param batchClassIdentifier String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	@Override
 	public List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchInstance(String batchInstanceIdentifier) {
 		DetachedCriteria criteria = criteria();
@@ -94,6 +130,12 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 		return find(criteria);
 	}
 
+	/**
+	 * To get all Dynamic Plugin Properties for Batch class.
+	 * 
+	 * @param batchClassIdentifier String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	@Override
 	public List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchClass(String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
@@ -107,6 +149,13 @@ public class BatchClassDynamicPluginConfigDaoImpl extends HibernateDao<BatchClas
 		return find(criteria);
 	}
 
+	/**
+	 * To get Dynamic Plugin Properties for Batch class.
+	 * 
+	 * @param batchClassIdentifier String
+	 * @param pluginName String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	@Override
 	public List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName) {
 		DetachedCriteria criteria = criteria();

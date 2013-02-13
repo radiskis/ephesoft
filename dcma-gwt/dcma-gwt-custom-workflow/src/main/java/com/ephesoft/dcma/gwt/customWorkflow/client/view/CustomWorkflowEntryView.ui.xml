@@ -1,5 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.customWorkflow.client.view'>
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:cw='urn:import:com.ephesoft.dcma.gwt.customworkflow.client.view'>
 
 	<g:DockLayoutPanel ui:field="customWorkflowEntryDockLayoutPanel"
 		width="98%" height="92%" unit="PCT">

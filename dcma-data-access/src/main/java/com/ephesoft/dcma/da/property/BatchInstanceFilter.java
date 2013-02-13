@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,13 +37,33 @@ package com.ephesoft.dcma.da.property;
 
 import com.ephesoft.dcma.core.common.DataFilter;
 
+/**
+ * This class is to filter the batch instances.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DataFilter
+ */
 public class BatchInstanceFilter extends DataFilter<BatchInstanceProperty> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param nameProperty {@link BatchInstanceProperty}
+	 * @param valueProperty {@link Object}
+	 */
 	public BatchInstanceFilter(BatchInstanceProperty nameProperty,
 			Object valueProperty) {
 		super(nameProperty, valueProperty);
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param nameProperty {@link BatchInstanceProperty}
+	 * @param valueProperty {@link Object}
+	 * @param isLike boolean
+	 */
 	public BatchInstanceFilter(BatchInstanceProperty nameProperty,
 			Object valueProperty, boolean isLike) {
 		super(nameProperty, valueProperty, isLike);

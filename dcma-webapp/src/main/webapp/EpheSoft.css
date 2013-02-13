@@ -2,11 +2,15 @@
 .configurable-DialogBox {
 	width: auto !important;
 }
-
+.gwt-sample-pattern-DialogBox {
+	width: 500px !important;
+}
 .gwt-DialogBox {
 	width: 400px;
 }
-
+.gwt-Advanced-KV-TextBox {
+	width: 90% !important;
+}
 .dialogVPanel {
 	margin: 5px;
 }
@@ -60,6 +64,11 @@
 	padding-top: 0;
 }
 
+.license-text {
+	color: red;
+	font-weight: bold;
+	
+	}
 .top-links {
 	text-align: left;
 	font-weight: normal;
@@ -416,6 +425,14 @@ select,input[type="text"] {
 	width: 100%;
 }
 
+.validate_button_image {
+	background: url("images/validate.gif") no-repeat scroll 0 0 transparent !important;
+	height: 25px !important;
+    width: 19px !important;
+    border: none;
+    cursor: pointer !important;
+}
+
 .top-box {
 	position: absolute;
 	border-style: solid;
@@ -495,6 +512,16 @@ select,input[type="text"] {
 	color: #639ace !important;
 }
 
+.blue_link {
+	color: #639ace !important;
+	text-decoration: underline !important;
+	cursor: pointer !important;
+}
+
+.blue_link:hover {
+	text-decoration: none !important;
+}
+
 .gwt-Button {
 	height: 25px;
 	-moz-background-clip: border !important;
@@ -506,6 +533,21 @@ select,input[type="text"] {
 	border-right-style: none;
 	border-top: 0 solid #FFFFFF !important;
 	color: #FFFFFF;
+	font-weight: bold;
+	cursor: pointer !important;
+}
+
+.gwt-Button[disabled] {
+	height: 25px;
+	-moz-background-clip: border !important;
+	-moz-background-inline-policy: continuous !important;
+	-moz-background-origin: padding !important;
+	background: #CCCCCC none repeat scroll 0 0 !important;
+	border-bottom-style: none;
+	border-left-style: none;
+	border-right-style: none;
+	border-top: 0 solid #FFFFFF !important;
+	color: #FFFFFF !important;
 	font-weight: bold;
 	cursor: pointer !important;
 }
@@ -543,6 +585,9 @@ select,input[type="text"] {
 
 .cursorHand {
 	cursor: pointer !important;
+}
+.cursorHand:hover {
+	text-decoration:underline !important;
 }
 
 .mainPanelLayout {
@@ -696,11 +741,11 @@ select,input[type="text"] {
 }
 
 .button_image_overlay {
-	background: transparent url(images/move_bg.gif) repeat-x scroll 0 0;
-	border: 0px solid #B3B3B3;
-	height: 50px;
-	margin-bottom: 5px;
-	width: 100%;
+	border: 0 solid #B3B3B3;
+    height: 30px;
+    margin-bottom: 5px;
+    width: 100%;
+    background-color: #EFF7F7;
 }
 
 .pointer {
@@ -827,4 +872,73 @@ select,input[type="text"] {
 
 .buttonsPanelLayout {
 	background-color: #C8E0F8;
+}
+
+.options_Box {
+	padding: 10px;
+	font-weight: bold;
+	spacing: 10px;
+}
+
+.custom-ListBox {
+	border: 2px solid #92C1F0 !important;
+}
+
+.helpContent{
+	background-color: #C8E0F8;
+	font-size: 12pt;
+	text-align:center;
+	word-spacing:3px;
+	line-height:120%;
+	border: 2px solid #92C1F0;
+}
+
+.fe-footer {
+	padding: 4px;
+	background-color: #D0E4F6;
+	font-weight: bold;
+	text-align: right;
+	padding-right: 30px;
+}
+
+.whiteBackground {
+	background-color: white;
+}
+
+.tableBorderCollapse {
+	border-collapse: collapse;
+}
+
+.optionsPanel {
+	padding-left: 20px !important;
+	padding-right: 20px !important;
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
+}
+
+.sample_regex_button {
+	width: 120.0px;
+}
+
+
+.button_padding{
+	padding-top: 4px;
+    padding-left: 15px;
+    padding-left: 4px\0;
+}
+
+.text_area {
+	width: 75px !important;
+}
+
+.scroll_panel_height {
+	height: 9em;
+	height: 8em\0;
+	width: 100%;
+}
+
+.scroll_panel_plugin {
+	height: 15em;
+	height: 14em\0;
+	width: 100%;
 }

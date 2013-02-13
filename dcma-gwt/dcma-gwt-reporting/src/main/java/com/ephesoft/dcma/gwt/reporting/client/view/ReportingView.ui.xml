@@ -102,7 +102,7 @@
 										</g:HorizontalPanel>
 										<g:HorizontalPanel ui:field="datePanel"
 											height="15px">
-											<g:cell width="11%">
+											<g:cell width="13%">
 												<g:Label>Start Date</g:Label>
 											</g:cell>
 											<g:cell>
@@ -116,7 +116,7 @@
 												ui:field="startDateCalendar"></core:CalendarWidget>
 												</g:HorizontalPanel> </g:cell>
 											-->
-											<g:cell width="10%">
+											<g:cell width="12%">
 												<g:Label>End Date</g:Label>
 											</g:cell>
 											<g:cell>

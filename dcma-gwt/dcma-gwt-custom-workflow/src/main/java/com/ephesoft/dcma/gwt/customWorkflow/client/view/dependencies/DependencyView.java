@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,14 +33,15 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.DependencyPresenter;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.DependencyPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -58,12 +59,6 @@ import com.google.gwt.user.client.ui.ListBox;
 
 public class DependencyView extends View<DependencyPresenter> {
 
-	private static final String BUTTONS_PANEL_LAYOUT = "buttonsPanelLayout";
-
-	private static final String MAIN_PANEL_LAYOUT = "mainPanelLayout";
-
-	public static int TABLE_ROW_COUNT = 15;
-	
 	private final DependencyListView dependencyListView;
 
 	@UiField
@@ -82,25 +77,23 @@ public class DependencyView extends View<DependencyPresenter> {
 	protected HorizontalPanel dependenciesButtonPanel;
 
 	@UiField
-	Label pluginLabel;
+	protected Label pluginLabel;
 
 	@UiField
-	ListBox pluginNames;
+	protected ListBox pluginNames;
 
 	@UiField
-	DockLayoutPanel dependencyLayoutPanel;
+	protected DockLayoutPanel dependencyLayoutPanel;
 	
 
 	interface Binder extends UiBinder<DockLayoutPanel, DependencyView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
-
-	private static final String TWENTY_PIXEL = "20px";
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DependencyView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		dependencyListView = new DependencyListView();
 
@@ -115,10 +108,10 @@ public class DependencyView extends View<DependencyPresenter> {
 	 * 
 	 */
 	private void addUIComponentsText() {
-		addDependencyButton.setText(CustomWorkflowConstants.ADD_CONSTANT);
-		editDependencyButton.setText(CustomWorkflowConstants.EDIT_CONSTANT);
-		deleteDependencyButton.setText(CustomWorkflowConstants.DELETE_CONSTANT);
-		pluginLabel.setText(CustomWorkflowConstants.PLUGIN_LABEL_CONSTANT);
+		addDependencyButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.ADD_CONSTANT));
+		editDependencyButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.EDIT_CONSTANT));
+		deleteDependencyButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.DELETE_CONSTANT));
+		pluginLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.PLUGIN_LABEL_CONSTANT));
 		
 	}
 
@@ -126,33 +119,34 @@ public class DependencyView extends View<DependencyPresenter> {
 	 * 
 	 */
 	private void addCssStyle() {
-		addDependencyButton.setHeight(TWENTY_PIXEL);
-		editDependencyButton.setHeight(TWENTY_PIXEL);
-		deleteDependencyButton.setHeight(TWENTY_PIXEL);
-		dependenciesButtonPanel.setSpacing(5);
+		addDependencyButton.setHeight(CustomWorkflowConstants.TWENTY_PIXEL);
+		editDependencyButton.setHeight(CustomWorkflowConstants.TWENTY_PIXEL);
+		deleteDependencyButton.setHeight(CustomWorkflowConstants.TWENTY_PIXEL);
+		dependenciesButtonPanel.setSpacing(CustomWorkflowConstants.SPACING_5);
 		dependenciesButtonPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		dependenciesButtonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		dependencyLayoutPanel.addStyleName(MAIN_PANEL_LAYOUT);
-		dependenciesButtonPanel.addStyleName(BUTTONS_PANEL_LAYOUT);
+		dependencyLayoutPanel.addStyleName(CustomWorkflowConstants.MAIN_PANEL_LAYOUT);
+		dependenciesButtonPanel.addStyleName(CustomWorkflowConstants.BUTTONS_PANEL_LAYOUT);
+		pluginLabel.addStyleName(CustomWorkflowConstants.STRONG_LABEL);
 	}
 
 	@UiHandler("editDependencyButton")
-	void onEditDependencyButtonClicked(ClickEvent clickEvent) {
+	protected void onEditDependencyButtonClicked(ClickEvent clickEvent) {
 		presenter.showEditDependencyView();
 	}
 
 	@UiHandler("addDependencyButton")
-	void onAddDependencyButtonClicked(ClickEvent clickEvent) {
+	protected void onAddDependencyButtonClicked(ClickEvent clickEvent) {
 		presenter.showAddDependencyView();
 	}
 
 	@UiHandler("deleteDependencyButton")
-	void onDeleteDependencyButtonClicked(ClickEvent clickEvent) {
+	protected void onDeleteDependencyButtonClicked(ClickEvent clickEvent) {
 		presenter.onDeleteDependencyClicked();
 	}
 
 	@UiHandler("pluginNames")
-	void onPluginChange(ChangeEvent changeEvent) {
+	protected void onPluginChange(ChangeEvent changeEvent) {
 		presenter.onPluginChange(pluginNames.getValue(pluginNames.getSelectedIndex()));
 	}
 

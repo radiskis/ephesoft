@@ -39,6 +39,13 @@
 				<value>com.ephesoft.dcma.da.domain.BatchInstanceGroups</value>
 				<value>com.ephesoft.dcma.da.domain.AdvancedKVExtraction</value>
 				<value>com.ephesoft.dcma.da.domain.Dependency</value>
+				<value>com.ephesoft.dcma.da.domain.BatchClassScannerConfiguration</value>
+				<value>com.ephesoft.dcma.da.domain.ScannerMasterConfiguration</value>
+				<value>com.ephesoft.dcma.da.domain.ScannerMasterConfigSampleValue</value>
+			    <value>com.ephesoft.dcma.da.domain.ManualStepHistoryInWorkflow</value>
+			    <value>com.ephesoft.dcma.da.domain.BatchClassCmisConfiguration</value>
+			    <value>com.ephesoft.dcma.da.domain.User</value>
+			    <value>com.ephesoft.dcma.da.domain.BatchClassCloudConfig</value>
 			</list>
 		</property>
 	</bean>

@@ -23,11 +23,11 @@
 		</property>
 	</bean>
 
-	<bean id="cmisExporter" class="com.ephesoft.dcma.cmis.CMISExporter"
-		p:pluginMappingFileName="$cmis{cmis.plugin_mapping_file_name}"
-		p:documentVersioningState="$cmis{cmis.document_versioning_state}"
-		p:dateFormat="$cmis{cmis.date_format}"
-		p:securityMode="$cmis{cmis.security.mode}"
+	<bean id="cmisExporter" class="com.ephesoft.dcma.cmis.CMISExporter"		
+		p:repoCreateBatchFolder="$cmis{cmis.repo.create_batch_subfolders}">		
+	</bean>
+	
+	<bean id="urlService" class="com.ephesoft.dcma.cmis.URLService"
 		p:urlAclService="$cmis{cmis.url.acl_service}"
 		p:urlDiscoveryService="$cmis{cmis.url.discovery_service}"
 		p:urlMultifilingService="$cmis{cmis.url.multifiling_service}"
@@ -36,14 +36,25 @@
 		p:urlPolicyService="$cmis{cmis.url.policy_service}"
 		p:urlRelationshipService="$cmis{cmis.url.relationship_service}"
 		p:urlRepositoryService="$cmis{cmis.url.repository_service}"
-		p:urlVersioningService="$cmis{cmis.url.versioning_service}"
-		p:repoCreateBatchFolder="$cmis{cmis.repo.create_batch_subfolders}"
+		p:urlVersioningService="$cmis{cmis.url.versioning_service}">
+	</bean>
+	
+	<bean id="documentDetails" class="com.ephesoft.dcma.cmis.CMISDocumentDetails"
+		p:pluginMappingFileName="$cmis{cmis.plugin_mapping_file_name}"
+		p:documentVersioningState="$cmis{cmis.document_versioning_state}"
+		p:dateFormat="$cmis{cmis.date_format}"
 		p:aspectMappingFileName="$cmis{cmis.aspect_mapping_file_name}">
 	</bean>
-
+	
+	<bean id="cmisFactory"
+		class="com.ephesoft.dcma.cmis.factory.CMISSessionFactory"
+		p:sessionType="$cmis{cmis.security.mode}">
+	</bean>
+	
 	<bean id="cmisExportService" class="com.ephesoft.dcma.cmis.service.CMISExportServiceImpl" />
 
 	<context:component-scan base-package="com.ephesoft.dcma.cmis" />
 	<context:component-scan base-package="com.ephesoft.dcma.cmis.service" />
-
+	<context:component-scan base-package="com.ephesoft.dcma.cmis.impl" />
+	<context:component-scan base-package="com.ephesoft.dcma.cmis.factory" />
 </beans>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,7 +49,7 @@ import com.ephesoft.dcma.da.domain.DocumentType;
 public interface DocumentTypeService {
 
 	/**
-	 * An api to fetch all DocumentType by batch instance id.
+	 * An API to fetch all DocumentType by batch instance id.
 	 * 
 	 * @param batchInstanceIdentifier {@link String}
 	 * @return List<{@link DocumentType}>
@@ -57,9 +57,9 @@ public interface DocumentTypeService {
 	List<DocumentType> getDocTypeByBatchInstanceIdentifier(String batchInstanceIdentifier);
 
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID {@link Long}
+	 * @param batchClassIdentifier {@link String}
 	 * @param firstIndex int
 	 * @param maxResults int
 	 * @return List<{@link DocumentType}>
@@ -67,7 +67,7 @@ public interface DocumentTypeService {
 	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier, final int firstIndex, final int maxResults);
 
 	/**
-	 * An api to fetch all DocumentType by document type name.
+	 * An API to fetch all DocumentType by document type name.
 	 * 
 	 * @param docTypeName {@link String}
 	 * @return List<{@link DocumentType}>
@@ -75,7 +75,7 @@ public interface DocumentTypeService {
 	List<DocumentType> getDocTypeByDocTypeName(String docTypeName);
 
 	/**
-	 * An api to fetch the document type based on identifier.
+	 * An API to fetch the document type based on identifier.
 	 * 
 	 * @param identifier {@link String}, the document type identifier
 	 * @return {@link DocumentType}
@@ -83,21 +83,21 @@ public interface DocumentTypeService {
 	DocumentType getDocTypeByIdentifier(String identifier);
 
 	/**
-	 * An api to insert the documentType object.
+	 * An API to insert the documentType object.
 	 * 
 	 * @param documentType {@link DocumentType}
 	 */
 	void insertDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to update the documentType object.
+	 * An API to update the documentType object.
 	 * 
 	 * @param documentType {@link DocumentType}
 	 */
 	void updateDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to remove the documentType object.
+	 * An API to remove the documentType object.
 	 * 
 	 * @param documentType {@link DocumentType}
 	 */
@@ -106,14 +106,14 @@ public interface DocumentTypeService {
 	/**
 	 * API to evict a document type object.
 	 * 
-	 * @param {@link DocumentType}
+	 * @param documentType {@link DocumentType}
 	 */
 	void evict(DocumentType documentType);
 	
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID {@link Long}
+	 * @param batchClassIdentifier {@link String}
 	 * @return List<{@link DocumentType}>
 	 */
 	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier);

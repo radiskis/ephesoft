@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Class that stores a record's information on client side.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.google.gwt.user.client.rpc.IsSerializable
  */
 
 public class BatchInstanceDTO implements IsSerializable {
@@ -69,6 +71,11 @@ public class BatchInstanceDTO implements IsSerializable {
 	 * Date and time when this batch was uploaded.
 	 */
 	private String uploadedOn;
+
+	/**
+	 * Date and time when this batch was created.
+	 */
+	private String createdOn;
 
 	/**
 	 * No of documents present in this batch.
@@ -103,124 +110,286 @@ public class BatchInstanceDTO implements IsSerializable {
 	/**
 	 * Variable for isRemote.
 	 */
-	private boolean isRemote;
+	private boolean remote;
 
 	/**
 	 * Variable for executedModules.
 	 */
 	private String executedModules;
 
+	/**
+	 * To get Status.
+	 * 
+	 * @return String
+	 */
 	public String getStatus() {
 		return status;
 	}
 
+	/**
+	 * To set Status.
+	 * 
+	 * @param status String
+	 */
 	public void setStatus(final String status) {
 		this.status = status;
 	}
 
+	/**
+	 * To get Priority.
+	 * 
+	 * @return int
+	 */
 	public int getPriority() {
 		return priority;
 	}
 
+	/**
+	 * To set Priority.
+	 * 
+	 * @param priority int
+	 */
 	public void setPriority(final int priority) {
 		this.priority = priority;
 	}
 
+	/**
+	 * To get Batch Identifier.
+	 * 
+	 * @return String
+	 */
 	public String getBatchIdentifier() {
 		return batchIdentifier;
 	}
 
+	/**
+	 * To set Batch Identifier.
+	 * 
+	 * @param batchIdentifier String
+	 */
 	public void setBatchIdentifier(final String batchIdentifier) {
 		this.batchIdentifier = batchIdentifier;
 	}
 
+	/**
+	 * To get Batch Name.
+	 * 
+	 * @return String
+	 */
 	public String getBatchName() {
 		return batchName;
 	}
 
+	/**
+	 * To set Batch Name.
+	 * 
+	 * @param batchName String
+	 */
 	public void setBatchName(final String batchName) {
 		this.batchName = batchName;
 	}
 
+	/**
+	 * To get Uploaded On.
+	 * 
+	 * @return String
+	 */
 	public String getUploadedOn() {
 		return uploadedOn;
 	}
 
+	/**
+	 * To set Uploaded On.
+	 * 
+	 * @param uploadedOn String
+	 */
 	public void setUploadedOn(final String uploadedOn) {
 		this.uploadedOn = uploadedOn;
 	}
 
+	/**
+	 * To get No Of Documents.
+	 * 
+	 * @return String
+	 */
 	public String getNoOfDocuments() {
 		return noOfDocuments;
 	}
 
+	/**
+	 * To set No Of Documents.
+	 * 
+	 * @param noOfDocuments String
+	 */
 	public void setNoOfDocuments(final String noOfDocuments) {
 		this.noOfDocuments = noOfDocuments;
 	}
 
+	/**
+	 * To get Review Status.
+	 * 
+	 * @return String
+	 */
 	public String getReviewStatus() {
 		return reviewStatus;
 	}
 
+	/**
+	 * To set Review Status.
+	 * 
+	 * @param reviewStatus String
+	 */
 	public void setReviewStatus(final String reviewStatus) {
 		this.reviewStatus = reviewStatus;
 	}
 
+	/**
+	 * To get Validation Status.
+	 * 
+	 * @return String
+	 */
 	public String getValidationStatus() {
 		return validationStatus;
 	}
 
+	/**
+	 * To set Validation Status.
+	 * 
+	 * @param validationStatus String
+	 */
 	public void setValidationStatus(final String validationStatus) {
 		this.validationStatus = validationStatus;
 	}
 
+	/**
+	 * To get No Of Pages.
+	 * 
+	 * @return String
+	 */
 	public String getNoOfPages() {
 		return noOfPages;
 	}
 
+	/**
+	 * To set No Of Pages.
+	 * 
+	 * @param noOfPages String
+	 */
 	public void setNoOfPages(final String noOfPages) {
 		this.noOfPages = noOfPages;
 	}
 
+	/**
+	 * To get Batch Class Name.
+	 * 
+	 * @return String
+	 */
 	public String getBatchClassName() {
 		return batchClassName;
 	}
 
+	/**
+	 * To set Batch Class Name.
+	 * 
+	 * @param batchClassName String
+	 */
 	public void setBatchClassName(final String batchClassName) {
 		this.batchClassName = batchClassName;
 	}
 
+	/**
+	 * To check whether remote.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isRemote() {
-		return isRemote;
+		return remote;
 	}
 
-	public void setRemote(final boolean isRemote) {
-		this.isRemote = isRemote;
+	/**
+	 * To set remote.
+	 * 
+	 * @param isRemote boolean
+	 */
+	public void setRemote(final boolean remote) {
+		this.remote = remote;
 	}
 
+	/**
+	 * remoteBatchInstanceDTO RemoteBatchInstanceDTO.
+	 */
 	private RemoteBatchInstanceDTO remoteBatchInstanceDTO;
 
+	/**
+	 * To get Remote Batch Instance DTO.
+	 * 
+	 * @return RemoteBatchInstanceDTO
+	 */
 	public RemoteBatchInstanceDTO getRemoteBatchInstanceDTO() {
 		return remoteBatchInstanceDTO;
 	}
 
+	/**
+	 * To set Remote Batch Instance DTO.
+	 * 
+	 * @param remoteBatchInstanceDTO RemoteBatchInstanceDTO
+	 */
 	public void setRemoteBatchInstanceDTO(RemoteBatchInstanceDTO remoteBatchInstanceDTO) {
 		this.remoteBatchInstanceDTO = remoteBatchInstanceDTO;
 	}
 
+	/**
+	 * To get Executed Modules.
+	 * 
+	 * @param String
+	 */
 	public String getExecutedModules() {
 		return executedModules;
 	}
 
+	/**
+	 * To set Executed Modules.
+	 * 
+	 * @param executedModules String
+	 */
 	public void setExecutedModules(String executedModules) {
 		this.executedModules = executedModules;
 	}
 
+	/**
+	 * To get Current User.
+	 * 
+	 * @return String
+	 */
 	public String getCurrentUser() {
 		return currentUser;
 	}
 
+	/**
+	 * To get Current User.
+	 * 
+	 * @param currentUser String
+	 */
 	public void setCurrentUser(String currentUser) {
 		this.currentUser = currentUser;
 	}
+
+	/**
+	 * To get Created On.
+	 * 
+	 * @return String
+	 */
+	public String getCreatedOn() {
+		return createdOn;
+	}
+
+	/**
+	 * To set Created On.
+	 * 
+	 * @param createdOn String
+	 */
+	public void setCreatedOn(String createdOn) {
+		this.createdOn = createdOn;
+	}
+
 }

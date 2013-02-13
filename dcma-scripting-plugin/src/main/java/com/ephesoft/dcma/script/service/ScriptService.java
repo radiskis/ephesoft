@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,7 +55,7 @@ public interface ScriptService {
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param pluginWorkflow {@link String}
 	 * @param nameOfPluginScript {@link String}
-	 * @throws DCMAException If some error occur.
+	 * @throws DCMAException.
 	 */
 	void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String nameOfPluginScript)
 			throws DCMAException;
@@ -69,7 +69,7 @@ public interface ScriptService {
 	 * @param docIdentifier {@link String}
 	 * @param scriptVariableName {@link String}(in case of script execution on value change it is field Name and in case of function
 	 *            key script execution it is methodName
-	 * @throws DCMAException If some error occur.
+	 * @throws DCMAException.
 	 */
 	void executeScript(final BatchInstanceID batchInstanceID, final String pluginWorkflow, final String nameOfPluginScript,
 			final String docIdentifier, final String scriptVariableName) throws DCMAException;

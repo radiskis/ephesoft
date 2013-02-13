@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,10 +35,6 @@
 
 package com.ephesoft.dcma.gwt.reporting.server;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +49,6 @@ import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.common.WorkflowType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.service.BatchClassService;
-import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
 import com.ephesoft.dcma.gwt.core.shared.ReportDTO;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
@@ -62,7 +57,6 @@ import com.ephesoft.dcma.gwt.reporting.client.i18n.ReportingConstants;
 import com.ephesoft.dcma.performance.reporting.domain.ReportDisplayData;
 import com.ephesoft.dcma.performance.reporting.service.ReportDataService;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
-import com.ephesoft.dcma.util.OSUtil;
 
 /**
  * The server side implementation for the calls coming from client side.
@@ -83,11 +77,11 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 	public static final String ANT_HOME_PATH = "ANT_HOME_PATH";
 
 	@Override
-	public List<Integer> getSystemStatistics(Date startDate, Date endDate) throws GWTException {
+	public List<Integer> getSystemStatistics(Date startDate, Date endDate,List<String> batchClassIdList) throws GWTException {
 		List<Integer> statistics = new ArrayList<Integer>();
 		ReportDataService reportDataService = this.getSingleBeanOfType(ReportDataService.class);
 		try {
-			statistics = reportDataService.getSystemStatistics(endDate, startDate);
+			statistics = reportDataService.getSystemStatistics(endDate, startDate,batchClassIdList);
 		} catch (DCMAException dcmae) {
 			throw new GWTException("Exception while Getting System Statistics." + dcmae);
 		}
@@ -105,8 +99,7 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 		} catch (DCMAException dcmae) {
 			throw new GWTException("Exception while Getting Table Data." + dcmae);
 		}
-		List<ReportDTO> reportDtos = createReportDTOs(reports);
-		return reportDtos;
+		return createReportDTOs(reports);
 	}
 
 	@Override
@@ -119,12 +112,11 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 		} catch (DCMAException dcmae) {
 			throw new GWTException("Exception while Getting table Data for User." + dcmae);
 		}
-		List<ReportDTO> reportDtos = createReportDTOs(reports);
-		return reportDtos;
+		return createReportDTOs(reports);
 	}
 
 	@Override
-	public HashMap<String, String> getAllBatchClasses() {
+	public Map<String, String> getAllBatchClasses() {
 		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
 		List<BatchClass> batchClassList = batchClassService.getAllBatchClasses();
 		LinkedHashMap<String, String> batchClassNames = new LinkedHashMap<String, String>();
@@ -194,7 +186,7 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 			String antPath = app.getProperty("report.ant.buildfile.path");
 			reportService.syncDatabase(antPath);
 		} catch (Exception e) {
-			throw new GWTException("Exception while running reporting. " + e.getMessage());
+			throw new GWTException("Exception while running reporting. " + e.getMessage(), e);
 		}
 	}
 
@@ -205,7 +197,7 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 		try {
 			isAnotherUserAlreadyConnected = reportDataService.isAnotherUserConnected();
 		} catch (Exception e) {
-			throw new GWTException(e.getMessage());
+			throw new GWTException(e.getMessage(), e);
 		}
 		return isAnotherUserAlreadyConnected;
 	}
@@ -218,9 +210,22 @@ public class ReportingServiceImpl extends DCMARemoteServiceServlet implements Re
 		try {
 			popUpConfigs = reportDataService.getCustomReportButtonPopUpConfigs();
 		} catch (Exception e) {
-			throw new GWTException("Exception while Getting pop-up configs." + e);
+			throw new GWTException("Exception while Getting pop-up configs." + e, e);
 		}
 		return popUpConfigs;
+	}
+
+	@Override
+	public Map<String, String> getAllBatchClassesForUserRoles(Set<String> userRoles) {
+		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
+		List<BatchClass> batchClassList = batchClassService.getAllBatchClassesByUserRoles(userRoles);
+		LinkedHashMap<String, String> batchClassNames = new LinkedHashMap<String, String>();
+		batchClassNames.put(ReportingConstants.ALL_TEXT, ReportingConstants.ALL_TEXT);
+		for (Iterator<BatchClass> iterator = batchClassList.iterator(); iterator.hasNext();) {
+			BatchClass batchClass = (BatchClass) iterator.next();
+			batchClassNames.put(batchClass.getIdentifier(), batchClass.getIdentifier() + " - " + batchClass.getDescription());
+		}
+		return batchClassNames;
 	}
 
 }

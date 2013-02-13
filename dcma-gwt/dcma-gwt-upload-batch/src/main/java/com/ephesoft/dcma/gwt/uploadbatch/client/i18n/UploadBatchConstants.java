@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,12 +46,13 @@ public interface UploadBatchConstants extends LocaleCommonConstants {
 	String STAR = "*";
 
 	String UPLOAD_TEXT = "upload_text";
-	String UPLOAD_BUTTON = "upload_button_label";	
+	String UPLOAD_BUTTON = "upload_button_label";
+	String UPLOAD_LABEL = "upload_label";
 	String ERROR_CODE_TEXT = "error";
 	String RESET_BUTTON = "reset";
 	String ASSOCIATE_BCF_BUTTON = "associate_bcf_button";
 	String FINISH_BUTTON = "finish_button_label";
-	String OK = "ok";
+	String BUTTON_TEXT_OK = "ok";
 	String CANCEL = "cancel";
 	String DELETE_BUTTON = "delete_button_label";
 	
@@ -65,4 +66,40 @@ public interface UploadBatchConstants extends LocaleCommonConstants {
 	
 	String FILE_TYPES = "file_types";
 	String UPLOAD_PROGRESS = "upload_progress";
+	
+	/**
+	 * The IE_BROWSER {@link String} is a constant for IE Browser.
+	 */
+	String IE_BROWSER = "msie";
+	
+	/**
+	 * The WIDTH_26_EM {@link String} is a constant for width in
+	 * EM of 26.
+	 */
+	String WIDTH_26_EM = "26em";
+	
+	/**
+	 * The FREEMIUM_USER_TYPE {@link String} is a constant for Ephesoft Cloud freemium user type
+	 */
+	String FREEMIUM_USER_TYPE = "Freemium";
+	
+	/**
+	 * The INSTANCE_ERROR {@link String} is a constant for instance error.
+	 */
+	String INSTANCE_ERROR = "Instance Error";
+	
+	/**
+	 * The IMAGE_ERROR {@link String} is a constant for image error.
+	 */
+	String IMAGE_ERROR = "Image Error";
+	
+	/**
+	 * The SPACE {@link String} is a constant for space ' '.
+	 */
+	String SPACE = " ";
+	
+	/**
+	 * The MEGA_BYTE {@link String} is a constant for mega bytes short form notation.
+	 */
+	String MEGA_BYTE = "MB";
 }

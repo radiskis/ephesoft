@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,8 +43,18 @@ import org.w3c.dom.Element;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.workflow.jbpm.pvm.internal.wire.descriptor.BatchInstanceStatusDescriptor;
 
+/**
+ * This is binding class for batch instance status.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.pvm.internal.wire.binding.BasicTypeBinding
+ */
 public class BatchInstanceStatusBinding extends BasicTypeBinding {
 
+	/**
+	 * Constructor.
+	 */
 	public BatchInstanceStatusBinding() {
 		super("batch-instance-status");
 	}

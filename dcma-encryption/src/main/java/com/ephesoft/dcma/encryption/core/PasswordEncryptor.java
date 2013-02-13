@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,8 +45,22 @@ import java.net.URLClassLoader;
 
 import com.ephesoft.dcma.encryption.exception.CryptographyException;
 
+/**
+ * This class is used to encrypt the passwords.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.encryption.core.EncryptorDecryptor
+ */
+@SuppressWarnings("PMD")
 public class PasswordEncryptor {
 
+	/**
+	 * To encrypt the string.
+	 * @param decryptedString {@link String}
+	 * @return {@link String}
+	 * @throws CryptographyException {@link CryptographyException}
+	 */
 	public String encrypt(String decryptedString) throws CryptographyException {
 		String encryptedString = "";
 		if (!(decryptedString == null || decryptedString.length() == 0)) {
@@ -55,6 +69,10 @@ public class PasswordEncryptor {
 		return encryptedString;
 	}
 
+	/**
+	 * This method is used to load the class path for encryption and decryption process.
+	 * @param libDir {@link File}
+	 */
 	@SuppressWarnings("deprecation")
 	public static void loadClasspath(File libDir) {
 		try {
@@ -85,6 +103,10 @@ public class PasswordEncryptor {
 		}
 	}
 
+	/**
+	 * The main method to run this plug in.
+	 * @param args {@link String}
+	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.err.println("One Argument expected.");
@@ -99,19 +121,22 @@ public class PasswordEncryptor {
 		loadClasspath(libDir);
 	}
 
+	/**
+	 * This method is used to encrypt passwords.
+	 */
 	public void encrypt() {
 		boolean wantToContinue = true;
 		PasswordEncryptor passwordEncryptor = new PasswordEncryptor();
-		BufferedReader br = null;
+		BufferedReader bufferReader = null;
 		InputStreamReader inputStreamReader = null;
 		do {
 			inputStreamReader = new InputStreamReader(System.in);
-			br = new BufferedReader(inputStreamReader);
+			bufferReader = new BufferedReader(inputStreamReader);
 			String inputString = null;
 			boolean encryptionSuccessful = true;
 			System.out.println("********Enter the password*******");
 			try {
-				inputString = br.readLine();
+				inputString = bufferReader.readLine();
 			} catch (IOException e) {
 				System.out.println("Could not read the input. Exiting the application.");
 				System.exit(1);
@@ -140,7 +165,7 @@ public class PasswordEncryptor {
 			String wantToContinueString = "n";
 			wantToContinue = false;
 			try {
-				wantToContinueString = br.readLine();
+				wantToContinueString = bufferReader.readLine();
 			} catch (IOException e) {
 				System.out.println("Could not read the input. Exiting the application.");
 				System.exit(1);
@@ -150,8 +175,8 @@ public class PasswordEncryptor {
 			}
 		} while (wantToContinue);
 		try {
-			if (br != null) {
-				br.close();
+			if (bufferReader != null) {
+				bufferReader.close();
 			}
 			if (inputStreamReader != null) {
 				inputStreamReader.close();

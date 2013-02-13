@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.docushare.service.DocushareExportService;
 import com.ephesoft.dcma.util.FileUtils;
 
@@ -57,7 +58,6 @@ import com.ephesoft.dcma.util.FileUtils;
  * to be tested is present and second is s negative test case when batch xml of the instance to be tested is not present.
  * 
  * @author Ephesoft
- * @see com.epehsoft.dcma.docushare.AbstractDocushareExportTest
  */
 public class DocushareExportTest extends AbstractDocushareExportTest {
 
@@ -130,7 +130,15 @@ public class DocushareExportTest extends AbstractDocushareExportTest {
 	 */
 	private final transient Properties prop = new Properties();
 
+
+	
 	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+	
+		/**
 	 * Method to initialize resources.
 	 */
 	@Before
@@ -139,7 +147,7 @@ public class DocushareExportTest extends AbstractDocushareExportTest {
 		String testFolderLocation;
 		batchInstanceIdSuccess = "BI41";
 		batchInstanceIdFailure = "BI40";
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getBatchClassIdentifier(batchInstanceIdSuccess);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		baseFolderLocation = batchSchemaService.getBaseFolderLocation();
 		try {
@@ -214,10 +222,10 @@ public class DocushareExportTest extends AbstractDocushareExportTest {
 	/**
 	 * This method checks whether docushare plugin has successfully created the zipped folder.
 	 * 
-	 * @param batchInstanceId
-	 * @return
-	 * @throws DCMAException
-	 * @throws IOException
+	 * @param batchInstanceId {@link String}
+	 * @return boolean
+	 * @throws DCMAException {@link DCMAException}
+	 * @throws IOException {@link IOException}
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean docushareExportTest(final String batchInstanceId) throws DCMAException, IOException {

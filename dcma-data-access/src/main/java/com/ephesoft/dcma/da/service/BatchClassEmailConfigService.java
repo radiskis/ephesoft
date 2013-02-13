@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,22 +49,22 @@ import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 public interface BatchClassEmailConfigService {
 
 	/**
-	 * An api to fetch all batch class email configs.
+	 * An API to fetch all batch class email configs.
 	 * 
 	 * @return List<{@link BatchClassEmailConfiguration}>
 	 */
 	List<BatchClassEmailConfiguration> getAllEmailConfigs();
 
 	/**
-	 * An api to fetch all Email configurations by batch class id.
+	 * An API to fetch all Email configurations by batch class id.
 	 * 
-	 * @param batchClassId {@link String}
+	 * @param batchClassIdentifier {@link String}
 	 * @return List<{@link BatchClassEmailConfiguration}>
 	 */
 	List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(final String batchClassIdentifier);
 
 	/**
-	 * An api to fetch all DocumentType by batch class id starting at firstIndex and maxResults is the total number of records.
+	 * An API to fetch all DocumentType by batch class id starting at firstIndex and maxResults is the total number of records.
 	 * 
 	 * @param batchClassIdentifier {@link String}
 	 * @param firstIndex int
@@ -75,7 +75,7 @@ public interface BatchClassEmailConfigService {
 			final int maxResults);
 
 	/**
-	 * An api to fetch Email Configuration by id.
+	 * An API to fetch Email Configuration by id.
 	 * 
 	 * @param emailConfigId int
 	 * @return {@link BatchClassEmailConfiguration}
@@ -83,21 +83,21 @@ public interface BatchClassEmailConfigService {
 	BatchClassEmailConfiguration getEmailConfigById(int emailConfigId);
 
 	/**
-	 * An api to insert a new Email Config object.
+	 * An API to insert a new Email Config object.
 	 * 
 	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
 	 */
 	void insertEmailConfiguration(BatchClassEmailConfiguration emailConfiguration);
 
 	/**
-	 * An api to update the Email Config object.
+	 * An API to update the Email Config object.
 	 * 
 	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
 	 */
 	void updateEmailConfiguration(BatchClassEmailConfiguration emailConfiguration);
 
 	/**
-	 * An api to remove the Email Config object.
+	 * An API to remove the Email Config object.
 	 * 
 	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
 	 */

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
 import com.ephesoft.dcma.da.dao.BatchClassEmailConfigDao;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 
@@ -55,8 +54,11 @@ import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
  * @see com.ephesoft.dcma.da.service.BatchClassEmailConfigService
  */
 @Service
-public class BatchClassEmailConfigServiceImpl extends DataAccessService implements BatchClassEmailConfigService {
+public class BatchClassEmailConfigServiceImpl implements BatchClassEmailConfigService {
 
+	/**
+	 * batConfigDao {@link BatchClassEmailConfigDao}.
+	 */
 	@Autowired
 	private BatchClassEmailConfigDao batConfigDao;
 
@@ -65,6 +67,12 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassEmailConfigServiceImpl.class);
 
+	/**
+	 * An API to fetch all Email configurations by batch class id.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return List<{@link BatchClassEmailConfiguration}>
+	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(String batchClassIdentifier) {
@@ -72,6 +80,14 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 		return batConfigDao.getEmailConfigByBatchClassIdentifier(batchClassIdentifier);
 	}
 
+	/**
+	 * An API to fetch all DocumentType by batch class id starting at firstIndex and maxResults is the total number of records.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param firstIndex int
+	 * @param maxResults int
+	 * @return List<{@link BatchClassEmailConfiguration}>
+	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<BatchClassEmailConfiguration> getEmailConfigByBatchClassIdentifier(String batchClassIdentifier, int firstIndex,
@@ -79,12 +95,23 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 		return batConfigDao.getEmailConfigByBatchClassIdentifier(batchClassIdentifier, firstIndex, maxResults);
 	}
 
+	/**
+	 * An API to fetch Email Configuration by id.
+	 * 
+	 * @param emailConfigId int
+	 * @return {@link BatchClassEmailConfiguration}
+	 */
 	@Transactional(readOnly = true)
 	@Override
 	public BatchClassEmailConfiguration getEmailConfigById(int emailConfigId) {
 		return batConfigDao.get(emailConfigId);
 	}
 
+	/**
+	 * An API to insert a new Email Config object.
+	 * 
+	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
+	 */
 	@Transactional
 	@Override
 	public void insertEmailConfiguration(BatchClassEmailConfiguration emailConfiguration) {
@@ -92,6 +119,11 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 
 	}
 
+	/**
+	 * An API to remove the Email Config object.
+	 * 
+	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
+	 */
 	@Transactional
 	@Override
 	public void removeEmailConfiguration(BatchClassEmailConfiguration emailConfiguration) {
@@ -99,6 +131,11 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 
 	}
 
+	/**
+	 * An API to update the Email Config object.
+	 * 
+	 * @param emailConfiguration {@link BatchClassEmailConfiguration}
+	 */
 	@Transactional
 	@Override
 	public void updateEmailConfiguration(BatchClassEmailConfiguration emailConfiguration) {
@@ -106,6 +143,11 @@ public class BatchClassEmailConfigServiceImpl extends DataAccessService implemen
 
 	}
 
+	/**
+	 * An API to fetch all batch class email configs.
+	 * 
+	 * @return List<{@link BatchClassEmailConfiguration}>
+	 */
 	@Override
 	public List<BatchClassEmailConfiguration> getAllEmailConfigs() {
 		return batConfigDao.getAllEmailConfigs();

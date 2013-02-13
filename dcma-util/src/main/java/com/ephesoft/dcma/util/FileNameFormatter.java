@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,34 +38,41 @@ package com.ephesoft.dcma.util;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.ephesoft.dcma.constant.UtilConstants;
+
 /**
  * When an instance of the FileNameFormatter is created it loads the Properties file FileNameFormatter.properties to the field prop.
  * There are various methods in the Filename formatter which returns the File name based on the configuration in the properties file.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see java.io.IOException
  */
 public class FileNameFormatter implements IUtilCommonConstants {
 
+	/**
+	 * LENGTH_CONST int.
+	 */
+	private static final int LENGTH_CONST = 3;
+
+	/**
+	 * SET_PROPERTY_NAME String.
+	 */
 	private static final String SET_PROPERTY_NAME = "Property not set propertyname";
+
+    /**
+     * prop Properties.
+     */
 	private static Properties prop = new Properties();
 
 	/**
 	 * When an instance of the FileNameFormatter is created it loads the Properties file FileNameFormatter.properties to the field
 	 * prop.
 	 * 
-	 * @throws Exception
+	 * @throws IOException in case of error
 	 */
-	public FileNameFormatter() throws Exception {
-
-		try {
-			prop.load(FileNameFormatter.class.getClassLoader().getResourceAsStream(FILENAME_FORMATTER_PROPERTIES));
-
-		} catch (IOException ioExp) {
-
-			throw new Exception("Problem Reading the property file->" + "FileNameFormatter.properties" + ioExp);
-		}
-
+	public FileNameFormatter() throws IOException {
+		prop.load(FileNameFormatter.class.getClassLoader().getResourceAsStream(FILENAME_FORMATTER_PROPERTIES));
 	}
 
 	/**
@@ -73,17 +80,17 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * entry in the properties file is: multiPageFileNameFormat=batchInstanceIdentifier;separator ;document;documentId;extension
 	 * multiPageFileNameSeparator=_
 	 * 
-	 * @param documentID
-	 * @param batchInstanceIdentifier
-	 * @param extension
+	 * @param documentID {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param extension {@link String}
 	 * @return name of Multi page file.
-	 * @throws Exception
+	 * @throws FileFormatException in case of error
 	 */
-	public String getMuliPageFileName(String documentID, String batchInstanceIdentifier, String extension) throws Exception {
+	public String getMuliPageFileName(String documentID, String batchInstanceIdentifier, String extension) throws FileFormatException {
 		String multiPageFileNameFormat = prop.getProperty(MULIPAGE_FILENAME_FORMAT);
 		String separator = prop.getProperty(MULIPAGE_FILENAME_SEPARATOR);
 		if (multiPageFileNameFormat == null || multiPageFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + MULIPAGE_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + MULIPAGE_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = multiPageFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -102,8 +109,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 			} else if (fileNameComponents[index].equals(DOCUMENT_ID)) {
 				documentFileNameBuffer.append(documentID);
 			} else {
-				throw new Exception("The property " + MULIPAGE_FILENAME_FORMAT + " contains invalid element "
-						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
+				throw new FileFormatException("The property " + MULIPAGE_FILENAME_FORMAT + " contains invalid element"
+						+ fileNameComponents[index] + " refer the file " + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
 
@@ -115,20 +122,22 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * Returns the Hocr File name. Example configuration is hocrFileNameFormat=batchInstanceIdentifier
 	 * ;separator;oldFileNameWOExt;extension hocrFileNameSeparator=_
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param oldFileName
-	 * @param newFileName
-	 * @param OCRInputFileName
-	 * @param extension
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param oldFileName {@link String}
+	 * @param newFileName {@link String}
+	 * @param OCRInputFileName {@link String}
+	 * @param extension {@link String}
+	 * @param pageId {@link String}
+	 * @param forExtraction boolean
 	 * @return name of hocr file
-	 * @throws Exception
+	 * @throws FileFormatException in case of error
 	 */
 	public String getHocrFileName(String batchInstanceIdentifier, String oldFileName, String newFileName, String OCRInputFileName,
-			String extension, String pageId, boolean forExtraction) throws Exception {
+			String extension, String pageId, boolean forExtraction) throws FileFormatException {
 		String hocrFileNameFormat = prop.getProperty(HOCR_FILENAME_FORMAT);
 		String separator = prop.getProperty(HOCR_FILENAME_SEPARATOR);
 		if (hocrFileNameFormat == null || hocrFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + HOCR_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + HOCR_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = hocrFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -160,11 +169,9 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				}
 			} else if (fileNameComponents[index].equals(PAGE_ID)) {
 				hocrFileNameBuffer.append(pageId);
-			}
-
-			else {
-				throw new Exception("The property " + HOCR_FILENAME_FORMAT + " contains invalid element " + fileNameComponents[index]
-						+ "refer the file" + FILENAME_FORMATTER_PROPERTIES);
+			} else {
+				throw new FileFormatException(" The property " + HOCR_FILENAME_FORMAT + " contains invalid element  "
+						+ fileNameComponents[index] + "refer the file " + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
 
@@ -175,7 +182,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	/**
 	 * Removes the extension from the file name.
 	 * 
-	 * @param fileName
+	 * @param fileName {@link String}
 	 * @return file name without the ext.
 	 */
 	private String removeExtension(String fileName) {
@@ -187,7 +194,7 @@ public class FileNameFormatter implements IUtilCommonConstants {
 		} else {
 			if (strArr.length > 2) {
 				StringBuffer fileNameBuff = new StringBuffer();
-				for (int index = 0; index <= strArr.length - 3; index++) {
+				for (int index = 0; index <= strArr.length - LENGTH_CONST; index++) {
 					fileNameBuff.append(strArr[index]);
 					fileNameBuff.append(DOT);
 				}
@@ -204,20 +211,21 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * This method returns the Display thumbnail file name. eg. of configuration displayThumbNailFileNameFormat
 	 * =batchInstanceIdentifier;separator;oldFileNameWOExt ;separator;displayThumb;extension thumbNailFileNameSeparator=_
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param oldFileName
-	 * @param newFileName
-	 * @param OCRInputFileName
-	 * @param extension
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param oldFileName {@link String}
+	 * @param newFileName {@link String}
+	 * @param OCRInputFileName {@link String}
+	 * @param extension {@link String}
+	 * @param pageId {@link String}
 	 * @return name of thumbnail file
-	 * @throws Exception
+	 * @throws FileFormatException in case of error
 	 */
 	public String getDisplayThumbnailFileName(String batchInstanceIdentifier, String oldFileName, String newFileName,
-			String OCRInputFileName, String extension, String pageId) throws Exception {
+			String OCRInputFileName, String extension, String pageId) throws FileFormatException {
 		String thumbNailFileNameFormat = prop.getProperty(DISPLAY_THUMBNAIL_FILENAME_FORMAT);
 		String separator = prop.getProperty(THUMBNAIL_FILENAME_SEPARATOR);
 		if (thumbNailFileNameFormat == null || thumbNailFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + DISPLAY_THUMBNAIL_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + DISPLAY_THUMBNAIL_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = thumbNailFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -247,11 +255,9 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				dispThumbFileNameBuffer.append(DISP_THUMB_STRING);
 			} else if (fileNameComponents[index].equals(PAGE_ID)) {
 				dispThumbFileNameBuffer.append(pageId);
-			}
-
-			else {
-				throw new Exception("The property " + DISPLAY_THUMBNAIL_FILENAME_FORMAT + " contains invalid element "
-						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
+			} else {
+				throw new FileFormatException(" The property " + DISPLAY_THUMBNAIL_FILENAME_FORMAT + " contains invalid element  "
+						+ fileNameComponents[index] + "refer the file " + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
 
@@ -263,20 +269,21 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * This method returns the Compare thumbnail file name. eg. of configuration compareThumbNailFileNameFormat
 	 * =batchInstanceIdentifier;separator;oldFileNameWOExt ;separator;compareThumb;extension thumbNailFileNameSeparator=_
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param oldFileName
-	 * @param newFileName
-	 * @param OCRInputFileName
-	 * @param extension
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param oldFileName {@link String}
+	 * @param newFileName {@link String}
+	 * @param OCRInputFileName {@link String}
+	 * @param extension {@link String}
+	 * @param pageId {@link String}
 	 * @return name of thumbnail file
-	 * @throws Exception
+	 * @throws FileFormatException in case of error
 	 */
 	public String getCompareThumbnailFileName(String batchInstanceIdentifier, String oldFileName, String newFileName,
-			String OCRInputFileName, String extension, String pageId) throws Exception {
+			String OCRInputFileName, String extension, String pageId) throws FileFormatException {
 		String thumbNailFileNameFormat = prop.getProperty(COMPARE_THUMBNAIL_FILENAME_FORMAT);
 		String separator = prop.getProperty(THUMBNAIL_FILENAME_SEPARATOR);
 		if (thumbNailFileNameFormat == null || thumbNailFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + COMPARE_THUMBNAIL_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + COMPARE_THUMBNAIL_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = thumbNailFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -306,11 +313,9 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				dispThumbFileNameBuffer.append(COMPARE_THUMB_STRING);
 			} else if (fileNameComponents[index].equals(PAGE_ID)) {
 				dispThumbFileNameBuffer.append(pageId);
-			}
-
-			else {
-				throw new Exception("The property " + COMPARE_THUMBNAIL_FILENAME_FORMAT + " contains invalid element "
-						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
+			} else {
+				throw new FileFormatException(" The property " + COMPARE_THUMBNAIL_FILENAME_FORMAT + " contains invalid element  "
+						+ fileNameComponents[index] + "refer the file " + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
 
@@ -323,23 +328,23 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * =batchInstanceIdentifier;separator;oldFileNameWOExt;separator;fieldName ;alternateValueIndex;extension
 	 * overlayFileNameSeparator=_
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param documentId
-	 * @param ocrFileName
-	 * @param fieldName
-	 * @param alternateValueIndex
-	 * @param alternateValue
-	 * @param extension
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param documentId {@link String}
+	 * @param ocrFileName {@link String}
+	 * @param fieldName {@link String}
+	 * @param alternateValueIndex {@link String}
+	 * @param alternateValue boolean
+	 * @param extension {@link String}
 	 * @return overlayed file name
-	 * @throws Exception
+	 * @throws FileFormatException in case of error
 	 */
 	public String getOverlayedFileName(String batchInstanceIdentifier, String documentId, String ocrFileName, String fieldName,
-			int alternateValueIndex, boolean alternateValue, String extension) throws Exception {
+			int alternateValueIndex, boolean alternateValue, String extension) throws FileFormatException {
 
 		String overlayedFileNameFormat = prop.getProperty(HOCR_FILENAME_FORMAT);
 		String separator = prop.getProperty(OVERLAY_FILENAME_SEPARATOR);
 		if (overlayedFileNameFormat == null || overlayedFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + OVERLAY_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + OVERLAY_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = overlayedFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -349,16 +354,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				overlayFileNameBuffer.append(batchInstanceIdentifier);
 			} else if (fileNameComponents[index].equals(SEPARATOR)) {
 				overlayFileNameBuffer.append(separator);
-			} else if (fileNameComponents[index].equals(OLD_FILE_NAME_WITH_EXT)) {
-				// hocrFileNameBuffer.append(oldFileName);
-			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WITH_EXT)) {
-				// hocrFileNameBuffer.append(newFileName);
 			} else if (fileNameComponents[index].equals(OCR_INPUT_FILE_NAME_WITH_EXT)) {
 				overlayFileNameBuffer.append(ocrFileName);
-			} else if (fileNameComponents[index].equals(OLD_FILENAME_WO_EXT)) {
-				// hocrFileNameBuffer.append(removeExtension(ocrFileName));
-			} else if (fileNameComponents[index].equals(NEW_FILE_NAME_WO_EXT)) {
-				// hocrFileNameBuffer.append(removeExtension(newFileName));
 			} else if (fileNameComponents[index].equals(OCR_INPUT_FILE_NAME_WO_EXT)) {
 				overlayFileNameBuffer.append(removeExtension(ocrFileName));
 			} else if (fileNameComponents[index].equalsIgnoreCase(EXTENSION)) {
@@ -370,10 +367,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 					overlayFileNameBuffer.append(separator);
 					overlayFileNameBuffer.append(alternateValueIndex);
 				}
-			}
-
-			else {
-				throw new Exception("The property " + OVERLAY_FILENAME_FORMAT + " contains invalid element "
+			} else {
+				throw new FileFormatException("  The property " + OVERLAY_FILENAME_FORMAT + " contains invalid element"
 						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
@@ -394,19 +389,20 @@ public class FileNameFormatter implements IUtilCommonConstants {
 	 * Eg. of configuration ocrInputFileNameFormat=batchInstanceIdentifier;separator ;oldFileNameWOExt;extension
 	 * ocrInputFileNameSeparator=_
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param oldFileName
-	 * @param newFileName
-	 * @param extension
-	 * @return
-	 * @throws Exception
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param oldFileName {@link String}
+	 * @param newFileName {@link String}
+	 * @param extension {@link String}
+	 * @param pageId {@link String}
+	 * @return {@link String}
+	 * @throws FileFormatException in case of error
 	 */
 	public String getOCRInputFileName(String batchInstanceIdentifier, String oldFileName, String newFileName, String extension,
-			String pageId) throws Exception {
+			String pageId) throws FileFormatException {
 		String ocrInputFileNameFormat = prop.getProperty(OCR_INPUT_FILENAME_FORMAT);
 		String separator = prop.getProperty(OCR_INPUT_FILENAME_SEPARATOR);
 		if (ocrInputFileNameFormat == null || ocrInputFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + OCR_INPUT_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + OCR_INPUT_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = ocrInputFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -428,10 +424,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				ocrInputFileNameBuffer.append(extension);
 			} else if (fileNameComponents[index].equals(PAGE_ID)) {
 				ocrInputFileNameBuffer.append(pageId);
-			}
-
-			else {
-				throw new Exception("The property " + OCR_INPUT_FILENAME_FORMAT + " contains invalid element "
+			} else {
+				throw new FileFormatException("  The property " + OCR_INPUT_FILENAME_FORMAT + " contains invalid element"
 						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}
@@ -440,11 +434,22 @@ public class FileNameFormatter implements IUtilCommonConstants {
 
 	}
 
-	public String getNewFileName(String batchInstanceIdentifier, String oldFileName, String pageId, String extension) throws Exception {
+	/**
+	 * To get a new file.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param oldFileName {@link String}
+	 * @param extension {@link String}
+	 * @param pageId {@link String}
+	 * @return {@link String}
+	 * @throws FileFormatException in case of error
+	 */
+	public String getNewFileName(String batchInstanceIdentifier, String oldFileName, String pageId, String extension)
+			throws FileFormatException {
 		String newFileFileNameFormat = prop.getProperty(NEW_FILE_FILENAME_FORMAT);
 		String separator = prop.getProperty(NEW_FILE_FILENAME_SEPARATOR);
 		if (newFileFileNameFormat == null || newFileFileNameFormat.isEmpty()) {
-			throw new Exception(SET_PROPERTY_NAME + '=' + NEW_FILE_FILENAME_FORMAT);
+			throw new FileFormatException(SET_PROPERTY_NAME + UtilConstants.EQUAL + NEW_FILE_FILENAME_FORMAT);
 		}
 
 		String[] fileNameComponents = newFileFileNameFormat.split(FILE_NAME_FORMAT_DELIMITOR);
@@ -462,10 +467,8 @@ public class FileNameFormatter implements IUtilCommonConstants {
 				newFileFileNameBuffer.append(extension);
 			} else if (fileNameComponents[index].equals(PAGE_ID)) {
 				newFileFileNameBuffer.append(pageId);
-			}
-
-			else {
-				throw new Exception("The property " + OCR_INPUT_FILENAME_FORMAT + " contains invalid element "
+			} else {
+				throw new FileFormatException("The property " + OCR_INPUT_FILENAME_FORMAT + " contains invalid element "
 						+ fileNameComponents[index] + "refer the file" + FILENAME_FORMATTER_PROPERTIES);
 			}
 		}

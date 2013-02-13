@@ -18,13 +18,13 @@
 		class="com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl" />
 
 	<bean id="imageClassifier"
-		class="com.ephesoft.dcma.imagemagick.imageClassifier.ImageClassifier" />
+		class="com.ephesoft.dcma.imagemagick.imageclassifier.ImageClassifier" />
 
 	<bean id="imageComparisonUtil"
-		class="com.ephesoft.dcma.imagemagick.imageClassifier.ImageComparisonUtil" />
+		class="com.ephesoft.dcma.imagemagick.imageclassifier.ImageComparisonUtil" />
 
 	<bean id="sampleThumbnailGenerator"
-		class="com.ephesoft.dcma.imagemagick.imageClassifier.SampleThumbnailGenerator" />
+		class="com.ephesoft.dcma.imagemagick.imageclassifier.SampleThumbnailGenerator" />
 
 	<bean id="thumbnailPNGCreator" class="com.ephesoft.dcma.imagemagick.ThumbnailPNGCreator"
 		p:thumbnailWidthForScannedImage="$imagemagick{imagemagick.thumbnail_width_for_scanned_images}"
@@ -54,10 +54,12 @@
 		p:generateDisplayPng="$imagemagick{imagemagick.generate_display_png}"
 		p:inputParameters="$imagemagick{imagemagick.display_image_input_parameters}"
 		p:outputParameters="$imagemagick{imagemagick.display_image_output_parameters}"
-		p:validateDocumentPage="$imagemagick{imagemagick.validate_document_page}">
+		p:validateDocumentPage="$imagemagick{imagemagick.validate_document_page}"
+		p:maxFilesProcessedPerIMCmd="$imagemagick{imagemagick.max_files_processed_per_im_cmd}">
 	</bean>
 
-	<bean id="ghostScriptPDFCreator" class="com.ephesoft.dcma.imagemagick.impl.GhostScriptPDFCreator"
+	<bean id="ghostScriptPDFCreator"
+		class="com.ephesoft.dcma.imagemagick.impl.GhostScriptPDFCreator"
 		p:ghostScriptCommand="$imagemagick{imagemagick.ghostscript_command}"
 		p:maxFilesProcessedPerGSCmd="$imagemagick{imagemagick.max_files_processed_per_gs_cmd}"
 		p:unixGhostScriptCommand="$imagemagick{imagemagick.unix_ghostscript_command}"></bean>
@@ -67,7 +69,8 @@
 		p:unixPdfCmds="$imagemagick{imagemagick.unix_multi_pdf_commands}"
 		p:jarName="$imagemagick{imagemagick.hocrToPdf_jarName}"></bean>
 
-	<bean id="imageMagicKPDFCreator" class="com.ephesoft.dcma.imagemagick.impl.ImageMagicKPDFCreator"
+	<bean id="imageMagicKPDFCreator"
+		class="com.ephesoft.dcma.imagemagick.impl.ImageMagicKPDFCreator"
 		p:pdfQuality="$imagemagick{imagemagick.pdf_quality}" p:coloredImage="$imagemagick{imagemagick.colored}"
 		p:pdfCompression="$imagemagick{imagemagick.pdf_compression}"></bean>
 

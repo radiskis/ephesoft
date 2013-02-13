@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -195,25 +195,66 @@ public enum CSVFileCreationConstant {
 	 */
 	BATCH_CLASS_NAME("BatchClassName"),
 	
+	/**
+	 * Value for file process name.
+	 */
 	FILE_PROCESS_NAME("File_Process_Name"),
 	
+	/**
+	 * Value for Subpoena.
+	 */
 	SUBPOENA("Subpoena"),
 	
+	/**
+	 * value for LoanPerf.
+	 */
 	LOAN_NUMBER("LoanPerf");
 
 	/**
 	 * Used for returning as a string data.
 	 */
 	private String identifier;
+	
+	/**
+	 * Variable for comma character.
+	 */
+	public static final char COMMA_STRING = ',';
+
+	/**
+	 * Variable for quotes character.
+	 */
+	public static final String QUOTES = "\"";
+	
+	/**
+	 * Constant for ON.
+	 */
+	public static final String ON_STRING = "ON";
+
+	/**
+	 * Constant for pdf extension.
+	 */
+	public static final String PDF_EXT = ".pdf";
+	
+	/**
+	 * The end index value for loop.
+	 */
+	public static final int END_INDEX_VALUE = 3;
+
 
 	private CSVFileCreationConstant(final String statusId) {
 		this.identifier = statusId;
 	}
 
+	/**
+	 * @return List< {@link CSVFileCreationConstant}>
+	 */
 	public static List<CSVFileCreationConstant> valuesAsList() {
 		return Arrays.asList(values());
 	}
 
+	/**
+	 * @return {@link String}
+	 */
 	public String getId() {
 		return this.identifier;
 	}

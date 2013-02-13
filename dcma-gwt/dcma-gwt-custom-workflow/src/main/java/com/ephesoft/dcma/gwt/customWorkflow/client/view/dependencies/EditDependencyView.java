@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,15 +33,16 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.EditDependencyPresenter;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.EditDependencyPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -60,100 +61,100 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class EditDependencyView extends View<EditDependencyPresenter> {
 
-	private static final String OPTION = "option";
-
-	private static final String MAIN_PANEL_LAYOUT = "mainPanelLayout";
-
-	private static final String CUSTOM_WORKFLOW_PANEL = "custom-workflow-panel";
-
-	private static final String _86PX = "86px";
-	
-	private static final String _95PX = "95px";
-
-	private static final String _280PX = "280px";
-
-	private static final String _25PX = "25px";
-
-	private static final String _50PX = "50px";
+	@UiField
+	protected DockLayoutPanel editDependencyDockLayoutPanel;
 
 	@UiField
-	DockLayoutPanel editDependencyDockLayoutPanel;
+	protected VerticalPanel editDependencyPanel;
 
 	@UiField
-	VerticalPanel editDependencyPanel;
+	protected VerticalPanel buttonsPanel;
 
 	@UiField
-	VerticalPanel buttonsPanel;
+	protected Label pluginLabel;
 
 	@UiField
-	Label pluginLabel;
+	protected Label dependencyTypeLabel;
 
 	@UiField
-	Label dependencyTypeLabel;
+	protected Label dependenciesLabel;
 
 	@UiField
-	Label dependenciesLabel;
+	protected Label pluginNamesList;
 
 	@UiField
-	Label pluginNamesList;
+	protected ListBox dependencyTypeList;
 
 	@UiField
-	ListBox dependencyTypeList;
+	protected HorizontalPanel dependenciesListHorizontalPanel;
+
+	protected ListBox dependenciesList;
 
 	@UiField
-	HorizontalPanel dependenciesListHorizontalPanel;
-
-	ListBox dependenciesList;
+	protected Button okButton;
 
 	@UiField
-	Button okButton;
+	protected Button cancelButton;
 
 	@UiField
-	Button cancelButton;
+	protected Button andButton;
 
 	@UiField
-	Button andButton;
+	protected Button orButton;
 
 	@UiField
-	Button orButton;
-
-	@UiField
-	TextArea dependenciesTextArea;
+	protected TextArea dependenciesTextArea;
 
 	interface Binder extends UiBinder<DockLayoutPanel, EditDependencyView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public EditDependencyView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		dependenciesList = new ListBox();
-		okButton.setText(CustomWorkflowConstants.OK_CONSTANT);
-		cancelButton.setText(CustomWorkflowConstants.RESET_BUTTON);
-		andButton.setText(CustomWorkflowConstants.AND_CONSTANT);
-		orButton.setText(CustomWorkflowConstants.OR_CONSTANT);
-		pluginLabel.setText(CustomWorkflowConstants.PLUGIN_LABEL_CONSTANT);
-		dependencyTypeLabel.setText(CustomWorkflowConstants.DEPENDENCY_TYPE_LABEL_CONSTANT);
-		dependenciesLabel.setText(CustomWorkflowConstants.DEPENDENCIES_CONSTANT);
+		addUiComponentText();
 
+		addCssStyle();
+		okButton.setEnabled(true);
+	}
+
+	/**
+	 * 
+	 */
+	private void addUiComponentText() {
+		okButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.OK_CONSTANT));
+		cancelButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.RESET_BUTTON));
+		andButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.AND_CONSTANT));
+		orButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.OR_CONSTANT));
+		pluginLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.PLUGIN_LABEL_CONSTANT));
+		dependencyTypeLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.DEPENDENCY_TYPE_LABEL_CONSTANT));
+		dependenciesLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.DEPENDENCIES_CONSTANT));
+	}
+
+	/**
+	 * 
+	 */
+	private void addCssStyle() {
 		editDependencyPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		editDependencyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
-		andButton.setSize(_50PX, _25PX);
-		orButton.setSize(_50PX, _25PX);
-		buttonsPanel.setSpacing(15);
-		dependenciesList.setVisibleItemCount(6);
+		andButton.setSize(CustomWorkflowConstants._50PX, CustomWorkflowConstants._25PX);
+		orButton.setSize(CustomWorkflowConstants._50PX, CustomWorkflowConstants._25PX);
+		buttonsPanel.setSpacing(CustomWorkflowConstants.SPACING_15);
+		dependenciesList.setVisibleItemCount(CustomWorkflowConstants.VISIBLE_ITEM_10);
 		dependenciesListHorizontalPanel.add(dependenciesList);
-		dependenciesList.setSize(_280PX, _95PX);
-		dependenciesTextArea.setSize(_280PX, _86PX);
-		// dependenciesTextArea.setVisibleLines(3);
+		dependenciesTextArea.setSize(CustomWorkflowConstants._280PX, CustomWorkflowConstants._147PX);
 		dependenciesTextArea.setTextAlignment(TextArea.ALIGN_JUSTIFY);
-		//dependenciesTextArea.setEnabled(false);
-		editDependencyDockLayoutPanel.addStyleName(CUSTOM_WORKFLOW_PANEL);
-		editDependencyDockLayoutPanel.addStyleName(MAIN_PANEL_LAYOUT);
+		editDependencyDockLayoutPanel.addStyleName(CustomWorkflowConstants.CUSTOM_WORKFLOW_PANEL);
+		editDependencyDockLayoutPanel.addStyleName(CustomWorkflowConstants.MAIN_PANEL_LAYOUT);
 
-		okButton.setEnabled(true);
+		pluginLabel.addStyleName(CustomWorkflowConstants.STRONG_LABEL);
+		dependencyTypeLabel.addStyleName(CustomWorkflowConstants.STRONG_LABEL);
+		dependenciesLabel.addStyleName(CustomWorkflowConstants.STRONG_LABEL);
+		pluginNamesList.addStyleName(CustomWorkflowConstants.STRONG_LABEL);
 	}
 
 	@UiHandler("okButton")
@@ -181,11 +182,6 @@ public class EditDependencyView extends View<EditDependencyPresenter> {
 		presenter.onDependencyTypeChange();
 	}
 
-	@UiHandler("dependenciesTextArea")
-	public void onDependenciesChange(ChangeEvent changeEvent) {
-		presenter.onDependenciesChange();
-	}
-
 	/**
 	 * @return the okButton
 	 */
@@ -210,7 +206,8 @@ public class EditDependencyView extends View<EditDependencyPresenter> {
 			int index = 0;
 			for (Entry<Integer, String> pluginEntry : values.entrySet()) {
 				listBox.addItem(pluginEntry.getValue(), pluginEntry.getKey().toString());
-				listBox.getElement().getElementsByTagName(OPTION).getItem(index++).setTitle(pluginEntry.getValue());
+				listBox.getElement().getElementsByTagName(CustomWorkflowConstants.OPTION).getItem(index++).setTitle(
+						pluginEntry.getValue());
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.mail.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -46,12 +48,30 @@ import com.ephesoft.dcma.mail.SendMailException;
 
 import freemarker.template.Configuration;
 
+/**
+ * Mail service implementation class.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class MailServiceImpl implements MailService {
 
-//	private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
+	/**
+	 * Logger instance for proper logging.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
 
+	/**
+	 * An instance of {@link JavaMailSender}.
+	 */
 	private JavaMailSender mailSender;
+	/**
+	 * An instance of {@link Configuration}.
+	 */
 	private Configuration freemarkerMailConfiguration;
+	/**
+	 * boolean value for Suppress mail.
+	 */
 	private Boolean suppressMail;
 
 	public void setMailSender(final JavaMailSender mailSender) {
@@ -72,8 +92,8 @@ public class MailServiceImpl implements MailService {
 			return;
 		}
 		final SimpleMailMessage mailMessage = new SimpleMailMessage();
-		mailMessage.setFrom(new StringBuilder().append(mailMetaData.getFromName()).append(" <")
-				.append(mailMetaData.getFromAddress()).append(">").toString());
+		mailMessage.setFrom(new StringBuilder().append(mailMetaData.getFromName()).append(" <").append(mailMetaData.getFromAddress())
+				.append(">").toString());
 		mailMessage.setSubject(mailMetaData.getSubject());
 		mailMessage.setReplyTo(mailMetaData.getReplyTo());
 		if (mailMetaData.getCcAddresses() != null && mailMetaData.getCcAddresses().size() > 0) {
@@ -89,22 +109,25 @@ public class MailServiceImpl implements MailService {
 		try {
 			mailSender.send(mailMessage);
 		} catch (MailException e) {
-			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString())
-					.toString(), e);
+			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString()).toString(),
+					e);
 		}
 	}
 
 	@Override
-	public void sendTextMailWithClasspathTemplate(final MailMetaData mailMetaData, final String templateLocation, final MailContentModel model) {
+	public void sendTextMailWithClasspathTemplate(final MailMetaData mailMetaData, final String templateLocation,
+			final MailContentModel model) {
+		LOGGER.info("Entering method sendTextMailWithClasspathTemplate..");
 		model.add("mailMeta", mailMetaData);
 		try {
 			final String result = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerMailConfiguration
 					.getTemplate(templateLocation), model.getModel());
 			sendTextMail(mailMetaData, result);
 		} catch (Exception e) {
-			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString())
-					.toString(), e);
+			throw new SendMailException(new StringBuilder().append("Error sending mail: ").append(mailMetaData.toString()).toString(),
+					e);
 		}
+		LOGGER.info("Exiting method sendTextMailWithClasspathTemplate..");
 	}
 
 }

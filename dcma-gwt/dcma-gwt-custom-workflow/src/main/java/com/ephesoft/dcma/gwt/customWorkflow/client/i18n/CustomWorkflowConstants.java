@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,26 +33,74 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.i18n;
+package com.ephesoft.dcma.gwt.customworkflow.client.i18n;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 
 public interface CustomWorkflowConstants extends LocaleCommonConstants {
 
-	String ADD_CONSTANT = "Add";
+	// Locale Constants
+	String ADD_CONSTANT = "add_constant";
 
-	String UP_CONSTANT = "Up";
+	String BACK_CONSTANT = "back_constant";
 
-	String DOWN_CONSTANT = "Down";
+	String PLUGIN_NAMES_STRING = "plugin_names_string";
 
-	String CREATE = "Create";
+	String ADD_PLUGIN_STRING = "add_plugin_string";
 
-	String NEXT_CONSTANT = "Next";
+	String SAVE_BUTTON = "save_button";
 
-	String PREVIOUS_CONSTANT = "Previous";
+	String CANCEL_BUTTON = "cancel_button";
 
-	String BACK_CONSTANT = "Back";
+	String RESET_BUTTON = "reset_button";
 
+	String IMPORT_FILE = "import_file";
+
+	String DEPENDENCIES_CONSTANT = "dependencies_constant";
+
+	String EDIT_CONSTANT = "edit_constant";
+
+	String DELETE_CONSTANT = "delete_constant";
+
+	String OK_CONSTANT = "ok_constant";
+
+	String AND_CONSTANT = "and_constant";
+
+	String OR_CONSTANT = "or_constant";
+
+	String PLUGIN_LABEL_CONSTANT = "plugin_label_constant";
+
+	String DEPENDENCY_TYPE_LABEL_CONSTANT = "dependency_type_label_constant";
+
+	String DEPENDENCIES_LABEL_CONSTANT = "dependencies_label_constant";
+
+	String HELP_BUTTON = "help_button";
+
+	String PLUGIN_NAME_LABEL = "plugin_name_label";
+
+	String APPLY_BUTTON = "apply_button";
+
+	String NO_CONSTANT = "no";
+
+	String YES = "yes";
+
+	String DESCRIPTION = "description";
+
+	String DEPENDENCY_TYPE = "dependency_type";
+
+	String DEPENDENCIES = "dependencies";
+
+	String PLUGINS_LIST = "plugins_list";
+
+	String ADD_NEW_PLUGIN = "add_new_plugin";
+	
+	String DELETE_PLUGIN = "delete_plugin";
+	
+	String PLUGIN_DELETED_SUCCESSFULLY = "plugin_deleted_successfully";
+
+	String DELETING_PLUGIN_MESSAGE = "deleting_plugin_wait";
+
+	// Internal constants
 	int SPACING_CONSTANT_10 = 10;
 
 	int SPACING_CONSTANT_30 = 30;
@@ -63,65 +111,13 @@ public interface CustomWorkflowConstants extends LocaleCommonConstants {
 
 	int INDEX_VALUE_0 = 0;
 
-	String NEXT_URL = "Next";
-
-	String PREVIOUS_URL = "Previous";
+	int VISIBLE_COUNT_4 = 4;
 
 	String FILE_SEPARATOR = "/";
 
-	int VISIBLE_COUNT_4 = 4;
-
-	String MODULE_WIDGET = "module";
-
-	String PLUGIN_WIDGET = "plugin";
-
-	String MODULE_NAMES_STRING = "Module Names";
-
-	String PLUGIN_NAMES_STRING = "Plugins List";
-
-	String ADD_PLUGIN_STRING = "Add New Plug-in";
-
-	String SAVE_BUTTON = "Save";
-
-	String CANCEL_BUTTON = "Cancel";
-
-	String RESET_BUTTON = "Reset";
-
-	String ATTACH_BUTTON = "Attach";
-
-	String IMPORT_FILE = "Import file";
-
 	String STAR = "*";
 
-	String IMPORT_FILE_INVALID_TYPE = "Invalid file extension. Please Select a ZIP file containing a JAR and an XML file";
-
 	String ERROR_CODE_TEXT = "error";
-
-	String IMPORT_UNSUCCESSFUL = "Error occurred while importing. Please try again";
-
-	String NO_ZIP_ATTACHED = "Please attach a zip file first.";
-
-	String DEPENDENCIES_CONSTANT = "Dependencies";
-
-	String EDIT_CONSTANT = "Edit";
-
-	String DELETE_CONSTANT = "Delete";
-
-	String OK_CONSTANT = "Ok";
-
-	String CANCEL_CONSTANT = "Cancel";
-
-	String AND_CONSTANT = "And";
-
-	String OR_CONSTANT = "Or";
-
-	String PLUGIN_LABEL_CONSTANT = "Plugin";
-
-	String DEPENDENCY_TYPE_LABEL_CONSTANT = "Dependency Type";
-
-	String DEPENDENCIES_LABEL_CONSTANT = "Dependencies";
-
-	String VALIDATE_CONSTANT = "Validate";
 
 	String DOUBLE_ARROW = " >> ";
 
@@ -133,15 +129,96 @@ public interface CustomWorkflowConstants extends LocaleCommonConstants {
 
 	String PLUGIN_NAME = "pluginName:";
 
-	String HELP_BUTTON = "Help";
-
 	String FONT_RED_STYLE = "font_red";
 
 	String CAUSE = "cause:";
 
-	String APPLY_BUTTON = "Apply";
+	String AND_SEPERATOR = ",";
 
-	String AND = ",";
+	String OR_SEPERATOR = "/";
 
-	String OR = "/";
+	String EMPTY_STRING = "";
+
+	String NEXT_LINE = "\n";
+
+	String NEW = "New";
+
+	String _100 = "100%";
+
+	String HELP_CONTENT = "helpContent";
+
+	String TEXT_PANEL = "textPanel";
+
+	String SUBPOINT_SPACING = "<td><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
+	String ROW_END = "</p></td></tr><tr>";
+
+	String ROW_SPACING = "<td><p><b>&nbsp;&nbsp;";
+
+	String XML_FILE = ".Xml";
+
+	String ZIP_FILE = ".Zip";
+
+	String JAR_FILE = ".Jar";
+
+	int TABLE_ROW_COUNT = 15;
+
+	char EXT_SEPARATOR = '.';
+
+	char SERVLET_RESULT_SEPERATOR = '|';
+
+	String LAST_ATTACHED_ZIP_SOURCE_PATH = "lastAttachedZipSourcePath=";
+
+	String ZIP = "zip";
+
+	String ATTACH_FORM_ACTION = "dcma-gwt-custom-workflow/importPluginUploadServlet?";
+
+	int SPACING_5 = 5;
+
+	String STRONG_LABEL = "strong_label";
+
+	String BUTTONS_PANEL_LAYOUT = "buttonsPanelLayout";
+
+	String MAIN_PANEL_LAYOUT = "mainPanelLayout";
+
+	String TWENTY_PIXEL = "20px";
+
+	int VISIBLE_ITEM_10 = 10;
+
+	int SPACING_15 = 15;
+
+	String OPTION = "option";
+
+	String CUSTOM_WORKFLOW_PANEL = "custom-workflow-panel";
+
+	String _147PX = "147px";
+
+	String _280PX = "280px";
+
+	String _25PX = "25px";
+
+	String _50PX = "50px";
+
+	String HTML_LI_END = "</li>";
+
+	String HTML_LI = " <li>";
+
+	String SPACE = " ";
+
+	String CURSOR_POINTER = "cursorHand";
+
+	/**
+	 * The CARRIAGE_RETURN {@link String} is a constant for carriage return appended by IE browser on next line.
+	 */
+	String CARRIAGE_RETURN = "\r";
+
+	String BREAK_TAG_START = "<b>";
+	
+	String BREAK_TAG_END = "</b>";
+	
+	String AND_REPLACE_REGEX = "[,]{1}\\b|\\b[,]{1}";
+	
+	String OR_REPLACE_REGEX = "[/]{1}\\b|\\b[/]{1}";
+	
+	String BOUNDARY = "\\b";
 }

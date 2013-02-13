@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,14 +38,24 @@ package com.ephesoft.dcma.da.dao;
 import org.junit.Test;
 
 import com.ephesoft.dcma.da.AbstractDataAccessTests;
+
+/**
+ * This class contains JUnit for testing the Tesseract Service. It contains positive test case to check the creation of .html(HOCR)
+ * file generation and XML updation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.tesseract.AbstractTesseractTests
+ * 
+ */
 public class BatchClassDaoTest extends AbstractDataAccessTests {
 
-//	@Autowired
-//	private BatchClassDao batchClassDao;
-	
+	// @Autowired
+	// private BatchClassDao batchClassDao;
+
 	@Test
 	protected void findBatchClassTest() {
-		//BatchClass batchClass = batchClassDao.getBatchClassbyUncFolder("unc");
-		//assertNotNull(batchClass);
+		// BatchClass batchClass = batchClassDao.getBatchClassbyUncFolder("unc");
+		// assertNotNull(batchClass);
 	}
 }

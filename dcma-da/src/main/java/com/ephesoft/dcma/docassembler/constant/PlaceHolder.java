@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -77,8 +77,7 @@ public enum PlaceHolder {
 	/**
 	 * Single argument.
 	 * 
-	 * @param value
-	 *            int
+	 * @param value int
 	 */
 	PlaceHolder(final int value) {
 		this.value = value;
@@ -90,6 +89,7 @@ public enum PlaceHolder {
 	private int value;
 
 	/**
+	 * To get value.
 	 * @return the value
 	 */
 	public int getValue() {
@@ -97,11 +97,9 @@ public enum PlaceHolder {
 	}
 
 	/**
-	 * This method will return the PlaceHolder on the basis of input integer
-	 * value.
+	 * This method will return the PlaceHolder on the basis of input integer value.
 	 * 
-	 * @param placeHolder
-	 *            int
+	 * @param placeHolder int
 	 * @return PlaceHolder
 	 */
 	public static PlaceHolder getPlaceHolder(final int placeHolder) {

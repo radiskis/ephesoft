@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,18 +35,23 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
+import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassSuperConfig;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassUserOptionDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
+import com.ephesoft.dcma.gwt.core.shared.ModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
@@ -100,7 +105,7 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 
 	void matchBaseFolder(String uncFolder, AsyncCallback<String> callback);
 
-	void copyDocument(DocumentTypeDTO documentTypeDTO, AsyncCallback<Void> asyncCallback);
+	void copyDocument(DocumentTypeDTO documentTypeDTO, AsyncCallback<DocumentTypeDTO> asyncCallback);
 
 	void getAdvancedKVImageUploadPath(String batchClassId, String docName, String imageName, AsyncCallback<String> asyncCallback);
 
@@ -121,16 +126,12 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 	void getBatchClassRowCount(AsyncCallback<String> callback);
 
 	void isUserSuperAdmin(AsyncCallback<Boolean> callback);
-	
-	void getAllRolesOfUser(AsyncCallback<HashSet<String>> callback);
+
+	void getAllRolesOfUser(AsyncCallback<Set<String>> callback);
 
 	void getAllPluginDetailDTOs(AsyncCallback<List<PluginDetailsDTO>> callback);
 
 	void createAndDeployWorkflowJPDL(String workflowName, BatchClassDTO batchClassDTO, AsyncCallback<BatchClassDTO> callback);
-
-	void getAllBatchClassModulesWorkflowName(AsyncCallback<List<String>> callback);
-
-	void setBatchClassDTOModulesList(BatchClassDTO batchClassDTO, List<String> moduleNames, AsyncCallback<BatchClassDTO> callback);
 
 	void isWorkflowContentEqual(ImportBatchClassUserOptionDTO userOptions, String workflowName,
 			AsyncCallback<java.util.Map<String, Boolean>> asyncCallback);
@@ -141,4 +142,33 @@ public interface BatchClassManagementServiceAsync extends DCMARemoteServiceAsync
 	void getUpdatedTestFileName(String batchClassIdentifier, String docName, String fileName, AsyncCallback<String> asyncCallback);
 
 	void getSamplePatterns(AsyncCallback<SamplePatternDTO> callback);
+
+	void getSpanList(String batchClassId, String docName, String hocrFileName, AsyncCallback<List<Span>> callback);
+
+	void getAdvancedTEImageUploadPath(String batchClassId, String documentName, String imageName, AsyncCallback<String> asyncCallback);
+
+	void getAllModules(AsyncCallback<List<ModuleDTO>> callback);
+
+	void createNewModule(ModuleDTO moduleDTO, AsyncCallback<ModuleDTO> callback);
+
+	void getAllPluginsNames(AsyncCallback<List<String>> callback);
+
+	void validateEmailConfig(EmailConfigurationDTO emailConfigDTO, AsyncCallback<Boolean> asyncCallback);
+
+	void getAllUnFinishedBatchInstancesCount(String batchClassIdentifier, AsyncCallback<Integer> callback);
+	
+	void checkCmisConnection(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues, AsyncCallback<Map<String, String>> callback);
+	
+	void getCmisConfiguration(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues, AsyncCallback<Map<String, String>> callback);
+	
+	void getAuthenticationURL(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues, AsyncCallback<String> callback);
+	
+	void getBoxProperties(AsyncCallback<Map<String, String>> asyncCallback);
+
+	void getNewTicket(String APIKey, AsyncCallback<String> asyncCallback);
+
+	void authenticateBox(AsyncCallback<Boolean> asyncCallback);
+
+	void getAuthenticationToken(String APIKey, String ticket, AsyncCallback<String> asyncCallback);
+
 }

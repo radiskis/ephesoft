@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,11 +36,13 @@
 package com.ephesoft.dcma.da.dao.hibernate;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -48,51 +50,86 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
 import com.ephesoft.dcma.da.domain.BatchClassGroups;
 
+/**
+ * This class is responsible to fetch data of batch instance group table from data base.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassGroupsDao
+ */
 @Repository
 public class BatchClassGroupsDaoImpl extends HibernateDao<BatchClassGroups> implements BatchClassGroupsDao {
 
+	/**
+	 * GROUP_NAME String.
+	 */
 	private static final String GROUP_NAME = "groupName";
+	
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+	
+	/**
+	 * BATCH_CLASS_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
 
+	/**
+	 * API for getting the batch class identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles) {
+		//Set<String> batchClassIdentifiers = getBatchClassIdentifierForUserRoles(userRoles, true);
+		return getBatchClassIdentifierForUserRoles(userRoles, true);
+	}
+	
+	/**
+	 * API for getting the batch class identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @param includeDeleted boolean
+	 * @return Set<String>
+	 */
+	@Override
+	public Set<String> getBatchClassIdentifierForUserRoles(Set<String> userRoles, boolean includeDeleted) {
 		boolean isValid = true;
 		if (userRoles == null || userRoles.size() == 0) {
 			isValid = false;
 		}
 		Set<String> batchClassIdentifiers = null;
 
-//		Old version of fetching.
-//				
-//		for (String string : userGroups) {
-//			DetachedCriteria criteria = criteria();
-//			criteria.add(Restrictions.eq("groupName", string));
-//			List<BatchClassGroups> batchClassGroups = find(criteria);
-//			for (BatchClassGroups batchClassGroups2 : batchClassGroups) {
-//				batchIdentifier.add(batchClassGroups2.getBatchClass()
-//						.getIdentifier());
-//			}
-//		}
-
 		// New version of fetching.
 		if (isValid) {
-			batchClassIdentifiers = new HashSet<String>();
+			batchClassIdentifiers = new LinkedHashSet<String>();
 			DetachedCriteria criteria = criteria();
 			Disjunction disjunction = Restrictions.disjunction();
 			for (String userRole : userRoles) {
 				disjunction.add(Restrictions.eq(GROUP_NAME, userRole));
 			}
 			criteria.add(disjunction);
+			criteria.addOrder(Order.asc(BATCH_CLASS));
 			List<BatchClassGroups> batchClassGroups = find(criteria);
 			for (BatchClassGroups batchClassGroup : batchClassGroups) {
-				batchClassIdentifiers.add(batchClassGroup.getBatchClass().getIdentifier());
+				if(includeDeleted) {
+					batchClassIdentifiers.add(batchClassGroup.getBatchClass().getIdentifier());	
+				} else {
+					if(!batchClassGroup.getBatchClass().isDeleted()) {
+						batchClassIdentifiers.add(batchClassGroup.getBatchClass().getIdentifier());
+					}
+				}
 			}
 		}
 		return batchClassIdentifiers;
 	}
 	
-		
+	/**
+	 * API for getting the user roles for a batch class.
+	 * @param userRoles Set<String>
+	 * @param batchClassIdentifier
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getRolesForBatchClass(String batchClassIdentifier) {
 		Set<String> userGroups = new HashSet<String>();

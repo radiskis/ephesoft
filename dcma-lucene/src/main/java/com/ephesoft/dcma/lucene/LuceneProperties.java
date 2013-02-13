@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -93,19 +93,19 @@ public enum LuceneProperties implements PluginProperty {
 	LUCENE_SWITCH("lucene.switch"),
 
 	/**
-	 * Maximum number of results
+	 * Maximum number of results.
 	 */
 	LUCENE_MAX_RESULT_COUNT("lucene.max_result_count"),
 	/**
-	 * first page confidence score weightage factor
+	 * first page confidence score weightage factor.
 	 */
 	LUCENE_FIRST_PAGE_CONF_WEIGHTAGE("lucene.first_page_conf_weightage"),
 	/**
-	 * middle page confidence score weightage factor
+	 * middle page confidence score weightage factor.
 	 */
 	LUCENE_MIDDLE_PAGE_CONF_WEIGHTAGE("lucene.middle_page_conf_weightage"),
 	/**
-	 * last page confidence score weightage factor
+	 * last page confidence score weightage factor.
 	 */
 	LUCENE_LAST_PAGE_CONF_WEIGHTAGE("lucene.last_page_conf_weightage");
 

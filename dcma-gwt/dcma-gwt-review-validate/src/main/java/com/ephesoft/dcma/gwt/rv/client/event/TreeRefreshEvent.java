@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,13 +42,14 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class TreeRefreshEvent extends GwtEvent<TreeRefreshEventHandler> {
 
-	public static Type<TreeRefreshEventHandler> TYPE = new Type<TreeRefreshEventHandler>();
+	public static Type<TreeRefreshEventHandler> type = new Type<TreeRefreshEventHandler>();
 
-	private BatchDTO batchDTO;
-	private Document document;
-	private Page page;
+	private final BatchDTO batchDTO;
+	private final Document document;
+	private final Page page;
 
 	public TreeRefreshEvent(BatchDTO batchDTO, Document document, Page page) {
+		super();
 		this.batchDTO = batchDTO;
 		this.document = document;
 		this.page = page;
@@ -61,7 +62,7 @@ public class TreeRefreshEvent extends GwtEvent<TreeRefreshEventHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<TreeRefreshEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public BatchDTO getBatchDTO() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.tablefinder.data;
 
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
+import com.ephesoft.dcma.tablefinder.constants.TableExtractionConstants;
 
 /**
  * This class is used to carry the span, confidence and value objects for extraction.
@@ -64,9 +65,9 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	/**
 	 * Constructor.
 	 * 
-	 * @param span Span
-	 * @param confidence float
-	 * @param value String
+	 * @param span {@link Span}
+	 * @param confidence {@link float}
+	 * @param value {@link String}
 	 */
 	public DataCarrier(final Span span, final float confidence, final String value) {
 		super();
@@ -79,62 +80,68 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	 * Compare a given DataCarrier with this object. If confidence of this object is greater than the received object, then this object
 	 * is greater than the other. As we have to finder larger confidence score value we will return -1 for this case.
 	 * 
-	 * @param dataCarrier DataCarrier
+	 * @param dataCarrier {@link DataCarrier}
 	 * @return int
 	 */
 	public int compareTo(final DataCarrier dataCarrier) {
 
-		int returnValue = 0;
+		int returnValue = TableExtractionConstants.ZERO;
 
 		final float diffConfidence = this.getConfidence() - dataCarrier.getConfidence();
 
-		if (diffConfidence > 0) {
-			returnValue = -1;
+		if (diffConfidence > TableExtractionConstants.ZERO) {
+			returnValue = -TableExtractionConstants.ONE;
 		}
-		if (diffConfidence < 0) {
-			returnValue = 1;
+		if (diffConfidence < TableExtractionConstants.ZERO) {
+			returnValue = TableExtractionConstants.ONE;
 		}
 
 		return returnValue;
 	}
 
 	/**
-	 * @return the span
+	 * To get span.
+	 * @return Span
 	 */
 	public final Span getSpan() {
 		return span;
 	}
 
 	/**
-	 * @return the confidence
+	 * To get confidence.
+	 * @return float the confidence
 	 */
 	public final float getConfidence() {
 		return confidence;
 	}
 
 	/**
-	 * @return the value
+	 * To get value.
+	 * @return String the value
 	 */
 	public final String getValue() {
 		return value;
 	}
 
 	/**
-	 * @param span the span to set
+	 * To set span.
+	 * @param span {@link Span} 
 	 */
 	public final void setSpan(final Span span) {
 		this.span = span;
 	}
 
 	/**
-	 * @param confidence the confidence to set
+	 * To set confidence.
+	 * @param confidence float 
 	 */
 	public final void setConfidence(final float confidence) {
 		this.confidence = confidence;
 	}
 
 	/**
-	 * @param value the value to set
+	 * To set value.
+	 * @param value {@link String} 
 	 */
 	public final void setValue(final String value) {
 		this.value = value;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,31 +43,31 @@ public class ReverseIterable<T> implements Iterable<T> {
 
 	private static class ReverseIterator<T> implements Iterator<T> {
 
-		private ListIterator<T> it;
+		private final ListIterator<T> iterator;
 
 		public ReverseIterator(ListIterator<T> listIterator) {
-			it = listIterator;
+			iterator = listIterator;
 		}
 
 		public boolean hasNext() {
-			return it.hasPrevious();
+			return iterator.hasPrevious();
 		}
 
 		public T next() {
-			return it.previous();
+			return iterator.previous();
 		}
 
 		public void remove() {
-			it.remove();
+			iterator.remove();
 		}
 	}
 
 	// private final List<T> l;
-	private ReverseIterator<T> iter;
+	private final ReverseIterator<T> iter;
 
-	public ReverseIterable(List<T> l) {
+	public ReverseIterable(List<T> list) {
 		// this.l = l;
-		this.iter = new ReverseIterator<T>(l.listIterator(l.size()));
+		this.iter = new ReverseIterator<T>(list.listIterator(list.size()));
 	}
 
 	public Iterator<T> iterator() {

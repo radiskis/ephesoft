@@ -1,0 +1,14 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:VerticalPanel width="100%" ui:field="mainPanel">
+		<g:HorizontalPanel ui:field="labelPanel">
+			<g:Label ui:field="uploadHere" />
+		</g:HorizontalPanel>
+		<g:HorizontalPanel ui:field="buttonPanel">
+			<g:Label ui:field="uploadFilePlaceholder" />
+			<g:Button ui:field="upload" />
+			<g:Button ui:field="viewAttachedFiles" />
+		</g:HorizontalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>

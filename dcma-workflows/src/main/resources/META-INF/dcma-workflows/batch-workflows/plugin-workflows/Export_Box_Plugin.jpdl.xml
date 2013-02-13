@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Export_Box_Plugin">
+
+	<start>
+		<transition to="box-export-files" />
+	</start>
+
+	<java continue="async" expr="#{boxExportService}" method="boxExport" name="box-export-files">
+
+		<arg>
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		
+		<arg>
+			<object expr="Export_Box_Plugin" />
+		</arg>
+		<transition to="end" />
+	</java>
+	<end name="end" />
+</process>

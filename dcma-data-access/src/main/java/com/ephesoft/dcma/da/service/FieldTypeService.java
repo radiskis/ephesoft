@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,7 +50,7 @@ import com.ephesoft.dcma.da.domain.FieldType;
 public interface FieldTypeService {
 
 	/**
-	 * An api to fetch all Field types by document type name
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName {@link String}
 	 * @param batchInstanceIdentifier {@link String}
@@ -59,54 +59,54 @@ public interface FieldTypeService {
 	List<FieldType> getFdTypeByDocTypeNameForBatchInstance(String docTypeName, String batchInstanceIdentifier);
 	
 	/**
-	 * An api to fetch Field types by document type name
+	 * An API to fetch Field types by document type name.
 	 * 
 	 * @param fieldTypeName {@link String}
 	 * @param docTypeName  {@link String}
-	 * @param batchInstanceID   {@link String}
+	 * @param batchInstanceIdentifier   {@link String}
 	 * @return FieldType {@link FieldType}
 	 */
 	FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier);
 	
 	/**
-	 * An api to fetch all Field types by document type name for batch class.
+	 * An API to fetch all Field types by document type name for batch class.
 	 * 
 	 * @param docTypeName {@link String}
-	 * @param batchClassID {@link String}
+	 * @param batchClassIdentifier {@link String}
 	 * @return List<{@link FieldType}>
 	 */
 	List<FieldType> getFdTypeByDocTypeNameForBatchClass(String docTypeName, String batchClassIdentifier);
 
 	/**
-	 * An api to fetch all Field types by document type name
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName {@link String}
-	 * @param batchInstanceID {@link String}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @return List<{@link FieldType}>
 	 */
 	List<FieldType> getFdTypeByDocTypeName(String docTypeName, String batchInstanceIdentifier);
 
 	/**
-	 * An api to fetch all Field types and KV Extraction by document type name
+	 * An API to fetch all Field types and KV Extraction by document type name.
 	 * 
 	 * @param docTypeName {@link String}
-	 * @param batchInstanceID {@link String}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @param isKVExtraction boolean
 	 * @return List<{@link FieldType}>
 	 */
 	List<FieldType> getFdTypeAndKVExtractionByDocTypeName(String docTypeName, String batchInstanceIdentifier, boolean isKVExtraction);
 
 	/**
-	 * An api to fetch all Field types and Regex Validation type name
+	 * An API to fetch all Field types and Regex Validation type name.
 	 * 
 	 * @param docTypeName {@link String}
-	 * @param batchInstanceID {@link String}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @return List<{@link FieldType}>
 	 */
 	List<FieldType> getFdTypeAndRegexValidationByDocTypeName(String docTypeName, String batchInstanceIdentifier);
 	
 	/**
-	 * An api to fetch all Field types by document type.
+	 * An API to fetch all Field types by document type.
 	 * 
 	 * @param documentType {@link DocumentType}
 	 * @return List<{@link FieldType}>
@@ -114,21 +114,21 @@ public interface FieldTypeService {
 	List<FieldType> getFdTypeByDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to insert the fieldType object.
+	 * An API to insert the fieldType object.
 	 * 
 	 * @param fieldType {@link FieldType}
 	 */
 	void insertFieldType(FieldType fieldType);
 
 	/**
-	 * An api to update the fieldType object.
+	 * An API to update the fieldType object.
 	 * 
 	 * @param fieldType {@link FieldType}
 	 */
 	void updateFieldType(FieldType fieldType);
 
 	/**
-	 * An api to remove the fieldType object.
+	 * An API to remove the fieldType object.
 	 * 
 	 * @param fieldType {@link FieldType}
 	 */

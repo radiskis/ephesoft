@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,8 +46,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.ephesoft.dcma.batch.schema.Batch;
+import com.ephesoft.dcma.batch.schema.Column;
+import com.ephesoft.dcma.batch.schema.DataTable;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
+import com.ephesoft.dcma.batch.schema.Row;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
@@ -168,37 +171,25 @@ public class RegexAutomatedValidation {
 					List<DocField> docFieldList = documentLevelFields.getDocumentLevelField();
 					List<FieldType> fieldTypeList = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier, document.getType());
 					if (fieldTypeList != null) {
-
-						// if (docFieldList.isEmpty()) {
-						// for (FieldType fieldType : fieldTypeList) {
-						// if (null != fieldType) {
-						// DocField docField = new DocField();
-						// docField.setName(fieldType.getName());
-						// docField.setFieldOrderNumber(fieldType.getFieldOrderNumber());
-						// docField.setFieldValueOptionList(fieldType.getFieldOptionValueList());
-						// docField.setConfidence(0f);
-						// docField.setType(fieldType.getDataType().name());
-						// docField.setValue("");
-						// docFieldList.add(docField);
-						// }
-						// }
-						// }
-
 						for (DocField docField : docFieldList) {
 							for (FieldType fieldType : fieldTypeList) {
-								if (docField != null && fieldType != null) {
-									String docFieldName = docField.getName();
-									String fieldTypeName = fieldType.getName();
-									if (null != docFieldName && docFieldName.equals(fieldTypeName)) {
-										String fieldOptionValueList = fieldType.getFieldOptionValueList();
-										if (fieldOptionValueList != null) {
-											docField.setFieldValueOptionList(fieldOptionValueList);
-										}
-									}
-								}
+								validateFieldType(docField, fieldType);
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+
+	private void validateFieldType(DocField docField, FieldType fieldType) {
+		if (docField != null && fieldType != null) {
+			String docFieldName = docField.getName();
+			String fieldTypeName = fieldType.getName();
+			if (null != docFieldName && docFieldName.equals(fieldTypeName)) {
+				String fieldOptionValueList = fieldType.getFieldOptionValueList();
+				if (fieldOptionValueList != null) {
+					docField.setFieldValueOptionList(fieldOptionValueList);
 				}
 			}
 		}
@@ -216,6 +207,7 @@ public class RegexAutomatedValidation {
 	private void validateDLFields(final List<Document> xmlDocuments, final String batchInstanceIdentifier)
 			throws DCMAApplicationException {
 		String errMsg = null;
+		List<DocField> documentLevelField = null;
 		documentFor: for (Document document : xmlDocuments) {
 			final String docTypeName = document.getType();
 			LOGGER.info("docTypeName : " + docTypeName);
@@ -223,157 +215,128 @@ public class RegexAutomatedValidation {
 			DocumentLevelFields documentLevelFields = document.getDocumentLevelFields();
 			if (null == documentLevelFields) {
 				document.setValid(true);
-				continue;
-			}
+				// continue;
+			} else {
+				documentLevelField = documentLevelFields.getDocumentLevelField();
+				if (null == documentLevelField || documentLevelField.isEmpty()) {
+					LOGGER.info("Document level field is null or empty.");
+					document.setValid(true);
+					// continue;
+				} else {
+					final List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = fieldTypeService
+							.getFdTypeAndRegexValidationByDocTypeName(docTypeName, batchInstanceIdentifier);
 
-			List<DocField> documentLevelField = documentLevelFields.getDocumentLevelField();
+					if (null == allFdTypes || allFdTypes.isEmpty()) {
+						errMsg = "No FieldType data found from data base for document type : " + docTypeName;
+						LOGGER.info(errMsg);
+						document.setValid(true);
+						// continue;
+					} else {
+						LOGGER.info("FieldType data found from data base for document type : " + docTypeName);
+						for (DocField docField : documentLevelField) {
+							final String value = docField.getValue();
+							final String name = docField.getName();
 
-			if (null == documentLevelField || documentLevelField.isEmpty()) {
-				LOGGER.info("Document level field is null or empty.");
-				document.setValid(true);
-				continue;
-			}
-
-			final List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = fieldTypeService.getFdTypeAndRegexValidationByDocTypeName(
-					docTypeName, batchInstanceIdentifier);
-
-			if (null == allFdTypes || allFdTypes.isEmpty()) {
-				errMsg = "No FieldType data found from data base for document type : " + docTypeName;
-				LOGGER.info(errMsg);
-				document.setValid(true);
-				continue;
-			}
-
-			LOGGER.info("FieldType data found from data base for document type : " + docTypeName);
-
-			for (DocField docField : documentLevelField) {
-				final String value = docField.getValue();
-				// final String type = docField.getType();
-				final String name = docField.getName();
-
-				if (name == null) {
-					LOGGER.info("Name is null for document level field.");
-					continue;
-				}
-
-				boolean isCorrect = false;
-				// isCorrect = checkValueText(value, type);
-				// if (isCorrect) {
-				// document.setValid(true);
-				// } else {
-				// LOGGER.info("Setting document type as in valid. Document type : " + docTypeName);
-				// document.setValid(false);
-				// continue documentFor;
-				// }
-
-				for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
-
-					if (null == fdType) {
-						LOGGER.info("field is null for database field type.");
-						continue;
-					}
-
-					final String dbFdName = fdType.getName();
-
-					if (null == dbFdName) {
-						LOGGER.info("field name is null for database field type.");
-						continue;
-					}
-
-					if (dbFdName.equals(name)) {
-						final List<RegexValidation> regexValidationList = fdType.getRegexValidation();
-
-						if (null == regexValidationList || regexValidationList.isEmpty()) {
-							LOGGER.info("Regex validation list is empty.");
-							document.setValid(true);
-							break;
-						}
-
-						for (RegexValidation regexValidation : regexValidationList) {
-							if (null == regexValidation) {
-								LOGGER.info("Regex validation is null.");
-								document.setValid(true);
+							if (name == null) {
+								LOGGER.info("Name is null for document level field.");
 								continue;
 							}
-							String pattern = regexValidation.getPattern();
 
-							isCorrect = findPattern(value, pattern);
-							if (isCorrect) {
-								LOGGER.info("Setting document type as valid document. Document type : " + docTypeName);
-								document.setValid(true);
-							} else {
-								LOGGER.info("Setting document type as in valid document. Document type : " + docTypeName);
-								document.setValid(false);
-								continue documentFor;
+							boolean isCorrect = false;
+							for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
+
+								if (null == fdType) {
+									LOGGER.info("field is null for database field type.");
+									continue;
+								}
+
+								final String dbFdName = fdType.getName();
+
+								if (null == dbFdName) {
+									LOGGER.info("field name is null for database field type.");
+									continue;
+								}
+
+								if (dbFdName.equals(name)) {
+									final List<RegexValidation> regexValidationList = fdType.getRegexValidation();
+
+									if (null == regexValidationList || regexValidationList.isEmpty()) {
+										LOGGER.info("Regex validation list is empty.");
+										document.setValid(true);
+										break;
+									}
+									for (RegexValidation regexValidation : regexValidationList) {
+										if (null == regexValidation) {
+											LOGGER.info("Regex validation is null.");
+											document.setValid(true);
+											continue;
+										}
+										String pattern = regexValidation.getPattern();
+
+										isCorrect = findPattern(value, pattern);
+										if (isCorrect) {
+											LOGGER.info("Setting document type as valid document. Document type : " + docTypeName);
+											document.setValid(true);
+										} else {
+											LOGGER.info("Setting document type as in valid document. Document type : " + docTypeName);
+											document.setValid(false);
+											continue documentFor;
+										}
+									}
+									break;
+								}
 							}
 						}
-						break;
 					}
-
 				}
 			}
+			document.setValid(checkForInvalidDataTables(document));
 		}
 	}
 
-	/**
-	 * The <code>checkValueText</code> method will check the valueText with typeText compatibility.
-	 * 
-	 * @param valueText {@link String}
-	 * @param typeText {@link String}
-	 * @return boolean true if pass the test otherwise false.
-	 */
-	// private boolean checkValueText(String valueText, String typeText) {
-	//
-	// boolean isValid = false;
-	// if (null == valueText || RegexValidationConstants.EMPTY.equals(valueText) || null == typeText
-	// || RegexValidationConstants.EMPTY.equals(typeText)) {
-	// LOGGER.error("Input value text or type text is null or empty.");
-	// isValid = false;
-	// } else {
-	// if (typeText.equals(RegexValidationConstants.DATE)) {
-	// SimpleDateFormat format = new SimpleDateFormat(RegexValidationConstants.PATTERN);
-	// try {
-	// format.parse(valueText);
-	// isValid = true;
-	// } catch (Exception e) {
-	// // the value couldn't be parsed by the pattern, return false.
-	// LOGGER.error(e.getMessage(), e);
-	// isValid = false;
-	// }
-	// } else {
-	// if (typeText.equals(RegexValidationConstants.LONG)) {
-	// try {
-	// Long.parseLong(valueText);
-	// isValid = true;
-	// } catch (Exception e) {
-	// // the value couldn't be parsed by the pattern, return false
-	// LOGGER.error(e.getMessage(), e);
-	// isValid = false;
-	// }
-	// } else {
-	// if (typeText.equals(RegexValidationConstants.DOUBLE)) {
-	// try {
-	// Float.parseFloat(valueText);
-	// isValid = true;
-	// } catch (Exception e) {
-	// // the value couldn't be parsed by the pattern, return false
-	// LOGGER.error(e.getMessage(), e);
-	// isValid = false;
-	// }
-	// } else {
-	// if (typeText.equals(RegexValidationConstants.STRING)) {
-	// isValid = true;
-	// } else {
-	// isValid = false;
-	// }
-	// }
-	// }
-	// }
-	// }
-	//
-	// return isValid;
-	// }
+	private boolean checkForInvalidDataTables(Document document) {
+		LOGGER.info("Checking for invalid datatables.");
+		boolean isValidDoc = true;
+		if (document.getDataTables() != null) {
+			List<DataTable> dataTableList = document.getDataTables().getDataTable();
+			for (DataTable dataTable : dataTableList) {
+				LOGGER.debug("Datatable name : " + dataTable.getName());
+				if (dataTable.getRows() != null) {
+					isValidDoc = checkForInvalidRow(dataTable);
+					if (!isValidDoc) {
+						break;
+					}
+				}
+			}
+		}
+		LOGGER.debug("Is datatable valid : " + isValidDoc);
+		return isValidDoc;
+	}
 
+	public boolean checkForInvalidRow(final DataTable dataTable) {
+		LOGGER.info("Checking for invalid rows in table.");
+		boolean isValidDoc = true;
+		List<Row> rowList = dataTable.getRows().getRow();
+		for (Row row : rowList) {
+			if (row.getColumns() != null) {
+				List<Column> columnList = row.getColumns().getColumn();
+				for (Column column : columnList) {
+					LOGGER.debug("Column data : " + column.getValue());
+					if (!column.isValid()) {
+						isValidDoc = false;
+						LOGGER.debug("Column not valid.");
+						break;
+					}
+				}
+				if (!isValidDoc) {
+					break;
+				}
+			}
+		}
+		return isValidDoc;
+	}
+
+	
 	/**
 	 * The <code>findPattern</code> method will test the pattern on the input character sequence and return true if and only if it
 	 * passes the test.
@@ -390,7 +353,7 @@ public class RegexAutomatedValidation {
 		boolean isFound = false;
 		if (null == inputStr /* || RegexValidationConstants.EMPTY.equals(inputStr) */) {
 			errMsg = "Invalid input character sequence.";
-			LOGGER.error(errMsg);
+			LOGGER.info(errMsg);
 		} else {
 
 			if (null == patternStr || RegexValidationConstants.EMPTY.equals(patternStr)) {
@@ -405,7 +368,7 @@ public class RegexAutomatedValidation {
 			// boolean matchFound = matcher.find();
 			whileLoop: while (matcher.find()) {
 				// Get all groups for this match
-				for (int i = 0; i <= matcher.groupCount();) {
+				for (int i = RegexValidationConstants.ZERO; i <= matcher.groupCount();) {
 					String groupStr = matcher.group(i);
 					if (groupStr != null && groupStr.equals(inputStr)) {
 						isFound = true;

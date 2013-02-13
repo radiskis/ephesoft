@@ -2,123 +2,142 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
+		<g:ScrollPanel height="7em" width="100%">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="nameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="name" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="nameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="name" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="descriptionLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="description" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="descriptionLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="description" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="dataTypeLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="dataType" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="dataTypeLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="dataType" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="patternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="pattern" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="fdOrderLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="fdOrder" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="sampleValueLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="sampleValue" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="patternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="pattern" />
+					</g:cell>
+				</g:HorizontalPanel>
 
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="fdOrderLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="fdOrder" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="sampleValueLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="sampleValue" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="fieldOptionValueListLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="fieldOptionValueList" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="barcodeTypeLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="barcodeType" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isHiddenLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="isHidden" />
+					</g:cell>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isMultiLineLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="isMultiLine" />
+					</g:cell>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isReadOnlyLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="isReadOnly" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="fieldOptionValueListLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="fieldOptionValueList" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="barcodeTypeLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="barcodeType"/>
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isHiddenLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isHidden" />
-			</g:cell>
-		</g:HorizontalPanel>
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isMultiLineLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isMultiLine" />
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editFieldPropertiesButton"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
 	</g:VerticalPanel>

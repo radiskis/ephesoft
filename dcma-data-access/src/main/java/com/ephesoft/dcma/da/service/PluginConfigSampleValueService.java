@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,14 +35,32 @@
 
 package com.ephesoft.dcma.da.service;
 
+import java.util.List;
+
 import com.ephesoft.dcma.da.domain.PluginConfigSampleValue;
 
+/**
+ * This is a database service to get the plugin config sample values.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.PluginConfigSampleValueServiceImpl
+ */
 public interface PluginConfigSampleValueService {
 
 	/**
 	 * API to create a new plugin config sample value.
+	 * 
 	 * @param pluginConfigSampleValue {@link PluginConfigSampleValue}
 	 */
 	void createNewPluginConfigSampleValue(PluginConfigSampleValue pluginConfigSampleValue);
+	
+	/**
+	 * API to get list sample values for plugin config id.
+	 * 
+	 * @param pluginConfigId {@link Long}  
+	 * @return List<PluginConfigSampleValue> 
+	 */
+	List<PluginConfigSampleValue> getAllPluginConfigSampleValuesForPluginConfigId(Long pluginConfigId);
 
 }

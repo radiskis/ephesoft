@@ -54,7 +54,7 @@
 			</g:DockLayoutPanel>
 		</g:north>
 		<g:center>
-			<g:DockLayoutPanel unit="PCT" ui:field="reviewValidatePanel" />
+			<g:DockLayoutPanel unit="PCT" ui:field="reviewValidateDockLayoutPanel" />
 		</g:center>
 	</g:DockLayoutPanel>
 

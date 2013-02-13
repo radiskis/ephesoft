@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,12 +43,28 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the edit module details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditModulePresenter extends AbstractBatchClassPresenter<EditModuleView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditModuleView
+	 */
 	public EditModulePresenter(BatchClassManagementController controller, EditModuleView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedModule() != null) {
@@ -56,19 +72,31 @@ public class EditModulePresenter extends AbstractBatchClassPresenter<EditModuleV
 			view.setDescription(controller.getSelectedModule().getModule().getDescription());
 			view.setRemoteUrl(controller.getSelectedModule().getRemoteURL());
 			view.setRemoteBatchClassIdentifier(controller.getSelectedModule().getRemoteBatchClassIdentifier());
+			view.getRemoteUrlTextBox().setFocus(true);
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		controller.getMainPresenter().getModuleViewPresenter().showModuleDetailView();
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		String remoteURL = view.getRemoteUrl();
 		String remoteBCId = view.getRemoteBatchClassIdentifier();
@@ -81,9 +109,11 @@ public class EditModulePresenter extends AbstractBatchClassPresenter<EditModuleV
 			controller.getMainPresenter().getModuleViewPresenter().showModuleDetailView();
 		} else {
 			if (remoteBCId.isEmpty()) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.REMOTE_BATCH_CLASSIDENTIFIER_CANT_EMPTY));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.REMOTE_BATCH_CLASSIDENTIFIER_CANT_EMPTY));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.REMOTE_URL_CANT_BE_EMPTY));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.REMOTE_URL_CANT_BE_EMPTY));
 			}
 		}
 	}

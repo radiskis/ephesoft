@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,8 +35,6 @@
 
 package com.ephesoft.dcma.gwt.rv.client.view;
 
-import com.ephesoft.dcma.core.common.BatchInstanceStatus;
-import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -58,7 +56,7 @@ public class ExternalAppDialogBox extends DialogBox {
 	interface Binder extends UiBinder<Widget, ExternalAppDialogBox> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private static final int DEFAULT_X_DIMENSION = 640;
 	private static final int DEFAULT_Y_DIMENSION = 480;
@@ -67,22 +65,21 @@ public class ExternalAppDialogBox extends DialogBox {
 
 	public interface DialogBoxListener {
 
-		public void onOkClick();
+		void onOkClick();
 
-		public void onCloseClick();
+		void onCloseClick();
 	}
 
 	@UiField
-	VerticalPanel verticalPanel;
+	protected VerticalPanel verticalPanel;
 
-	private Frame frame;
+	private final Button okButton;
 
-	private Button okButton;
-
-	private Button closeButton;
+	private final Button closeButton;
 
 	public ExternalAppDialogBox(String url, java.util.Map<String, String> dimensionsOfPopUpMap) {
-		setWidget(binder.createAndBindUi(this));
+		super();
+		setWidget(BINDER.createAndBindUi(this));
 		addStyleName(ReviewValidateConstants.CONFIGURED_DIMENSIONS_DIALOG);
 		int xDimension;
 		int yDimension;
@@ -90,7 +87,7 @@ public class ExternalAppDialogBox extends DialogBox {
 		try {
 			xDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ReviewValidateConstants.POP_UP_X_DIMENSION));
 			if (xDimension < 0) {
-				throw new Exception("Invalid x-dimension set");
+				xDimension = DEFAULT_X_DIMENSION;
 			}
 		} catch (Exception e) {
 			xDimension = DEFAULT_X_DIMENSION;
@@ -99,7 +96,7 @@ public class ExternalAppDialogBox extends DialogBox {
 		try {
 			yDimension = Integer.parseInt(dimensionsOfPopUpMap.get(ReviewValidateConstants.POP_UP_Y_DIMENSION));
 			if (yDimension < 0) {
-				throw new Exception("Invalid y-dimension set");
+				yDimension = DEFAULT_Y_DIMENSION;
 			}
 		} catch (Exception e) {
 			yDimension = DEFAULT_Y_DIMENSION;
@@ -107,7 +104,7 @@ public class ExternalAppDialogBox extends DialogBox {
 
 		setWidth(xDimension + "px");
 		setHeight(yDimension + "px");
-		frame = new Frame(url);
+		Frame frame = new Frame(url);
 		frame.setWidth(xDimension + "px");
 		frame.setHeight(yDimension + "px");
 		okButton = new Button("Ok", new ClickHandler() {
@@ -164,6 +161,8 @@ public class ExternalAppDialogBox extends DialogBox {
 					evt.preventDefault();
 					closeButton.click();
 					break;
+				default:
+				break;
 			}
 		}
 

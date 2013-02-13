@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -61,24 +61,79 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.encryption.core.PasswordDecryptor;
 import com.ephesoft.dcma.encryption.exception.CryptographyException;
 
+/**
+ * Class to get connections, seesion and create queries.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.encryption.core.PasswordDecryptor
+ *
+ */
 public class DynamicHibernateDao {
 
+	/**
+	 * META_INF String.
+	 */
 	private static final String META_INF = "META-INF";
+	
+	/**
+	 * FOLDER_NAME String.
+	 */
 	private static final String FOLDER_NAME = "dcma-performance-reporting";
+	
+	/**
+	 * FILE_NAME String.
+	 */
 	private static final String FILE_NAME = "dcma-report-db";
+	
+	/**
+	 * TABLE String.
+	 */
 	private static final String TABLE = "TABLE";
+	
+	/**
+	 * VIEW String.
+	 */
 	private static final String VIEW = "VIEW";
+	
+	/**
+	 * sessionFactory SessionFactory.
+	 */
 	private SessionFactory sessionFactory = null;
+	
+	/**
+	 * connectionProvider ConnectionProvider.
+	 */ 
 	private ConnectionProvider connectionProvider = null;
+	
+	/**
+	 * connection Connection.
+	 */
 	private Connection connection = null;
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(DynamicHibernateDao.class);
+	
+	/**
+	 * PASSWORD String.
+	 */
 	private static final String PASSWORD = "hibernate.connection.password";
 
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param userName String
+	 * @param password String
+	 * @param driverName String
+	 * @param jdbcUrl String
+	 * @param dialectName String
+	 */
 	public DynamicHibernateDao(String userName, String password, String driverName, String jdbcUrl, String dialectName) {
 		Properties properties = createHibernateProperties(userName, password, driverName, jdbcUrl, dialectName);
 
@@ -93,12 +148,23 @@ public class DynamicHibernateDao {
 		sessionFactory = configuration.buildSessionFactory();
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param userName String
+	 * @param password String
+	 * @param driverName String
+	 * @param jdbcUrl String
+	 */
 	public DynamicHibernateDao(String userName, String password, String driverName, String jdbcUrl) {
 		this(userName, password, driverName, jdbcUrl, null);
 	}
 
-	/* Changes for reporting module Start */
-
+	/**
+	 * Constructor.
+	 * 
+	 * @param cfgLocation String
+	 */
 	public DynamicHibernateDao(String cfgLocation) {
 		Configuration configuration = new Configuration().configure(cfgLocation);
 		String filePath = META_INF + File.separator + FOLDER_NAME + File.separator + FILE_NAME + ".properties";
@@ -144,32 +210,32 @@ public class DynamicHibernateDao {
 		sessionFactory = configuration.buildSessionFactory();
 	}
 
-	public StatelessSession getStatelessSession() throws DCMAException {
+	/**
+	 * To get Connection Provider.
+	 * @return ConnectionProvider
+	 */
+	public ConnectionProvider getConnectionProvider() {
 		ConnectionProvider connectionProvider = null;
-		Connection connection = null;
-		StatelessSession statelessSession = null;
-		try {
-			/*try {
-				if (connection != null) {
-					connection.close();
-				}
-				if (connectionProvider != null) {
-					connectionProvider.close();
-				}
-			} catch (Exception e) {
-				LOG.error("Unable to close open connections", e);
-			}*/
-			connectionProvider = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
-			connection = connectionProvider.getConnection();
-			statelessSession = sessionFactory.openStatelessSession(connection);
-		} catch (Exception sqle) {
-			LOG.error("Exception occurred while getting report connection.", sqle);
-			throw new DCMAException("Exception occurred while getting report connection.", sqle);
-		}
-		return statelessSession;
+		connectionProvider = ((SessionFactoryImplementor) this.sessionFactory).getConnectionProvider();
+		return connectionProvider;
 	}
 
-	/* Changes for reporting module End */
+	/**
+	 * To get Stateless Session.
+	 * @param connection Connection
+	 * @return StatelessSession
+	 */
+	public StatelessSession getStatelessSession(Connection connection) {
+		return sessionFactory.openStatelessSession(connection);
+	}
+
+	/**
+	 * To get Stateless Session.
+	 * @return StatelessSession
+	 */
+	public StatelessSession getStatelessSession() {
+		return sessionFactory.openStatelessSession();
+	}
 
 	private Properties createHibernateProperties(String userName, String password, String driverName, String jdbcUrl,
 			String dialectName) {
@@ -184,6 +250,14 @@ public class DynamicHibernateDao {
 		return properties;
 	}
 
+	/**
+	 * To create queries.
+	 * 
+	 * @param queryString String
+	 * @param aliasTypes List<AliasType>
+	 * @param params Object
+	 * @return SQLQuery
+	 */
 	public SQLQuery createQuery(String queryString, List<AliasType> aliasTypes, Object... params) {
 		SQLQuery sqlQuery = createQuery(queryString, params);
 
@@ -195,6 +269,13 @@ public class DynamicHibernateDao {
 		return sqlQuery;
 	}
 
+	/**
+	 * To create queries.
+	 * 
+	 * @param queryString String
+	 * @param params Object
+	 * @return SQLQuery
+	 */
 	public SQLQuery createQuery(String queryString, Object... params) {
 		SQLQuery sqlQuery = sessionFactory.openStatelessSession().createSQLQuery(queryString);
 
@@ -207,6 +288,14 @@ public class DynamicHibernateDao {
 		return sqlQuery;
 	}
 
+	/**
+	 * To create, update or insert query.
+	 * 
+	 * @param session StatelessSession
+	 * @param queryString String
+	 * @param params Object
+	 * @return SQLQuery
+	 */
 	public SQLQuery createUpdateOrInsertQuery(StatelessSession session, String queryString, Object... params) {
 		SQLQuery sqlQuery = session.createSQLQuery(queryString);
 
@@ -219,6 +308,12 @@ public class DynamicHibernateDao {
 		return sqlQuery;
 	}
 
+	/**
+	 * To get all table names.
+	 * 
+	 * @return Map<String, List<String>>
+	 * @throws SQLException in case of error
+	 */
 	public Map<String, List<String>> getAllTableNames() throws SQLException {
 		Map<String, List<String>> tableMap = new HashMap<String, List<String>>();
 
@@ -238,28 +333,40 @@ public class DynamicHibernateDao {
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
-
-			ResultSet rSet = databaseMetaData.getTables(null, null, null, new String[] {TABLE, VIEW});
-			while (rSet.next()) {
-				if (rSet.getString("TABLE_TYPE").equals(TABLE)) {
-					tableNames.add(rSet.getString("TABLE_NAME"));
-				} else if (rSet.getString("TABLE_TYPE").equals(VIEW)) {
-					viewNames.add(rSet.getString("TABLE_NAME"));
-				}
-			}
-			tableMap.put(TABLE, tableNames);
-			tableMap.put(VIEW, viewNames);
+			ResultSet rSet = null;
 			try {
+				rSet = databaseMetaData.getTables(null, null, null, new String[] {TABLE, VIEW});
+				while (rSet.next()) {
+					if (rSet.getString("TABLE_TYPE").equals(TABLE)) {
+						tableNames.add(rSet.getString("TABLE_NAME"));
+					} else if (rSet.getString("TABLE_TYPE").equals(VIEW)) {
+						viewNames.add(rSet.getString("TABLE_NAME"));
+					}
+				}
+				tableMap.put(TABLE, tableNames);
+				tableMap.put(VIEW, viewNames);
+
 				if (rSet != null) {
 					rSet.close();
 				}
 			} catch (Exception e) {
 				LOG.error("Could not close result set ", e);
+			} finally {
+				if (rSet != null) {
+					rSet.close();
+				}
 			}
 		}
 		return tableMap;
 	}
 
+	/**
+	 * To get all columns for table.
+	 * 
+	 * @param table String
+	 * @return List<ColumnDefinition>
+	 * @throws SQLException in case of error
+	 */
 	public List<ColumnDefinition> getAllColumnsForTable(String table) throws SQLException {
 		List<ColumnDefinition> columnDefinitions = new LinkedList<ColumnDefinition>();
 
@@ -277,23 +384,30 @@ public class DynamicHibernateDao {
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
-
-			ResultSet rSet = databaseMetaData.getColumns(null, null, table, null);
-			while (rSet.next()) {
-				columnDefinitions
-						.add(new ColumnDefinition(rSet.getString("COLUMN_NAME"), getColumnClassName(rSet.getInt("DATA_TYPE"))));
-			}
+			ResultSet rSet = null;
 			try {
+				rSet = databaseMetaData.getColumns(null, null, table, null);
+				while (rSet.next()) {
+					columnDefinitions.add(new ColumnDefinition(rSet.getString("COLUMN_NAME"), getColumnClassName(rSet
+							.getInt("DATA_TYPE"))));
+				}
+			} finally {
 				if (rSet != null) {
 					rSet.close();
 				}
-			} catch (Exception e) {
-				LOG.error("Could not close result set ", e);
 			}
 		}
 		return columnDefinitions;
 	}
 
+	/**
+	 * To get primary keys for table.
+	 * 
+	 * @param table String
+	 * @param tableType String
+	 * @return List<String>
+	 * @throws SQLException in case of error
+	 */
 	public List<String> getPrimaryKeysForTable(String table, String tableType) throws SQLException {
 		List<String> primaryKeys = new LinkedList<String>();
 		ResultSet rSet = null;
@@ -311,21 +425,24 @@ public class DynamicHibernateDao {
 			connectionProvider = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
 			connection = connectionProvider.getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
-
-			if (tableType.equals(TABLE)) {
-				rSet = databaseMetaData.getPrimaryKeys(null, null, table);
-			} else if (tableType.equals(VIEW)) {
-				rSet = databaseMetaData.getBestRowIdentifier(null, null, table, 1, false);
-			}
-			while (rSet.next()) {
-				primaryKeys.add(rSet.getString("COLUMN_NAME"));
-			}
 			try {
+				if (tableType.equals(TABLE)) {
+					rSet = databaseMetaData.getPrimaryKeys(null, null, table);
+				} else if (tableType.equals(VIEW)) {
+					rSet = databaseMetaData.getBestRowIdentifier(null, null, table, 1, false);
+				}
+				while (rSet.next()) {
+					final String primaryKey = rSet.getString("COLUMN_NAME");
+					LOG.info("Found primary key: " + primaryKey);
+					primaryKeys.add(primaryKey);
+				}
+
+			} catch (Exception e) {
+				LOG.error("Error processing the result set");
+			} finally {
 				if (rSet != null) {
 					rSet.close();
 				}
-			} catch (Exception e) {
-				LOG.error("Could not close result set ", e);
 			}
 		}
 		return primaryKeys;
@@ -380,15 +497,15 @@ public class DynamicHibernateDao {
 				break;
 
 			case Types.DATE:
-				clazz = (new java.sql.Date(123456)).getClass();
+				clazz = java.sql.Date.class;
 				break;
 
 			case Types.TIME:
-				clazz = (new java.sql.Time(123456)).getClass();
+				clazz = java.sql.Time.class;
 				break;
 
 			case Types.TIMESTAMP:
-				clazz = (new java.sql.Timestamp(123456)).getClass();
+				clazz = java.sql.Timestamp.class;
 				break;
 
 			case Types.BLOB:
@@ -405,36 +522,87 @@ public class DynamicHibernateDao {
 		return clazz;
 	}
 
+	/**
+	 * Class for alias type.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public static class AliasType {
 
+		/**
+		 * alias String.
+		 */
 		private final String alias;
+		
+		/**
+		 * type NullableType.
+		 */
 		private final NullableType type;
 
+		/**
+		 * Constructor.
+		 *  
+		 * @param alias String
+		 * @param type NullableType
+		 */
 		public AliasType(String alias, NullableType type) {
 			this.alias = alias;
 			this.type = type;
 		}
 	}
 
+	/**
+	 * Class for Column Definition.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public static class ColumnDefinition {
 
+		/**
+		 * columnName String.
+		 */
 		private final String columnName;
+		
+		/**
+		 * type Class<?>.
+		 */
 		private final Class<?> type;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param columnName String
+		 * @param type Class<?>
+		 */
 		public ColumnDefinition(String columnName, Class<?> type) {
 			this.columnName = columnName;
 			this.type = type;
 		}
 
+		/**
+		 * To get column name.
+		 * 
+		 * @return String
+		 */
 		public String getColumnName() {
 			return columnName;
 		}
 
+		/**
+		 * To get type.
+		 * 
+		 * @return Class<?>
+		 */
 		public Class<?> getType() {
 			return type;
 		}
 	}
 
+	/**
+	 * To close the session.
+	 */
 	public void closeSession() {
 		try {
 			if (connection != null) {

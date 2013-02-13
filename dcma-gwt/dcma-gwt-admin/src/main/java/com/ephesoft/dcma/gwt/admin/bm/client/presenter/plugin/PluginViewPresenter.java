@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,12 +47,36 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the plugin details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class PluginViewPresenter extends AbstractBatchClassPresenter<PluginView> implements ValueChangeHandler<String> {
 
+	/**
+	 * pluginDetailPresenter PluginDetailPresenter.
+	 */
 	private final PluginDetailPresenter pluginDetailPresenter;
+
+	/**
+	 * editPluginPresenter EditPluginPresenter.
+	 */
 	private final EditPluginPresenter editPluginPresenter;
+
+	/**
+	 * pluginDataPresenter PluginDataPresenter.
+	 */
 	private final PluginDataPresenter pluginDataPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view PluginView
+	 */
 	public PluginViewPresenter(BatchClassManagementController controller, PluginView view) {
 		super(controller, view);
 		this.pluginDataPresenter = new PluginDataPresenter(controller, view.getPluginDataView());
@@ -60,18 +84,36 @@ public class PluginViewPresenter extends AbstractBatchClassPresenter<PluginView>
 		this.editPluginPresenter = new EditPluginPresenter(controller, view.getEditPluginView());
 	}
 
+	/**
+	 * To get Plugin Detail Presenter.
+	 * 
+	 * @return PluginDetailPresenter
+	 */
 	public PluginDetailPresenter getPluginDetailPresenter() {
 		return pluginDetailPresenter;
 	}
 
+	/**
+	 * To get Edit Plugin Presenter.
+	 * 
+	 * @return EditPluginPresenter
+	 */
 	public EditPluginPresenter getEditPluginPresenter() {
 		return editPluginPresenter;
 	}
 
+	/**
+	 * To get Plugin Data Presenter.
+	 * 
+	 * @return PluginDataPresenter
+	 */
 	public PluginDataPresenter getPluginDataPresenter() {
 		return pluginDataPresenter;
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {
@@ -82,37 +124,49 @@ public class PluginViewPresenter extends AbstractBatchClassPresenter<PluginView>
 			view.getPluginConfigVerticalPanel().setVisible(Boolean.FALSE);
 			Collection<BatchClassPluginConfigDTO> values = controller.getSelectedPlugin().getBatchClassPluginConfigs();
 			if (values != null && values.isEmpty()) {
-				view.getEditButton().setVisible(false);
+				view.getPluginDetailView().getEditButton().setVisible(false);
 				view.getNoResuleLabel().setVisible(true);
 			} else {
-				view.getEditButton().setVisible(true);
+				view.getPluginDetailView().getEditButton().setVisible(true);
 				view.getNoResuleLabel().setVisible(false);
 			}
-			view.getEditButton().addClickHandler(new ClickHandler() {
+			view.getPluginDetailView().getEditButton().addClickHandler(new ClickHandler() {
 
 				@Override
 				public void onClick(ClickEvent arg0) {
 					view.getPluginViewVerticalPanel().setVisible(Boolean.FALSE);
 					view.getPluginConfigVerticalPanel().setVisible(Boolean.TRUE);
 					controller.getBatchClass().setDirty(Boolean.TRUE);
+					editPluginPresenter.bind();
 				}
 			});
 			// rpc calls
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * In case of value change.
+	 */
 	@Override
 	public void onValueChange(ValueChangeEvent<String> arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * To show Plugin View Detail.
+	 */
 	public void showPluginViewDetail() {
 		view.getPluginViewVerticalPanel().setVisible(Boolean.TRUE);
 		view.getPluginConfigVerticalPanel().setVisible(Boolean.FALSE);

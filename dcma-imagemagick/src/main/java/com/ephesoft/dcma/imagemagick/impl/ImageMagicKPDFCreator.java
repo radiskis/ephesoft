@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,21 +35,19 @@
 
 package com.ephesoft.dcma.imagemagick.impl;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
-import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.imagemagick.IImageMagickCommonConstants;
 import com.ephesoft.dcma.imagemagick.MultiPageExecutor;
-import com.ephesoft.dcma.util.OSUtil;
 
 /**
  * This class is used to create the pdf file using Image magick.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
+ * 
  */
 public class ImageMagicKPDFCreator implements IImageMagickCommonConstants {
 
@@ -69,42 +67,42 @@ public class ImageMagicKPDFCreator implements IImageMagickCommonConstants {
 	private transient String coloredImage;
 
 	/**
-	 * @param pdfCompression the pdfCompression to set
+	 * @param pdfCompression {@link String}
 	 */
 	public void setPdfCompression(String pdfCompression) {
 		this.pdfCompression = pdfCompression;
 	}
 
 	/**
-	 * @param pdfQuality the pdfQuality to set
+	 * @param pdfQuality {@link String}
 	 */
 	public void setPdfQuality(String pdfQuality) {
 		this.pdfQuality = pdfQuality;
 	}
 
 	/**
-	 * @param coloredImage the coloredImage to set
+	 * @param coloredImage {@link String}
 	 */
 	public void setColoredImage(String coloredImage) {
 		this.coloredImage = coloredImage;
 	}
 
 	/**
-	 * @return the pdfCompression
+	 * @return {@link String}
 	 */
 	public String getPdfCompression() {
 		return pdfCompression;
 	}
 
 	/**
-	 * @return the pdfQuality
+	 * @return {@link String}
 	 */
 	public String getPdfQuality() {
 		return pdfQuality;
 	}
 
 	/**
-	 * @return the coloredImage
+	 * @return {@link String}
 	 */
 	public String getColoredImage() {
 		return coloredImage;
@@ -112,11 +110,10 @@ public class ImageMagicKPDFCreator implements IImageMagickCommonConstants {
 
 	/**
 	 * API for creating pdf using image magicK.
-	 * 
-	 * @param pdfPages
-	 * @param pdfBatchInstanceThread
-	 * @param multiPageExecutorsPdf
-	 * @param pdfOptimizationSwitch
+	 * @param pdfPages {@link String []}
+	 * @param pdfBatchInstanceThread {@link BatchInstanceThread}
+	 * @param multiPageExecutorsPdf {@link List<MultiPageExecutor>}
+	 * @param pdfOptimizationSwitch {@link String}
 	 */
 	public void createPDFUsingImageMagick(String[] pdfPages, BatchInstanceThread pdfBatchInstanceThread,
 			List<MultiPageExecutor> multiPageExecutorsPdf, String pdfOptimizationSwitch) {

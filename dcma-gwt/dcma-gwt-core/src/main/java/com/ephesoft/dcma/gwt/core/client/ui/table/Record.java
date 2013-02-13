@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,13 +43,13 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Record {
 	
-	private String identifier;
+	private final String identifier;
 	
 	public Record(String identifier) {
 		this.identifier = identifier;
 	}
 	
-	private Map<HeaderColumn, Widget> properties = new HashMap<HeaderColumn, Widget>();
+	private final Map<HeaderColumn, Widget> properties = new HashMap<HeaderColumn, Widget>();
 		
 	public void addWidget(HeaderColumn headerColumn, Widget property) {
 		properties.put(headerColumn, property);

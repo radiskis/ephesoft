@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -88,5 +88,15 @@ public interface UploadBatchMessages extends LocaleCommonMessages {
 	String NONE_FILE_TO_DELETE_SELECTED_WARNING = "none_file_to_delete_selected_warning";
 	
 	String BROWSE = "browse";
+	
+	String UPLOAD_IMAGE_LIMIT_ERROR = "upload_image_limit_message";
+	
+	String UPLOAD_INSTANCE_LIMIT_ERROR = "upload_instance_limit_message";
+	
+	String LIMIT_REACHED = "limit_reached";
+	
+	String FILE_SIZE_EXCEED_MESSAGE = "file_size_exceed_meesage";
+	
+	String UPLOAD_INSTANCE_LIMIT_APPENDED_MESSAGE = "upload_instance_limit_appended_message";
 
 }

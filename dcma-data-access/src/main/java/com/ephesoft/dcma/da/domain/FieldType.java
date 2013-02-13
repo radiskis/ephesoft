@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,167 +55,329 @@ import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for field_type.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "field_type")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class FieldType extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * docType DocumentType.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "document_type_id")
 	private DocumentType docType;
 
+	/**
+	 * dataType DataType.
+	 */
 	@Column(name = "field_data_type")
 	@Enumerated(EnumType.STRING)
 	private DataType dataType;
 
+	/**
+	 * identifier String.
+	 */ 
 	@Column(name = "identifier")
 	private String identifier;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "field_type_name")
 	private String name;
 
+	/**
+	 * fieldOrderNumber int.
+	 */
 	@Column(name = "field_order_number", nullable = false)
 	private int fieldOrderNumber;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "field_type_description")
 	private String description;
 
+	/**
+	 * pattern String.
+	 */
 	@Column(name = "pattern")
 	private String pattern;
 
+	/**
+	 * sampleValue String.
+	 */
 	@Column(name = "sample_value")
 	private String sampleValue;
 
+	/**
+	 * barcodeType String.
+	 */
 	@Column(name = "barcode_type")
 	private String barcodeType;
 
+	/**
+	 * fieldOptionValueList String.
+	 */
 	@Column(name = "field_option_value_list")
 	private String fieldOptionValueList;
 
+	/**
+	 * hidden boolean.
+	 */
 	@Column(name = "is_hidden", columnDefinition = "bit default 0")
-	private boolean isHidden;
+	private boolean hidden;
 
+	/**
+	 * multiLine boolean.
+	 */
 	@Column(name = "is_multi_line", columnDefinition = "bit default 0")
-	private boolean isMultiLine;
+	private boolean multiLine;
 
+	/**
+	 * readOnly boolean.
+	 */
+	@Column(name = "is_read_only", columnDefinition = "bit default 0")
+	private boolean readOnly;
+
+	/**
+	 * kvExtraction List<KVExtraction>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "field_type_id")
 	private List<KVExtraction> kvExtraction = new ArrayList<KVExtraction>();;
 
+	/**
+	 * regexValidation List<RegexValidation>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "field_type_id")
 	private List<RegexValidation> regexValidation = new ArrayList<RegexValidation>();
 
+	/**
+	 * To get Doc Type.
+	 * @return DocumentType
+	 */
 	public DocumentType getDocType() {
 		return docType;
 	}
 
+	/**
+	 * To set Doc Type.
+	 * @param docType DocumentType
+	 */
 	public void setDocType(DocumentType docType) {
 		this.docType = docType;
 	}
 
+	/**
+	 * To get Data Type.
+	 * @return DataType
+	 */
 	public DataType getDataType() {
 		return dataType;
 	}
 
+	/**
+	 * To set Data Type.
+	 * @param dataType DataType
+	 */
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
 	}
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Pattern.
+	 * @return String
+	 */
 	public String getPattern() {
 		return pattern;
 	}
 
+	/**
+	 * To set Pattern.
+	 * @param pattern String
+	 */
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
 	}
 
+	/**
+	 * To get Kv Extraction.
+	 * @return List<KVExtraction>
+	 */
 	public List<KVExtraction> getKvExtraction() {
 		return kvExtraction;
 	}
 
+	/**
+	 * To set Kv Extraction.
+	 * @param kvExtraction List<KVExtraction>
+	 */
 	public void setKvExtraction(List<KVExtraction> kvExtraction) {
 		this.kvExtraction = kvExtraction;
 	}
 
+	/**
+	 * To get Regex Validation.
+	 * @return List<RegexValidation> 
+	 */
 	public List<RegexValidation> getRegexValidation() {
 		return regexValidation;
 	}
 
+	/**
+	 * To set Regex Validation.
+	 * @param regexValidation List<RegexValidation>
+	 */
 	public void setRegexValidation(List<RegexValidation> regexValidation) {
 		this.regexValidation = regexValidation;
 	}
 
+	/**
+	 * To get Identifier.
+	 * @return String
+	 */
 	public String getIdentifier() {
 		return identifier;
 	}
 
+	/**
+	 * To set Identifier.
+	 * @param identifier String
+	 */
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
+	/**
+	 * To get Field Order Number.
+	 * @return int
+	 */
 	public int getFieldOrderNumber() {
 		return fieldOrderNumber;
 	}
 
+	/**
+	 * To set Field Order Number.
+	 * @param fieldOrderNumber int
+	 */
 	public void setFieldOrderNumber(int fieldOrderNumber) {
 		this.fieldOrderNumber = fieldOrderNumber;
 	}
 
+	/**
+	 * To get Sample Value.
+	 * @return String
+	 */
 	public String getSampleValue() {
 		return sampleValue;
 	}
 
+	/**
+	 * To set Sample Value.
+	 * @param sampleValue String
+	 */
 	public void setSampleValue(String sampleValue) {
 		this.sampleValue = sampleValue;
 	}
 
+	/**
+	 * To get Barcode Type.
+	 * @return String
+	 */
 	public String getBarcodeType() {
 		return barcodeType;
 	}
 
+	/**
+	 * To set Barcode Type.
+	 * @param barcodeType String
+	 */
 	public void setBarcodeType(String barcodeType) {
 		this.barcodeType = barcodeType;
 	}
 
+	/**
+	 * To get Field Option Value List.
+	 * @return String
+	 */
 	public String getFieldOptionValueList() {
 		return fieldOptionValueList;
 	}
 
+	/**
+	 * To set Field Option Value List.
+	 * @param fieldOptionValueList String
+	 */
 	public void setFieldOptionValueList(String fieldOptionValueList) {
 		this.fieldOptionValueList = fieldOptionValueList;
 	}
 
+	/**
+	 * To check whether hidden or not.
+	 * @return boolean
+	 */
 	public boolean isHidden() {
-		return isHidden;
-	}
-
-	public void setHidden(boolean isHidden) {
-		this.isHidden = isHidden;
+		return hidden;
 	}
 
 	/**
-	 * Removes a KV Extraction from the field type based on id (Used in same respect as identifier)
+	 * To set hidden.
+	 * @param hidden boolean
+	 */
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	/**
+	 * Removes a KV Extraction from the field type based on id (Used in same respect as identifier).
 	 * 
 	 * @param identifier the id corresponding to the KV Extraction
 	 * @return true if KV Extraction could be found and removed. False otherwise
@@ -238,7 +400,7 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	}
 
 	/**
-	 * Adds a KV Extraction to this field type
+	 * Adds a KV Extraction to this field type.
 	 * 
 	 * @param kvExtraction the KV Extraction to be added
 	 */
@@ -257,7 +419,7 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 	}
 
 	/**
-	 * Returns a KV Extraction based on identifier
+	 * Returns a KV Extraction based on identifier.
 	 * 
 	 * @param identifier the identifier corresponding to the KV Extraction
 	 * @return KV Extraction if found. null otherwise
@@ -275,6 +437,11 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 		return kvExtraction1;
 	}
 
+	/**
+	 * To remove Regex Validation by Id.
+	 * @param identifier Long
+	 * @return boolean
+	 */
 	public boolean removeRegexValidationById(Long identifier) {
 		boolean isRemoved = false;
 		if (null != this.regexValidation) {
@@ -292,6 +459,10 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 		return isRemoved;
 	}
 
+	/**
+	 * To add Regex Validation.
+	 * @param regexValidation RegexValidation
+	 */
 	public void addRegexValidation(RegexValidation regexValidation) {
 
 		if (null == regexValidation) {
@@ -301,6 +472,11 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 		this.regexValidation.add(regexValidation);
 	}
 
+	/**
+	 * To get Regex Validation by Identifier.
+	 * @param identifier String
+	 * @return RegexValidation
+	 */
 	public RegexValidation getRegexValidationbyIdentifier(String identifier) {
 		RegexValidation regexValidation1 = null;
 		if (null != identifier && this.regexValidation != null && !this.regexValidation.isEmpty()) {
@@ -315,11 +491,37 @@ public class FieldType extends AbstractChangeableEntity implements Serializable 
 		return regexValidation1;
 	}
 
-	public void setMultiLine(boolean isMultiLine) {
-		this.isMultiLine = isMultiLine;
+	/**
+	 * To set MultiLine.
+	 * @param multiLine boolean
+	 */
+	public void setMultiLine(boolean multiLine) {
+		this.multiLine = multiLine;
 	}
 
+	/**
+	 * To check whether multiline or not.
+	 * @return boolean
+	 */
 	public boolean isMultiLine() {
-		return isMultiLine;
+		return multiLine;
+	}
+
+	/**
+	 * API to set the boolean flag 'readOnly'.
+	 * 
+	 * @param isReadOnly boolean
+	 */
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	/**
+	 * API to get the boolean flag 'readOnly'.
+	 * 
+	 * @return the isReadOnly
+	 */
+	public boolean getIsReadOnly() {
+		return readOnly;
 	}
 }

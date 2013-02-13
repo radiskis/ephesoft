@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,76 +49,147 @@ import org.hibernate.annotations.CascadeType;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_module")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class BatchClassModule extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -5366469561526543577L;
 
+	/**
+	 * batchClass BatchClass.
+	 */
 	@OneToOne
 	@JoinColumn(name = "batch_class_id")
 	private BatchClass batchClass;
 
+	/** 
+	 * module Module.
+	 */
 	@OneToOne
 	@JoinColumn(name = "module_id", nullable = false)
 	private Module module;
 
+	/**
+	 * orderNumber int.
+	 */
 	@Column(name = "order_number")
 	private int orderNumber;
 
+	/**
+	 * workflowName String.
+	 */
 	@Column(name = "workflow_name")
 	private String workflowName;
 
+	/**
+	 * remoteURL String.
+	 */
 	@Column(name = "remote_url")
 	private String remoteURL;
 
+	/**
+	 * remoteBatchClassIdentifier String.
+	 */
 	@Column(name = "remote_batch_class_id")
 	private String remoteBatchClassIdentifier;
 
+	/**
+	 * batchClassPlugins List<BatchClassPlugin>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "batch_class_module_id")
 	@javax.persistence.OrderBy("orderNumber")
 	private List<BatchClassPlugin> batchClassPlugins;
 
+	/**
+	 * batchClassModuleConfig List<BatchClassModuleConfig>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "batch_class_module_id")
 	private List<BatchClassModuleConfig> batchClassModuleConfig;
 
+	/**
+	 * To get Order Number.
+	 * @return int
+	 */
 	public int getOrderNumber() {
 		return orderNumber;
 	}
 
+	/**
+	 * To set Order Number.
+	 * @param orderNumber int
+	 */
 	public void setOrderNumber(int orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
+	/**
+	 * To get Batch Class.
+	 * @return BatchClass
+	 */
 	public BatchClass getBatchClass() {
 		return batchClass;
 	}
 
+	/**
+	 * To get Batch Class.
+	 * @param batchClass
+	 */
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
 
+	/**
+	 * To get Module.
+	 * @return Module
+	 */
 	public Module getModule() {
 		return module;
 	}
 
+	/**
+	 * To set Module.
+	 * @param module Module
+	 */
 	public void setModule(Module module) {
 		this.module = module;
 	}
 
+	/**
+	 * To get Batch Class Plugins.
+	 * @return List<BatchClassPlugin>
+	 */
 	public List<BatchClassPlugin> getBatchClassPlugins() {
 		return batchClassPlugins;
 	}
 
+	/**
+	 * To set Batch Class Plugins.
+	 * @param batchClassPlugins List<BatchClassPlugin>
+	 */
 	public void setBatchClassPlugins(List<BatchClassPlugin> batchClassPlugins) {
 		this.batchClassPlugins = batchClassPlugins;
 	}
 
+	/**
+	 * To get Batch Class Plugin by Id.
+	 * @param identifier long
+	 * @return BatchClassPlugin
+	 */
 	public BatchClassPlugin getBatchClassPluginById(long identifier) {
 		BatchClassPlugin plugin = null;
 		if (getBatchClassPlugins() != null && getBatchClassPlugins().size() > 0) {
@@ -132,39 +203,75 @@ public class BatchClassModule extends AbstractChangeableEntity {
 		return plugin;
 	}
 
+	/**
+	 * To remove Batch Class Plugin By Id.
+	 * @param identifier long
+	 */
 	public void removeBatchClassPluginById(long identifier) {
 		BatchClassPlugin plugin = getBatchClassPluginById(identifier);
 		batchClassPlugins.remove(plugin);
 	}
 
+	/**
+	 * To get Workflow Name.
+	 * @return String
+	 */
 	public String getWorkflowName() {
 		return workflowName;
 	}
 
+	/**
+	 * To set Workflow Name.
+	 * @param workflowName String
+	 */
 	public void setWorkflowName(String workflowName) {
 		this.workflowName = workflowName;
 	}
 
+	/**
+	 * To get Batch Class Module Configuration.
+	 * @return List<BatchClassModuleConfig>
+	 */
 	public List<BatchClassModuleConfig> getBatchClassModuleConfig() {
 		return batchClassModuleConfig;
 	}
 
+	/**
+	 * To set Batch Class Module Configuration.
+	 * @param batchClassModuleConfig List<BatchClassModuleConfig>
+	 */
 	public void setBatchClassModuleConfig(List<BatchClassModuleConfig> batchClassModuleConfig) {
 		this.batchClassModuleConfig = batchClassModuleConfig;
 	}
 
+	/**
+	 * To set Remote Batch Class Identifier.
+	 * @param remoteBatchClassIdentifier String
+	 */
 	public void setRemoteBatchClassIdentifier(String remoteBatchClassIdentifier) {
 		this.remoteBatchClassIdentifier = remoteBatchClassIdentifier;
 	}
 
+	/**
+	 * To get Remote Batch Class Identifier.
+	 * @return String
+	 */
 	public String getRemoteBatchClassIdentifier() {
 		return remoteBatchClassIdentifier;
 	}
 
+	/**
+	 * To set remote URL.
+	 * @param remoteURL String
+	 */
 	public void setRemoteURL(String remoteURL) {
 		this.remoteURL = remoteURL;
 	}
 
+	/**
+	 * To get remote URL.
+	 * @return String
+	 */
 	public String getRemoteURL() {
 		return remoteURL;
 	}

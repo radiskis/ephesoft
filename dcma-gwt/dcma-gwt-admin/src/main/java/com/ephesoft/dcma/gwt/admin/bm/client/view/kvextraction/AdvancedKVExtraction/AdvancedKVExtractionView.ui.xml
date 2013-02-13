@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c='urn:import:com.ephesoft.dcma.gwt.core.client.ui'>
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c='urn:import:com.ephesoft.dcma.gwt.core.client.ui'
+	xmlns:core='urn:import:com.ephesoft.dcma.gwt.core.client.view'>
 
 	<g:DockLayoutPanel unit='PCT' ui:field="advancedKVLayoutPanel">
 		<g:west size='25'>
@@ -7,23 +8,42 @@
 				ui:field="groupingKVExtractionProperties">
 				<g:north size="90">
 					<g:DockLayoutPanel ui:field="properties" unit='PCT'>
-						<g:north size="45">
+						<g:north size="55">
 							<g:VerticalPanel width="100%"
 								ui:field="oldKVExtractionProperties">
 								<g:HorizontalPanel width="100%">
-									<g:cell width="44%" horizontalAlignment="ALIGN_RIGHT">
+									<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+										<g:CheckBox ui:field="useExistingKey"></g:CheckBox>
+									</g:cell>
+									<g:cell width="1%">
+										<g:Label ui:field="keyFieldStar"></g:Label>
+									</g:cell>
+									<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+										<g:Label ui:field="useExistingKeyLabel" />
+									</g:cell>
+								</g:HorizontalPanel>
+
+								<g:HorizontalPanel width="100%">
+									<g:cell width="48%" horizontalAlignment="ALIGN_RIGHT">
 										<g:Label ui:field="keyPatternLabel"></g:Label>
 									</g:cell>
 									<g:cell width="1%">
 										<g:Label ui:field="keyPatternStar"></g:Label>
 									</g:cell>
 									<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-										<g:TextBox ui:field="keyPattern" />
+										<g:HorizontalPanel ui:field="keyPatternPanel"
+											width="98%" />
+									</g:cell>
+									<g:cell width="1%">
+				                          <g:Label></g:Label>
+			                        </g:cell>
+			                        <g:cell >
+										<g:Button ui:field="keyPatternValidateButton"/>
 									</g:cell>
 								</g:HorizontalPanel>
-								
+
 								<g:HorizontalPanel width="100%">
-									<g:cell width="44%" horizontalAlignment="ALIGN_RIGHT">
+									<g:cell width="48%" horizontalAlignment="ALIGN_RIGHT">
 										<g:Label ui:field="valuePatternLabel"></g:Label>
 									</g:cell>
 									<g:cell width="1%">
@@ -31,6 +51,12 @@
 									</g:cell>
 									<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
 										<g:TextBox ui:field="valuePattern" />
+									</g:cell>
+									<g:cell width="1%">
+				                          <g:Label></g:Label>
+			                        </g:cell>
+			                        <g:cell >
+										<g:Button ui:field="valuePatternValidateButton"/>
 									</g:cell>
 								</g:HorizontalPanel>
 
@@ -74,22 +100,9 @@
 							<g:VerticalPanel />
 						</g:center>
 
-						<g:south size="50">
+						<g:south size="40">
 							<g:VerticalPanel width="100%"
 								ui:field="newKVExtractionProperties">
-
-								<g:HorizontalPanel width="100%">
-									<g:cell width="44%" horizontalAlignment="ALIGN_RIGHT">
-										<g:Label ui:field="locationLabel"></g:Label>
-									</g:cell>
-									<g:cell width="1%">
-										<g:Label ui:field="locationStar"></g:Label>
-									</g:cell>
-									<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-										<g:TextBox ui:field="location" />
-									</g:cell>
-								</g:HorizontalPanel>
-
 
 								<g:HorizontalPanel width="100%">
 									<g:cell width="44%" horizontalAlignment="ALIGN_RIGHT">
@@ -149,14 +162,19 @@
 
 				<g:south size="10">
 					<g:HorizontalPanel ui:field="editAdvancedKVPanel">
-						<g:cell width="17%">
+						<g:cell width="1%">
 							<g:Label></g:Label>
 						</g:cell>
 						<g:Button ui:field="saveButton" />
-						<g:cell width="7%">
+						<g:cell width="2%">
 							<g:Label></g:Label>
 						</g:cell>
 						<g:Button ui:field="cancelButton" />
+						<g:cell width="2%">
+							<g:Label></g:Label>
+						</g:cell>
+						<g:Button ui:field="samplePatternButton" />
+						
 					</g:HorizontalPanel>
 				</g:south>
 			</g:DockLayoutPanel>
@@ -164,12 +182,11 @@
 		<g:center>
 			<g:DockLayoutPanel unit="PCT" ui:field="imageOverlayPanel">
 				<g:north size="7">
-					<g:FocusPanel width='100%' height='100%'>
-						<g:HorizontalPanel styleName="button_image_overlay"
-							width="100%" height="20px">
+					<g:DockLayoutPanel unit="PCT" styleName="button_image_overlay">
+						<g:west size="33">
 							<g:FormPanel ui:field="imageUpload">
 								<g:HorizontalPanel width="100%">
-									<g:cell horizontalAlignment="ALIGN_LEFT">
+									<g:cell horizontalAlignment="ALIGN_LEFT" verticalAlignment="ALIGN_MIDDLE">
 										<g:FileUpload ui:field="importFile" name="importFile">
 										</g:FileUpload>
 									</g:cell>
@@ -181,21 +198,32 @@
 									</g:cell>
 								</g:HorizontalPanel>
 							</g:FormPanel>
-							<g:HorizontalPanel>
-								<g:Button ui:field="zoomin" visible="false"></g:Button>
-								<g:Button ui:field="zoomout" visible="false"></g:Button>
-								<g:Button ui:field="rotate" visible="false"></g:Button>
-								<g:Button ui:field="fitToPage" visible="false"></g:Button>
-							</g:HorizontalPanel>
-							<g:HorizontalPanel ui:field="captureValues">
-								<g:Button ui:field="captureKey" />
-								<g:Button ui:field="captureValue" />
-								<g:Button ui:field="clearButton" />
-								<g:Button ui:field="testAdvKvButton" />
-								<c:RotatableImage ui:field="tempImage" visible="false" />
-							</g:HorizontalPanel>
-						</g:HorizontalPanel>
-					</g:FocusPanel>
+						</g:west>
+						<g:center>
+							<g:DockLayoutPanel>
+								<g:west size="0">
+									<c:RotatableImage ui:field="tempImage"
+										visible="false" />
+								</g:west>
+								<g:center>
+									<core:SlidingPanel ui:field="optionsSlidingPanel">
+										<g:HorizontalPanel ui:field="initialOptionsPanel">
+											<g:Button ui:field="captureKey" />
+											<g:Button ui:field="editKey" />
+											<g:Button ui:field="captureValue" />
+											<g:Button ui:field="editValue" />
+											<g:Button ui:field="nextOptions" />
+										</g:HorizontalPanel>
+										<g:HorizontalPanel ui:field="secondOptionsPanel">
+											<g:Button ui:field="previousOptions" />
+											<g:Button ui:field="clearButton" />
+											<g:Button ui:field="testAdvKvButton" />
+										</g:HorizontalPanel>
+									</core:SlidingPanel>
+								</g:center>
+							</g:DockLayoutPanel>
+						</g:center>
+					</g:DockLayoutPanel>
 				</g:north>
 
 				<g:center>

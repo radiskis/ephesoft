@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,10 +43,12 @@ import java.util.Map;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.DocTypeFieldsMappingView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.FuzzyDBPluginView.Id;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDynamicPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
@@ -55,23 +57,40 @@ import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 
+/**
+ * The presenter for view that shows document type fields mappings.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<DocTypeFieldsMappingView> {
 
+	/**
+	 * fuzzyDBDocTypeDetailPresenter FuzzyDBDocTypeDetailPresenter.
+	 */
 	private final FuzzyDBDocTypeDetailPresenter fuzzyDBDocTypeDetailPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view DocTypeFieldsMappingView
+	 */
 	public DocTypeFieldsMappingPresenter(BatchClassManagementController controller, DocTypeFieldsMappingView view) {
 		super(controller, view);
 		this.fuzzyDBDocTypeDetailPresenter = new FuzzyDBDocTypeDetailPresenter(controller, view.getFuzzyDBDocTypeDetailView());
-
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (!(controller.getSelectedPlugin() != null && controller.getSelectedPlugin().getPlugin().getPluginName().equals(
@@ -94,9 +113,12 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 		}
 	}
 
+	/**
+	 * To set Columns to Fuzzy DB View.
+	 */
 	public void setColumnsToFuzzyDBView() {
 		controller.getRpcService().getAllColumnsForTable(view.getDriverName(), view.getUrl(), view.getUserName(), view.getPassword(),
-				controller.getSelectedTable(), new AsyncCallback<Map<String, String>>() {
+				controller.getSelectedTable(), new EphesoftAsyncCallback<Map<String, String>>() {
 
 					@Override
 					public void onSuccess(Map<String, String> map) {
@@ -108,10 +130,10 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 											controller.getBatchClassDynamicPluginConfigDTO().getDescription())) {
 								String documentName = documentTypeDTO.getName();
 								controller.getRpcService().getDocumentLevelFields(documentName,
-										controller.getBatchClass().getIdentifier(), new AsyncCallback<Map<String, String>>() {
+										controller.getBatchClass().getIdentifier(), new EphesoftAsyncCallback<Map<String, String>>() {
 
 											@Override
-											public void onFailure(Throwable arg0) {
+											public void customFailure(Throwable arg0) {
 												ConfirmationDialogUtil
 														.showConfirmationDialogError(MessageConstants.UNABLE_TO_RETRIEVE_FIELDS);
 
@@ -135,26 +157,61 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 					}
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNABLE_TO_RETRIEVE_COLUMNS);
 
 					}
 				});
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// To be used in case of event handling.
 	}
 
+	/**
+	 * This is class for custom widget.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class CustomWidget extends Composite {
 
+		/**
+		 * panel HorizontalPanel.
+		 */
 		private final HorizontalPanel panel;
+
+		/**
+		 * associateAndVerify Button.
+		 */
 		private final Button associateAndVerify;
+
+		/**
+		 * fields ListBox.
+		 */
 		private final ListBox fields;
+
+		/**
+		 * fieldTypeLabel Label.
+		 */
 		private final Label fieldTypeLabel;
+
+		/**
+		 * editButton Button.
+		 */
 		private final Button editButton;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param fieldType String
+		 */
 		public CustomWidget(final String fieldType) {
 			super();
 			String tobeDeletedConfig = null;
@@ -244,7 +301,7 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 						if (controller.getSelectedTableType().equals("TABLE")) {
 							controller.getRpcService().getAllPrimaryKeysForTable(view.getDriverName(), view.getUrl(),
 									view.getUserName(), view.getPassword(), controller.getSelectedTable(),
-									controller.getSelectedTableType(), new AsyncCallback<List<String>>() {
+									controller.getSelectedTableType(), new EphesoftAsyncCallback<List<String>>() {
 
 										@Override
 										public void onSuccess(List<String> list) {
@@ -265,15 +322,13 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 										}
 
 										@Override
-										public void onFailure(Throwable arg0) {
+										public void customFailure(Throwable arg0) {
 											ConfirmationDialogUtil
 													.showConfirmationDialogError(MessageConstants.UNABLE_TO_RETRIEVE_COLUMNS);
-											return;
 										}
 									});
 						} else {
 							setPluginConfigDTOForRowId(fieldType, selectedPlugin);
-
 						}
 
 					} else {
@@ -309,7 +364,7 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 			panel.setCellWidth(associateAndVerify, "30%");
 			panel.add(editButton);
 			panel.setCellWidth(editButton, "10%");
-			panel.setSpacing(20);
+			panel.setSpacing(BatchClassManagementConstants.TWENTY);
 			initWidget(panel);
 		}
 
@@ -353,32 +408,36 @@ public class DocTypeFieldsMappingPresenter extends AbstractBatchClassPresenter<D
 				String fieldType) {
 			Collection<BatchClassDynamicPluginConfigDTO> pluginConfigDTOs = controller.getBatchClassDynamicPluginConfigDTO()
 					.getChildren();
+			BatchClassDynamicPluginConfigDTO batchClassDynamicConfigDTO = new BatchClassDynamicPluginConfigDTO();
+			boolean returnFlag = false;
 			if (pluginConfigDTOs != null) {
 				for (BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO : pluginConfigDTOs) {
 					if (batchClassDynamicPluginConfigDTO.getDescription() != null
 							&& batchClassDynamicPluginConfigDTO.getDescription().equals(fieldType)) {
 						batchClassDynamicPluginConfigDTO.setValue(fields.getValue(fields.getSelectedIndex()));
-						return batchClassDynamicPluginConfigDTO;
+						batchClassDynamicConfigDTO = batchClassDynamicPluginConfigDTO;
+						returnFlag = true;
+						break;
 					}
-
 				}
 			}
-			BatchClassDynamicPluginConfigDTO batchClassDynamicConfigDTO = new BatchClassDynamicPluginConfigDTO();
-			batchClassDynamicConfigDTO.setBatchClassPlugin(selectedPlugin);
-			batchClassDynamicConfigDTO.setChildren(null);
-			batchClassDynamicConfigDTO.setParent(controller.getBatchClassDynamicPluginConfigDTO());
-			if (controller.getBatchClassDynamicPluginConfigDTO().getChildren() == null) {
-				List<BatchClassDynamicPluginConfigDTO> children = new ArrayList<BatchClassDynamicPluginConfigDTO>();
-				controller.getBatchClassDynamicPluginConfigDTO().setChildren(children);
+			if (!returnFlag) {
+				batchClassDynamicConfigDTO.setBatchClassPlugin(selectedPlugin);
+				batchClassDynamicConfigDTO.setChildren(null);
+				batchClassDynamicConfigDTO.setParent(controller.getBatchClassDynamicPluginConfigDTO());
+				if (controller.getBatchClassDynamicPluginConfigDTO().getChildren() == null) {
+					List<BatchClassDynamicPluginConfigDTO> children = new ArrayList<BatchClassDynamicPluginConfigDTO>();
+					controller.getBatchClassDynamicPluginConfigDTO().setChildren(children);
+				}
+				controller.getBatchClassDynamicPluginConfigDTO().getChildren().add(batchClassDynamicConfigDTO);
+				controller.getBatchClass().setDirty(true);
+				batchClassDynamicConfigDTO.setDescription(fieldType);
+				batchClassDynamicConfigDTO.setName(AdminConstants.FIELD_TYPE);
+				String itemText = fields.getItemText(fields.getSelectedIndex());
+				batchClassDynamicConfigDTO.setValue(itemText);
+				batchClassDynamicConfigDTO.setIdentifier(String.valueOf(Id.getIdentifier()));
+				selectedPlugin.addBatchClassDynamicPluginConfig(String.valueOf(Id.getIdentifier()), batchClassDynamicConfigDTO);
 			}
-			controller.getBatchClassDynamicPluginConfigDTO().getChildren().add(batchClassDynamicConfigDTO);
-			controller.getBatchClass().setDirty(true);
-			batchClassDynamicConfigDTO.setDescription(fieldType);
-			batchClassDynamicConfigDTO.setName(AdminConstants.FIELD_TYPE);
-			String itemText = fields.getItemText(fields.getSelectedIndex());
-			batchClassDynamicConfigDTO.setValue(itemText);
-			batchClassDynamicConfigDTO.setIdentifier(String.valueOf(Id.getIdentifier()));
-			selectedPlugin.addBatchClassDynamicPluginConfig(String.valueOf(Id.getIdentifier()), batchClassDynamicConfigDTO);
 			return batchClassDynamicConfigDTO;
 		}
 

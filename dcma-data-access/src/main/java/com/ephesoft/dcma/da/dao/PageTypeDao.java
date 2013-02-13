@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,40 +42,41 @@ import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.PageType;
 
 /**
- * Dao representing page_type table in database
+ * Dao representing page_type table in database.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.PageTypeDaoImpl
  */
 public interface PageTypeDao extends CacheableDao<PageType> {
 
 	/**
-	 * An api to fetch all page types by document type
+	 * An API to fetch all page types by document type.
 	 * 
-	 * @param documentType
+	 * @param documentType DocumentType
 	 * @return List<PageType>
 	 */
 	List<PageType> getPageTypesByDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to fetch all Page types by batchInstanceID.
+	 * An API to fetch all Page types by batchInstanceID.
 	 * 
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<PageType>
 	 */
-	List<PageType> getPageTypesByBatchInstanceID(String batchInstanceIdentifierIdentifier);
+	List<PageType> getPageTypesByBatchInstanceID(String batchInstanceIdentifier);
 
 	/**
-	 * An api to fetch page types by page type name.
+	 * An API to fetch page types by page type name.
 	 * 
 	 * @param name String
-	 * @param batchClassID Long
+	 * @param batchClassID String
 	 * @return List<PageType>
 	 */
 	List<PageType> getPageTypeByName(String name, String batchClassID);
 
 	/**
-	 * An api to fetch all Page types by document type name.
+	 * An API to fetch all Page types by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @return List<PageType>
@@ -83,9 +84,9 @@ public interface PageTypeDao extends CacheableDao<PageType> {
 	List<PageType> getPageTypeByDocTypeName(String docTypeName);
 
 	/**
-	 * An api to fetch all the page types for input document type ID.
+	 * An API to fetch all the page types for input document type ID.
 	 * 
-	 * @param documentTypeID Long
+	 * @param documentTypeID String
 	 * @param startResult int
 	 * @param maxResult int
 	 * @return List<PageType>
@@ -93,7 +94,7 @@ public interface PageTypeDao extends CacheableDao<PageType> {
 	List<PageType> getPageTypes(String documentTypeID, int startResult, int maxResult);
 
 	/**
-	 * An api to fetch all batch class id, document type names and Page type names corresponding to each other.
+	 * An API to fetch all batch class id, document type names and Page type names corresponding to each other.
 	 * 
 	 * @param batchClassIDList List<String>
 	 * @return List<Object[]>
@@ -101,21 +102,21 @@ public interface PageTypeDao extends CacheableDao<PageType> {
 	List<Object[]> getDocTypeNameAndPgTypeName(List<String> batchClassIDList);
 
 	/**
-	 * An api to insert the page type object.
+	 * An API to insert the page type object.
 	 * 
 	 * @param pageType PageType
 	 */
 	void insertPageType(PageType pageType);
 
 	/**
-	 * An api to update the pageType object.
+	 * An API to update the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */
 	void updatePageType(PageType pageType);
 
 	/**
-	 * An api to remove the pageType object.
+	 * An API to remove the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */
@@ -124,8 +125,8 @@ public interface PageTypeDao extends CacheableDao<PageType> {
 	/**
 	 * API to get the page type by batch class ID.
 	 * 
-	 * @param batchClassID
-	 * @return
+	 * @param batchClassID String
+	 * @return List<PageType>
 	 */
 	List<PageType> getPageTypesByBatchClassID(String batchClassID);
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,30 +35,89 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype;
 
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.FieldTypeListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show field type list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FieldTypeListView extends View<FieldTypeListPresenter> {
 
+	/**
+	 * To get Fields List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getFieldsListView() {
 		return listView;
 	}
 
-	public HeaderColumn name = new HeaderColumn(0, "Name", 19);
-	public HeaderColumn description = new HeaderColumn(1, "Description", 16);
-	public HeaderColumn type = new HeaderColumn(2, "Type", 7);
-	public HeaderColumn fdOrder = new HeaderColumn(3, "Field Order", 10);
-	public HeaderColumn sampleValue = new HeaderColumn(4, "Sample Value", 13);
-	public HeaderColumn barcode = new HeaderColumn(5, "Barcode", 8);
-	public HeaderColumn isHidden = new HeaderColumn(6, "Hidden", 9);
-	public HeaderColumn isMultiLine = new HeaderColumn(6, "MultiLine", 12);
+	/**
+	 * name HeaderColumn.
+	 */
+	public HeaderColumn name = new HeaderColumn(0, "Name", BatchClassManagementConstants.NINTEEN);
 
+	/**
+	 * description HeaderColumn.
+	 */
+	public HeaderColumn description = new HeaderColumn(1, "Description", BatchClassManagementConstants.SIXTEEN);
+
+	/**
+	 * type HeaderColumn.
+	 */
+	public HeaderColumn type = new HeaderColumn(2, "Type", BatchClassManagementConstants.SEVEN);
+
+	/**
+	 * fdOrder HeaderColumn.
+	 */
+	public HeaderColumn fdOrder = new HeaderColumn(BatchClassManagementConstants.THREE, "Field Order",
+			BatchClassManagementConstants.TEN);
+
+	/**
+	 * sampleValue HeaderColumn.
+	 */
+	public HeaderColumn sampleValue = new HeaderColumn(BatchClassManagementConstants.FOUR, "Sample Value",
+			BatchClassManagementConstants.THIRTEEN);
+
+	/**
+	 * barcode HeaderColumn.
+	 */
+	public HeaderColumn barcode = new HeaderColumn(BatchClassManagementConstants.FIVE, "Barcode", BatchClassManagementConstants.EIGHT);
+
+	/**
+	 * isHidden HeaderColumn.
+	 */
+	public HeaderColumn isHidden = new HeaderColumn(BatchClassManagementConstants.SIX, "Hidden", BatchClassManagementConstants.NINE);
+
+	/**
+	 * isMultiLine HeaderColumn.
+	 */
+	public HeaderColumn isMultiLine = new HeaderColumn(BatchClassManagementConstants.SEVEN, "MultiLine",
+			BatchClassManagementConstants.NINE);
+
+	/**
+	 * isReadOnly HeaderColumn.
+	 */
+	public HeaderColumn isReadOnly = new HeaderColumn(BatchClassManagementConstants.EIGHT, "ReadOnly",
+			BatchClassManagementConstants.TEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public FieldTypeListView() {
 		super();
-		listView.addHeaderColumns(name, description, type, fdOrder, sampleValue, barcode, isHidden, isMultiLine);
+		listView.addHeaderColumns(name, description, type, fdOrder, sampleValue, barcode, isHidden, isMultiLine, isReadOnly);
 	}
 }

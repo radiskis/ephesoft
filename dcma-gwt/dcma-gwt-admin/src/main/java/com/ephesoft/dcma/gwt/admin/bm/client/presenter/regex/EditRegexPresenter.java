@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,12 +45,28 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the edit regex details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditRegexView
+	 */
 	public EditRegexPresenter(BatchClassManagementController controller, EditRegexView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getMainPresenter().showFieldTypeView(controller.getSelectedDocument(), true);
@@ -59,15 +75,19 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 		controller.getMainPresenter().getRegexPresenter().showRegexDetailView();
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		boolean validFlag = true;
-		if (validFlag && !view.getValidatePatternTextBox().validate()) {
+		if (validFlag && !view.getValidatePatternTextBox().isValid()) {
 			if (view.getValidatePatternTextBox().getWidget().getText().isEmpty()) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
 			} else {
+				String label = view.getPatternLabel().getText();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+						BatchClassManagementMessages.VALIDATE_THE_REGEX_PATTERN, label.subSequence(0, label.length() - 1)));
 			}
 			validFlag = false;
 		}
@@ -89,6 +109,9 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 		}
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedRegex() != null) {
@@ -96,16 +119,31 @@ public class EditRegexPresenter extends AbstractBatchClassPresenter<EditRegexVie
 		} else {
 			RegexDTO regexDTO = controller.getMainPresenter().getFieldTypeViewPresenter().createRegexDTOObject();
 			regexDTO.setPattern(view.getPattern());
-			controller.setAdd(true);
+			// controller.setAdd(true);
 			controller.setSelectedRegex(regexDTO);
 		}
-		view.getValidatePatternTextBox().addValidator(new RegExValidator(view.getPatternTextBox(), true, false, true, null));
+		view.getValidatePatternTextBox().addValidator(
+				new RegExValidator(view.getValidatePatternTextBox(), view.getPatternTextBox(), true, false, true, null, controller
+						.getRpcService()));
 		view.getValidatePatternTextBox().toggleValidDateBox();
+		view.getValidatePatternTextBox().getWidget().setFocus(true);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// To be used in case of event handling.
+	}
+
+	/**
+	 * To validate on validate pattern button clicked.
+	 */
+	public void onValidatePatternButtonClicked() {
+		view.getValidatePatternTextBox().validate();
 	}
 
 }

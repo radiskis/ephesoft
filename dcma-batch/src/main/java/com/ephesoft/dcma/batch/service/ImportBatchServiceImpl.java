@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,19 +46,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.schema.ImportBatchClassOptions;
 import com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition;
 import com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition.Folders.Folder;
 import com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition.Scripts.Script;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 import com.ephesoft.dcma.da.domain.BatchClassGroups;
@@ -66,68 +70,133 @@ import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
+import com.ephesoft.dcma.da.domain.BatchClassScannerConfiguration;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.Module;
-import com.ephesoft.dcma.da.domain.ModuleConfig;
 import com.ephesoft.dcma.da.domain.Plugin;
 import com.ephesoft.dcma.da.domain.PluginConfig;
+import com.ephesoft.dcma.da.domain.ScannerMasterConfiguration;
 import com.ephesoft.dcma.da.service.BatchClassEmailConfigService;
+import com.ephesoft.dcma.da.service.BatchClassPluginConfigService;
+import com.ephesoft.dcma.da.service.BatchClassPluginService;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
-import com.ephesoft.dcma.da.service.ModuleConfigService;
+import com.ephesoft.dcma.da.service.MasterScannerService;
 import com.ephesoft.dcma.da.service.ModuleService;
 import com.ephesoft.dcma.da.service.PluginConfigService;
 import com.ephesoft.dcma.da.service.PluginService;
 import com.ephesoft.dcma.util.FileUtils;
 
 /**
+ * Service to import the batch class.
  * 
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.batch.service.ImportBatchServiceImpl
+ * @see com.ephesoft.dcma.batch.service.ImportBatchService
  */
 public class ImportBatchServiceImpl implements ImportBatchService {
 
+	/**
+	 * WITH_FILE String.
+	 */
+	private static final String WITH_FILE = "with file : ";
+	
+	/**
+	 * EMPTY_STRING String.
+	 */
 	private static final String EMPTY_STRING = "";
-
+	
+	/**
+	 * SEMI_COLON String.
+	 */
 	private static final String SEMI_COLON = ";";
 	
+	/**
+	 * INPUT_BATCH_XML String.
+	 */
 	private static final String INPUT_BATCH_XML = "backup.input_batch_xml";
-	private static final String OUTPUT_BATCH_XML = "backup.output_batch_xml";
-	private static final String INPUT_BATCH_XML_ZIP = "backup.input_batch_xml_zip";
-	private static final String SCRIPTING_PLUGIN = "Scripting_Plugin";
 
+	/**
+	 * OUTPUT_BATCH_XML String.
+	 */
+	private static final String OUTPUT_BATCH_XML = "backup.output_batch_xml";
+	
+	/**
+	 * INPUT_BATCH_XML_ZIP String.
+	 */
+	private static final String INPUT_BATCH_XML_ZIP = "backup.input_batch_xml_zip";
+	
+	/**
+	 * SCRIPTING_PLUGIN String.
+	 */
+	private static final String SCRIPTING_PLUGIN = "Scripting_Plugin";
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
-	private Logger logger = LoggerFactory.getLogger(ImportBatchServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportBatchServiceImpl.class);
 
+	/**
+	 * Instance of BatchSchemaService.
+	 */
 	@Autowired
-	BatchSchemaService batchSchemaService;
+	private BatchSchemaService batchSchemaService;
 
+	/**
+	 * Instance of BatchClassService.
+	 */
 	@Autowired
-	BatchClassService batchClassService;
+	private BatchClassService batchClassService;
 
+	/**
+	 * Instance of BatchInstanceService.
+	 */
 	@Autowired
-	BatchInstanceService batchInstanceService;
+	private BatchInstanceService batchInstanceService;
 
+	/**
+	 * Instance of ModuleService.
+	 */
 	@Autowired
 	private ModuleService moduleService;
-	
+
+	/**
+	 * Instance of PluginService.
+	 */ 
 	@Autowired
 	private PluginService pluginService;
-	
+
+	/**
+	 * Instance of PluginConfigService.
+	 */
 	@Autowired
 	private PluginConfigService pluginConfigService;
-	
-	@Autowired
-	private ModuleConfigService moduleConfigService;
-	
+
+	/**
+	 * Instance of BatchClassEmailConfigService.
+	 */
 	@Autowired
 	private BatchClassEmailConfigService bcEmailConfigService;
-	
+
+	/**
+	 * Instance of BatchClassPluginService.
+	 */
+	@Autowired
+	private BatchClassPluginService batchClassPluginService;
+
+	/**
+	 * Instance of BatchClassPluginConfigService.
+	 */
+	@Autowired
+	private BatchClassPluginConfigService batchClassPluginConfigService;
+
+	/**
+	 * Instance of MasterScannerService.
+	 */
+	@Autowired
+	private MasterScannerService masterScannerService;
+
 	private BatchClassPlugin getLastPluginFor(BatchClassModule previousBatchClassModule) {
 		List<BatchClassPlugin> batchClassPlugins = previousBatchClassModule.getBatchClassPlugins();
 		BatchClassPlugin lastBatchClassPlugin = null;
@@ -143,8 +212,25 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		return lastBatchClassPlugin;
 	}
 
+	/**
+	 * Method to act as utility for Restart Batch API.
+	 * 
+	 * @param properties {@link Properties}
+	 * @param batchInstance {@link BatchInstance}
+	 * @param moduleName {@link String}
+	 * @param isZipSwitchOn boolean
+	 * @throws DCMAApplicationException if unable to find restart option for batch instance
+	 */
 	@Override
-	public void updateBatchFolders(Properties properties , BatchInstance batchInstance, String moduleName, boolean isZipSwitchOn) throws Exception {
+	public void updateBatchFolders(Properties properties, BatchInstance batchInstance, String moduleName, boolean isZipSwitchOn)
+			throws DCMAApplicationException {
+
+		// removing .SER files of deleted batch instances
+		boolean isRemoveSuccessful = removeFolders(batchInstance);
+		if (!isRemoveSuccessful) {
+			LOGGER.error("Exception in removing .SER files of batch Instance:" + batchInstance.getIdentifier()
+					+ ". Continuing further in deleting folders.");
+		}
 		String batchXmlExtension = ICommonConstants.UNDERSCORE_BATCH_XML;
 		if (properties != null) {
 			batchXmlExtension = properties.getProperty(INPUT_BATCH_XML);
@@ -164,44 +250,16 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			batchXmlFile = new File(batchXmlPath);
 			if (batchXmlFile.exists()) {
 				isZip = false;
-
 			} else {
 				isZip = true;
 			}
 		}
 
-		logger.info("isZip in restarting batch is : " + isZip);
+		LOGGER.info("isZip in restarting batch is : " + isZip);
 		if (isZip) {
-			batchXmlExtension = ICommonConstants.UNDERSCORE_BATCH_XML_ZIP;
-			if (properties != null) {
-				batchXmlExtension = properties.getProperty(INPUT_BATCH_XML_ZIP);
-			}
-			String batchZipPath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ batchXmlExtension;
-			batchZipFile = new File(batchZipPath);
-			File backupXmlZipFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML_ZIP);
-			try {
-				FileUtils.copyFile(batchZipFile, backupXmlZipFile);
-			} catch (Exception e) {
-				logger.error("Unable to create backup copy of batch file for batch instance : " + batchInstance.getIdentifier());
-				throw new Exception("Unable to create backup copy of batch file for batch instance : "
-						+ batchInstance.getIdentifier());
-			}
+			batchZipFile = getBackUpXMLZipFile(properties, batchInstance, batchInstanceFolder);
 		} else {
-			batchXmlFile = new File(batchXmlPath);
-			File backupXmlFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
-					+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML);
-			try {
-				if (batchXmlFile.exists()) {
-					FileUtils.copyFile(batchXmlFile, backupXmlFile);
-				}
-			} catch (Exception e) {
-				logger.error("Unable to create backup copy of batch file for batch instance : " + batchInstance.getIdentifier());
-				throw new Exception("Unable to create backup copy of batch file for batch instance : "
-						+ batchInstance.getIdentifier());
-			}
-
+			batchXmlFile = getBackUpXMLFile(batchInstance, batchInstanceFolder, batchXmlPath);
 		}
 
 		List<BatchClassModule> batchClassModuleList = batchInstance.getBatchClass().getBatchClassModules();
@@ -239,45 +297,95 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 
 				if (!prevPluginBatchXml.exists() && !FileUtils.isZipFileExists(prevPluginFilePath)) {
 					String prevPath = prevPluginBatchXml.getAbsolutePath();
-					prevPluginFilePath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier() + "_"
-							+ previousBatchClassModule.getWorkflowName() + "_" + SCRIPTING_PLUGIN + batchBakXml;
+					prevPluginFilePath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier() + BatchConstants.UNDER_SCORE
+							+ previousBatchClassModule.getWorkflowName() + BatchConstants.UNDER_SCORE + SCRIPTING_PLUGIN + batchBakXml;
 					prevPluginBatchXml = new File(prevPluginFilePath);
 					if (!prevPluginBatchXml.exists() && !FileUtils.isZipFileExists(prevPluginFilePath)) {
-						logger.error("Unable to find backup batch xml for batch instance : " + batchInstance.getIdentifier()
-								+ "with file : " + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
-						throw new Exception("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier()
-								+ "with file : " + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
+						LOGGER.error("Unable to find backup batch xml for batch instance : " + batchInstance.getIdentifier()
+								+ WITH_FILE + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
+						throw new DCMAApplicationException("Unable to update batch xml for batch instance : "
+								+ batchInstance.getIdentifier() + WITH_FILE + prevPluginBatchXml.getAbsolutePath() + "or " + prevPath);
 					}
 				}
-
-				try {
-					if (batchZipFile != null && batchZipFile.exists()) {
-						prevPluginFilePath = prevPluginBatchXml + FileType.ZIP.getExtensionWithDot();
-						FileUtils.copyFile(new File(prevPluginFilePath), batchZipFile);
-					} else {
-						FileUtils.copyFile(prevPluginBatchXml, batchXmlFile);
-					}
-				} catch (Exception e) {
-					logger.error("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier() + "with file : "
-							+ prevPluginBatchXml.getAbsolutePath());
-					throw new Exception("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier()
-							+ "with file : " + prevPluginBatchXml.getAbsolutePath());
-				}
+				copyFileInfo(batchInstance, batchZipFile, batchXmlFile, prevPluginBatchXml);
 			}
 		} else {
-			logger.error("Could not find restart option for batch instance : " + batchInstance.getIdentifier() + "restart option "
+			LOGGER.error("Could not find restart option for batch instance : " + batchInstance.getIdentifier() + "restart option "
 					+ moduleName);
-			throw new Exception("Could not find restart option for batch instance : " + batchInstance.getIdentifier()
+			throw new DCMAApplicationException("Could not find restart option for batch instance : " + batchInstance.getIdentifier()
 					+ "restart option " + moduleName);
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ephesoft.dcma.batch.service.ImportBatchService#importBatchClass(com.ephesoft.dcma.batch.schema.ImportBatchClassOptions, boolean, boolean)
+	private File getBackUpXMLFile(BatchInstance batchInstance, File batchInstanceFolder, String batchXmlPath)
+			throws DCMAApplicationException {
+		File batchXmlFile;
+		batchXmlFile = new File(batchXmlPath);
+		File backupXmlFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
+				+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML);
+		try {
+			if (batchXmlFile.exists()) {
+				FileUtils.copyFile(batchXmlFile, backupXmlFile);
+			}
+		} catch (IOException e) {
+			LOGGER.error(BatchConstants.BACKUP_BATCH_FILE_NOT_CREATED + batchInstance.getIdentifier());
+			throw new DCMAApplicationException(BatchConstants.BACKUP_BATCH_FILE_NOT_CREATED + batchInstance.getIdentifier(), e);
+		}
+		return batchXmlFile;
+	}
+
+	private void copyFileInfo(BatchInstance batchInstance, File batchZipFile, File batchXmlFile, File prevPluginBatchXml)
+			throws DCMAApplicationException {
+		String prevPluginFilePath;
+		try {
+			if (batchZipFile != null && batchZipFile.exists()) {
+				prevPluginFilePath = prevPluginBatchXml + FileType.ZIP.getExtensionWithDot();
+				FileUtils.copyFile(new File(prevPluginFilePath), batchZipFile);
+			} else {
+				FileUtils.copyFile(prevPluginBatchXml, batchXmlFile);
+			}
+		} catch (IOException e) {
+			LOGGER.error("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier() + WITH_FILE
+					+ prevPluginBatchXml.getAbsolutePath());
+			throw new DCMAApplicationException("Unable to update batch xml for batch instance : " + batchInstance.getIdentifier()
+					+ WITH_FILE + prevPluginBatchXml.getAbsolutePath(), e);
+		}
+	}
+
+	private File getBackUpXMLZipFile(Properties properties, BatchInstance batchInstance, File batchInstanceFolder)
+			throws DCMAApplicationException {
+		String batchXmlExtension;
+		File batchZipFile;
+		batchXmlExtension = ICommonConstants.UNDERSCORE_BATCH_XML_ZIP;
+		if (properties != null) {
+			batchXmlExtension = properties.getProperty(INPUT_BATCH_XML_ZIP);
+		}
+		String batchZipPath = batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
+				+ batchXmlExtension;
+		batchZipFile = new File(batchZipPath);
+		File backupXmlZipFile = new File(batchInstanceFolder.getAbsolutePath() + File.separator + batchInstance.getIdentifier()
+				+ ICommonConstants.UNDERSCORE_BAK_BATCH_XML_ZIP);
+		try {
+			FileUtils.copyFile(batchZipFile, backupXmlZipFile);
+		} catch (IOException e) {
+			LOGGER.error(BatchConstants.BACKUP_BATCH_FILE_NOT_CREATED + batchInstance.getIdentifier());
+			throw new DCMAApplicationException(BatchConstants.BACKUP_BATCH_FILE_NOT_CREATED + batchInstance.getIdentifier(), e);
+		}
+		return batchZipFile;
+	}
+
+	/**
+	 * Method to import the batch class as specified with the options XML.
+	 * 
+	 * @param optionXML {@link ImportBatchClassOptions}
+	 * @param isDeployed boolean
+	 * @param isFromWebService boolean
+	 * @param userRolesToAssign {@link Set<{@link String}>}
+	 * @return {@link Map<{@link Boolean}, {@link String}>}
 	 */
 	@Override
 	public Map<Boolean, String> importBatchClass(ImportBatchClassOptions optionXML, boolean isDeployed, boolean isFromWebService,
-			String userRole) {
+			Set<String> userRolesToAssign) {
 		Map<Boolean, String> resultsMap = new HashMap<Boolean, String>();
 		String tempOutputUnZipDir = optionXML.getZipFilePath();
 		File originalFolder = new File(tempOutputUnZipDir);
@@ -298,19 +406,26 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			if (isFromWebService) {
 				boolean isNameExistInDatabase = (batchClassService.getBatchClassByNameIncludingDeleted(optionXML.getName()) != null
 						? true : false);
+				if (!optionXML.isUseExisting() && isNameExistInDatabase) {
+					String errorMessg = "Incorrect user input. Please specify another name for workflow while importing a new batch class. Returning from import.";
+					resultsMap.put(false, errorMessg);
+					LOGGER.error(errorMessg);
+					return resultsMap;
+				}
+
 				boolean isEqual = isImportWorkflowEqualDeployedWorkflow(importBatchClass, optionXML.getName());
 				if (isNameExistInDatabase && !isEqual) {
 					String errorMessg = "Incorrect user input. Workflow name specified exists with different configuration. Returning from import.";
 					resultsMap.put(false, errorMessg);
-					logger.error(errorMessg);
+					LOGGER.error(errorMessg);
 					return resultsMap;
 				}
 
-				// verify the contents are equal to the deployed workflow
+				// verify the contents are equal to the deployed work flow
 				if (!optionXML.isImportIfConflict() && !isNameExistInDatabase && isDeployed) {
 					String errorMessg = "Zip contains a workflow name that is already deployed but no batch class exists corresponding to this workflow name. It may be possible that the zip contains different configuration. Please specify another name for workflow.";
 					resultsMap.put(false, errorMessg);
-					logger.error(errorMessg);
+					LOGGER.error(errorMessg);
 					return resultsMap;
 				}
 			}
@@ -318,99 +433,131 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			if (optionXML.getName() == null || optionXML.getName().isEmpty()) {
 				optionXML.setName(importBatchClass.getName());
 			}
+
 			if (optionXML.isUseExisting()) {
-				overrideExistingBatchClass(resultsMap, optionXML, tempOutputUnZipDir, originalFolder, importBatchClass,userRole);
+				overrideExistingBatchClass(resultsMap, optionXML, tempOutputUnZipDir, originalFolder, importBatchClass,
+						userRolesToAssign);
 			} else {
 				importNewBatchClass(resultsMap, optionXML, tempOutputUnZipDir, originalFolder, serializableFileStream,
-						importBatchClass, userRole);
+						importBatchClass, userRolesToAssign);
 			}
 		} catch (Exception e) {
 			String errorMessg = "Error while importing." + e.getMessage();
 			resultsMap.put(false, errorMessg);
-			logger.error(errorMessg, e);
+			LOGGER.error(errorMessg, e);
 		}
 		return resultsMap;
 	}
 
-	/** Method to import a new batch class.
-	 * 
-	 * @param resultsImport
-	 * @param optionXML
-	 * @param tempOutputUnZipDir
-	 * @param originalFolder
-	 * @param serializableFileStream
-	 * @param importBatchClass
-	 * @throws IOException
+	private void checkAndCreateNewSystemFolder(BatchClass dbBatchClass, BatchClass zipBatchClass) throws DCMAApplicationException {
+		String existingSystemFolderPath = null;
+		String newSystemFolderPath = null;
+		if (null != dbBatchClass) {
+			existingSystemFolderPath = dbBatchClass.getSystemFolder();
+
+		}
+		newSystemFolderPath = zipBatchClass.getSystemFolder();
+		if (null != newSystemFolderPath) {
+			File newSystemFolder = new File(newSystemFolderPath);
+			if (existingSystemFolderPath == null
+					|| (!existingSystemFolderPath.equals(newSystemFolderPath) && !newSystemFolder.exists())) {
+				newSystemFolder.mkdirs();
+				createAndLockFolder(newSystemFolder);
+			}
+		} else {
+			String errorMessage = "Invalid value for system folder. System folder is null.";
+			LOGGER.error(errorMessage);
+			throw new DCMAApplicationException(errorMessage);
+		}
+	}
+
+	/**
+	 * @param newSystemFolder
+	 * @throws Exception
 	 */
+	private void createAndLockFolder(File newSystemFolder) throws DCMAApplicationException {
+		final boolean isLockAcquired = FileUtils.lockFolder(newSystemFolder.getPath());
+		if (!isLockAcquired) {
+			String errorMessage = "Could not acquire lock on the system folder.";
+			LOGGER.error(errorMessage);
+			throw new DCMAApplicationException(errorMessage);
+		}
+	}
+
 	private void importNewBatchClass(Map<Boolean, String> resultsImport, ImportBatchClassOptions optionXML, String tempOutputUnZipDir,
-			File originalFolder, InputStream serializableFileStream, BatchClass importBatchClass, String userRole) throws IOException {
+			File originalFolder, InputStream serializableFileStream, BatchClass importBatchClass, Set<String> userRolesToAssign)
+			throws IOException {
 		// create a new batch class from zip file
-		String errorMessg = "";
+		BatchClass tempImportBatchClass = importBatchClass;
+		String errorMessg = BatchConstants.EMPTY;
 		boolean isSuccess = true;
 		resultsImport.put(isSuccess, errorMessg);
 		try {
-			importBatchClass.setId(0L);
+			tempImportBatchClass.setId(0L);
 			List<ImportBatchClassOptions.BatchClassDefinition> bcdList = optionXML.getBatchClassDefinition();
-			BatchClassDefinition bcd = bcdList.get(0);
+			BatchClassDefinition bcd = bcdList.get(BatchConstants.ZERO);
 			if (!optionXML.isRolesImported()) {
 				// do not import the roles
-				importBatchClass.getAssignedGroups().clear();
+				tempImportBatchClass.getAssignedGroups().clear();
 			}
 
 			for (Folder folder : bcd.getFolders().getFolder()) {
-				if (batchSchemaService.getImagemagickBaseFolderName().equalsIgnoreCase(folder.getFileName())) {
-					if (!folder.isSelected()) {
-						// do not import the image samples
-						String imagemagickBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, batchSchemaService
-								.getImagemagickBaseFolderName());
-						FileUtils.deleteDirectoryAndContentsRecursive(new File(imagemagickBaseFolder));
-					}
+				if (batchSchemaService.getImagemagickBaseFolderName().equalsIgnoreCase(folder.getFileName()) && !folder.isSelected()) {
+
+					// do not import the image samples
+					String imagemagickBaseFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, batchSchemaService
+							.getImagemagickBaseFolderName());
+					FileUtils.deleteDirectoryAndContentsRecursive(new File(imagemagickBaseFolder));
+
 				}
-				if (batchSchemaService.getSearchSampleName().equalsIgnoreCase(folder.getFileName())) {
-					if (!folder.isSelected()) {
-						// do not import the lucene samples
-						String searchSampleFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, batchSchemaService
-								.getSearchSampleName());
-						FileUtils.deleteDirectoryAndContentsRecursive(new File(searchSampleFolder));
-					}
+				if (batchSchemaService.getSearchSampleName().equalsIgnoreCase(folder.getFileName()) && !folder.isSelected()) {
+
+					// do not import the lucene samples
+					String searchSampleFolder = FileUtils.getFileNameOfTypeFromFolder(tempOutputUnZipDir, batchSchemaService
+							.getSearchSampleName());
+					FileUtils.deleteDirectoryAndContentsRecursive(new File(searchSampleFolder));
+
 				}
 			}
-			setCurrentUserRoleToBatchClass(importBatchClass,userRole);
+			setCurrentUserRoleToBatchClass(tempImportBatchClass, userRolesToAssign);
+			tempImportBatchClass.setSystemFolder(optionXML.getSystemFolder());
 			if (!optionXML.isUseSource()) {
-				importBatchClass.setDescription(optionXML.getDescription());
-				importBatchClass.setName(optionXML.getName());
-				importBatchClass.setPriority(optionXML.getPriority());
+				tempImportBatchClass.setDescription(optionXML.getDescription());
+				tempImportBatchClass.setName(optionXML.getName());
+				tempImportBatchClass.setPriority(optionXML.getPriority());
 			}
 			new File(optionXML.getUncFolder()).mkdirs();
-			importBatchClass.setUncFolder(optionXML.getUncFolder());
+			tempImportBatchClass.setUncFolder(optionXML.getUncFolder());
 			try {
 				BatchClass dbBatchClass = batchClassService.getLoadedBatchClassByNameIncludingDeleted(optionXML.getName());
 				if (dbBatchClass != null) {
 					batchClassService.evict(dbBatchClass);
 				}
-				updateSerializableBatchClass(dbBatchClass, importBatchClass);
-				batchClassService.evict(importBatchClass);
-				importBatchClass = batchClassService.createBatchClass(importBatchClass);
+				updateSerializableBatchClass(dbBatchClass, tempImportBatchClass);
+				batchClassService.evict(tempImportBatchClass);
+				tempImportBatchClass = batchClassService.createBatchClass(tempImportBatchClass);
+				resultsImport.put(Boolean.TRUE, tempImportBatchClass.getIdentifier());
 			} catch (Exception exception) {
 				errorMessg = "Unable to create/override batch Class." + exception.getMessage();
-				logger.error(errorMessg, exception);
+				LOGGER.error(errorMessg, exception);
 				isSuccess = false;
 				resultsImport.put(isSuccess, errorMessg);
 				new File(optionXML.getUncFolder()).delete();
 			}
 
-			File copiedFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator + importBatchClass.getIdentifier());
+			File copiedFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator
+					+ tempImportBatchClass.getIdentifier());
 			FileUtils.copyDirectoryWithContents(originalFolder, copiedFolder);
 
 		} catch (FileNotFoundException e) {
 			errorMessg = "Serializable file not found." + e.getMessage();
-			logger.error(errorMessg, e);
+			LOGGER.error(errorMessg, e);
 			isSuccess = false;
 			resultsImport.put(isSuccess, errorMessg);
 			new File(optionXML.getUncFolder()).delete();
 		} catch (IOException e) {
 			errorMessg = "Unable to copy the learning folders." + e.getMessage();
-			logger.error(errorMessg, e);
+			LOGGER.error(errorMessg, e);
 			isSuccess = false;
 			resultsImport.put(isSuccess, errorMessg);
 			new File(optionXML.getUncFolder()).delete();
@@ -423,66 +570,56 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		}
 	}
 
-	/**
-	 * This API sets first role of current user to this import batch class.
-	 * 
-	 * @param importBatchClass
-	 * @param userRoles
-	 */
-	private void setCurrentUserRoleToBatchClass(BatchClass importBatchClass, String userRole) {
-		if(userRole != null){
-		List<BatchClassGroups> batchClassGroupsList = importBatchClass.getAssignedGroups();
-		BatchClassGroups batchClassGroup = new BatchClassGroups();
-		batchClassGroup.setGroupName(userRole);
-		batchClassGroup.setId(0);
-		batchClassGroup.setBatchClass(null);
-		batchClassGroupsList.add(batchClassGroup);
-		importBatchClass.setAssignedGroups(batchClassGroupsList);
+	private void setCurrentUserRoleToBatchClass(BatchClass importBatchClass, Set<String> userRolesToAssign) {
+		if (userRolesToAssign != null) {
+			List<BatchClassGroups> batchClassGroupsList = importBatchClass.getAssignedGroups();
+			for (String roleToAssign : userRolesToAssign) {
+				boolean validRoleToAdd = true;
+				for (BatchClassGroups batchClassGroup : batchClassGroupsList) {
+					if (batchClassGroup.getGroupName().equals(roleToAssign)) {
+						validRoleToAdd = false;
+						break;
+					}
+
+				}
+				if (validRoleToAdd) {
+					BatchClassGroups batchClassGroup = new BatchClassGroups();
+					batchClassGroup.setGroupName(roleToAssign);
+					batchClassGroup.setId(BatchConstants.ZERO);
+					batchClassGroup.setBatchClass(null);
+					batchClassGroupsList.add(batchClassGroup);
+				}
+			}
+			importBatchClass.setAssignedGroups(batchClassGroupsList);
 		}
 	}
 
-	/**
-	 * Method to override the existing batch class
-	 * 
-	 * @param resultsImport
-	 * @param optionXML
-	 * @param tempOutputUnZipDir
-	 * @param originalFolder
-	 * @param importBatchClass
-	 * @throws Exception
-	 */
 	private void overrideExistingBatchClass(Map<Boolean, String> resultsImport, ImportBatchClassOptions optionXML,
-			final String tempOutputUnZipDir, File originalFolder, BatchClass importBatchClass, String userRole) throws Exception {
-
+			final String tempOutputUnZipDir, File originalFolder, BatchClass importBatchClass, Set<String> userRolesToAssign)
+			throws IOException {
+		BatchClass tempImportBatchClass = importBatchClass;
 		// overriding a batch class
 		BatchClass existingBatchClass = batchClassService.getLoadedBatchClassByUNC(optionXML.getUncFolder());
 		batchClassService.evict(existingBatchClass);
 		List<String> scriptsList = new ArrayList<String>();
 		if (existingBatchClass != null) {
 			// check the workflow name with UNC folder
-			/*
-			 * if (!existingBatchClass.getName().equalsIgnoreCase(importBatchClass.getName())) { logger.error(
-			 * "Returning from import batch service with error. Mismathing workflow type from zip and from UNC folder specified. Zip workflow name:"
-			 * + importBatchClass.getName() + ". UNC workflow name:" + existingBatchClass.getName()); isSuccess = false; return
-			 * isSuccess; }
-			 */
-
 			String existingUncFolder = existingBatchClass.getUncFolder();
-			setCurrentUserRoleToBatchClass(importBatchClass,userRole);
+			setCurrentUserRoleToBatchClass(tempImportBatchClass, userRolesToAssign);
 			// update the configurations of imported batch class from DB / Zip
 			if (!optionXML.isRolesImported()) {
 				// import the roles from database
-				updateRoles(importBatchClass, existingBatchClass, Boolean.TRUE);
+				updateRoles(tempImportBatchClass, existingBatchClass, Boolean.TRUE);
 			}
 			if (!optionXML.isEmailAccounts()) {
-				updateEmailConfigurations(importBatchClass, existingBatchClass, Boolean.TRUE);
+				updateEmailConfigurations(tempImportBatchClass, existingBatchClass, Boolean.TRUE);
 			}
 			List<ImportBatchClassOptions.BatchClassDefinition> bcdList = optionXML.getBatchClassDefinition();
-			BatchClassDefinition bcd = bcdList.get(0);
+			BatchClassDefinition bcd = bcdList.get(BatchConstants.ZERO);
 			if (bcd.getScripts() != null && !bcd.getScripts().getScript().isEmpty()) {
 				scriptsList = updateScriptsFiles(tempOutputUnZipDir, bcd.getScripts().getScript(), existingBatchClass.getIdentifier());
 			}
-			if(bcd.getFolders() != null && !bcd.getFolders().getFolder().isEmpty()) {
+			if (bcd.getFolders() != null && !bcd.getFolders().getFolder().isEmpty()) {
 				for (Folder folder : bcd.getFolders().getFolder()) {
 					if (!folder.isSelected()) {
 						// import from database
@@ -495,12 +632,12 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 							return;
 						}
 					}
-				}				
+				}
 			}
-			if(bcd.getBatchClassModules() != null && !bcd.getBatchClassModules().getBatchClassModule().isEmpty()) {
+			if (bcd.getBatchClassModules() != null && !bcd.getBatchClassModules().getBatchClassModule().isEmpty()) {
 				for (com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition.BatchClassModules.BatchClassModule bcm : bcd
 						.getBatchClassModules().getBatchClassModule()) {
-					updatePlgConfig(resultsImport, bcm, importBatchClass, existingBatchClass);
+					updatePlgConfig(resultsImport, bcm, tempImportBatchClass, existingBatchClass);
 					String errorMessgImport = resultsImport.get(Boolean.FALSE);
 					if (errorMessgImport != null && !errorMessgImport.isEmpty()) {
 						return;
@@ -511,84 +648,91 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			String errorMessg = "";
 			if (isSuccess) {
 				// override the existing batch class
-				importBatchClass.setId(0L);
-				importBatchClass.setUncFolder("dummyUncFolder" + System.currentTimeMillis());
-
+				tempImportBatchClass.setId(0L);
+				tempImportBatchClass.setUncFolder("dummyUncFolder" + System.currentTimeMillis());
+				tempImportBatchClass.setSystemFolder(optionXML.getSystemFolder());
 				if (!optionXML.isUseSource()) {
-					importBatchClass.setDescription(optionXML.getDescription());
-					importBatchClass.setName(optionXML.getName());
-					importBatchClass.setPriority(optionXML.getPriority());
+					tempImportBatchClass.setDescription(optionXML.getDescription());
+					tempImportBatchClass.setName(optionXML.getName());
+					tempImportBatchClass.setPriority(optionXML.getPriority());
 				}
 			}
-
-			updateSerializableBatchClass(existingBatchClass, importBatchClass);
-			importBatchClass = batchClassService.createBatchClassWithoutWatch(importBatchClass);
-			batchClassService.evict(importBatchClass);
-			importBatchClass = batchClassService.getLoadedBatchClassByIdentifier(importBatchClass.getIdentifier());
-
 			try {
-				String dummyUncFolder = existingUncFolder + "-" + existingBatchClass.getIdentifier() + "-deleted";
-				existingBatchClass = batchClassService.getBatchClassByIdentifier(existingBatchClass.getIdentifier());
-				existingBatchClass.setUncFolder(dummyUncFolder);
-				deleteEmailConfigForBatchClass(existingBatchClass);
-				existingBatchClass = batchClassService.merge(existingBatchClass);
-				try {
-					importBatchClass.setUncFolder(existingUncFolder);
-					importBatchClass = batchClassService.createBatchClass(importBatchClass);
-					try {
-						FileUtils.deleteSelectedFilesFromDirectory(tempOutputUnZipDir + File.separator
-								+ batchSchemaService.getScriptFolderName(), scriptsList);
-						File copiedFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator
-								+ importBatchClass.getIdentifier());
-						FileUtils.copyDirectoryWithContents(originalFolder, copiedFolder);
-
-						List<BatchInstance> newBatchInstances = batchInstanceService.getBatchInstByBatchClass(existingBatchClass);
-						for (BatchInstance batchInstance : newBatchInstances) {
-							if (batchInstance.getStatus().equals(BatchInstanceStatus.NEW)) {
-								batchInstance.setBatchClass(importBatchClass);
-								batchInstance.setPriority(importBatchClass.getPriority());
-								batchInstanceService.updateBatchInstance(batchInstance);
-							}
-						}
-					} catch (Exception e) {
-						errorMessg = "Error while overriding, reverting the changes:" + e.getMessage();
-						logger.info(errorMessg, e);
-						isSuccess = false;
-						resultsImport.put(isSuccess, errorMessg);
-						importBatchClass.setDeleted(true);
-						importBatchClass = batchClassService.merge(importBatchClass, true);
-
-						existingBatchClass.setUncFolder(existingUncFolder);
-						existingBatchClass = batchClassService.merge(existingBatchClass);
-					}
-					existingBatchClass.setDeleted(true);
-					existingBatchClass = batchClassService.merge(existingBatchClass, true);
-					new File(dummyUncFolder).mkdirs();
-
-				} catch (Exception e) {
-					errorMessg = "Error while overriding, reverting the changes:" + e.getMessage();
-					isSuccess = false;
-					resultsImport.put(isSuccess, errorMessg);
-					logger.info(errorMessg, e);
-					existingBatchClass.setUncFolder(existingUncFolder);
-					existingBatchClass = batchClassService.merge(existingBatchClass);
-				}
-
+				tempImportBatchClass = getOverridedBatchClass(resultsImport, tempOutputUnZipDir, originalFolder, tempImportBatchClass,
+						existingBatchClass, scriptsList, existingUncFolder);
 			} catch (Exception e) {
 				errorMessg = "Error while overriding, reverting the changes:" + e.getMessage();
 				isSuccess = false;
 				resultsImport.put(isSuccess, errorMessg);
-				logger.info(errorMessg, e);
-				importBatchClass.setDeleted(true);
-				importBatchClass = batchClassService.merge(importBatchClass, true);
+				LOGGER.info(errorMessg, e);
+				tempImportBatchClass.setDeleted(true);
+				tempImportBatchClass = batchClassService.merge(tempImportBatchClass, true);
 			}
 
 		}
 	}
 
-	/** Method to delete the email configurations from the specified batch class.
-	 * @param batchClass
-	 */
+	private BatchClass getOverridedBatchClass(Map<Boolean, String> resultsImport, final String tempOutputUnZipDir,
+			File originalFolder, BatchClass tempImportBatchClass, BatchClass existingBatchClass, List<String> scriptsList,
+			String existingUncFolder) throws DCMAApplicationException {
+		boolean isSuccess;
+		String errorMessg;
+		BatchClass localExistingBatchClass = existingBatchClass;
+		BatchClass localTempImportBatchClass = tempImportBatchClass;
+		updateSerializableBatchClass(localExistingBatchClass, localTempImportBatchClass);
+		localTempImportBatchClass = batchClassService.createBatchClassWithoutWatch(localTempImportBatchClass);
+		batchClassService.evict(localTempImportBatchClass);
+		localTempImportBatchClass = batchClassService.getLoadedBatchClassByIdentifier(localTempImportBatchClass.getIdentifier());
+
+		String dummyUncFolder = existingUncFolder + "-" + localExistingBatchClass.getIdentifier() + "-deleted";
+		localExistingBatchClass = batchClassService.getBatchClassByIdentifier(localExistingBatchClass.getIdentifier());
+		localExistingBatchClass.setUncFolder(dummyUncFolder);
+		deleteEmailConfigForBatchClass(localExistingBatchClass);
+		localExistingBatchClass = batchClassService.merge(localExistingBatchClass);
+		try {
+			localTempImportBatchClass.setUncFolder(existingUncFolder);
+			localTempImportBatchClass = batchClassService.createBatchClass(localTempImportBatchClass);
+			try {
+				FileUtils.deleteSelectedFilesFromDirectory(tempOutputUnZipDir + File.separator
+						+ batchSchemaService.getScriptFolderName(), scriptsList);
+				File copiedFolder = new File(batchSchemaService.getBaseSampleFDLock() + File.separator
+						+ localTempImportBatchClass.getIdentifier());
+				FileUtils.copyDirectoryWithContents(originalFolder, copiedFolder);
+
+				List<BatchInstance> newBatchInstances = batchInstanceService.getBatchInstByBatchClass(localExistingBatchClass);
+				for (BatchInstance batchInstance : newBatchInstances) {
+					if (batchInstance.getStatus().equals(BatchInstanceStatus.NEW)) {
+						batchInstance.setBatchClass(localTempImportBatchClass);
+						batchInstance.setPriority(localTempImportBatchClass.getPriority());
+						batchInstanceService.updateBatchInstance(batchInstance);
+					}
+				}
+				resultsImport.put(Boolean.TRUE, localTempImportBatchClass.getIdentifier());
+			} catch (Exception e) {
+				errorMessg = "Error while overriding, reverting the changes:" + e.getMessage();
+				LOGGER.info(errorMessg, e);
+				isSuccess = false;
+				resultsImport.put(isSuccess, errorMessg);
+				localTempImportBatchClass.setDeleted(true);
+				localTempImportBatchClass = batchClassService.merge(localTempImportBatchClass, true);
+
+				localExistingBatchClass.setUncFolder(existingUncFolder);
+				localExistingBatchClass = batchClassService.merge(localExistingBatchClass);
+			}
+			localExistingBatchClass.setDeleted(true);
+			localExistingBatchClass = batchClassService.merge(localExistingBatchClass, true);
+			new File(dummyUncFolder).mkdirs();
+		} catch (Exception e) {
+			errorMessg = "Error while overriding, reverting the changes:" + e.getMessage();
+			isSuccess = false;
+			resultsImport.put(isSuccess, errorMessg);
+			LOGGER.info(errorMessg, e);
+			localExistingBatchClass.setUncFolder(existingUncFolder);
+			localExistingBatchClass = batchClassService.merge(localExistingBatchClass);
+		}
+		return localTempImportBatchClass;
+	}
+
 	private void deleteEmailConfigForBatchClass(final BatchClass batchClass) {
 		List<BatchClassEmailConfiguration> emailConfigList = bcEmailConfigService.getEmailConfigByBatchClassIdentifier(batchClass
 				.getIdentifier());
@@ -598,20 +742,15 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 	}
 
 	/**
-	 * Utility Method to synchronize the serializable file Batch class with the current System Batch Class. In case the exported batch
-	 * class contains any additional plugins,modules,plugin Config or plugin config sample values, they are imported as well.
+	 * To update Serializable Batch Class.
 	 * 
-	 * @param dbBatchClass
-	 * @param moduleConfigService
-	 * @param moduleService
-	 * @param pluginService
-	 * @param pluginConfigService
-	 * @param batchClassService
-	 * @param batchSchemaService
-	 * @param serializedBatchClass
+	 * @param dbBatchClass {@link BatchClass} 
+	 * @param serializedBatchClass {@link BatchClass}
+	 * @throws DCMAApplicationException if required scanner configuration is not found
 	 */
-	public void updateSerializableBatchClass(BatchClass dbBatchClass, BatchClass serializedBatchClass) {
+	public void updateSerializableBatchClass(BatchClass dbBatchClass, BatchClass serializedBatchClass) throws DCMAApplicationException {
 		// fix for "Not Mapped yet." issue while importing old batch classes.
+		checkAndCreateNewSystemFolder(dbBatchClass, serializedBatchClass);
 		List<DocumentType> documentTypes = serializedBatchClass.getDocumentTypes();
 		if (documentTypes != null) {
 			for (DocumentType documentType : documentTypes) {
@@ -630,32 +769,9 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			} else {
 				batchClassModule.setModule(currentModule);
 			}
-			List<BatchClassModuleConfig> batchClassModConfigs = batchClassModule.getBatchClassModuleConfig();
-			boolean isClearBatchClassModuleConfig = false;
-			if (batchClassModConfigs != null) {
-				for (BatchClassModuleConfig batchClassModConfig : batchClassModConfigs) {
-					if (batchClassModConfig != null) {
-						if (batchClassModConfig.getModuleConfig() != null) {
-							ModuleConfig currentModuleConfig = moduleConfigService.getModuleConfigByKeyAndMandatory(
-									batchClassModConfig.getModuleConfig().getChildKey(), batchClassModConfig.getModuleConfig()
-											.isMandatory());
-							if (currentModuleConfig == null) {
-								continue;
-							} else {
-								batchClassModConfig.setModuleConfig(currentModuleConfig);
-							}
-						} else if (!isClearBatchClassModuleConfig) {
-							isClearBatchClassModuleConfig = true;
-						}
-					}
-				}
-
-				// backward compatibility support for 2.2 release exported batch classes
-				if (isClearBatchClassModuleConfig) {
-					batchClassModule.getBatchClassModuleConfig().clear();
-					batchClassModule.setBatchClassModuleConfig(new ArrayList<BatchClassModuleConfig>());
-				}
-			}
+	
+			batchClassModule.getBatchClassModuleConfig().clear();
+			batchClassModule.setBatchClassModuleConfig(new ArrayList<BatchClassModuleConfig>());
 
 			List<BatchClassPlugin> batchClassPlugins = batchClassModule.getBatchClassPlugins();
 			for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
@@ -680,55 +796,42 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 				}
 			}
 		}
-		if (dbBatchClass != null) {
-			updateBatchClassModules(pluginConfigService, batchSchemaService, dbBatchClass, batchClassModules);
-		}
+		updateScannerConfig(serializedBatchClass.getBatchClassScannerConfiguration());
+		updateBatchClassModules(batchClassModules);
 	}
 
 	/**
-	 * This method synchronizes the zip batch class modules with the system batch class modules.
+	 * To update the scanner configuration.
 	 * 
-	 * @param pluginConfigService
-	 * @param batchSchemaService
-	 * @param dbBatchClass
-	 * @param zipBatchClassModules
+	 * @param batchClassScannerConfigs List<BatchClassScannerConfiguration>
 	 */
-	private void updateBatchClassModules(PluginConfigService pluginConfigService, BatchSchemaService batchSchemaService,
-			BatchClass dbBatchClass, List<BatchClassModule> zipBatchClassModules) {
-		List<BatchClassModule> dbBatchClassModules = dbBatchClass.getBatchClassModules();
-		List<BatchClassModule> validBatchClassModules = new ArrayList<BatchClassModule>();
-		if (dbBatchClassModules != null) {
-			BatchClassModule bcModule = null;
-			for (BatchClassModule dbBatchClassModule : dbBatchClassModules) {
-				boolean isPresent = false;
-				for (BatchClassModule zipBatchClassModule : zipBatchClassModules) {
-					if (zipBatchClassModule.getWorkflowName().equalsIgnoreCase(dbBatchClassModule.getWorkflowName())) {
-						isPresent = true;
-						validBatchClassModules.add(zipBatchClassModule);
-						bcModule = zipBatchClassModule;
-						break;
-					}
-				}
-				if (isPresent) {
-					BatchClassModule detachedBatchClassModule = batchSchemaService.getDetachedBatchClassModuleByName(dbBatchClass
-							.getIdentifier(), bcModule.getWorkflowName());
-					if (detachedBatchClassModule != null) {
-						updateBatchClassPlugins(pluginConfigService, detachedBatchClassModule, bcModule.getBatchClassPlugins());
-					} else {
-						logger.info("No module found with workflowName:" + bcModule.getWorkflowName() + " in batch class id:"
-								+ dbBatchClass.getIdentifier() + ". Skipping the updates for this module.");
-					}
+	public void updateScannerConfig(List<BatchClassScannerConfiguration> batchClassScannerConfigs) {
+		if (batchClassScannerConfigs == null || batchClassScannerConfigs.isEmpty()) {
+			LOGGER.info("No Scanner Configs present in the imported batch class.");
+			return;
+		}
+		for (BatchClassScannerConfiguration batchClassScannerConfig : batchClassScannerConfigs) {
+			ScannerMasterConfiguration importedScannerMasterConfig = batchClassScannerConfig.getScannerMasterConfig();
+			if (null != importedScannerMasterConfig) {
+				String masterScannerConfigName = importedScannerMasterConfig.getName();
+				ScannerMasterConfiguration scannerMasterConfig = masterScannerService
+						.getScannerMasterConfigForProfile(masterScannerConfigName);
+				if (scannerMasterConfig != null) {
+					batchClassScannerConfig.setScannerMasterConfig(scannerMasterConfig);
 				} else {
-					BatchClassModule detachedBatchClassModule = batchSchemaService.getDetachedBatchClassModuleByName(dbBatchClass
-							.getIdentifier(), dbBatchClassModule.getWorkflowName());
-					if (detachedBatchClassModule != null) {
-						validBatchClassModules.add(detachedBatchClassModule);
-					} else {
-						logger.info("No module found with workflowName:" + dbBatchClassModule.getWorkflowName()
-								+ " in batch class id:" + dbBatchClass.getIdentifier() + ". Skipping the updates for this module.");
-					}
+					LOGGER.error("Scanner config with name:" + masterScannerConfigName
+							+ " is not present in the scanner_master_configuration table. So skipping this scanner config.");
 				}
 			}
+		}
+
+	}
+
+	private void updateBatchClassModules(List<BatchClassModule> zipBatchClassModules) {
+		List<BatchClassModule> validBatchClassModules = new ArrayList<BatchClassModule>();
+		for (BatchClassModule zipBatchClassModule : zipBatchClassModules) {
+			updateBatchClassPlugins(zipBatchClassModule.getBatchClassPlugins());
+			validBatchClassModules.add(zipBatchClassModule);
 		}
 		if (validBatchClassModules != null) {
 			zipBatchClassModules.clear();
@@ -736,37 +839,11 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		}
 	}
 
-	/**
-	 * This method synchronizes the zip batch class plugins of specific batch class module with batch class plugins of corresponding
-	 * batch class module of system batch class.
-	 * 
-	 * @param pluginConfigService
-	 * @param dbBatchClassModule
-	 * @param zipBatchClassPlugins
-	 */
-	private void updateBatchClassPlugins(PluginConfigService pluginConfigService, BatchClassModule dbBatchClassModule,
-			List<BatchClassPlugin> zipBatchClassPlugins) {
-		List<BatchClassPlugin> dbBatchClassPlugins = dbBatchClassModule.getBatchClassPlugins();
+	private void updateBatchClassPlugins(List<BatchClassPlugin> zipBatchClassPlugins) {
 		List<BatchClassPlugin> validBatchClassPlugins = new ArrayList<BatchClassPlugin>();
-		if (dbBatchClassPlugins != null) {
-			BatchClassPlugin bcPlugin = null;
-			for (BatchClassPlugin dbBatchClassPlugin : dbBatchClassPlugins) {
-				boolean isPresent = false;
-				for (BatchClassPlugin zipBatchClassPlugin : zipBatchClassPlugins) {
-					if (zipBatchClassPlugin.getPlugin().getPluginName().equalsIgnoreCase(
-							dbBatchClassPlugin.getPlugin().getPluginName())) {
-						isPresent = true;
-						validBatchClassPlugins.add(zipBatchClassPlugin);
-						bcPlugin = zipBatchClassPlugin;
-						break;
-					}
-				}
-				if (isPresent) {
-					updateBatchClassPluginConfigs(pluginConfigService, dbBatchClassPlugin, bcPlugin.getBatchClassPluginConfigs());
-				} else {
-					validBatchClassPlugins.add(dbBatchClassPlugin);
-				}
-			}
+		for (BatchClassPlugin zipBatchClassPlugin : zipBatchClassPlugins) {
+			updateBatchClassPluginConfigs(zipBatchClassPlugin);
+			validBatchClassPlugins.add(zipBatchClassPlugin);
 		}
 		if (validBatchClassPlugins != null) {
 			zipBatchClassPlugins.clear();
@@ -774,85 +851,134 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		}
 	}
 
-	/**
-	 * This method synchronizes the zip batch class plugin configs of specific batch class plugin with the corresponding batch class
-	 * plugin config in system batch class.
-	 * 
-	 * @param pluginConfigService
-	 * @param dbBatchClassPlugin
-	 * @param zipBatchClassPluginConfigs
-	 */
-	private void updateBatchClassPluginConfigs(PluginConfigService pluginConfigService, BatchClassPlugin dbBatchClassPlugin,
+	private void updateBatchClassPluginConfigs(BatchClassPlugin zipBatchClassPlugin) {
+		getBatchClassPluginConfigs(zipBatchClassPlugin);
+	}
+
+	private List<BatchClassPluginConfig> addBatchClassPluginConfigsForNewPlugin(List<PluginConfig> existingPluginConfig,
 			List<BatchClassPluginConfig> zipBatchClassPluginConfigs) {
-		if (dbBatchClassPlugin != null) {
-			List<BatchClassPluginConfig> dbBatchClassPluginConfigs = dbBatchClassPlugin.getBatchClassPluginConfigs();
-			List<BatchClassPluginConfig> validBCPluginConfigs = new ArrayList<BatchClassPluginConfig>();
-			BatchClassPluginConfig bcPluginConfig = null;
-			if (dbBatchClassPluginConfigs != null) {
-				for (BatchClassPluginConfig dbBatchClassPluginConfig : dbBatchClassPluginConfigs) {
-					boolean isPresent = false;
-					for (BatchClassPluginConfig zipBatchClassPluginConfig : zipBatchClassPluginConfigs) {
-						if (zipBatchClassPluginConfig.getPluginConfig().getName().equalsIgnoreCase(
-								dbBatchClassPluginConfig.getPluginConfig().getName())) {
-							isPresent = true;
-							bcPluginConfig = zipBatchClassPluginConfig;
-							validBCPluginConfigs.add(zipBatchClassPluginConfig);
-							break;
-						}
-					}
-					if (isPresent) {
-						// update batch class plugin config value.
-						updateBatchClassPluginConfigValue(pluginConfigService, bcPluginConfig, dbBatchClassPluginConfig);
-					} else {
-						// add new batch class plugin config to imported batch class.
-						validBCPluginConfigs.add(dbBatchClassPluginConfig);
-					}
+		List<BatchClassPluginConfig> validBCPluginConfigs = new ArrayList<BatchClassPluginConfig>();
+		for (PluginConfig pluginConfig : existingPluginConfig) {
+			boolean pluginConfigExits = false;
+			String pluginConfigName = pluginConfig.getName();
+			for (BatchClassPluginConfig batchClassPluginConfig : zipBatchClassPluginConfigs) {
+				String existingPluginConfigName = batchClassPluginConfig.getName();
+				if (existingPluginConfigName.equals(pluginConfigName)) {
+					updateBatchClassPluginConfigValue(batchClassPluginConfig, pluginConfig);
+					pluginConfigExits = true;
+					validBCPluginConfigs.add(batchClassPluginConfig);
+					break;
 				}
 			}
-			if (validBCPluginConfigs != null) {
-				zipBatchClassPluginConfigs.clear();
-				zipBatchClassPluginConfigs.addAll(validBCPluginConfigs);
+			if (!pluginConfigExits) {
+				BatchClassPluginConfig batchClassPluginConfig = new BatchClassPluginConfig();
+				batchClassPluginConfig.setPluginConfig(pluginConfig);
+				setDefaultValueForNewConfig(batchClassPluginConfig);
+				validBCPluginConfigs.add(batchClassPluginConfig);
 			}
+		}
+		return validBCPluginConfigs;
+	}
+
+	private List<BatchClassPluginConfig> addBatchClassPluginConfigsForExitingPlugin(Plugin dbBatchClassPlugin,
+			BatchClassPlugin zipBatchClassPlugin) {
+		List<BatchClassPluginConfig> validBCPluginConfigs = new ArrayList<BatchClassPluginConfig>();
+		long batchClassPluginId = -BatchConstants.ONE;
+		long pluginId = dbBatchClassPlugin.getId();
+		List<BatchClassPluginConfig> batchClassPluginConfigsList = new ArrayList<BatchClassPluginConfig>(0);
+		try {
+			List<BatchClassPlugin> batchClassPlugins = batchClassPluginService.getBatchClassPluginForPluginId(pluginId);
+			for (BatchClassPlugin batchClassPlugin : batchClassPlugins) {
+				if (batchClassPlugin.getPlugin().getPluginName().equals(dbBatchClassPlugin.getPluginName())) {
+					batchClassPluginId = batchClassPlugin.getId();
+					break;
+				}
+
+			}
+		} catch (NumberFormatException e) {
+			LOGGER.error("Error converting number: " + e.getMessage(), e);
+		}
+		if (batchClassPluginId != -BatchConstants.ONE) {
+			batchClassPluginConfigsList = batchClassPluginConfigService.getPluginConfigurationForPluginId(batchClassPluginId);
+
+			if (batchClassPluginConfigsList != null) {
+				List<PluginConfig> existingPluginConfigs = new ArrayList<PluginConfig>();
+				for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigsList) {
+					PluginConfig pluginConfig = batchClassPluginConfig.getPluginConfig();
+					existingPluginConfigs.add(pluginConfig);
+				}
+				validBCPluginConfigs = addBatchClassPluginConfigsForNewPlugin(existingPluginConfigs, zipBatchClassPlugin
+						.getBatchClassPluginConfigs());
+			}
+
+		}
+		return validBCPluginConfigs;
+	}
+
+	private void getBatchClassPluginConfigs(BatchClassPlugin zipBatchClassPlugin) {
+		long pluginId;// = dbBatchClassPlugin.getPlugin().getId();
+		String pluginName = zipBatchClassPlugin.getPlugin().getPluginName();
+		Plugin plugin = pluginService.getPluginPropertiesForPluginName(pluginName);
+		pluginId = plugin.getId();
+		List<PluginConfig> pluginConfigs = pluginConfigService.getPluginConfigForPluginId(String.valueOf(pluginId));
+		List<BatchClassPluginConfig> newBatchClassClassPluginConfigs = null;
+		if (pluginConfigs != null && !pluginConfigs.isEmpty()) {
+			// Newly added plugins
+			newBatchClassClassPluginConfigs = addBatchClassPluginConfigsForNewPlugin(pluginConfigs, zipBatchClassPlugin
+					.getBatchClassPluginConfigs());
+		} else {
+			// workaround for Plugins added before 3.0 with no entry for plugin id in plugin config table.
+			newBatchClassClassPluginConfigs = addBatchClassPluginConfigsForExitingPlugin(plugin, zipBatchClassPlugin);
+		}
+
+		if (newBatchClassClassPluginConfigs != null) {
+			zipBatchClassPlugin.getBatchClassPluginConfigs().clear();
+			zipBatchClassPlugin.getBatchClassPluginConfigs().addAll(newBatchClassClassPluginConfigs);
+		}
+
+	}
+
+	private static void setDefaultValueForNewConfig(BatchClassPluginConfig batchClassPluginConfig) {
+		DataType pluginConfigDataType = batchClassPluginConfig.getPluginConfig().getDataType();
+		if (pluginConfigDataType == DataType.BOOLEAN) {
+			batchClassPluginConfig.setValue("Yes");
+		} else {
+			boolean isMandatory = batchClassPluginConfig.getPluginConfig().isMandatory();
+			if (pluginConfigDataType == DataType.STRING && isMandatory) {
+				List<String> sampleValues = batchClassPluginConfig.getSampleValue();
+				if (sampleValues == null || sampleValues.isEmpty()) {
+					batchClassPluginConfig.setValue("Default");
+				} else if (sampleValues.size() > 0) {
+					batchClassPluginConfig.setValue(sampleValues.get(0));
+				}
+			} else if (pluginConfigDataType == DataType.INTEGER && isMandatory) {
+				batchClassPluginConfig.setValue("0");
+			}
+
 		}
 	}
 
-	/**
-	 * This method sychronizes the zip batch class plugin config value with the value in plugin config sample value.
-	 * 
-	 * @param pluginConfigService
-	 * @param zipBatchClassPluginConfig
-	 * @param dbBatchClassPluginConfig
-	 */
-	private void updateBatchClassPluginConfigValue(PluginConfigService pluginConfigService,
-			BatchClassPluginConfig zipBatchClassPluginConfig, BatchClassPluginConfig dbBatchClassPluginConfig) {
-		PluginConfig pluginConfig = dbBatchClassPluginConfig.getPluginConfig();
-		if (pluginConfig != null) {
-			pluginConfig = pluginConfigService.getPluginConfigByName(pluginConfig.getName());
+	private void updateBatchClassPluginConfigValue(BatchClassPluginConfig zipBatchClassPluginConfig, PluginConfig pluginConfig) {
+		PluginConfig tempPluginConfig = pluginConfig;
+		if (tempPluginConfig != null) {
+			tempPluginConfig = pluginConfigService.getPluginConfigByName(tempPluginConfig.getName());
 			// get sample values for that plugin config.
-			List<String> pcSampleValue = pluginConfig.getSampleValue();
+			List<String> pcSampleValue = tempPluginConfig.getSampleValue();
 			// get batch class plugin config value in zip.
 			String bcpcValue = zipBatchClassPluginConfig.getValue();
 			// Check if batch class plugin config value is valid or not.
 			if (pcSampleValue != null && !pcSampleValue.isEmpty() && !isBcpcValueExistsInDB(pcSampleValue, bcpcValue)) {
 				// update imported batch class plugin value with plugin config value for system batch class.
-				zipBatchClassPluginConfig.setValue(dbBatchClassPluginConfig.getValue());
+				zipBatchClassPluginConfig.setValue(pcSampleValue.get(0));
 			}
 		}
 	}
 
-	/**
-	 * This method returns true or false depending on whether zip batch class plugin config value exists in its sample values in
-	 * database.
-	 * 
-	 * @param dbBatchClassPluginConfig
-	 * @param zipBcpcValue
-	 * @return
-	 */
 	private boolean isBcpcValueExistsInDB(List<String> dbBatchClassPluginConfig, String zipBcpcValue) {
 		boolean isPresent = false;
 		if (zipBcpcValue != null) {
 			String[] valueArray = zipBcpcValue.split(SEMI_COLON);
-			for (int index = 0; index < valueArray.length; index++) {
+			for (int index = BatchConstants.ZERO; index < valueArray.length; index++) {
 				String eachValue = valueArray[index];
 				for (String sampleValue : dbBatchClassPluginConfig) {
 					// Check if BCPC value exists in database.
@@ -864,7 +990,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 				if (!isPresent) {
 					// Value not present in sample values. Return false.
 					break;
-				} else if (index == valueArray.length - 1) {
+				} else if (index == valueArray.length - BatchConstants.ONE) {
 					// Reached end of array. Each BCPC value present. Return true.
 					break;
 				} else {
@@ -876,16 +1002,18 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		return isPresent;
 	}
 
-	/** Method to update the plugin configurations of the batch class as per the options specified.
-	 * @param resultsImport
-	 * @param bcm
-	 * @param importBatchClass
-	 * @param existingBatchClass
+	/**
+	 * To update plugin configuration.
+	 * 
+	 * @param resultsImport Map<Boolean, String>
+	 * @param bcm com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition.BatchClassModules.BatchClassModule
+	 * @param importBatchClass {@link BatchClass}
+	 * @param existingBatchClass {@link BatchClass}
 	 */
 	public void updatePlgConfig(Map<Boolean, String> resultsImport,
 			com.ephesoft.dcma.batch.schema.ImportBatchClassOptions.BatchClassDefinition.BatchClassModules.BatchClassModule bcm,
 			BatchClass importBatchClass, BatchClass existingBatchClass) {
-		String errorMessg = "";
+		String errorMessg = BatchConstants.EMPTY;
 		boolean results = true;
 		BatchClassModule importBatchClassModule = importBatchClass.getBatchClassModuleByWorkflowName(bcm.getModuleName());
 		BatchClassModule existingBatchClassModule = batchSchemaService.getDetachedBatchClassModuleByName(existingBatchClass
@@ -896,7 +1024,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 				errorMessg = "Either no module found with workflowName:\"" + bcm.getModuleName() + "\" in batch class id:"
 						+ existingBatchClass.getIdentifier()
 						+ " or no module found in zip batch class. Returning with error while batch class import.";
-				logger.error(errorMessg);
+				LOGGER.error(errorMessg);
 				results = false;
 			} else {
 				List<BatchClassModule> importedBatchClassMod = importBatchClass.getBatchClassModules();
@@ -909,17 +1037,19 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 				// not found in zip throw in error
 				errorMessg = "No module found with workflowName:\"" + bcm.getModuleName()
 						+ "\" in zip batch class. Returning with error while batch class import.";
-				logger.error(errorMessg);
+				LOGGER.error(errorMessg);
 				results = false;
 				resultsImport.put(results, errorMessg);
 			}
 		}
 	}
 
-	/** Method to update the roles of the specified batch class.
-	 * @param importBatchClass
-	 * @param existingBatchClass
-	 * @param isFromDB
+	/**
+	 * To update roles of assigned gropus.
+	 * 
+	 * @param importBatchClass {@link BatchClass}
+	 * @param existingBatchClass {@link BatchClass}
+	 * @param isFromDB Boolean
 	 */
 	public void updateRoles(BatchClass importBatchClass, BatchClass existingBatchClass, Boolean isFromDB) {
 		List<BatchClassGroups> batchClassGroups = new ArrayList<BatchClassGroups>();
@@ -931,7 +1061,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		List<BatchClassGroups> newBatchClassGroupsList = new ArrayList<BatchClassGroups>();
 		for (BatchClassGroups batchClassGroup : batchClassGroups) {
 			newBatchClassGroupsList.add(batchClassGroup);
-			batchClassGroup.setId(0);
+			batchClassGroup.setId(BatchConstants.ZERO);
 			batchClassGroup.setBatchClass(null);
 		}
 		if (isFromDB) {
@@ -944,9 +1074,11 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 	}
 
 	/**
-	 * @param importBatchClass
-	 * @param existingBatchClass
-	 * @param isFromDB
+	 * To update email configuration.
+	 * 
+	 * @param importBatchClass {@link BatchClass}
+	 * @param existingBatchClass {@link BatchClass}
+	 * @param isFromDB Boolean
 	 */
 	public void updateEmailConfigurations(BatchClass importBatchClass, BatchClass existingBatchClass, Boolean isFromDB) {
 		List<BatchClassEmailConfiguration> batchClassEmailConfigurations = new ArrayList<BatchClassEmailConfiguration>();
@@ -959,7 +1091,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		List<BatchClassEmailConfiguration> newBatchClassEmailConfigurationList = new ArrayList<BatchClassEmailConfiguration>();
 		for (BatchClassEmailConfiguration batchClassEmailConfiguration : batchClassEmailConfigurations) {
 			newBatchClassEmailConfigurationList.add(batchClassEmailConfiguration);
-			batchClassEmailConfiguration.setId(0);
+			batchClassEmailConfiguration.setId(BatchConstants.ZERO);
 			batchClassEmailConfiguration.setBatchClass(null);
 		}
 		if (isFromDB) {
@@ -972,48 +1104,53 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 	}
 
 	/**
-	 * @param resultsImport
-	 * @param existingFolderName
-	 * @param zipFolderName
-	 * @param zipDir
+	 * To override folder from database.
+	 * 
+	 * @param resultsImport Map<Boolean, String> 
+	 * @param zipFolderName String
+	 * @param existingFolderName String
+	 * @param zipDir String
 	 */
 	public void overrideFromDB(Map<Boolean, String> resultsImport, String zipFolderName, String existingFolderName, String zipDir) {
-		String errorMessg = "";
+		String tempZipFolderName = zipFolderName;
+		String errorMessg = BatchConstants.EMPTY;
 		boolean isSuccess = true;
 		// import the samples from database
-		if (zipFolderName.isEmpty()) {
+		if (tempZipFolderName.isEmpty()) {
 			// create a folder in the directory of zip file
-			zipFolderName = new File(zipFolderName).getAbsolutePath();
+			tempZipFolderName = new File(tempZipFolderName).getAbsolutePath();
 		} else {
-			FileUtils.deleteDirectoryAndContentsRecursive(new File(zipFolderName), false);
+			FileUtils.deleteDirectoryAndContentsRecursive(new File(tempZipFolderName), false);
 		}
-		if (zipFolderName != null && !zipFolderName.isEmpty()) {
-			if (existingFolderName != null && !existingFolderName.isEmpty()) {
-				boolean copiedSuccessfully = true;
-				try {
-					FileUtils.copyDirectoryWithContents(existingFolderName, zipFolderName);
-				} catch (IOException ioe) {
-					errorMessg = "Unable to override folder" + existingFolderName + " for batch class.";
-					logger.info(errorMessg + ioe, ioe);
-					copiedSuccessfully = false;
-				}
-				if (!copiedSuccessfully) {
-					isSuccess = false;
-					resultsImport.put(isSuccess, errorMessg);
-				}
+		if (tempZipFolderName != null && !tempZipFolderName.isEmpty() && existingFolderName != null && !existingFolderName.isEmpty()) {
+
+			boolean copiedSuccessfully = true;
+			try {
+				FileUtils.copyDirectoryWithContents(existingFolderName, tempZipFolderName);
+			} catch (IOException ioe) {
+				errorMessg = "Unable to override folder" + existingFolderName + " for batch class.";
+				LOGGER.info(errorMessg + ioe, ioe);
+				copiedSuccessfully = false;
 			}
+			if (!copiedSuccessfully) {
+				isSuccess = false;
+				resultsImport.put(isSuccess, errorMessg);
+			}
+
 		}
 	}
 
 	/**
-	 * @param tempOutputUnZipDir
-	 * @param allScriptsList
-	 * @param existingBCID
-	 * @return
-	 * @throws Exception
+	 * To update the scripts files.
+	 * 
+	 * @param tempOutputUnZipDir String
+	 * @param allScriptsList List<ImportBatchClassOptions.BatchClassDefinition.Scripts.Script>
+	 * @param existingBCID String
+	 * @return List<String>
+	 * @throws IOException if case error occurs
 	 */
 	public List<String> updateScriptsFiles(String tempOutputUnZipDir,
-			List<ImportBatchClassOptions.BatchClassDefinition.Scripts.Script> allScriptsList, String existingBCID) throws Exception {
+			List<ImportBatchClassOptions.BatchClassDefinition.Scripts.Script> allScriptsList, String existingBCID) throws IOException {
 		List<String> scriptsList = new ArrayList<String>();
 		if (!allScriptsList.isEmpty()) {
 			String existingScriptFilePath = EMPTY_STRING;
@@ -1061,24 +1198,26 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		return scriptsList;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ephesoft.dcma.batch.service.ImportBatchService#validateInputXML(com.ephesoft.dcma.batch.schema.ImportBatchClassOptions)
+	/**
+	 * To validate the XML input.
+	 * 
+	 * @param optionXML {@link ImportBatchClassOptions}
+	 * @return Map<Boolean, String>
 	 */
 	@Override
 	public Map<Boolean, String> validateInputXML(ImportBatchClassOptions optionXML) {
 		boolean isValid = true;
-		String errorMessg = "";
-		if (!optionXML.isUseSource()) {
-			// check for the description and priority from the XML file
-			if (optionXML.getName() == null || optionXML.getDescription() == null || optionXML.getName().isEmpty() || optionXML.getDescription().isEmpty() || optionXML.getPriority() <= 0
-					|| optionXML.getPriority() > 100) {
-				errorMessg = "Either name, description is empty or priority is not between 1 and 100 inclusive.";
-				isValid = false;
-			}
+		String errorMessg = BatchConstants.EMPTY;
+		// check for the description and priority from the XML file
+		if (!optionXML.isUseSource()
+				&& (optionXML.getName() == null || optionXML.getDescription() == null || optionXML.getName().isEmpty()
+						|| optionXML.getDescription().isEmpty() || optionXML.getPriority() <= BatchConstants.ZERO || optionXML.getPriority() > BatchConstants.HUNDRED)) {
+			errorMessg = "Either name, description is empty or priority is not between 1 and 100 inclusive.";
+			isValid = false;
 		}
 		if (isValid) {
 			String name = optionXML.getName();
-			if (name.indexOf(" ") > -1 || name.indexOf("-") > -1) {
+			if (name.indexOf(BatchConstants.SPACE) > -BatchConstants.ONE || name.indexOf(BatchConstants.HYPHEN) > -BatchConstants.ONE) {
 				errorMessg = "Workflow name should not contain space or hyphen character.";
 				isValid = false;
 			}
@@ -1109,8 +1248,12 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 		return results;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ephesoft.dcma.batch.service.ImportBatchService#isImportWorkflowEqualDeployedWorkflow(com.ephesoft.dcma.da.domain.BatchClass, java.lang.String)
+	/**
+	 * To check whether Import Workflow equals Deployed Workflow.
+	 * 
+	 * @param importBatchClass {@link BatchClass}
+	 * @param userInputWorkflowName {@link String}
+	 * @return boolean
 	 */
 	@Override
 	public boolean isImportWorkflowEqualDeployedWorkflow(final BatchClass importBatchClass, final String userInputWorkflowName) {
@@ -1121,7 +1264,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			List<BatchClassModule> zipBCMs = importBatchClass.getBatchClassModules();
 			List<BatchClassModule> dbBCMs = dbBatchClass.getBatchClassModules();
 			if (dbBCMs.size() == zipBCMs.size()) {
-				bcmLoop: for (int index = 0; index < dbBCMs.size(); index++) {
+				bcmLoop: for (int index = BatchConstants.ZERO; index < dbBCMs.size(); index++) {
 					BatchClassModule zipBCM = zipBCMs.get(index);
 					BatchClassModule dbBCM = dbBCMs.get(index);
 					if (!dbBCM.getWorkflowName().equals(zipBCM.getWorkflowName())) {
@@ -1132,7 +1275,7 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 					List<BatchClassPlugin> zipBCPs = zipBCM.getBatchClassPlugins();
 					List<BatchClassPlugin> dbBCPs = dbBCM.getBatchClassPlugins();
 					if (dbBCPs.size() == zipBCPs.size()) {
-						for (int indexPlg = 0; indexPlg < dbBCPs.size(); indexPlg++) {
+						for (int indexPlg = BatchConstants.ZERO; indexPlg < dbBCPs.size(); indexPlg++) {
 							BatchClassPlugin zipBCP = zipBCPs.get(indexPlg);
 							BatchClassPlugin dbBCP = dbBCPs.get(indexPlg);
 							if (!dbBCP.getPlugin().getWorkflowName().equals(zipBCP.getPlugin().getWorkflowName())) {
@@ -1153,5 +1296,23 @@ public class ImportBatchServiceImpl implements ImportBatchService {
 			isEqual = false;
 		}
 		return isEqual;
+	}
+
+	/**
+	 * To remove folders from given batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 * @return boolean
+	 */
+	@Override
+	public boolean removeFolders(BatchInstance batchInstance) {
+		boolean isDeleted = true;
+		File propertiesFile = new File(batchInstance.getLocalFolder() + File.separator + BatchConstants.PROPERTIES_DIRECTORY
+				+ File.separator + batchInstance.getIdentifier() + FileType.SER.getExtensionWithDot());
+
+		if (null != propertiesFile) {
+			isDeleted &= propertiesFile.delete();
+		}
+		return isDeleted;
 	}
 }

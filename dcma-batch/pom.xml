@@ -83,6 +83,9 @@
 								<include>ImportBatchClass.xsd</include>
 								<include>WebServiceParams.xsd</include>
 								<include>KVExtractionFieldPattern.xsd</include>
+								<include>ModuleWorkflowNames.xsd</include>
+								<include>UserInformation.xsd</include>
+								<include>UploadBatchMetaData.xsd</include>
 							</schemaIncludes>
 
 							<removeOldOutput>true</removeOldOutput>
@@ -95,24 +98,27 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
 				<executions>
 					<execution>
-						<id>copy-jaxb-batch-source</id>
-						<phase>compile</phase>
+						<id>attach-sources</id>
+						<phase>verify</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>jar-no-fork</goal>
 						</goals>
-						<configuration>
-							<tasks>
-								<copydir dest="${basedir}/target/classes" src="${basedir}/src-generated/main/java"
-									forceoverwrite="true" />
-							</tasks>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- <plugin> <artifactId>maven-antrun-plugin</artifactId> <executions> 
+				<execution> <id>copy-jaxb-batch-source</id> <phase>compile</phase> <goals> 
+				<goal>run</goal> </goals> <configuration> <tasks> <copydir dest="${basedir}/target/classes" 
+				src="${basedir}/src-generated/main/java" forceoverwrite="true" /> </tasks> 
+				</configuration> </execution> </executions> </plugin> -->
 		</plugins>
+
+
 	</build>
 
 </project>

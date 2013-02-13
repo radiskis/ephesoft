@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,29 +46,69 @@ import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.docushare.DocushareExporter;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This service implementation provides API for exporting zipped file for a batch.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.docushare.service.DocushareExportService
+ */
 public class DocushareExportServiceImpl implements DocushareExportService, ICommonConstants {
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * An instance of Logger for logging.
+	 */
+	protected static final Logger LOG = LoggerFactory.getLogger(DocushareExportServiceImpl.class);
 
+	/**
+	 * An instance of {@link DocushareExporter}.
+	 */
 	@Autowired
 	private DocushareExporter docushareExporter;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get xml file before the finish of processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * To get the xml file after processing has finished.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
-
+	/**
+	 * This method exports the zipped files to a predefined location for DocuShare upload.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException if any exception occurs during processing of xml file.
+	 */
 	@Override
 	public void exportDocushareFiles(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
@@ -78,6 +118,10 @@ public class DocushareExportServiceImpl implements DocushareExportService, IComm
 		}
 	}
 
+	/**
+	 * @param args {@link String}
+	 * @throws DCMAException {@link DCMAApplicationException}
+	 */
 	public static void main(String[] args) throws DCMAException {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"classpath:/META-INF/applicationContext-docushare-export.xml");

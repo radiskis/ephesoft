@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,7 +41,8 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
  * The interface is used to define all the constants used in the Batch List page and support internationalization.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants
  */
 public interface BatchListConstants extends LocaleCommonConstants {
 
@@ -58,13 +59,11 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	/**
 	 * The title of the tab which points to batch detail.
 	 */
-
 	String TAB_LABEL_BATCH_DETAIL = "tabLabel_batch_detail";
 
 	/**
 	 * The title of the tab which points to web scanner page.
 	 */
-
 	String TAB_LABEL_WEB_SCANNER = "tabLabel_web_scanner";
 
 	/**
@@ -72,7 +71,7 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	 */
 
 	String TAB_LABEL_UPLOAD_BATCH = "tabLabel_upload_batch";
-	
+
 	/**
 	 * Used in the labels for batch alerts.
 	 */
@@ -154,6 +153,11 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	String LABEL_TABLE_COLUMN_BATCHUPDATEDON = "label_table_column_batchUpdatedOn";
 
 	/**
+	 * Used in the label for table column batch create date.
+	 */
+	String LABEL_TABLE_COLUMN_BATCHCREATEDON = "label_table_column_batchCreatedOn";
+
+	/**
 	 * Used in the label for table column batch status.
 	 */
 	String LABEL_TABLE_COLUMN_BATCHSTATUS = "label_table_column_batchStatus";
@@ -189,11 +193,6 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	String BATCH_PRIORITY_LOW = "batch_priority_low";
 
 	/**
-	 * Type of css to be applied on a button.
-	 */
-	String BUTTON_STYLE = "button-style";
-
-	/**
 	 * Text of the button used to start review process.
 	 */
 	String START_REVIEW_BUTTON = "Start Review";
@@ -207,9 +206,15 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	 * Text of the list box that shows batch list priorities.
 	 */
 	String LABEL_PRIORITY_LISTBOX = "label_priority_listbox";
-	
+
+	/**
+	 * Constant for review tab shortcut.
+	 */
 	String REVIEW_TAB_SHORTCUT = "review_tab_shortcut";
-	
+
+	/**
+	 * Constant for validate tab shortcut.
+	 */
 	String VALIDATE_TAB_SHORTCUT = "validate_tab_shortcut";
 
 	/**
@@ -227,6 +232,67 @@ public interface BatchListConstants extends LocaleCommonConstants {
 	 */
 	String LABEL_SEARCH_BATCH = "search_batch_label";
 
+	/**
+	 * Constant for Colon.
+	 */
 	String COLON = ":";
 
+	/**
+	 * EMPTY_STRING String.
+	 */
+	String EMPTY_STRING = "";
+
+	/**
+	 * TEN int.
+	 */
+	int TEN = 10;
+
+	/**
+	 * TWENTY int.
+	 */
+	int TWENTY = 20;
+
+	/**
+	 * FIFTEEN int.
+	 */
+	int FIFTEEN = 15;
+
+	/**
+	 * THREE int.
+	 */
+	int THREE = 3;
+
+	/**
+	 * FOUR int.
+	 */
+	int FOUR = 4;
+	/**
+	 * FIVE int.
+	 */
+	int FIVE = 5;
+
+	/**
+	 * SIX int.
+	 */
+	int SIX = 6;
+
+	/**
+	 * EIGHTEEN int.
+	 */
+	int EIGHTEEN = 18;
+
+	/**
+	 * REVIEW_VALIDATE_HTML String.
+	 */
+	String REVIEW_VALIDATE_HTML = "/ReviewValidate.html";
+
+	/**
+	 * BATCH_ID String.
+	 */
+	String BATCH_ID = "?batch_id=";
+
+	/**
+	 * ZERO String.
+	 */
+	String ZERO = "0";
 }

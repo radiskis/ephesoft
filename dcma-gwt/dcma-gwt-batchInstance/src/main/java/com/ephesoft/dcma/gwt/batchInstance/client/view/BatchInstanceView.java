@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client.view;
+package com.ephesoft.dcma.gwt.batchinstance.client.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,11 +44,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
-import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceConstants;
-import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceMessages;
-import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstancePresenter;
-import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstancePresenter.ActionableStatus;
+import com.ephesoft.dcma.gwt.batchinstance.client.i18n.BatchInstanceConstants;
+import com.ephesoft.dcma.gwt.batchinstance.client.i18n.BatchInstanceMessages;
+import com.ephesoft.dcma.gwt.batchinstance.client.presenter.BatchInstancePresenter;
+import com.ephesoft.dcma.gwt.batchinstance.client.presenter.BatchInstancePresenter.ActionableStatus;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.CoreCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
@@ -72,6 +73,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -81,138 +83,295 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit batch instance view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class BatchInstanceView extends View<BatchInstancePresenter> {
 
+	/**
+	 * SPACE char.
+	 */
 	private static final char SPACE = ' ';
 
+	/**
+	 * UNDER_SCORE char.
+	 */
 	private static final char UNDER_SCORE = '_';
 
-	@UiField
-	HorizontalPanel filterAndSearchPanel;
-
+	/**
+	 * mainLayoutPanel DockLayoutPanel.
+	 */
 	@UiField
 	DockLayoutPanel mainLayoutPanel;
 
+	/**
+	 * totalBatchesLabel Label.
+	 */
 	@UiField
 	Label totalBatchesLabel;
 
+	/**
+	 * totalBatches Label.
+	 */
 	@UiField
 	Label totalBatches;
 
+	/**
+	 * deletedBatchesLabel Label.
+	 */
 	@UiField
 	Label deletedBatchesLabel;
 
+	/**
+	 * deletedBatches Label.
+	 */
 	@UiField
 	Label deletedBatches;
 
+	/**
+	 * restartedBatchesLabel Label.
+	 */
 	@UiField
 	Label restartedBatchesLabel;
 
+	/**
+	 * restartedBatches Label.
+	 */
 	@UiField
 	Label restartedBatches;
 
+	/**
+	 * labelPanel VerticalPanel.
+	 */
 	@UiField
 	VerticalPanel labelPanel;
 
+	/**
+	 * batchAlerts Label.
+	 */
 	@UiField
 	Label batchAlerts;
 
+	/**
+	 * valuesPanel HorizontalPanel.
+	 */
 	@UiField
 	HorizontalPanel valuesPanel;
 
+	/**
+	 * batchAlertPanel HorizontalPanel.
+	 */
 	@UiField
 	HorizontalPanel batchAlertPanel;
 
+	/**
+	 * batchInstanceLayoutPanel LayoutPanel.
+	 */
 	@UiField
 	LayoutPanel batchInstanceLayoutPanel;
 
+	/**
+	 * batchInstanceListPanel DockLayoutPanel.
+	 */
 	@UiField
 	DockLayoutPanel batchInstanceListPanel;
 
+	/**
+	 * actionPanel HorizontalPanel.
+	 */
 	@UiField
 	HorizontalPanel actionPanel;
 
+	/**
+	 * slidingPanel SlidingPanel.
+	 */
 	@UiField
 	SlidingPanel slidingPanel;
 
+	/**
+	 * controlPanel HorizontalPanel.
+	 */
 	@UiField
 	HorizontalPanel controlPanel;
 
+	/**
+	 * batchInstanceControlPanel DockLayoutPanel.
+	 */
+	@UiField
+	DockLayoutPanel batchInstanceControlPanel;
+
+	/**
+	 * topPanelContainer FlowPanel.
+	 */
+	@UiField
+	FlowPanel topPanelContainer;
+
+	/**
+	 * restartBatchButton Button.
+	 */
 	private Button restartBatchButton;
 
+	/**
+	 * deleteBatchButton Button.
+	 */
 	private Button deleteBatchButton;
 
+	/**
+	 * openBatchButton Button.
+	 */
 	private Button openBatchButton;
 
+	/**
+	 * filterPanel HorizontalPanel.
+	 */
 	private HorizontalPanel filterPanel;
 
+	/**
+	 * searchPanel HorizontalPanel.
+	 */
 	private HorizontalPanel searchPanel;
 
+	/**
+	 * refreshButtonPanel VerticalPanel.
+	 */
 	private VerticalPanel refreshButtonPanel;
 
+	/**
+	 * priorityListBox ListBox.
+	 */
 	private ListBox priorityListBox;
 
+	/**
+	 * batchInstanceListBox ListBox.
+	 */
 	private ListBox batchInstanceListBox;
 
+	/**
+	 * priorityLabel Label.
+	 */
 	private Label priorityLabel;
 
+	/**
+	 * batchInstanceLabel Label.
+	 */
 	private Label batchInstanceLabel;
 
+	/**
+	 * searchBatchButton Button.
+	 */
 	private Button searchBatchButton;
 
+	/**
+	 * searchBatchLabel Label.
+	 */
 	private Label searchBatchLabel;
 
+	/**
+	 * deleteButtonPanel HorizontalPanel.
+	 */
 	private HorizontalPanel deleteButtonPanel;
 
-	private HorizontalPanel openBatchButtonPanel;
-
+	/**
+	 * restartPanel HorizontalPanel.
+	 */
 	private HorizontalPanel restartPanel;
 
+	/**
+	 * searchBatchTextBox TextBox.
+	 */
 	private TextBox searchBatchTextBox;
 
+	/**
+	 * refreshButton Button.
+	 */
 	private Button refreshButton;
 
+	/**
+	 * restartOptions ListBox.
+	 */
 	public ListBox restartOptions;
 
-	private HorizontalPanel restartAllButtonPanel;
-
+	/**
+	 * unlockButtonPanel HorizontalPanel.
+	 */
 	private HorizontalPanel unlockButtonPanel;
 
+	/**
+	 * deleteOpenPanel VerticalPanel.
+	 */
+	private VerticalPanel deleteOpenPanel;
+
+	/**
+	 * unlockRestartPanel VerticalPanel.
+	 */
+	private VerticalPanel unlockRestartPanel;
+
+	/**
+	 * restartAllButton Button.
+	 */
 	private Button restartAllButton;
 
+	/**
+	 * unlockButton Button.
+	 */
 	private Button unlockButton;
 
+	/**
+	 * nextButton Button.
+	 */
 	private Button nextButton;
 
+	/**
+	 * previousButton Button.
+	 */
 	private Button previousButton;
 
-	private HorizontalPanel previousButtonPanel;
-
-	private HorizontalPanel nextButtonPanel;
-
+	/**
+	 * batchInstanceListView BatchInstanceListView.
+	 */
 	private BatchInstanceListView batchInstanceListView;
 
+	/**
+	 * deleteAllButton Button.
+	 */
 	private Button deleteAllButton;
 
+	/**
+	 * unlockRecord boolean.
+	 */
+	private boolean unlockRecord;
+
+	/**
+	 * batchInstanceDTOMap Map<String, BatchInstanceDTO>.
+	 */
 	private Map<String, BatchInstanceDTO> batchInstanceDTOMap = new HashMap<String, BatchInstanceDTO>();
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, BatchInstanceView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder binder = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public BatchInstanceView() {
+		super();
 		initWidget(binder.createAndBindUi(this));
-
 		restartBatchButton = new Button();
 
 		deleteBatchButton = new Button();
 
 		openBatchButton = new Button();
-
-		filterPanel = new HorizontalPanel();
-
-		searchPanel = new HorizontalPanel();
 
 		refreshButtonPanel = new VerticalPanel();
 
@@ -230,10 +389,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		deleteButtonPanel = new HorizontalPanel();
 
-		openBatchButtonPanel = new HorizontalPanel();
-
-		restartPanel = new HorizontalPanel();
-
 		searchBatchTextBox = new TextBox();
 
 		refreshButton = new Button();
@@ -250,64 +405,65 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 		previousButton = new Button(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.PREVIOUS_TEXT));
 
-		previousButtonPanel = new HorizontalPanel();
-
-		nextButtonPanel = new HorizontalPanel();
-
-		restartAllButtonPanel = new HorizontalPanel();
-
 		unlockButtonPanel = new HorizontalPanel();
 
+		deleteOpenPanel = new VerticalPanel();
+
+		unlockRestartPanel = new VerticalPanel();
+
 		refreshButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_REFRESH));
+		refreshButton.setWidth(BatchInstanceConstants.BUTTON_WIDTH);
+		refreshButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_REFRESH_TOOLTIP));
+		refreshButton.addStyleName(CoreCommonConstants.MARGIN_BOTTOM_5_CSS);
 		restartAllButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_ALL));
 		deleteAllButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_ALL));
 		deleteAllButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_TOOLTIP));
-		deleteAllButton.setWidth("5.6em");
+		deleteAllButton.setWidth(BatchInstanceConstants.BUTTON_WIDTH);
 
 		unlockButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_UNLOCK));
+		unlockButton.addStyleName(CoreCommonConstants.MARGIN_BOTTOM_5_CSS);
+		unlockButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_UNLOCK_TOOLTIP));
 		searchBatchLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_SEARCH_BATCH)
 				+ BatchInstanceConstants.COLON);
 		searchBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_SEARCH_BATCH));
+		searchBatchButton.addStyleName(CoreCommonConstants.MARGIN_LEFT_5_CSS);
 		restartBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_BATCH));
 		restartBatchButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_RESTART_BATCH_TITLE));
-		restartBatchButton.addStyleName(BatchInstanceConstants.TEXT_LIMIT_CSS);
+		restartBatchButton.addStyleName(CoreCommonConstants.MARGIN_LEFT_5_CSS);
 		deleteBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_BATCH));
+		deleteBatchButton.addStyleName(CoreCommonConstants.MARGIN_BOTTOM_5_CSS);
+		deleteBatchButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_DELETE_BATCH_TOOLTIP));
 		openBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_OPEN_BATCH));
 		openBatchButton.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BUTTON_OPEN_BATCH_TITLE));
-		openBatchButton.addStyleName(BatchInstanceConstants.TEXT_LIMIT_CSS);
+		openBatchButton.setWidth(CoreCommonConstants._58PX);
+		deleteBatchButton.setWidth(CoreCommonConstants._58PX);
+		restartAllButton.setWidth(CoreCommonConstants._97PX);
+		unlockButton.setWidth(CoreCommonConstants._97PX);
 		totalBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TOTAL_BATCHES));
 		deletedBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.DELETED_BATCHES));
-		// restartedBatchesLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.RESTARTED_BATCHES));
+		totalBatchesLabel.addStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
+		deletedBatchesLabel.addStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
 		searchBatchTextBox.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SEARCH_CRITERIA));
 		searchBatchTextBox.setTitle(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.SEARCH_TYPE));
 		batchAlerts.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.BATCH_ALERTS));
 		batchInstanceListView = new BatchInstanceListView();
 		batchInstanceLayoutPanel.add(batchInstanceListView.listView);
+		searchBatchTextBox.setWidth(CoreCommonConstants._120PX);
+		batchInstanceControlPanel.addStyleName(CoreCommonConstants.OPTIONS_PANEL);
+		batchInstanceControlPanel.addStyleName(CoreCommonConstants.OPTION_PANEL_MARGIN_CSS);
 		fillPriorityListBox();
 		fillBatchInstanceListBox(batchInstanceListBox);
-
 		setDefaultFilters();
 		batchInstanceListPanel.addStyleName("mainPanelLayout");
-
+		topPanelContainer.addStyleName(CoreCommonConstants.TOP_PANEL_CSS);
 		searchPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		refreshButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		searchPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		filterPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
+		filterPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		restartPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		deleteButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		restartAllButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		unlockButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		nextButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		previousButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-		openBatchButtonPanel.addStyleName(BatchInstanceConstants.GRP_PANEL_STYLE_NAME);
-
-		filterAndSearchPanel.addStyleName("compositePanelLayout");
-		actionPanel.addStyleName("compositePanelLayout");
-		controlPanel.addStyleName("compositePanelLayout");
-
-		filterAndSearchPanel.setSpacing(5);
-		actionPanel.setSpacing(5);
-		controlPanel.setSpacing(5);
-
+		restartPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
+		deleteButtonPanel.addStyleName(CoreCommonConstants.LAST_GRP_PANEL_CSS);
+		unlockButtonPanel.addStyleName(CoreCommonConstants.LAST_GRP_PANEL_CSS);
 		filterPanel.add(priorityLabel);
 		filterPanel.add(priorityListBox);
 		filterPanel.add(batchInstanceLabel);
@@ -321,88 +477,54 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		filterPanel.setCellVerticalAlignment(batchInstanceLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		filterPanel.setCellVerticalAlignment(refreshButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		filterPanel.setCellVerticalAlignment(deleteAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		filterPanel.setSpacing(5);
 
 		searchPanel.add(searchBatchLabel);
 		searchPanel.add(searchBatchTextBox);
 		searchPanel.add(searchBatchButton);
-		searchPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 		searchPanel.setCellVerticalAlignment(searchBatchLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		searchPanel.setSpacing(5);
 
 		restartPanel.add(restartOptions);
-		restartPanel.setCellWidth(restartOptions, "200px");
 		restartPanel.add(restartBatchButton);
-		restartPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
 		restartPanel.setCellVerticalAlignment(restartBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		restartPanel.setCellVerticalAlignment(restartOptions, HasVerticalAlignment.ALIGN_MIDDLE);
-		restartPanel.setSpacing(5);
 
-		deleteButtonPanel.add(deleteBatchButton);
+		deleteOpenPanel.add(deleteBatchButton);
+		deleteOpenPanel.add(openBatchButton);
+		deleteButtonPanel.add(deleteOpenPanel);
+		deleteButtonPanel.add(nextButton);
 		deleteButtonPanel.setCellVerticalAlignment(deleteBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		deleteButtonPanel.setSpacing(5);
-		deleteButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
-
-		openBatchButtonPanel.add(openBatchButton);
-		openBatchButtonPanel.setCellVerticalAlignment(openBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		openBatchButtonPanel.setSpacing(5);
-		openBatchButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
-
-		nextButtonPanel.add(nextButton);
-		nextButtonPanel.setCellVerticalAlignment(nextButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		nextButtonPanel.setSpacing(5);
-		nextButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
-
-		previousButtonPanel.add(previousButton);
-		previousButtonPanel.setCellVerticalAlignment(previousButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		previousButtonPanel.setSpacing(5);
-		previousButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
+		deleteButtonPanel.setCellVerticalAlignment(nextButton, HasVerticalAlignment.ALIGN_MIDDLE);
 
 		restartAllButton.setEnabled(false);
 
-		restartAllButtonPanel.add(restartAllButton);
-		restartAllButtonPanel.setCellVerticalAlignment(restartAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		restartAllButtonPanel.setSpacing(5);
-		restartAllButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
-
-		unlockButtonPanel.add(unlockButton);
+		unlockRestartPanel.add(unlockButton);
+		unlockRestartPanel.add(restartAllButton);
+		unlockButtonPanel.add(unlockRestartPanel);
+		unlockButtonPanel.add(previousButton);
 		unlockButtonPanel.setCellVerticalAlignment(unlockButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		unlockButtonPanel.setSpacing(5);
-		unlockButtonPanel.addStyleName(BatchInstanceConstants.SUB_PANEL_STYLE_NAME);
-
-		filterAndSearchPanel.add(filterPanel);
-		filterAndSearchPanel.add(searchPanel);
-
-		actionPanel.add(restartPanel);
+		unlockButtonPanel.setCellVerticalAlignment(restartAllButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		unlockButtonPanel.setCellVerticalAlignment(openBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
+		unlockButtonPanel.setCellVerticalAlignment(previousButton, HasVerticalAlignment.ALIGN_MIDDLE);
 		actionPanel.add(deleteButtonPanel);
-		actionPanel.add(nextButtonPanel);
 
 		controlPanel.setWidth("100%");
 		controlPanel.add(unlockButtonPanel);
-		controlPanel.add(restartAllButtonPanel);
-		controlPanel.add(openBatchButtonPanel);
-		controlPanel.add(previousButtonPanel);
 		controlPanel.setCellHorizontalAlignment(unlockButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
-		controlPanel.setCellHorizontalAlignment(restartAllButtonPanel, HasHorizontalAlignment.ALIGN_LEFT);
-		controlPanel.setCellHorizontalAlignment(previousButtonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
 
 		batchAlertPanel.setBorderWidth(0);
-		labelPanel.addStyleName("top-box");
-		setLabelsStyle("batchAlertText");
-		batchAlerts.setStyleName("blk_bold_text");
-		labelPanel.setSpacing(5);
+		setLabelsStyle();
+		batchAlerts.setStyleName(CoreCommonConstants.HEADER_BOLD_TEXT_CSS);
 		batchInstanceLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_COLUMN_STATUS)
 				+ BatchInstanceConstants.COLON);
 		priorityLabel.setText(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.LABEL_TABLE_COLUMN_PRIORITY)
 				+ BatchInstanceConstants.COLON);
-		mainLayoutPanel.addStyleName("middle");
-		priorityListBox.setVisibleItemCount(3);
-		batchInstanceListBox.setVisibleItemCount(3);
+		mainLayoutPanel.addStyleName(CoreCommonConstants.MAIN_CONTAINER_CSS);
+		priorityListBox.setVisibleItemCount(BatchInstanceConstants.THREE);
+		batchInstanceListBox.setVisibleItemCount(BatchInstanceConstants.THREE);
 		clearRestartOptions();
-		restartOptions.setWidth("100%");
-		slidingPanel.addStyleName("compositePanelLayout");
+		restartOptions.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		slidingPanel.setWidget(actionPanel);
 		slidingPanel.setVisible(true);
 
@@ -423,9 +545,6 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				final List<DataFilter> statusFilters = new ArrayList<DataFilter>();
 
 				List<String> selectedBatchInstanceStatus = getBatchInstanceSelected();
-
-				// Status for which a batch can be deleted:
-				// ERROR(4), READY_FOR_REVIEW(9), READY_FOR_VALIDATION(10), RUNNING(8)
 
 				statusFilters.clear();
 				boolean isValidSelection = true;
@@ -481,6 +600,13 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			}
 		});
 
+		addButtonHandlers();
+
+		addBoxHandlers();
+
+	}
+
+	private void addButtonHandlers() {
 		restartAllButton.setEnabled(false);
 
 		deleteBatchButton.addClickHandler(new ClickHandler() {
@@ -579,6 +705,9 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				}
 			}
 		});
+	}
+
+	private void addBoxHandlers() {
 
 		priorityListBox.addChangeHandler(new ChangeHandler() {
 
@@ -621,7 +750,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				controlPanel.setWidth("100%");
+				controlPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 				slidingPanel.setWidget(controlPanel);
 				slidingPanel.setVisible(true);
 			}
@@ -641,6 +770,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			@Override
 			public void onClick(ClickEvent arg0) {
 				if (checkRowSelection()) {
+					unlockRecord = true;
 					presenter.onUnlockButtonClicked(batchInstanceListView.listView.getSelectedRowIndex());
 				}
 			}
@@ -680,13 +810,10 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		searchBatchTextBox.setText("");
 	}
 
-	private void setLabelsStyle(String styleName) {
-		totalBatchesLabel.setStyleName(styleName);
-		totalBatches.setStyleName(styleName);
-		deletedBatches.setStyleName(styleName);
-		deletedBatchesLabel.setStyleName(styleName);
-		restartedBatches.setStyleName(styleName);
-		restartedBatchesLabel.setStyleName(styleName);
+	private void setLabelsStyle() {
+		totalBatchesLabel.setStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
+		deletedBatchesLabel.setStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
+		restartedBatchesLabel.setStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
 	}
 
 	private void fillBatchInstanceListBox(ListBox listBox) {
@@ -716,6 +843,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 				BatchInstanceStatus.DELETED.getId().toString());
 		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_RESTART_IN_PROGRESS),
 				BatchInstanceStatus.RESTART_IN_PROGRESS.getId().toString());
+		listBox.addItem(LocaleDictionary.get().getConstantValue(BatchInstanceConstants.TEXT_REMOTE), BatchInstanceStatus.REMOTE
+				.getId().toString());
 	}
 
 	private void fillPriorityListBox() {
@@ -732,7 +861,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 	public void createBatchInstanceList(Collection<BatchInstanceDTO> batchInstanceDTOs, int count) {
 		List<Record> recordList = createRecords(batchInstanceDTOs);
-		batchInstanceListView.listView.initTable(count, presenter, presenter, recordList, true, true);
+		batchInstanceListView.listView.initTable(count, presenter, presenter, recordList, true, true, null, false);
 		toggleButtons();
 	}
 
@@ -791,7 +920,14 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 
 	public void updateBatchInstanceList(List<BatchInstanceDTO> arg0, int startIndex, int count) {
 		List<Record> list = createRecords(arg0);
-		batchInstanceListView.listView.updateRecords(list, startIndex, count);
+
+		if (unlockRecord) {
+			batchInstanceListView.listView.updateUnlockRecords(list, startIndex, count);
+			unlockRecord = false;
+		} else {
+			batchInstanceListView.listView.updateRecords(list, startIndex, count);
+		}
+
 		toggleButtons();
 	}
 
@@ -810,6 +946,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 			record.addWidget(batchInstanceListView.batchId, new Label(batchInstanceDTO.getBatchIdentifier()));
 			record.addWidget(batchInstanceListView.batchClassName, new Label(batchInstanceDTO.getBatchClassName()));
 			record.addWidget(batchInstanceListView.batchName, new Label(batchInstanceDTO.getBatchName()));
+			record.addWidget(batchInstanceListView.batchCreatedOn, new Label(batchInstanceDTO.getCreatedOn()));
 			record.addWidget(batchInstanceListView.batchUpdatedOn, new Label(batchInstanceDTO.getUploadedOn()));
 			record.addWidget(batchInstanceListView.currentUser, new Label(batchInstanceDTO.getCurrentUser()));
 			record.addWidget(batchInstanceListView.status, new Label(batchInstanceDTO.getStatus()));
@@ -863,6 +1000,14 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		return check;
 	}
 
+	public String getSearchTextEntered() {
+		String searchText = null;
+		if (null != searchBatchTextBox && !searchBatchTextBox.getText().isEmpty()) {
+			searchText = searchBatchTextBox.getText();
+		}
+		return searchText;
+	}
+
 	private void showConfirmationDialog(final boolean isDelete, final String identifier) {
 		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
 				.getMessageValue(BatchInstanceMessages.MSG_DELETE_CONFIRMATION_TEXT), LocaleDictionary.get().getMessageValue(
@@ -899,7 +1044,7 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
 				/*
-				 * ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+				 * ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary .get().getMessageValue(
 				 * BatchInstanceMessages.MSG_NO_RECORD));
 				 */
 			} else {
@@ -947,9 +1092,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public boolean checkRowSelectedIsValid(String identifer) {
 		BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifer);
 		boolean isValidRow = false;
-		if (null != batchInstanceDTO) {
-			if (ActionableStatus.valuesAsString().contains(batchInstanceDTO.getStatus()))
-				isValidRow = true;
+		if (null != batchInstanceDTO && (ActionableStatus.valuesAsString().contains(batchInstanceDTO.getStatus()))) {
+			isValidRow = true;
 		}
 		return isValidRow;
 	}
@@ -957,13 +1101,11 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public boolean checkRemoteBatch(String identifer) {
 		BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifer);
 		boolean isRemoteRow = false;
-		if (null != batchInstanceDTO) {
-			if (batchInstanceDTO.getRemoteBatchInstanceDTO() != null) {
-				if (batchInstanceDTO.getRemoteBatchInstanceDTO().getPreviousRemoteURL() != null
-						|| batchInstanceDTO.getRemoteBatchInstanceDTO().getRemoteURL() != null) {
-					isRemoteRow = true;
-				}
-			}
+		if (null != batchInstanceDTO
+				&& batchInstanceDTO.getRemoteBatchInstanceDTO() != null
+				&& (batchInstanceDTO.getRemoteBatchInstanceDTO().getPreviousRemoteURL() != null || batchInstanceDTO
+						.getRemoteBatchInstanceDTO().getRemoteURL() != null)) {
+			isRemoteRow = true;
 		}
 		return isRemoteRow;
 	}
@@ -971,10 +1113,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public boolean checkRemotelyExecutingBatch(String identifer) {
 		BatchInstanceDTO batchInstanceDTO = batchInstanceDTOMap.get(identifer);
 		boolean isRemoteRow = false;
-		if (null != batchInstanceDTO) {
-			if (batchInstanceDTO.isRemote()) {
-				isRemoteRow = true;
-			}
+		if (null != batchInstanceDTO && batchInstanceDTO.isRemote()) {
+			isRemoteRow = true;
 		}
 		return isRemoteRow;
 	}
@@ -982,21 +1122,15 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public void disableButtons() {
 		restartBatchButton.setEnabled(false);
 		deleteBatchButton.setEnabled(false);
-		restartBatchButton.removeStyleName(BatchInstanceConstants.STYLE_BUTTON);
-		deleteBatchButton.removeStyleName(BatchInstanceConstants.STYLE_BUTTON);
-		restartBatchButton.addStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
-		deleteBatchButton.addStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
 		restartOptions.setEnabled(false);
+		unlockButton.setEnabled(false);
+		openBatchButton.setEnabled(false);
 		clearRestartOptions();
 	}
 
 	public void disableDeleteButtons() {
 		deleteBatchButton.setEnabled(false);
-		deleteBatchButton.removeStyleName(BatchInstanceConstants.STYLE_BUTTON);
-		deleteBatchButton.addStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
 		restartBatchButton.setEnabled(true);
-		restartBatchButton.removeStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
-		restartBatchButton.addStyleName(BatchInstanceConstants.STYLE_BUTTON);
 		restartOptions.setEnabled(true);
 		clearRestartOptions();
 	}
@@ -1004,11 +1138,9 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	public void enableButtons() {
 		restartBatchButton.setEnabled(true);
 		deleteBatchButton.setEnabled(true);
-		restartBatchButton.removeStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
-		deleteBatchButton.removeStyleName(BatchInstanceConstants.DISABLED_BUTTON_STYLE);
-		restartBatchButton.addStyleName(BatchInstanceConstants.STYLE_BUTTON);
-		deleteBatchButton.addStyleName(BatchInstanceConstants.STYLE_BUTTON);
 		restartOptions.setEnabled(true);
+		unlockButton.setEnabled(true);
+		openBatchButton.setEnabled(true);
 		clearRestartOptions();
 	}
 
@@ -1026,16 +1158,17 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 		} else if (BatchPriority.HIGH.getLowerLimit() <= priority && priority <= BatchPriority.HIGH.getUpperLimit()) {
 			priorityListBox.setItemSelected(2, true);
 		} else if (BatchPriority.MEDIUM.getLowerLimit() <= priority && priority <= BatchPriority.MEDIUM.getUpperLimit()) {
-			priorityListBox.setItemSelected(3, true);
+			priorityListBox.setItemSelected(BatchInstanceConstants.THREE, true);
 		} else if (BatchPriority.LOW.getLowerLimit() <= priority && priority <= BatchPriority.LOW.getUpperLimit()) {
-			priorityListBox.setItemSelected(4, true);
+			priorityListBox.setItemSelected(BatchInstanceConstants.FOUR, true);
 		}
 	}
 
 	public void setBatchInstanceListBox(String status) {
 		int index = 2;
-		while (!batchInstanceListBox.getValue(index++).equals(BatchInstanceStatus.valueOf(status).getId().toString()))
+		while (!batchInstanceListBox.getValue(index++).equals(BatchInstanceStatus.valueOf(status).getId().toString())) {
 			;
+		}
 		batchInstanceListBox.setItemSelected(index - 1, true);
 	}
 
@@ -1094,10 +1227,8 @@ public class BatchInstanceView extends View<BatchInstancePresenter> {
 	}
 
 	public void performRestartOptionsPopulate() {
-		if (checkRowSelection()) {
-			if (checkRowSelectedIsValid(batchInstanceListView.listView.getSelectedRowIndex())) {
-				presenter.getRestartOptions(batchInstanceListView.listView.getSelectedRowIndex());
-			}
+		if (checkRowSelection() && checkRowSelectedIsValid(batchInstanceListView.listView.getSelectedRowIndex())) {
+			presenter.getRestartOptions(batchInstanceListView.listView.getSelectedRowIndex());
 		}
 	}
 

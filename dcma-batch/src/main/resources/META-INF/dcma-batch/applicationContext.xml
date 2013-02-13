@@ -72,8 +72,8 @@
 		<constructor-arg type="java.lang.String" value="$batch{batch.upload_batch_folder}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.test_advanced_kv_extraction_sample_folder_name}" />
 		<constructor-arg type="java.lang.String" value="$batch{batch.webservices_folder_name}" />	
-		<constructor-arg type="java.lang.String" value="$batch{batch.sample_pattern_file_name}" />
-		<constructor-arg type="java.lang.String" value="$batch{batch.sample_pattern_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.advanced_test_table_folder_name}" />
+		<constructor-arg type="java.lang.String" value="$batch{batch.db_export}" />
 	</bean>
 
 	<bean id="hocrJAXB2Template" class="com.ephesoft.dcma.core.component.JAXB2Template">

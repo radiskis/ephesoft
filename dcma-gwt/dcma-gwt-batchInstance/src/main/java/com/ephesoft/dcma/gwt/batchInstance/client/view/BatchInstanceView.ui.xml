@@ -3,67 +3,63 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:DockLayoutPanel unit='PCT' ui:field="mainLayoutPanel">
-		<g:north size="18">
-			<g:VerticalPanel ui:field="labelPanel" width="100%"
-				height="50px">
-				<g:HorizontalPanel ui:field="batchAlertPanel"
-					width="100%" height="100%">
-					<g:cell>
-						<g:Label ui:field="batchAlerts"></g:Label>
-					</g:cell>
-				</g:HorizontalPanel>
-				<g:HorizontalPanel ui:field="valuesPanel" width="100%"
-					height="100%">
-					<g:cell width="6%">
-						<g:Label ui:field="totalBatchesLabel">
-						</g:Label>
-					</g:cell>
-					<g:cell width="10%">
-						<g:Label ui:field="totalBatches" />
-					</g:cell>
-					<g:cell width="7%">
-						<g:Label ui:field="deletedBatchesLabel">
-						</g:Label>
-					</g:cell>
-					<g:cell width="5%">
-						<g:Label ui:field="deletedBatches" />
-					</g:cell>
-					<g:cell width="8%">
-						<g:Label ui:field="restartedBatchesLabel">
-						</g:Label>
-					</g:cell>
-					<g:cell width="17%">
-						<g:Label ui:field="restartedBatches" />
-					</g:cell>
-				</g:HorizontalPanel>
-			</g:VerticalPanel>
+		<g:north size="15">
+			<g:FlowPanel ui:field="topPanelContainer">
+				<g:VerticalPanel ui:field="labelPanel" width="100%"
+					height="50px">
+					<g:HorizontalPanel ui:field="batchAlertPanel"
+						width="100%" height="100%">
+						<g:cell>
+							<g:Label ui:field="batchAlerts"></g:Label>
+						</g:cell>
+					</g:HorizontalPanel>
+					<g:HorizontalPanel ui:field="valuesPanel" width="100%"
+						height="100%">
+						<g:cell width="6%">
+							<g:Label ui:field="totalBatchesLabel">
+							</g:Label>
+						</g:cell>
+						<g:cell width="10%">
+							<g:Label ui:field="totalBatches" />
+						</g:cell>
+						<g:cell width="7%">
+							<g:Label ui:field="deletedBatchesLabel">
+							</g:Label>
+						</g:cell>
+						<g:cell width="5%">
+							<g:Label ui:field="deletedBatches" />
+						</g:cell>
+						<g:cell width="8%">
+							<g:Label ui:field="restartedBatchesLabel">
+							</g:Label>
+						</g:cell>
+						<g:cell width="17%">
+							<g:Label ui:field="restartedBatches" />
+						</g:cell>
+					</g:HorizontalPanel>
+				</g:VerticalPanel>
+			</g:FlowPanel>
 		</g:north>
 		<g:center>
-			<g:DockLayoutPanel ui:field="batchInstanceListPanel"
-				width="98%" height="93%">
+			<g:DockLayoutPanel ui:field="batchInstanceListPanel">
 				<g:north size="120">
 					<g:DockLayoutPanel unit="PCT">
 						<g:center>
-							<g:DockLayoutPanel unit="PCT">
-								<g:north size="10">
-									<g:HorizontalPanel />
-								</g:north>
-								<g:west size="63">
+							<g:DockLayoutPanel unit="PCT" ui:field="batchInstanceControlPanel">
+								<g:west size="84">
 									<g:HorizontalPanel width="99%">
-										<g:cell width="1%">
-											<g:Label />
+										<g:cell>
+											<g:HorizontalPanel ui:field="filterPanel"/>
 										</g:cell>
-										<g:cell width="55%">
-											<g:HorizontalPanel ui:field="filterAndSearchPanel" />
-
+										<g:cell>
+											<g:HorizontalPanel ui:field="searchPanel"/>
 										</g:cell>
-										<g:cell width="1%">
-											<g:Label />
+										<g:cell>
+											<g:HorizontalPanel ui:field="restartPanel"/>
 										</g:cell>
 									</g:HorizontalPanel>
-
 								</g:west>
-								<g:east size="37">
+								<g:east size="16">
 									<sliding-panel:SlidingPanel
 										ui:field="slidingPanel">
 

@@ -1,0 +1,933 @@
+@import "theme.less"; 
+
+*{ outline:none; margin:0;}
+body, input, select, textarea{ font-family:Arial, Helvetica, sans-serif !important;font-size: small !important; color:#000 !important;}
+
+a {color: #0A5B93;text-decoration: none;}
+a:hover {color: #0A5B93;text-decoration: underline;}
+
+/*top tab css start here*/
+.gwt-TabBar .gwt-TabBarItem {
+  .tabNormalBg;
+  .bdrLight;
+  border-bottom:0;
+  border-top-right-radius:3px;
+  border-top-left-radius:3px;
+}
+.gwt-TabBar .gwt-TabBarItem-selected {
+  .tabSelectedBg;
+  .darkbdr;
+  color:white !important;
+  border-bottom:0;
+}
+
+.header_tabs {
+	position: absolute;
+	top: 10px;
+	.darkbdrBottom;
+}
+/*top tab css end here*/
+
+/*sub tab css start here*/
+
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+  .bdrLight;
+  border-bottom:0;
+  .tabNormalBg;
+  border-top-right-radius:2px;
+  border-top-left-radius:2px;
+}
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected {
+  color: white !important;
+  .tabSelectedBg;
+  .darkbdr;
+  border-bottom:0;
+}
+/*sub tab css end here*/
+
+/*button css start here*/
+.gwt-Button {
+  color:#fff !important;
+  .bdrDarker;
+   border-radius:2px;
+  .btnNormalBg;
+}
+.gwt-Button.gwt-small-button {
+padding:0 5px !important;
+}
+.gwt-Button:active {
+  .bdrDarker;
+  border-radius:2px;
+}
+.gwt-Button:hover {
+  .bdrDarker;
+  border-radius:2px;
+  .btnHoverBg;
+}
+.gwt-Button[disabled] {
+  cursor: default;
+  color: #999 !important;
+  border-radius:2px;
+  .bdrLight;
+  .btnDisableBg;
+}
+
+/*button css end here*/
+
+
+/*table grid css start here*/
+.customGrid {color:#000;padding:0;margin:0;table-layout: fixed;width: 100%;}
+.customGridHeader td {background: darken(@baseLight, 06%);text-align:left;font-weight:bold;height:32px;padding: 0 2px;}
+.customGrid td {.bdrBottomLight; padding:0px;cursor: pointer;}
+.customGrid .odd td {/*background-color:#fff;*/}
+.customGrid .even td {background: lighten(@baseLight, 13%);}
+.customGrid .rowHighlighted td {background: @gridRowSelectionColor !important;}
+
+.files-table-small-column {text-align: center !important;}
+.gridHeaderAlignClass td {vertical-align: middle !important;}
+/*table grid css end here*/
+
+/*form container css start here*/
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+ border:1px solid @baseLight !important;
+}
+.topPanel {.bdrLight; padding:10px; 	margin: 0 0 5px 0;}
+.top-box {.bdrLight;}
+.mainBody_box {.bdrLight;padding: 10px;	}
+
+fieldset {.bdrLight;}
+
+.files-table-header-cell{background:lighten(@baseLight, 13%) !important; color: black;  font-weight: bold; padding: 4px;}
+.compositePanelLayout {
+	height: 80px;
+	background:lighten(@baseLight, 13%);
+	vertical-align: middle;
+}
+
+.batchListGroupPanelLayout {
+	height: 40px;
+	vertical-align: middle;
+}
+.batchListCompositePanelLayout {
+	height: 50px;
+	background:lighten(@baseLight, 13%);
+	vertical-align: middle;
+}
+.top_Panel {
+	background:lighten(@baseLight, 13%);
+	.bdrLight;
+	padding: 4.5px 0 8px;
+}
+.topSpacing {top: 65px !important;}
+.footer{.bdrTopLight; text-align: center;}
+.footer td a {color: @baseDark;text-decoration: underline;cursor: pointer;}
+
+.headTxt{
+	font-weight: bold;
+	font-size: 14px;
+	color: black;
+	padding:0 0 5px 0;
+ }
+ 
+ .boldTxt {
+	font-weight: bold;
+	color: #333;
+ }
+ 
+ .fontRed {
+	color: red;
+ }
+ 
+ .fontColorLink {
+	color: @baseDark !important;
+ }
+ 
+ .padding5 {
+	padding: 5px;
+ }
+ 
+.btnMrgRight{ margin:0 10px 0 0 !important;}
+/*form container css end here*/
+
+.gwt-SplitLayoutPanel-HDragger {
+  background:@baseLight url(../images/splitPanelThumb.png) center center no-repeat !important;
+  cursor: col-resize;
+}
+
+.gwt-SplitLayoutPanel-VDragger {
+  background:@baseLight url(../images/splitPanelThumb.png) center center no-repeat;
+  cursor: row-resize;
+}
+
+.doc_tree {
+	.bdrLeftLight;
+	.bdrTopLight;
+	height: 99%;
+	padding-top: 20px;
+}
+.review_validate_panel {
+	.bdrLeftLight;
+	.bdrTopLight;
+	width: 100%;
+	height: 100%;
+	padding-top: 20px;
+}
+.image_overlay_panel {
+	.bdrLight;
+	height: 100%;
+}
+.document-style {
+	background:lighten(@baseLight, 10%) !important;
+	.bdrTopLight;
+	.bdrBottomLight;
+}
+/*tree view css end here*/
+
+/*DialogBox css start here*/
+
+.gwt-DialogBox .Caption {
+  background:lighten(@baseLight, 10%) !important;
+  padding: 5px 10px !important;
+  .bdrBottomDarker;
+  border-top:0 !important;
+  text-shadow:none !important;
+}
+/*DialogBox css end here*/
+
+/*login page css start here*/
+.loginBox {	margin: 135px auto;}
+.loginTopSection{height:90px; background: url("@{themeImagePath}loginPage_logo.png") no-repeat; text-align:center; vertical-align:middle;}
+.loginTopSection .logo{ background: url("@{themeImagePath}logo.png") no-repeat; width:260px; height:63px; margin:5px auto 0 auto; display:inline-block;}
+.loginBody {background: url("@{themeImagePath}loginPage_bg.png") bottom repeat-x;}
+.loginLeftTile{width:9px; background: url("@{themeImagePath}loginPage_left.png") repeat-y; min-height:194px;}
+.loginRightTile{width:9px; background: url("@{themeImagePath}loginPage_right.png") repeat-y; min-height:194px;}
+.loginBottom{height:19px; width:468px; background: url("@{themeImagePath}loginPage_footer.png") no-repeat;}
+
+.logoHeaderPanel{ padding:0 15px 0 5px; width:auto !important;}
+.logoPanel { width:100%; margin:10px 0 0 0;}
+.logoPanel .gwt-Anchor{ margin:0 0 0 5px; padding:0 0 0 5px;.bdrLeftLight;line-height:normal;}
+
+/*login page css end here*/
+
+/** Most GWT widgets already have a style name defined */
+.configurable-DialogBox {
+	width: auto !important;
+}
+.gwt-sample-pattern-DialogBox {
+	width: 500px !important;
+}
+.gwt-DialogBox {
+	width: 400px;
+}
+.gwt-Advanced-KV-TextBox {
+	width: 90% !important;
+}
+.gwt-CheckBox label{ margin:0 0 0 5px;}
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+	margin: 15px 6px 6px;
+}
+
+.buttonContainer {
+	width: 100%;
+}
+
+.buttonContainer td{
+	padding:5px 5px 0 5px;
+}
+ 
+.buttonContainer  td table td{
+	padding:0;
+}
+ 
+.marBottom5 { 
+	margin-bottom:5px !important;
+}
+
+.marLeft5 { 
+	margin-left:5px !important;
+}
+
+.groupPanelLayout, .groupPanelLayoutNormal {
+	background:url("@{themeImagePath}imgbdrRight.png") right top repeat-y;
+}
+
+.groupPanelLayout td {
+	vertical-align: middle !important;
+	height: 70px;
+	padding:5px;
+}
+
+.groupPanelLayoutNormal td, .lastGroupPanelLayoutNormal td  {
+	padding:18px 10px;
+	vertical-align: middle !important;
+}
+
+.groupPanelLayout td table td, .lastGroupPanelLayout td table td { 
+	height:auto; 
+	padding:0;
+}
+ 
+.lastGroupPanelLayout td {
+	vertical-align: middle !important;
+	height: 60px;
+	padding:10px;
+}
+.optionsPanel.mrgnBottom {
+	margin-bottom:38px !important;
+}
+
+/*
+	Upload Batch File Name CSS
+*/
+.uploadFileLabel {
+	word-wrap: break-word !important;
+	width: 175.0px;
+}
+
+.read-only-widget-style{
+	background-color: darken(@baseLight, 06%) !important;
+}
+
+/* CSS for images configurable through CSS starts */
+.imageLogo {
+	background-image: url("@{themeImagePath}logo.jpg");
+}
+.imageLogoTK {
+	background-image: url("@{themeImagePath}logo_tk.jpg");
+}
+
+.previousPageImageButton {
+	background-image: url("@{themeImagePath}Prev_Button.jpg");
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+}
+
+.currentPageImageButton {
+	background-image: url("@{themeImagePath}Current.jpg");
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+}
+
+.nextPageImageButton {
+	background-image: url("@{themeImagePath}Next_Button.jpg");
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+}
+
+.split_button {
+	background: transparent url("@{themeImagePath}split.png") no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.delete_button {
+	background: transparent url("@{themeImagePath}delete.png") no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.duplicate_button {
+	background: transparent url("@{themeImagePath}duplicate.png") no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.move_page_button {
+	background: transparent url("@{themeImagePath}move.png") no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.zoom_in {
+	background: transparent url("@{themeImagePath}zoom-in.png") no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 75px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.zoom_out {
+	background: transparent url("@{themeImagePath}zoom-out.png") no-repeat scroll left 0
+		;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.rotate_button {
+	background: transparent url("@{themeImagePath}rotate.png") no-repeat scroll left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.fit_to_page {
+	background: transparent url("@{themeImagePath}fittopage.png") no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 4px 0 10px 5px;
+	padding: 0 5px 15px 15px;
+	text-decoration: none;
+}
+
+.no_error_icon {
+	background: transparent url("@{themeImagePath}icon_cirTic.gif") no-repeat scroll
+		left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 19px 15px;
+	text-decoration: none;
+}
+
+.error_icon {
+	background: transparent url("@{themeImagePath}icon_cirHelp.gif") no-repeat scroll
+		left 0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	margin: 5px 0 10px 5px;
+	padding: 0 5px 19px 15px;
+	text-decoration: none;
+}
+
+.tableViewButton {
+	background: transparent url("@{themeImagePath}tableView.png") no-repeat scroll left
+		0;
+	border: 0 none;
+	cursor: pointer;
+	font-size: small;
+	text-decoration: none;
+	width: 20px;
+	height: 20px;
+}
+
+/* CSS for images configurable through CSS starts */
+
+/* CSS for setting dialog box width */
+.width500px {
+	width: 506px;
+}
+
+/* CSS for batch priority status box on BatchList and BatchInstance starts */
+.batch-priority-urgent {
+	background-color: #ff0000;
+	color: black;
+	text-align:center;
+	height: 17.5px;
+}
+
+.batch-priority-high {
+	background-color: #ff9c00;
+	color: black;
+	text-align:center;
+	height: 17.5px;
+}
+
+.batch-priority-medium {
+	background-color: #fff600;
+	color: black;
+	text-align:center;
+	height: 17.5px;
+}
+
+.batch-priority-low {
+	background-color: #fbf9bb;
+	color: black;
+	text-align:center;
+	height: 17.5px;
+}
+
+/* CSS for batch priority status box on BatchList and BatchInstance ends */
+
+/* CSS for thumbnail images shown on RV-Screen and WebScanner */
+.thumbnailHighlighted {
+	border: 2px solid lighten(@baseDark, 41%);
+}
+
+.thumbnailDefault {
+	.bdrDarker;
+}
+
+.thumbnail {
+	.bdrDarker;
+	cursor: pointer;
+}
+
+/* CSS for separation between statistic data */
+.pipe {
+	background:url("@{themeImagePath}imgbdrRight.png") right top repeat-y;
+	height: 100%;
+	width: 100%;
+}
+
+/* CSS for validate button image beside regex pattern input box */
+.validateButtonImage {
+	background: url("../images/validate.gif") no-repeat scroll 0 0 transparent !important;
+	height: 25px !important;
+    width: 19px !important;
+    border: none;
+    cursor: pointer !important;
+}
+
+.gwt-ListBox, .gwt-TextBox {
+	border:1px solid darken(@baseLight, 20%) !important;
+}
+
+.padding0 {
+	padding: 0 !important;
+}
+
+.batchAlertText {
+	font-weight: bold;
+	color: #5a595a !important;
+}
+
+/* CSS for showing label as hyper-link */
+.blueLink {
+	color: @baseDark !important;
+	cursor: pointer !important;
+}
+
+.blueLink:hover {
+	text-decoration: underline !important;
+}
+
+.cursorHand {
+	cursor: pointer !important;
+}
+.cursorHand:hover {
+	text-decoration:underline !important;
+}
+
+/* CSS for main layout containing contents */
+.mainPanelLayout {
+	.bdrLight;
+}
+
+/* CSS for outermost container for every page */
+.mainContainer {
+	margin: 0 10px 0 10px;
+}
+
+.wordWrap {
+	word-wrap: break-word;
+}
+
+.wordWrap > div {
+	padding: 5px;
+}
+
+.header {
+	background: darken(@baseLight, 06%);
+	table-layout: fixed;
+	height: 32px;
+	.bdrTopLight;	
+	.bdrBottomLight;
+}
+
+.header td {
+	font-weight: bold;
+}
+
+.gwt-DisclosurePanel .content{
+	border-left:0 !important;
+    margin-left:0 !important;
+    padding: 4px 0 4px 8px;
+}
+
+/* CSS for table extracted in RV-Screen */
+.tableViewListBox {
+	border: 1px solid White !important;
+	width: 150px;
+	height: 20px;
+}
+
+.margin {
+	margin: 2px !important;
+}
+
+/* CSS for sample date format on Reporting */
+.sampleDateStyle {
+	color: red;
+	font-size: 11px;
+}
+
+/* CSS for scroll panel on BatchClassConfigurations starts */
+.scrollClass {
+	overflow: auto;
+	height: 400px;
+	.bdrLight;
+}
+
+.scrollClass table {
+	border-collapse:collapse;
+	.bdrLight;
+}
+
+.scrollClass table td {
+	.bdrBottomLight;
+}
+/* CSS for scroll panel on BatchClassConfigurations ends */
+
+.border {
+	.bdrLight;
+	overflow: hidden;
+	padding: 6px;
+}
+
+/* CSS for right border on Advanced KV Extraction  */
+.rightBorder {
+	border-right: 2px solid @baseDark;
+	overflow: hidden;
+	padding: 6px;
+}
+
+/* CSS for background color on Extraction Input Fields Screen  */
+.backgroundGroup {
+	background-color: @baseLight;
+}
+
+/* CSS for overlay on image shown on RV-Scrren,Web Scanner, Advanced KV Extraction Screen */
+.buttonImageOverlay {
+	border: 0;
+    height: 30px;
+    margin-bottom: 5px;
+    width: 100%;
+	background: darken(@baseLight, 06%);
+}
+
+.pointer {
+	cursor: crosshair;
+}
+
+.borderResultTable, .borderResultTable tr td {
+	.bdrLight;
+	text-align: center;
+	border-collapse:collapse;
+}
+
+.borderResultTable tr td {
+	padding: 5px;
+}
+
+/* CSS for showing scroll on screen */
+.overflowScroll {
+	overflow: auto !important;
+}
+
+/* CSS for showing error message */
+.errorStyle {
+	color: red;
+	font-size: small;
+	font-weight: bold;
+	padding-left: 5px;
+}
+
+.source {
+	
+}
+
+.gwt-TabBarItem-selected {
+	cursor: default !important;
+}
+
+/* CSS for web scanner select source button size  */
+.customWebScannerButton {
+	width: 150px !important;
+}
+
+.hyperlinkWithPadding {
+	padding-left: 16px;
+	cursor: pointer !important;
+}
+
+/* CSS for showing dependency between plugins */
+.dependencyColor {
+	background-color: #FFFF00;
+}
+
+.customWorkflowPanel {
+	position: relative;
+	left: 200px;
+}
+
+
+/* CSS for FolderManagement View */
+.folderOptionsBox {
+	padding: 10px;
+	font-weight: bold;
+	spacing: 10px;
+}
+
+.folderManagerFooter {
+	padding: 4px;
+	background-color: lighten(@baseLight, 13%);
+	font-weight: bold;
+	text-align: right;
+}
+
+.whiteBackground {
+	background-color: white;
+}
+
+.tableBorderCollapse {
+	border-collapse: collapse;
+}
+
+.optionsPanel {
+	.bdrBottomDarker;
+	background:lighten(@baseLight, 13%);
+}
+
+.sampleRegexButton {
+	width: 120.0px;
+}
+
+/* CSS to give padding between button on AdvancedKVExractionView */
+.buttonPadding{
+	padding-top: 4px;
+    padding-left: 15px;
+    padding-left: 4px\0;
+}
+
+.textArea {
+	width: 75px !important;
+}
+
+.scrollPanelHeight {
+	height: 9em;
+	height: 8em\0;
+	width: 100%;
+}
+
+.scrollPanelPlugin {
+	height: 15em;
+	height: 14em\0;
+	width: 100%;
+}
+
+/* CSS for RV Screen starts*/
+.reviewStyle {
+	background-color: lighten(@baseLight, 13%) !important;
+	.bdrBottomLight;
+	.bdrTopLight;
+	padding-left: 5px;
+}
+
+.validatePanelListBox {
+	border: 1px solid darken(@baseLight, 20%) !important;
+	width: 150px;
+	height: 20px;
+}
+
+.dropdownBox {
+	width : 150px;	
+}
+
+.rowSelectionStyle {
+	background-color: transparent; 
+	color:#347C2C; 
+	font-weight: bold;
+}
+
+.fuzzy-seperator { 
+	color: #E6E6E6;
+	height: 10px;
+}
+/* CSS for RV Screen ends*/
+
+/* CSS for flash button configuration starts */
+.swfupload {
+	position: absolute;
+	z-index: 5;
+}
+
+.browseButton {
+	width: 68px !important;
+}
+/* CSS for flash button configuration ends */
+
+/* CSS for Web Scanner thumbnail and image panel */
+.borderImageThumb {
+	border: 1px solid darken(@baseLight, 06%);
+}
+
+.selectedThumb {
+	border: 1px solid darken(@baseLight, 20%);
+}
+
+/* CSS for overlays drawn on RV-Screen and AdvancedKVExtraction Screen(utility.js) starts */
+.square {
+	border: 1px solid @overlayBorderColor;
+	background-color: @overlayColor;
+	opacity: 0.4;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+	/*filter: alpha(opacity =     40);*/
+	position: absolute;
+}
+
+.secondSquare {
+	border: 1px solid @overlayBorderColor;
+	background-color: @overlaySecondColor;
+	opacity: 0.4;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+	/*filter: alpha(opacity =     40);*/
+	position: absolute;
+}
+
+.thirdSquare {
+	border: 1px solid @overlayBorderColor;
+	background-color: @overlayThirdColor;
+	opacity: 0.4;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
+	/*filter: alpha(opacity =     40);*/
+	position: absolute;
+}
+
+.squareRow {
+	border: 1px solid #92C1F0;
+	background-color: #98AFC7;
+	opacity: 0.4;
+	position: absolute;
+}
+/* CSS for overlays drawn on RV-Screen and AdvancedKVExtraction Screen(utility.js) ends */
+
+/* CSS for UploadBatch starts */
+.paddingSelectAllLabel {
+	padding: 5px 6px;
+}
+
+.paddingSelectAll {
+	padding: 5px 0;
+}
+
+.margin5px {
+	margin: 5px;
+}
+
+.panelBorderCSS {
+	.bdrLight;
+}
+
+.panelBackgroundCSS {
+	background: none repeat scroll 0 0 lighten(@baseLight, 13%) !important;
+	.bdrLight;
+}
+
+.panelBorderScrollableCSS {
+	 .bdrBottomLight;
+    .bdrTopLight;
+}
+
+.dockPanelHeightCSS{
+	height: 520px;
+	height: 395px \0;
+}
+
+.scrollPanelHeightCSS{
+	height: 325px;
+	height: 215px \0;
+}
+
+.btnMrgLeftRight{
+	margin:0 5px !important;
+}
+/* CSS for UploadBatch ends */
+
+/* CSS for Custom Workflow Help Content */
+.helpContent {
+    background-color: lighten(@baseLight, 13%);
+    .bdrLight;
+    font-size: 12pt;
+    line-height: 120%;
+    text-align: center;
+    word-spacing: 3px;
+}
+
+/*This css is for the selected item in the list of options for right click option on tabs. */
+.gwt-MenuBar .gwt-MenuItem-selected {
+    background: none repeat scroll 0 0 @baseLight !important;
+}
+/*This css is used for giving the colors to the pop-up panel according to the color theme applied. */
+.gwt-PopupPanel {
+    background: none repeat scroll 0 0 white;
+    border: 3px solid @baseLight !important;
+    padding: 3px;
+}
+
+/*This css is used to remove the margin applied to the buttons through default overridden css.*/
+.removeMargin {
+	margin: 0px !important;
+}
+
+
+#FileUpload {
+    position:relative;
+}
+ 
+.BrowserVisible {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+    height:26px;
+    width:224px;
+}
+ 
+.FileField {
+    width:160px;
+    height:21px;
+    font-size:16px;
+    border:solid 1px #000;
+    cursor: none;
+}
+ 
+.BrowserHidden {
+    position:relative;
+    width:225px;
+    height:26px;
+    text-align: right;
+    -moz-opacity:0 ;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=1)";
+    opacity: 0;
+    z-index: 2;
+}
+
+/* Css for height of panel in web scanner*/
+.panelBrowserSpecificHeight {
+	height:435px !important;
+	height:409px \0;
+}

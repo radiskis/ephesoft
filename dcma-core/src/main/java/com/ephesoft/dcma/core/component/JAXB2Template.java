@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,72 +46,199 @@ import com.ephesoft.dcma.util.FileUtils;
  */
 public class JAXB2Template {
 
+	/**
+	 * jaxb2Marshaller Jaxb2Marshaller.
+	 */
 	private final Jaxb2Marshaller jaxb2Marshaller;
-	private String baseFolderLocation;
-	private String localFolderLocation;
-	private String exportFolderLocation;
-	private String baseHttpURL;
-	private String baseSampleFdLoc;
-	private String sampleFolders;
-	private String searchSampleName;
-	private String searchIndexFolderName;
-	private String imageMagickBaseFolderName;
-	private String fuzzyDBIndexFolderName;
-	private String webScannerScannedImagesFolderPath;
-	private String emailFolderName;
-	private String projectFilesBaseFolder;
-	private String testKVExtractionFolderName;
-	private String scriptFolderName;
-	private String cmisPluginMappingFolderName;
-	private String batchExportFolder;
-	private String batchClassSerializableFile;
-	private String fileboundPluginMappingFolderName;
-	private String validationScriptName;
-	private String tempFolder;
-	private String testTableFolderName;
-	private String threadpoolLockFolder;
-	private String addNewTableScriptName;
-	private String testFolderLocation;
-	private String scriptConfigFolderName;	
-	private String uploadBatchFolder;
-	private String testAdvancedKvExtractionFolder;
-	private String webServicesFolderPath;
-	private String samplePatternFolderName;
-	private String samplePatternFileName;
 	
+	/**
+	 * baseFolderLocation String.
+	 */
+	private String baseFolderLocation;
+	
+	/**
+	 * localFolderLocation String.
+	 */
+	private String localFolderLocation;
+	
+	/**
+	 * exportFolderLocation String.
+	 */
+	private String exportFolderLocation;
+	
+	/**
+	 * baseHttpURL String.
+	 */
+	private String baseHttpURL;
+	
+	/**
+	 * baseSampleFdLoc String.
+	 */
+	private String baseSampleFdLoc;
+	
+	/**
+	 * sampleFolders String.
+	 */
+	private String sampleFolders;
+	
+	/**
+	 * searchSampleName String.
+	 */
+	private String searchSampleName;
+	
+	/**
+	 * searchIndexFolderName String.
+	 */
+	private String searchIndexFolderName;
+	
+	/**
+	 * imageMagickBaseFolderName String.
+	 */
+	private String imageMagickBaseFolderName;
+	
+	/**
+	 * fuzzyDBIndexFolderName String.
+	 */
+	private String fuzzyDBIndexFolderName;
+	
+	/**
+	 * webScannerScannedImagesFolderPath String.
+	 */
+	private String webScannerScannedImagesFolderPath;
+	
+	/**
+	 * emailFolderName String.
+	 */
+	private String emailFolderName;
+	
+	/**
+	 * projectFilesBaseFolder String.
+	 */
+	private String projectFilesBaseFolder;
+	
+	/**
+	 * testKVExtractionFolderName String.
+	 */
+	private String testKVExtractionFolderName;
+	
+	/**
+	 * scriptFolderName String.
+	 */
+	private String scriptFolderName;
+	
+	/**
+	 * cmisPluginMappingFolderName String.
+	 */
+	private String cmisPluginMappingFolderName;
+	
+	/**
+	 * batchExportFolder String.
+	 */
+	private String batchExportFolder;
+	
+	/**
+	 * batchClassSerializableFile String.
+	 */
+	private String batchClassSerializableFile;
+	
+	/**
+	 * fileboundPluginMappingFolderName String.
+	 */
+	private String fileboundPluginMappingFolderName;
+	
+	/**
+	 * validationScriptName String.
+	 */
+	private String validationScriptName;
+	
+	/**
+	 * tempFolder String.
+	 */
+	private String tempFolder;
+	
+	/**
+	 * testTableFolderName String.
+	 */
+	private String testTableFolderName;
+	
+	/**
+	 * threadpoolLockFolder String.
+	 */
+	private String threadpoolLockFolder;
+	
+	/**
+	 * addNewTableScriptName String.
+	 */
+	private String addNewTableScriptName;
+	
+	/**
+	 * testFolderLocation String.
+	 */
+	private String testFolderLocation;
+	
+	/**
+	 * scriptConfigFolderName String.
+	 */
+	private String scriptConfigFolderName;
+	
+	/**
+	 * uploadBatchFolder String.
+	 */
+	private String uploadBatchFolder;
+	
+	/**
+	 * testAdvancedKvExtractionFolder String.
+	 */
+	private String testAdvancedKvExtractionFolder;
+	
+	/**
+	 * webServicesFolderPath String.
+	 */
+	private String webServicesFolderPath;
+	
+	/**
+	 * advancedTestTableFolder String.
+	 */
+	private String advancedTestTableFolder;
+	
+	/**
+	 * dbExportPluginMappingFolderName String.
+	 */
+	private String dbExportPluginMappingFolderName;
 
 	/**
-	 * @param jaxb2Marshaller
-	 * @param baseFolderLocation
-	 * @param localFolderLocation
-	 * @param exportFolderLocation
-	 * @param baseHttpURL
-	 * @param baseSampleFdLoc
-	 * @param sampleFolders
-	 * @param searchSampleName
-	 * @param searchIndexFolderName
-	 * @param imageMagickBaseFolderName
-	 * @param fuzzyDBIndexFolderName
-	 * @param webScannerScannedImagesFolderPath
-	 * @param emailFolderName
-	 * @param projectFilesBaseFolder
-	 * @param testKVExtFolder
-	 * @param scriptFolderName
-	 * @param cmisPluginMappingFolderName
-	 * @param batchExportFolder
-	 * @param batchClassSerializableFile
-	 * @param fileboundPluginMappingFolderName
-	 * @param validationScriptName
-	 * @param tempFolder
-	 * @param testTableFolderName
-	 * @param threadpoolLockFolder
-	 * @param testFolderLocation
-	 * @param scriptConfigFolderName
-	 * @param uploadBatchFolder
-	 * @param testAdvancedKvExtractionFolder
-	 * @param webServicesFolderPath
-     * @param samplePatternFolderName
-	 * @param samplePatternFileName
+	 * Constructor.
+	 * @param jaxb2Marshaller Jaxb2Marshaller
+	 * @param baseFolderLocation String
+	 * @param localFolderLocation String
+	 * @param exportFolderLocation String
+	 * @param baseHttpURL String
+	 * @param baseSampleFdLoc String
+	 * @param sampleFolders String
+	 * @param searchSampleName String
+	 * @param searchIndexFolderName String
+	 * @param imageMagickBaseFolderName String
+	 * @param fuzzyDBIndexFolderName String
+	 * @param webScannerScannedImagesFolder StringPath
+	 * @param emailFolderName String
+	 * @param projectFilesBaseFolder String
+	 * @param testKVExtFolder String
+	 * @param scriptFolderName String
+	 * @param cmisPluginMappingFolderName String
+	 * @param batchExportFolder String
+	 * @param batchClassSerializableFile String
+	 * @param fileboundPluginMappingFolderName String
+	 * @param validationScriptName String
+	 * @param tempFolder String
+	 * @param testTableFolderName String
+	 * @param threadpoolLockFolder String
+	 * @param testFolderLocation String
+	 * @param scriptConfigFolderName String
+	 * @param uploadBatchFolder String
+	 * @param testAdvancedKvExtractionFolder String
+	 * @param webServicesFolderPath String
+	 * @param samplePatternFolderName String
+	 * @param samplePatternFileName String
 	 */
 	public JAXB2Template(Jaxb2Marshaller jaxb2Marshaller, String baseFolderLocation, String localFolderLocation,
 			String exportFolderLocation, String baseHttpURL, String baseSampleFdLoc, String sampleFolders, String searchSampleName,
@@ -119,8 +246,9 @@ public class JAXB2Template {
 			String webScannerScannedImagesFolderPath, String emailFolderName, String projectFilesBaseFolder, String testKVExtFolder,
 			String scriptFolderName, String cmisPluginMappingFolderName, String batchExportFolder, String batchClassSerializableFile,
 			String fileboundPluginMappingFolderName, String validationScriptName, String tempFolder, String testTableFolderName,
-			String threadpoolLockFolder,String addNewTableScriptName, String testFolderLocation,
-			String scriptConfigFolderName, String uploadBatchFolder, String testAdvancedKvExtractionFolder, String webServicesFolderPath, String samplePatternFileName, String samplePatternFolderName) {
+			String threadpoolLockFolder, String addNewTableScriptName, String testFolderLocation, String scriptConfigFolderName,
+			String uploadBatchFolder, String testAdvancedKvExtractionFolder, String webServicesFolderPath,
+			String advancedTestTableFolder, String dbExportPluginMappingFolderName) {
 		super();
 		this.jaxb2Marshaller = jaxb2Marshaller;
 		this.baseFolderLocation = baseFolderLocation;
@@ -152,16 +280,20 @@ public class JAXB2Template {
 		this.uploadBatchFolder = uploadBatchFolder;
 		this.testAdvancedKvExtractionFolder = testAdvancedKvExtractionFolder;
 		this.webServicesFolderPath = webServicesFolderPath;
-		this.samplePatternFolderName = samplePatternFolderName;
-		this.samplePatternFileName = samplePatternFileName;
+		this.advancedTestTableFolder = advancedTestTableFolder;
+		this.dbExportPluginMappingFolderName = dbExportPluginMappingFolderName;
 	}
 
-	
+	/**
+	 * To set Base Sample Fd Loc.
+	 * @param baseSampleFdLoc String
+	 */
 	public void setBaseSampleFdLoc(String baseSampleFdLoc) {
 		this.baseSampleFdLoc = baseSampleFdLoc;
 	}
 
 	/**
+	 * Constructor.
 	 * @param jaxb2Marshaller Jaxb2Marshaller
 	 * @param localFolderLocation String
 	 */
@@ -172,6 +304,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Jaxb2 Marshaller.
 	 * @return the jaxb2Marshaller
 	 */
 	public Jaxb2Marshaller getJaxb2Marshaller() {
@@ -179,6 +312,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Local Folder Location.
 	 * @return the localFolderLocation
 	 */
 	public String getLocalFolderLocation() {
@@ -186,6 +320,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Export Folder Location.
 	 * @return the exportFolderLocation
 	 */
 	public String getExportFolderLocation() {
@@ -193,6 +328,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Base Http URL.
 	 * @return the baseHttpURL
 	 */
 	public String getBaseHttpURL() {
@@ -200,6 +336,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Base Sample Fd Loc.
 	 * @return the baseSampleFdLoc
 	 */
 	public String getBaseSampleFdLoc() {
@@ -207,6 +344,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Sample Folders.
 	 * @return the sampleFolders
 	 */
 	public String getSampleFolders() {
@@ -214,6 +352,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Search Sample Name.
 	 * @return the searchSampleName
 	 */
 	public String getSearchSampleName() {
@@ -221,6 +360,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Search Index Folder Name.
 	 * @return the searchIndexFolderName
 	 */
 	public String getSearchIndexFolderName() {
@@ -228,6 +368,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Image Magick Base Folder Name.
 	 * @return the imageMagickBaseFolderName
 	 */
 	public String getImageMagickBaseFolderName() {
@@ -235,6 +376,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Fuzzy DB Index Folder Name.
 	 * @return the fuzzyDBIndexFolderName
 	 */
 	public String getFuzzyDBIndexFolderName() {
@@ -242,7 +384,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the folder path of the scanned images
+	 * Api to return the folder path of the scanned images.
 	 * 
 	 * @return the folder path
 	 */
@@ -251,7 +393,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the base folder location
+	 * Api to return the base folder location.
 	 * 
 	 * @return the location of base folder
 	 */
@@ -260,6 +402,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Project Files Base Folder.
 	 * @return the projectFilesBaseFolder
 	 */
 	public String getProjectFilesBaseFolder() {
@@ -267,6 +410,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To set Project Files Base Folder.
 	 * @param projectFilesBaseFolder the projectFilesBaseFolder to set
 	 */
 	public void setProjectFilesBaseFolder(String projectFilesBaseFolder) {
@@ -274,7 +418,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the email folder location
+	 * Api to return the email folder location.
 	 * 
 	 * @return name of the folder
 	 */
@@ -292,6 +436,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Script Folder Name.
 	 * @return the scriptFolderName
 	 */
 	public String getScriptFolderName() {
@@ -299,6 +444,7 @@ public class JAXB2Template {
 	}
 
 	/**
+	 * To get Cmis Plugin Mapping Folder Name.
 	 * @return the cmisPluginMappingFolderName
 	 */
 	public String getCmisPluginMappingFolderName() {
@@ -306,7 +452,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the batch export folder location
+	 * Api to return the batch export folder location.
 	 * 
 	 * @return location of batch Export Folder
 	 */
@@ -315,7 +461,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the batch class serializable file name
+	 * Api to return the batch class serializable file name.
 	 * 
 	 * @return name of batch Class Serializable Description as appearing on the UI
 	 */
@@ -324,7 +470,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the filebound plugin mapping folder name
+	 * Api to return the filebound plugin mapping folder name.
 	 * 
 	 * @return Name of filebound plugin mapping folder
 	 */
@@ -334,7 +480,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to return the Validation Script name
+	 * API to return the Validation Script name.
 	 * 
 	 * @return Name of Script File
 	 */
@@ -351,7 +497,7 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * Api to get the KV Extraction test folder name.
+	 * API to get the KV Extraction test folder name.
 	 * 
 	 * @return name of the folder
 	 */
@@ -360,32 +506,30 @@ public class JAXB2Template {
 	}
 
 	/**
-	 * API to return the threadpool lock folder. This folder signifies if any thread is currently running for this batch instance at
+	 * API to return the thread pool lock folder. This folder signifies if any thread is currently running for this batch instance at
 	 * any point of time.
 	 * 
-	 * @return
+	 * @return String
 	 */
 	public String getThreadpoolLockFolder() {
 		return threadpoolLockFolder;
 	}
-	
-	/** API to set the threadpool lock folder.
-	 * This folder signifies if any thread is currently running for this batch instance at any point of time.
+
+	/**
+	 * API to get the thread pool lock folder. This folder signifies if any thread is currently running for this batch instance at any
+	 * point of time.
 	 * 
-	 * @param threadpoolLockFolder
+	 * @return String
 	 */
-	
 	public String getAddNewTableScriptName() {
 		return addNewTableScriptName;
 	}
-	
-	
 
 	/**
 	 * API to set the threadpool lock folder. This folder signifies if any thread is currently running for this batch instance at any
 	 * point of time.
 	 * 
-	 * @param threadpoolLockFolder
+	 * @param threadpoolLockFolder String
 	 */
 	public void setThreadpoolLockFolder(String threadpoolLockFolder) {
 		this.threadpoolLockFolder = threadpoolLockFolder;
@@ -394,7 +538,7 @@ public class JAXB2Template {
 	/**
 	 * API to set the local folder location.
 	 * 
-	 * @param localFolderLocation
+	 * @param localFolderLocation String
 	 */
 	public void setLocalFolderLocation(String localFolderLocation) {
 		this.localFolderLocation = localFolderLocation;
@@ -403,7 +547,7 @@ public class JAXB2Template {
 	/**
 	 * API to return test data folder.
 	 * 
-	 * @return
+	 * @return String
 	 */
 	public String getTestFolderLocation() {
 		return testFolderLocation;
@@ -411,8 +555,8 @@ public class JAXB2Template {
 
 	/**
 	 * API to set test data folder.
-	 * 
-	 * @param testFolderLocation
+	 *  
+	 * @param testFolderLocation String
 	 */
 	public void setTestFolderLocation(String testFolderLocation) {
 		this.testFolderLocation = testFolderLocation;
@@ -421,55 +565,89 @@ public class JAXB2Template {
 	/**
 	 * API to set base folder.
 	 * 
-	 * @param baseFolderLocation
+	 * @param baseFolderLocation String
 	 */
-	public void setBaseFolderLocation(String baseFolderLocation)
-	{
+	public void setBaseFolderLocation(String baseFolderLocation) {
 		this.baseFolderLocation = baseFolderLocation;
 	}
-	
-	
+
+	/**
+	 * To get Script Config Folder Name.
+	 * @return String
+	 */
 	public String getScriptConfigFolderName() {
 		return scriptConfigFolderName;
 	}
-	
+
+	/**
+	 * To set Script Config Folder Name.
+	 * @param scriptConfigFolderName String
+	 */
 	public void setScriptConfigFolderName(String scriptConfigFolderName) {
 		this.scriptConfigFolderName = scriptConfigFolderName;
 	}
-	
-	
+
+	/**
+	 * To get Upload Batch Folder.
+	 * @return String
+	 */
 	public String getUploadBatchFolder() {
 		return uploadBatchFolder;
 	}
-	
+
+	/**
+	 * To set Upload Batch Folder.
+	 * @param uploadBatchFolder String
+	 */
 	public void setUploadBatchFolder(String uploadBatchFolder) {
 		this.uploadBatchFolder = uploadBatchFolder;
 	}
 
+	/**
+	 * To get Web Services Folder Path.
+	 * @return String
+	 */ 
 	public String getWebServicesFolderPath() {
 		return webServicesFolderPath;
 	}
-	
+
+	/**
+	 * To set Web Services Folder Path.
+	 * @param webServicesFolderPath String
+	 */
 	public void setWebServicesFolderPath(String webServicesFolderPath) {
 		this.webServicesFolderPath = webServicesFolderPath;
 	}
-	
+
+	/**
+	 * To get Test Advanced Kv Extraction Folder Name.
+	 * @return String
+	 */
 	public String getTestAdvancedKvExtractionFolderName() {
 		return testAdvancedKvExtractionFolder;
 	}
-	public String getSamplePatternFolder() {
-		return samplePatternFolderName;
-	}
-	
-	public void setSamplePatternFolderName(String samplePatternFolderName) {
-		this.samplePatternFolderName = samplePatternFolderName;
-	}
-	
-	public String getSamplePatternFileName() {
-		return samplePatternFileName;
+
+	/**
+	 * To get Advanced Test Table Folder.
+	 * @return String
+	 */
+	public String getAdvancedTestTableFolder() {
+		return advancedTestTableFolder;
 	}
 
-	public void setSamplePatternFileName(String samplePatternFileName) {
-		this.samplePatternFileName = samplePatternFileName;
-	}			
+	/**
+	 * To set Advanced Test Table Folder.
+	 * @param advancedTestTableFolder String
+	 */
+	public void setAdvancedTestTableFolder(String advancedTestTableFolder) {
+		this.advancedTestTableFolder = advancedTestTableFolder;
+	}
+
+	/**
+	 * To get Db Export Plugin Mapping Folder Name.
+	 * @return the dbExportPluginMappingFolderName
+	 */
+	public String getDbExportPluginMappingFolderName() {
+		return dbExportPluginMappingFolderName;
+	}
 }

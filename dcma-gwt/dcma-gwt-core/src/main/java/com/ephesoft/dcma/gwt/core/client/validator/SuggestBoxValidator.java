@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,27 +41,30 @@ import com.google.gwt.user.client.ui.HasValue;
 
 public class SuggestBoxValidator implements Validator {
 
-	private HasValue<String> _value;
-	private Collection<String> suggestValues;
+	private HasValue<String> value;
+	private final Collection<String> suggestValues;
 
 	public SuggestBoxValidator(HasValue<String> value, Collection<String> suggestValues) {
-		_value = value;
+		this.value = value;
 		this.suggestValues = suggestValues;
 	}
 
 	public void setValue(HasValue<String> value) {
-		_value = value;
+		this.value = value;
 	}
 
 	@Override
 	public boolean validate() {
-		if (_value.getValue() == null || _value.getValue().isEmpty())
-			return false;
-		for (String altVal : suggestValues) {
-			if (_value.getValue().equals(altVal))
-				return true;
+		boolean valid = false;
+		if (value.getValue() == null || value.getValue().isEmpty()){
+			valid = false;
 		}
-		return false;
+		for (String altVal : suggestValues) {
+			if (value.getValue().equals(altVal)){
+				valid = true;
+			}				
+		}
+		return valid;
 	}
 
 }

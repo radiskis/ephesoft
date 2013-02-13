@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,20 +43,44 @@ import java.util.List;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see java.util.Arrays
  */
 public enum EphesoftUser {
-	NORMAL_USER("Normal User"), ADMIN_USER("Admin User"),SUPER_ADMIN("Super Admin");
+	
+	/**
+	 * NORMAL_USER.
+	 */
+	NORMAL_USER("Normal User"), 
+	/**
+	 * ADMIN_USER.
+	 */
+	ADMIN_USER("Admin User"),
+	/**
+	 * SUPER_ADMIN.
+	 */
+	SUPER_ADMIN("Super Admin");
 
+	/**
+	 * user String.
+	 */
 	private String user;
 
 	private EphesoftUser(String user) {
 		this.user = user;
 	}
 
+	/**
+	 * To get values.
+	 * @return List<EphesoftUser>
+	 */
 	public static List<EphesoftUser> valuesAsList() {
 		return Arrays.asList(values());
 	}
 
+	/**
+	 * To get user.
+	 * @return String
+	 */
 	public String getUser() {
 		return user;
 	}

@@ -2,89 +2,151 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editTableColumnInfoViewPanel">
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
+			
+			    <g:HorizontalPanel width="100%">
+					<g:cell width="22%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="betweenLeftLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="betweenLeft" />
+					</g:cell>
+					<g:cell horizontalAlignment="ALIGN_LEFT">
+						<g:Button ui:field="betweenLeftPatternValidateButton" />
+					</g:cell>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="columnPatternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="columnPatternStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="columnPattern" />
-			</g:cell>
-		</g:HorizontalPanel>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="columnNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="columnNameStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="columnName" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="22%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="betweenRightLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="betweenRight" />
+					</g:cell>
+					<g:cell horizontalAlignment="ALIGN_LEFT">
+						<g:Button ui:field="betweenRightPatternValidateButton" />
+					</g:cell>
+				</g:HorizontalPanel>
+			    
+			    <g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="columnNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="columnNameStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="columnName" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="columnHeaderPatternLabel"></g:Label>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="22%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="columnHeaderPatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="columnHeaderPattern" />
+					</g:cell>
+					<g:cell horizontalAlignment="ALIGN_LEFT">
+						<g:Button ui:field="columnHeaderPatternValidateButton" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="columnStartCoordinateLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="columnStartCoordinate" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="columnEndCoordinateLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="columnEndCoordinate" />
+					</g:cell>
+				</g:HorizontalPanel>
+			    
+				<g:HorizontalPanel width="100%">
+					<g:cell width="22%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="columnPatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<!-- <g:Label ui:field="columnPatternStar"></g:Label>  -->
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="columnPattern" />
+					</g:cell>
+					<g:cell horizontalAlignment="ALIGN_LEFT">
+						<g:Button ui:field="columnPatternValidateButton" />
+					</g:cell>
+				</g:HorizontalPanel>				
+				
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isRequiredLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="required" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isMandatoryLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="mandatory" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+		<g:HorizontalPanel width="100%" ui:field="editTableColumnInfoPanel">
+			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
+			</g:cell>
+			<g:cell width="2%">
+				<g:Label></g:Label>
+			</g:cell>
+
+			<g:cell width="2%">
+				<g:Button ui:field="cancelButton" />
 			</g:cell>
 			<g:cell width="1%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="columnHeaderPattern" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="betweenLeftLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="betweenLeft" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="betweenRightLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="betweenRight" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isRequiredLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isRequired" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel ui:field="editTableColumnInfoPanel">
-			<g:Button ui:field="saveButton" />
 			<g:cell width="7%">
-				<g:Label></g:Label>
+				<g:Button ui:field="samplePatternButton" />
 			</g:cell>
-			<g:Button ui:field="cancelButton" />	
-			<g:cell width="7%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:Button ui:field="samplePatternButton" />
+
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

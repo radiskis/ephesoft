@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -61,9 +61,11 @@ import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.util.XMLUtil;
 
 /**
+ * This is generic class for XML dao.
+ * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.core.dao.Dao
  * @param <T>
  */
 public abstract class XmlDao<T> implements Dao<T> {
@@ -72,28 +74,56 @@ public abstract class XmlDao<T> implements Dao<T> {
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(XmlDao.class);
+	
+	/** 
+	 * OPERATION_NOT_SUPPORTED String.
+	 */
 	private static final String OPERATION_NOT_SUPPORTED = "Operation not supported.";
 
-	public void create(T object, Serializable identifier, boolean isZipSwitchOn) {
-		create(object, identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn, false);
+	/**
+	 * To create new objects.
+	 * @param object T
+	 * @param identifier Serializable
+	 */
+	public void create(T object, Serializable identifier) {
+		create(object, identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, false);
 	}
 
-	public void create(T object, Serializable identifier, String pageId, String fileName, boolean isZipSwitchOn,
-			boolean isFirstTimeUpdate) {
+	/**
+	 * To create new objects.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param pageId String
+	 * @param fileName String 
+	 * @param isFirstTimeUpdate boolean
+	 */
+	public void create(T object, Serializable identifier, String pageId, String fileName, boolean isFirstTimeUpdate) {
+		create(object, identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, false, getJAXB2Template().getLocalFolderLocation());
+	}
+
+	/**
+	 * To create new objects.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param pageId String
+	 * @param fileName String 
+	 * @param isFirstTimeUpdate boolean
+	 * @param localFolderPath String
+	 */
+	public void create(T object, Serializable identifier, String pageId, String fileName, boolean isFirstTimeUpdate,
+			String localFolderPath) {
 		LOGGER.info("Entering create method.");
 		OutputStream stream = null;
 		try {
 			String filePath = null;
 			if (null == pageId) {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ fileName;
+				filePath = localFolderPath + File.separator + identifier + File.separator + identifier + fileName;
 			} else {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ "_" + pageId + fileName;
+				filePath = localFolderPath + File.separator + identifier + File.separator + identifier + "_" + pageId + fileName;
 			}
 			File xmlFile = new File(filePath);
 			boolean isZip = false;
-
+			boolean isZipSwitchOn = isZipSwitchOn();
 			if (isZipSwitchOn) {
 				if (isFirstTimeUpdate && !xmlFile.exists()) {
 					isZip = true;
@@ -121,6 +151,7 @@ public abstract class XmlDao<T> implements Dao<T> {
 				try {
 					stream.close();
 				} catch (IOException e) {
+					LOGGER.error("Error closing steam. " + e.getMessage(), e);
 				}
 			}
 		}
@@ -128,36 +159,46 @@ public abstract class XmlDao<T> implements Dao<T> {
 
 	}
 
+	/**
+	 * To get the object.
+	 * @param identifier Serializable
+	 */
 	@Override
 	public T get(Serializable identifier) {
-		boolean isZipSwitchOn = true;
-		try {
-			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
-			isZipSwitchOn = Boolean.parseBoolean(prop.getProperty(ICommonConstants.ZIP_SWITCH));
-		} catch (IOException ioe) {
-			LOGGER.error("Unable to read the zip switch value. Taking default value as true.Exception thrown is:" + ioe.getMessage(),
-					ioe);
-		}
-		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
+		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, getJAXB2Template().getLocalFolderLocation());
 	}
 
-	public T get(Serializable identifier, boolean isZipSwitchOn) {
-		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
+	/**
+	 * To get the object.
+	 * @param identifier Serializable
+	 * @param localFolder String
+	 */
+	public T get(Serializable identifier, String localFolder) {
+		return get(identifier, null, ICommonConstants.UNDERSCORE_BATCH_XML, localFolder);
 	}
 
+	/**
+	 * To get the object.
+	 * @param identifier Serializable
+	 * @param localFolder String
+	 * @param pageId String
+	 * @param fileName String
+	 * @return T
+	 */
 	@SuppressWarnings("unchecked")
-	public T get(Serializable identifier, String pageId, String fileName, boolean isZipSwitchOn) {
+	public T get(Serializable identifier, String pageId, String fileName, String localFolder) {
 		LOGGER.info("Entering get method.");
+		boolean isZipSwitchOn = true;
+		isZipSwitchOn = isZipSwitchOn();
+
 		InputStream inputStream = null;
 		String filePath = null;
 		try {
 
 			if (null == pageId) {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ fileName;
+				filePath = localFolder + File.separator + identifier + File.separator + identifier + fileName;
 			} else {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ "_" + pageId + fileName;
+				filePath = localFolder + File.separator + identifier + File.separator + identifier + ICommonConstants.UNDERSCORE + pageId + fileName;
 			}
 			File xmlFile = new File(filePath);
 			LOGGER.info("FilePath in get batch object is : " + filePath);
@@ -199,55 +240,205 @@ public abstract class XmlDao<T> implements Dao<T> {
 		}
 	}
 
+	/**
+	 * To check whether zip switch is on or not.
+	 * @return boolean
+	 */
+	private boolean isZipSwitchOn() {
+		boolean isZipSwitchOn = false;
+		try {
+			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			isZipSwitchOn = Boolean.parseBoolean(prop.getProperty(ICommonConstants.ZIP_SWITCH));
+		} catch (IOException ioe) {
+			LOGGER.error("Unable to read the zip switch value. Taking default value as true.Exception thrown is:" + ioe.getMessage(),
+					ioe);
+		}
+		return isZipSwitchOn;
+	}
+
+	/**
+	 * API for getting the Object providing the filePath.
+	 * 
+	 * @param filePath String
+	 * @return T
+	 */
+	@SuppressWarnings("unchecked")
+	public T getObjectFromFilePath(String filePath) {
+		LOGGER.info("Entering get method.");
+		InputStream inputStream = null;
+		try {
+
+			File xmlFile = new File(filePath);
+			LOGGER.info("FilePath in get batch object is : " + filePath);
+
+			inputStream = new FileInputStream(xmlFile);
+
+			Source source = XMLUtil.createSourceFromStream(inputStream);
+			return (T) getJAXB2Template().getJaxb2Marshaller().unmarshal(source);
+		} catch (Exception e) {
+			throw new DCMABusinessException(e.getMessage(), e);
+		} finally {
+			try {
+				if (inputStream != null) {
+					inputStream.close();
+				}
+			} catch (IOException ioe) {
+				LOGGER.info("Exception in closing inputstream in xml dao. Filename is:" + filePath);
+			}
+			LOGGER.info("Exiting get method.");
+		}
+	}
+
+	/**
+	 * To get all objects satisfying criteria.
+	 * @return List<T>
+	 */
 	@Override
 	public List<T> getAll() {
 		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
+	/**
+	 * To merge objects.
+	 * @param object T
+	 * @return T
+	 */
 	@Override
 	public T merge(T object) {
 		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
+	/**
+	 * To remove objects from the list.
+	 * @param object T
+	 */
 	@Override
 	public void remove(T object) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
+	/**
+	 * To save or update an object.
+	 * @param object T
+	 */
 	@Override
 	public void saveOrUpdate(T object) {
 		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
+	/**
+	 * To create new objects.
+	 * @param object T
+	 */
 	@Override
 	public void create(T object) {
 		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
+	/**
+	 * To evict an object.
+	 * @param object object
+	 */
 	@Override
 	public void evict(Object object) {
 		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
-	public void update(T object, Serializable identifier, String fileName, boolean isZipSwitchOn, boolean isFirstTimeUpdate) {
-		update(object, identifier, fileName, null, isZipSwitchOn, isFirstTimeUpdate);
+	/**
+	 * To count.
+	 * @return int
+	 */
+	@Override
+	public int countAll() {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
 	}
 
-	public void update(T object, Serializable identifier, String fileName, String pageId, boolean isZipSwitchOn,
-			boolean isFirstTimeUpdate) {
+	/**
+	 * To count.
+	 * @param criteria DetachedCriteria
+	 * @return int
+	 */
+	@Override
+	public int count(DetachedCriteria criteria) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 */
+	public void update(T object, Serializable identifier) {
+		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML);
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param fileName String
+	 */
+	public void update(T object, Serializable identifier, String fileName) {
+		update(object, identifier, fileName, false, getJAXB2Template().getLocalFolderLocation());
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param isFirstTimeUpdate boolean
+	 * @param localFolder String
+	 */
+	public void update(T object, Serializable identifier, boolean isFirstTimeUpdate, String localFolder) {
+		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, null, isFirstTimeUpdate, localFolder);
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param fileName String
+	 * @param isFirstTimeUpdate boolean
+	 * @param localFolder String
+	 */
+	public void update(T object, Serializable identifier, String fileName, boolean isFirstTimeUpdate, String localFolder) {
+		update(object, identifier, fileName, null, isFirstTimeUpdate, localFolder);
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param fileName String
+	 * @param isFirstTimeUpdate boolean
+	 * @param pageId String
+	 */
+	public void update(T object, Serializable identifier, String fileName, String pageId, boolean isFirstTimeUpdate) {
+		update(object, identifier, fileName, null, isFirstTimeUpdate, getJAXB2Template().getLocalFolderLocation());
+	}
+
+	/**
+	 * To update.
+	 * @param object T
+	 * @param identifier Serializable
+	 * @param fileName String
+	 * @param isFirstTimeUpdate boolean
+	 * @param pageId String
+	 * @param localFolder String
+	 */
+	public void update(T object, Serializable identifier, String fileName, String pageId, boolean isFirstTimeUpdate, String localFolder) {
 		LOGGER.info("Entering update method.");
 		OutputStream stream = null;
 		try {
 			String filePath = null;
 			if (pageId == null) {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ fileName;
+				filePath = localFolder + File.separator + identifier + File.separator + identifier + fileName;
 			} else {
-				filePath = getJAXB2Template().getLocalFolderLocation() + File.separator + identifier + File.separator + identifier
-						+ "_" + pageId + fileName;
+				filePath = localFolder + File.separator + identifier + File.separator + identifier + "_" + pageId + fileName;
 			}
 			File xmlFile = new File(filePath);
 			boolean isZip = false;
+			boolean isZipSwitchOn = isZipSwitchOn();
 			if (isZipSwitchOn) {
 				if (isFirstTimeUpdate && !xmlFile.exists()) {
 					isZip = true;
@@ -288,28 +479,11 @@ public abstract class XmlDao<T> implements Dao<T> {
 		LOGGER.info("Exiting update method.");
 	}
 
-	public void update(T object, Serializable identifier, String fileName, boolean isZipSwitchOn) {
-		update(object, identifier, fileName, isZipSwitchOn, false);
-	}
-
-	@Override
-	public int countAll() {
-		return 0;
-	}
-
-	@Override
-	public int count(DetachedCriteria criteria) {
-		return 0;
-	}
-
-	public void update(T object, Serializable identifier, boolean isZipSwitchOn) {
-		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn);
-	}
-
-	public void update(T object, Serializable identifier, boolean isZipSwitchOn, boolean isFirstTimeUpdate) {
-		update(object, identifier, ICommonConstants.UNDERSCORE_BATCH_XML, isZipSwitchOn, isFirstTimeUpdate);
-	}
-
+	/**
+	 * To update.
+	 * @param object T
+	 * @param filePath String
+	 */
 	public void update(final T object, final String filePath) {
 		LOGGER.info("Entering update method.");
 		if (filePath == null || filePath.isEmpty()) {
@@ -339,6 +513,10 @@ public abstract class XmlDao<T> implements Dao<T> {
 		LOGGER.info("Exiting update method.");
 	}
 
+	/**
+	 * To get JAXB2 Template.
+	 * @return JAXB2Template
+	 */
 	public abstract JAXB2Template getJAXB2Template();
 
 }

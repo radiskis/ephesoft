@@ -2,65 +2,73 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="kvPPDetailVerticalPanel">
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="keyPatternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="keyPattern" />
-			</g:cell>
-		</g:HorizontalPanel>
+		<g:ScrollPanel height="7em" width="100%">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="keyPatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="keyPattern" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="valuePatternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="valuePattern" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="valuePatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="valuePattern" />
+					</g:cell>
+				</g:HorizontalPanel>
 
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="locationLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="location" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="noOfWordsLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="noOfWords" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="pageLevelFieldNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="pageLevelFieldName" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="locationLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="location" />
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editKVPPPropertiesButton"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="noOfWordsLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="noOfWords" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="pageLevelFieldNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="pageLevelFieldName" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
 	</g:VerticalPanel>
 </ui:UiBinder>   

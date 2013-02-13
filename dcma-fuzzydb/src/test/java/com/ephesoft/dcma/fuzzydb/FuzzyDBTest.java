@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -148,7 +148,7 @@ public class FuzzyDBTest extends AbstractFuzzyDBTest {
 	public void setUp() {
 		boolean result = false;
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassId);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		batchInstanceId = "BI75";
 		batchClassId = "BC2";
@@ -263,7 +263,8 @@ public class FuzzyDBTest extends AbstractFuzzyDBTest {
 		try {
 			String searchString = prop.getProperty(SEACRCH_STRING);
 			fuzzyDBSearchService.learnDataBase(new BatchClassID(batchClassId), true);
-			List<List<String>> searchResult = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceId), null, searchString);
+			List<List<String>> searchResult = fuzzyDBSearchService.fuzzyTextSearch(new BatchInstanceID(batchInstanceId), null,
+					searchString);
 			if (searchResult.size() == 0) {
 				throw new DCMAException();
 			}

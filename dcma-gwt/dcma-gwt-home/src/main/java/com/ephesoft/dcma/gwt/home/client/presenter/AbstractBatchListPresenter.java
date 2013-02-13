@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,12 +35,26 @@
 
 package com.ephesoft.dcma.gwt.home.client.presenter;
 
-import com.ephesoft.dcma.gwt.core.client.BasePresenter;
+import com.ephesoft.dcma.gwt.core.client.AbstractBasePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.home.client.BatchListController;
 
-public abstract class AbstractBatchListPresenter<V extends View<?>> extends BasePresenter<BatchListController, V> {
+/**
+ * Base presenter for batch list.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.AbstractBasePresenter
+ * @param <V>
+ */
+public abstract class AbstractBatchListPresenter<V extends View<?>> extends AbstractBasePresenter<BatchListController, V> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchListController
+	 * @param view V
+	 */
 	public AbstractBatchListPresenter(BatchListController controller, V view) {
 		super(controller, view);
 	}

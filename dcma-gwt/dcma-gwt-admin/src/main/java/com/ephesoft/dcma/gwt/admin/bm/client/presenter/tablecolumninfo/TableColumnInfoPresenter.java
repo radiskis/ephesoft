@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,51 +35,84 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.tablecolumninfo;
 
-
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo.TableColumnInfoView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the table column info.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class TableColumnInfoPresenter extends AbstractBatchClassPresenter<TableColumnInfoView> {
 
+	/**
+	 * tableColumnInfoDetailPresenter TableColumnInfoDetailPresenter.
+	 */
 	private final TableColumnInfoDetailPresenter tableColumnInfoDetailPresenter;
 
+	/**
+	 * editTableColumnInfoPresenter EditTableColumnInfoPresenter.
+	 */
 	private final EditTableColumnInfoPresenter editTableColumnInfoPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view TableColumnInfoView
+	 */
 	public TableColumnInfoPresenter(BatchClassManagementController controller, TableColumnInfoView view) {
-
 		super(controller, view);
 		this.tableColumnInfoDetailPresenter = new TableColumnInfoDetailPresenter(controller, view.getTableColumnInfoDetailView());
 		this.editTableColumnInfoPresenter = new EditTableColumnInfoPresenter(controller, view.getEditTableColumnInfoView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		tableColumnInfoDetailPresenter.bind();
 		editTableColumnInfoPresenter.bind();
 	}
 
+	/**
+	 * To show Table column Info View.
+	 */
 	public void showTcInfoView() {
 		view.getTcInfoVerticalPanel().setVisible(Boolean.TRUE);
 		view.getTcInfoConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show Edit Table Column Info View.
+	 */
 	public void showEditTableColumnInfoView() {
 		view.getTcInfoVerticalPanel().setVisible(Boolean.FALSE);
 		view.getTcInfoConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
-	
+	/**
+	 * To bind on edit TC info properties button click.
+	 */
 	public void onEditTCInfoPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editTableColumnInfoPresenter.bind();
 		showEditTableColumnInfoView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editTableColumnInfoPresenter.bind();
 	}
-	
+
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 }

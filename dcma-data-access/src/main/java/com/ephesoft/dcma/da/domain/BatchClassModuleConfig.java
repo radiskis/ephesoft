@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,38 +43,67 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_module_config.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_module_config")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class BatchClassModuleConfig extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * batchClassModule BatchClassModule.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "batch_class_module_id")
 	private BatchClassModule batchClassModule;
 
+	/**
+	 * moduleConfig ModuleConfig.
+	 */
 	@OneToOne
 	@JoinColumn(name = "module_config_id")
 	private ModuleConfig moduleConfig;
 
+	/**
+	 * To get Batch Class Module.
+	 * @return BatchClassModule
+	 */
 	public BatchClassModule getBatchClassModule() {
 		return batchClassModule;
 	}
 
+	/**
+	 * To get Batch Class Module.
+	 * @param batchClassModule BatchClassModule
+	 */
 	public void setBatchClassModule(BatchClassModule batchClassModule) {
 		this.batchClassModule = batchClassModule;
 	}
 
+	/**
+	 * To get Module Config.
+	 * @return ModuleConfig
+	 */
 	public ModuleConfig getModuleConfig() {
 		return moduleConfig;
 	}
 
+	/**
+	 * To set Module Config.
+	 * @param moduleConfig ModuleConfig
+	 */
 	public void setModuleConfig(ModuleConfig moduleConfig) {
 		this.moduleConfig = moduleConfig;
 	}

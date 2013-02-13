@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,34 +41,89 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.regex.RegexDetailPresente
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class RegexDetailView  extends View<RegexDetailPresenter> {
+/**
+ * This class provides functionality to show regex detail.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
+public class RegexDetailView extends View<RegexDetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, RegexDetailView> {
 	}
 
+	/**
+	 * patternLabel Label.
+	 */
 	@UiField
 	protected Label patternLabel;
 
+	/**
+	 * pattern Label.
+	 */
 	@UiField
 	protected Label pattern;
-	
+
+	/**
+	 * editRegexPropertiesBtn Button.
+	 */
+	@UiField
+	protected Button editRegexPropertiesBtn;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public RegexDetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-		patternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PATTERN)+AdminConstants.COLON);
+		patternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PATTERN) + AdminConstants.COLON);
 
 		patternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		editRegexPropertiesBtn.setText(AdminConstants.EDIT_BUTTON);
 	}
 
+	/**
+	 * To set Pattern.
+	 * 
+	 * @param pattern String
+	 */
 	public void setPattern(String pattern) {
 		this.pattern.setText(pattern);
 	}
 
+	/**
+	 * To get Edit Regex Properties Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getEditRegexPropertiesBtnButton() {
+		return editRegexPropertiesBtn;
+	}
+
+	/**
+	 * To perform operations on Edit Regex Properties Button Click.
+	 * 
+	 * @param clickEvent
+	 */
+	@UiHandler("editRegexPropertiesBtn")
+	public void onEditRegexPropertiesBtnClick(ClickEvent clickEvent) {
+		presenter.getController().getBatchClassManagementPresenter().getRegexPresenter().onEditRegexPropertiesBtnClicked();
+	}
 }

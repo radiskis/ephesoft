@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,42 +38,48 @@ package com.ephesoft.dcma.gwt.core.client.i18n;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommonLocaleInfo extends LocaleInfo {
+public final class CommonLocaleInfo extends LocaleInfo {
 
 	private CommonLocaleInfo(String locale) {
 		super(locale, "commonConstants", null);
-		availableConstants.add(LocaleCommonConstants.header_label_hi);
-		availableConstants.add(LocaleCommonConstants.header_label_signOut);
-		availableConstants.add(LocaleCommonConstants.msg_mask_wait);
-		availableConstants.add(LocaleCommonConstants.exc_consumerAmountIsNotPositive);
-		availableConstants.add(LocaleCommonConstants.exc_consumerTypeIsNull);
-		availableConstants.add(LocaleCommonConstants.exc_cpu_count_voilation);
-		availableConstants.add(LocaleCommonConstants.exc_holderIsNull);
-		availableConstants.add(LocaleCommonConstants.exc_invalidSubject);
-		availableConstants.add(LocaleCommonConstants.exc_issuedIsNull);
-		availableConstants.add(LocaleCommonConstants.exc_issuerIsNull);
-		availableConstants.add(LocaleCommonConstants.exc_licenseHasExpired);
-		availableConstants.add(LocaleCommonConstants.exc_licenseIsNotYetValid);
-		availableConstants.add(LocaleCommonConstants.exc_system_date_voilation);
-		availableConstants.add(LocaleCommonConstants.exc_system_mac_address_voilation);
-		availableConstants.add(LocaleCommonConstants.title_confirmation_ok);
-		availableConstants.add(LocaleCommonConstants.title_confirmation_cancel);
-		availableConstants.add(LocaleCommonConstants.dialog_box_title);
-		availableConstants.add(LocaleCommonConstants.exc_ephesoft_license_cpu_limit_exhausted);
-		availableConstants.add(LocaleCommonConstants.exc_ephesoft_license_server_error);
-		availableConstants.add(LocaleCommonConstants.title_go_to_page);
-		availableConstants.add(LocaleCommonConstants.title_previous);
-		availableConstants.add(LocaleCommonConstants.title_next);
-		availableConstants.add(LocaleCommonConstants.title_displaying);
-		availableConstants.add(LocaleCommonConstants.title_confirmation_save);
-		availableConstants.add(LocaleCommonConstants.title_confirmation_discard);
+		availableConstants.add(LocaleCommonConstants.HEADER_LABEL_HI);
+		availableConstants.add(LocaleCommonConstants.HEADER_LABEL_SIGN_OUT);
+		availableConstants.add(LocaleCommonConstants.HEADER_LABEL_HELP);
+		availableConstants.add(LocaleCommonConstants.MSG_MASK_WAIT);
+		availableConstants.add(LocaleCommonConstants.EXC_CONSUMER_AMOUNT_IS_NOT_POSITIVE);
+		availableConstants.add(LocaleCommonConstants.EXC_CONSUMER_TYPE_IS_NULL);
+		availableConstants.add(LocaleCommonConstants.EXC_CPU_COUNT_VOILATION);
+		availableConstants.add(LocaleCommonConstants.EXC_HOLDER_IS_NULL);
+		availableConstants.add(LocaleCommonConstants.EXC_INVALID_SUBJECT);
+		availableConstants.add(LocaleCommonConstants.EXC_ISSUED_IS_NULL);
+		availableConstants.add(LocaleCommonConstants.EXC_ISSUER_IS_NULL);
+		availableConstants.add(LocaleCommonConstants.EXC_LICENSE_HAS_EXPIRED);
+		availableConstants.add(LocaleCommonConstants.EXC_LICENSE_IS_NOT_YET_VALID);
+		availableConstants.add(LocaleCommonConstants.EXC_SYSTEM_DATE_VOILATION);
+		availableConstants.add(LocaleCommonConstants.EXC_SYSTEM_MAC_ADDRESS_VOILATION);
+		availableConstants.add(LocaleCommonConstants.TITLE_CONFIRMATION_OK);
+		availableConstants.add(LocaleCommonConstants.TITLE_CONFIRMATION_CANCEL);
+		availableConstants.add(LocaleCommonConstants.DIALOG_BOX_TITLE);
+		availableConstants.add(LocaleCommonConstants.EXC_EPHESOFT_LICENSE_CPU_LIMIT_EXHAUSTED);
+		availableConstants.add(LocaleCommonConstants.EXC_EPHESOFT_LICENSE_SERVER_ERROR);
+		availableConstants.add(LocaleCommonConstants.TITLE_GO_TO_PAGE);
+		availableConstants.add(LocaleCommonConstants.TITLE_PREVIOUS);
+		availableConstants.add(LocaleCommonConstants.TITLE_NEXT);
+		availableConstants.add(LocaleCommonConstants.TITLE_DISPLAYING);
+		availableConstants.add(LocaleCommonConstants.TITLE_CONFIRMATION_SAVE);
+		availableConstants.add(LocaleCommonConstants.TITLE_CONFIRMATION_DISCARD);
+		availableConstants.add(LocaleCommonConstants.HELP_URK_ERROR_MESSAGE);
+		availableConstants.add(LocaleCommonConstants.ERROR_TITLE);
+		availableConstants.add(LocaleCommonConstants.UP_RECORD);
+		availableConstants.add(LocaleCommonConstants.DOWN_RECORD);
+		availableConstants.add(LocaleCommonConstants.SERVER_DISCONNECTED);
 	}
 
 	public static CommonLocaleInfo get(String locale) {
 		return new CommonLocaleInfo(locale);
 	}
 
-	private List<String> availableConstants = new ArrayList<String>(3);
+	private final List<String> availableConstants = new ArrayList<String>(3);
 
 	public boolean isExist(String key) {
 		return availableConstants.contains(key);

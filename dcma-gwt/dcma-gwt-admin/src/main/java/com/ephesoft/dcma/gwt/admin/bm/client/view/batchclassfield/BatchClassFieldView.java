@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,76 +39,115 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batchclassfield.BatchClassFieldViewPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show individual batch class field and it's child.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class BatchClassFieldView extends View<BatchClassFieldViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, BatchClassFieldView> {
 	}
 
+	/**
+	 * batchClassFieldDetailView BatchClassFieldDetailView.
+	 */
 	@UiField
 	protected BatchClassFieldDetailView batchClassFieldDetailView;
 
+	/**
+	 * editBatchClassFieldView EditBatchClassFieldView.
+	 */
 	@UiField
 	protected EditBatchClassFieldView editBatchClassFieldView;
 
+	/**
+	 * batchClassFieldVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel batchClassFieldVerticalPanel;
-	
+
+	/**
+	 * batchClassFieldConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel batchClassFieldConfigVerticalPanel;
-	
+
+	/**
+	 * batchClassFieldCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel batchClassFieldCaptionPanel;
 
-	@UiField
-	protected Button editBatchClassFieldPropertiesButton;
-
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public BatchClassFieldView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		batchClassFieldCaptionPanel.setCaptionHTML(AdminConstants.BATCH_CLASS_FIELD_HTML);
-
-		editBatchClassFieldPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
-		batchClassFieldVerticalPanel.add(editBatchClassFieldPropertiesButton);
 	}
 
+	/**
+	 * To set Presenter.
+	 * 
+	 * @param presenter BatchClassFieldViewPresenter
+	 */
 	public void setPresenter(BatchClassFieldViewPresenter presenter) {
 		this.presenter = presenter;
 	}
 
+	/**
+	 * To get Batch Class Field Detail View.
+	 * 
+	 * @return BatchClassFieldDetailView
+	 */
 	public BatchClassFieldDetailView getBatchClassFieldDetailView() {
 		return batchClassFieldDetailView;
 	}
 
+	/**
+	 * To get Edit Batch Class Field View.
+	 * 
+	 * @return EditBatchClassFieldView
+	 */
 	public EditBatchClassFieldView getEditBatchClassFieldView() {
 		return editBatchClassFieldView;
 	}
 
-	public Button getEditBatchClassFieldPropertiesButton() {
-		return editBatchClassFieldPropertiesButton;
-	}
-
+	/**
+	 * To get Batch Class Field Config Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getBatchClassFieldConfigVerticalPanel() {
 		return batchClassFieldConfigVerticalPanel;
 	}
-	
+
+	/**
+	 * To get Batch Class Field Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getBatchClassFieldVerticalPanel() {
 		return batchClassFieldVerticalPanel;
 	}
 
-	@UiHandler("editBatchClassFieldPropertiesButton")
-	public void onEditDocumentPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditBatchClassFieldPropertiesButtonClicked();
-	}
 }

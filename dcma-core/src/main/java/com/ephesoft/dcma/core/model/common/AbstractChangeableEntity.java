@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,17 +46,27 @@ import javax.persistence.TemporalType;
  * {@link AbstractEntity} with an additional field for last changed date.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see javax.persistence.MappedSuperclass
  * 
  */
 @MappedSuperclass
 public class AbstractChangeableEntity extends AbstractEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 2299316279488258372L;
+	
+	/**
+	 * lastModified Date.
+	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_modified")
 	private Date lastModified;
 
 	/**
+	 * To get Last Modified date.
 	 * @return the lastModified
 	 */
 	public Date getLastModified() {
@@ -64,12 +74,16 @@ public class AbstractChangeableEntity extends AbstractEntity {
 	}
 
 	/**
-	 * @param lastModified the lastModified to set
+	 * To set Last Modified date.
+	 * @param lastModified Date
 	 */
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
 	
+	/**
+	 * To persist values other than in pojo.
+	 */
 	@Override
 	public void postPersist() {
 		super.postPersist();

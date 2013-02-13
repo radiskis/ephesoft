@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,7 +44,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEventHandler> {
 
-	public static Type<ValidationFieldChangeEventHandler> TYPE = new Type<ValidationFieldChangeEventHandler>();
+	public static Type<ValidationFieldChangeEventHandler> type = new Type<ValidationFieldChangeEventHandler>();
 
 	public enum Action {
 		FieldChange, ValueChange
@@ -58,24 +58,26 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 
 	private String sampleValue;
 
-	private Action action;
+	private final Action action;
 
 	private String fieldName;
-	
+
 	private boolean removeOverlay;
-	
+
 	private Document document;
 
 	private boolean validatorsValidated;
 
 	public ValidationFieldChangeEvent(Field field) {
+		super();
 		this.field = field;
 		this.coordinatesList = null;
 		this.action = Action.FieldChange;
 		this.removeOverlay = Boolean.FALSE;
 	}
-	
-	public ValidationFieldChangeEvent(Field field, boolean removeOverlay){
+
+	public ValidationFieldChangeEvent(Field field, boolean removeOverlay) {
+		super();
 		this.field = field;
 		this.coordinatesList = null;
 		this.action = Action.FieldChange;
@@ -83,6 +85,7 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 	}
 
 	public ValidationFieldChangeEvent(Field field, List<Coordinates> coordinatesList) {
+		super();
 		this.field = field;
 		this.coordinatesList = coordinatesList;
 		this.action = Action.FieldChange;
@@ -90,6 +93,7 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 	}
 
 	public ValidationFieldChangeEvent(boolean validated, String sampleValue, String fieldName, boolean validatorsValidated) {
+		super();
 		this.validated = validated;
 		this.action = Action.ValueChange;
 		this.sampleValue = sampleValue;
@@ -97,8 +101,9 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 		this.removeOverlay = Boolean.FALSE;
 		this.validatorsValidated = validatorsValidated;
 	}
-	
+
 	public ValidationFieldChangeEvent(boolean validated, Document document) {
+		super();
 		this.validated = validated;
 		this.action = Action.ValueChange;
 		this.document = document;
@@ -120,7 +125,7 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<ValidationFieldChangeEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public Field getField() {
@@ -142,15 +147,15 @@ public class ValidationFieldChangeEvent extends GwtEvent<ValidationFieldChangeEv
 	public String getFieldName() {
 		return fieldName;
 	}
-	
+
 	public boolean isRemoveOverlay() {
 		return removeOverlay;
 	}
-	
+
 	public Document getDocument() {
 		return document;
 	}
-	
+
 	public void setDocument(Document document) {
 		this.document = document;
 	}

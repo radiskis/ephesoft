@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,53 +51,70 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.CustomMessage;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.common.MailMetaData;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.service.FileFormatConvertor;
 import com.ephesoft.dcma.mail.constants.MailConstants;
 import com.ephesoft.dcma.util.FileUtils;
 
+/**
+ * This Class converts the email into desired format of test or html.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class EmailConvertorImpl implements EmailConvertor {
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	/**
+	 * An instance of Logger for proper logging.
+	 */
+	protected static final Logger LOGGER = LoggerFactory.getLogger(EmailConvertorImpl.class);
 
+	/**
+	 * An instance of {@link FileFormatConvertor}.
+	 */
 	@Autowired
 	@Qualifier("openOfficeConvertor")
 	private FileFormatConvertor openOfficeConvertor;
 
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
-	BatchSchemaService batchSchemaService;
+	private BatchSchemaService batchSchemaService;
 
 	@Override
-	public void convert(CustomMessage cm, URI outputFileURI) throws DCMAApplicationException {
-		convert(cm, outputFileURI.toString());
+	public void convert(CustomMessage customMsg, URI outputFileURI) throws DCMAApplicationException {
+		convert(customMsg, outputFileURI.toString());
 	}
 
 	@Override
-	public void convert(CustomMessage customMessage, String outputFilePath) throws DCMAApplicationException {
+	public void convert(final CustomMessage customMessage, final String outputFilePath) throws DCMAApplicationException {
 		FileOutputStream fileOutputStream = null;
 		MailMetaData mail = null;
+		String localOutputFilePath = outputFilePath;
 		try {
 			if (customMessage.getMessage().getContent() instanceof Multipart) {
-				File createFolders = new File(outputFilePath + File.separator + MailConstants.DOWNLOAD_FOLDER_NAME);
+				File createFolders = new File(localOutputFilePath + File.separator + ICommonConstants.DOWNLOAD_FOLDER_NAME);
 				createFolders.mkdirs();
 				mail = customMessage.getMailMetaData();
-				File file = new File(outputFilePath + File.separator + MailConstants.DOWNLOAD_FOLDER_NAME + File.separator
+				File file = new File(localOutputFilePath + File.separator + ICommonConstants.DOWNLOAD_FOLDER_NAME + File.separator
 						+ MailConstants.TEMP_FILE_NAME + FileType.TXT.getExtensionWithDot());
 				fileOutputStream = new FileOutputStream(file);
 				fileOutputStream.write(mail.toString().getBytes());
-				outputFilePath = FileUtils.changeFileExtension(outputFilePath + File.separator + file.getName(), FileType.PDF
-						.getExtension());
+				localOutputFilePath = FileUtils.changeFileExtension(localOutputFilePath + File.separator + file.getName(),
+						FileType.PDF.getExtension());
 				fileOutputStream.close();
 				// get the input file http url.
 				File parentFile = file.getParentFile();
 				String inputFileURL = batchSchemaService.getHttpEmailFolderPath() + '/' + parentFile.getParentFile().getName() + '/'
 						+ parentFile.getName() + '/' + file.getName();
-				openOfficeConvertor.convert(inputFileURL, outputFilePath, null, FileType.PDF);
+				openOfficeConvertor.convert(inputFileURL, localOutputFilePath, null, FileType.PDF);
 				// Uncomment following line to delete the file after converting to 'pdf'.
 				// file.delete();
 			}
 		} catch (Exception e) {
-			logger.error("Unable to convert Email into PDF file.", e);
+			LOGGER.error("Unable to convert Email into PDF file.", e);
 			throw new DCMAApplicationException(e.getMessage(), e);
 
 		} finally {
@@ -106,7 +123,7 @@ public class EmailConvertorImpl implements EmailConvertor {
 					fileOutputStream.close();
 				}
 			} catch (IOException e) {
-				logger.error("Error in closing file :" + e.getMessage());
+				LOGGER.error("Error in closing file :" + e.getMessage());
 			}
 		}
 	}

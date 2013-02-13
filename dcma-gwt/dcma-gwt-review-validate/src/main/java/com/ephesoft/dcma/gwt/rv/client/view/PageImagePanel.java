@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,38 +57,39 @@ public class PageImagePanel extends RVBasePanel {
 	}
 
 	@UiField
-	RotatableImage currPageImage;
+	protected RotatableImage currPageImage;
 
 	@UiField
-	RotatableImage previousPageImage;
+	protected RotatableImage previousPageImage;
 
 	@UiField
-	RotatableImage nextPageImage;
+	protected RotatableImage nextPageImage;
 
 	@UiField
-	RotatableImage previousPageImageButton;
+	protected RotatableImage previousPageImageButton;
 
 	@UiField
-	RotatableImage nextPageImageButton;
+	protected RotatableImage nextPageImageButton;
 
-	Page nextPage;
+	private Page nextPage;
 
-	Page previousPage;
+	private Page previousPage;
 
-	Document previousDocument;
+	private Document previousDocument;
 
-	Document nextDocument;
+	private Document nextDocument;
 
 	@UiField
-	HorizontalPanel imagesPanel;
+	protected HorizontalPanel imagesPanel;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private static final String CURSOR = "cursor_style";
 	private static final String THUMBNAIL = "thumbnail";
 
 	public PageImagePanel() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		setImageStyle(previousPageImage, THUMBNAIL);
 		setImageStyle(nextPageImage, THUMBNAIL);
 		currPageImage.setUrl("images/Current.jpg");
@@ -160,7 +161,7 @@ public class PageImagePanel extends RVBasePanel {
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		eventBus.addHandler(DocExpandEvent.TYPE, new DocExpandEventHandler() {
+		eventBus.addHandler(DocExpandEvent.type, new DocExpandEventHandler() {
 
 			@Override
 			public void onExpand(DocExpandEvent event) {
@@ -200,7 +201,7 @@ public class PageImagePanel extends RVBasePanel {
 			}
 		});
 
-		eventBus.addHandler(PageChangeEvent.TYPE, new PageChangeEventHandler() {
+		eventBus.addHandler(PageChangeEvent.type, new PageChangeEventHandler() {
 
 			@Override
 			public void onPageChange(PageChangeEvent event) {

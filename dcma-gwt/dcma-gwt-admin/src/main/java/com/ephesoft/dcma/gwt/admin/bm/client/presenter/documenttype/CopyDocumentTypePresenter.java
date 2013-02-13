@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,18 +35,35 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.CopyDocumentView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
+import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
+import com.ephesoft.dcma.gwt.core.shared.FieldTypeDTO;
+import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
+import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
+import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
+import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
+import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * This class handles functionality to copy document type and show end result to user.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyDocumentView> {
 
 	/**
@@ -54,10 +71,19 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 	 */
 	private DocumentTypeDTO documentTypeDTO;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view {@link CopyDocumentView}
+	 */
 	public CopyDocumentTypePresenter(final BatchClassManagementController controller, final CopyDocumentView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (documentTypeDTO != null) {
@@ -67,6 +93,9 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 		}
 	}
 
+	/**
+	 * To show Document Copy View.
+	 */
 	public void showDocumentCopyView() {
 		view.getDialogBox().setWidth("100%");
 		view.getDialogBox().center();
@@ -75,19 +104,37 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 		view.getDialogBox().setText(MessageConstants.DOCUMENT_TYPE_COPY);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * To get Document Type DTO.
+	 * 
+	 * @return DocumentTypeDTO
+	 */
 	public DocumentTypeDTO getDocumentTypeDTO() {
 		return documentTypeDTO;
 	}
 
+	/**
+	 * To set Document Type DTO.
+	 * 
+	 * @param documentTypeDTO DocumentTypeDTO
+	 */
 	public void setDocumentTypeDTO(DocumentTypeDTO documentTypeDTO) {
 		this.documentTypeDTO = documentTypeDTO;
 	}
 
+	/**
+	 * To perform operations on OK clicked.
+	 */
 	public void onOkClicked() {
 		ScreenMaskUtility.maskScreen();
 		boolean validCheck = true;
@@ -126,56 +173,139 @@ public class CopyDocumentTypePresenter extends AbstractBatchClassPresenter<CopyD
 		}
 
 		if (validCheck) {
-			this.documentTypeDTO.setName(view.getName());
-			this.documentTypeDTO.setDescription(view.getDescription());
-			this.documentTypeDTO.setMinConfidenceThreshold(Integer.parseInt(view.getMinConfidenceThreshold()));
-			controller.getRpcService().copyDocument(documentTypeDTO, new AsyncCallback<Void>() {
+
+			controller.getRpcService().copyDocument(documentTypeDTO, new EphesoftAsyncCallback<DocumentTypeDTO>() {
 
 				@Override
-				public void onFailure(Throwable arg0) {
+				public void customFailure(Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.DOCUMENT_COPY_FAILURE + arg0.getMessage(), MessageConstants.COPY_FAILURE, Boolean.TRUE);
-					
+					ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.DOCUMENT_COPY_FAILURE + arg0.getMessage(),
+							MessageConstants.COPY_FAILURE, Boolean.TRUE);
+				}
+
+				@Override
+				public void onSuccess(final DocumentTypeDTO newDocumentTypeDTO) {
+					ScreenMaskUtility.unmaskScreen();
+					newDocumentTypeDTO.setName(view.getName());
+					newDocumentTypeDTO.setDescription(view.getDescription());
+					newDocumentTypeDTO.setMinConfidenceThreshold(Integer.parseInt(view.getMinConfidenceThreshold()));
+					newDocumentTypeDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+					newDocumentTypeDTO.setNew(true);
+
+					// Set new attribute for child DTOs
+					setNewAttributeOfFeildDTO(newDocumentTypeDTO.getFields(true));
+					setNewAttributeOfFunctionKeys(newDocumentTypeDTO.getFunctionKeys(true));
+					setNewAttributeOfTableInfoDTO(newDocumentTypeDTO.getTableInfos(true));
+					controller.getBatchClass().addDocumentType(newDocumentTypeDTO);
+
+					// To update batch class DTO changes
+					controller.getBatchClass().setDirty(true);
+					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+							MessageConstants.DOCUMENT_COPY_CREATED_SUCCESSFULLY, MessageConstants.COPY_SUCCESSFUL, Boolean.TRUE);
+
 					confirmationDialog.addDialogListener(new DialogListener() {
 
 						@Override
 						public void onOkClick() {
-							controller.getMainPresenter().onEditButtonClicked(controller.getBatchClass().getIdentifier());
+							controller.refresh();
 							view.getDialogBox().hide(true);
 						}
 
 						@Override
 						public void onCancelClick() {
-							// do nothing.
+							// To do nothing
 						}
 					});
 
-					
 				}
-
-				@Override
-				public void onSuccess(Void arg0) {
-					ScreenMaskUtility.unmaskScreen();
-					ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.DOCUMENT_COPY_CREATED_SUCCESSFULLY, MessageConstants.COPY_SUCCESSFUL, Boolean.TRUE);
-					
-					confirmationDialog.addDialogListener(new DialogListener() {
-
-						@Override
-						public void onOkClick() {
-							controller.getMainPresenter().onEditButtonClicked(controller.getBatchClass().getIdentifier());
-							view.getDialogBox().hide(true);
-						}
-
-						@Override
-						public void onCancelClick() {
-							// do nothing.
-						}
-					});
-
-					
-				}
-
 			});
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of TableInfoDTO.
+	 * 
+	 * @param tableInfos collection of copied TableInfoDTO
+	 */
+	protected void setNewAttributeOfTableInfoDTO(Collection<TableInfoDTO> tableInfos) {
+		if (null != tableInfos) {
+			for (TableInfoDTO tableInfoDTO : tableInfos) {
+				tableInfoDTO.setNew(true);
+				setNewAttributeTableColumnInfoDTO(tableInfoDTO.getColumnInfoDTOs(true));
+			}
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of TableColumnInfoDTO.
+	 * 
+	 * @param columnInfoDTOs collection of copied TableColumnInfoDTO
+	 */
+	private void setNewAttributeTableColumnInfoDTO(List<TableColumnInfoDTO> columnInfoDTOs) {
+		if (null != columnInfoDTOs) {
+			for (TableColumnInfoDTO tableColumnInfoDTO : columnInfoDTOs) {
+				tableColumnInfoDTO.setNew(true);
+			}
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of FunctionKeyDTO.
+	 * 
+	 * @param functionKeys collection of copied FunctionKeyDTO
+	 */
+	protected void setNewAttributeOfFunctionKeys(Collection<FunctionKeyDTO> functionKeys) {
+		if (null != functionKeys) {
+			for (FunctionKeyDTO functionKeyDTO : functionKeys) {
+				functionKeyDTO.setNew(true);
+			}
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of FieldTypeDTO.
+	 * 
+	 * @param fields collection of copied FieldTypeDTO
+	 */
+	protected void setNewAttributeOfFeildDTO(Collection<FieldTypeDTO> fields) {
+		if (null != fields) {
+			for (FieldTypeDTO fieldTypeDTO : fields) {
+				fieldTypeDTO.setNew(true);
+				setNewAttributeOfKvExtractionDTO(fieldTypeDTO.getKvExtractionList(true));
+				setNewAttributeOfRegexDTO(fieldTypeDTO.getRegexList(true));
+			}
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of RegexDTO.
+	 * 
+	 * @param regexList list of copied RegexDTO
+	 */
+	private void setNewAttributeOfRegexDTO(List<RegexDTO> regexList) {
+		if (null != regexList) {
+			for (RegexDTO regexDTO : regexList) {
+				regexDTO.setNew(true);
+			}
+		}
+
+	}
+
+	/**
+	 * This method set new attribute of KVExtractionDTO.
+	 * 
+	 * @param kvExtractionList list of copied KVExtractionDTO
+	 */
+	private void setNewAttributeOfKvExtractionDTO(List<KVExtractionDTO> kvExtractionList) {
+		if (null != kvExtractionList) {
+			for (KVExtractionDTO kvExtractionDTO : kvExtractionList) {
+				kvExtractionDTO.setNew(true);
+			}
 		}
 
 	}

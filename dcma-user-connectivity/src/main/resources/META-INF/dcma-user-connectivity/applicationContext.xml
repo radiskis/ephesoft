@@ -27,7 +27,11 @@
 	<bean id="ldapConnectivity" class="com.ephesoft.dcma.user.connectivity.impl.LdapConnectivity"
 		p:ldapURL="$user{user.ldap_url}" p:ldapConfig="$user{user.ldap_config}"
 		p:ldapDomainName="$user{user.ldap_domain_component_name}"
-		p:ldapDomainOrganization="$user{user.ldap_domain_component_organization}">
+		p:ldapDomainOrganization="$user{user.ldap_domain_component_organization}"
+		p:ldapUserName="$user{user.ldap_username}"
+		p:ldapPassword="$user{user.ldap_password}"
+		p:userBasePath="$user{user.ldap_user_base}"
+		p:groupBasePath="$user{user.ldap_group_base}">
 	</bean>
 
 	<bean id="msActiveDirectoryConnectivity" class="com.ephesoft.dcma.user.connectivity.impl.MSActiveDirectoryConnectivity"
@@ -50,11 +54,6 @@
 		p:tomcatUserXmlPath="$user{user.tomcatUserXmlPath}">
 	</bean>
 	
-	<bean id="userConnectivityServiceImpl" class="com.ephesoft.dcma.user.service.UserConnectivityServiceImpl"
-		p:superAdmins="$user{user.super_admin}">
-	</bean>
-	
-
 	<context:component-scan base-package="com.ephesoft.dcma.user.connectivity.factory" />
 	<context:component-scan base-package="com.ephesoft.dcma.user.service" />
 

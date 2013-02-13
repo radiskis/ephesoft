@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -49,12 +50,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import com.ephesoft.dcma.core.constant.CoreConstants;
+
 /**
  * This class used to creates the thread in the thread pool and maintains the information of the threads per batch instance.
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see java.util.concurrent.ThreadPoolExecutor
  */
 public final class ThreadPool extends ThreadPoolExecutor {
 
@@ -133,16 +136,16 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * Creating a singleton class.
 	 */
 	private ThreadPool(boolean isUsingGhostScript) {
-		super(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new EphesoftRandomBlockingQueue<Runnable>());
+		super(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 		int corePoolSize = getCorePoolSize(isUsingGhostScript);
-		super.setCorePoolSize(corePoolSize);
+		this.setCorePoolSize(corePoolSize);
 	}
 
 	/**
 	 * API for getting the core pool size configured in the property file.
 	 * 
-	 * @param isUsingGhostScript
-	 * @return
+	 * @param isUsingGhostScript boolean
+	 * @return int 
 	 */
 	private int getCorePoolSize(boolean isUsingGhostScript) {
 		String filePath = META_INF + File.separator + FOLDER_NAME + File.separator + FILE_NAME + ".properties";
@@ -189,12 +192,21 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	public void addTask(Runnable runnable) throws RejectedExecutionException {
 		threadPoolInstance.execute(runnable);
 	}
+	
+	/**
+	 * Adds a task to the thread pool for ghost script.
+	 * 
+	 * @param runnable the runnable task to be added.
+	 */
+	public void addTaskForGhostScript(Runnable runnable) throws RejectedExecutionException {
+		threadPoolInstanceForGhostScript.execute(runnable);
+	}
 
 	/**
 	 * API for add information in the batch instance thread map.
 	 * 
-	 * @param batchInstanceId
-	 * @param batchInstanceThread
+	 * @param batchInstanceId String
+	 * @param batchInstanceThread BatchInstanceThread
 	 */
 	public void putBatchInstanceThreadMap(String batchInstanceId, BatchInstanceThread batchInstanceThread) {
 		if (batchInstanceId != null && batchInstanceThread != null) {
@@ -216,7 +228,7 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * 
 	 * @return threadPoolInstance.
 	 */
-	public static synchronized ThreadPool getInstance() {
+	public static ThreadPool getInstance() {
 		if (threadPoolInstance == null) {
 			synchronized (object) {
 				if (threadPoolInstance == null) {
@@ -232,19 +244,19 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * Generates the thread pool results.
 	 */
 	public void generateSystemReport() {
-		LOG.info("------------------------------------------------------" + "Active count " + super.getActiveCount()
-				+ "-----------------------------------------------");
-		LOG.info("------------------------------------------------------" + "Completed count " + super.getCompletedTaskCount()
-				+ "-----------------------------------------------");
-		LOG.info("------------------------------------------------------" + "Task Count " + super.getTaskCount()
-				+ "-----------------------------------------------\n");
+		LOG.info(CoreConstants.HYPHENS + "Active count " + super.getActiveCount()
+				+ CoreConstants.HYPHENS);
+		LOG.info(CoreConstants.HYPHENS + "Completed count " + super.getCompletedTaskCount()
+				+ CoreConstants.HYPHENS);
+		LOG.info(CoreConstants.HYPHENS + "Task Count " + super.getTaskCount()
+				+ CoreConstants.HYPHENS + "\n");
 
 	}
 
 	/**
 	 * Returns batch instance thread {@link BatchInstanceThread} for specific batch instance.
 	 * 
-	 * @return
+	 * @return BatchInstanceThread
 	 */
 	public static BatchInstanceThread getBatchInstanceThreadList(String batchInstanceId) {
 		return BATCH_INSTANCE_THREAD_MAP.get(batchInstanceId);
@@ -274,8 +286,8 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	/**
 	 * API for deleting the information from the batch instance thread map.
 	 * 
-	 * @param batchInstanceId
-	 */
+	 * @param batchInstanceId String
+	 */ 
 	public void removeBatchInstanceThreadMap(String batchInstanceId) {
 		if (batchInstanceId != null) {
 			BATCH_INSTANCE_THREAD_MAP.remove(batchInstanceId);
@@ -287,7 +299,7 @@ public final class ThreadPool extends ThreadPoolExecutor {
 	 * 
 	 * @return threadPoolInstanceForGhostScript
 	 */
-	public static synchronized ThreadPool getInstanceForGhostScript() {
+	public static ThreadPool getInstanceForGhostScript() {
 		if (threadPoolInstanceForGhostScript == null) {
 			synchronized (object) {
 				if (threadPoolInstanceForGhostScript == null) {

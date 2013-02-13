@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,15 +36,14 @@
 package com.ephesoft.dcma.gwt.reporting.client;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.common.WorkflowType;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.ephesoft.dcma.gwt.core.shared.ReportDTO;
-import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -61,15 +60,13 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * @param endDate {@link Date}
 	 * @return List<{@link Integer}>
 	 * @param callback {@link AsyncCallback} < List < {@link Integer} > >
-	 * @throws GWTException
 	 */
-	void getSystemStatistics(Date startDate, Date endDate, AsyncCallback<List<Integer>> callback);
+	void getSystemStatistics(Date startDate, Date endDate, List<String> batchClassIdList,AsyncCallback<List<Integer>> callback);
 
 	/**
 	 * API to get flag whether another user is already connected with the report DB.
 	 * 
 	 * @param callback {@link AsyncCallback} < Boolean >
-	 * @throws GWTException
 	 */
 	void isAnotherUserConnected(AsyncCallback<Boolean> callback);
 
@@ -85,7 +82,6 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * @param maxResults int
 	 * @param order {@link Order}
 	 * @param callback {@link AsyncCallback} < List < {@link ReportDTO} > >
-	 * @throws GWTException
 	 */
 	void getTableData(List<String> batchClassIds, WorkflowType workflowType, Date startDate, Date endDate, int startIndex,
 			int maxResults, Order order, AsyncCallback<List<ReportDTO>> callback);
@@ -102,7 +98,6 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * @param maxResults int
 	 * @param order {@link Order}
 	 * @param callback {@link AsyncCallback} < List < {@link ReportDTO} > >
-	 * @throws GWTException
 	 */
 	void getTableDataForUser(List<String> batchClassIds, String user, Date startDate, Date endDate, int startIndex, int maxResults,
 			Order order, AsyncCallback<List<ReportDTO>> callback);
@@ -117,16 +112,16 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	/**
 	 * API to get custom report button pop up url ,title,xDimension and yDimension asynchronously.
 	 * 
-	 * @param callback {@link AsyncCallback} <  Map<{@link String}, {@link String}> >
+	 * @param callback {@link AsyncCallback} < Map<{@link String}, {@link String}> >
 	 */
-	void getCustomReportButtonPopUpConfigs(AsyncCallback<Map<String,String>> callback);
+	void getCustomReportButtonPopUpConfigs(AsyncCallback<Map<String, String>> callback);
 
 	/**
 	 * API to get All Batch Classes available in the form of map of identifier and it's description asynchronously.
 	 * 
-	 * @param callback {@link AsyncCallback} < List < HashMap<{@link String}, {@link String}> > >
+	 * @param callback {@link AsyncCallback} < List < Map<{@link String}, {@link String}> > >
 	 */
-	void getAllBatchClasses(AsyncCallback<HashMap<String, String>> callback);
+	void getAllBatchClasses(AsyncCallback<Map<String, String>> callback);
 
 	/**
 	 * API to get Total Row Count for workflow type between the given startDate and endDate and list of batch class id's
@@ -137,7 +132,6 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * @param startDate {@link Date}
 	 * @param endDate {@link Date}
 	 * @param callback {@link AsyncCallback} < List < {@link Integer} > >
-	 * @throws GWTException
 	 */
 	void getTotalRowCount(List<String> batchClassIds, WorkflowType workflowType, Date startDate, Date endDate,
 			AsyncCallback<Integer> callback);
@@ -151,7 +145,6 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * @param startDate {@link Date}
 	 * @param endDate {@link Date}
 	 * @param callback {@link AsyncCallback} < List < {@link Integer} > >
-	 * @throws GWTException
 	 */
 	void getTotalRowCountForUser(List<String> batchClassIds, String user, Date startDate, Date endDate, AsyncCallback<Integer> callback);
 
@@ -159,8 +152,14 @@ public interface ReportingModelServiceAsync extends DCMARemoteServiceAsync {
 	 * API to sync Database for reporting asynchronously.
 	 * 
 	 * @param callback {@link AsyncCallback} < List < {@link Void} > >
-	 * @throws GWTException
 	 */
 	void syncDatabase(AsyncCallback<Void> callback);
+	/**
+	 * API to get All Batch Classes for the given user, available in the form of map of identifier and it's description asynchronously.
+	 * 
+	 * @param callback {@link AsyncCallback} < List < Map<{@link String}, {@link String}> > >
+	 * @param userName {String}
+	 */
+	void getAllBatchClassesForUserRoles(Set<String> userRoles,AsyncCallback<Map<String, String>> callback);
 
 }

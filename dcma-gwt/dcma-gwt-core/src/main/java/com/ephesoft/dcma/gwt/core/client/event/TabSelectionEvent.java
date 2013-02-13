@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,17 +38,19 @@ package com.ephesoft.dcma.gwt.core.client.event;
 import com.google.gwt.event.shared.GwtEvent;
 
 public class TabSelectionEvent extends GwtEvent<TabSelectionEventHandler> {
-	public static Type<TabSelectionEventHandler> TYPE = new Type<TabSelectionEventHandler>();
+	public static Type<TabSelectionEventHandler> type = new Type<TabSelectionEventHandler>();
 	
 	private String htmlPattern;
 
 	private Boolean saveState;
 
 	public TabSelectionEvent(String htmlPattern) {
+		super();
 		this.htmlPattern = htmlPattern;
 	}
 
 	public TabSelectionEvent(String htmlPattern, Boolean saveState) {
+		super();
 		this.htmlPattern = htmlPattern;
 		this.saveState = saveState;
 	}
@@ -68,7 +70,7 @@ public class TabSelectionEvent extends GwtEvent<TabSelectionEventHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<TabSelectionEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	/**

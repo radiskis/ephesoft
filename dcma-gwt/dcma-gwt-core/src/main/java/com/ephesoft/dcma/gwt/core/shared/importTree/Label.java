@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,14 +33,14 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.core.shared.importTree;
+package com.ephesoft.dcma.gwt.core.shared.importtree;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Label implements IsSerializable {
 	private String key;
 	private String displayName;
-	private boolean isMandatory;
+	private boolean mandatory;
 	
 	public Label() {
 		super();
@@ -52,15 +52,15 @@ public class Label implements IsSerializable {
 		super();
 		this.key = key;
 		this.displayName = displayName;
-		this.isMandatory = isMandatory;
+		this.mandatory = isMandatory;
 	}
 
 	public boolean isMandatory() {
-		return isMandatory;
+		return mandatory;
 	}
 	
-	public void setMandatory(boolean isMandatory) {
-		this.isMandatory = isMandatory;
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 
 	public String getKey() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -60,6 +60,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,29 +90,10 @@ import com.ephesoft.dcma.util.XMLUtil;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.ibm.service.IBMCMService
  */
 @Component
 public class IBMCMExporter implements ICommonConstants {
-
-	/**
-	 * Variable for offset.
-	 */
-	private static final String OFFSET = "Offset";
-
-	/**
-	 * Variable for docID.
-	 */
-	private static final String DOC_ID = "DocId";
-
-	/**
-	 * Variable for document.
-	 */
-	private static final String DOCUMENT = "Document";
-
-	/**
-	 * String for ON switch.
-	 */
-	private static final String ON_STRING = "ON";
 
 	/**
 	 * Instance of Logger.
@@ -242,11 +224,6 @@ public class IBMCMExporter implements ICommonConstants {
 		this.email = email;
 	}
 
-	/**
-	 * This API update the batch.xml.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 */
 	private void updateBatch(final String batchInstanceID) {
 		LOGGER.info("Update document size of each document in batch.xml");
 		Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -264,13 +241,6 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API retrieving the file location, calculating the file size and update it to batch.xml.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param batch {@link Batch}
-	 * @param document {@link Document}
-	 */
 	private void updateDocumentSize(final String batchInstanceID, final Batch batch, final Document document) {
 		LOGGER.info("Retrieving document size for each document");
 		String multipagePdf = document.getMultiPagePdfFile();
@@ -292,12 +262,6 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API calculating the document size of mutipage pdf and returns the sum of all multipage pdf document.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @return totalDocSize
-	 */
 	private int getTotalDocumentSize(final String batchInstanceID) {
 		LOGGER.info("Retrieving total size of document");
 		int totalDocSize = 0;
@@ -322,42 +286,28 @@ public class IBMCMExporter implements ICommonConstants {
 	 * This method transforms the batch.xml to another XML acceptable by IBM Content Management.
 	 * 
 	 * @param batchInstanceID {@link String}
-	 * @throws JAXBException
-	 * @throws DCMAApplicationException
+	 * @throws JAXBException root exception class for all JAXB exceptions
+	 * @throws DCMAApplicationException if any exception occurs.
 	 */
 	public void exportFiles(final String batchInstanceID) throws JAXBException, DCMAApplicationException {
 		LOGGER.info("IBM Content Management plugin.");
 		LOGGER.info("Initializing properties...");
-
 		String ibmCMSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, IBMCMConstant.IBM_CM_PLUGIN.getId(),
 				IBMCMProperties.IBM_CM_SWITCH);
-
-		if (ON_STRING.equalsIgnoreCase(ibmCMSwitch)) {
-			// update document size in batch.xml
+		if (IBMCMConstant.ON_STRING.equalsIgnoreCase(ibmCMSwitch)) {
 			updateBatch(batchInstanceID);
-
 			String exportFolder = pluginPropertiesService.getPropertyValue(batchInstanceID, IBMCMConstant.IBM_CM_PLUGIN.getId(),
 					IBMCMProperties.IBM_CM_EXPORT_FOLDER);
-
-			// return total document size
 			int totalDocSize = getTotalDocumentSize(batchInstanceID);
-
 			if (null == exportFolder || "".equalsIgnoreCase(exportFolder)) {
-				LOGGER.error("Export folder is null or empty");
-				throw new DCMAApplicationException(
-						"IBM Content Management Export Folder value is null/empty from the database. Invalid initializing of properties.");
+				validateExportFolder();
 			}
-
 			LOGGER.info("Properties Initialized Successfully");
-			
 			boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
 			LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
-
-			// check whether export folder to be created or not
-			String exportToFolder = batchSchemaService.getLocalFolderLocation();
+			String exportToFolder = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID);
 			String baseDocsFolder = exportToFolder + File.separator + batchInstanceID;
 			boolean isExportFolderCreated = folderCreation(exportFolder);
-
 			String batchXmlName = batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML;
 			String sourceXMLPath = baseDocsFolder + File.separator + batchInstanceID + ICommonConstants.UNDERSCORE_BATCH_XML;
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -365,144 +315,154 @@ public class IBMCMExporter implements ICommonConstants {
 			String batchName = "";
 			Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
 			if (subPoenaLoanMap.size() == 2) {
-				batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
-						+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+				batchName = validateSubPoenaLoanMap(subPoenaLoanMap);
 			}
 			if ((batch != null && batch.getBatchName() != null && !batch.getBatchName().isEmpty())
 					|| (batchName != null && !batchName.isEmpty())) {
 				targetXmlPath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.XML_EXTENSION.getId(), batchName);
 			}
-
 			InputStream xslStream = null;
 			try {
-				LOGGER.info("xslResource = " + xslResource.toString());
 				xslStream = xslResource.getInputStream();
 			} catch (IOException e) {
-				LOGGER.error("Could not find xsl file in the classpath resource", e.getMessage(), e);
 				throw new DCMAApplicationException("Could not find xsl file in the classpath resource", e);
 			}
-			InputStream in = null;
-			LOGGER.debug("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
-			if (xslStream != null && targetXmlPath != null && isExportFolderCreated) {
-				try {
-					TransformerFactory tFactory = TransformerFactory.newInstance();
-					Transformer transformer = null;
-
-					try {
-						transformer = tFactory.newTransformer(new StreamSource(xslStream));
-					} finally {
-						if (xslStream != null) {
-							try {
-								xslStream.close();
-							} catch (IOException e) {
-								LOGGER.info("Error closing input stream for :" + xslResource.toString());
-							}
-						}
-					}
-					if (transformer != null) {
-						String prefixSubpoenaValue = "";
-						List<Document> listDocuments = batch.getDocuments().getDocument();
-						outer: for (Document doc : listDocuments) {
-							DocumentLevelFields documentLevelFields = doc.getDocumentLevelFields();
-							if (null == documentLevelFields) {
-								LOGGER.info("DocumentLevelFields is null.");
-							} else {
-								List<DocField> documentLevelField = documentLevelFields.getDocumentLevelField();
-								for (DocField docField : documentLevelField) {
-									String name = docField.getName();
-									if (null != name && name.equalsIgnoreCase("DRCi_Instance")) {
-										prefixSubpoenaValue = docField.getValue();
-										break outer;
-									}
-								}
-							}
-						}
-
-						String cmodAppGroupLocal = "";
-						String cmodAppLocal = "";
-
-						if (prefixSubpoenaValue.equalsIgnoreCase("FRE")) {
-							cmodAppLocal = "FreddieMac_Loans_PDF";
-							cmodAppGroupLocal = "FreddieMac_Loans";
-						} else if (prefixSubpoenaValue.equalsIgnoreCase("FNM")) {
-							cmodAppLocal = "FannieMae_Loans_PDF";
-							cmodAppGroupLocal = "FannieMae_Loans";
-						} else {
-							cmodAppGroupLocal = this.cmodAppGroup;
-							cmodAppLocal = this.cmodApp;
-						}
-						
-						// Parsing parameter to XML
-						parsingParamterToXML(batchInstanceID, transformer, cmodAppGroupLocal, cmodAppLocal);
-						// Setting parameter for total document size for updating its value in XML
-						transformer.setParameter(IBMCMConstant.TOTAL_DOCUMENT_SIZE.getId(), totalDocSize);
-						String datFile = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId(),
-								batchName);
-						// Setting parameter for DAT file name for updating its value in XML.
-						transformer.setParameter(IBMCMConstant.DAT_FILE_NAME.getId(), new File(datFile).getName());
-						transformer.setParameter(IBMCMConstant.SUPLLYING_SYSTEM.getId(), this.getSupplyingSystem());
-						
-						if (isZipSwitchOn) {
-							if (FileUtils.isZipFileExists(sourceXMLPath)) {
-								in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
-								transformer.transform(new StreamSource(in), new StreamResult(new FileOutputStream(targetXmlPath)));
-							} else {
-								transformer.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(
-										targetXmlPath)));
-							}
-						} else {
-							File srcXML = new File(sourceXMLPath);
-							if (srcXML.exists()) {
-								transformer.transform(new StreamSource(srcXML), new StreamResult(new FileOutputStream(
-										targetXmlPath)));
-							} else {
-								in = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
-								transformer.transform(new StreamSource(in), new StreamResult(new FileOutputStream(targetXmlPath)));
-							}
-						}									
-						
-						updateDocumentOffsetValue(batchInstanceID, targetXmlPath);
-					} else {
-						LOGGER.error("Transformer is null due to Invalid xsl file.");
-					}
-				} catch (FileNotFoundException e) {
-					LOGGER.error("ibmCMTransform.xsl is not found" + e.getMessage(), e);
-					throw new DCMAApplicationException("Could not find nsiTransform.xsl file : " + e.getMessage(), e);
-				} catch (TransformerException e1) {
-					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + e1.getMessage(), e1);
-					throw new DCMAApplicationException("Could not transform ibmCMTransform.xsl file : " + e1.getMessage(), e1);
-				} catch (IOException ioe) {
-					LOGGER.error("Problem occurred in transforming " + sourceXMLPath + " to " + targetXmlPath + ioe.getMessage(), ioe);
-					throw new DCMAApplicationException("Could not transform ibmCMTransform.xsl file : " + ioe.getMessage(), ioe);
-				} finally {
-					if (in != null) {
-						try {
-							in.close();
-						} catch (IOException e) {
-							LOGGER.info("Error closing input stream for :" + sourceXMLPath);
-						}
-					}
-				}
-			} else {
-				LOGGER.error("Invalid input stream for :" + xslResource.toString());
-				throw new DCMAApplicationException("Could not find ibmCMTransform.xsl file");
+			InputStream inputStream = null;
+			tracingLogs(isExportFolderCreated, sourceXMLPath, targetXmlPath, xslStream);
+			if (targetXmlPath == null) {
+				validateTargetXmlPath(exportFolder);
 			}
-
-			// generating DAT file
+			if (xslStream == null) {
+				validateXslStream();
+			}
+			if (!isExportFolderCreated) {
+				throw new DCMAApplicationException("Unable to create directory in " + exportFolder + ". Please verify the permission");
+			}
+			try {
+				TransformerFactory tFactory = TransformerFactory.newInstance();
+				Transformer transformer = null;
+				try {
+					transformer = tFactory.newTransformer(new StreamSource(xslStream));
+				} finally {
+					IOUtils.closeQuietly(xslStream);
+				}
+				if (transformer != null) {
+					String prefixSubpoenaValue = "";
+					prefixSubpoenaValue = getPrefixSubpoenaValue(prefixSubpoenaValue, batch);
+					String cmodAppGroupLocal = "";
+					String cmodAppLocal = "";
+					if (prefixSubpoenaValue.equalsIgnoreCase("FRE")) {
+						cmodAppLocal = "FreddieMac_Loans_PDF";
+						cmodAppGroupLocal = "FreddieMac_Loans";
+					} else if (prefixSubpoenaValue.equalsIgnoreCase("FNM")) {
+						cmodAppLocal = "FannieMae_Loans_PDF";
+						cmodAppGroupLocal = "FannieMae_Loans";
+					} else {
+						cmodAppGroupLocal = this.cmodAppGroup;
+						cmodAppLocal = this.cmodApp;
+					}
+					parsingParamterToXML(batchInstanceID, transformer, cmodAppGroupLocal, cmodAppLocal);
+					transformer.setParameter(IBMCMConstant.TOTAL_DOCUMENT_SIZE.getId(), totalDocSize);
+					String datFile = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId(),
+							batchName);
+					transformer.setParameter(IBMCMConstant.DAT_FILE_NAME.getId(), new File(datFile).getName());
+					transformer.setParameter(IBMCMConstant.SUPLLYING_SYSTEM.getId(), this.getSupplyingSystem());
+					inputStream = transformIntoXML(isZipSwitchOn, batchXmlName, sourceXMLPath, targetXmlPath, inputStream, transformer);
+					updateDocumentOffsetValue(batchInstanceID, targetXmlPath);
+				} else {
+					LOGGER.error("Transformer is null due to Invalid xsl file.");
+				}
+			} catch (FileNotFoundException e) {
+				throw new DCMAApplicationException("Error in creating output xml file :" + targetXmlPath + " " + e.getMessage(), e);
+			} catch (TransformerException e1) {
+				throw new DCMAApplicationException("Could not transform ibmCMTransform.xsl file : " + e1.getMessage(), e1);
+			} catch (IOException ioe) {
+				throw new DCMAApplicationException("Could not transform ibmCMTransform.xsl file : " + ioe.getMessage(), ioe);
+			} finally {
+				IOUtils.closeQuietly(inputStream);
+			}
 			generateDATFile(batchInstanceID, exportFolder, batch);
-			// generating CTL file
 			generateCTLFile(batchInstanceID, exportFolder, batch);
 		} else {
 			LOGGER.info("IBM Content Management Exporter is switched off or null");
 		}
 	}
 
-	/**
-	 * This API is used to parsing parameter to ibmCMTransform.xsl file.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param transformer {@link Transformer}
-	 */
+	private void tracingLogs(boolean isExportFolderCreated, String sourceXMLPath, String targetXmlPath, InputStream xslStream) {
+		LOGGER.info("Transforming XML " + sourceXMLPath + " to " + targetXmlPath);
+		LOGGER.info("targetXMLPath value is :" + targetXmlPath);
+		LOGGER.info("xslStream value is :" + xslStream);
+		LOGGER.info("isExportFolderCreated value is :" + isExportFolderCreated);
+	}
+
+	private InputStream transformIntoXML(boolean isZipSwitchOn, String batchXmlName, String sourceXMLPath, String targetXmlPath,
+			InputStream inputStream, Transformer transformer) throws FileNotFoundException, IOException, TransformerException {
+		InputStream localInputStream = inputStream;
+		if (isZipSwitchOn) {
+			if (FileUtils.isZipFileExists(sourceXMLPath)) {
+				localInputStream = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
+				transformer.transform(new StreamSource(localInputStream), new StreamResult(new FileOutputStream(targetXmlPath)));
+			} else {
+				transformer
+						.transform(new StreamSource(new File(sourceXMLPath)), new StreamResult(new FileOutputStream(targetXmlPath)));
+			}
+		} else {
+			File srcXML = new File(sourceXMLPath);
+			if (srcXML.exists()) {
+				transformer.transform(new StreamSource(srcXML), new StreamResult(new FileOutputStream(targetXmlPath)));
+			} else {
+				localInputStream = FileUtils.getInputStreamFromZip(sourceXMLPath, batchXmlName);
+				transformer.transform(new StreamSource(localInputStream), new StreamResult(new FileOutputStream(targetXmlPath)));
+			}
+		}
+		return localInputStream;
+	}
+
+	private String getPrefixSubpoenaValue(String prefixSubpoenaValue, Batch batch) {
+		String localPrefixSubpoenaValue = prefixSubpoenaValue;
+		List<Document> listDocuments = batch.getDocuments().getDocument();
+		outer: for (Document doc : listDocuments) {
+			DocumentLevelFields documentLevelFields = doc.getDocumentLevelFields();
+			if (null == documentLevelFields) {
+				LOGGER.info("DocumentLevelFields is null.");
+			} else {
+				List<DocField> documentLevelField = documentLevelFields.getDocumentLevelField();
+				for (DocField docField : documentLevelField) {
+					String name = docField.getName();
+					if (null != name && name.equalsIgnoreCase("DRCi_Instance")) {
+						localPrefixSubpoenaValue = docField.getValue();
+						break outer;
+					}
+				}
+			}
+		}
+		return localPrefixSubpoenaValue;
+	}
+
+	private void validateXslStream() throws DCMAApplicationException {
+		LOGGER.error("xslStream is null. Unable to generate xsl stream from " + xslResource.toString());
+		throw new DCMAApplicationException("xslStream is null. Unable to generate xsl stream from " + xslResource.toString());
+	}
+
+	private void validateTargetXmlPath(String exportFolder) throws DCMAApplicationException {
+		LOGGER.error("targetXMLPath is null. Unable to create directory in " + exportFolder + ". Please verify permission");
+		throw new DCMAApplicationException("targetXMLPath is null. Unable to create directory in " + exportFolder
+				+ ". Please verify the permission");
+	}
+
+	private String validateSubPoenaLoanMap(Map<String, String> subPoenaLoanMap) {
+		String batchName;
+		batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
+				+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+		return batchName;
+	}
+
+	private void validateExportFolder() throws DCMAApplicationException {
+		LOGGER.error("Export folder is null or empty");
+		throw new DCMAApplicationException(
+				"IBM Content Management Export Folder value is null/empty from the database. Invalid initializing of properties.");
+	}
+
 	private void parsingParamterToXML(final String batchInstanceID, final Transformer transformer, final String cmodAppGroupLocal,
 			final String cmodAppLocal) {
 		LOGGER.info("Parsing infomation to transformer");
@@ -542,12 +502,6 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API created the export folder if it not exists else it will created the export folder.
-	 * 
-	 * @param exportFolder {@link String}
-	 * @return
-	 */
 	private boolean folderCreation(final String exportFolder) {
 		LOGGER.info("Checking the export folder is exist or not");
 		File exportFolderFile = new File(exportFolder);
@@ -560,25 +514,17 @@ public class IBMCMExporter implements ICommonConstants {
 		return isExportFolderCreated;
 	}
 
-	/**
-	 * This API provides the target file path to be created.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param exportFolder {@link String}
-	 * @param batch {@link Batch}
-	 * @param fileExtension {@link String}
-	 * @return targetXmlPath {@link String}
-	 */
 	private String getTargetFilePath(final String batchInstanceID, final String exportFolder, final Batch batch,
 			final String fileExtension, String batchName) {
 		LOGGER.info("Generating file path to be exported");
 		String targetFilePath = null;
 		String filePath = "";
-		if (batchName == null || batchName.isEmpty()) {
-			batchName = batch.getBatchName();
+		String newBatchName = batchName;
+		if (newBatchName == null || newBatchName.isEmpty()) {
+			newBatchName = batch.getBatchName();
 		}
-		if (batchName.length() > 3) {
-			String subpoenaPrefix = batchName.substring(0, 3);
+		if (newBatchName.length() > IBMCMConstant.CONSTANT_3) {
+			String subpoenaPrefix = newBatchName.substring(0, IBMCMConstant.CONSTANT_3);
 			filePath = exportFolder + File.separator + subpoenaPrefix + File.separator + batchInstanceID;
 		} else {
 			filePath = exportFolder + File.separator + batchInstanceID;
@@ -591,19 +537,13 @@ public class IBMCMExporter implements ICommonConstants {
 			isFolderCreated = true;
 		}
 		if (isFolderCreated) {
-			targetFilePath = filePath + File.separator + batchName + IBMCMConstant.UNDERSCORE.getId() + batchInstanceID
+			targetFilePath = filePath + File.separator + newBatchName + IBMCMConstant.UNDERSCORE.getId() + batchInstanceID
 					+ fileExtension.toLowerCase(Locale.getDefault());
 			LOGGER.info("File path to be exported is :" + targetFilePath);
 		}
 		return targetFilePath;
 	}
 
-	/**
-	 * This API fetching the document list of mutipage pdf.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @return totalDocSize
-	 */
 	private List<String> getDocumentFileList(final String batchInstanceID) throws DCMAApplicationException {
 		LOGGER.info("Retrieving file list of multipage document");
 		List<String> multiPageDocument = new ArrayList<String>();
@@ -626,13 +566,6 @@ public class IBMCMExporter implements ICommonConstants {
 		return multiPageDocument;
 	}
 
-	/**
-	 * This API for generating DAT file.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param exportFolder {@link String}
-	 * @param batch {@link Batch}
-	 */
 	private void generateDATFile(final String batchInstanceID, final String exportFolder, final Batch batch)
 			throws DCMAApplicationException {
 		LOGGER.info("Generating DAT file");
@@ -640,8 +573,7 @@ public class IBMCMExporter implements ICommonConstants {
 		String batchName = "";
 		Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
 		if (subPoenaLoanMap.size() == 2) {
-			batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
-					+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+			batchName = validateSubPoenaLoanMap(subPoenaLoanMap);
 		}
 		// Output DAT file path
 		String outputFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.DAT_EXTENSION.getId(), batchName);
@@ -682,21 +614,13 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API for generating CTL file.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param exportFolder {@link String}
-	 * @param batch {@link Batch}
-	 */
 	private void generateCTLFile(final String batchInstanceID, final String exportFolder, final Batch batch)
 			throws DCMAApplicationException {
 		LOGGER.info("Generating CTL file");
 		String batchName = "";
 		Map<String, String> subPoenaLoanMap = getSubPoenaLoanNumber(batch.getDocuments().getDocument());
 		if (subPoenaLoanMap.size() == 2) {
-			batchName = subPoenaLoanMap.get(IBMCMConstant.SUBPOENA.getId()) + IBMCMConstant.UNDERSCORE.getId()
-					+ subPoenaLoanMap.get(IBMCMConstant.LOAN_NUMBER.getId());
+			batchName = validateSubPoenaLoanMap(subPoenaLoanMap);
 		}
 		// Output CTL file path
 		String outputCTLFilePath = getTargetFilePath(batchInstanceID, exportFolder, batch, IBMCMConstant.CTL_EXTENSION.getId(),
@@ -713,21 +637,14 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API is used to update the offset value in XML file generated for IBM Content Management.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param filePath {@link String}
-	 * @throws DCMAApplicationException if any exception or error occur
-	 */
 	private void updateDocumentOffsetValue(final String batchInstanceID, final String filePath) throws DCMAApplicationException {
 		try {
 			org.w3c.dom.Document document = XMLUtil.createDocumentFrom(new File(filePath));
-			NodeList documentList = document.getElementsByTagName(DOCUMENT);
+			NodeList documentList = document.getElementsByTagName(IBMCMConstant.DOCUMENT);
 			for (int documentIndex = 0; documentIndex < documentList.getLength(); documentIndex++) {
 				Element documentTag = (Element) documentList.item(documentIndex);
-				Element docTag = (Element) documentTag.getElementsByTagName(DOC_ID).item(0);
-				Element offset = (Element) documentTag.getElementsByTagName(OFFSET).item(0);
+				Element docTag = (Element) documentTag.getElementsByTagName(IBMCMConstant.DOC_ID).item(0);
+				Element offset = (Element) documentTag.getElementsByTagName(IBMCMConstant.OFFSET).item(0);
 				String docIdentifier = docTag.getTextContent();
 				if (docIdentifier != null & !docIdentifier.isEmpty()) {
 					offset.setTextContent(String.valueOf(getOffsetValue(batchInstanceID, docIdentifier)));
@@ -763,14 +680,6 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This API is used to get the offset value for the specific document identifier.
-	 * 
-	 * @param batchInstanceID {@link String}
-	 * @param docID {@link String}
-	 * @return offset
-	 * @throws DCMAApplicationException if any exception or error occur
-	 */
 	private int getOffsetValue(final String batchInstanceID, final String docID) throws DCMAApplicationException {
 		int offset = 0;
 		Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -790,12 +699,7 @@ public class IBMCMExporter implements ICommonConstants {
 		}
 		return offset;
 	}
-	
-	/**
-	 * API for getting subpoena loan number on the basis of document list.
-	 * @param documentList
-	 * @return
-	 */
+
 	private Map<String, String> getSubPoenaLoanNumber(List<Document> documentList) {
 		Map<String, String> resultMap = new HashMap<String, String>();
 		for (Document document : documentList) {

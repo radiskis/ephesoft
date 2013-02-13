@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.EditPluginView;
@@ -54,30 +55,55 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * The presenter for view that shows edit plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginView> {
 
+	/**
+	 * docFieldWidgets List<EditableWidgetStorage>.
+	 */
 	private List<EditableWidgetStorage> docFieldWidgets;
 
+	/**
+	 * MAX_VISIBLE_ITEM_COUNT int.
+	 */
 	public static final int MAX_VISIBLE_ITEM_COUNT = 4;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditPluginView
+	 */
 	public EditPluginPresenter(BatchClassManagementController controller, EditPluginView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * To show view in case of cancel click.
+	 */
 	public void onCancel() {
 		controller.getMainPresenter().getPluginViewPresenter().bind();
 		controller.getMainPresenter().getPluginViewPresenter().showPluginViewDetail();
 	}
 
+	/**
+	 * To show view in case of save click.
+	 */
 	public void onSave() {
 		boolean fieldsValid = false;
 		Collection<BatchClassPluginConfigDTO> values = controller.getSelectedPlugin().getBatchClassPluginConfigs();
-		for (int index = 0; index < docFieldWidgets.size(); index++) {
-			if (docFieldWidgets.get(index).isValidatable()) {
-				if (!docFieldWidgets.get(index).isListBox()) {
-					String textBoxValue = docFieldWidgets.get(index).getTextBoxWidget().getWidget().getText();
-					if (!docFieldWidgets.get(index).getTextBoxWidget().validate()) {
-						if (docFieldWidgets.get(index).isMandatory) {// mandatory fields
+		for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
+			if (editableWidgetStorage.isValidatable()) {
+				if (!editableWidgetStorage.isListBox()) {
+					String textBoxValue = editableWidgetStorage.getTextBoxWidget().getWidget().getText();
+					if (!editableWidgetStorage.getTextBoxWidget().validate()) {
+						if (editableWidgetStorage.mandatory) {// mandatory fields
 							if ((textBoxValue != null && textBoxValue.isEmpty())) {
 								ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
 								fieldsValid = true;
@@ -96,7 +122,7 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 						}
 					}
 				} else {
-					if (docFieldWidgets.get(index).getListBoxwidget().getSelectedIndex() == -1) {
+					if (editableWidgetStorage.getListBoxwidget().getSelectedIndex() == -1) {
 						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.MANDATORY_FIELDS_ERROR_MSG);
 						fieldsValid = true;
 						break;
@@ -107,13 +133,13 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 		if (!fieldsValid) {
 			int index = 0;
 			for (BatchClassPluginConfigDTO batchClassPluginConfigDTO : values) {
-				if (docFieldWidgets.get(index).isListBox) {
+				if (docFieldWidgets.get(index).listBox) {
 					if (docFieldWidgets.get(index).getListBoxwidget().isMultipleSelect()) {
 						StringBuffer selectedItem = new StringBuffer();
 						Integer numberOfItemSelected = docFieldWidgets.get(index).getListBoxwidget().getItemCount();
 						for (int i = 0; i < numberOfItemSelected; i++) {
 							if (docFieldWidgets.get(index).getListBoxwidget().isItemSelected(i)) {
-								selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(';');
+								selectedItem.append(docFieldWidgets.get(index).getListBoxwidget().getItemText(i)).append(BatchClassManagementConstants.SEMICOLON);
 							}
 						}
 						String selectedItemString = selectedItem.toString();
@@ -137,6 +163,9 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 		}
 	}
 
+	/**
+	 * To set properties.
+	 */
 	public void setProperties() {
 		ListBox hocrToPdfListBox = null;
 		ListBox createMultipagePdfOptimizationSwitchListBox = null;
@@ -147,7 +176,7 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 		if (values != null) {
 			for (final BatchClassPluginConfigDTO batchClassPluginConfig : values) {
 				view.formatRow(row);
-				view.addWidget(row, 0, new Label(batchClassPluginConfig.getDescription() + ":"));
+				view.addWidget(row, 0, new Label(batchClassPluginConfig.getDescription() + BatchClassManagementConstants.COLON));
 
 				if (batchClassPluginConfig.isMandatory()) {
 					view.addWidgetStar(row, 1);
@@ -181,7 +210,6 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 										enableHocrToPdfProps(fieldValue);
 									}
 								});
-
 							}
 							if (batchClassPluginConfig.getPluginConfig().getFieldName().equalsIgnoreCase(
 									PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_SWITCH)) {
@@ -193,9 +221,7 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 										enableCreateMultipageOptimizationProps(fieldValue);
 									}
 								});
-
 							}
-							
 							if (batchClassPluginConfig.getPluginConfig().getFieldName().equalsIgnoreCase(
 									PluginNameConstants.TABBED_PDF_OPTIMIZATION_SWITCH)) {
 								createMultipagePdfOptimizationSwitchListBox = fieldValue;
@@ -206,15 +232,12 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 										enableTabbedPdfOptimizationProps(fieldValue);
 									}
 								});
-
 							}
-							
 							view.addWidget(row, 2, fieldValue);
 							EditableWidgetStorage editableWidgetStorage = new EditableWidgetStorage(fieldValue);
 							editableWidgetStorage.setValidatable(Boolean.FALSE);
 							docFieldWidgets.add(editableWidgetStorage);
 						}
-
 					} else {
 						// Create a read only text box
 						ValidatableWidget<TextBox> validatableTextBox = view.addTextBox(row, batchClassPluginConfig, true);
@@ -232,135 +255,231 @@ public class EditPluginPresenter extends AbstractBatchClassPresenter<EditPluginV
 						editableWidgetStorage.setMandatory(true);
 					}
 					docFieldWidgets.add(editableWidgetStorage);
-
 				}
 				row++;
 			}
 			row++;
-			view.addButtons(row);
+			// view.addButtons(row);
 		}
 		enableHocrToPdfProps(hocrToPdfListBox);
 		enableCreateMultipageOptimizationProps(createMultipagePdfOptimizationSwitchListBox);
 		enableTabbedPdfOptimizationProps(tabbedPdfOptimizationSwitchListBox);
 	}
 
+	/**
+	 * This is editable widget storage class.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	private static class EditableWidgetStorage {
 
-		private ValidatableWidget<TextBox> widget;
-		private boolean isListBox;
-		private ListBox listBoxwidget;
-		private boolean isValidatable;
-		private boolean isMandatory;
+		/**
+		 * widget ValidatableWidget<TextBox>.
+		 */
+		private final ValidatableWidget<TextBox> widget;
 
+		/**
+		 * listBox boolean.
+		 */
+		private final boolean listBox;
+
+		/**
+		 * listBoxwidget ListBox.
+		 */
+		private final ListBox listBoxwidget;
+
+		/**
+		 * validatable boolean.
+		 */
+		private boolean validatable;
+
+		/**
+		 * mandatory boolean.
+		 */
+		private boolean mandatory;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param widget ValidatableWidget<TextBox>
+		 */
 		public EditableWidgetStorage(ValidatableWidget<TextBox> widget) {
-			this.widget = widget;
-			this.isListBox = false;
-			this.isValidatable = true;
-			this.isMandatory = false;
+			this(widget, false, null, true, false);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param listBoxwidget ListBox
+		 */
 		public EditableWidgetStorage(ListBox listBoxwidget) {
-			this.listBoxwidget = listBoxwidget;
-			this.isListBox = true;
-			this.isValidatable = true;
-			this.isMandatory = false;
+			this(null, true, listBoxwidget, true, false);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param widget ValidatableWidget<TextBox>
+		 * @param listBox boolean
+		 * @param listBoxwidget ListBox
+		 * @param validatable boolean
+		 * @param mandatory boolean
+		 */
+		public EditableWidgetStorage(ValidatableWidget<TextBox> widget, boolean listBox, ListBox listBoxwidget, boolean validatable,
+				boolean mandatory) {
+			super();
+			this.widget = widget;
+			this.listBox = listBox;
+			this.listBoxwidget = listBoxwidget;
+			this.validatable = validatable;
+			this.mandatory = mandatory;
+		}
+
+		/**
+		 * To get Text Box Widget.
+		 * 
+		 * @return ValidatableWidget<TextBox>
+		 */
 		public ValidatableWidget<TextBox> getTextBoxWidget() {
 			return widget;
 		}
 
+		/**
+		 * To get List Box widget.
+		 * 
+		 * @return ListBox
+		 */
 		public ListBox getListBoxwidget() {
 			return listBoxwidget;
 		}
 
+		/**
+		 * To check whether list box or not.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isListBox() {
-			return isListBox;
+			return listBox;
 		}
 
+		/**
+		 * To check whether validatable.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isValidatable() {
-			return isValidatable;
+			return validatable;
 		}
 
+		/**
+		 * To set validatable.
+		 * 
+		 * @param isValidatable boolean
+		 */
 		public void setValidatable(boolean isValidatable) {
-			this.isValidatable = isValidatable;
+			this.validatable = isValidatable;
 		}
 
+		/**
+		 * To set mandatory.
+		 * 
+		 * @param isMandatory boolean
+		 */
 		public void setMandatory(boolean isMandatory) {
-			this.isMandatory = isMandatory;
+			this.mandatory = isMandatory;
 		}
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {
 			view.setView();
 			setProperties();
+			int index = 0;
+			if ((docFieldWidgets != null) && (docFieldWidgets.size() != 0)) {
+				while ((index < docFieldWidgets.size() && !docFieldWidgets.get(index).listBox)
+						&& docFieldWidgets.get(index).widget.getWidget().isReadOnly()) {
+					index++;
+				}
+				if (index < docFieldWidgets.size()) {
+					if (docFieldWidgets.get(index).listBox) {
+						docFieldWidgets.get(index).listBoxwidget.setFocus(true);
+					} else {
+						docFieldWidgets.get(index).widget.getWidget().setFocus(true);
+					}
+				}
+			}
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// to be used in case of event handling
 	}
-	
+
 	private void enableCreateMultipageOptimizationProps(final ListBox fieldValue) {
 		if (fieldValue != null) {
 			for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
-				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(
-						PluginNameConstants.ON_STRING)) {
+				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(PluginNameConstants.ON_STRING)) {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getTextBoxWidget() != null
 							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
-									.equals(PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
+									PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(true);
 					}
 				} else {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getTextBoxWidget() != null
 							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
-									.equals(PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
+									PluginNameConstants.CREATE_MULTIPAGE_PDF_OPTIMIZATION_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(false);
 					}
 				}
 			}
 		}
-		
+
 	}
-	
+
 	private void enableTabbedPdfOptimizationProps(final ListBox fieldValue) {
 		if (fieldValue != null) {
 			for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
-				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(
-						PluginNameConstants.ON_STRING)) {
+				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(PluginNameConstants.ON_STRING)) {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getTextBoxWidget() != null
 							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
-									.equals(PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
+									PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(true);
 					}
 				} else {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getTextBoxWidget() != null
 							&& editableWidgetStorage.getTextBoxWidget().getWidget() != null
-							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName()
-									.equals(PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
+							&& editableWidgetStorage.getTextBoxWidget().getWidget().getName().equals(
+									PluginNameConstants.TABBED_PDF_OPTIMIZATION_PARAMETERS)) {
 						editableWidgetStorage.widget.getWidget().setEnabled(false);
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	private void enableHocrToPdfProps(final ListBox fieldValue) {
 		if (fieldValue != null) {
 			for (EditableWidgetStorage editableWidgetStorage : docFieldWidgets) {
-				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(
-						PluginNameConstants.GHOSTSCRPT)) {
+				if (fieldValue.getItemText(fieldValue.getSelectedIndex()).equalsIgnoreCase(PluginNameConstants.GHOSTSCRPT)) {
 					if (editableWidgetStorage != null
 							&& editableWidgetStorage.getListBoxwidget() != null
 							&& editableWidgetStorage.getListBoxwidget().getName() != null

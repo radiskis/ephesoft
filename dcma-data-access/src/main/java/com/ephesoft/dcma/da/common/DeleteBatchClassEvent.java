@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,17 +39,39 @@ import org.springframework.context.ApplicationEvent;
 
 import com.ephesoft.dcma.da.id.BatchClassID;
 
+/**
+ * This class deletes batch class event.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.id.BatchClassID
+ */
 public class DeleteBatchClassEvent extends ApplicationEvent {
-
+    /**
+     *  serialVersionUID, constant long interger.
+     */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * batchClassID BatchClassID.
+	 */
 	private final BatchClassID batchClassID;
 
+	/**
+	 * This method deletes batch class event.
+	 * 
+	 * @param source Object
+	 * @param batchClassID {@link BatchClassID}
+	 */
 	public DeleteBatchClassEvent(final Object source, final BatchClassID batchClassID) {
 		super(source);
 		this.batchClassID = batchClassID;
 	}
 
+	/**
+	 * To get Batch Class ID.
+	 * @return batchClassID
+	 */ 
 	public BatchClassID getBatchClassID() {
 		return batchClassID;
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,6 +52,7 @@ public class ListView extends ResizeComposite {
 	}
 
 	public interface RowSelectionListner {
+
 		void onRowSelected(String identifer);
 	}
 
@@ -61,38 +62,27 @@ public class ListView extends ResizeComposite {
 	}
 
 	public interface PaginationListner {
+
 		void onPagination(int startIndex, int maxResult, Order order);
 	}
 
+	public interface OrderingListner {
+
+		void onOrdering(int startIndex, int maxResult, String selectedRowId, int swapIndex, int selectedRecordIndex);
+	}
+
 	@UiField
-	LayoutPanel layoutPanel;
+	protected LayoutPanel layoutPanel;
 
-	Table table;
+	private Table table;
 
-	private TableHeader header = new TableHeader();
+	private final TableHeader header = new TableHeader();
 
-	PaginationListner paginationListner;
-	
-	RowSelectionListner rowSelectionListner;
-
-	DoubleClickListner doubleClickListener;
-
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ListView() {
-		initWidget(binder.createAndBindUi(this));
-	}
-
-	public void setPaginationListner(PaginationListner paginationListner) {
-		this.paginationListner = paginationListner;
-	}
-	
-	public void setRowSelectionListner(RowSelectionListner rowSelectionListner) {
-		this.rowSelectionListner = rowSelectionListner;
-	}
-
-	public void setDoubleClickListener(DoubleClickListner doubleClickListener) {
-		this.doubleClickListener = doubleClickListener;
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	public void addHeaderColumns(HeaderColumn... columns) {
@@ -102,12 +92,12 @@ public class ListView extends ResizeComposite {
 	}
 
 	public void initTable(int totalCount, List<Record> recordList, boolean requireRadioButton) {
-		initTable(totalCount, null, recordList, requireRadioButton, false);
+		initTable(totalCount, null, recordList, requireRadioButton, false, null, false);
 
 	}
-	
+
 	public void initTable(int totalCount, List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow) {
-		initTable(totalCount, null, recordList, requireRadioButton, fireEventForFirstRow);
+		initTable(totalCount, null, recordList, requireRadioButton, fireEventForFirstRow, null, false);
 
 	}
 
@@ -116,31 +106,38 @@ public class ListView extends ResizeComposite {
 			header.addHeaderColumn(headerColumn);
 		}
 	}
-	
+
 	public void initTable(int totalCount, PaginationListner paginationListner, List<Record> recordList, boolean requireRadioButton,
-			boolean fireEventForFirstRow) {
-		initTable(totalCount, paginationListner, recordList, requireRadioButton, fireEventForFirstRow, null);
+			boolean fireEventForFirstRow, OrderingListner orderingListner, boolean isOrderedEntity) {
+		initTable(totalCount, paginationListner, recordList, requireRadioButton, fireEventForFirstRow, null, null, isOrderedEntity);
 	}
 
 	public void initTable(int totalCount, PaginationListner paginationListner, List<Record> recordList, boolean requireRadioButton,
-			boolean fireEventForFirstRow, DoubleClickListner doubleClickListner) {
-		initTable(totalCount, paginationListner, null, recordList, requireRadioButton, fireEventForFirstRow, doubleClickListner);
-	}
-	
-	public void initTable(int totalCount, PaginationListner paginationListner,RowSelectionListner rowSelectionListner,  List<Record> recordList,boolean requireRadioButton,
-			boolean fireEventForFirstRow) {
-		initTable(totalCount, paginationListner, rowSelectionListner, recordList, requireRadioButton, fireEventForFirstRow, null);
+			boolean fireEventForFirstRow, DoubleClickListner doubleClickListner, OrderingListner orderingListner,
+			boolean isOrderedEntity) {
+		initTable(totalCount, paginationListner, null, recordList, requireRadioButton, fireEventForFirstRow, doubleClickListner,
+				orderingListner, isOrderedEntity);
 	}
 
 	public void initTable(int totalCount, PaginationListner paginationListner, RowSelectionListner rowSelectionListner,
-			List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow, DoubleClickListner doubleClickListner) {
+			List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow, OrderingListner orderingListner,
+			boolean isOrderedEntity) {
+		initTable(totalCount, paginationListner, rowSelectionListner, recordList, requireRadioButton, fireEventForFirstRow, null,
+				orderingListner, isOrderedEntity);
+	}
+
+	public void initTable(int totalCount, PaginationListner paginationListner, RowSelectionListner rowSelectionListner,
+			List<Record> recordList, boolean requireRadioButton, boolean fireEventForFirstRow, DoubleClickListner doubleClickListner,
+			OrderingListner orderingListner, boolean isOrderedEntity) {
 		table = new Table(totalCount, header, requireRadioButton, fireEventForFirstRow, doubleClickListner);
 		table.setPaginationListner(paginationListner);
 		table.setRowSelectionListener(rowSelectionListner);
+		table.setOrderingListner(orderingListner);
+		table.setOrderedEntity(isOrderedEntity);
 		table.pushData(recordList, 0);
 		layoutPanel.clear();
 		layoutPanel.add(table);
-		
+
 	}
 
 	public void initTable(int totalCount, List<Record> recordList) {
@@ -155,6 +152,14 @@ public class ListView extends ResizeComposite {
 		table.pushData(recordList, startIndex, count);
 	}
 
+	public void updateRecords(List<Record> recordList, int startIndex, int count, int selectedIndex) {
+		table.pushData(recordList, startIndex, count, selectedIndex);
+	}
+
+	public void updateUnlockRecords(List<Record> recordList, int startIndex, int count) {
+		table.pushData(recordList, startIndex, count, table.getSelectedIndex());
+	}
+
 	public String getSelectedRowIndex() {
 		return table.getSelectedRowId();
 	}
@@ -164,11 +169,11 @@ public class ListView extends ResizeComposite {
 	}
 
 	public int getTableRowCount() {
-		return Table.VISIBLE_RECORD_COUNT;
+		return Table.visibleRecodrCount;
 	}
 
 	public void setTableRowCount(int count) {
-		Table.VISIBLE_RECORD_COUNT = count;
+		Table.visibleRecodrCount = count;
 	}
 
 	public int getTableRecordCount() {

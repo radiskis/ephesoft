@@ -16,7 +16,7 @@
 							<xs:element name="KeyPattern" type="xs:string" />
 							<xs:element name="Length" type="xs:int" />
 							<xs:element name="Location" type="xs:string" />
-							<xs:element name="Multiplier" type="xs:float" />
+							<xs:element name="Multiplier" type="xs:float" default = "1"/>
 							<xs:element name="NoOfWords" type="xs:int" />
 							<xs:element name="ValuePattern" type="xs:string" />
 							<xs:element name="Width" type="xs:int" />

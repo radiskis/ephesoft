@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,6 +44,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.EditFieldTypePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,105 +60,308 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit field type.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditFieldTypeView> {
 	}
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * nameStar Label.
+	 */
 	@UiField
 	protected Label nameStar;
+
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
 
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * descStar Label.
+	 */
 	@UiField
 	protected Label descStar;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
 
+	/**
+	 * dataTypeLabel Label.
+	 */
 	@UiField
 	protected Label dataTypeLabel;
+
+	/**
+	 * dataTypeStar Label.
+	 */
 	@UiField
 	protected Label dataTypeStar;
+
+	/**
+	 * dataType ListBox.
+	 */
 	@UiField
 	protected ListBox dataType;
 
+	/**
+	 * patternLabel Label.
+	 */
 	@UiField
 	protected Label patternLabel;
+
+	/**
+	 * To get Pattern Label.
+	 * 
+	 * @return Label
+	 */
+	public Label getPatternLabel() {
+		return patternLabel;
+	}
+
+	/**
+	 * To set Pattern Label.
+	 * 
+	 * @param patternLabel Label
+	 */
+	public void setPatternLabel(Label patternLabel) {
+		this.patternLabel = patternLabel;
+	}
+
+	/**
+	 * patternStar Label.
+	 */
 	@UiField
 	protected Label patternStar;
+
+	/**
+	 * pattern TextBox.
+	 */
 	@UiField
 	protected TextBox pattern;
 
+	/**
+	 * fdOrderLabel Label.
+	 */
 	@UiField
 	protected Label fdOrderLabel;
+
+	/**
+	 * fdOrderStar Label.
+	 */
 	@UiField
 	protected Label fdOrderStar;
+
+	/**
+	 * fdOrder TextBox.
+	 */
 	@UiField
 	protected TextBox fdOrder;
 
+	/**
+	 * sampleValueLabel Label.
+	 */
 	@UiField
 	protected Label sampleValueLabel;
+
+	/**
+	 * sampleValueStar Label.
+	 */
 	@UiField
-	Label sampleValueStar;
+	protected Label sampleValueStar;
+
+	/**
+	 * sampleValue TextBox.
+	 */
 	@UiField
 	protected TextBox sampleValue;
 
+	/**
+	 * fieldOptionValueListLabel Label.
+	 */
 	@UiField
 	protected Label fieldOptionValueListLabel;
+
+	/**
+	 * fieldOptionValueList TextBox.
+	 */
 	@UiField
 	protected TextBox fieldOptionValueList;
 
+	/**
+	 * barcodeTypeLabel Label.
+	 */
 	@UiField
 	protected Label barcodeTypeLabel;
+
+	/**
+	 * barcodeTypeListBox ListBox.
+	 */
 	@UiField
 	protected ListBox barcodeTypeListBox;
 
+	/**
+	 * isHiddenLabel Label.
+	 */
 	@UiField
 	protected Label isHiddenLabel;
-	@UiField
-	protected CheckBox isHidden;
 
+	/**
+	 * hidden CheckBox.
+	 */
+	@UiField
+	protected CheckBox hidden;
+
+	/**
+	 * isMultiLineLabel Label.
+	 */
 	@UiField
 	protected Label isMultiLineLabel;
+
+	/**
+	 * multiLine CheckBox.
+	 */
 	@UiField
-	protected CheckBox isMultiLine;
+	protected CheckBox multiLine;
+
+	/**
+	 * isReadOnly CheckBox.
+	 */
+	@UiField
+	protected CheckBox isReadOnly;
+
+	/**
+	 * isReadOnlyLabel Label.
+	 */
+	@UiField
+	protected Label isReadOnlyLabel;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * samplePatternButton Button.
+	 */
 	@UiField
 	protected Button samplePatternButton;
 
+	/**
+	 * validateButton Button.
+	 */
+	@UiField
+	protected Button validateButton;
+
+	/**
+	 * To get Is MultiLine.
+	 * 
+	 * @return CheckBox
+	 */
 	public CheckBox getIsMultiLine() {
-		return isMultiLine;
+		return multiLine;
 	}
 
+	/**
+	 * To get Is Hidden.
+	 * 
+	 * @return CheckBox
+	 */
 	public CheckBox getIsHidden() {
-		return isHidden;
+		return hidden;
 	}
 
+	/**
+	 * To get Is Readonly.
+	 * 
+	 * @return CheckBox
+	 */
+	public CheckBox getIsReadonly() {
+		return isReadOnly;
+	}
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * validateNameTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateNameTextBox;
+
+	/**
+	 * validateDescriptionTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
-	private ValidatableWidget<TextBox> validatePatternTextBox;
+
+	/**
+	 * validatePatternTextBox ValidatableWidget<TextBox>.
+	 */
+	private RegExValidatableWidget<TextBox> validatePatternTextBox;
+
+	/**
+	 * validateFdOrderTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateFdOrderTextBox;
+
+	/**
+	 * editDocumentTypeViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editDocumentTypeViewPanel;
 
+	/**
+	 * allBarcodeValues List<String>.
+	 */
 	private List<String> allBarcodeValues = null;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditFieldTypeView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
+		validateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		validateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
+
+		// This is added to make it compatible with all browsers
+		samplePatternButton.addStyleName("sample_regex_button");
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
 		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -176,12 +380,12 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 			}
 		});
 
-		validatePatternTextBox = new ValidatableWidget<TextBox>(pattern);
+		validatePatternTextBox = new RegExValidatableWidget<TextBox>(pattern);
 		validatePatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validatePatternTextBox.toggleValidDateBox();
+				validatePatternTextBox.setValid(false);
 			}
 		});
 
@@ -194,7 +398,7 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 			}
 		});
 
-		editDocumentTypeViewPanel.setSpacing(5);
+		editDocumentTypeViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + ":");
 		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + ":");
@@ -211,6 +415,8 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 				+ AdminConstants.COLON);
 		isHiddenLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_HIDDEN) + AdminConstants.COLON);
 		isMultiLineLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_MULTILINE)
+				+ AdminConstants.COLON);
+		isReadOnlyLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_READONLY)
 				+ AdminConstants.COLON);
 		nameStar.setText(AdminConstants.STAR);
 		descStar.setText(AdminConstants.STAR);
@@ -232,78 +438,143 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		barcodeTypeLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isMultiLineLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		isReadOnlyLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 	}
 
+	/**
+	 * To perform operations on Save Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 
 	}
 
+	/**
+	 * To perform operations on cancel Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
+	/**
+	 * To perform operations on sample pattern button click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("samplePatternButton")
 	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
 		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
+	/**
+	 * To perform operations on validate pattern button click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("validateButton")
+	public void onValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onValidateButtonClicked();
+	}
+
+	/**
+	 * To set Name.
+	 * 
+	 * @param name TextBox
+	 */
 	public void setName(TextBox name) {
 		this.name = name;
 	}
 
+	/**
+	 * To set Name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setValue(name);
 	}
 
+	/**
+	 * To get Name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return this.name.getValue();
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return this.description.getValue();
 	}
 
+	/**
+	 * To get Data Type.
+	 * 
+	 * @return DataType
+	 */
 	public DataType getDataType() {
 		String selected = this.dataType.getItemText(this.dataType.getSelectedIndex());
 		DataType[] allDataTypes = DataType.values();
+		DataType tempDataType = allDataTypes[0];
 		for (DataType dataType2 : allDataTypes) {
 			if (dataType2.name().equals(selected)) {
-				return dataType2;
+				tempDataType = dataType2;
+				break;
 			}
 		}
-		return allDataTypes[0];
+		return tempDataType;
 	}
 
+	/**
+	 * To get Barcode Type.
+	 * 
+	 * @return String
+	 */
 	public String getBarcodeType() {
 		return this.barcodeTypeListBox.getItemText(this.barcodeTypeListBox.getSelectedIndex());
 	}
 
 	private int findIndex(DataType datatype) {
-		if (datatype == null) {
-			return 0;
+		int index = 0;
+		if (datatype != null) {
+			DataType[] allDataTypes = DataType.values();
+			List<DataType> tempList = Arrays.asList(allDataTypes);
+			index = tempList.indexOf(datatype);
 		}
-		DataType[] allDataTypes = DataType.values();
-		List<DataType> tempList = Arrays.asList(allDataTypes);
-		return tempList.indexOf(datatype);
+		return index;
 	}
 
 	private int findIndex(String barcodeType) {
-		if (barcodeType == null || barcodeType.isEmpty()) {
-			return 0;
+		int index = 0;
+		if (barcodeType != null && !barcodeType.isEmpty() && allBarcodeValues != null && !allBarcodeValues.isEmpty()) {
+			index = (allBarcodeValues.indexOf(barcodeType)) + 1;
 		}
-		if (allBarcodeValues != null && !allBarcodeValues.isEmpty()) {
-			return (allBarcodeValues.indexOf(barcodeType)) + 1;
-		}
-		return 0;
+		return index;
 	}
 
+	/**
+	 * To set Data Type.
+	 */
 	public void setDataType() {
 		this.dataType.setVisibleItemCount(1);
 		DataType[] allDataTypes = DataType.values();
@@ -312,6 +583,9 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		}
 	}
 
+	/**
+	 * To set Barcode Type.
+	 */
 	public void setBarcodeType() {
 		this.barcodeTypeListBox.setVisibleItemCount(1);
 		this.barcodeTypeListBox.addItem(AdminConstants.EMPTY_STRING);
@@ -322,6 +596,11 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		}
 	}
 
+	/**
+	 * To set Data Type.
+	 * 
+	 * @param datatype DataType
+	 */
 	public void setDataType(DataType datatype) {
 		if (this.dataType.getItemCount() == 0) {
 			setDataType();
@@ -329,6 +608,11 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		this.dataType.setSelectedIndex(findIndex(datatype));
 	}
 
+	/**
+	 * To set Barcode Type.
+	 * 
+	 * @param barcodeType String
+	 */
 	public void setBarcodeType(String barcodeType) {
 		if (this.barcodeTypeListBox.getItemCount() == 0) {
 			setBarcodeType();
@@ -336,107 +620,266 @@ public class EditFieldTypeView extends View<EditFieldTypePresenter> {
 		this.barcodeTypeListBox.setSelectedIndex(findIndex(barcodeType));
 	}
 
+	/**
+	 * To get Validate Name TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}
 
+	/**
+	 * To set validate Name TextBox.
+	 * 
+	 * @param validateNameTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateNameTextBox(ValidatableWidget<TextBox> validateNameTextBox) {
 		this.validateNameTextBox = validateNameTextBox;
 	}
 
+	/**
+	 * To get Validate Description TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescriptionTextBox() {
 		return validateDescriptionTextBox;
 	}
 
+	/**
+	 * To set Validate Description TextBox.
+	 * 
+	 * @param validateDescriptionTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateDescriptionTextBox(ValidatableWidget<TextBox> validateDescriptionTextBox) {
 		this.validateDescriptionTextBox = validateDescriptionTextBox;
 	}
 
-	public ValidatableWidget<TextBox> getValidatePatternTextBox() {
+	/**
+	 * To get Validate Pattern TextBox.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidatePatternTextBox() {
 		return validatePatternTextBox;
 	}
 
-	public void setValidatePatternTextBox(ValidatableWidget<TextBox> validatePatternTextBox) {
+	/**
+	 * To set Validate Pattern TextBox.
+	 * 
+	 * @param validatePatternTextBox RegExValidatableWidget<TextBox>
+	 */
+	public void setValidatePatternTextBox(RegExValidatableWidget<TextBox> validatePatternTextBox) {
 		this.validatePatternTextBox = validatePatternTextBox;
 	}
 
+	/**
+	 * To get Validate Fd Order TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateFdOrderTextBox() {
 		return validateFdOrderTextBox;
 	}
 
+	/**
+	 * To set Validate Fd Order TextBox.
+	 * 
+	 * @param validateFdOrderTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateFdOrderTextBox(ValidatableWidget<TextBox> validateFdOrderTextBox) {
 		this.validateFdOrderTextBox = validateFdOrderTextBox;
 	}
 
+	/**
+	 * To get Name TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getNameTextBox() {
 		return name;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return description;
 	}
 
+	/**
+	 * To get pattern.
+	 * 
+	 * @return String
+	 */
 	public String getPattern() {
 		return this.pattern.getValue();
 	}
 
+	/**
+	 * To set pattern.
+	 * 
+	 * @param pattern String
+	 */
 	public void setPattern(String pattern) {
 		this.pattern.setText(pattern);
 	}
 
+	/**
+	 * To get Pattern TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getPatternTextBox() {
 		return pattern;
 	}
 
+	/**
+	 * To get Fd Order.
+	 * 
+	 * @return String
+	 */
 	public String getFdOrder() {
 		return fdOrder.getText();
 	}
 
+	/**
+	 * To set Fd Order.
+	 * 
+	 * @param fdOrder String
+	 */
 	public void setFdOrder(String fdOrder) {
 		this.fdOrder.setText(fdOrder);
 	}
 
+	/**
+	 * To get Fd Order TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getFdOrderTextBox() {
 		return this.fdOrder;
 	}
 
+	/**
+	 * To get Fd Order label.
+	 * 
+	 * @return Label
+	 */
 	public Label getFdOrderLabel() {
 		return fdOrderLabel;
 	}
 
+	/**
+	 * To get Sample Value.
+	 * 
+	 * @return String
+	 */
 	public String getSampleValue() {
 		return this.sampleValue.getText();
 	}
 
+	/**
+	 * To set Sample Value.
+	 * 
+	 * @param sampleValue2
+	 */
 	public void setSampleValue(String sampleValue2) {
 		this.sampleValue.setText(sampleValue2);
 	}
 
+	/**
+	 * To get Field Option Value List.
+	 * 
+	 * @return String
+	 */
 	public String getFieldOptionValueList() {
 		return this.fieldOptionValueList.getText();
 	}
 
+	/**
+	 * To set Field Option Value List.
+	 * 
+	 * @param fieldValueList String
+	 */
 	public void setFieldOptionValueList(String fieldValueList) {
 		this.fieldOptionValueList.setText(fieldValueList);
 	}
 
+	/**
+	 * To set all Barcode Values.
+	 * 
+	 * @param allBarcodeValues List<String>
+	 */
 	public void setAllBarcodeValues(List<String> allBarcodeValues) {
 		this.allBarcodeValues = allBarcodeValues;
 	}
 
+	/**
+	 * To get value of hidden.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isHidden() {
-		return this.isHidden.getValue();
+		return this.hidden.getValue();
 	}
 
+	/**
+	 * To set Hidden.
+	 * 
+	 * @param isHidden boolean
+	 */
 	public void setHidden(boolean isHidden) {
-		this.isHidden.setValue(isHidden);
+		this.hidden.setValue(isHidden);
 	}
 
+	/**
+	 * To get value of multiline.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isMultiLine() {
-		return this.isMultiLine.getValue();
+		return this.multiLine.getValue();
 	}
 
+	/**
+	 * To set MultiLine.
+	 * 
+	 * @param isMultiLine boolean
+	 */
 	public void setMultiLine(boolean isMultiLine) {
-		this.isMultiLine.setValue(isMultiLine);
+		this.multiLine.setValue(isMultiLine);
 	}
+
+	/**
+	 * To set Save Button Enable.
+	 * 
+	 * @param isEnable boolean
+	 */
+	public void setSaveButtonEnable(boolean isEnable) {
+		saveButton.setEnabled(isEnable);
+
+	}
+
+	/**
+	 * API to get the boolean value of isReadOnly checkbox.
+	 * 
+	 * @return boolean
+	 */
+	public boolean getIsReadonlyValue() {
+		return this.isReadOnly.getValue();
+	}
+
+	/**
+	 * API to set the 'isReadOnly' property for document level field.
+	 * 
+	 * @param isReadOnly boolean
+	 */
+	public void setReadOnly(boolean isReadOnly) {
+		this.isReadOnly.setValue(isReadOnly);
+	}
+
 }

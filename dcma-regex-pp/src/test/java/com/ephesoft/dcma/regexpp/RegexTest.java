@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,6 +59,7 @@ import com.ephesoft.dcma.util.FileUtils;
  * second is a negative test case when HOCR file is not present.
  * 
  * @author Ephesoft
+ * @version 1.0
  * @see com.ephesoft.dcma.regexpp.AbstractRegexTests
  */
 
@@ -149,7 +150,7 @@ public class RegexTest extends AbstractRegexTests {
 		batchClassIdSuccess = "BC2";
 		batchClassIdFailure = "BC2";
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassIdSuccess);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		Properties prop = new Properties();
 		try {

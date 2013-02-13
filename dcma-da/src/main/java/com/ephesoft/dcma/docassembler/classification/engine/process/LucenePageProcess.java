@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,6 +46,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
@@ -73,10 +74,6 @@ import com.ephesoft.dcma.docassembler.constant.PlaceHolder;
  * @version 1.0
  * @see com.ephesoft.dcma.docassembler.DocumentAssembler
  */
-/**
- * @author chhavi1470
- * 
- */
 public class LucenePageProcess {
 
 	/**
@@ -95,7 +92,7 @@ public class LucenePageProcess {
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * Instance of DocType Service
+	 * Instance of DocType Service.
 	 */
 	private DocumentTypeService docTypeService;
 
@@ -125,6 +122,7 @@ public class LucenePageProcess {
 	private Map<String, String> propertyMap;
 
 	/**
+	 * To get Property Map.
 	 * @return the propertyMap
 	 */
 	public Map<String, String> getPropertyMap() {
@@ -132,13 +130,15 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * @param propertyMap the propertyMap to set
+	 * To set Property Map.
+	 * @param propertyMap Map<String, String>
 	 */
 	public void setPropertyMap(Map<String, String> propertyMap) {
 		this.propertyMap = propertyMap;
 	}
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public final BatchSchemaService getBatchSchemaService() {
@@ -146,13 +146,15 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService BatchSchemaService
 	 */
 	public final void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get Page Type Service.
 	 * @return the pageTypeService
 	 */
 	public final PageTypeService getPageTypeService() {
@@ -160,13 +162,15 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * @param pageTypeService the pageTypeService to set
+	 * To set Page Type Service.
+	 * @param pageTypeService PageTypeService
 	 */
 	public final void setPageTypeService(final PageTypeService pageTypeService) {
 		this.pageTypeService = pageTypeService;
 	}
 
 	/**
+	 * To get Xml Documents.
 	 * @return List<DocumentType>
 	 */
 	public final List<Document> getXmlDocuments() {
@@ -174,6 +178,7 @@ public class LucenePageProcess {
 	}
 
 	/**
+	 * To set Xml Documents.
 	 * @param xmlDocuments List<DocumentType>
 	 */
 	public final void setXmlDocuments(final List<Document> xmlDocuments) {
@@ -181,6 +186,7 @@ public class LucenePageProcess {
 	}
 
 	/**
+	 * To get Batch Instance Identifier.
 	 * @return batchInstanceIdentifier
 	 */
 	public final String getBatchInstanceIdentifier() {
@@ -188,13 +194,15 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * @param batchInstanceIdentifier Long
+	 * To set Batch Instance Identifier.
+	 * @param batchClassIdentifier String.
 	 */
 	public final void setBatchClassIdentifier(String batchClassIdentifier) {
 		this.batchClassIdentifier = batchClassIdentifier;
 	}
 
 	/**
+	 * To get Batch Instance Identifier.
 	 * @return batchClassIdentifier
 	 */
 	public final String getBatchClassIdentifier() {
@@ -202,6 +210,7 @@ public class LucenePageProcess {
 	}
 
 	/**
+	 * To set Batch Instance Identifier.
 	 * @param batchInstanceIdentifier Long
 	 */
 	public final void setBatchInstanceIdentifier(String batchInstanceIdentifier) {
@@ -209,6 +218,7 @@ public class LucenePageProcess {
 	}
 
 	/**
+	 * To get the plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -216,29 +226,27 @@ public class LucenePageProcess {
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set the plugin Properties Service.
+	 * @param pluginPropertiesService PluginPropertiesService
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
-	 * @param docTypeService the doc type service to be set
+	 * To set the doc type service.
+	 * @param docTypeService DocumentTypeService
 	 */
 	public void setDocTypeService(DocumentTypeService docTypeService) {
 		this.docTypeService = docTypeService;
 	}
 
 	/**
-	 * @param docType
-	 * @param pageTypeName
+	 * API to set the document type name and ConfidenceThreshold.
+	 * @param docType {@link Document}
+	 * @param pageTypeName {@link String}
 	 */
 	public void setDocTypeNameAndConfThresholdAPI(final Document docType, final String pageTypeName) {
-
-		/*
-		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
-		 * batchInstanceID);
-		 */
 		List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = docTypeService.getDocTypeByBatchClassIdentifier(
 				batchClassIdentifier, -1, -1);
 
@@ -275,15 +283,10 @@ public class LucenePageProcess {
 	/**
 	 * This method will set the document type name and ConfidenceThreshold.
 	 * 
-	 * @param docType DocumentType
-	 * @param pageTypeName String
+	 * @param docType {@link DocumentType}
+	 * @param pageTypeName {@link String}
 	 */
 	public void setDocTypeNameAndConfThreshold(final Document docType, final String pageTypeName) {
-
-		/*
-		 * List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pageTypeService.getDocTypeByPageTypeName(pageTypeName,
-		 * batchInstanceID);
-		 */
 		List<com.ephesoft.dcma.da.domain.DocumentType> docTypes = pluginPropertiesService.getDocTypeByPageTypeName(
 				batchInstanceIdentifier, pageTypeName);
 
@@ -319,12 +322,11 @@ public class LucenePageProcess {
 	/**
 	 * Update Batch XML file.
 	 * 
-	 * @param insertAllDocument List<DocumentType>
-	 * @param removeIndexList List<Integer>
-	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
+	 * @param insertAllDocument {@link List<DocumentType>}
+	 * @param isFromWebService boolean
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
-	private void updateBatchXMLAPI(final List<Document> insertAllDocument, final List<Integer> removeIndexList,
-			boolean isFromWebService) throws DCMAApplicationException {
+	private void updateBatchXMLAPI(final List<Document> insertAllDocument, boolean isFromWebService) throws DCMAApplicationException {
 		// set the confidence score and document type name on the basis of
 		// defined rules.
 		setDocConfAndDocType(insertAllDocument, isFromWebService);
@@ -334,9 +336,9 @@ public class LucenePageProcess {
 	/**
 	 * Update Batch XML file.
 	 * 
-	 * @param insertAllDocument List<DocumentType>
-	 * @param removeIndexList List<Integer>
-	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
+	 * @param insertAllDocument {@link List<DocumentType>}
+	 * @param removeIndexList {@link List<Integer>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
 	private void updateBatchXML(final List<Document> insertAllDocument, final List<Integer> removeIndexList)
 			throws DCMAApplicationException {
@@ -418,7 +420,7 @@ public class LucenePageProcess {
 		// Set the error message explicitly to blank to display the node in batch xml
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			final Document document = xmlDocuments.get(i);
-			document.setErrorMessage("");
+			document.setErrorMessage(DocumentAssemblerConstants.EMPTY);
 		}
 
 		// now write the state of the object to the xml file.
@@ -432,7 +434,7 @@ public class LucenePageProcess {
 	 * This method will retrieve the page level field type docFieldType for any input page type for current classification name.
 	 * 
 	 * @param pgType PageType
-	 * @return docFieldType DocFieldType
+	 * @return docFieldType {@link DocFieldType}
 	 */
 	private DocField getPgLevelField(final Page pgType) {
 
@@ -461,7 +463,9 @@ public class LucenePageProcess {
 	/**
 	 * This method will set the confidence score of every document on the basis of average of all the page confidence score.
 	 * 
-	 * @param xmlDocuments List<DocumentType>
+	 * @param xmlDocuments {@link List<DocumentType>}
+	 * @param isFromWebService boolean
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
 	@SuppressWarnings("unchecked")
 	private void setDocConfAndDocType(final List<Document> xmlDocuments, boolean isFromWebService) throws DCMAApplicationException {
@@ -536,12 +540,12 @@ public class LucenePageProcess {
 
 			docType.setConfidence(confidenceScore);
 			if (null != checkTypeList && !checkTypeList.isEmpty()) {
-				StringBuilder stringBuilder = new StringBuilder("");
+				StringBuilder stringBuilder = new StringBuilder(DocumentAssemblerConstants.EMPTY);
 				stringBuilder.append(pageTypeName);
 				stringBuilder.append(checkTypeList.get(0));
 				pageTypeName = stringBuilder.toString();
 			} else {
-				StringBuilder stringBuilder = new StringBuilder("");
+				StringBuilder stringBuilder = new StringBuilder(DocumentAssemblerConstants.EMPTY);
 				stringBuilder.append(pageTypeName);
 				stringBuilder.append(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE));
 				pageTypeName = stringBuilder.toString();
@@ -558,19 +562,10 @@ public class LucenePageProcess {
 	/**
 	 * This method will apply the rule to calculate the confidence score.
 	 * 
-	 * @param checkTypeList List<String>
+	 * @param checkTypeList {@link List<String>}
 	 * @return multiplyingFactor float
 	 */
 	private float multiplyingFactor(List<String> checkTypeList) {
-
-		// fp + mp + lp = 1
-		// fp = 0.50
-		// lp = 0.50
-		// mp = 0.25
-		// fp + lp = 0.75
-		// fp + mp = 0.50
-		// mp + lp = 0.50
-
 		float multiplyingFactor = 1.00f;
 		float intialFactor = 1.00f;
 		String checkFirstPage = getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE);
@@ -585,16 +580,6 @@ public class LucenePageProcess {
 		int mlPage = Integer.parseInt(getPropertyMap().get(DocumentAssemblerConstants.RULE_ML_PAGE));
 
 		if (null != checkTypeList) {
-
-			// A = First_Page
-			// B = Middle_Page
-			// C = Last_Page
-			// CBA
-			// 101 = 5
-			// 100 = 4
-			// 111 = 7
-			// 010 = 2
-
 			int placeHolder = 0;
 
 			if (checkTypeList.contains(checkFirstPage)) {
@@ -714,8 +699,8 @@ public class LucenePageProcess {
 	/**
 	 * This method will read all the pages of the document for document type Unknown.
 	 * 
-	 * @return docPageInfo List<PageType>
-	 * @throws DCMAApplicationException Check for input parameters and read all pages of the document.
+	 * @return docPageInfo {@link List<PageType>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters and read all pages of the document.
 	 */
 	public final List<Page> readAllPages() throws DCMAApplicationException {
 		LOGGER.info("Reading the document for Document Assembler.");
@@ -736,28 +721,28 @@ public class LucenePageProcess {
 
 		return docPageInfo;
 	}
-
+	
+	/**
+	 * This method will create all the pages of the document for document type Unknown.
+	 * 
+	 * @param insertAllDocument {@link List<Document>}
+	 * @param docPageInfo {@link List<Page>}
+	 * @param isFromWebService boolean
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
+	 */
 	public void createDocForPages(List<Document> insertAllDocument, List<Page> docPageInfo, boolean isFromWebService)
 			throws DCMAApplicationException {
-
 		String errMsg = null;
-
-		if (!isFromWebService) {
-			if (null == this.xmlDocuments) {
-				throw new DCMAApplicationException("Unable to write pages for the document.");
-			}
+		if (!isFromWebService && null == this.xmlDocuments) {
+			throw new DCMAApplicationException("Unable to write pages for the document.");
 		}
-
 		try {
 			List<Integer> removeIndexList = new ArrayList<Integer>();
 			Document document = null;
 			Long idGenerator = 0L;
-
 			boolean isLast = true;
 			boolean isFirst = true;
-
 			for (int index = 0; index < docPageInfo.size(); index++) {
-
 				Page pgType = docPageInfo.get(index);
 				DocField docFieldType = getPgLevelField(pgType);
 				if (null == docFieldType) {
@@ -765,43 +750,39 @@ public class LucenePageProcess {
 							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
 					throw new DCMAApplicationException(errMsg);
 				}
-
 				String value = docFieldType.getValue();
 				float confidenceScore = docFieldType.getConfidence();
-
 				if (null == value) {
 					errMsg = "Invalid format of page level fields. Value found for "
 							+ getPropertyMap().get(DocumentAssemblerConstants.LUCENE_CLASSIFICATION) + " classification is null.";
 					throw new DCMAApplicationException(errMsg);
 				}
-
 				// check for zero confidence score value
 				// for zero value just leave the page to unknown type.
-
 				if (confidenceScore == 0) {
 					document = new Document();
 					Pages pages = new Pages();
 					idGenerator++;
 					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 					document.setPages(pages);
+					document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 					insertAllDocument.add(document);
 					document.getPages().getPage().add(pgType);
 					document.setType(EphesoftProperty.UNKNOWN.getProperty());
 					removeIndexList.add(index);
 					continue;
 				}
-
 				if (isLast) {
 					document = new Document();
 					Pages pages = new Pages();
 					idGenerator++;
 					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 					document.setPages(pages);
+					document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 					insertAllDocument.add(document);
 					isLast = false;
 					isFirst = false;
 				}
-
 				if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE))) {
 					if (isFirst) {
 						document = new Document();
@@ -809,6 +790,7 @@ public class LucenePageProcess {
 						idGenerator++;
 						document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 						document.setPages(pages);
+						document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 						insertAllDocument.add(document);
 					}
 					isFirst = true;
@@ -836,14 +818,7 @@ public class LucenePageProcess {
 					}
 				}
 			}
-
-			if (isFromWebService) {
-				updateBatchXMLAPI(insertAllDocument, removeIndexList, isFromWebService);
-			} else {
-				// update the xml file.
-				updateBatchXML(insertAllDocument, removeIndexList);
-			}
-
+			updateBatchXML(insertAllDocument, isFromWebService, removeIndexList);
 		} catch (Exception e) {
 			errMsg = "Unable to write pages for the document. " + e.getMessage();
 			LOGGER.error(errMsg, e);
@@ -851,4 +826,21 @@ public class LucenePageProcess {
 		}
 	}
 
+	/**
+	 * This method will update batch xml.
+	 * 
+	 * @param insertAllDocument {@link List<Document>}
+	 * @param isFromWebService boolean
+	 * @param removeIndexList {@link List<Integer>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
+	 */
+	private void updateBatchXML(List<Document> insertAllDocument, boolean isFromWebService, List<Integer> removeIndexList)
+			throws DCMAApplicationException {
+		if (isFromWebService) {
+			updateBatchXMLAPI(insertAllDocument, isFromWebService);
+		} else {
+			// update the xml file.
+			updateBatchXML(insertAllDocument, removeIndexList);
+		}
+	}
 }

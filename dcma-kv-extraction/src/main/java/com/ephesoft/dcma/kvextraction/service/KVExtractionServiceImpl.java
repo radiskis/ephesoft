@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,28 +49,69 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.kvextraction.KeyValueExtraction;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This class performs the functions of extraction kv values from document, ocr files etc.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class KVExtractionServiceImpl implements KVExtractionService {
 
+	/**
+	 * An instance of Logger for proper logging using slf4j.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KVExtractionServiceImpl.class);
 
+	/**
+	 * An instance of {@link KeyValueExtraction}.
+	 */
 	@Autowired
 	private KeyValueExtraction keyValueExtraction;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get the xml file before processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public final void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * To get the xml file after the processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public final void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * This method is used to extract the data from scanned pages using key value extraction and insert the received data to the
+	 * batch.xml file.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException If not able to extract Key Value document level fields.
+	 */
 	@Override
 	public void extractKVDocumentFields(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
@@ -81,14 +122,42 @@ public class KVExtractionServiceImpl implements KVExtractionService {
 		}
 	}
 
+	/**
+	 * This API is called from web services to perform KV extraction on the specified HOCR.
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param params {@link ExtractKVParams}
+	 * @return boolean
+	 * @throws DCMAException
+	 */
 	@Override
-	public boolean extractKVDocumentFieldsFromHOCR(final List<DocField> updtDocList, final HocrPages hocrPages, final ExtractKVParams params) throws DCMAException {
+	public boolean extractKVDocumentFieldsFromHOCR(final List<DocField> updtDocList, final HocrPages hocrPages,
+			final ExtractKVParams params) throws DCMAException {
 		try {
-			boolean results = keyValueExtraction.extractFieldsFromHOCR(updtDocList, hocrPages, params);
-			return results;
+			return keyValueExtraction.extractFieldsFromHOCR(updtDocList, hocrPages, params);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
+
+	/**
+	 * This API is called from web services to perform KV extraction on the specified HOCR.
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param params {@link ExtractKVParams}
+	 * @return bolean
+	 * @throws DCMAException
+	 */
+	@Override
+	public boolean extractKVFromHOCRForBatchClass(List<DocField> updtDocList, HocrPages hocrPages, String batchClassIdentifier,
+			String documentType) throws DCMAException {
+		try {
+			return keyValueExtraction.extractFromHOCRForBatchClass(updtDocList, hocrPages, batchClassIdentifier, documentType);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+
 }

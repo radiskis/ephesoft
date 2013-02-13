@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,33 +35,64 @@
 
 package com.ephesoft.dcma.core.validator;
 
+/**
+ * This class validates whether is number or not.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class NumberValidator implements Validator {
 
+	/**
+	 * value String.
+	 */
 	private String value;
+	
+	/**
+	 * isFloat boolean.
+	 */
 	private final boolean isFloat;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param value String
+	 * @param isFloat boolean
+	 */
 	public NumberValidator(String value, boolean isFloat) {
 		this.value = value;
 		this.isFloat = isFloat;
 	}
 
+	/**
+	 * To set value.
+	 * @param value String
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * Validate method.
+	 * @return boolean
+	 */
 	@Override
 	public boolean validate() {
+		boolean numberValid = false;
 		try {
-			if (value == null) return false;
-			if(!isFloat) {
-				Long.parseLong(value.toString());
+			if (value == null) {
+				numberValid = false;
 			} else {
-				Float.parseFloat(value.toString());
+				if (!isFloat) {
+					Long.parseLong(value);
+				} else {
+					Float.parseFloat(value);
+				}
 			}
 		} catch (Exception e) {
 			// the value couldn't be parsed by the pattern, return false
-			return false;
+			numberValid = false;
 		}
-		return true;
+		return numberValid;
 	}
 }

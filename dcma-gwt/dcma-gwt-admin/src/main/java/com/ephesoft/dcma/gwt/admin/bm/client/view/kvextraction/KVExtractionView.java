@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,72 +39,105 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction.KVExtractionPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit KV extraction.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KVExtractionView extends View<KVExtractionPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, KVExtractionView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * kvextractionDetailView KVExtractionDetailView.
+	 */
 	@UiField
 	protected KVExtractionDetailView kvextractionDetailView;
 
+	/**
+	 * editKVExtractionView EditKVExtractionView.
+	 */
 	@UiField
 	protected EditKVExtractionView editKVExtractionView;
 
+	/**
+	 * kvExtractionTypeVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel kvExtractionTypeVerticalPanel;
 
+	/**
+	 * kvTypeConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel kvTypeConfigVerticalPanel;
 
+	/**
+	 * kvConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel kvConfigurationCaptionPanel;
 
-	@UiField
-	protected Button editKVPropertiesButton;
-
+	/**
+	 * Constructor.
+	 */
 	public KVExtractionView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		kvConfigurationCaptionPanel.setCaptionHTML(AdminConstants.KVEXTRACTION_DETAILS_HTML);
-
-		editKVPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
-		kvExtractionTypeVerticalPanel.add(editKVPropertiesButton);
 	}
 
+	/**
+	 * To get Edit KV Extraction View.
+	 * 
+	 * @return EditKVExtractionView
+	 */
 	public EditKVExtractionView getEditKVExtractionView() {
 		return editKVExtractionView;
 	}
 
+	/**
+	 * To get KV extraction Detail View.
+	 * 
+	 * @return KVExtractionDetailView
+	 */
 	public KVExtractionDetailView getKvextractionDetailView() {
 		return kvextractionDetailView;
 	}
 
-	public Button getEditKVPropertiesButtonButton() {
-		return editKVPropertiesButton;
-	}
-
+	/**
+	 * To get Kv Extraction Type Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getKvExtractionTypeVerticalPanel() {
 		return kvExtractionTypeVerticalPanel;
 	}
 
+	/**
+	 * To get Kv Type Config Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getKvTypeConfigVerticalPanel() {
 		return kvTypeConfigVerticalPanel;
-	}
-	
-	@UiHandler("editKVPropertiesButton")
-	public void onEditKVPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditKVPropertiesButtonClicked();
 	}
 
 }

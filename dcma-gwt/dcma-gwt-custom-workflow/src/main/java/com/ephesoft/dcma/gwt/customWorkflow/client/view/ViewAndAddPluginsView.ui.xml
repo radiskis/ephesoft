@@ -5,11 +5,14 @@
 		height="100%">
 		<g:north size="60">
 			<g:HorizontalPanel width="99%" ui:field="pluginButtonsPanel">
-				<g:cell width="45%" horizontalAlignment="ALIGN_LEFT">
+				<g:cell width="40%" horizontalAlignment="ALIGN_CENTER">
 					<g:Label ui:field="pluginsListingLabel"></g:Label>
 				</g:cell>
-				<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:cell width="45%" horizontalAlignment="ALIGN_RIGHT">
 					<g:Button ui:field="addNewPluginButton"></g:Button>
+				</g:cell>
+				<g:cell width="14%" horizontalAlignment="ALIGN_RIGHT">
+					<g:Button ui:field="deletePluginButton"></g:Button>
 				</g:cell>
 				<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
 					<g:Button ui:field="dependenciesButton"></g:Button>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,6 +40,7 @@ import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.ExportBatchClassView;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
@@ -48,15 +49,13 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Presenter for Importing a batch class.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Presenter for Importing a batch class.
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class ExportBatchClassPresenter extends AbstractBatchClassPresenter<ExportBatchClassView> {
 
@@ -65,40 +64,71 @@ public class ExportBatchClassPresenter extends AbstractBatchClassPresenter<Expor
 	 */
 	private BatchFolderListDTO batchFolderListDTO;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view ExportBatchClassView
+	 */
 	public ExportBatchClassPresenter(final BatchClassManagementController controller, final ExportBatchClassView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 	}
 
+	/**
+	 * To show Batch Class Export View.
+	 */
 	public void showBatchClassExportView() {
 		view.getDialogBox().setWidth("100%");
 		view.getDialogBox().add(view);
 		view.getDialogBox().center();
 		view.getDialogBox().setPopupPosition(Window.getClientWidth() / 2 - view.getDialogBox().getOffsetWidth() / 2,
-				Window.getClientHeight() / 2 - view.getDialogBox().getOffsetHeight() / 2 - 100);
+				Window.getClientHeight() / 2 - view.getDialogBox().getOffsetHeight() / 2 - BatchClassManagementConstants.HUNDRED);
 		view.getDialogBox().show();
 		view.getDialogBox().setText(MessageConstants.BATCH_CLASS_EXPORT);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * To get Batch Folder List DTO.
+	 * 
+	 * @return BatchFolderListDTO
+	 */
 	public BatchFolderListDTO getBatchFolderListDTO() {
 		return batchFolderListDTO;
 	}
 
+	/**
+	 * To set Batch Folder List DTO.
+	 * 
+	 * @param batchFolderListDTO BatchFolderListDTO
+	 */
 	public void setBatchFolderListDTO(BatchFolderListDTO batchFolderListDTO) {
 		this.batchFolderListDTO = batchFolderListDTO;
 	}
 
+	/**
+	 * In case of submit.
+	 */
 	public void onSubmitComplete() {
-		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY, MessageConstants.IMPORT_SUCCESSFUL, Boolean.TRUE);
-		
+		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+				MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY, MessageConstants.IMPORT_SUCCESSFUL, Boolean.TRUE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -113,20 +143,25 @@ public class ExportBatchClassPresenter extends AbstractBatchClassPresenter<Expor
 			}
 		});
 
-	
 	}
 
+	/**
+	 * To perform operations in case of OK clicked.
+	 */
 	public void onOkClicked() {
-	
+
 		view.getExportFormPanel().submit();
-			
+
 	}
 
+	/**
+	 * To set Folder List.
+	 */
 	public void setFolderList() {
 		BatchFolderListDTO batchFolderListDTO = getBatchFolderListDTO();
 		List<HashMap<String, String>> folderList = batchFolderListDTO.getFolderList();
 		for (HashMap<String, String> propertyMap : folderList) {
 			view.getbatchFolderListView(propertyMap);
 		}
-	}	
+	}
 }

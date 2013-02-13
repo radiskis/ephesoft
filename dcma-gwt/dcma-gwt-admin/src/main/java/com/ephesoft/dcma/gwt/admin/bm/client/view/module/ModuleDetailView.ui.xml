@@ -2,55 +2,62 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
-	
+		<g:ScrollPanel height="7em" width="100%">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="nameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="name" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="descLabel">Description:</g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="description" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="remoteUrlLabel">Remote URL:</g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="remoteUrl" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="remoteBatchClassIdentifierLabel">Remote URL:</g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="remoteBatchClassIdentifier" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="nameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="name"/>
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editModuleButton"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="descLabel">Description:</g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="description"/>
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="remoteUrlLabel">Remote URL:</g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="remoteUrl"/>
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="remoteBatchClassIdentifierLabel">Remote URL:</g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="remoteBatchClassIdentifier"/>
-			</g:cell>
-		</g:HorizontalPanel>
-		
-	</g:VerticalPanel>   
-	
+	</g:VerticalPanel>
+
 </ui:UiBinder>

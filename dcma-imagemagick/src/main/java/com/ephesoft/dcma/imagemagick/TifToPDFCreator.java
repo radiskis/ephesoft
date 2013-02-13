@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,37 +46,56 @@ import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.threadpool.AbstractRunnable;
+import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 
 /**
  * This class is used for converting tif to pdf.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
  */
 public class TifToPDFCreator extends AbstractRunnable {
 
-	private static final char DOT = '.';
-	private String sourcePath;
-	private String tifImageName;
+	/**
+	 * A constant for storing source path.
+	 */
+	private final  String sourcePath;
+	/**
+	 * A constant for storing tiff image name.
+	 */
+	private final String tifImageName;
 
+	/**
+	 * An instance of Logger for proper logging in this file.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TifToPDFCreator.class);
-
+	/**
+	 * Parameterized constructor.
+	 * @param sourcePath {@link String}
+	 * @param tifImageName {@link String}
+	 */
 	public TifToPDFCreator(String sourcePath, String tifImageName) {
+		super();
 		this.sourcePath = sourcePath;
 		this.tifImageName = tifImageName;
 	}
 
+	/**
+	 * This method is used to run the processing for conversion of tif to pdf conversion. 
+	 */
 	@Override
 	public void run() {
 		LOGGER.info("Converting tif to pdf.");
 		String imagePath = sourcePath + File.separator + tifImageName;
 		String pdfImagePath = sourcePath + File.separator
-				+ tifImageName.replaceAll(tifImageName.substring(tifImageName.lastIndexOf(DOT)), FileType.PDF.getExtensionWithDot());
+				+ tifImageName.replaceAll(tifImageName.substring(tifImageName.lastIndexOf(ImageMagicKConstants.DOT)), FileType.PDF.getExtensionWithDot());
 		ConvertCmd cmd = new ConvertCmd();
-		IMOperation op = new IMOperation();
-		op.addImage();
-		op.addImage();
+		IMOperation imOper = new IMOperation();
+		imOper.addImage();
+		imOper.addImage();
 		try {
-			cmd.run(op, imagePath, pdfImagePath);
+			cmd.run(imOper, imagePath, pdfImagePath);
 			LOGGER.info("Succesfully completed conversion of tif to pdf.");
 		} catch (IOException e) {
 			LOGGER.error(e.getMessage(), e);

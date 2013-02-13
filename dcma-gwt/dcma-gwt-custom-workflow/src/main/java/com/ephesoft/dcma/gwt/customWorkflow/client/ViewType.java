@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,11 +33,11 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client;
+package com.ephesoft.dcma.gwt.customworkflow.client;
 
 public enum ViewType {
 
-	ENTRY_VIEW("Entry view"), DEPENDENCIES_VIEW("dependencies view"), ADD_DEPENDENCY_VIEW("Add dependency view");
+	ENTRY_VIEW("Plugin List"), DEPENDENCIES_VIEW("Dependencies"), ADD_DEPENDENCY_VIEW("Add dependency view");
 
 	String value;
 

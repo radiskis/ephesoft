@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,8 +48,8 @@ import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 public class PluginComparator implements Comparator<Object> {
 
 	private final Order order;
-	String PLUGIN_NAME = "name";
-	String PLUGIN_DESCRIPTION = "description";
+	/*String PLUGIN_NAME = "name";
+	String PLUGIN_DESCRIPTION = "description";*/
 
 	public PluginComparator(final Order order) {
 
@@ -71,12 +71,12 @@ public class PluginComparator implements Comparator<Object> {
 
 		final Boolean isAsc = order.isAscending();
 
-		final String PluginDetailsPropertyOne = getProperty(order.getSortProperty(), pluginDetailsDTOOne);
-		final String PluginDetailsPropertyTwo = getProperty(order.getSortProperty(), pluginDetailsDTOTwo);
+		final String pluginDetailsPropertyOne = getProperty(order.getSortProperty(), pluginDetailsDTOOne);
+		final String pluginDetailsPropertyTwo = getProperty(order.getSortProperty(), pluginDetailsDTOTwo);
 		if (isAsc) {
-			isEqualOrGreater = PluginDetailsPropertyOne.compareTo(PluginDetailsPropertyTwo);
+			isEqualOrGreater = pluginDetailsPropertyOne.compareTo(pluginDetailsPropertyTwo);
 		} else {
-			isEqualOrGreater = PluginDetailsPropertyTwo.compareTo(PluginDetailsPropertyOne);
+			isEqualOrGreater = pluginDetailsPropertyTwo.compareTo(pluginDetailsPropertyOne);
 		}
 		return isEqualOrGreater;
 	}
@@ -95,9 +95,7 @@ public class PluginComparator implements Comparator<Object> {
 		} else {
 			if (domainProperty.getProperty().equals(PluginProperty.DESCRIPTION.getProperty())) {
 				property = pluginDetailsDTO.getPluginDescription();
-			} else {
-				property = null;
-			}
+			} 
 		}
 		return property;
 	}

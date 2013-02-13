@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -77,50 +77,98 @@ public class BarcodeResult {
 	 */
 	private BarcodeReaderTypes barcodeType;
 
+	/**
+	 * getter for x0Cord.
+	 * @return double
+	 */
 	public double getX0Cord() {
 		return x0Cord;
 	}
 
+	/**
+	 * setter for x0Cord.
+	 * @param x0Cord double
+	 */
 	public void setX0Cord(final double x0Cord) {
 		this.x0Cord = x0Cord;
 	}
 
+	/**
+	 * getter for y0Cord.
+	 * @return double
+	 */
 	public double getY0Cord() {
 		return y0Cord;
 	}
 
+	/**
+	 * setter for x0Cord.
+	 * @param y0Cord double
+	 */
 	public void setY0Cord(final double y0Cord) {
 		this.y0Cord = y0Cord;
 	}
 
+	/**
+	 * getter for x1Cord.
+	 * @return double
+	 */
 	public double getX1Cord() {
 		return x1Cord;
 	}
 
+	/**
+	 * setter for x1Cord.
+	 * @param x1Cord double
+	 */
 	public void setX1Cord(final double x1Cord) {
 		this.x1Cord = x1Cord;
 	}
 
+	/**
+	 * getter for y1Cord.
+	 * @return double
+	 */
 	public double getY1Cord() {
 		return y1Cord;
 	}
 
+	/**
+	 * setter for y1Cord.
+	 * @param y1Cord double
+	 */
 	public void setY1Cord(final double y1Cord) {
 		this.y1Cord = y1Cord;
 	}
 
+	/**
+	 * getter for texts.
+	 * @return {@link String}
+	 */
 	public String getTexts() {
 		return texts;
 	}
 
+	/**
+	 * setter for texts.
+	 * @param texts {@link String}
+	 */
 	public void setTexts(final String texts) {
 		this.texts = texts;
 	}
 
+	/**
+	 * getter for barcodeType.
+	 * @return {@link BarcodeReaderTypes}
+	 */
 	public BarcodeReaderTypes getBarcodeType() {
 		return barcodeType;
 	}
 
+	/**
+	 * setter for barcodeType.
+	 * @param barcodeType {@link BarcodeReaderTypes}
+	 */
 	public void setBarcodeType(final BarcodeReaderTypes barcodeType) {
 		this.barcodeType = barcodeType;
 	}

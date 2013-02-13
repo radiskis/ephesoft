@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,98 +58,112 @@ import com.ephesoft.dcma.workflow.common.EnvironmentObjectGetCmd;
 /**
  * Factory bean which create the JBPM Process Engine.
  * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.pvm.internal.processengine.ProcessEngineImpl
  */
 @Configuration
 public class JbpmAutoSpringConfiguration {
 
+	/**
+	 * jbpmCfg String.
+	 */
 	protected String jbpmCfg = "META-INF/dcma-workflows/jbpm.cfg.xml";
 
+	/**
+	 * To set JbpmCfg.
+	 * 
+	 * @param jbpmCfg String
+	 */
 	public void setJbpmCfg(String jbpmCfg) {
 		this.jbpmCfg = jbpmCfg;
 	}
 
+	/**
+	 * applicationContext {@link ApplicationContext}.
+	 */
 	@Autowired
 	private ApplicationContext applicationContext;
-	
-	@Bean(name="jbpmConfiguration")
+
+	/**
+	 * To configure JBPM.
+	 * 
+	 * @return org.jbpm.api.Configuration
+	 */
+	@Bean(name = "jbpmConfiguration")
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public org.jbpm.api.Configuration jbpmConfiguration() {
-		ConfigurationImpl configuration = new ConfigurationImpl(); 
+		ConfigurationImpl configuration = new ConfigurationImpl();
 		configuration.springInitiated(applicationContext).setResource(jbpmCfg);
 		return configuration;
 	}
-	
-	@Bean(name="jbpmProcessEngine")
+
+	/**
+	 * To process Engine.
+	 * 
+	 * @return ProcessEngine
+	 */
+	@Bean(name = "jbpmProcessEngine")
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public ProcessEngine processEngine() {
 		ProcessEngine processEngine = jbpmConfiguration().buildProcessEngine();
-		((ProcessEngineImpl)processEngine).set("PNG_IMAGE", ImageType.PNG);
-		((ProcessEngineImpl)processEngine).set("TIFF_IMAGE", ImageType.TIFF);
+		((ProcessEngineImpl) processEngine).set("PNG_IMAGE", ImageType.PNG);
+		((ProcessEngineImpl) processEngine).set("TIFF_IMAGE", ImageType.TIFF);
 		return processEngine;
 	}
 
 	/**
-	 * Provides the {@link ExecutionService}. Qualifier name is
-	 * 'jbpmExecutionService'.
+	 * Provides the {@link ExecutionService}. Qualifier name is 'jbpmExecutionService'.
 	 * 
 	 * @return {@link ExecutionService}
 	 */
 	@Bean(name = "jbpmExecutionService")
 	public ExecutionService executionService() {
-		return (ExecutionService) processEngine()
-				.execute(new EnvironmentObjectGetCmd(ExecutionService.class));
+		return (ExecutionService) processEngine().execute(new EnvironmentObjectGetCmd(ExecutionService.class));
 	}
 
 	/**
-	 * Provides the {@link HistoryService}. Qualifier name is
-	 * 'jbpmHistoryService'.
+	 * Provides the {@link HistoryService}. Qualifier name is 'jbpmHistoryService'.
 	 * 
 	 * @return {@link HistoryService}
 	 */
 	@Bean
 	@Qualifier("jbpmHistoryService")
 	public HistoryService historyService() {
-		return (HistoryService) processEngine().execute(new EnvironmentObjectGetCmd(
-				HistoryService.class));
+		return (HistoryService) processEngine().execute(new EnvironmentObjectGetCmd(HistoryService.class));
 	}
 
 	/**
-	 * Provides the {@link IdentityService}. Qualifier name is
-	 * 'jbpmIdentityService'.
+	 * Provides the {@link IdentityService}. Qualifier name is 'jbpmIdentityService'.
 	 * 
 	 * @return {@link IdentityService}
 	 */
 	@Bean
 	@Qualifier("jbpmIdentityService")
 	public IdentityService identityService() {
-		return (IdentityService) processEngine()
-				.execute(new EnvironmentObjectGetCmd(IdentityService.class));
+		return (IdentityService) processEngine().execute(new EnvironmentObjectGetCmd(IdentityService.class));
 	}
 
 	/**
-	 * Provides the {@link ManagementService}. Qualifier name is
-	 * 'jbpmManagementService'.
+	 * Provides the {@link ManagementService}. Qualifier name is 'jbpmManagementService'.
 	 * 
 	 * @return {@link ManagementService}
 	 */
 	@Bean
 	@Qualifier("jbpmManagementService")
 	public ManagementService managementService() {
-		return (ManagementService) processEngine()
-				.execute(new EnvironmentObjectGetCmd(ManagementService.class));
+		return (ManagementService) processEngine().execute(new EnvironmentObjectGetCmd(ManagementService.class));
 	}
 
 	/**
-	 * Provides the {@link RepositoryService}. Qualifier name is
-	 * 'jbpmRepositoryService'.
+	 * Provides the {@link RepositoryService}. Qualifier name is 'jbpmRepositoryService'.
 	 * 
 	 * @return {@link RepositoryService}
 	 */
 	@Bean
 	@Qualifier("jbpmRepositoryService")
 	public RepositoryService repositoryService() {
-		return (RepositoryService) processEngine()
-				.execute(new EnvironmentObjectGetCmd(RepositoryService.class));
+		return (RepositoryService) processEngine().execute(new EnvironmentObjectGetCmd(RepositoryService.class));
 	}
 
 	/**
@@ -160,8 +174,7 @@ public class JbpmAutoSpringConfiguration {
 	@Bean
 	@Qualifier("jbpmTaskService")
 	public TaskService taskService() {
-		return (TaskService) processEngine().execute(new EnvironmentObjectGetCmd(
-				TaskService.class));
+		return (TaskService) processEngine().execute(new EnvironmentObjectGetCmd(TaskService.class));
 	}
 
 }

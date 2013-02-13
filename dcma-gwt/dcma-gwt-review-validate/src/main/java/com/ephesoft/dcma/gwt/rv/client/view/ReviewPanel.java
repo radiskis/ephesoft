@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -87,37 +87,47 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
+/**
+ * The <code>ReviewPanel</code> class provides functionality to show review panel view shown to user.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.rv.client.view
+ * 
+ */
 public class ReviewPanel extends RVBasePanel {
 
 	@UiField
-	ListBox documentList;
+	protected ListBox documentList;
 	@UiField
-	Label docTypeText;
+	protected Label docTypeText;
 	@UiField
-	Label mergeDocText;
+	protected Label mergeDocText;
 	@UiField
-	VerticalPanel documentTypePanel;
+	protected VerticalPanel documentTypePanel;
 
 	private SuggestionBox documentTypeSuggestBox;
 
-	private ListBox documentTypes;
+	protected ListBox documentTypes;
 
-	ValidatableWidget<SuggestBox> validatableSuggestBox;
+	protected ValidatableWidget<SuggestBox> validatableSuggestBox;
 
-	private Map<Integer, Document> indexedDocumentMap = new LinkedHashMap<Integer, Document>();
+	private final Map<Integer, Document> indexedDocumentMap = new LinkedHashMap<Integer, Document>();
 
 	private static final String LIST_VIEW = "dropdown_list";
 
 	private static final String SUGGEST_BOX_VIEW = "suggest_box";
+
+	private static final String EMPTY_STRING = "";
 
 	private String currentDocTypeView = null;
 
 	interface Binder extends UiBinder<VerticalPanel, ReviewPanel> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
-	boolean keyPressed = true;
-	boolean keyPressedForDocList = true;
+	private static final Binder BINDER = GWT.create(Binder.class);
+	private boolean keyPressed = true;
+	private boolean keyPressedForDocList = true;
 
 	private void fireDocTypeChangeEvent() {
 		ScreenMaskUtility.maskScreen();
@@ -127,11 +137,12 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	public ReviewPanel() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		documentList.addStyleName(ReviewValidateConstants.DROPBOX_STYLE);
 
-		docTypeText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_reviewPanel_docType));
-		mergeDocText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_reviewPanel_mergeDocWith));
+		docTypeText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_REVIEWPANEL_DOCTYPE));
+		mergeDocText.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_REVIEWPANEL_MERGEDOCWITH));
 		docTypeText.addStyleName("bold_text");
 		mergeDocText.addStyleName("bold_text");
 		documentTypes = new ListBox();
@@ -160,11 +171,9 @@ public class ReviewPanel extends RVBasePanel {
 			@Override
 			public void onKeyDown(KeyDownEvent arg0) {
 				keyPressed = true;
-				switch (arg0.getNativeKeyCode()) {
-					case KeyCodes.KEY_ENTER:
-						arg0.preventDefault();
-						fireDocTypeChangeEvent();
-						break;
+				if (arg0.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+					arg0.preventDefault();
+					fireDocTypeChangeEvent();
 				}
 
 			}
@@ -193,29 +202,26 @@ public class ReviewPanel extends RVBasePanel {
 			@Override
 			public void onKeyDown(KeyDownEvent arg0) {
 				keyPressedForDocList = true;
-				switch (arg0.getNativeKeyCode()) {
-					case KeyCodes.KEY_ENTER:
-						arg0.preventDefault();
-						fireDocListChangeEvent();
-						break;
+				if (arg0.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+					arg0.preventDefault();
+					fireDocListChangeEvent();
 				}
-
 			}
 		});
 
 	}
 
 	private void fireDocListChangeEvent() {
-		if (documentList.getSelectedIndex() == 0)
-			return;
-		final Document selectedDoc = indexedDocumentMap.get(documentList.getSelectedIndex());
-		mergeDocument(selectedDoc);
-		keyPressedForDocList = false;
+		if (documentList.getSelectedIndex() != 0) {
+			final Document selectedDoc = indexedDocumentMap.get(documentList.getSelectedIndex());
+			mergeDocument(selectedDoc);
+			keyPressedForDocList = false;
+		}
 	}
 
 	@Override
 	public void initializeWidget() {
-
+		// no need to do anything while initializing widget
 	}
 
 	public void clearPanel() {
@@ -226,13 +232,97 @@ public class ReviewPanel extends RVBasePanel {
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		eventBus.addHandler(DocExpandEvent.TYPE, new DocExpandEventHandler() {
+		addDocExpandEventHandler(eventBus);
+
+		addTreeRefreshEventHandler(eventBus);
+
+		addRVKeyUpEventHandler(eventBus);
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addRVKeyUpEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(RVKeyUpEvent.type, new RVKeyUpEventHandler() {
+
+			@Override
+			public void onKeyUp(RVKeyUpEvent event) {
+				if (event.getEvent().isControlKeyDown()) {
+					switch (event.getEvent().getNativeKeyCode()) {
+						// CTRL + ;
+						case 59:
+						case 186:
+							if (!presenter.isTableView()) {
+								event.getEvent().getNativeEvent().preventDefault();
+								setFocus();
+							}
+							break;
+						// CTRL + /
+						case 191:
+							if (!presenter.isTableView()) {
+								getAndMergeDocumentListInBatch(event);
+							}
+							break;
+						case '0':
+							if (!presenter.isTableView()) {
+								toggleView();
+								presenter.getView().getRvPanel().getValidatePanel().resetFocusToDocumentField(
+										presenter.getCurrentDocumentFieldName());
+							}
+							break;
+						default:
+							break;
+					}
+				}
+			}
+
+			private void getAndMergeDocumentListInBatch(RVKeyUpEvent event) {
+				event.getEvent().getNativeEvent().preventDefault();
+				List<Document> documentListInBatch = presenter.batchDTO.getBatch().getDocuments().getDocument();
+				for (int index = 0; index < documentListInBatch.size(); index++) {
+					if (documentListInBatch.get(index).getIdentifier().equals(presenter.document.getIdentifier())
+							&& index > 0) {
+						mergeDocument(documentListInBatch.get(index - 1));
+						break;
+					}
+				}
+			}
+
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addTreeRefreshEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(TreeRefreshEvent.type, new TreeRefreshEventHandler() {
+
+			@Override
+			public void refresh(TreeRefreshEvent treeRefreshEvent) {
+				// If any of the following entities is null... this means there is no page or document left in the batch.
+				// Set the validate panel visibility to false.
+				Batch batch = presenter.batchDTO.getBatch();
+				if (batch == null || batch.getDocuments() == null || batch.getDocuments().getDocument() == null
+						|| batch.getDocuments().getDocument().size() < 1) {
+					documentTypes.clear();
+					documentList.setEnabled(Boolean.FALSE);
+					documentTypes.setEnabled(Boolean.FALSE);
+					return;
+				}
+				setFocus();
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addDocExpandEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(DocExpandEvent.type, new DocExpandEventHandler() {
 
 			@Override
 			public void onExpand(DocExpandEvent event) {
 				presenter.document = event.getDocument();
-
-				presenter.getView().getRvPanel().getReviewDisclosurePanel().setOpen(true);
 
 				presenter.rpcService.getDocTypeByBatchInstanceID(presenter.batchDTO.getBatch().getBatchInstanceIdentifier(),
 						new AsyncCallback<List<DocumentTypeDBBean>>() {
@@ -252,7 +342,7 @@ public class ReviewPanel extends RVBasePanel {
 								for (DocumentTypeDBBean bean : documentTypesList) {
 									if (bean.getName().equalsIgnoreCase("Unknown")) {
 										documentTypes.addItem(LocaleDictionary.get().getConstantValue(
-												ReviewValidateConstants.document_type_unknown), bean.getName());
+												ReviewValidateConstants.DOCUMENT_TYPE_UNKNOWN), bean.getName());
 										indexUnknown = index;
 									} else {
 										documentTypes.addItem(bean.getDescription(), bean.getName());
@@ -270,7 +360,7 @@ public class ReviewPanel extends RVBasePanel {
 									actualValue = "Unknown";
 								}
 								documentTypes.setVisible(true);
-								if(documentTypeSuggestBox!=null) {
+								if (documentTypeSuggestBox != null) {
 									documentTypeSuggestBox.hideSuggestionList();
 
 								}
@@ -280,48 +370,27 @@ public class ReviewPanel extends RVBasePanel {
 								documentTypeSuggestBox.addStyleName(ReviewValidateConstants.INPUTBOX_STYLE);
 
 								setHandlerForSuggestBox(documentTypeSuggestBox);
-								actualValue = null == actualValue ? "" : actualValue;
+								if (actualValue == null) {
+									actualValue = EMPTY_STRING;
+								}
 								oracle.add(actualValue);
 								for (int i = 0; i < documentTypes.getItemCount(); i++) {
 									oracle.add(documentTypes.getItemText(i));
 								}
 								documentTypeSuggestBox.setValue(actualValue, true);
-								if (currentDocTypeView == null) {
-									presenter.rpcService.getDefaultDocTypeView(new AsyncCallback<String>() {
+								setDocTypeView();
+								ReviewPanel.this.fireEvent(new ThumbnailSelectionEvent(presenter.page));
 
-										@Override
-										public void onFailure(Throwable paramThrowable) {
-											ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-													ReviewValidateMessages.DEFAULT_DOC_TYPE_VIEW_FAILURE)
-													+ paramThrowable.getMessage());
-											enableListBox();
-										}
-
-										@Override
-										public void onSuccess(String docType) {
-											if (docType.equalsIgnoreCase(SUGGEST_BOX_VIEW)) {
-												enableSuggestBox();
-											} else {
-												enableListBox();
-											}
-										}
-									});
-								} else {
-									setDocumentView();
-								}
-								if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
-									ReviewPanel.this.fireEvent(new ThumbnailSelectionEvent(presenter.page));
-								}
 							}
 
 							@Override
 							public void onFailure(Throwable arg0) {
-
+								// do nothing if unable to get document type by batch instance id
 							}
 						});
 
 				documentList.clear();
-				documentList.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_select_doc));
+				documentList.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_SELECT_DOC));
 				documentList.setEnabled(Boolean.TRUE);
 
 				indexedDocumentMap.clear();
@@ -342,70 +411,13 @@ public class ReviewPanel extends RVBasePanel {
 				setFocus();
 			}
 		});
-
-		eventBus.addHandler(TreeRefreshEvent.TYPE, new TreeRefreshEventHandler() {
-
-			@Override
-			public void refresh(TreeRefreshEvent treeRefreshEvent) {
-				// If any of the following entities is null... this means there is no page or document left in the batch.
-				// Set the validate panel visibility to false.
-				Batch batch = presenter.batchDTO.getBatch();
-				if (batch == null || batch.getDocuments() == null || batch.getDocuments().getDocument() == null
-						|| batch.getDocuments().getDocument().size() < 1) {
-					documentTypes.clear();
-					documentList.setEnabled(Boolean.FALSE);
-					documentTypes.setEnabled(Boolean.FALSE);
-					return;
-				}
-				setFocus();
-			}
-		});
-
-		eventBus.addHandler(RVKeyUpEvent.TYPE, new RVKeyUpEventHandler() {
-
-			@Override
-			public void onKeyUp(RVKeyUpEvent event) {
-				if (event.getEvent().isControlKeyDown()) {
-					switch (event.getEvent().getNativeKeyCode()) {
-						// CTRL + ;
-						case 59:
-						case 186:
-							if (!presenter.isTableView()) {
-								event.getEvent().getNativeEvent().preventDefault();
-								setFocus();
-							}
-							break;
-						// CTRL + /
-						case 191:
-							if (!presenter.isTableView()) {
-								event.getEvent().getNativeEvent().preventDefault();
-								List<Document> documentListInBatch = presenter.batchDTO.getBatch().getDocuments().getDocument();
-								for (int index = 0; index < documentListInBatch.size(); index++) {
-									if (documentListInBatch.get(index).getIdentifier().equals(presenter.document.getIdentifier())
-											&& index > 0) {
-										mergeDocument(documentListInBatch.get(index - 1));
-										break;
-									}
-								}
-							}
-							break;
-						case '0':
-							if (!presenter.isTableView()) {
-								toggleView();
-							}
-							break;
-					}
-				}
-			}
-
-		});
 	}
 
 	private void mergeDocument(final Document selectedDoc) {
 		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
-				.getMessageValue(ReviewValidateMessages.msg_tree_merge_doc, presenter.document.getIdentifier(),
+				.getMessageValue(ReviewValidateMessages.MSG_TREE_MERGE_DOC, presenter.document.getIdentifier(),
 						selectedDoc.getIdentifier()), LocaleDictionary.get().getConstantValue(
-				ReviewValidateConstants.title_merge_confirm), Boolean.FALSE);
+				ReviewValidateConstants.TITLE_MERGE_CONFIRM), Boolean.FALSE);
 
 		confirmationDialog.addDialogListener(new DialogListener() {
 
@@ -424,24 +436,25 @@ public class ReviewPanel extends RVBasePanel {
 				presenter.setFocus();
 			}
 		});
-		
+
 	}
 
 	class DocumentTypesComparator implements Comparator<DocumentTypeDBBean> {
 
 		@Override
-		public int compare(DocumentTypeDBBean o1, DocumentTypeDBBean o2) {
-			if (o1 instanceof DocumentTypeDBBean && o2 instanceof DocumentTypeDBBean) {
-				String name1 = ((DocumentTypeDBBean) o1).getDescription();
-				String name2 = ((DocumentTypeDBBean) o2).getDescription();
-				return name1.compareTo(name2);
+		public int compare(DocumentTypeDBBean firstObject, DocumentTypeDBBean secondObject) {
+			int comparisonValue = 0;
+			if (firstObject instanceof DocumentTypeDBBean && secondObject instanceof DocumentTypeDBBean) {
+				String name1 = ((DocumentTypeDBBean) firstObject).getDescription();
+				String name2 = ((DocumentTypeDBBean) secondObject).getDescription();
+				comparisonValue = name1.compareTo(name2);
 			}
-			return 0;
+			return comparisonValue;
 		}
 
 	}
 
-	public void setFocus() {
+	public final void setFocus() {
 		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
 			if (documentTypes.isVisible()) {
 				documentTypes.setFocus(true);
@@ -454,9 +467,9 @@ public class ReviewPanel extends RVBasePanel {
 	private void setFocus(boolean isSuggestBox) {
 		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
 			if (isSuggestBox) {
-                 documentTypeSuggestBox.setFocus(true);
+				documentTypeSuggestBox.setFocus(true);
 			} else {
-                  documentTypes.setFocus(true);
+				documentTypes.setFocus(true);
 			}
 		}
 	}
@@ -469,7 +482,7 @@ public class ReviewPanel extends RVBasePanel {
 		documentTypes.setVisible(false);
 		currentDocTypeView = SUGGEST_BOX_VIEW;
 		documentTypeSuggestBox.getTextBox().selectAll();
-		setFocus(true);		
+		setFocus(true);
 	}
 
 	private void enableListBox() {
@@ -502,14 +515,16 @@ public class ReviewPanel extends RVBasePanel {
 					@Override
 					public void onSuccess(Document documentType) {
 
-						if (docType.equals(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.document_type_unknown))) {
+						if (docType.equals(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.DOCUMENT_TYPE_UNKNOWN))) {
 							documentType.setReviewed(false);
 							documentType.setType("Unknown");
 						} else {
 							documentType.setType(docType);
 						}
+						documentType.setDocumentTypeChanged(true);
 						documentType.setIdentifier(presenter.document.getIdentifier());
 						documentType.setPages(presenter.document.getPages());
+						documentType.setDocumentDisplayInfo(EMPTY_STRING);
 						List<Document> listDocumentTypes = presenter.batchDTO.getBatch().getDocuments().getDocument();
 						int index = 0;
 						for (Document documentType2 : listDocumentTypes) {
@@ -562,10 +577,11 @@ public class ReviewPanel extends RVBasePanel {
 	}
 
 	public boolean isSuggestBoxValid() {
+		boolean isValidated = true;
 		if (documentTypeSuggestBox.isVisible()) {
-			return validatableSuggestBox.validate();
+			isValidated = validatableSuggestBox.validate();
 		}
-		return true;
+		return isValidated;
 	}
 
 	private void setDocumentView() {
@@ -573,6 +589,35 @@ public class ReviewPanel extends RVBasePanel {
 			enableListBox();
 		} else {
 			enableSuggestBox();
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private void setDocTypeView() {
+		if (currentDocTypeView == null) {
+			presenter.rpcService.getDefaultDocTypeView(new AsyncCallback<String>() {
+
+				@Override
+				public void onFailure(Throwable paramThrowable) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							ReviewValidateMessages.DEFAULT_DOC_TYPE_VIEW_FAILURE)
+							+ paramThrowable.getMessage());
+					enableListBox();
+				}
+
+				@Override
+				public void onSuccess(String docType) {
+					if (docType.equalsIgnoreCase(SUGGEST_BOX_VIEW)) {
+						enableSuggestBox();
+					} else {
+						enableListBox();
+					}
+				}
+			});
+		} else {
+			setDocumentView();
 		}
 	}
 }

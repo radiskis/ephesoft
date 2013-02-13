@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -154,12 +154,12 @@ public class SearchClassificationServiceTest extends AbstractSearchClassificatio
 		boolean result = false;
 		Properties prop = new Properties();
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
-		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		batchInstanceIdSuccess1 = "BI7C";
 		batchInstanceIdSuccess2 = "BI7B";
 		batchClassId1 = "BC1";
 		batchClassId2 = "BC2";
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassId1);
+		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		try {
 			prop.load(SearchClassificationServiceTest.class.getClassLoader().getResourceAsStream(PROP_FILE_LUCENE_TEST));
 		} catch (IOException e) {

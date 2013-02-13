@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -148,11 +148,11 @@ public interface ImageProcessService {
 	/**
 	 * Method used for web services.
 	 * 
-	 * @param inputParams
-	 * @param imagePath
-	 * @param outputParams
-	 * @param outputFilePath
-	 * @param thread
+	 * @param inputParams {@link String}
+	 * @param imagePath {@link File}
+	 * @param outputParams {@link String}
+	 * @param outputFilePath {@link File}
+	 * @param thread {@link BatchInstanceThread}
 	 * @throws DCMAException
 	 */
 	void convertPdfOrMultiPageTiffToTiffUsingIM(String inputParams, File imagePath, String outputParams, File outputFilePath,
@@ -174,28 +174,12 @@ public interface ImageProcessService {
 			Boolean isTestAdvancedKV, BatchInstanceThread batchInstanceThread) throws DCMAException;
 
 	/**
-	 * Method to generate the PNG for a tiff file at the same location as input file
+	 * Method to generate the PNG for a tiff file at the same location as input file.
 	 * 
 	 * @param imagePath {@link File}
 	 * @throws DCMAException
 	 */
 	void generatePNGForImage(final File imagePath) throws DCMAException;
-
-	/**
-	 * This method converts a given single page tiff to tiff. Also depending upon the parameter allowPdfConversion it can convert a
-	 * single page pdf to single page tiff too. The output files will be generated in the same folder. Conversion is done by
-	 * imagemagick.
-	 * 
-	 * @param batchClassID {@link BatchClassID}
-	 * @param imagePath {@link File}
-	 * @param batchInstanceThread {@link BatchInstanceThread}
-	 * @param allowPdfConversion {@link Boolean}
-	 * @throws DCMAException
-	 */
-	/*
-	 * void convertPdfOrSinglePageTiffToTiff(BatchClassID batchClassID, File imagePath, BatchInstanceThread batchInstanceThread,
-	 * Boolean allowPdfConversion) throws DCMAException;
-	 */
 
 	/**
 	 * This method converts a given pdf into tiff. The output files will be generated in the same folder.
@@ -205,18 +189,17 @@ public interface ImageProcessService {
 	 * @param threadList {@link BatchInstanceThread}
 	 * @throws DCMAException
 	 */
-
 	void convertPdfToSinglePageTiffs(BatchClass batchClass, File imagePath, BatchInstanceThread threadList) throws DCMAException;
 
 	/**
 	 * This method converts a given pdf into tiff. The output files will be generated in the output folder specified. Called from Web
 	 * Service API.
 	 * 
-	 * @param inputParams
-	 * @param imagePath
-	 * @param outputParams
-	 * @param outputFilePath
-	 * @param thread
+	 * @param inputParams {@link String}
+	 * @param imagePath {@link File}
+	 * @param outputParams {@link String}
+	 * @param outputFilePath {@link File}
+	 * @param thread {@link BatchInstanceThread}
 	 * @throws DCMAException
 	 */
 	void convertPdfToSinglePageTiffsUsingGSAPI(String inputParams, File imagePath, String outputParams, File outputFilePath,
@@ -239,58 +222,56 @@ public interface ImageProcessService {
 	/**
 	 * Method to create thumbnails for web service Image Classification API.
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param folderPath
-	 * @param sListOfTiffFiles
-	 * @param outputImageParameters
-	 * @param compareThumbnailH
-	 * @param compareThumbnailW
-	 * @return
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param folderPath {@link String}
+	 * @param sListOfTiffFiles {@link String [][]}
+	 * @param outputImageParameters {@link String}
+	 * @param compareThumbnailH {@link String}
+	 * @param compareThumbnailW {@link String}
+	 * @return {@link BatchInstanceThread}
 	 * @throws DCMAException
 	 */
 	BatchInstanceThread createCompThumbForImage(String batchInstanceIdentifier, String folderPath, String[][] sListOfTiffFiles,
 			String outputImageParameters, String compareThumbnailH, String compareThumbnailW) throws DCMAException;
 
 	/**
-	 * Method to perform image classification of PP module for web services
-	 * 
-	 * @param maxVal
-	 * @param imMetric
-	 * @param imFuzz
-	 * @param batchInstanceIdentifier
-	 * @param batchClassIdentifier
-	 * @param sBatchFolder
-	 * @param listOfPages
+	 * Method to perform image classification of PP module for web services.
+	 * @param maxVal {@link String}
+	 * @param imMetric {@link String}
+	 * @param imFuzz {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param batchClassIdentifier {@link String}
+	 * @param sBatchFolder {@link String}
+	 * @param listOfPages {@link List<Page>}
 	 * @throws DCMAException
 	 */
 	void classifyImagesAPI(String maxVal, String imMetric, String imFuzz, String batchInstanceIdentifier, String batchClassIdentifier,
 			String sBatchFolder, List<Page> listOfPages) throws DCMAException;
-	
+
 	/**
 	 * API for creating pdf from single tif file.
 	 * 
-	 * @param pdfGeneratorEngine {@link String} pdfGeneration engine values can be ITEXT and IMAGE_MAGICK
-	 * @param files {@link String[]} array of file size of 2 having input file absoulte path and output file absolute path. 
+	 * @param pdfGeneratorEngine {@link String}
+	 * @param files {@link String[]}
 	 * @param pdfBatchInstanceThread {@link BatchInstanceThread}
-	 * @param inputParams {@link String} this parameter will used in case of IMAGE_MAGICK used as pdf generator engine
-	 * @param outputParams {@link String} this parameter will used in case of IMAGE_MAGICK used as pdf generator engine
+	 * @param inputParams {@link String}
+	 * @param outputParams {@link String}
 	 * @throws DCMAException if exception or error occur
 	 */
-	public void createTifToPDF(String pdfGeneratorEngine, String[] files, BatchInstanceThread pdfBatchInstanceThread,
-			String inputParams, String outputParams) throws DCMAException;
+	void createTifToPDF(String pdfGeneratorEngine, String[] files, BatchInstanceThread pdfBatchInstanceThread, String inputParams,
+			String outputParams) throws DCMAException;
 
 	/**
 	 * API for create multipage files web service.
-	 * 
-	 * @param ghostscriptPdfParameters
-	 * @param pdfOptimizationParams
-	 * @param multipageTifSwitch
-	 * @param toolName
-	 * @param pdfOptimizationSwitch
-	 * @param workingDir
-	 * @param outputDir
-	 * @param singlePageFiles
-	 * @param batchInstanceIdentifier
+	 * @param ghostscriptPdfParameters {@link String}
+	 * @param pdfOptimizationParams {@link String}
+	 * @param multipageTifSwitch {@link String}
+	 * @param toolName {@link String}
+	 * @param pdfOptimizationSwitch {@link String}
+	 * @param workingDir {@link String}
+	 * @param outputDir {@link String}
+	 * @param singlePageFiles {@link List<File>}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @throws DCMAException
 	 */
 	void createMultiPageFilesAPI(String ghostscriptPdfParameters, String pdfOptimizationParams, String multipageTifSwitch,

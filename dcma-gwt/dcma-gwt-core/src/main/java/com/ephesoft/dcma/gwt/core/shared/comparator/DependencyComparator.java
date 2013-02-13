@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,9 +47,9 @@ import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
  */
 public class DependencyComparator implements Comparator<Object> {
 
-	private final Order order;
-	String DEPENDENCY_NAME = "dependencyName";
-	String DEPENDENCY_TYPE = "dependencyType";
+	private final Order order;/*
+	private static final String DEPENDENCY_NAME = "dependencyName";
+	private static final String DEPENDENCY_TYPE = "dependencyType";*/
 
 	public DependencyComparator(final Order order) {
 
@@ -95,9 +95,7 @@ public class DependencyComparator implements Comparator<Object> {
 		} else {
 			if (domainProperty.getProperty().equals(DependencyProperty.DEPENDENCY_TYPE.getProperty())) {
 				property = dependencyDTO.getDependencyType();
-			} else {
-				property = null;
-			}
+			} 
 		}
 		return property;
 	}

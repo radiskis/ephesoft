@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -69,10 +69,18 @@ package org.artofsolving.jodconverter.office;
  * in the OpenOffice.org Developer's Guide for more details.
  * 
  * @author Ephesoft
+ * @version 1.0
  */
-class UnoUrl {
+final class UnoUrl {
 
+	/**
+	 * acceptString String.
+	 */
 	private final String acceptString;
+	
+	/**
+	 * connectString String.
+	 */
 	private final String connectString;
 
 	private UnoUrl(String acceptString, String connectString) {
@@ -80,11 +88,22 @@ class UnoUrl {
 		this.connectString = connectString;
 	}
 
+	/**
+	 * Socket method.
+	 * @param port int
+	 * @return UnoUrl
+	 */
 	public static UnoUrl socket(int port) {
 		String socketString = "socket,host=127.0.0.1,port=" + port;
 		return new UnoUrl(socketString, socketString + ",tcpNoDelay=1");
 	}
 
+	/**
+	 * Socket method.
+	 * @param port int
+	 * @param host String
+	 * @return UnoUrl
+	 */
 	public static UnoUrl socket(String host, int port) {
 		if (host == null) {
 			socket(port);
@@ -93,19 +112,36 @@ class UnoUrl {
 		return new UnoUrl(socketString, socketString + ";urp;StarOffice.ServiceManager");
 	}
 
+	/**
+	 * Pipe method.
+	 * @param pipeName
+	 * @return
+	 */
 	public static UnoUrl pipe(String pipeName) {
 		String pipeString = "pipe,name=" + pipeName;
 		return new UnoUrl(pipeString, pipeString);
 	}
 
+	/**
+	 * To accept string.
+	 * @return String
+	 */
 	public String getAcceptString() {
 		return acceptString;
 	}
 
+	/**
+	 * To get connection string.
+	 * @return String
+	 */
 	public String getConnectString() {
 		return connectString;
 	}
 
+	/**
+	 * To convert to String.
+	 * @return String
+	 */
 	@Override
 	public String toString() {
 		return connectString;

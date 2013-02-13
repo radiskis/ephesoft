@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,6 +51,7 @@ import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
 import com.ephesoft.dcma.util.FileUtils;
 
@@ -138,6 +139,12 @@ public class ImagemagickTest extends AbstractImageMagickTests {
 	private String samplesFolder;
 
 	/**
+	 * An instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
 	 * This method prepares and initializes all the resources that would be required by the plugin.
 	 * 
 	 * @throws IOException
@@ -154,7 +161,8 @@ public class ImagemagickTest extends AbstractImageMagickTests {
 		} catch (IOException e) {
 			assertTrue(e.getMessage(), result);
 		}
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdMultiPage);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		actualOutputFolder = testFolderLocation + File.separator + prop.getProperty(ACTUAL_OUTPUT_FOLDER);
 		expectedOutputFolder = testFolderLocation + File.separator + prop.getProperty(EXPECTED_OUTPUT_FOLDER);
@@ -174,7 +182,8 @@ public class ImagemagickTest extends AbstractImageMagickTests {
 			imageProcessService.createOcrInputImages(new BatchInstanceID(batchInstanceIdPngThumbnail), null, null);
 			imageProcessService.createThumbnails(new BatchInstanceID(batchInstanceIdPngThumbnail), null);
 			imageProcessService.createDisplayImages(new BatchInstanceID(batchInstanceIdPngThumbnail), null);
-			compareXMLs(batchSchemaService.getLocalFolderLocation(), expectedOutputFolder, batchInstanceIdPngThumbnail);
+			compareXMLs(batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdMultiPage), expectedOutputFolder,
+					batchInstanceIdPngThumbnail);
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdPngThumbnail);
 			Document document = batch.getDocuments().getDocument().get(0);
 			List<Page> listOfPages = document.getPages().getPage();

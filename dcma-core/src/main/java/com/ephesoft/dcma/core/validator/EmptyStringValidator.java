@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,18 +35,40 @@
 
 package com.ephesoft.dcma.core.validator;
 
+/**
+ * This class validates whether string is empty or not.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class EmptyStringValidator implements Validator {
 
+	/**
+	 * value String.
+	 */
 	private String value;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param value String
+	 */
 	public EmptyStringValidator(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * To set value.
+	 * @param value String
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * Validate method.
+	 * @return boolean
+	 */
 	@Override
 	public boolean validate() {
 		boolean isValid = true;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,45 +50,93 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ModuleListView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.OrderingListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.comparator.ModuleComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class ModuleListPresenter extends AbstractBatchClassPresenter<ModuleListView> implements PaginationListner, DoubleClickListner {
+/**
+ * The presenter for view that shows the module list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
+public class ModuleListPresenter extends AbstractBatchClassPresenter<ModuleListView> implements PaginationListner, DoubleClickListner,
+		OrderingListner {
 
-	private Collection<BatchClassModuleDTO> ModuleDTOList;
+	/**
+	 * moduleDTOList Collection<BatchClassModuleDTO>.
+	 */
+	private Collection<BatchClassModuleDTO> moduleDTOList;
 
+	/**
+	 * To get Module DTO List.
+	 * 
+	 * @return Collection<BatchClassModuleDTO>
+	 */
 	public Collection<BatchClassModuleDTO> getModuleDTOList() {
-		return ModuleDTOList;
+		return moduleDTOList;
 	}
 
+	/**
+	 * To set Module DTO List.
+	 * 
+	 * @param moduleDTOList Collection<BatchClassModuleDTO>
+	 */
 	public void setModuleDTOList(Collection<BatchClassModuleDTO> moduleDTOList) {
-		ModuleDTOList = moduleDTOList;
+		this.moduleDTOList = moduleDTOList;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view ModuleListView
+	 */
 	public ModuleListPresenter(BatchClassManagementController controller, ModuleListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 
 	}
 
+	/**
+	 * To perform operations in case of pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param order Order
+	 */
 	@Override
 	public void onPagination(int startIndex, int maxResult, Order order) {
+		doPagination(startIndex, maxResult, order);
+	}
+
+	private void doPagination(int startIndex, int maxResult, Order paramOrder) {
+		Order order = paramOrder;
 		if (order == null) {
 			order = new Order(ModuleProperty.ORDER, true);
 		}
 		ModuleComparator comparator = new ModuleComparator(order);
-		List<BatchClassModuleDTO> newModuleDTOList = new ArrayList<BatchClassModuleDTO>(ModuleDTOList);
+		List<BatchClassModuleDTO> newModuleDTOList = new ArrayList<BatchClassModuleDTO>(moduleDTOList);
 		Collections.sort(newModuleDTOList, comparator);
 		List<Record> moduleRecordList = getController().getMainPresenter().getView().getBatchClassView().setModuleList(
 				newModuleDTOList);
@@ -96,13 +144,21 @@ public class ModuleListPresenter extends AbstractBatchClassPresenter<ModuleListV
 		int lastIndex = startIndex + maxResult;
 		int count = Math.min(totalSize, lastIndex);
 		this.getView().getModuleListView().updateRecords(moduleRecordList.subList(startIndex, count), startIndex, totalSize);
+		moduleDTOList.clear();
+		moduleDTOList.addAll(newModuleDTOList);
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getModuleListView().getSelectedRowIndex();
 		if (identifier == null || identifier.isEmpty()) {
@@ -115,4 +171,75 @@ public class ModuleListPresenter extends AbstractBatchClassPresenter<ModuleListV
 			controller.getMainPresenter().showModuleView(batchClassModuleDTO);
 		}
 	}
+
+	/**
+	 * To perform operation on ordering.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param selectedRowId String
+	 * @param swapIndex int
+	 * @param selectedRecordIndex int
+	 */
+	@Override
+	public void onOrdering(final int startIndex, final int maxResult, final String selectedRowId, final int swapIndex,
+			final int selectedRecordIndex) {
+		List<BatchClassModuleDTO> newModuleDTOList = new ArrayList<BatchClassModuleDTO>(moduleDTOList);
+		int selectedIndex = getIndexForIdentifierFromModulesList(newModuleDTOList, selectedRowId);
+		int swappedIndex = selectedIndex + swapIndex;
+		int selRecordIndexLocal = selectedRecordIndex + swapIndex;
+		if ((selectedIndex > 0 && selectedIndex < newModuleDTOList.size() - 1)
+				|| (swappedIndex > 0 && swappedIndex < newModuleDTOList.size() - 1)) {
+			selRecordIndexLocal = selRecordIndexLocal < 0 ? maxResult - 1 : selRecordIndexLocal > maxResult - 1 ? 0
+					: selRecordIndexLocal;
+			swapBatchClassModules(newModuleDTOList, selectedIndex, swappedIndex);
+			updateModuleList(startIndex, maxResult, newModuleDTOList, selRecordIndexLocal);
+			moduleDTOList.clear();
+			moduleDTOList.addAll(newModuleDTOList);
+		}
+	}
+
+	private void updateModuleList(final int startIndex, final int maxResult, final List<BatchClassModuleDTO> newModuleDTOList,
+			final int selRecordIndex) {
+		List<Record> moduleRecordList = getController().getMainPresenter().getView().getBatchClassView().setModuleList(
+				newModuleDTOList);
+		int totalSize = moduleRecordList.size();
+		int lastIndex = startIndex + maxResult;
+		int count = Math.min(totalSize, lastIndex);
+		this.getView().getModuleListView().updateRecords(moduleRecordList.subList(startIndex, count), startIndex, totalSize,
+				selRecordIndex);
+	}
+
+	/**
+	 * Method to swap the two modules in the list.
+	 * 
+	 * @param newModuleDTOList module list
+	 * @param selectedIndex index of the module to be swapped
+	 * @param swappedIndex index of the module to be swapped
+	 */
+	private void swapBatchClassModules(final List<BatchClassModuleDTO> newModuleDTOList, final int selectedIndex,
+			final int swappedIndex) {
+		BatchClassModuleDTO selectedBatchClassModuleDTO = newModuleDTOList.get(selectedIndex);
+		BatchClassModuleDTO swappedBatchClassModuleDTO = newModuleDTOList.get(swappedIndex);
+		// Swap order number of two fields.
+		int selOrderNumber = selectedBatchClassModuleDTO.getOrderNumber();
+		int swappedOrderNumber = swappedBatchClassModuleDTO.getOrderNumber();
+		swappedBatchClassModuleDTO.setOrderNumber(selOrderNumber);
+		selectedBatchClassModuleDTO.setOrderNumber(swappedOrderNumber);
+		// Swap the positions of two fields in the list to be displayed on UI.
+		Collections.swap(newModuleDTOList, selectedIndex, swappedIndex);
+		controller.getBatchClass().setDirty(true);
+	}
+
+	private int getIndexForIdentifierFromModulesList(List<BatchClassModuleDTO> newModuleDTOList, String selectedId) {
+		int index = -1;
+		for (BatchClassModuleDTO batchClassModuleDTO : newModuleDTOList) {
+			if (batchClassModuleDTO.getIdentifier().equals(selectedId)) {
+				index = newModuleDTOList.indexOf(batchClassModuleDTO);
+				break;
+			}
+		}
+		return index;
+	}
+
 }

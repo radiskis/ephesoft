@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,71 +51,224 @@ import org.hibernate.annotations.CascadeType;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for table_info.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "table_info")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class TableInfo extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * Serial version UID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * docType DocumentType.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "document_type_id")
 	private DocumentType docType;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "table_name")
 	private String name;
 
+	/**
+	 * startPattern String.
+	 */
 	@Column(name = "start_pattern")
 	private String startPattern;
 
+	/**
+	 * endPattern String.
+	 */
 	@Column(name = "end_pattern")
 	private String endPattern;
 
+	/**
+	 * tableExtractionAPI {@link String}.
+	 */
+	@Column(name = "table_extraction_api")
+	private String tableExtractionAPI;
+
+	/**
+	 * widthOfMultiline {@link Integer}.
+	 */
+	@Column(name = "width_of_multiline", columnDefinition = "int default 0")
+	private Integer widthOfMultiline;
+
+	/**
+	 * tableColumnsInfo List<TableColumnsInfo>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "table_info_id")
 	private List<TableColumnsInfo> tableColumnsInfo = new ArrayList<TableColumnsInfo>();
 
+	/**
+	 * displayImage String.
+	 */
+	@Column(name = "display_image")
+	private String displayImage;
+
+	/**
+	 * To get Display Image.
+	 * 
+	 * @return String
+	 */
+	public String getDisplayImage() {
+		return displayImage;
+	}
+
+	/**
+	 * To set Display Image.
+	 * 
+	 * @param displayImage String
+	 */
+	public void setDisplayImage(String displayImage) {
+		this.displayImage = displayImage;
+	}
+
+	/**
+	 * To get Table Extraction API.
+	 * 
+	 * @return String
+	 */
+	public String getTableExtractionAPI() {
+		return tableExtractionAPI;
+	}
+
+	/**
+	 * To set Table Extraction API.
+	 * 
+	 * @param tableExtractionAPI String
+	 */
+	public void setTableExtractionAPI(String tableExtractionAPI) {
+		this.tableExtractionAPI = tableExtractionAPI;
+	}
+
+	/**
+	 * To get Doc Type.
+	 * 
+	 * @return DocumentType
+	 */
 	public DocumentType getDocType() {
 		return docType;
 	}
 
+	/**
+	 * To set Doc Type.
+	 * 
+	 * @param docType DocumentType
+	 */
 	public void setDocType(DocumentType docType) {
 		this.docType = docType;
 	}
 
+	/**
+	 * To get name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To set Start Pattern.
+	 * 
+	 * @param startPattern String
+	 */
 	public void setStartPattern(String startPattern) {
 		this.startPattern = startPattern;
 	}
 
+	/**
+	 * To get Start Pattern.
+	 * 
+	 * @return String
+	 */
 	public String getStartPattern() {
 		return startPattern;
 	}
 
+	/**
+	 * To set End Pattern.
+	 * 
+	 * @param endPattern String
+	 */
 	public void setEndPattern(String endPattern) {
 		this.endPattern = endPattern;
 	}
 
+	/**
+	 * To get End Pattern.
+	 * 
+	 * @return String
+	 */
 	public String getEndPattern() {
 		return endPattern;
 	}
 
+	/**
+	 * To set Table Columns Info.
+	 * 
+	 * @param tableColumnsInfo List<TableColumnsInfo>
+	 */
 	public void setTableColumnsInfo(List<TableColumnsInfo> tableColumnsInfo) {
 		this.tableColumnsInfo = tableColumnsInfo;
 	}
 
+	/**
+	 * To get Table Columns Info.
+	 * 
+	 * @return List<TableColumnsInfo>
+	 */
 	public List<TableColumnsInfo> getTableColumnsInfo() {
 		return tableColumnsInfo;
 	}
 
+	/**
+	 * To get Width of multiline.
+	 * 
+	 * @return widthOfMultiline Integer
+	 */
+	public Integer getWidthOfMultiline() {
+		return widthOfMultiline;
+	}
+
+	/**
+	 * To set Width of multiline.
+	 * 
+	 * @param widthOfMultiline Integer
+	 */
+	public void setWidthOfMultiline(Integer widthOfMultiline) {
+		this.widthOfMultiline = widthOfMultiline;
+	}
+
+	/**
+	 * To remove Table Columns Info by Id.
+	 * 
+	 * @param identifier Long
+	 * @return boolean
+	 */
 	public boolean removeTableColumnsInfoById(Long identifier) {
 		boolean isRemoved = false;
 		if (null != this.tableColumnsInfo) {
@@ -134,6 +287,11 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 		return isRemoved;
 	}
 
+	/**
+	 * To add Table Columns Info.
+	 * 
+	 * @param tableColumnsInfo TableColumnsInfo
+	 */
 	public void addTableColumnsInfo(TableColumnsInfo tableColumnsInfo) {
 
 		if (null == tableColumnsInfo) {
@@ -143,6 +301,12 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 		this.tableColumnsInfo.add(tableColumnsInfo);
 	}
 
+	/**
+	 * To get Table Columns Info by Id of Column.
+	 * 
+	 * @param tableColumnInfoId Long
+	 * @return TableColumnsInfo
+	 */
 	public TableColumnsInfo getTableColumnsInfobyIdOfColumn(Long tableColumnInfoId) {
 		TableColumnsInfo tableColumnsInfo1 = null;
 		if (null != tableColumnInfoId && this.tableColumnsInfo != null && !this.tableColumnsInfo.isEmpty()) {
@@ -157,9 +321,9 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 	}
 
 	/**
-	 * Adds a Table Column Info to this table
+	 * Adds a Table Column Info to this table.
 	 * 
-	 * @param kvExtraction the KV Extraction to be added
+	 * @param tableColumnsInfo TableColumnsInfo
 	 */
 	public void addTableColumnInfo(TableColumnsInfo tableColumnsInfo) {
 
@@ -171,7 +335,7 @@ public class TableInfo extends AbstractChangeableEntity implements Serializable 
 	}
 
 	/**
-	 * Returns a Table Columns Info based on identifier
+	 * Returns a Table Columns Info based on identifier.
 	 * 
 	 * @param identifier the identifier corresponding to the Table Columns Info
 	 * @return Table Columns Info if found. null otherwise

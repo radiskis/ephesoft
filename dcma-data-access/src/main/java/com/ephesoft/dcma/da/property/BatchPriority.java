@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,11 +37,9 @@ package com.ephesoft.dcma.da.property;
 
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 
-
 /**
- * This is a enum BatchPriority. On the basis of priority we have four kinds of
- * BatchPriority's URGENT, HIGH, MEDIUM and LOW. We can get the BatchPriority
- * for input of priority.
+ * This is a enum BatchPriority. On the basis of priority we have four kinds of BatchPriority's URGENT, HIGH, MEDIUM and LOW. We can
+ * get the BatchPriority for input of priority.
  * 
  * @author Ephesoft
  * @version 1.0
@@ -49,29 +47,54 @@ import com.ephesoft.dcma.core.common.DCMABusinessException;
  */
 public enum BatchPriority {
 
-	URGENT("Urgent", 1, 25), HIGH("High", 26, 50), MEDIUM("Medium", 51, 75), LOW(
-			"Low", 76, 100);
+	/**
+	 * URGENT.
+	 */
+	URGENT("Urgent", 1, 25),
+	/**
+	 * HIGH.
+	 */
+	HIGH("High", 26, 50),
+	/**
+	 * MEDIUM.
+	 */
+	MEDIUM("Medium", 51, 75),
+	/**
+	 * LOW.
+	 */
+	LOW("Low", 76, 100);
 
+	/**
+	 * batchPriorityName String.
+	 */
 	private String batchPriorityName;
+
+	/**
+	 * lowerLimit Integer.
+	 */
 	private Integer lowerLimit;
+
+	/**
+	 * upperLimit Integer.
+	 */
 	private Integer upperLimit;
 
 	/**
-	 * @param batchPriorityName
-	 *            String
-	 * @param lowerLimit
-	 *            Integer
-	 * @param upperLimit
-	 *            Integer
+	 * Constructor.
+	 * 
+	 * @param batchPriorityName String
+	 * @param lowerLimit Integer
+	 * @param upperLimit Integer
 	 */
-	BatchPriority(String batchPriorityName, Integer lowerLimit,
-			Integer upperLimit) {
+	BatchPriority(String batchPriorityName, Integer lowerLimit, Integer upperLimit) {
 		this.batchPriorityName = batchPriorityName;
 		this.lowerLimit = lowerLimit;
 		this.upperLimit = upperLimit;
 	}
 
 	/**
+	 * To get Batch Priority Name.
+	 * 
 	 * @return the batchPriorityName
 	 */
 	public String getBatchPriorityName() {
@@ -79,6 +102,8 @@ public enum BatchPriority {
 	}
 
 	/**
+	 * To get lower limit.
+	 * 
 	 * @return the lowerLimit
 	 */
 	public Integer getLowerLimit() {
@@ -86,6 +111,8 @@ public enum BatchPriority {
 	}
 
 	/**
+	 * To get upper limit.
+	 * 
 	 * @return the upperLimit
 	 */
 	public Integer getUpperLimit() {
@@ -95,8 +122,7 @@ public enum BatchPriority {
 	/**
 	 * This method will return the BatchPriority on the basis of input priority.
 	 * 
-	 * @param priority
-	 *            int
+	 * @param priority int
 	 * @return BatchPriority
 	 */
 	public static BatchPriority getBatchPriority(int priority) {
@@ -123,14 +149,11 @@ public enum BatchPriority {
 	/**
 	 * This method will check for data i.e. data is present in the range or not.
 	 * 
-	 * @param priority
-	 *            int
-	 * @param batchPriority
-	 *            BatchPriority
+	 * @param priority int
+	 * @param batchPriority BatchPriority
 	 * @return true if data found other wise false.
 	 */
-	private static boolean getBatchPriority(int priority,
-			BatchPriority batchPriority) {
+	private static boolean getBatchPriority(int priority, BatchPriority batchPriority) {
 
 		boolean isFound = false;
 		int minRange = batchPriority.getLowerLimit();

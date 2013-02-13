@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -63,6 +63,7 @@ import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.service.FieldTypeService;
 import com.ephesoft.dcma.regex.constant.RegexConstants;
 import com.ephesoft.dcma.regex.util.ExtractDocField;
@@ -78,6 +79,14 @@ import com.ephesoft.dcma.regex.util.ExtractDocField;
 @Component
 public class Extraction {
 
+	/**
+	 * CONFIDENCE_CONST int.
+	 */
+	private static final int CONFIDENCE_CONST = 100;
+
+	/**
+	 * REGEX_EXTRACTION_PLUGIN String.
+	 */
 	private static final String REGEX_EXTRACTION_PLUGIN = "REGULAR_REGEX_EXTRACTION";
 
 	/**
@@ -105,6 +114,13 @@ public class Extraction {
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
+	 * Instance of PluginPropertiesService.
+	 */
+	@Autowired
+	@Qualifier("batchClassPluginPropertiesService")
+	private PluginPropertiesService batchClassPluginPropertiesService;
+
+	/**
 	 * Search coordinate.
 	 */
 	private String searchCoordinate;
@@ -115,7 +131,7 @@ public class Extraction {
 	private boolean firstFieldValue;
 
 	/**
-	 * Reference of FieldTypeService.
+	 * To set Reference of FieldTypeService.
 	 * 
 	 * @param fieldTypeService FieldService
 	 */
@@ -124,7 +140,7 @@ public class Extraction {
 	}
 
 	/**
-	 * Search coordinate.
+	 * To set Search coordinate.
 	 * 
 	 * @param searchCoordinate String
 	 */
@@ -152,7 +168,7 @@ public class Extraction {
 	}
 
 	/**
-	 * Reference fieldTypeService.
+	 * To get Reference fieldTypeService.
 	 * 
 	 * @return fieldTypeService
 	 */
@@ -161,7 +177,7 @@ public class Extraction {
 	}
 
 	/**
-	 * Reference fieldTypeService.
+	 * To set Reference fieldTypeService.
 	 * 
 	 * @param fieldTypeService FieldTypeService
 	 */
@@ -179,6 +195,8 @@ public class Extraction {
 	}
 
 	/**
+	 * To get Batch Schema Service.
+	 * 
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -186,13 +204,17 @@ public class Extraction {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * 
+	 * @param batchSchemaService {@link BatchSchemaService}
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get get Plugin Properties Service.
+	 * 
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -200,7 +222,9 @@ public class Extraction {
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To get set Plugin Properties Service.
+	 * 
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -274,7 +298,9 @@ public class Extraction {
 	 * @param xmlDocuments List<DocumentType>
 	 * @param batchInstanceId String
 	 * @param extractDocField ExtractDocField
-	 * @return batch Batch
+	 * @param batch Batch
+	 * @param confidenceScore String
+	 * @return boolean
 	 * @throws DCMAApplicationException Check for all the input parameters and process the document page.
 	 */
 	private boolean processDocPage(List<Document> xmlDocuments, String batchInstanceId, ExtractDocField extractDocField, Batch batch,
@@ -326,53 +352,17 @@ public class Extraction {
 				final DocField updtDocFdType = new DocField();
 				updtDocFdType.setName(key);
 				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
-				
+
 				final AlternateValues alternateValues = new AlternateValues();
 
 				setFirstFieldValue(true);
 
 				for (Page pageType : pageList) {
 					String pageID = pageType.getIdentifier();
-					HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceId, pageID);
-					List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-					HocrPage hocrPage = hocrPageList.get(0);
 					if (pageType.getIdentifier().equals(pageID)) {
 
-						LOGGER.info("HocrPage page ID : " + pageID);
-
-						List<DataCarrier> foundData = new ArrayList<DataCarrier>();
-
-						Spans spans = hocrPage.getSpans();
-
-						if (null != spans) {
-
-							List<Span> spanList = spans.getSpan();
-
-							int index = 0;
-							for (Span span : spanList) {
-								try {
-									if (pattern.contains(RegexConstants.SEMI_COLON)) {
-										String[] patternArr = pattern.split(RegexConstants.SEMI_COLON);
-										List<DataCarrier> localFoundData = null;
-										findPattern(span, patternArr[patternArr.length - 1], localFoundData, confidenceScore);
-										if (null != localFoundData && !localFoundData.isEmpty()) {
-											verifyFoundValue(spanList, index, patternArr, localFoundData);
-											foundData.addAll(localFoundData);
-										}
-									} else {
-										findPattern(span, pattern, foundData, confidenceScore);
-									}
-								} catch (Exception e) {
-									LOGGER.error(e.getMessage());
-								}
-								index++;
-							}
-
-						}
-
-						if (foundData != null && foundData.size() > 0) {
-							processPageType(updtDocFdType, foundData, pageID, alternateValues, fdTypeName);
-						}
+						HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceId, pageID);
+						extractFieldsFromHOCR(confidenceScore, pattern, fdTypeName, updtDocFdType, alternateValues, pageID, hocrPages);
 						break;
 					} else {
 						continue;
@@ -402,6 +392,113 @@ public class Extraction {
 		return isSuccessful;
 	}
 
+	private void extractFieldsFromHOCR(final String confidenceScore, final String pattern, final String fdTypeName,
+			final DocField updtDocFdType, final AlternateValues alternateValues, final String pageID, final HocrPages hocrPages)
+			throws DCMAApplicationException {
+		LOGGER.info("Entering method extractFieldsFromHOCR....");
+		List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+		HocrPage hocrPage = hocrPageList.get(RegexConstants.ZERO);
+
+		LOGGER.debug("HocrPage page ID : " + pageID);
+
+		List<DataCarrier> foundData = new ArrayList<DataCarrier>();
+
+		Spans spans = hocrPage.getSpans();
+
+		if (null != spans) {
+
+			List<Span> spanList = spans.getSpan();
+
+			int index = RegexConstants.ZERO;
+			for (Span span : spanList) {
+				try {
+					LOGGER.debug("Span value : " + span.getValue());
+					if (pattern.contains(RegexConstants.SEMI_COLON)) {
+						String[] patternArr = pattern.split(RegexConstants.SEMI_COLON);
+						List<DataCarrier> localFoundData = new ArrayList<DataCarrier>();
+						findPattern(span, patternArr[patternArr.length - RegexConstants.ONE], localFoundData, confidenceScore);
+						if (null != localFoundData && !localFoundData.isEmpty()) {
+							verifyFoundValue(spanList, index, patternArr, localFoundData);
+							foundData.addAll(localFoundData);
+						}
+					} else {
+						findPattern(span, pattern, foundData, confidenceScore);
+					}
+				} catch (Exception e) {
+					LOGGER.error(e.getMessage());
+				}
+				index++;
+			}
+
+		}
+
+		if (foundData != null && foundData.size() > RegexConstants.ZERO ) {
+			processPageType(updtDocFdType, foundData, pageID, alternateValues, fdTypeName);
+		}
+		LOGGER.info("Exiting method extractFieldsFromHOCR....");
+	}
+
+	/**
+	 * API to extract the fields.
+	 * 
+	 * @param batchClassID String
+	 * @param docTypeName String
+	 * @param hocrPages HocrPages
+	 * @return List<DocField>
+	 * @throws DCMAApplicationException if document level fields is not present
+	 */
+	public List<DocField> extractFieldsAPI(final String batchClassID, final String docTypeName, final HocrPages hocrPages)
+			throws DCMAApplicationException {
+		LOGGER.info("Entering method extractFieldsAPI......");
+		LOGGER.debug("Getting fields type for batch class : " + batchClassID + ", document : " + docTypeName);
+		List<FieldType> allFdTypes = fieldTypeService.getFdTypeByDocTypeNameForBatchClass(docTypeName, batchClassID);
+		String confidenceScore = batchClassPluginPropertiesService.getPropertyValue(batchClassID, REGEX_EXTRACTION_PLUGIN,
+				ExtractionProperties.REGEX_CONFIDENCE_SCORE);
+		LOGGER.debug("Confidence score for REGULAR_REGEX_EXTRACTION plugin : " + confidenceScore);
+
+		List<DocField> updtDocFdTyList = null;
+
+		if (allFdTypes == null || allFdTypes.isEmpty()) {
+			LOGGER.error("No document level fields for document type : " + docTypeName);
+		} else {
+			updtDocFdTyList = new ArrayList<DocField>();
+			for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
+				String key = fdType.getName();
+				String pattern = fdType.getPattern();
+				int fieldOrderNumber = fdType.getFieldOrderNumber();
+				LOGGER.debug("Extarcting values for field type : " + key + " , Field type pattern : " + pattern
+						+ "Field type order number : " + fieldOrderNumber);
+
+				String fdTypeName = null;
+
+				if (fdType.getDataType() != null) {
+					fdTypeName = fdType.getDataType().name();
+				}
+
+				final DocField updtDocFdType = new DocField();
+				updtDocFdType.setName(key);
+				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
+
+				final AlternateValues alternateValues = new AlternateValues();
+
+				setFirstFieldValue(true);
+				String pageID = hocrPages.getHocrPage().get(0).getPageID();
+
+				extractFieldsFromHOCR(confidenceScore, pattern, fdTypeName, updtDocFdType, alternateValues, pageID, hocrPages);
+
+				if (!isFirstFieldValue()) {
+					updtDocFdTyList.add(updtDocFdType);
+				} else {
+					updtDocFdType.setType(fdTypeName);
+					updtDocFdTyList.add(updtDocFdType);
+				}
+
+			}
+		}
+		LOGGER.info("Exiting method extractFieldsAPI......");
+		return updtDocFdTyList;
+	}
+
 	/**
 	 * Sort the document level fields on the basis of confidence score.
 	 * 
@@ -425,7 +522,7 @@ public class Extraction {
 					localFdType.setPage(updtDocFdType.getPage());
 					localFdType.setType(updtDocFdType.getType());
 
-					alternateValue.add(0, localFdType);
+					alternateValue.add(RegexConstants.ZERO, localFdType);
 
 					// sort the field type on the basis of confidence score.
 					Collections.sort(alternateValue, new Comparator<Field>() {
@@ -434,19 +531,19 @@ public class Extraction {
 
 							float confidenceFd = fdType1.getConfidence() - fdType2.getConfidence();
 
-							if (confidenceFd > 0) {
-								return -1;
+							if (confidenceFd > RegexConstants.ZERO) {
+								return -RegexConstants.ONE;
 							}
-							if (confidenceFd < 0) {
-								return 1;
+							if (confidenceFd < RegexConstants.ZERO) {
+								return RegexConstants.ONE;
 							}
 
-							return 0;
+							return RegexConstants.ZERO;
 						}
 					});
 
 					// get the maximum confidence value.
-					Field fdType = alternateValue.get(0);
+					Field fdType = alternateValue.get(RegexConstants.ZERO);
 
 					updtDocFdType.setConfidence(fdType.getConfidence());
 					updtDocFdType.setCoordinatesList(fdType.getCoordinatesList());
@@ -456,7 +553,7 @@ public class Extraction {
 					updtDocFdType.setType(fdType.getType());
 					updtDocFdType.setValue(fdType.getValue());
 
-					alternateValue.remove(0);
+					alternateValue.remove(RegexConstants.ZERO);
 				}
 			}
 		}
@@ -465,10 +562,10 @@ public class Extraction {
 	/**
 	 * This method will verify all the values found in the pattern matching weather they are valid or not.
 	 * 
-	 * @param spanList List<Span>
+	 * @param spanList List
 	 * @param index int
 	 * @param patternArr String[]
-	 * @param foundData List<Span>
+	 * @param foundData List
 	 */
 	private void verifyFoundValue(List<Span> spanList, int index, String[] patternArr, List<DataCarrier> foundData) {
 
@@ -510,16 +607,13 @@ public class Extraction {
 	 * 
 	 * @param updtDocFdType DocFieldType
 	 * @param foundData List<DataCarrier>
-	 * @param key String
 	 * @param pageID String
 	 * @param alternateValues AlternateValues
 	 * @param fdTypeName String
-	 * @param fieldOrderNumber int
 	 * @throws DCMAApplicationException Check for input parameters and process the document page.
 	 */
-	private void processPageType(final DocField updtDocFdType, final List<DataCarrier> foundData,
-			final String pageID, final AlternateValues alternateValues, final String fdTypeName)
-			throws DCMAApplicationException {
+	private void processPageType(final DocField updtDocFdType, final List<DataCarrier> foundData, final String pageID,
+			final AlternateValues alternateValues, final String fdTypeName) throws DCMAApplicationException {
 
 		for (DataCarrier dataCarrier : foundData) {
 			Span span = dataCarrier.getSpan();
@@ -545,10 +639,11 @@ public class Extraction {
 				final List<Field> alternateValue = alternateValues.getAlternateValue();
 
 				final Field fieldType = new Field();
+				fieldType.setName(updtDocFdType.getName());
 				fieldType.setValue(value);
 				fieldType.setType(fdTypeName);
 				fieldType.setConfidence(dataCarrier.getConfidence());
-
+				fieldType.setFieldOrderNumber(updtDocFdType.getFieldOrderNumber());
 				fieldType.setPage(pageID);
 
 				Coordinates coordinates = new Coordinates();
@@ -574,7 +669,7 @@ public class Extraction {
 	 * @param span Span
 	 * @param patternStr String
 	 * @param confidenceScore String
-	 * @return foundData List<DataCarrier>
+	 * @param foundData List<DataCarrier>
 	 * @throws DCMAApplicationException Check for all the input parameters and find the pattern.
 	 */
 	private void findPattern(Span span, String patternStr, List<DataCarrier> foundData, String confidenceScore)
@@ -603,11 +698,8 @@ public class Extraction {
 			// boolean matchFound = matcher.find();
 			while (matcher.find()) {
 				// Get all groups for this match
-				for (int i = 0; i <= matcher.groupCount(); i++) {
+				for (int i = RegexConstants.ZERO; i <= matcher.groupCount(); i++) {
 					String groupStr = matcher.group(i);
-					if (null == foundData) {
-						foundData = new ArrayList<DataCarrier>();
-					}
 					isFound = false;
 					if (patternStr.contains(RegexConstants.NOT_SPACE)) {
 						if (groupStr.contains(RegexConstants.FULL_STOP)) {
@@ -618,7 +710,7 @@ public class Extraction {
 					}
 
 					if (isFound) {
-						int confidenceInt = 100;
+						int confidenceInt = CONFIDENCE_CONST;
 						try {
 							confidenceInt = Integer.parseInt(confidenceScore);
 						} catch (NumberFormatException nfe) {
@@ -635,14 +727,36 @@ public class Extraction {
 
 	}
 
+	/**
+	 * This is data carrier class that compares two objects.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	private class DataCarrier implements Comparable<DataCarrier> {
 
-		private Span span;
+		/**
+		 * span Span.
+		 */
+		private final Span span;
 
-		private float confidence;
+		/**
+		 * confidence float.
+		 */
+		private final float confidence;
 
-		private String value;
+		/**
+		 * value String.
+		 */
+		private final String value;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param span Span
+		 * @param confidence float
+		 * @param value String
+		 */
 		public DataCarrier(final Span span, final float confidence, final String value) {
 			super();
 			this.span = span;
@@ -653,24 +767,28 @@ public class Extraction {
 		/**
 		 * Compare a given DataCarrier with this object. If confidence of this object is greater than the received object, then this
 		 * object is greater than the other. As we have to finder larger confidence score value we will return -1 for this case.
+		 * 
+		 * @param dataCarrier DataCarrier
+		 * @return int
 		 */
 		public int compareTo(DataCarrier dataCarrier) {
 
-			int returnValue = 0;
+			int returnValue = RegexConstants.ZERO;
 
 			float confidenceData = this.getConfidence() - dataCarrier.getConfidence();
 
-			if (confidenceData > 0) {
-				returnValue = -1;
+			if (confidenceData > RegexConstants.ZERO) {
+				returnValue = -RegexConstants.ONE;
 			}
-			if (confidenceData < 0) {
-				returnValue = 1;
+			if (confidenceData < RegexConstants.ZERO) {
+				returnValue = RegexConstants.ONE;
 			}
 
 			return returnValue;
 		}
 
 		/**
+		 * To get span.
 		 * @return the span
 		 */
 		public Span getSpan() {
@@ -678,6 +796,7 @@ public class Extraction {
 		}
 
 		/**
+		 * To get confidence.
 		 * @return the confidence
 		 */
 		public float getConfidence() {
@@ -685,6 +804,7 @@ public class Extraction {
 		}
 
 		/**
+		 * To get value.
 		 * @return the value
 		 */
 		public String getValue() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,84 +35,123 @@
 
 package com.ephesoft.dcma.gwt.core.client.validator;
 
+import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.user.client.ui.HasValue;
 
 public class RegExValidator implements Validator {
 
-	private HasValue<String> _value;
-	private String _pattern;
-	private boolean isOnlyPatternValidator;
-	private boolean isMandatory;
-	private boolean isMultiplePattern;
+	protected static final String INVALID_REGEX_PATTERN = "invalid_regex_pattern";
+	private final HasValue<String> _value;
+	private String pattern;
+	private final boolean isOnlyPatternValidator;
+	private final boolean isMandatory;
+	private final boolean isMultiplePattern;
 	private String patternDelimiter;
+	private final DCMARemoteServiceAsync remoteService;
+	private RegExValidatableWidget<?> validatableWidget;
 
-	public RegExValidator(String pattern, HasValue<String> value) {
-		_pattern = pattern;
-		_value = value;
-		isOnlyPatternValidator = false;
-		isMandatory = true;
-		isMultiplePattern = false;
+	public RegExValidator(final RegExValidatableWidget<?> validatableWidget, final String pattern, final HasValue<String> value,
+			final DCMARemoteServiceAsync remoteServiceAsync) {
+		this(validatableWidget, value, true, false, false, null, remoteServiceAsync);
+		this.pattern = pattern;
 	}
 
-	public RegExValidator(HasValue<String> value, boolean isMandatory, boolean isMultiplePattern, boolean isPatternValidator,
-			String patternDelimiter) {
-		_value = value;
+	public RegExValidator(final RegExValidatableWidget<?> validatableWidget, final HasValue<String> value, final boolean isMandatory,
+			final boolean isMultiplePattern, final boolean isPatternValidator, final String patternDelimiter,
+			final DCMARemoteServiceAsync remoteServiceAsync) {
+		this._value = value;
+		this.validatableWidget = validatableWidget;
 		this.isMandatory = isMandatory;
 		this.isMultiplePattern = isMultiplePattern;
 		this.isOnlyPatternValidator = isPatternValidator;
 		this.patternDelimiter = patternDelimiter;
+		this.remoteService = remoteServiceAsync;
 	}
 
 	@Override
 	public boolean validate() {
 		boolean isPatternValid = true;
 		if (isOnlyPatternValidator) {
-			String pattern = _value.getValue();
+			final String pattern = _value.getValue();
 			if (pattern.isEmpty() && isMandatory) {
 				isPatternValid = false;
 			} else {
 				if (isMultiplePattern) {
 					isPatternValid = validateMultiplePattern(pattern);
 				} else {
-					isPatternValid = validatePattern(pattern);
+					isPatternValid = validatePatternOnServer(pattern);
 				}
 			}
 		} else {
 			if (_value.getValue() == null || _value.getValue().trim().isEmpty()) {
 				isPatternValid = false;
 			} else {
-				isPatternValid = _value.getValue().matches(_pattern);
+				isPatternValid = validateValueWithPatternOnServer(_value.getValue(), pattern);
 			}
 		}
 		return isPatternValid;
 	}
 
-	public boolean validateMultiplePattern(String multiplePattern) {
+	public boolean validateMultiplePattern(final String multiplePattern) {
 		boolean isPatternValid = true;
 		String[] patternArr = null;
 		if (multiplePattern.contains(patternDelimiter)) {
 			patternArr = multiplePattern.split(patternDelimiter);
-			for (String pattern : patternArr) {
-				if (!validatePattern(pattern)) {
+			for (final String pattern : patternArr) {
+				if (!validatePatternOnServer(pattern)) {
 					isPatternValid = false;
 					break;
 				}
 			}
 		} else {
-			isPatternValid = validatePattern(multiplePattern);
+			isPatternValid = validatePatternOnServer(multiplePattern);
 		}
 		return isPatternValid;
 	}
 
-	public boolean validatePattern(String pattern) {
-		boolean isPatternValid = true;
-		try {
-			String dummyString = "";
-			dummyString.matches(pattern);
-		} catch (Exception e) {
-			isPatternValid = false;
-		}
+	private boolean validateValueWithPatternOnServer(final String value, final String pattern) {
+		ScreenMaskUtility.maskScreen();
+		remoteService.validateValueWithRegEx(value, pattern, new EphesoftAsyncCallback<Boolean>() {
 
-		return isPatternValid;
+			@Override
+			public void onSuccess(final Boolean isValidInput) {
+				ScreenMaskUtility.unmaskScreen();
+				validatableWidget.toggleValidateBox(isValidInput);
+			}
+
+			@Override
+			public void customFailure(final Throwable arg0) {
+				ScreenMaskUtility.unmaskScreen();
+				validatableWidget.toggleValidateBox(false);
+			}
+		});
+		return false;
+	}
+
+	private boolean validatePatternOnServer(final String pattern) {
+		ScreenMaskUtility.maskScreen();
+		remoteService.validateRegEx(pattern, new EphesoftAsyncCallback<Boolean>() {
+
+			@Override
+			public void onSuccess(final Boolean isPatternValid) {
+				validatableWidget.setValid(isPatternValid);
+				ScreenMaskUtility.unmaskScreen();
+				if (!isPatternValid) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(INVALID_REGEX_PATTERN));
+				}
+			}
+
+			@Override
+			public void customFailure(final Throwable arg0) {
+				validatableWidget.setValid(false);
+				ScreenMaskUtility.unmaskScreen();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(INVALID_REGEX_PATTERN));
+			}
+		});
+		return false;
 	}
 }

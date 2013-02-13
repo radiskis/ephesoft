@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -74,9 +74,9 @@ public interface ScriptConstants {
 	String NOT_SPACE = "\\S";
 
 	/**
-	 * String constant for dot.
+	 * Constant for dot.
 	 */
-	String FULL_STOP = ".";
+	char FULL_STOP = '.';
 
 	/**
 	 * String constant for not valid.
@@ -102,9 +102,75 @@ public interface ScriptConstants {
 	 * JDOM type parser.
 	 */
 	String JDOM_PARSER_TYPE = "jdom";
-	
+
 	/**
 	 * String constant for ON.
 	 */
 	String ON_STRING = "ON";
+
+	/**
+	 * Constant for UNDERSCORE.
+	 */
+	char UNDERSCORE = '_';
+
+	/**
+	 * Constant for COLON.
+	 */
+	char COLON = ':';
+
+	/**
+	 * Constant for SLASH.
+	 */
+	char SLASH = '/';
+
+	/**
+	 * Constant for DOUBLE_SLASH.
+	 */
+	char DOUBLE_SLASH = '\\';
+
+	/**
+	 * Constant for DOT_JAVA.
+	 */
+	String DOT_JAVA = ".java";
+
+	/**
+	 * Constant for HYPHEN_CLASSPATH.
+	 */
+	String HYPHEN_CLASSPATH = "-classpath";
+
+	/**
+	 * Constant for HYPHEN_SOURCEPATH.
+	 */
+	String HYPHEN_SOURCEPATH = "-sourcepath";
+
+	/**
+	 * Constant for HYPHEN_BOOTCLASSPATH.
+	 */
+	String HYPHEN_BOOTCLASSPATH = "-bootclasspath";
+
+	/**
+	 * Constant for HYPHEN_EXTDIRS.
+	 */
+	String HYPHEN_EXTDIRS = "-extdirs";
+
+	/**
+	 * Constant for HYPHEN_ENCODING.
+	 */
+	String HYPHEN_ENCODING = "-encoding";
+
+	/**
+	 * Constant for HYPHEN_TARGET.
+	 */
+	String HYPHEN_TARGET = "-target";
+
+	/**
+	 * Constant for HYPHEN_D.
+	 */
+	String HYPHEN_D = "-d";
+	
+	/**
+	 * Constant for .class.
+	 */
+	String DOT_CLASS = ".class";
+
 }

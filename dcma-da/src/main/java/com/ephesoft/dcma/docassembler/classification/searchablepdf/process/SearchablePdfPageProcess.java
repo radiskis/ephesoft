@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -78,6 +78,7 @@ public class SearchablePdfPageProcess {
 	private BatchSchemaService batchSchemaService;
 
 	/**
+	 * To get the plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -85,6 +86,7 @@ public class SearchablePdfPageProcess {
 	}
 
 	/**
+	 * To get Batch Instance ID.
 	 * @return the batchInstanceID
 	 */
 	public String getBatchInstanceID() {
@@ -92,20 +94,23 @@ public class SearchablePdfPageProcess {
 	}
 
 	/**
-	 * @param batchInstanceID the batchInstanceID to set
+	 * To set Batch Instance ID.
+	 * @param batchInstanceID String
 	 */
 	public void setBatchInstanceID(String batchInstanceID) {
 		this.batchInstanceID = batchInstanceID;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set the plugin Properties Service.
+	 * @param pluginPropertiesService PluginPropertiesService
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -113,7 +118,8 @@ public class SearchablePdfPageProcess {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService BatchSchemaService
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
@@ -123,7 +129,7 @@ public class SearchablePdfPageProcess {
 	 * This method modifies the document type from UNKNWON to the first document type configured for batch class configured for
 	 * searchable pdf workflow.
 	 * 
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
 	public void modifyDocumentType() throws DCMAApplicationException {
 		List<DocumentType> allDocTypes = pluginPropertiesService.getDocumentTypes(batchInstanceID);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,47 +37,76 @@ package com.ephesoft.dcma.openoffice;
 
 import java.io.File;
 
-import org.apache.tools.ant.taskdefs.ExecTask;
-import org.apache.tools.ant.types.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is open office task class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class OpenOfficeTask {
 
+	/**
+	 * server String.
+	 */
 	private String server;
+	
+	/**
+	 * homePath String.
+	 */
 	private String homePath;
+	
+	/**
+	 * serverPort String.
+	 */
 	private String serverPort;
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	protected final static Logger LOGGER = LoggerFactory.getLogger(OpenOfficeTask.class);
 
+	/**
+	 * Start method.
+	 */
 	public void start() {
 		Thread thread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					ExecTask execTask = new ExecTask();
-					String command = "cmd /c soffice -invisible -accept=socket,host=" + server + ",port=" + serverPort + ";urp;";
-					Commandline commandline = new Commandline(command);
-					execTask.setDir(new File(homePath + File.separator + "program"));
-					execTask.setCommand(commandline);
-					execTask.execute();
+					String command = "cmd /c soffice.exe -invisible -accept=socket,host=" + server + ",port=" + serverPort + ";urp;";
+					Runtime.getRuntime().exec(command, null, new File(homePath + File.separator + "program"));
 				} catch (Exception e) {
-					logger.error("Could not start Open Office Server.", e);
+					LOGGER.error("Could not start Open Office Server.", e);
 				}
 			}
 		});
 		thread.start();
 	}
 
+	/**
+	 * To set server.
+	 * @param server String
+	 */
 	public void setServer(String server) {
 		this.server = server;
 	}
 
+	/**
+	 * To set server port.
+	 * @param serverPort String
+	 */
 	public void setServerPort(String serverPort) {
 		this.serverPort = serverPort;
 	}
 
+	/**
+	 * To set home path.
+	 * @param homePath String
+	 */
 	public void setHomePath(String homePath) {
 		this.homePath = homePath;
 	}

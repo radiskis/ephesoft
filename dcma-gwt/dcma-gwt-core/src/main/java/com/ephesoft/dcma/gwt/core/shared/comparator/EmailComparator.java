@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,12 +50,12 @@ public class EmailComparator implements Comparator<Object> {
 
 	private final Order order;
 
-	String EMAIL_USERNAME = "username";
-	String EMAIL_PASSWORD = "password";
-	String EMAIL_SERVER_NAME = "serverName";
-	String EMAIL_SERVER_TYPE = "serverType";
-	String EMAIL_FOLDER_NAME = "folderName";
-	String EMAIL_PORTNUMBER = "portNumber";
+	private static final String EMAIL_USERNAME = "username";
+	private static final String EMAIL_PASSWORD = "password";
+	private static final String EMAIL_SERVER_NAME = "serverName";
+	private static final String EMAIL_SERVER_TYPE = "serverType";
+	private static final String EMAIL_FOLDER_NAME = "folderName";
+	private static final String EMAIL_PORTNUMBER = "portNumber";
 	
 	public EmailComparator(final Order order) {
 

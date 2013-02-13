@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,6 +46,7 @@ import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.csv.CSVFileCreationExporter;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.BackUpFileService;
 
 /**
@@ -63,29 +64,48 @@ public class CSVFileCreationServiceImpl implements CSVFileCreationService, IComm
 	private static final Logger LOG = LoggerFactory.getLogger(CSVFileCreationServiceImpl.class);
 
 	/**
-	 * Instance of CSVFileCreationExporter.
+	 * Instance of {@link CSVFileCreationExporter}.
 	 */
 	@Autowired
 	private CSVFileCreationExporter csvFileCreationExport;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get the xml file before start of process.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * To get the xml file after finishing process.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, final String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceID.getID()));
 	}
 
 	/**
 	 * This method export the data into CSV format.
-	 * 
-	 * @param paramBatchInstanceID
-	 * @param paramString
-	 * @throws DCMAException
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException for error in exporting data.
 	 */
 	public void csvFileExport(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		LOG.info("Start exporting data into CSV file");

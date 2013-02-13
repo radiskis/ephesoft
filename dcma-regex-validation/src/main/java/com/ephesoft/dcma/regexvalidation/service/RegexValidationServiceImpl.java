@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,28 +44,77 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.regexvalidation.RegexAutomatedValidation;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This service is used to validate the document level fields of document for whole batch. It will validate the DLF's on the basis of
+ * regex patterns available in database. If the document level field is valid with data type and regex pattern then only document is
+ * called as valid document otherwise it is taken as invalid document.
+ * 
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.regexvalidation.service.RegexValidationService
+ */
 public class RegexValidationServiceImpl implements RegexValidationService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegexValidationServiceImpl.class);
 
+	/**
+	 * regexAutomatedValidation {@link RegexAutomatedValidation}.
+	 */
 	@Autowired
 	private RegexAutomatedValidation regexAutomatedValidation;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * Pre-processing method.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * Post-processing method.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * The <code>regexValidation</code> method is used to validate the document level fields of document for whole batch. It will fetch
+	 * all the record corresponding to document level fields from the database and on the basis of that pattern it will validate the
+	 * document level field. If all the patterns satisfied with the document level field value then only that document will marked as
+	 * valid otherwise it will marked as invalid document.
+	 * 
+	 * @param batchInstanceIdentifier {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException If any invalid state occur during the regex based validation process.
+	 */
 	@Override
 	public void regexValidation(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 

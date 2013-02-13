@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,12 +35,11 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.module;
 
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ConfigureModulePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.view.MultipleSelectTwoSidedListBox;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -50,99 +49,193 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to configure module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class ConfigureModuleView extends View<ConfigureModulePresenter> {
 
+	/**
+	 * ADD_NEW_MODULE String.
+	 */
+	private static final String ADD_NEW_MODULE = "Add New Module";
+
+	/**
+	 * SELECTED_MODULES String.
+	 */
 	private static final String SELECTED_MODULES = "Selected Modules";
 
+	/**
+	 * AVAILABLE_MODULES String.
+	 */
 	private static final String AVAILABLE_MODULES = "Available Modules";
 
+	/**
+	 * BUTTON_STYLE String.
+	 */
 	private static final String BUTTON_STYLE = "button-style";
 
+	/**
+	 * RESET String.
+	 */
+	private static final String RESET = "Reset";
+
+	/**
+	 * BUTTON_TEXT_OK String.
+	 */
+	private static final String BUTTON_TEXT_OK = "Ok";
+
+	/**
+	 * CANCEL String.
+	 */
 	private static final String CANCEL = "Cancel";
 
-	private static final String OK = "Ok";
-
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, ConfigureModuleView> {
 	}
 
-	MultipleSelectTwoSidedListBox multipleSelectTwoSidedListBox;
+	/**
+	 * multipleSelectTwoSidedListBox MultipleSelectTwoSidedListBox.
+	 */
+	protected MultipleSelectTwoSidedListBox multipleSelectTwoSidedListBox;
 
+	/**
+	 * buttonsVerticalPanel VerticalPanel.
+	 */
 	@UiField
-	HorizontalPanel buttonsHorizontalPanel;
+	protected VerticalPanel buttonsVerticalPanel;
 
+	/**
+	 * addNewModule Button.
+	 */
 	@UiField
-	Button okButton;
+	protected Button addNewModule;
 
+	/**
+	 * okButton Button.
+	 */
 	@UiField
-	Button cancelButton;
+	protected Button okButton;
 
-
+	/**
+	 * resetButton Button.
+	 */
 	@UiField
-	DockLayoutPanel customWorkflowPanel;
+	protected Button resetButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	/**
+	 * cancelButton Button.
+	 */
+	@UiField
+	protected Button cancelButton;
 
-	public ConfigureModuleView()
-	{
+	/**
+	 * customWorkflowPanel DockLayoutPanel.
+	 */
+	@UiField
+	protected DockLayoutPanel customWorkflowPanel;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+	private static final Binder BINDER = GWT.create(Binder.class);
+
+	/**
+	 * Constructor.
+	 */
+	public ConfigureModuleView() {
 		this(null);
 	}
-	
-	public ConfigureModuleView(HandlerManager eventBus) {
-		initWidget(binder.createAndBindUi(this));
 
-		multipleSelectTwoSidedListBox = new MultipleSelectTwoSidedListBox();
-		customWorkflowPanel.addNorth(multipleSelectTwoSidedListBox, 300);
-		
+	/**
+	 * Constructor.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
+	public ConfigureModuleView(HandlerManager eventBus) {
+		super();
+		initWidget(BINDER.createAndBindUi(this));
+		multipleSelectTwoSidedListBox = new MultipleSelectTwoSidedListBox(eventBus);
+
+		customWorkflowPanel.addNorth(multipleSelectTwoSidedListBox, BatchClassManagementConstants.SEVENTY);
 		addCSSStyle();
 		addFieldText();
 
-		multipleSelectTwoSidedListBox.getRightHandSideListBox().addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent changeEvent) {
-			}
-		});
 	}
 
 	private void addFieldText() {
-		okButton.setText(OK);
+		okButton.setText(BUTTON_TEXT_OK);
+		resetButton.setText(RESET);
+		addNewModule.setText(ADD_NEW_MODULE);
 		cancelButton.setText(CANCEL);
-	}
-
-	private void addCSSStyle() {
-
-		buttonsHorizontalPanel.setSpacing(30);
-		okButton.addStyleName(BUTTON_STYLE);
-		cancelButton.addStyleName(BUTTON_STYLE);
-		buttonsHorizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		buttonsHorizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		customWorkflowPanel.addStyleName("mainPanelLayout");
-		multipleSelectTwoSidedListBox.addStyleName("custom-workflow-panel");
 		multipleSelectTwoSidedListBox.getAvailableLabel().setText(AVAILABLE_MODULES);
 		multipleSelectTwoSidedListBox.getSelectedLabel().setText(SELECTED_MODULES);
 	}
 
+	private void addCSSStyle() {
+		addNewModule.addStyleName(BUTTON_STYLE);
+		okButton.addStyleName(BUTTON_STYLE);
+		resetButton.addStyleName(BUTTON_STYLE);
+		cancelButton.addStyleName(BUTTON_STYLE);
+
+		buttonsVerticalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+		buttonsVerticalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
+		customWorkflowPanel.addStyleName("mainPanelLayout");
+		multipleSelectTwoSidedListBox.addStyleName("custom-workflow-panel");
+
+	}
+
 	/**
+	 * To get Multiple Select Two Sided List Box.
+	 * 
 	 * @return the multipleSelectTwoSidedListBox
 	 */
 	public MultipleSelectTwoSidedListBox getMultipleSelectTwoSidedListBox() {
 		return multipleSelectTwoSidedListBox;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("okButton")
 	public void onOkClicked(ClickEvent clickEvent) {
-		presenter.setBatchClassDTOModulesList(getMultipleSelectTwoSidedListBox().getAllValuesFromList(
+		presenter.setBatchClassDTOModulesList(getMultipleSelectTwoSidedListBox().getAllValuesMapFromList(
 				getMultipleSelectTwoSidedListBox().getRightHandSideListBox()));
 	}
 
-	@UiHandler("cancelButton")
-	public void onCancelClicked(ClickEvent clickEvent) {
+	@UiHandler("resetButton")
+	public void onResetClicked(ClickEvent clickEvent) {
 		presenter.bind();
 	}
 
+	@UiHandler("addNewModule")
+	public void onAddNewModuleClicked(ClickEvent clickEvent) {
+		presenter.addNewModule();
+	}
+
 	/**
+	 * To perform operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("cancelButton")
+	public void onCancelClicked(ClickEvent clickEvent) {
+		presenter.onCancelButtonClicked();
+	}
+
+	/**
+	 * To get OK button.
+	 * 
 	 * @return the okButton
 	 */
 	public Button getOkButton() {
@@ -150,34 +243,44 @@ public class ConfigureModuleView extends View<ConfigureModulePresenter> {
 	}
 
 	/**
-	 * @param okButton the okButton to set
+	 * To set OK button.
+	 * 
+	 * @param okButton Button
 	 */
 	public void setOkButton(Button okButton) {
 		this.okButton = okButton;
 	}
 
 	/**
-	 * @return the cancelButton
+	 * To get Reset Button.
+	 * 
+	 * @return the resetButton
 	 */
-	public Button getCancelButton() {
-		return cancelButton;
+	public Button getResetButton() {
+		return resetButton;
 	}
 
 	/**
-	 * @param cancelButton the cancelButton to set
+	 * To set Reset Button.
+	 * 
+	 * @param resetButton Button
 	 */
-	public void setCancelButton(Button cancelButton) {
-		this.cancelButton = cancelButton;
+	public void setResetButton(Button resetButton) {
+		this.resetButton = resetButton;
 	}
 
 	/**
-	 * @param multipleSelectTwoSidedListBox the multipleSelectTwoSidedListBox to set
+	 * To set Multiple Select Two Sided ListBox.
+	 * 
+	 * @param multipleSelectTwoSidedListBox MultipleSelectTwoSidedListBox
 	 */
 	public void setMultipleSelectTwoSidedListBox(MultipleSelectTwoSidedListBox multipleSelectTwoSidedListBox) {
 		this.multipleSelectTwoSidedListBox = multipleSelectTwoSidedListBox;
 	}
 
 	/**
+	 * To get Custom Workflow Panel.
+	 * 
 	 * @return the customWorkflowPanel
 	 */
 	public DockLayoutPanel getCustomWorkflowPanel() {
@@ -185,7 +288,9 @@ public class ConfigureModuleView extends View<ConfigureModulePresenter> {
 	}
 
 	/**
-	 * @param customWorkflowPanel the customWorkflowPanel to set
+	 * To set Custom Workflow Panel.
+	 * 
+	 * @param customWorkflowPanel DockLayoutPanel
 	 */
 	public void setCustomWorkflowPanel(DockLayoutPanel customWorkflowPanel) {
 		this.customWorkflowPanel = customWorkflowPanel;

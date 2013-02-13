@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,8 +40,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -57,6 +57,7 @@ import javax.mail.Store;
 import javax.mail.URLName;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.CustomMessage;
 import com.ephesoft.dcma.core.common.MailMetaData;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 import com.ephesoft.dcma.mail.constants.MailConstants;
@@ -72,12 +74,38 @@ import com.ephesoft.dcma.util.FileUtils;
 import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.pop3.POP3SSLStore;
 
+/**
+ * This class handles the mails recieved and processing of them.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class MailReceiverServiceImpl implements MailReceiverService {
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	/**
+	 * Size of the buffer byte array.
+	 */
+	private static final int BUFFER_SIZE_2048 = 2048;
+	/**
+	 * Constant value of "46".
+	 */
+	private static final int EXTENSION_VALUE_46 = 46;
+	/**
+	 * An instance of Logger for proper logging.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailReceiverServiceImpl.class);
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
+	/**
+	 * To store the requested connection.
+	 */
 	private Store store = null;
+	/**
+	 * To store the session.
+	 */
 	private Session session = null;
 
 	@Override
@@ -101,7 +129,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 					store = connectWithIMAPSSL(configuration);
 					isUsingImapConf = true;
 				} else {
-					logger.error("Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
+					LOGGER.error("Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
 					throw new DCMAApplicationException(
 							"Error in Server Type Configuration, only imap/pop3 is allowed. Configuration used : " + errorMsg);
 				}
@@ -110,8 +138,8 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				store = connectWithNonSSL(configuration);
 			}
 			if (store == null || !store.isConnected()) {
-				logger.error("Not able to establish connection with " + errorMsg);
-				throw (new DCMAApplicationException("Not able to establish connection with " + errorMsg));
+				LOGGER.error("Not able to establish connection with " + errorMsg);
+				throw new DCMAApplicationException("Not able to establish connection with " + errorMsg);
 			} else {
 				folder = store.getDefaultFolder();
 				folder = folder.getFolder(configuration.getFolderName());
@@ -123,29 +151,30 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 
 					if (messages[messageNumber] != null && messages[messageNumber].getContent() != null) {
 						if (isUsingImapConf && messages[messageNumber].isSet(Flags.Flag.SEEN)) {
-							logger.info("Message " + messageNumber + " already proceesed.");
+							LOGGER.info("Message " + messageNumber + " already proceesed.");
 							continue;
 						}
 						Object messagecontentObject = messages[messageNumber].getContent();
 						if (messagecontentObject instanceof Multipart) {
 							Multipart multipart = (Multipart) messages[messageNumber].getContent();
-							CustomMessage cm = new CustomMessage();
+							CustomMessage customMsg = new CustomMessage();
 							MailMetaData mmd = new MailMetaData();
-							cm.setMessage(messages[messageNumber]);
-							cm.setContent(getText((Part) multipart.getBodyPart(0)));
-							mmd = createMailMetaData(cm.getMessage(), cm.getContent());
-							cm.setMailMetaData(mmd);
-							String folderName = String.valueOf(new Date().getTime());
+							customMsg.setMessage(messages[messageNumber]);
+							customMsg.setContent(getText((Part) multipart.getBodyPart(0)));
+							mmd = createMailMetaData(customMsg.getMessage(), customMsg.getContent());
+							customMsg.setMailMetaData(mmd);
+							String folderName = String.valueOf(System.nanoTime()) + messageNumber;
 							File uniqueFolderForMail = new File(defaultFolderLocation + File.separator + folderName);
-							String folderPath = uniqueFolderForMail.getPath().toString();
-							cm.setFolderPath(folderPath);
-							cm.setFolderName(folderName);
-							customMessageList.add(cm);
-							folderPath = folderPath + File.separator + MailConstants.DOWNLOAD_FOLDER_NAME;
+							StringBuffer folderPath = new StringBuffer(uniqueFolderForMail.getPath());
+							customMsg.setFolderPath(folderPath.toString());
+							customMsg.setFolderName(folderName);
+							customMessageList.add(customMsg);
+							folderPath.append(File.separator);
+							folderPath.append(ICommonConstants.DOWNLOAD_FOLDER_NAME);
 							// downloading all attachments....
 							for (int i = 0; i < multipart.getCount(); i++) {
 								Part part = (Part) multipart.getBodyPart(i);
-								downloadAttachment(part, folderPath);
+								downloadAttachment(part, folderPath.toString());
 							}
 						}
 					}
@@ -156,7 +185,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Not able to process the mail reading from configuration : " + errorMsg, e);
+			LOGGER.error("Not able to process the mail reading from configuration : " + errorMsg, e);
 			throw new DCMAApplicationException("Not able to process the mail reading from configuration : " + errorMsg
 					+ e.getMessage(), e);
 		} finally {
@@ -168,7 +197,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 					store.close();
 				}
 			} catch (Exception e) {
-				logger.error("Could not close the Connection.", e);
+				LOGGER.error("Could not close the Connection.", e);
 			}
 		}
 		return customMessageList;
@@ -182,7 +211,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		Integer portNumber = configuration.getPortNumber();
 
 		if (portNumber == null) {
-			logger.error("Could not find port number. Trying with default value of 995");
+			LOGGER.error("Could not find port number. Trying with default value of 995");
 			portNumber = MailConstants.DEFAULT_PORT_NUMBER_POP3;
 		}
 
@@ -205,7 +234,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 		Integer portNumber = configuration.getPortNumber();
 
 		if (portNumber == null) {
-			logger.error("Could not find port number. Trying with default value of 993");
+			LOGGER.error("Could not find port number. Trying with default value of 993");
 			portNumber = MailConstants.DEFAULT_PORT_NUMBER_IMAP;
 		}
 
@@ -267,7 +296,7 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 			String senderAddress = ((InternetAddress) message.getFrom()[0]).getAddress();
 			if (senderName == null) {
 				sender.append(senderAddress);
-				logger.info("sender in NULL. Printing Address:" + sender);
+				LOGGER.info("sender in NULL. Printing Address:" + sender);
 			} else {
 				sender.append(MailConstants.QUOTES);
 				sender.append(senderName);
@@ -285,106 +314,123 @@ public class MailReceiverServiceImpl implements MailReceiverService {
 				mailMetaData.setCcAddresses(ccAddresses);
 			}
 			if (null != subject) {
-				mailMetaData.setSubject(subject.toString());
+				mailMetaData.setSubject(subject);
 			} else {
 				mailMetaData.setSubject("");
 			}
 			mailMetaData.setFromAddress(sender.toString());
 		} catch (MessagingException e) {
-			logger.error("Unable to retreive sender information.");
+			LOGGER.error("Unable to retreive sender information.");
 		}
 		return mailMetaData;
 
 	}
 
-	private String getFormattedAddress(String address) {
-		address = address.replace(MailConstants.OPENING_ANGULAR_BRACKET, MailConstants.OPENING_BRACKET);
-		address = address.replace(MailConstants.CLOSING_ANGULAR_BRACKET, MailConstants.CLOSING_BRACKET);
-		return address;
+	private String getFormattedAddress(final String address) {
+		String localAddress = address;
+		localAddress = address.replace(MailConstants.OPENING_ANGULAR_BRACKET, MailConstants.OPENING_BRACKET);
+		localAddress = address.replace(MailConstants.CLOSING_ANGULAR_BRACKET, MailConstants.CLOSING_BRACKET);
+		return localAddress;
 	}
 
-	public String getText(Part part) throws MessagingException, IOException {
-		if (part.isMimeType("text/*")) {
-			String s = (String) part.getContent();
-			return s;
+	public String getText(final Part part) throws MessagingException, IOException {
+		// String text = null;
+		String text = null;
+		if (part.isMimeType(MailConstants.MIME_TYPE_TEXT)) {
+			text = (String) part.getContent();
+			// return content;
 		}
+		Multipart multiPart = (Multipart) part.getContent();
 
-		if (part.isMimeType("multipart/alternative")) {
-			Multipart multiPart = (Multipart) part.getContent();
-			String text = null;
+		if (part.isMimeType(MailConstants.MIME_TYPE_ALTERNATIVE)) {
 			for (int i = 0; i < multiPart.getCount(); i++) {
-				Part bp = multiPart.getBodyPart(i);
-				if (bp.isMimeType("text/plain")) {
+				Part bodyPart = multiPart.getBodyPart(i);
+				if (bodyPart.isMimeType(MailConstants.MIME_TYPE_PLAIN_TEXT)) {
 					if (text == null) {
-						text = getText(bp);
-						return text;
+						text = getText(bodyPart);
+					} else {
+						continue;
 					}
-					continue;
-				} else if (bp.isMimeType("text/html")) {
-					String s = getText(bp);
-					if (s != null)
-						return s;
+				} else if (bodyPart.isMimeType(MailConstants.MIME_TYPE_HTML_TEXT)) {
+					text = getText(bodyPart);
+					if (text != null) {
+						break;
+						// return text;
+					}
 				} else {
-					return getText(bp);
+					text = getText(bodyPart);
+					break;
+					// return getText(bodyPart);
 				}
 			}
-			return text;
+			// return text;
 		} else if (part.isMimeType("multipart/*")) {
-			Multipart multiPart = (Multipart) part.getContent();
+			// Multipart multiPart = (Multipart) part.getContent();
 			for (int i = 0; i < multiPart.getCount(); i++) {
-				String s = getText(multiPart.getBodyPart(i));
-				if (s != null)
-					return s;
+				text = getText(multiPart.getBodyPart(i));
+				if (text != null) {
+					break;
+					// return text;
+				}
 			}
 		}
 
-		return null;
+		return text;
 	}
 
-	private void downloadAttachment(Part part, String folderPath) throws Exception {
+	private void downloadAttachment(Part part, String folderPath) throws MessagingException, IOException {
 		String disPosition = part.getDisposition();
-		String fileName = null;
-		fileName = part.getFileName();
+		String fileName = part.getFileName();
+		String decodedAttachmentName = null;
+
 		if (fileName != null) {
-			int extensionIndex = fileName.indexOf('.');
-			extensionIndex = extensionIndex == -1 ? fileName.length() : extensionIndex;
+			LOGGER.info("Attached File Name :: " + fileName);
+			decodedAttachmentName = MimeUtility.decodeText(fileName);
+			LOGGER.info("Decoded string :: " + decodedAttachmentName);
+			decodedAttachmentName = Normalizer.normalize(decodedAttachmentName, Normalizer.Form.NFC);
+			LOGGER.info("Normalized string :: " + decodedAttachmentName);
+			int extensionIndex = decodedAttachmentName.indexOf(EXTENSION_VALUE_46);
+			extensionIndex = extensionIndex == -1 ? decodedAttachmentName.length() : extensionIndex;
 			File parentFile = new File(folderPath);
-			logger.info("Updating file name if any file with the same name exists. File : " + fileName);
-			fileName = FileUtils.getUpdatedFileNameForDuplicateFile(fileName.substring(0, extensionIndex), parentFile, -1)
-					+ fileName.substring(extensionIndex);
-			logger.info("Updated file name : " + fileName);
+			LOGGER.info("Updating file name if any file with the same name exists. File : " + decodedAttachmentName);
+			decodedAttachmentName = FileUtils.getUpdatedFileNameForDuplicateFile(decodedAttachmentName.substring(0, extensionIndex), parentFile, -1)
+					+ decodedAttachmentName.substring(extensionIndex);
+
+			LOGGER.info("Updated file name : " + decodedAttachmentName);
 		}
 		if (disPosition != null && disPosition.equalsIgnoreCase(Part.ATTACHMENT)) {
-			File file = new File(folderPath + File.separator + fileName);
+			File file = new File(folderPath + File.separator + decodedAttachmentName);
 			file.getParentFile().mkdirs();
 			saveEmailAttachment(file, part);
 		}
 	}
 
-	protected int saveEmailAttachment(File saveFile, Part part) throws Exception {
+	private int saveEmailAttachment(File saveFile, Part part) throws IOException, MessagingException {
 
 		BufferedOutputStream bos = null;
-		InputStream is = null;
+		InputStream inputStream = null;
 		int ret = 0, count = 0;
 		try {
 			bos = new BufferedOutputStream(new FileOutputStream(saveFile));
 
-			byte[] buff = new byte[2048];
-			is = part.getInputStream();
-			while ((ret = is.read(buff)) > 0) {
+			byte[] buff = new byte[BUFFER_SIZE_2048];
+			inputStream = part.getInputStream();
+			ret = inputStream.read(buff);
+			while (ret > 0) {
 				bos.write(buff, 0, ret);
 				count += ret;
+				ret = inputStream.read(buff);
 			}
 		} finally {
 			try {
 				if (bos != null) {
 					bos.close();
 				}
-				if (is != null) {
-					is.close();
+				if (inputStream != null) {
+					inputStream.close();
 				}
 			} catch (IOException ioe) {
-				logger.error("Error while closing the stream.", ioe);
+				LOGGER.error("Error while closing the stream.", ioe);
 			}
 		}
 		return count;

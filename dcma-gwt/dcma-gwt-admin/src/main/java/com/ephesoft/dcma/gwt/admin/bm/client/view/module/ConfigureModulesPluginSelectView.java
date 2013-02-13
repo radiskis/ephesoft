@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.module;
 
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.module.ConfigureModulePluginsPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.view.MultipleSelectTwoSidedListBox;
@@ -52,50 +53,113 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
+/**
+ * This class provides functionality to configure module plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class ConfigureModulesPluginSelectView extends View<ConfigureModulePluginsPresenter> {
 
+	/**
+	 * SELECTED_PLUGINS String.
+	 */
 	private static final String SELECTED_PLUGINS = "Selected Plugins";
 
+	/**
+	 * AVAILABLE_PLUGINS String.
+	 */
 	private static final String AVAILABLE_PLUGINS = "Available Plugins";
 
-
+	/**
+	 * CANCEL String.
+	 */
 	private static final String CANCEL = "Cancel";
 
-	private static final String OK = "Ok";
-	
-	
+	/**
+	 * BUTTON_TEXT_OK String.
+	 */
+	private static final String BUTTON_TEXT_OK = "Ok";
+
+	/**
+	 * RESET String.
+	 */
+	private static final String RESET = "Reset";
+
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, ConfigureModulesPluginSelectView> {
 	}
 
-	MultipleSelectTwoSidedListBox multipleSelectTwoSidedListBox;
-	
-	HorizontalPanel twoSidedListBoxHorizontalPanel;
+	/**
+	 * multipleSelectTwoSidedListBox MultipleSelectTwoSidedListBox.
+	 */
+	protected MultipleSelectTwoSidedListBox multipleSelectTwoSidedListBox;
 
+	/**
+	 * twoSidedListBoxHorizontalPanel HorizontalPanel.
+	 */
+	protected HorizontalPanel twoSidedListBoxHorizontalPanel;
+
+	/**
+	 * buttonsHorizontalPanel HorizontalPanel.
+	 */
 	@UiField
-	HorizontalPanel buttonsHorizontalPanel;
+	protected HorizontalPanel buttonsHorizontalPanel;
 
+	/**
+	 * okButton Button.
+	 */
 	@UiField
-	Button okButton;
+	protected Button okButton;
 
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
+	/**
+	 * resetButton Button.
+	 */
 	@UiField
-	DockLayoutPanel customWorkflowVerticalPanel;
+	protected Button resetButton;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	/**
+	 * customWorkflowVerticalPanel DockLayoutPanel.
+	 */
+	@UiField
+	protected DockLayoutPanel customWorkflowVerticalPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+	private static final Binder BINDER = GWT.create(Binder.class);
+
+	/**
+	 * eventBus HandlerManager.
+	 */
 	private HandlerManager eventBus;
 
-	public ConfigureModulesPluginSelectView()
-	{
+	/**
+	 * Constructor.
+	 */
+	public ConfigureModulesPluginSelectView() {
 		this(null);
 	}
-	public ConfigureModulesPluginSelectView(HandlerManager eventBus) {
 
-		initWidget(binder.createAndBindUi(this));
+	/**
+	 * Constructor.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
+	public ConfigureModulesPluginSelectView(HandlerManager eventBus) {
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		multipleSelectTwoSidedListBox = new MultipleSelectTwoSidedListBox(eventBus);
-		customWorkflowVerticalPanel.addNorth(multipleSelectTwoSidedListBox, 300);
+		customWorkflowVerticalPanel.addNorth(multipleSelectTwoSidedListBox, BatchClassManagementConstants.THREE_HUNDRED);
 
 		addCSSStyle();
 		addFieldText();
@@ -106,38 +170,41 @@ public class ConfigureModulesPluginSelectView extends View<ConfigureModulePlugin
 				presenter.onPluginSelect();
 			}
 		});
-		
+
 		multipleSelectTwoSidedListBox.getRightHandSideListBox().addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent changeEvent) {
+				// On change
 			}
 		});
 
 	}
 
-	
-	
 	private void addFieldText() {
-		okButton.setText(OK);
+		okButton.setText(BUTTON_TEXT_OK);
 		cancelButton.setText(CANCEL);
+		resetButton.setText(RESET);
+		multipleSelectTwoSidedListBox.getAvailableLabel().setText(AVAILABLE_PLUGINS);
+		multipleSelectTwoSidedListBox.getSelectedLabel().setText(SELECTED_PLUGINS);
 	}
 
 	private void addCSSStyle() {
 
-		buttonsHorizontalPanel.setSpacing(30);
+		buttonsHorizontalPanel.setSpacing(BatchClassManagementConstants.THIRTY);
 		okButton.addStyleName("button-style");
 		cancelButton.addStyleName("button-style");
+		resetButton.addStyleName("button-style");
 
 		buttonsHorizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		buttonsHorizontalPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		customWorkflowVerticalPanel.addStyleName("mainPanelLayout");
-		multipleSelectTwoSidedListBox.getAvailableLabel().setText(AVAILABLE_PLUGINS);
-		multipleSelectTwoSidedListBox.getSelectedLabel().setText(SELECTED_PLUGINS);
-		
+
 	}
 
 	/**
+	 * To get Custom Workflow Vertical Panel.
+	 * 
 	 * @return the customWorkflowVerticalPanel
 	 */
 	public DockLayoutPanel getCustomWorkflowVerticalPanel() {
@@ -145,24 +212,48 @@ public class ConfigureModulesPluginSelectView extends View<ConfigureModulePlugin
 	}
 
 	/**
+	 * To get Multiple Select Two Sided List Box.
+	 * 
 	 * @return the multipleSelectTwoSidedListBox
 	 */
 	public MultipleSelectTwoSidedListBox getMultipleSelectTwoSidedListBox() {
 		return multipleSelectTwoSidedListBox;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("okButton")
 	public void onOkClicked(ClickEvent clickEvent) {
 		presenter.setBatchClassDTOPluginsList(getMultipleSelectTwoSidedListBox().getAllValuesMapFromList(
 				getMultipleSelectTwoSidedListBox().getRightHandSideListBox()));
 	}
 
+	/**
+	 * To perform operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
+		presenter.onCancelButtonClicked();
+	}
+
+	/**
+	 * To perform operations on reset click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("resetButton")
+	public void onResetClicked(ClickEvent clickEvent) {
 		presenter.bind();
 	}
 
 	/**
+	 * To get Event Bus.
+	 * 
 	 * @return the eventBus
 	 */
 	public HandlerManager getEventBus() {
@@ -170,7 +261,9 @@ public class ConfigureModulesPluginSelectView extends View<ConfigureModulePlugin
 	}
 
 	/**
-	 * @param eventBus the eventBus to set
+	 * To set Event Bus.
+	 * 
+	 * @param eventBus HandlerManager
 	 */
 	public void setEventBus(HandlerManager eventBus) {
 		this.eventBus = eventBus;

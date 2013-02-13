@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,11 +45,31 @@ import com.ephesoft.dcma.gwt.core.shared.ModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the module view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class ModuleViewPresenter extends AbstractBatchClassPresenter<ModuleView> {
 
+	/**
+	 * moduleDetailPresenter ModuleDetailPresenter.
+	 */
 	private final ModuleDetailPresenter moduleDetailPresenter;
+
+	/**
+	 * editModulePresenter EditModulePresenter.
+	 */
 	private final EditModulePresenter editModulePresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view ModuleView
+	 */
 	public ModuleViewPresenter(final BatchClassManagementController controller, ModuleView view) {
 		super(controller, view);
 
@@ -57,56 +77,97 @@ public class ModuleViewPresenter extends AbstractBatchClassPresenter<ModuleView>
 		this.editModulePresenter = new EditModulePresenter(controller, view.getEditModuleView());
 	}
 
+	/**
+	 * To perform binding in case of detail view clicked.
+	 */
 	public void onDetailViewClicked() {
 		moduleDetailPresenter.bind();
 	}
 
+	/**
+	 * To get Module Detail Presenter.
+	 * 
+	 * @return ModuleDetailPresenter
+	 */
 	public ModuleDetailPresenter getModuleDetailPresenter() {
 		return moduleDetailPresenter;
 	}
 
+	/**
+	 * To fire event on module selection.
+	 * 
+	 * @param module ModuleDTO
+	 */
 	public void onModuleSelection(ModuleDTO module) {
 		controller.getEventBus().fireEvent(new ModuleEvent(Action.SELECT, module));
 	}
 
+	/**
+	 * To fire event on plugin selection.
+	 * 
+	 * @param plugin PluginDetailsDTO
+	 */
 	public void onPluginSelection(PluginDetailsDTO plugin) {
 		controller.getEventBus().fireEvent(new PluginEvent(Action.SELECT, plugin));
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		this.moduleDetailPresenter.bind();
-		this.editModulePresenter.bind();
 		if (controller.getSelectedModule() != null) {
 			view.createPluginList(controller.getSelectedModule().getBatchClassPlugins());
 		}
+		this.editModulePresenter.bind();
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * To show Module Detail View.
+	 */
 	public void showModuleDetailView() {
 		view.getEditModuleViewPanel().setVisible(Boolean.FALSE);
 		view.getModuleDetailViewPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To do binding in case of edit module button click.
+	 */
 	public void onEditModuleButtonClick() {
-		editModulePresenter.bind();
-		view.getEditModuleViewPanel().setVisible(Boolean.TRUE);
 		view.getModuleDetailViewPanel().setVisible(Boolean.FALSE);
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		view.getEditModuleViewPanel().setVisible(Boolean.TRUE);
+		editModulePresenter.bind();
 	}
 
+	/**
+	 * To get edit module presenter.
+	 * 
+	 * @return EditModulePresenter
+	 */
 	public EditModulePresenter getEditModulePresenter() {
 		return editModulePresenter;
 	}
 
+	/**
+	 * To set add button enable.
+	 * 
+	 * @param enable boolean
+	 */
 	public void setAddButtonEnable(boolean enable) {
-		view.getAddPlugin().setEnabled(enable);
-		view.getEditPlugin().setEnabled(!enable);
+	
 	}
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,9 @@ package com.ephesoft.dcma.kvfieldcreation.constant;
  */
 public interface KVFieldCreatorConstants {
 
+	/**
+	 * String constant for checking value of switch as "ON".
+	 */
 	String SWITCH_ON = "ON";
 
 	/**
@@ -110,5 +113,21 @@ public interface KVFieldCreatorConstants {
 	 * Value to be specified in pixels.
 	 */
 	Integer DEFAULT_GAP_BETWEEN_KEYS = 50;
-
+	
+	/**
+	 * Path of exclusion regex property file .
+	 */
+	String EXCLUSION_REGEX_FILE_PATH  = "/META-INF/dcma-key-value-learning/key_exclusion_list.properties";
+	/**
+	 * Constant value of "100" used in calculations.
+	 */
+	int CONSTANT_VALUE_100 = 100;
+	/**
+	 * Message shown during process of key creation.
+	 */
+	String MSG_KEY_CREATION = "Creating key at location : ";
+	/**
+	 * KV field learning plug in name.
+	 */
+	String KV_FIELD_LEARNING_PLUGIN = "KEY_VALUE_LEARNING_PLUGIN";
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,25 +51,39 @@ import javax.persistence.Transient;
  * fields.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see javax.persistence.MappedSuperclass
  */
 @MappedSuperclass
 public class AbstractEntity implements DomainEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
-	/** This object's id */
+	/**
+	 * id long.
+	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	protected long id;
 
+	/**
+	 * creationDate Date.
+	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="creation_date", nullable = false, updatable=false)
 	private Date creationDate = new Date();
 
+	/**
+	 * entityState EntityState.
+	 */
 	@Transient
 	private EntityState entityState;
 
 	/**
+	 * To get id.
 	 * @return the id
 	 */
 	public long getId() {
@@ -77,6 +91,7 @@ public class AbstractEntity implements DomainEntity {
 	}
 
 	/**
+	 * To set id.
 	 * @param id the id to set
 	 */
 	public void setId(long id) {
@@ -84,6 +99,7 @@ public class AbstractEntity implements DomainEntity {
 	}
 
 	/**
+	 * To get creation date.
 	 * @return the creationDate
 	 */
 	public Date getCreationDate() {
@@ -91,22 +107,34 @@ public class AbstractEntity implements DomainEntity {
 	}
 
 	/**
-	 * @param creationDate the creationDate to set
+	 * To set creation date.
+	 * @param creationDate Date
 	 */
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
+	/**
+	 * To get entity name.
+	 * @return EntityState
+	 */
 	@Override
 	public EntityState getEntityState() {
 		return entityState;
 	}
 
+	/**
+	 * To set entity name.
+	 * @param entityState EntityState
+	 */
 	@Override
 	public void setEntityState(EntityState entityState) {
 		this.entityState =  entityState;
 	}
 	
+	/**
+	 * To persist values other than in pojo.
+	 */
 	public void postPersist() {
 		// Explicitly kept the method as empty
 	}

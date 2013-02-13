@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,9 +38,12 @@ package com.ephesoft.dcma.gwt.core.client.ui.table;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.OrderingListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableTextBox;
+import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,6 +62,8 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 class NavBar extends Composite {
@@ -72,14 +77,28 @@ class NavBar extends Composite {
 		ImageResource nextPage();
 
 		ImageResource previousPage();
+
+		ImageResource upRecord();
+
+		ImageResource downRecord();
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	@UiField
-	Anchor newerButton;
+	protected HTMLPanel paginationPanel;
+
 	@UiField
-	Anchor olderButton;
+	protected HTMLPanel orderingPanel;
+
+	@UiField
+	protected Anchor newerButton;
+	@UiField
+	protected Anchor olderButton;
+	@UiField
+	protected Anchor upButton;
+	@UiField
+	protected Anchor downButton;
 
 	enum Pagination {
 		NONE, NEWER, OLDER;
@@ -87,13 +106,11 @@ class NavBar extends Composite {
 
 	private Order order;
 
-	private PaginationListner listner;
+	private PaginationListner paginationListner;
 
-	Pagination pagination = Pagination.NONE;
+	private OrderingListner orderingListner;
 
 	private int startIndex;
-	// private int endIndex;
-	// private int count;
 
 	private String countString;
 
@@ -101,21 +118,31 @@ class NavBar extends Composite {
 
 	private Integer totalPageCount;
 
-	private Table table;
+	private final Table table;
 
-	private ValidatableTextBox searchPageTextBox;
+	private TextBox searchPageTextBox;
+
+	private final ValidatableWidget<TextBox> pageNumberValidatableWidget;
 
 	public NavBar(final Table table) {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		this.table = table;
 		Images images = GWT.create(Images.class);
 		DOM.setInnerHTML(newerButton.getElement(), AbstractImagePrototype.create(images.previousPage()).getHTML());
 		DOM.setInnerHTML(olderButton.getElement(), AbstractImagePrototype.create(images.nextPage()).getHTML());
-		countString = new String();
-		newerButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_previous));
-		olderButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_next));
-		searchPageTextBox = new ValidatableTextBox();
-		searchPageTextBox.addValidator(new NumberValidator(searchPageTextBox, false, true));
+		DOM.setInnerHTML(upButton.getElement(), AbstractImagePrototype.create(images.upRecord()).getHTML());
+		DOM.setInnerHTML(downButton.getElement(), AbstractImagePrototype.create(images.downRecord()).getHTML());
+
+		//countString = new String();
+		newerButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_PREVIOUS));
+		olderButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_NEXT));
+		upButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.UP_RECORD));
+		downButton.setTitle(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.DOWN_RECORD));
+
+		searchPageTextBox = new TextBox();
+		pageNumberValidatableWidget = new ValidatableWidget<TextBox>(searchPageTextBox, true);
+		pageNumberValidatableWidget.addValidator(new NumberValidator(searchPageTextBox, false, true));
 		searchPageTextBox.setText("1");
 		searchPageTextBox.setWidth("30px");
 		searchPageTextBox.addKeyPressHandler(new KeyPressHandler() {
@@ -124,7 +151,8 @@ class NavBar extends Composite {
 			public void onKeyPress(KeyPressEvent event) {
 				String pageNo = searchPageTextBox.getText();
 				char keyCode = event.getCharCode();
-				if (keyCode == KeyCodes.KEY_ENTER && checkTextEntered(pageNo) && searchPageTextBox.validate()) {
+				pageNumberValidatableWidget.toggleValidDateBox();
+				if (keyCode == KeyCodes.KEY_ENTER && checkTextEntered(pageNo) && pageNumberValidatableWidget.validate()) {
 					moveToEnteredPage(pageNo);
 				}
 			}
@@ -134,24 +162,33 @@ class NavBar extends Composite {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> arg0) {
-				searchPageTextBox.toggleValidDateBox();
+				pageNumberValidatableWidget.toggleValidDateBox();
 			}
 		});
 	}
 
-	private void moveToEnteredPage(String pageNo) {
+	public void moveToEnteredPage(String pageNo) {
+		int startIndex = goToPage(pageNo);
+		paginationListner.onPagination(startIndex, Table.visibleRecodrCount, order);
+	}
+
+	/**
+	 * @param pageNo
+	 * @return
+	 */
+	private int goToPage(String pageNo) {
 		int currentPageNo = Integer.parseInt(pageNo) - 1;
 		int totalPageCountLocal = totalPageCount > 0 ? (totalPageCount - 1) : totalPageCount;
 		int startIndex = 0;
 		if (currentPageNo < 0) {
 			searchPageTextBox.setText("1");
 		} else if (currentPageNo > totalPageCountLocal) {
-			startIndex = totalPageCountLocal * Table.VISIBLE_RECORD_COUNT;
+			startIndex = totalPageCountLocal * Table.visibleRecodrCount;
 			searchPageTextBox.setText(totalPageCount.toString());
 		} else {
-			startIndex = currentPageNo * Table.VISIBLE_RECORD_COUNT;
+			startIndex = currentPageNo * Table.visibleRecodrCount;
 		}
-		listner.onPagination(startIndex, Table.VISIBLE_RECORD_COUNT, order);
+		return startIndex;
 	}
 
 	private boolean checkTextEntered(String pageNo) {
@@ -164,8 +201,8 @@ class NavBar extends Composite {
 
 	public void update(int startIndex, int count, int max) {
 		this.startIndex = startIndex;
-		this.currentPageNumber = getCurrentPageNumber(startIndex, Table.VISIBLE_RECORD_COUNT);
-		this.totalPageCount = getTotalPageCount(count, Table.VISIBLE_RECORD_COUNT);
+		this.currentPageNumber = getCurrentPageNumber(startIndex, Table.visibleRecodrCount);
+		this.totalPageCount = getTotalPageCount(count, Table.visibleRecodrCount);
 		if (totalPageCount == 0) {
 			searchPageTextBox.setText(totalPageCount.toString());
 		} else {
@@ -175,9 +212,10 @@ class NavBar extends Composite {
 		// this.count = count;
 
 		setVisibility(newerButton, startIndex != 0);
-		setVisibility(olderButton, startIndex + Table.VISIBLE_RECORD_COUNT < count);
-		String displayingText = LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_displaying);
-		if (listner != null) {
+		setVisibility(olderButton, startIndex + Table.visibleRecodrCount < count);
+		updateOrderingPanel();
+		String displayingText = LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_DISPLAYING);
+		if (paginationListner != null) {
 			countString = displayingText + (startIndex + 1) + " - " + max + " of " + count;
 		} else {
 			countString = displayingText + (startIndex + 1) + " - " + count + " of " + count;
@@ -186,6 +224,11 @@ class NavBar extends Composite {
 			countString = displayingText + (startIndex) + " - " + count + " of " + count;
 		}
 		// countLabel.setInnerText("" + (startIndex + 1) + " - " + max + " of " + count);
+	}
+
+	public void updateOrderingPanel() {
+		setVisibility(upButton, newerButton.isVisible() || table.getSelectedIndex() > 0);
+		setVisibility(downButton, olderButton.isVisible() || table.getSelectedIndex() < 0);
 	}
 
 	private int getTotalPageCount(int count, int max) {
@@ -207,32 +250,67 @@ class NavBar extends Composite {
 	}
 
 	@UiHandler("newerButton")
-	void onNewerClicked(ClickEvent event) {
-		pagination = Pagination.NEWER;
-		startIndex = startIndex - Table.VISIBLE_RECORD_COUNT;
+	protected void onNewerClicked(ClickEvent event) {
+		startIndex = startIndex - Table.visibleRecodrCount;
 		if (startIndex <= 0) {
 			startIndex = 0;
 		}
-		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.VISIBLE_RECORD_COUNT).toString());
-		listner.onPagination(startIndex, Table.VISIBLE_RECORD_COUNT, order);
+		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.visibleRecodrCount).toString());
+		paginationListner.onPagination(startIndex, Table.visibleRecodrCount, order);
 		table.scrollPanel.scrollToTop();
 	}
 
 	@UiHandler("olderButton")
-	void onOlderClicked(ClickEvent event) {
-		pagination = Pagination.OLDER;
-		startIndex = startIndex + Table.VISIBLE_RECORD_COUNT;
-		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.VISIBLE_RECORD_COUNT).toString());
-		listner.onPagination(startIndex, Table.VISIBLE_RECORD_COUNT, order);
+	protected void onOlderClicked(ClickEvent event) {
+		startIndex = startIndex + Table.visibleRecodrCount;
+		searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.visibleRecodrCount).toString());
+		paginationListner.onPagination(startIndex, Table.visibleRecodrCount, order);
 		table.scrollPanel.scrollToTop();
+	}
+
+	@UiHandler("upButton")
+	protected void onUpClicked(ClickEvent event) {
+		if (orderingListner != null) {
+			ScreenMaskUtility.maskScreen();
+			String selectedRowId = table.getSelectedRowId();
+			int selectedRecordIndex = table.getSelectedIndex();
+			int swapIndex = -1;
+			if (currentPageNumber > 1 && selectedRecordIndex == 0) {
+				startIndex = startIndex - Table.visibleRecodrCount;
+				if (startIndex <= 0) {
+					startIndex = 0;
+				}
+				searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.visibleRecodrCount).toString());
+				table.scrollPanel.scrollToBottom();
+			}
+			orderingListner.onOrdering(startIndex, Table.visibleRecodrCount, selectedRowId, swapIndex, selectedRecordIndex);
+			ScreenMaskUtility.unmaskScreen();
+		}
+	}
+
+	@UiHandler("downButton")
+	protected void onDownClicked(ClickEvent event) {
+		if (orderingListner != null) {
+			ScreenMaskUtility.maskScreen();
+			String selectedRowId = table.getSelectedRowId();
+			int selectedRecordIndex = table.getSelectedIndex();
+			int swapIndex = 1;
+			if (currentPageNumber < totalPageCount && selectedRecordIndex == Table.visibleRecodrCount - 1) {
+				startIndex = startIndex + Table.visibleRecodrCount;
+				searchPageTextBox.setText(getCurrentPageNumber(startIndex, Table.visibleRecodrCount).toString());
+				table.scrollPanel.scrollToTop();
+			}
+			orderingListner.onOrdering(startIndex, Table.visibleRecodrCount, selectedRowId, swapIndex, selectedRecordIndex);
+			ScreenMaskUtility.unmaskScreen();
+		}
 	}
 
 	private void setVisibility(Widget widget, boolean visible) {
 		widget.getElement().getStyle().setVisibility(visible ? Visibility.VISIBLE : Visibility.HIDDEN);
 	}
 
-	public void setListner(PaginationListner paginationListner) {
-		this.listner = paginationListner;
+	public void setPaginationListner(PaginationListner paginationListner) {
+		this.paginationListner = paginationListner;
 	}
 
 	public String getCountString() {
@@ -240,7 +318,7 @@ class NavBar extends Composite {
 	}
 
 	public PaginationListner getListner() {
-		return listner;
+		return paginationListner;
 	}
 
 	public int getStartIndex() {
@@ -267,11 +345,47 @@ class NavBar extends Composite {
 		this.totalPageCount = totalPageCount;
 	}
 
-	public ValidatableTextBox getSearchPageTextBox() {
+	public TextBox getSearchPageTextBox() {
 		return searchPageTextBox;
 	}
 
 	public void setSearchPageTextBox(ValidatableTextBox searchPageTextBox) {
 		this.searchPageTextBox = searchPageTextBox;
 	}
+
+	/**
+	 * @return the pageNumberValidatableWidget
+	 */
+	public ValidatableWidget<TextBox> getPageNumberValidatableWidget() {
+		return pageNumberValidatableWidget;
+	}
+
+	/**
+	 * @return the orderingListner
+	 */
+	public OrderingListner getOrderingListner() {
+		return orderingListner;
+	}
+
+	/**
+	 * @param orderingListner the orderingListner to set
+	 */
+	public void setOrderingListner(OrderingListner orderingListner) {
+		this.orderingListner = orderingListner;
+	}
+
+	/**
+	 * @return paginationPanel
+	 */
+	public HTMLPanel getPaginationPanel() {
+		return paginationPanel;
+	}
+
+	/**
+	 * @return orderingPanel
+	 */
+	public HTMLPanel getOrderingPanel() {
+		return orderingPanel;
+	}
+
 }

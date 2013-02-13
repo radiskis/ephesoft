@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassCloudConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -112,4 +113,21 @@ public interface UploadBatchServiceAsync extends DCMARemoteServiceAsync {
 	 * @param callback {@link AsyncCallback}< {@link String} >
 	 */
 	void getCurrentBatchFolderName(AsyncCallback<String> asyncCallback);
+	
+	
+	/**
+	 * The <code>getBatchClassImageLimit</code> method is used to get batch class
+	 * instance image limit.
+	 * 
+	 * @param callback {@link AsyncCallback}< Map<{@link String},{@link BatchClassCloudConfigDTO}> >
+	 */
+	void getBatchClassImageLimit(AsyncCallback<Map<String, BatchClassCloudConfigDTO>> asyncCallback);
+	
+	/**
+	 * The <code>getFileSizeLimit</code> method is used for getting upload
+	 * file limit.
+	 * 
+	 * @param callback {@link AsyncCallback}< {@link Long} >
+	 */
+	void getFileSizeLimit(AsyncCallback<Long> asyncCallBack);
 }

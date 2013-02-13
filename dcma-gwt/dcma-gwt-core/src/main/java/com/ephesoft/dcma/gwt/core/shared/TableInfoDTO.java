@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,22 +42,36 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class TableInfoDTO implements IsSerializable {
-	
+
 	private DocumentTypeDTO docTypeDTO;
 
 	private String name;
-	
+
 	private String identifier;
 
 	private String startPattern;
 
 	private String endPattern;
-	
-	private boolean isNew;
-	
-	private boolean isDeleted;
-	
+
+	private boolean newTableInfo;
+
+	private boolean deleted;
+
+	private String tableExtractionAPI;
+
+	private String widthOfMultiline;
+
 	private List<TableColumnInfoDTO> columnInfoDTOs = new ArrayList<TableColumnInfoDTO>();
+
+	private String displayImage;
+
+	public String getDisplayImage() {
+		return displayImage;
+	}
+
+	public void setDisplayImage(String displayImage) {
+		this.displayImage = displayImage;
+	}
 
 	public DocumentTypeDTO getDocTypeDTO() {
 		return docTypeDTO;
@@ -92,9 +106,11 @@ public class TableInfoDTO implements IsSerializable {
 	}
 
 	public List<TableColumnInfoDTO> getColumnInfoDTOs(boolean includeDeleted) {
-		if (includeDeleted)
-			return columnInfoDTOs;
-		return getColumnInfoDTOs();
+		List<TableColumnInfoDTO> tableColumnInfoDTOs = getColumnInfoDTOs();
+		if (includeDeleted) {
+			tableColumnInfoDTOs = columnInfoDTOs;
+		}
+		return tableColumnInfoDTOs;
 	}
 
 	public List<TableColumnInfoDTO> getColumnInfoDTOs() {
@@ -110,14 +126,17 @@ public class TableInfoDTO implements IsSerializable {
 	public void setColumnInfoDTOs(List<TableColumnInfoDTO> columnInfoDTOs) {
 		this.columnInfoDTOs = columnInfoDTOs;
 	}
+
 	public void addColumnInfo(TableColumnInfoDTO columnInfoDTO) {
 		columnInfoDTOs.add(columnInfoDTO);
 	}
-	
+
 	public List<TableColumnInfoDTO> getTableColumnInfoList(boolean includeDeleted) {
-		if (includeDeleted)
-			return columnInfoDTOs;
-		return getTableColumnInfoList();
+		List<TableColumnInfoDTO> tableColumnInfoDTOs = getTableColumnInfoList();
+		if (includeDeleted) {
+			tableColumnInfoDTOs = columnInfoDTOs;
+		}
+		return tableColumnInfoDTOs;
 	}
 
 	public List<TableColumnInfoDTO> getTableColumnInfoList() {
@@ -130,46 +149,63 @@ public class TableInfoDTO implements IsSerializable {
 		return tableColumnInfoDTOs;
 	}
 
-	
 	public String getIdentifier() {
 		return identifier;
 	}
-	
+
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
-	
+
 	public boolean isNew() {
-		return isNew;
+		return newTableInfo;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newTableInfo) {
+		this.newTableInfo = newTableInfo;
 	}
-	
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
-	
+
 	public TableColumnInfoDTO getTCInfoDTOByIdentifier(String identifier) {
+		TableColumnInfoDTO tableColumnInfoDTO = null;
 		for (TableColumnInfoDTO columnInfoDTO : columnInfoDTOs) {
-			if (columnInfoDTO.getIdentifier().equals(identifier))
-				return columnInfoDTO;
+			if (columnInfoDTO.getIdentifier().equals(identifier)) {
+				tableColumnInfoDTO = columnInfoDTO;
+			}
 		}
-		return null;
+		return tableColumnInfoDTO;
 	}
-	
+
 	public TableColumnInfoDTO getTCInfoDTOByNameAndPattern(String name, String pattern) {
+		TableColumnInfoDTO tableColumnInfoDTO = null;
 		for (TableColumnInfoDTO columnInfoDTO : columnInfoDTOs) {
-			if (columnInfoDTO.getColumnName().equals(name) && columnInfoDTO.getColumnPattern().equals(pattern))
-				return columnInfoDTO;
+			if (columnInfoDTO.getColumnName().equals(name) && columnInfoDTO.getColumnPattern().equals(pattern)) {
+				tableColumnInfoDTO = columnInfoDTO;
+			}
 		}
-		return null;
+		return tableColumnInfoDTO;
 	}
 
+	public String getTableExtractionAPI() {
+		return tableExtractionAPI;
+	}
 
+	public void setTableExtractionAPI(String tableExtractionAPI) {
+		this.tableExtractionAPI = tableExtractionAPI;
+	}
+
+	public String getWidthOfMultiline() {
+		return widthOfMultiline;
+	}
+
+	public void setWidthOfMultiline(String widthOfMultiline) {
+		this.widthOfMultiline = widthOfMultiline;
+	}
 }

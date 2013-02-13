@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,8 +35,6 @@
 
 package com.ephesoft.dcma.script;
 
-import org.w3c.dom.Document;
-
 /**
  * The <code>IScripts</code> interface represents the script execute structure. Writer of scripts plug-in should implement this IScript
  * interface to execute it from the scripting plug-in. Via implementing this interface writer can change its java file at run time.
@@ -51,9 +49,10 @@ public interface IScripts {
 	 * The <code>execute</code> method will execute the script written by the writer at run time with new compilation of java file. It
 	 * will execute the java file dynamically after new compilation.
 	 * 
-	 * @param document {@link Document}
+	 * @param document {@link org.w3c.dom.Document}
 	 * @param methodName {@link String}
 	 * @param docIdentifier {@link String}
+	 * @return Object
 	 */
 	Object execute(org.w3c.dom.Document document, String methodName, String docIdentifier);
 }

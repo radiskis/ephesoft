@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,50 @@ import java.util.Properties;
 
 import org.springframework.core.io.ClassPathResource;
 
-public class ApplicationConfigProperties {
+import com.ephesoft.dcma.constant.UtilConstants;
 
+/**
+ * This class handles Application Config Properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.springframework.core.io.ClassPathResource
+ */
+public final class ApplicationConfigProperties {
+
+	/**
+	 * serialVersionUID, constant long.
+	 */
 	private static final long serialVersionUID = 1L;
-	private static final String APPLICATION_PROPERTY_NAME = "application";
-	private static final String META_INF = "META-INF";
-	private Properties properties;
-	private static ApplicationConfigProperties applicationConfigProperties = null;
+	
+	/**
+	 * properties Properties.
+	 */
+	private final Properties properties;
 
+	/**
+	 * applicationConfigurationProperties ApplicationConfigProperties.
+	 */
+	private static ApplicationConfigProperties applicationConfigurationProperties = null;
+
+	/**
+	 * To get properties.
+	 * @return properties
+	 */
+	public Properties getProperties() {
+		return properties;
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @throws IOException {@link IOException} while reading from the file.
+	 */
 	private ApplicationConfigProperties() throws IOException {
 		InputStream propertyInStream = null;
 		this.properties = new Properties();
 		try {
-			String filePath = META_INF + File.separator + APPLICATION_PROPERTY_NAME + ".properties";
+			String filePath = UtilConstants.META_INF + File.separator + UtilConstants.APPLICATION_PROPERTY_NAME + ".properties";
 			propertyInStream = new ClassPathResource(filePath).getInputStream();
 			this.properties.load(propertyInStream);
 		} finally {
@@ -64,15 +95,54 @@ public class ApplicationConfigProperties {
 		}
 	}
 
-	public static ApplicationConfigProperties getApplicationConfigProperties() throws IOException {
-		if (applicationConfigProperties == null) {
-			applicationConfigProperties = new ApplicationConfigProperties();
+	/**
+	 * This method gets all the properties.
+	 * 
+	 * @param propertyFileName {@link String}
+	 * @return Properties
+	 * @throws IOException while reading from the file.
+	 */
+	public Properties getAllProperties(String propertyFileName) throws IOException {
+		InputStream propertyInStream = null;
+		Properties properties = new Properties();
+		try {
+			String filePath = UtilConstants.META_INF + File.separator + propertyFileName + ".properties";
+			propertyInStream = new ClassPathResource(filePath).getInputStream();
+			properties.load(propertyInStream);
+		} finally {
+			if (propertyInStream != null) {
+				propertyInStream.close();
+			}
 		}
-		return applicationConfigProperties;
+		return properties;
 	}
 
+	/**
+	 * This method gets Application Configuration Properties.
+	 * 
+	 * @return ApplicationConfigProperties
+	 * @throws IOException {@link IOException}
+	 */
+	public static ApplicationConfigProperties getApplicationConfigProperties() throws IOException {
+		if (applicationConfigurationProperties == null) {
+			synchronized (ApplicationConfigProperties.class) {
+				if (applicationConfigurationProperties == null) {
+					applicationConfigurationProperties = new ApplicationConfigProperties();
+				}
+			}
+		}
+		return applicationConfigurationProperties;
+	}
+
+	/**
+	 * This method gets the property.
+	 * 
+	 * @param propertyKey {@link String}
+	 * @return {@link String}
+	 * @throws IOException {@link IOException}
+	 */
 	public String getProperty(String propertyKey) throws IOException {
-		return applicationConfigProperties.properties.getProperty(propertyKey);
+		return applicationConfigurationProperties.properties.getProperty(propertyKey);
 	}
 
 }

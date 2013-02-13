@@ -15,29 +15,43 @@
 <!-- limitations under the License.                                         -->
 
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=8" />
-    
-    <link type="text/css" rel="stylesheet" href="WebScanner.css">
-    <link type="text/css" rel="stylesheet" href="EpheSoft.css">
-    
-    <title>Web Scanner</title>
-    <script type="text/javascript" language='javascript' src='webscanner/webscanner.nocache.js'></script>
-    
-    <script type="text/javascript" language="javascript" src="i18n/common/locale.js"></script>
-    <script type="text/javascript" language="javascript" src="i18n/webscanner/locale.js"></script>
-    
-     <script type="text/javascript" language="javascript" src="utility.js"></script>
-  </head>
-  <body>
-    <noscript>
-      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color:white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
-      </div>
-      <div id="appletPlaceHolder" align="center">
-      </div>
-    </noscript>
-  </body>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<link type="text/css" rel="stylesheet" href="WebScanner.css">
+<link type="text/css" rel="stylesheet" href="EpheSoft.css">
+
+<title>Web Scanner</title>
+<script type="text/javascript" language='javascript'
+src='webscanner/webscanner.nocache.js'></script>
+
+<script type="text/javascript" language="javascript"
+src="i18n/common/locale.js"></script>
+<script type="text/javascript" language="javascript"
+src="i18n/webscanner/locale.js"></script>
+
+<script type="text/javascript" language="javascript" src="utility.js"></script>
+
+<script type="text/javascript" language="javascript">
+	/*
+	* To destroy any loaded web scanner applet and drivers before page reloads or close. 
+	*/
+	function destroyWebScannerApplet() {	
+		window.document.webScannerApplet.destroyAll();
+		return;
+	}
+</script>
+</head>
+<body onbeforeunload = "return destroyWebScannerApplet()">
+<applet id='webScannerApplet'
+	code='com/ephesoft/dcma/twain/EphesoftWebScanner.class'
+	name='webScannerApplet' archive='dcma-twain-scanner.jar,jna.jar'
+	width='0%' height='0%' />
+	<noscript>
+	<div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+	Your web browser must have JavaScript enabled in order for this
+	application to display correctly.</div>
+	</noscript>
+</body>
 </html>

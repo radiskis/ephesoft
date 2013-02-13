@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,28 +43,76 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show cmis importer list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EmailListView extends View<EmailListPresenter> {
 
+	/**
+	 * To get Email List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getEmailListView() {
 		return listView;
 	}
 
+	/**
+	 * userName HeaderColumn.
+	 */
 	public HeaderColumn userName = new HeaderColumn(1,
-			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.USERNAME), 15, true, EmailProperty.USERNAME);
-	public HeaderColumn password = new HeaderColumn(2,
-			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PASSWORD), 10, true, EmailProperty.PASSWORD);
-	public HeaderColumn serverName = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.SERVER_NAME), 10, true, EmailProperty.SERVERNAME);
-	public HeaderColumn serverType = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.SERVER_TYPE), 10, true, EmailProperty.SERVERTYPE);
-	public HeaderColumn folderName = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.FOLDER_NAME), 10, true, EmailProperty.FOLDERNAME);
-	public HeaderColumn isSSL = new HeaderColumn(6, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.ISSSL), 10);
-	public HeaderColumn portNumbner = new HeaderColumn(7, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.PORTNUMBER), 10, true, EmailProperty.PORTNUMBER);
+			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.USERNAME), BatchClassManagementConstants.FIFTEEN,
+			true, EmailProperty.USERNAME);
 
+	/**
+	 * password HeaderColumn.
+	 */
+	public HeaderColumn password = new HeaderColumn(2,
+			LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PASSWORD), BatchClassManagementConstants.TEN, true,
+			EmailProperty.PASSWORD);
+
+	/**
+	 * serverName HeaderColumn.
+	 */
+	public HeaderColumn serverName = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.SERVER_NAME), BatchClassManagementConstants.TEN, true, EmailProperty.SERVERNAME);
+
+	/**
+	 * serverType HeaderColumn.
+	 */
+	public HeaderColumn serverType = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.SERVER_TYPE), BatchClassManagementConstants.TEN, true, EmailProperty.SERVERTYPE);
+
+	/**
+	 * folderName HeaderColumn.
+	 */
+	public HeaderColumn folderName = new HeaderColumn(BatchClassManagementConstants.FIVE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.FOLDER_NAME), BatchClassManagementConstants.TEN, true, EmailProperty.FOLDERNAME);
+
+	/**
+	 * isSSL HeaderColumn.
+	 */
+	public HeaderColumn isSSL = new HeaderColumn(BatchClassManagementConstants.SIX, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.ISSSL), BatchClassManagementConstants.TEN);
+
+	/**
+	 * portNumbner HeaderColumn.
+	 */
+	public HeaderColumn portNumbner = new HeaderColumn(BatchClassManagementConstants.SEVEN, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.PORTNUMBER), BatchClassManagementConstants.TEN, true, EmailProperty.PORTNUMBER);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public EmailListView() {
 		super();
 		listView.addHeaderColumns(userName, password, serverName, serverType, folderName, isSSL, portNumbner);

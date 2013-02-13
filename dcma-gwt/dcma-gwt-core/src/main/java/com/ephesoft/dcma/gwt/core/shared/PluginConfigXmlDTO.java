@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,10 +43,11 @@ public class PluginConfigXmlDTO implements IsSerializable {
 
 	private String pluginPropertyName;
 	private String pluginPropertyType;
-	private Boolean pluginPropertyIsMandetory;
+	private Boolean pluginPropertyIsMandatory;
 	private Boolean pluginPropertyIsMultiValues;
 	private String pluginPropertyDesc;
 	private List<String> pluginPropertySampleValues;
+	private String operation;
 
 	/**
 	 * @return the pluginPropertyName
@@ -80,15 +81,15 @@ public class PluginConfigXmlDTO implements IsSerializable {
 	/**
 	 * @return the pluginPropertyIsMandetory
 	 */
-	public Boolean getPluginPropertyIsMandetory() {
-		return pluginPropertyIsMandetory;
+	public Boolean getPluginPropertyIsMandatory() {
+		return pluginPropertyIsMandatory;
 	}
 
 	/**
 	 * @param pluginPropertyIsMandetory the pluginPropertyIsMandetory to set
 	 */
-	public void setPluginPropertyIsMandetory(Boolean pluginPropertyIsMandetory) {
-		this.pluginPropertyIsMandetory = pluginPropertyIsMandetory;
+	public void setPluginPropertyIsMandatory(Boolean pluginPropertyIsMandetory) {
+		this.pluginPropertyIsMandatory = pluginPropertyIsMandetory;
 	}
 
 	/**
@@ -135,5 +136,19 @@ public class PluginConfigXmlDTO implements IsSerializable {
 	 */
 	public void setPluginPropertySampleValues(List<String> pluginPropertySampleValues) {
 		this.pluginPropertySampleValues = pluginPropertySampleValues;
+	}
+	
+	/**
+	 * @return the operation
+	 */
+	public String getOperation() {
+		return operation;
+	}
+	
+	/**
+	 * @param operation the operation to set
+	 */
+	public void setOperation(String operation) {
+		this.operation = operation;
 	}
 }

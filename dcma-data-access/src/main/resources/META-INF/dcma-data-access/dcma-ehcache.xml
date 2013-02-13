@@ -204,4 +204,11 @@ properties="hostName=localhost, port=port_number,socketTimeoutMillis=2000"/>
 			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
 			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
 	</cache>
+   <cache name="com.ephesoft.dcma.da.domain.BatchClassScannerConfiguration"
+		maxElementsInMemory="10000" eternal="false" timeToIdleSeconds="3600"
+		timeToLiveSeconds="86400">
+		<cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=true,replicatePuts=true,replicateUpdates=true,replicateUpdatesViaCopy=true,replicateRemovals=true " />
+	</cache>
 </ehcache>

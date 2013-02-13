@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,11 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
+ * This class is used to create a batch class event when the user saves or cancels the changes made in a Batch Class.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Used to create a batch class event. Created when the user save's or cancel's the changes made in a Batch Class.
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
  */
 public class BatchClassEvent extends GwtEvent<BatchClassHandler> {
 
@@ -58,16 +57,28 @@ public class BatchClassEvent extends GwtEvent<BatchClassHandler> {
 	 * Action taken.
 	 */
 	private final Action action;
+	
 	/**
 	 * Batch Class the user is working on.
 	 */
 	private BatchClassDTO batchClass;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 */
 	public BatchClassEvent(final Action action) {
 		super();
 		this.action = action;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 * @param batchClass BatchClassDTO
+	 */
 	public BatchClassEvent(final Action action, final BatchClassDTO batchClass) {
 		super();
 		this.batchClass = batchClass;
@@ -88,11 +99,21 @@ public class BatchClassEvent extends GwtEvent<BatchClassHandler> {
 		}
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<BatchClassHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<BatchClassHandler> getAssociatedType() {
 		return type;
 	}
 
+	/**
+	 * To get Batch Class.
+	 * 
+	 * @return BatchClassDTO
+	 */
 	public BatchClassDTO getBatchClass() {
 		return batchClass;
 	}

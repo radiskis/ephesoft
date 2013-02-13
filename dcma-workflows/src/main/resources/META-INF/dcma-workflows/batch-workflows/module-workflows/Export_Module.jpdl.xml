@@ -32,7 +32,7 @@
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="IBM_CM_Plugin" />
 	</sub-process>
-	
+
 	<sub-process continue="async" g="645,16,176,59" name="IBM_CM_Plugin"
 		sub-process-key="IBM_CM_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
@@ -60,6 +60,12 @@
 	<sub-process continue="async" g="1061,16,176,59" name="CMIS_Export_Plugin"
 		sub-process-key="CMIS_Export_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Export_Box_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="1061,16,176,59" name="Export_Box_Plugin"
+		sub-process-key="Export_Box_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="Filebound_Export_Plugin" />
 	</sub-process>
 
@@ -68,15 +74,21 @@
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="NSI_Export_Plugin" />
 	</sub-process>
-	
+
 	<sub-process continue="async" g="1269,16,176,59" name="Key_Value_Learning_Plugin"
 		sub-process-key="Key_Value_Learning_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
-		<transition to="XML_to_Database_Plugin" />
+		<transition to="Db_Export_Plugin" />
 	</sub-process>
-	
-	<sub-process continue="async" g="1269,16,176,59" name="XML_to_Database_Plugin"
-		sub-process-key="XML_to_Database_Plugin">
+
+	<sub-process continue="async" g="62,107,176,59" name="Db_Export_Plugin"
+		sub-process-key="Db_Export_Plugin">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Automatic_Learning_Classification_Plugin" />
+	</sub-process>
+
+	<sub-process continue="async" g="62,107,176,59"
+		name="Automatic_Learning_Classification_Plugin" sub-process-key="Automatic_Learning_Classification_Plugin">
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="CleanUp_Plugin" />
 	</sub-process>
@@ -86,6 +98,6 @@
 		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
 		<transition to="end" />
 	</sub-process>
-	
+
 	<end g="1685,25,80,40" name="end" />
 </process>

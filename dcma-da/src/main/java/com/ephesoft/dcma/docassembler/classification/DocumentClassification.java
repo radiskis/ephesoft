@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,14 +54,12 @@ public interface DocumentClassification {
 	 * This method will process all the unclassified pages present at document
 	 * type Unknown. Process every page one by one and create new documents.
 	 * 
-	 * @param documentAssembler
-	 *            DocumentAssembler
-	 * @param batchInstanceID
-	 *            Long
-	 * @throws DCMAApplicationException
-	 *             If any invalid parameter found.
+	 * @param documentAssembler {@link DocumentAssembler}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} If any invalid parameter found.
 	 */
 	void processUnclassifiedPages(final DocumentAssembler documentAssembler,
-			final String batchInstanceIdentifierIdentifier, final PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException;
+			final String batchInstanceIdentifier, final PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException;
 
 }

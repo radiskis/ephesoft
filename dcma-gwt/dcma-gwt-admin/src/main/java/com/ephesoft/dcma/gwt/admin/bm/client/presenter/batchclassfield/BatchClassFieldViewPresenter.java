@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,12 +42,30 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield.BatchClassFiel
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the batch class field view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class BatchClassFieldViewPresenter extends AbstractBatchClassPresenter<BatchClassFieldView> implements PaginationListner {
 
+	/**
+	 * batchClassFieldDetailPresenter BatchClassFieldDetailPresenter.
+	 */
 	private final BatchClassFieldDetailPresenter batchClassFieldDetailPresenter;
 
+	/**
+	 * editBatchClassFieldPresenter EditBatchClassFieldPresenter.
+	 */
 	private final EditBatchClassFieldPresenter editBatchClassFieldPresenter;
 
+	/**
+	 * Constructor.
+	 * @param controller BatchClassManagementController
+	 * @param view BatchClassFieldView
+	 */
 	public BatchClassFieldViewPresenter(BatchClassManagementController controller, BatchClassFieldView view) {
 
 		super(controller, view);
@@ -55,42 +73,73 @@ public class BatchClassFieldViewPresenter extends AbstractBatchClassPresenter<Ba
 		this.editBatchClassFieldPresenter = new EditBatchClassFieldPresenter(controller, view.getEditBatchClassFieldView());
 	}
 
+	/**
+	 * To show Batch Class Field View.
+	 */
 	public void showBatchClassFieldView() {
 		view.getBatchClassFieldVerticalPanel().setVisible(Boolean.TRUE);
 		view.getBatchClassFieldConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show Edit Batch Class Field View.
+	 */
 	public void showEditBatchClassFieldView() {
 		view.getBatchClassFieldVerticalPanel().setVisible(Boolean.FALSE);
 		view.getBatchClassFieldConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * In case of Detail View Clicked.
+	 */
 	public void onDetailViewClicked() {
 		batchClassFieldDetailPresenter.bind();
 	}
 
+	/**
+	 * To get Batch Class Field Detail Presenter.
+	 * @return BatchClassFieldDetailPresenter
+	 */
 	public BatchClassFieldDetailPresenter getBatchClassFieldDetailPresenter() {
 		return batchClassFieldDetailPresenter;
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		this.editBatchClassFieldPresenter.bind();
 		this.batchClassFieldDetailPresenter.bind();
+		this.editBatchClassFieldPresenter.bind();
 	}
 
+	/**
+	 * To perform operations in case of edit batch class field properties button clicked.
+	 */
 	public void onEditBatchClassFieldPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editBatchClassFieldPresenter.bind();
 		showEditBatchClassFieldView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editBatchClassFieldPresenter.bind();
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * In case of pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param paramOrder Order
+	 */
 	@Override
 	public void onPagination(int startIndex, int maxResult, Order order) {
 		order.getSortProperty();

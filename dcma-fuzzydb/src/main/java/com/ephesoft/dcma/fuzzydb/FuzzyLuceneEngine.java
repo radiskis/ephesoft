@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,12 +47,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.fuzzydb.demo.IndexHTML;
 import org.apache.fuzzydb.demo.SearchFiles;
 import org.apache.lucene.index.CorruptIndexException;
@@ -79,15 +82,14 @@ import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
-import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.hibernate.DynamicHibernateDao;
 import com.ephesoft.dcma.core.hibernate.DynamicHibernateDao.ColumnDefinition;
 import com.ephesoft.dcma.da.dao.BatchInstanceDao;
 import com.ephesoft.dcma.da.service.BatchClassPluginConfigService;
-import com.ephesoft.dcma.da.service.DocumentTypeService;
 import com.ephesoft.dcma.da.service.FieldTypeService;
 import com.ephesoft.dcma.da.service.PageTypeService;
+import com.ephesoft.dcma.fuzzydb.constants.FuzzyDBSearchConstants;
 
 /**
  * This class first indexes the tables corresponding to document types defined in database and then it overwrites/creates the value of
@@ -99,26 +101,7 @@ import com.ephesoft.dcma.da.service.PageTypeService;
  * 
  */
 @Component
-public class FuzzyLuceneEngine implements ICommonConstants {
-
-	private static final String SPLIT_CONSTANT = ";";
-	private static final String FUZZYDB_PLUGIN = "FUZZYDB";
-	private static final String COLUMN_NAME_ERROR_MSG = "Unable to fetch column names from DB";
-	private static final String CONFIDENCE_ERROR_MSG = "Problem generating confidence score for Document :  ";
-	private static final String SPACE_DELIMITER = " ";
-	private static final String QUERY_STRING_DELIMITER = ":";
-	public static final String TIMESTAMP_NAME = "Timestamp";
-	public static final String DATE_NAME = "Date";
-	public static final String ALLPAGES = "ALLPAGES";
-	public static final String FIRSTPAGE = "FIRSTPAGE";
-	public static final String INDEX_FIELD = "rowData";
-	public static final String COMMA = ",";
-	public static final String DOUBLE_QUOTES = "\"";
-	public static final String SINGLE_QUOTES = "`";
-	public static final String MYSQL_DATABASE = "mysql";
-	private static final String EMPTY_STRING = "";
-	private static final String WORD_BOUNDRY_REGEX = "\\b";
-	private static final String EQUALS = " = ";
+public class FuzzyLuceneEngine {
 
 	/**
 	 * Logger instance for logging using slf4j for logging information.
@@ -126,46 +109,43 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FuzzyLuceneEngine.class);
 
 	/**
-	 * Instance of BatchSchemaService.
+	 * Instance of {@link BatchSchemaService}.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 	/**
-	 * Instance of BatchInstanceDao
+	 * Instance of {@link BatchInstanceDao}.
 	 */
 	@Autowired
 	private BatchInstanceDao batchInstanceDao;
 
 	/**
-	 * Instance of PluginPropertiesService for batch instance.
+	 * Instance of {@link PluginPropertiesService} for batch instance.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 	/**
-	 * Instance of PluginPropertiesService for batch class.
+	 * Instance of {@link PluginPropertiesService} for batch class.
 	 */
 	@Autowired
 	@Qualifier("batchClassPluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesServiceBatchClass;
 
 	/**
-	 * Instance of BatchClassPluginConfigService.
+	 * Instance of {@link BatchClassPluginConfigService}.
 	 */
 	@Autowired
 	private BatchClassPluginConfigService batchClassPluginConfigService;
 
 	/**
-	 * Instance of PageTypeService.
+	 * Instance of {@link PageTypeService}.
 	 */
 	@Autowired
 	private PageTypeService pageTypeService;
 
-	@Autowired
-	private DocumentTypeService documentTypeService;
-
 	/**
-	 * Instance of FieldTypeService.
+	 * Instance of {@link FieldTypeService}.
 	 */
 	@Autowired
 	private FieldTypeService fieldTypeService;
@@ -176,14 +156,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	private transient String rowID;
 
 	/**
-	 * List of batch class IDs in properties file for which learn DB should be called
+	 * List of batch class IDs in properties file for which learn DB should be called.
 	 */
 	private transient String batchClassIDList;
-
-	/**
-	 * Ignore words separated by ';' that are to be ignored while performing fuzzy db extraction.
-	 */
-	private transient String ignoreList;
 
 	/**
 	 * Ignore words array that are to be ignored while performing fuzzy db extraction.
@@ -193,134 +168,135 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	/**
 	 * Set ignore word list.
 	 * 
-	 * @param ignoreList
+	 * @param ignoreList {@link String}
 	 */
 	public void setIgnoreList(String ignoreList) {
-		this.ignoreList = ignoreList;
-		this.ignoreWordList = ignoreList.split(SPLIT_CONSTANT);
+		this.ignoreWordList = ignoreList.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
 	}
 
 	/**
-	 * @return the batchSchemaService
+	 * getter for batchSchemaService.
+	 * @return {@link BatchSchemaService}
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * setter for batchSchemaService.
+	 * @param batchSchemaService {@link BatchSchemaService}
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService the {@link PluginPropertiesService}
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
-	 * @return the pageTypeService
+	 * @return the {@link PageTypeService}
 	 */
 	public PageTypeService getPageTypeService() {
 		return pageTypeService;
 	}
 
 	/**
-	 * @param pageTypeService the pageTypeService to set
+	 * @param pageTypeService the {@link PageTypeService}
 	 */
 	public void setPageTypeService(PageTypeService pageTypeService) {
 		this.pageTypeService = pageTypeService;
 	}
 
 	/**
-	 * @return the batchClassPluginConfigService
+	 * @return the {@link BatchClassPluginConfigService}
 	 */
 	public BatchClassPluginConfigService getBatchClassPluginConfigService() {
 		return batchClassPluginConfigService;
 	}
 
 	/**
-	 * @param batchClassPluginConfigService the batchClassPluginConfigService to set
+	 * @param batchClassPluginConfigService the {@link BatchClassPluginConfigService}
 	 */
 	public void setBatchClassPluginConfigService(BatchClassPluginConfigService batchClassPluginConfigService) {
 		this.batchClassPluginConfigService = batchClassPluginConfigService;
 	}
 
 	/**
-	 * @return the fieldTypeService
+	 * @return the {@link FieldTypeService}
 	 */
 	public FieldTypeService getFieldTypeService() {
 		return fieldTypeService;
 	}
 
 	/**
-	 * @param the fieldTypeService to set
+	 * @param the fieldTypeService {@link FieldTypeService}
 	 */
 	public void setFieldTypeService(FieldTypeService fieldTypeService) {
 		this.fieldTypeService = fieldTypeService;
 	}
 
 	/**
-	 * @return the pluginPropertiesServiceBatchClass
+	 * @return the pluginPropertiesServiceBatchClass {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesServiceBatchClass() {
 		return pluginPropertiesServiceBatchClass;
 	}
 
 	/**
-	 * @param pluginPropertiesServiceBatchClass the pluginPropertiesServiceBatchClass to set
+	 * @param pluginPropertiesServiceBatchClass the {@link PluginPropertiesService}
 	 */
 	public void setPluginPropertiesServiceBatchClass(PluginPropertiesService pluginPropertiesServiceBatchClass) {
 		this.pluginPropertiesServiceBatchClass = pluginPropertiesServiceBatchClass;
 	}
 
 	/**
-	 * @return the rowID
+	 * @return {@link String}
 	 */
 	public String getRowID() {
 		return rowID;
 	}
 
 	/**
-	 * @param rowID the rowID to set
+	 * @param rowID {@link String}
 	 */
 	public void setRowID(String rowID) {
 		this.rowID = rowID;
 	}
 
 	/**
-	 * @return the batchInstanceDao
+	 * @return {@link BatchInstanceDao}.
 	 */
 	public BatchInstanceDao getBatchInstanceDao() {
 		return batchInstanceDao;
 	}
 
 	/**
-	 * @param batchInstanceDao the batchInstanceDao to set
+	 * @param batchInstanceDao {@link BatchInstanceDao} 
 	 */
 	public void setBatchInstanceDao(BatchInstanceDao batchInstanceDao) {
 		this.batchInstanceDao = batchInstanceDao;
 	}
 
 	/**
-	 * This API learns DB for a list of batchclasses 'batchClassIDList' given in fuzzy-db properties file
+	 * This API learns DB for a list of batch classes 'batchClassIDList' given in fuzzy-db properties file.
 	 */
 	public void learnDataBaseForMultipleBatchClasses() {
 		LOGGER.info("Entering method learnDataBaseForMultipleBatchClasses...");
 		String batchClassIDList = getBatchClassIDList();
 		if (batchClassIDList != null && !batchClassIDList.isEmpty()) {
 			LOGGER.info("Start splitting batch class list given in fuzzy DB  properties file ");
-			String[] batchClassIDs = batchClassIDList.split(SPLIT_CONSTANT);
+			String[] batchClassIDs = batchClassIDList.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
 			for (String batchClassID : batchClassIDs) {
 				if (!batchClassID.isEmpty()) {
 					try {
@@ -341,13 +317,13 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	 * This method is used to generate the indexes for the tables mapped for each document type in database. The indexes are stored in
 	 * a hierarchical structure: batch class id >> database name >> table name.
 	 * 
-	 * @param batchClassIdentifier String
+	 * @param batchClassIdentifier {@link String}
 	 * @param createIndex boolean
 	 */
 	public void learnFuzzyDatabase(final String batchClassIdentifier, boolean createIndex) throws DCMAApplicationException {
 
 		Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatchClass(batchClassIdentifier,
-				FUZZYDB_PLUGIN, null);
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, null);
 		if (properties != null && !properties.isEmpty()) {
 			LOGGER.info("Fetching properties from DB");
 			// String dbName = properties.get(FuzzyDBProperties.FUZZYDB_DB_NAME.getPropertyKey());
@@ -356,19 +332,19 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			String dbPassword = properties.get(FuzzyDBProperties.FUZZYDB_DB_PASSWORD.getPropertyKey());
 			String dbConnectionURL = properties.get(FuzzyDBProperties.FUZZYDB_CONNECTION_URL.getPropertyKey());
 			String dateFormat = properties.get(FuzzyDBProperties.FUZZYDB_DATE_FORMAT.getPropertyKey());
-			String dbName = EMPTY_STRING;
+			String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
 			if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-				dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
+				dbName = getDatabaseName(dbConnectionURL, dbDriver);
 			}
 			LOGGER.info("Properties fetched successfully from DB");
 			String baseFuzzyIndexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
 			if (dbName.length() <= 0) {
-				LOGGER.info("Wrong DB name found");
+				LOGGER.info(FuzzyDBSearchConstants.WRONG_DB_NAME_MESSAGE);
 				return;
 			}
 
 			BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesServiceBatchClass.getDynamicPluginProperties(
-					batchClassIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+					batchClassIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
 			if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
 				for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
 					String tableName = eachConfig.getValue();
@@ -392,12 +368,38 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This method deletes the previous indexes before creating new one.
-	 * 
-	 * @param fuzzyIndexFolder
-	 * @param batchClassId
-	 */
+	private String getDatabaseName(String dbConnectionURL, String dbDriver) {
+		String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
+		if (dbDriver.equals(FuzzyDBSearchConstants.MYSQL_DRIVER)) {
+			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf(FuzzyDBSearchConstants.DATABASE_URL_SEPERATOR) + 1,
+					dbConnectionURL.length());
+		} else if (dbDriver.equals(FuzzyDBSearchConstants.MSSQL_DRIVER)) {
+			String dbKeywordString = FuzzyDBSearchConstants.DATABASE_CONSTANT;
+			dbName = extractDbNameValueFromUrl(dbConnectionURL, dbKeywordString);
+		} else if (dbDriver.equals(FuzzyDBSearchConstants.JTDS_DRIVER)) {
+			String dbKeywordString = FuzzyDBSearchConstants.DATABASE_NAME_CONSTANT;
+			dbName = extractDbNameValueFromUrl(dbConnectionURL, dbKeywordString);
+		}
+		dbName = com.ephesoft.dcma.util.FileUtils.replaceInvalidFileChars(dbName);
+		return dbName;
+	}
+
+	private String extractDbNameValueFromUrl(String dbConnectionURL, String dbKeywordString) {
+		String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
+		StringTokenizer stringTokenizer = new StringTokenizer(dbConnectionURL, FuzzyDBSearchConstants.SPLIT_CONSTANT);
+		while (stringTokenizer.hasMoreTokens()) {
+			String token = stringTokenizer.nextToken();
+			if (token.contains(dbKeywordString)) {
+				final String[] databaseString = token.split(FuzzyDBSearchConstants.EQUALS_DELIM);
+				if (databaseString.length == 2) {
+					dbName = databaseString[1];
+					break;
+				}
+			}
+		}
+		return dbName;
+	}
+
 	public void deleteIndexes(final String fuzzyIndexFolder, final String batchClassId) {
 		File oldIndexes = new File(fuzzyIndexFolder);
 		if (oldIndexes.exists()) {
@@ -410,23 +412,22 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			LOGGER.info("Fuzzy Db index folder does not exist");
 		}
 	}
-
+	
 	/**
 	 * This method fetches the data for a row returned by lucene search.
-	 * 
-	 * @param rowId
-	 * @param tableName
-	 * @param dbConnectionURL
-	 * @param dbName
-	 * @param dbDriver
-	 * @param dbUserName
-	 * @param dbPassword
-	 * @param eachConfig
-	 * @return
-	 * @throws DCMAApplicationException
+	 * @param rowId long
+	 * @param tableName {@link String}
+	 * @param dbConnectionURL {@link String}
+	 * @param dbName {@link String}
+	 * @param dbDriver {@link String}
+	 * @param dbUserName {@link String}
+	 * @param dbPassword {@link String}
+	 * @param eachConfig {@link com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchDynamicPluginConfiguration}
+	 * @return {@link List<Object[]>}
+	 * @throws DCMAApplicationException if any exception occurs.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> fetchDataForRow(int rowId, String tableName, String dbConnectionURL, String dbName, String dbDriver,
+	public List<Object[]> fetchDataForRow(long rowId, String tableName, String dbConnectionURL, String dbName, String dbDriver,
 			String dbUserName, String dbPassword, BatchDynamicPluginConfiguration eachConfig) throws DCMAApplicationException {
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
 		List<Object[]> dataList = null;
@@ -444,18 +445,21 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							count++;
 							appendColumnNameByDatabase(dbConnectionURL, allColumnNames, dbQuery, count, eachColumn);
 							if (eachColumn.getKey().equalsIgnoreCase(rowID)) {
-								if (dbConnectionURL.contains(MYSQL_DATABASE)) {
-									retrunFieldName = SINGLE_QUOTES + eachColumn.getValue() + SINGLE_QUOTES;
+								if (dbConnectionURL.contains(FuzzyDBSearchConstants.MYSQL_DATABASE)) {
+									retrunFieldName = FuzzyDBSearchConstants.SINGLE_QUOTES + eachColumn.getValue()
+											+ FuzzyDBSearchConstants.SINGLE_QUOTES;
 								} else {
-									retrunFieldName = DOUBLE_QUOTES + eachColumn.getValue() + DOUBLE_QUOTES;
+									retrunFieldName = FuzzyDBSearchConstants.DOUBLE_QUOTES + eachColumn.getValue()
+											+ FuzzyDBSearchConstants.DOUBLE_QUOTES;
 								}
 							}
 						}
 					} else {
-						LOGGER.info(COLUMN_NAME_ERROR_MSG);
-						throw new DCMAApplicationException(COLUMN_NAME_ERROR_MSG);
+						LOGGER.info(FuzzyDBSearchConstants.COLUMN_NAME_ERROR_MSG);
+						throw new DCMAApplicationException(FuzzyDBSearchConstants.COLUMN_NAME_ERROR_MSG);
 					}
-					dbQuery.append(" from ").append(tableName).append(" where ").append(retrunFieldName).append(EQUALS).append(rowId);
+					dbQuery.append(" from ").append(tableName).append(" where ").append(retrunFieldName).append(
+							FuzzyDBSearchConstants.EQUALS).append(rowId);
 					SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 					dataList = query.list();
 				} finally {
@@ -471,21 +475,21 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method fetches the data for a row returned by lucene search.
-	 * 
-	 * @param rowId
-	 * @param tableName
-	 * @param dbConnectionURL
-	 * @param dbName
-	 * @param dbDriver
-	 * @param dbUserName
-	 * @param dbPassword
-	 * @param eachConfig
+	 * @param rowId long
+	 * @param confidenceScore {@link String}
+	 * @param tableName {@link String}
+	 * @param dbConnectionURL {@link String}
+	 * @param dbName {@link String}
+	 * @param dbDriver {@link String}
+	 * @param dbUserName {@link String}
+	 * @param dbPassword {@link String}
+	 * @param eachConfig {@link com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchDynamicPluginConfiguration}
 	 * @param isHeaderAdded boolean
-	 * @return
-	 * @throws DCMAApplicationException
+	 * @return {@link List<List<String>>}
+	 * @throws DCMAApplicationException if any exception occurs.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<List<String>> fetchFuzzySearchResult(int rowId, String confidenceScore, String tableName, String dbConnectionURL,
+	public List<List<String>> fetchFuzzySearchResult(long rowId, String confidenceScore, String tableName, String dbConnectionURL,
 			String dbName, String dbDriver, String dbUserName, String dbPassword, BatchDynamicPluginConfiguration eachConfig,
 			boolean isHeaderAdded) throws DCMAApplicationException {
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
@@ -508,10 +512,12 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							count++;
 							appendColumnNameByDatabase(dbConnectionURL, allColumnNames, dbQuery, count, eachColumn);
 							if (eachColumn.getKey().equalsIgnoreCase(rowID)) {
-								if (dbConnectionURL.contains(MYSQL_DATABASE)) {
-									retrunFieldName = SINGLE_QUOTES + eachColumn.getValue() + SINGLE_QUOTES;
+								if (dbConnectionURL.contains(FuzzyDBSearchConstants.MYSQL_DATABASE)) {
+									retrunFieldName = FuzzyDBSearchConstants.SINGLE_QUOTES + eachColumn.getValue()
+											+ FuzzyDBSearchConstants.SINGLE_QUOTES;
 								} else {
-									retrunFieldName = DOUBLE_QUOTES + eachColumn.getValue() + DOUBLE_QUOTES;
+									retrunFieldName = FuzzyDBSearchConstants.DOUBLE_QUOTES + eachColumn.getValue()
+											+ FuzzyDBSearchConstants.DOUBLE_QUOTES;
 								}
 							}
 						}
@@ -520,11 +526,11 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							extractedData.add(list);
 						}
 					} else {
-						LOGGER.info(COLUMN_NAME_ERROR_MSG);
-						throw new DCMAApplicationException(COLUMN_NAME_ERROR_MSG);
+						LOGGER.info(FuzzyDBSearchConstants.COLUMN_NAME_ERROR_MSG);
+						throw new DCMAApplicationException(FuzzyDBSearchConstants.COLUMN_NAME_ERROR_MSG);
 					}
 					dbQuery.append(new StringBuffer(" from ")).append(tableName).append(new StringBuffer(" where ")).append(
-							retrunFieldName).append(new StringBuffer(EQUALS)).append(rowId);
+							retrunFieldName).append(new StringBuffer(FuzzyDBSearchConstants.EQUALS)).append(rowId);
 					SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 					List<Object[]> dataList = query.list();
 
@@ -533,7 +539,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							List<String> list = new ArrayList<String>();
 							for (Object object : obj) {
 								if (object == null) {
-									object = new StringBuffer(SPACE_DELIMITER);
+									object = new StringBuffer(FuzzyDBSearchConstants.SPACE_DELIMITER);
 								}
 								list.add(object.toString());
 							}
@@ -551,12 +557,6 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 		return extractedData;
 	}
 
-	/**
-	 * This method finds the index of row ID to be returned.
-	 * 
-	 * @param eachConfig
-	 * @return
-	 */
 	private int findIndexOfRowID(BatchDynamicPluginConfiguration eachConfig) {
 		int returnValue = 0;
 		Set<BatchDynamicPluginConfiguration> allColumnNames = null;
@@ -579,17 +579,16 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method finds all the records that needs to be indexed for all the tables configured for document types.
-	 * 
-	 * @param tableName
-	 * @param dbConnectionURL
-	 * @param dbName
-	 * @param dbDriver
-	 * @param dbUserName
-	 * @param dbPassword
-	 * @param dateFormat
-	 * @param eachConfig
-	 * @return List<String>
-	 * @throws DCMAApplicationException
+	 * @param tableName {@link String}
+	 * @param dbConnectionURL {@link String}
+	 * @param dbName {@link String}
+	 * @param dbDriver {@link String}
+	 * @param dbUserName {@link String}
+	 * @param dbPassword {@link String}
+	 * @param dateFormat {@link String}
+	 * @param eachConfig {@link com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchDynamicPluginConfiguration}
+	 * @return {@link List<String>}
+	 * @throws DCMAApplicationException if any exception occurs.
 	 */
 	@SuppressWarnings("unchecked")
 	public List<String> fetchAllRecordsToBeIndexed(String tableName, String dbConnectionURL, String dbName, String dbDriver,
@@ -617,7 +616,8 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						appendColumnNameByDatabase(dbConnectionURL, allColumnNames, dbQuery, count, eachColumn);
 						String colDataType = getColumnDataType(eachColumn.getValue(), colNames);
 						if (colDataType != null
-								&& (colDataType.equalsIgnoreCase(TIMESTAMP_NAME) || colDataType.equalsIgnoreCase(DATE_NAME))) {
+								&& (colDataType.equalsIgnoreCase(FuzzyDBSearchConstants.TIMESTAMP_NAME) || colDataType
+										.equalsIgnoreCase(FuzzyDBSearchConstants.DATE_NAME))) {
 							dateColIndex.add(count);
 						}
 					}
@@ -625,7 +625,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					SQLQuery query = dynamicHibernateDao.createQuery(dbQuery.toString());
 					List<Object[]> dataList = query.list();
 
-					StringBuffer dbRow = new StringBuffer(EMPTY_STRING);
+					StringBuffer dbRow = new StringBuffer(FuzzyDBSearchConstants.EMPTY_STRING);
 					int indexCount = 0;
 					if (dataList != null && !dataList.isEmpty()) {
 						returnList = new ArrayList<String>();
@@ -634,12 +634,12 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						}
 						for (Object[] eachRecord : dataList) {
 							indexCount = 0;
-							dbRow = new StringBuffer(EMPTY_STRING);
+							dbRow = new StringBuffer(FuzzyDBSearchConstants.EMPTY_STRING);
 							for (Object eachElement : eachRecord) {
 								indexCount++;
 								if (eachElement != null) {
 									if (dateColIndex.contains(indexCount)) {
-										SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+										SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());
 										eachElement = simpleDateFormat.format(eachElement);
 									}
 									dbRow.append(eachElement).append(";;;");
@@ -666,17 +666,21 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	private void appendColumnNameByDatabase(String dbConnectionURL, Set<BatchDynamicPluginConfiguration> allColumnNames,
 			StringBuffer dbQuery, int count, BatchDynamicPluginConfiguration eachColumn) {
-		if (dbConnectionURL.contains(MYSQL_DATABASE)) {
+		if (dbConnectionURL.contains(FuzzyDBSearchConstants.MYSQL_DATABASE)) {
 			if (count < allColumnNames.size()) {
-				dbQuery.append(SINGLE_QUOTES).append(eachColumn.getValue()).append(SINGLE_QUOTES).append(COMMA);
+				dbQuery.append(FuzzyDBSearchConstants.SINGLE_QUOTES).append(eachColumn.getValue()).append(
+						FuzzyDBSearchConstants.SINGLE_QUOTES).append(FuzzyDBSearchConstants.COMMA);
 			} else {
-				dbQuery.append(SINGLE_QUOTES).append(eachColumn.getValue()).append(SINGLE_QUOTES);
+				dbQuery.append(FuzzyDBSearchConstants.SINGLE_QUOTES).append(eachColumn.getValue()).append(
+						FuzzyDBSearchConstants.SINGLE_QUOTES);
 			}
 		} else {
 			if (count < allColumnNames.size()) {
-				dbQuery.append(DOUBLE_QUOTES).append(eachColumn.getValue()).append(DOUBLE_QUOTES).append(COMMA);
+				dbQuery.append(FuzzyDBSearchConstants.DOUBLE_QUOTES).append(eachColumn.getValue()).append(
+						FuzzyDBSearchConstants.DOUBLE_QUOTES).append(FuzzyDBSearchConstants.COMMA);
 			} else {
-				dbQuery.append(DOUBLE_QUOTES).append(eachColumn.getValue()).append(DOUBLE_QUOTES);
+				dbQuery.append(FuzzyDBSearchConstants.DOUBLE_QUOTES).append(eachColumn.getValue()).append(
+						FuzzyDBSearchConstants.DOUBLE_QUOTES);
 			}
 		}
 	}
@@ -684,9 +688,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	/**
 	 * This method fetches the data type of a column supplied.
 	 * 
-	 * @param eachColumn
-	 * @param colNames
-	 * @return
+	 * @param eachColumn {@link String}
+	 * @param colNames {@link List<ColumnDefinition>}
+	 * @return {@link String}
 	 */
 	public String getColumnDataType(String eachColumn, List<ColumnDefinition> colNames) {
 		String columnDataType = null;
@@ -704,9 +708,9 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	/**
 	 * This method finds the index of a column from the all column list.
 	 * 
-	 * @param allColumnNames
-	 * @param colName
-	 * @return
+	 * @param allColumnNames {@link Set<BatchPluginConfiguration>}
+	 * @param colName {@link String}
+	 * @return int
 	 */
 	public int findIndexOf(Set<BatchPluginConfiguration> allColumnNames, String colName) {
 		int returnIndex = -1;
@@ -721,249 +725,372 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	 * This method creates/updates the value of document level fields for each document by searching for similarities in HOCR content
 	 * with the data in database tables mapped for each document type.
 	 * 
-	 * @param batchInstanceIdentifier String
+	 * @param batchInstanceIdentifier {@link String}
 	 * @param createIndex boolean
 	 */
 	public boolean extractDataBaseFields(final String batchInstanceIdentifier) throws DCMAApplicationException {
 		LOGGER.info("Initializing properties...");
-		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_SWITCH);
-		if (("ON".equalsIgnoreCase(switchValue))) {
-			String indexFields = INDEX_FIELD;
-			String stopWords = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_STOP_WORDS);
-			String minTermFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
-			String minDocFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
-			String minWordLength = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
-			String maxQueryTerms = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
+		String searchableColumns = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_SEARCH_COLUMNS);
+		String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
+		String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
+		String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
+		String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
 
-			String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
+		String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_DB_DRIVER);
+		boolean isSearchSuccessful = false;
+		if (FuzzyDBSearchConstants.SWITCH_ON.equalsIgnoreCase(switchValue)) {
+			isSearchSuccessful = processFuzzyDBExtraction(batchInstanceIdentifier, searchableColumns, dbUserName, dbPassword,
+					thresholdValue, numOfPages, dbDriver);
+		} else {
+			LOGGER.info("Skipping FuzzyDB extraction. Switch set as off.");
+		}
+		return isSearchSuccessful;
+	}
 
-			String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_DB_DRIVER);
-			String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
-			String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
-			String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
-			String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
-			String includePages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-					FuzzyDBProperties.FUZZYDB_INCLUDE_PAGES);
-			String dbName = EMPTY_STRING;
-			if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-				dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
-			}
+	private boolean processFuzzyDBExtraction(final String batchInstanceIdentifier, String searchableColumns, String dbUserName,
+			String dbPassword, String thresholdValue, String numOfPages, String dbDriver) throws DCMAApplicationException {
+		String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
+		boolean isSearchSuccessful = true;
+		String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
+		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
+			dbName = getDatabaseName(dbConnectionURL, dbDriver);
+		}
+		if (dbName.length() <= 0) {
+			LOGGER.info(FuzzyDBSearchConstants.WRONG_DB_NAME_MESSAGE);
+			isSearchSuccessful = false;
+		} else {
 			LOGGER.info("Properties Initialized Successfully");
-
 			Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 			String batchClassIdentifier = batch.getBatchClassIdentifier();
 			String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
 
-			if (dbName.length() <= 0) {
-				LOGGER.info("Wrong DB name found");
-				return false;
-			}
-
 			File baseFuzzyDbIndexFolder = new File(indexFolder);
 			if (baseFuzzyDbIndexFolder != null && !baseFuzzyDbIndexFolder.exists()) {
-				LOGGER.info("The base fuzzy db index folder does not exist. So cannot extract database fields.");
-				return false;
-			}
-
-			String[] allIndexFields = indexFields.split(SPLIT_CONSTANT);
-			String[] allStopWords = stopWords.split(SPLIT_CONSTANT);
-			IndexReader reader = null;
-			Query query = null;
-			Map<String, Float> returnMap = new HashMap<String, Float>();
-
-			// List<com.ephesoft.dcma.da.domain.PageType> allPageTypes =
-			// pageTypeService.getPageTypesByBatchInstanceID(batchInstanceID);
-			try {
-				List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pluginPropertiesService
-						.getPageTypes(batchInstanceIdentifier);
-				if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
-					LOGGER.info("Page Types not configured in Database");
-					return false;
-				}
-
-				BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(
-						batchInstanceIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
-				if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
-					for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
-						String tableName = eachConfig.getValue();
-						String fuzzyIndexFolder = indexFolder + File.separator + dbName + File.separator + tableName;
-						File indexFolderDirectory = new File(fuzzyIndexFolder);
-						if (indexFolderDirectory != null && indexFolderDirectory.exists()) {
-							String[] indexFiles = indexFolderDirectory.list();
-							if (indexFiles == null || indexFiles.length <= 0) {
-								LOGGER.info("No index files exist inside folder : " + indexFolderDirectory);
-								continue;
-							}
-							try {
-								reader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
-							} catch (CorruptIndexException e) {
-								LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
-								cleanUpResource(reader);
-								return false;
-							} catch (IOException e) {
-								LOGGER.error("IOException while reading Index" + e.getMessage(), e);
-								cleanUpResource(reader);
-								return false;
-							}
-						} else {
-							LOGGER.info("No index created for : " + eachConfig.getKey());
-							continue;
-						}
-						MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
-						moreLikeThis.setFieldNames(allIndexFields);
-						moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
-						moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
-						moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
-						moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
-						if (allStopWords != null && allStopWords.length > 0) {
-							Set<String> stopWordsTemp = new HashSet<String>();
-							for (int i = 0; i < allStopWords.length; i++) {
-								stopWordsTemp.add(allStopWords[i]);
-							}
-							moreLikeThis.setStopWords(stopWordsTemp);
-						}
-
-						Map<String, String> docHocrContent = new HashMap<String, String>();
-
-						if (includePages != null && includePages.equalsIgnoreCase(ALLPAGES)) {
-							List<Document> xmlDocuments = batch.getDocuments().getDocument();
-							for (Document eachDocType : xmlDocuments) {
-								StringBuilder hocrContent = new StringBuilder();
-								List<Page> pages = eachDocType.getPages().getPage();
-								for (Page eachPage : pages) {
-									String pageId = eachPage.getIdentifier();
-									HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
-									List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-									HocrPage hocrPage = hocrPageList.get(0);
-									if (hocrPage.getPageID().equals(eachPage.getIdentifier())) {
-										hocrContent.append(hocrPage.getHocrContent());
-									}
-									hocrContent.append(SPACE_DELIMITER);
-								}
-								docHocrContent.put(eachDocType.getIdentifier(), hocrContent.toString());
-							}
-						} else if (includePages != null && includePages.equalsIgnoreCase(FIRSTPAGE)) {
-							List<Document> xmlDocuments = batch.getDocuments().getDocument();
-							for (Document eachDocType : xmlDocuments) {
-								String hocrContent = EMPTY_STRING;
-								List<Page> pages = eachDocType.getPages().getPage();
-								String pageId = pages.get(0).getIdentifier();
-								HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
-								List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-								HocrPage hocrPage = hocrPageList.get(0);
-								hocrContent = hocrPage.getHocrContent();
-								docHocrContent.put(eachDocType.getIdentifier(), hocrContent);
-							}
-						}
-
-						if (docHocrContent.size() > 0) {
-							Set<String> docIds = docHocrContent.keySet();
-							for (String eachDoc : docIds) {
-								String docTypeForID = getDocTypeByID(eachDoc, batch);
-								if (eachConfig.getDescription().equalsIgnoreCase(docTypeForID)) {
-									LOGGER.info("Generating query for Document: " + eachDoc);
-									String docHocr = docHocrContent.get(eachDoc);
-									if (null != docHocr) {
-										InputStream inputStream = null;
-										if (null != ignoreWordList && ignoreWordList.length > 0) {
-											docHocr = removeIgnoreWordsFromHOCR(docHocr, ignoreWordList);
-										}
-										try {
-											inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
-											query = moreLikeThis.like(inputStream);
-										} catch (UnsupportedEncodingException e) {
-											LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
-											continue;
-										} catch (IOException e) {
-											LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
-											continue;
-										} finally {
-											if (inputStream != null) {
-												try {
-													inputStream.close();
-												} catch (IOException e) {
-													LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
-												}
-											}
-										}
-									} else {
-										LOGGER.info("Empty HOCR content found for Document :  " + eachDoc);
+				LOGGER.info(FuzzyDBSearchConstants.FUZZY_DB_INDEX_FOLDER_DOES_NOT_EXIST_MESSAGE);
+				isSearchSuccessful = false;
+			} else {
+				IndexReader reader = null;
+				try {
+					List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pluginPropertiesService
+							.getPageTypes(batchInstanceIdentifier);
+					if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
+						LOGGER.info("Page Types not configured in Database");
+						isSearchSuccessful = false;
+					} else {
+						BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(
+								batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+								FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+						if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
+							for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
+								String tableName = eachConfig.getValue();
+								String fuzzyIndexFolder = indexFolder + File.separator + dbName + File.separator + tableName;
+								File indexFolderDirectory = new File(fuzzyIndexFolder);
+								if (indexFolderDirectory != null && indexFolderDirectory.exists()) {
+									String[] indexFiles = indexFolderDirectory.list();
+									if (indexFiles == null || indexFiles.length <= 0) {
+										LOGGER.info("No index files exist inside folder : " + indexFolderDirectory);
 										continue;
 									}
-									if (query != null && query.toString() != null && query.toString().length() > 0) {
-										LOGGER.info("Generating confidence score for Document: " + eachDoc);
-										try {
-											returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(),
-													INDEX_FIELD, Integer.valueOf(numOfPages), ignoreWordList);
-										} catch (NumberFormatException e) {
-											LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
-											continue;
-										} catch (Exception e) {
-											LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
-											continue;
-										}
-										LOGGER.info("Return Map is : " + returnMap);
-										int highestScoreDoc = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
-										if (highestScoreDoc != 0) {
-											List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName,
-													dbConnectionURL, dbName, dbDriver, dbUserName, dbPassword, eachConfig);
-											LOGGER.info("Extracted data is : " + extractedData);
-											LOGGER.info("Updating XML....");
-											updateBatchXML(batch, extractedData, eachDoc, batchInstanceIdentifier, eachConfig);
-										} else {
-											LOGGER.info("No document found with confidence score greater than threshold value : "
-													+ thresholdValue);
-										}
+									try {
+										reader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
+									} catch (CorruptIndexException e) {
+										LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
+										cleanUpResource(reader);
+										isSearchSuccessful = false;
+									} catch (IOException e) {
+										LOGGER.error("IOException while reading Index" + e.getMessage(), e);
+										cleanUpResource(reader);
+										isSearchSuccessful = false;
+									}
+								} else {
+									LOGGER.info("No index created for : " + eachConfig.getKey());
+									continue;
+								}
+								if (isSearchSuccessful) {
+									List<Document> xmlDocuments = batch.getDocuments().getDocument();
+									if (!searchableColumns.isEmpty()) {
+										// New Code here
+										extractThroughAlreadyExtractedContent(batchInstanceIdentifier, numOfPages, dbDriver,
+												dbConnectionURL, dbUserName, dbPassword, thresholdValue, dbName, batch, reader,
+												eachConfig, tableName, fuzzyIndexFolder, xmlDocuments, searchableColumns);
 									} else {
-										LOGGER.info("Empty query generated for Document : " + eachDoc);
+										extractThroughOCRContent(batchInstanceIdentifier, numOfPages, dbDriver, dbConnectionURL,
+												dbUserName, dbPassword, thresholdValue, dbName, batch, reader, eachConfig, tableName,
+												fuzzyIndexFolder, xmlDocuments);
 									}
 								}
+							}// end of dynamic loop
+						} else {
+							LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
+						}
+					}
+				} finally {
+					LOGGER.info("Closing input stream for index.");
+					cleanUpResource(reader);
+				}
+				if (isSearchSuccessful) {
+					batchSchemaService.updateBatch(batch);
+					LOGGER.info("updateBatchXML done.");
+				}
+			}
+		}
+		return isSearchSuccessful;
+	}
+
+	private void extractThroughAlreadyExtractedContent(final String batchInstanceIdentifier, String numOfPages, String dbDriver,
+			String dbConnectionURL, String dbUserName, String dbPassword, String thresholdValue, String dbName, Batch batch,
+			IndexReader reader, BatchDynamicPluginConfiguration eachConfig, String tableName, String fuzzyIndexFolder,
+			List<Document> xmlDocuments, String searchableColumns) throws DCMAApplicationException {
+
+		Map<String, Float> returnMap = null;
+		List<String> searchColumnList = new ArrayList<String>(0);
+		String queryDelimiters = FuzzyDBSearchConstants.DOLLAR_DELIMITER + FuzzyDBSearchConstants.COMMA;
+		StringTokenizer tokens = new StringTokenizer(searchableColumns, queryDelimiters);
+		while (tokens.hasMoreTokens()) {
+			searchColumnList.add(tokens.nextToken());
+		}
+
+		for (Document eachDoc : xmlDocuments) {
+			StringBuilder queryBuffer = new StringBuilder();
+			// only if * is not there
+			// To be compared with the mapped table
+			if (eachConfig.getDescription().equalsIgnoreCase(eachDoc.getType())) {
+				List<DocField> documentLevelField = eachDoc.getDocumentLevelFields().getDocumentLevelField();
+
+				for (DocField docField : documentLevelField) {
+					if (searchColumnList.contains(FuzzyDBSearchConstants.STAR) || searchColumnList.contains(docField.getName())) {
+						// Append values of all the DLF's rather than *
+						final String fieldValue = docField.getValue();
+						if (fieldValue != null) {
+							queryBuffer.append(FuzzyDBSearchConstants.INDEX_FIELD);
+							queryBuffer.append(FuzzyDBSearchConstants.QUERY_STRING_DELIMITER);
+							queryBuffer.append(fieldValue);
+							queryBuffer.append(FuzzyDBSearchConstants.SPACE_DELIMITER);
+						}
+					}
+
+				}
+			}
+
+			if (queryBuffer != null && queryBuffer.toString() != null && queryBuffer.length() > 0) {
+				LOGGER.info(FuzzyDBSearchConstants.GENERATING_CONFIDENCE_MESSAGE + eachDoc);
+				try {
+					returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, queryBuffer.toString(),
+							FuzzyDBSearchConstants.INDEX_FIELD, Integer.valueOf(numOfPages), ignoreWordList);
+				} catch (NumberFormatException e) {
+					LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
+					continue;
+				} catch (Exception e) {
+					LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
+					continue;
+				}
+				LOGGER.info(FuzzyDBSearchConstants.RETURN_MAP_MESSAGE + returnMap);
+				FuzzyDBResultInfo fuzzyDBResultInfo = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
+				if (fuzzyDBResultInfo != null) {
+					long highestScoreDoc = parsingConfidenceScore(fuzzyDBResultInfo);
+					if (highestScoreDoc != 0) {
+						List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName, dbConnectionURL, dbName, dbDriver,
+								dbUserName, dbPassword, eachConfig);
+						LOGGER.info(FuzzyDBSearchConstants.EXTRACTED_DATA_MESSAGE + extractedData);
+						LOGGER.info("Updating XML....");
+						updateBatchXML(batch, extractedData, eachDoc.getIdentifier(), batchInstanceIdentifier, eachConfig,
+								fuzzyDBResultInfo.getConfidence());
+					} else {
+						LOGGER.info("No document found with confidence score greater than threshold value : " + thresholdValue);
+
+						String hocrSwitchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+								FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_HOCR_SWITCH);
+						if (FuzzyDBSearchConstants.SWITCH_ON.equalsIgnoreCase(hocrSwitchValue)) {
+							LOGGER.info("HOCR search switch is ON.");
+							LOGGER.info("Trying Extracting through the complete HOCR Content.");
+							extractThroughOCRContent(batchInstanceIdentifier, numOfPages, dbDriver, dbConnectionURL, dbUserName,
+									dbPassword, thresholdValue, dbName, batch, reader, eachConfig, tableName, fuzzyIndexFolder,
+									xmlDocuments);
+						} else {
+							LOGGER.info("HOCR search switch is off. No updation made to XML file.");
+						}
+					}
+				}
+			} else {
+				LOGGER.info(FuzzyDBSearchConstants.EMPTY_QUERY_MESSAGE + eachDoc);
+				String hocrSwitchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+						FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_HOCR_SWITCH);
+				if (FuzzyDBSearchConstants.SWITCH_ON.equalsIgnoreCase(hocrSwitchValue)) {
+					LOGGER.info("HOCR search switch is ON.");
+					LOGGER.info("Trying Extracting through the complete HOCR Content.");
+					extractThroughOCRContent(batchInstanceIdentifier, numOfPages, dbDriver, dbConnectionURL, dbUserName, dbPassword,
+							thresholdValue, dbName, batch, reader, eachConfig, tableName, fuzzyIndexFolder, xmlDocuments);
+				} else {
+					LOGGER.info("HOCR search switch is off. No updation made to XML file.");
+				}
+			}
+		}
+
+	}
+
+	private Map<String, Float> extractThroughOCRContent(final String batchInstanceIdentifier, String numOfPages, String dbDriver,
+			String dbConnectionURL, String dbUserName, String dbPassword, String thresholdValue, String dbName, Batch batch,
+			IndexReader reader, BatchDynamicPluginConfiguration eachConfig, String tableName, String fuzzyIndexFolder,
+			List<Document> xmlDocuments) throws DCMAApplicationException {
+		String minTermFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
+		String minDocFreq = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
+		String minWordLength = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
+		String maxQueryTerms = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
+		String includePages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_INCLUDE_PAGES);
+		String stopWords = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
+				FuzzyDBProperties.FUZZYDB_STOP_WORDS);
+		String[] allStopWords = stopWords.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
+		String indexFields = FuzzyDBSearchConstants.INDEX_FIELD;
+		String[] allIndexFields = indexFields.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
+		Map<String, Float> returnMap = null;
+		Query query = null;
+		MoreLikeThis moreLikeThis = updateQueryInfo(reader, minTermFreq, minDocFreq, minWordLength, maxQueryTerms, allStopWords,
+				allIndexFields);
+		Map<String, String> docHocrContent = new HashMap<String, String>();
+		if (includePages != null && includePages.equalsIgnoreCase(FuzzyDBSearchConstants.ALLPAGES)) {
+			updateDocHOCRForAllDoc(batchInstanceIdentifier, xmlDocuments, docHocrContent);
+		} else if (includePages != null && includePages.equalsIgnoreCase(FuzzyDBSearchConstants.FIRSTPAGE)) {
+			updateDocHocrContent(batchInstanceIdentifier, xmlDocuments, docHocrContent);
+		}
+		if (docHocrContent.size() > 0) {
+			Set<String> docIds = docHocrContent.keySet();
+			for (String eachDoc : docIds) {
+				String docTypeForID = getDocTypeByID(eachDoc, batch);
+				if (eachConfig.getDescription().equalsIgnoreCase(docTypeForID)) {
+					LOGGER.info("Generating query for Document: " + eachDoc);
+					String docHocr = docHocrContent.get(eachDoc);
+					if (null != docHocr) {
+						InputStream inputStream = null;
+						if (null != ignoreWordList && ignoreWordList.length > 0) {
+							docHocr = removeIgnoreWordsFromHOCR(docHocr, ignoreWordList);
+						}
+						try {
+							inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
+							query = moreLikeThis.like(inputStream);
+						} catch (UnsupportedEncodingException e) {
+							LOGGER.error(FuzzyDBSearchConstants.PROBLEM_GENERATING_QUERY_MESSAGE + eachDoc, e);
+							continue;
+						} catch (IOException e) {
+							LOGGER.error(FuzzyDBSearchConstants.PROBLEM_GENERATING_QUERY_MESSAGE + eachDoc, e);
+							continue;
+						} finally {
+							IOUtils.closeQuietly(inputStream);
+						}
+					} else {
+						LOGGER.info("Empty HOCR content found for Document :  " + eachDoc);
+						continue;
+					}
+					if (query != null && query.toString() != null && query.toString().length() > 0) {
+						LOGGER.info(FuzzyDBSearchConstants.GENERATING_CONFIDENCE_MESSAGE + eachDoc);
+						try {
+							returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(),
+									FuzzyDBSearchConstants.INDEX_FIELD, Integer.valueOf(numOfPages), ignoreWordList);
+						} catch (NumberFormatException e) {
+							LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
+							continue;
+						} catch (Exception e) {
+							LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
+							continue;
+						}
+						LOGGER.info(FuzzyDBSearchConstants.RETURN_MAP_MESSAGE + returnMap);
+						FuzzyDBResultInfo fuzzyDBResultInfo = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
+						if (fuzzyDBResultInfo != null) {
+							long highestScoreDoc = parsingConfidenceScore(fuzzyDBResultInfo);
+							if (highestScoreDoc != 0) {
+								List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName, dbConnectionURL, dbName,
+										dbDriver, dbUserName, dbPassword, eachConfig);
+								LOGGER.info(FuzzyDBSearchConstants.EXTRACTED_DATA_MESSAGE + extractedData);
+								LOGGER.info("Updating XML....");
+								updateBatchXML(batch, extractedData, eachDoc, batchInstanceIdentifier, eachConfig, fuzzyDBResultInfo
+										.getConfidence());
+							} else {
+								LOGGER
+										.info("No document found with confidence score greater than threshold value : "
+												+ thresholdValue);
 							}
 						}
-
+					} else {
+						LOGGER.info(FuzzyDBSearchConstants.EMPTY_QUERY_MESSAGE + eachDoc);
 					}
-				} else {
-					LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
 				}
-			} finally {
-				LOGGER.info("Closing input stream for index.");
-				cleanUpResource(reader);
 			}
-			batchSchemaService.updateBatch(batch);
-			LOGGER.info("updateBatchXML done.");
-			return false;
-		} else {
-			LOGGER.info("Skipping FuzzyDB extraction. Switch set as off.");
-			return false;
+		}
+		return returnMap;
+	}
+
+	private MoreLikeThis updateQueryInfo(IndexReader reader, String minTermFreq, String minDocFreq, String minWordLength,
+			String maxQueryTerms, String[] allStopWords, String[] allIndexFields) {
+		MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
+		moreLikeThis.setFieldNames(allIndexFields);
+		moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
+		moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
+		moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
+		moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
+		if (allStopWords != null && allStopWords.length > 0) {
+			Set<String> stopWordsTemp = new HashSet<String>();
+			for (int index = 0; index < allStopWords.length; index++) {
+				stopWordsTemp.add(allStopWords[index]);
+			}
+			moreLikeThis.setStopWords(stopWordsTemp);
+		}
+		return moreLikeThis;
+	}
+
+	private void updateDocHOCRForAllDoc(final String batchInstanceIdentifier, List<Document> xmlDocuments,
+			Map<String, String> docHocrContent) {
+		for (Document eachDocType : xmlDocuments) {
+			StringBuilder hocrContent = new StringBuilder();
+			List<Page> pages = eachDocType.getPages().getPage();
+			for (Page eachPage : pages) {
+				String pageId = eachPage.getIdentifier();
+				HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
+				List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+				HocrPage hocrPage = hocrPageList.get(0);
+				if (hocrPage.getPageID().equals(eachPage.getIdentifier())) {
+					hocrContent.append(hocrPage.getHocrContent());
+				}
+				hocrContent.append(FuzzyDBSearchConstants.SPACE_DELIMITER);
+			}
+			docHocrContent.put(eachDocType.getIdentifier(), hocrContent.toString());
 		}
 	}
 
-	/**
-	 * This method removes the words specified in ignore list from input string.
-	 * 
-	 * @param docHocr
-	 * @param ignoreWordList
-	 * @return
-	 */
+	private void updateDocHocrContent(final String batchInstanceIdentifier, List<Document> xmlDocuments,
+			Map<String, String> docHocrContent) {
+		for (Document eachDocType : xmlDocuments) {
+			String hocrContent = FuzzyDBSearchConstants.EMPTY_STRING;
+			List<Page> pages = eachDocType.getPages().getPage();
+			String pageId = pages.get(0).getIdentifier();
+			HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageId);
+			List<HocrPage> hocrPageList = hocrPages.getHocrPage();
+			HocrPage hocrPage = hocrPageList.get(0);
+			hocrContent = hocrPage.getHocrContent();
+			docHocrContent.put(eachDocType.getIdentifier(), hocrContent);
+		}
+	}
+
 	private String removeIgnoreWordsFromHOCR(final String docHocr, final String[] ignoreWordList) {
 		String finalDocHocr = docHocr;
 		if (null != finalDocHocr && null != ignoreWordList && ignoreWordList.length > 0) {
 			for (String ignoreWord : ignoreWordList) {
 				if (ignoreWord != null && !ignoreWord.isEmpty()) {
 					try {
-						finalDocHocr = finalDocHocr.replaceAll(WORD_BOUNDRY_REGEX + ignoreWord + WORD_BOUNDRY_REGEX, EMPTY_STRING);
+						finalDocHocr = finalDocHocr.replaceAll(FuzzyDBSearchConstants.WORD_BOUNDRY_REGEX + ignoreWord
+								+ FuzzyDBSearchConstants.WORD_BOUNDRY_REGEX, FuzzyDBSearchConstants.EMPTY_STRING);
 						LOGGER.info("Word ignored : " + ignoreWord);
 					} catch (PatternSyntaxException pattexception) {
 						LOGGER.info("Incorrect ignoreWord specifeid in properties file :: " + ignoreWord, pattexception);
@@ -988,54 +1115,53 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	 * This method updates the value of document level fields for each document by searching for similarities in input search text with
 	 * the data in database tables mapped for each document type.
 	 * 
-	 * @param batchInstanceIdentifier String
-	 * @param documentType String
-	 * @param searchText String
-	 * @throws DCMAApplicationException
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param documentType {@link String}
+	 * @param searchText {@link String}
+	 * @throws DCMAApplicationException for handling any exception.
+	 * @return {@link List<List<String>>}
 	 */
 	public List<List<String>> fuzzyTextSearch(final String batchInstanceIdentifier, final String documentType, final String searchText)
 			throws DCMAApplicationException {
 		LOGGER.info("Initializing properties...");
-
-		String searchTextInLowerCase = searchText.toLowerCase();
+		String searchTextInLowerCase = searchText.toLowerCase(Locale.getDefault());
 		List<List<String>> extractedData = null;
-		String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+		String numOfPages = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
-		String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+		String dbDriver = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_DB_DRIVER);
-		String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
-		String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+		String dbConnectionURL = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
+		String dbUserName = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
-		String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
-		String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
+		String thresholdValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
+		String dbPassword = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN,
 				FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
-		String dbName = EMPTY_STRING;
+		String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
 		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
+			dbName = getDatabaseName(dbConnectionURL, dbDriver);
 		}
-
-		String queryDelimiters = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_QUERY_DELIMITERS);
+		String queryDelimiters = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_QUERY_DELIMITERS);
 		LOGGER.info("Properties Initialized Successfully");
-
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 		String batchClassIdentifier = batch.getBatchClassIdentifier();
 		String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
 
 		if (dbName.length() <= 0) {
-			LOGGER.info("Wrong DB name found");
+			LOGGER.info(FuzzyDBSearchConstants.WRONG_DB_NAME_MESSAGE);
 			return extractedData;
 		}
 
 		File baseFuzzyDbIndexFolder = new File(indexFolder);
 		if (baseFuzzyDbIndexFolder != null && !baseFuzzyDbIndexFolder.exists()) {
-			LOGGER.info("The base fuzzy db index folder does not exist. So cannot extract database fields.");
+			LOGGER.info(FuzzyDBSearchConstants.FUZZY_DB_INDEX_FOLDER_DOES_NOT_EXIST_MESSAGE);
 			return extractedData;
 		}
 
 		Map<String, Float> returnMap = new HashMap<String, Float>();
+		Set<FuzzyDBResultInfo> resultSet = new TreeSet<FuzzyDBResultInfo>();
 
 		List<com.ephesoft.dcma.da.domain.PageType> allPageTypes = pluginPropertiesService.getPageTypes(batchInstanceIdentifier);
 		if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
@@ -1044,7 +1170,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 		}
 
 		BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(
-				batchInstanceIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+				batchInstanceIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
 		if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
 			for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
 				if (eachConfig.getDescription().equals(documentType)) {
@@ -1061,77 +1187,76 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 						LOGGER.info("No index created for : " + eachConfig.getDescription());
 						continue;
 					}
-					StringBuffer query = new StringBuffer();
-
 					StringTokenizer tokens = new StringTokenizer(searchTextInLowerCase, queryDelimiters);
-					while (tokens.hasMoreTokens()) {
-						query.append(INDEX_FIELD + QUERY_STRING_DELIMITER + tokens.nextToken());
-						query.append(SPACE_DELIMITER);
-					}
+
+					StringBuffer query = createQueryForTextSearch(tokens);
 					if (query != null && query.toString() != null && query.toString().length() > 0) {
-						LOGGER.info("Generating confidence score for Document: " + searchTextInLowerCase);
+						LOGGER.info(FuzzyDBSearchConstants.GENERATING_CONFIDENCE_MESSAGE + searchTextInLowerCase);
 						try {
-							returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD, Integer
-									.valueOf(numOfPages), this.ignoreWordList);
+							returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(),
+									FuzzyDBSearchConstants.INDEX_FIELD, Integer.valueOf(numOfPages), this.ignoreWordList);
+							for (String key : returnMap.keySet()) {
+								FuzzyDBResultInfo fuzzyDBResultInfo = new FuzzyDBResultInfo(returnMap.get(key), key);
+								resultSet.add(fuzzyDBResultInfo);
+							}
 						} catch (NumberFormatException e) {
-							LOGGER.error(CONFIDENCE_ERROR_MSG + searchTextInLowerCase, e);
+							LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + searchTextInLowerCase, e);
 							continue;
 						} catch (Exception e) {
-							LOGGER.error(CONFIDENCE_ERROR_MSG + searchTextInLowerCase, e);
+							LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + searchTextInLowerCase, e);
 							continue;
 						}
-						LOGGER.info("Return Map is : " + returnMap);
-						if (returnMap != null && returnMap.size() > 0) {
+						LOGGER.info(FuzzyDBSearchConstants.RETURN_MAP_MESSAGE + returnMap);
+						if (resultSet != null && resultSet.size() > 0) {
 							if (extractedData == null) {
 								extractedData = new ArrayList<List<String>>();
 							}
 							boolean isHeaderAdded = true;
-							Set<String> set = fetchDocumentHavingThresholdValue(returnMap, thresholdValue);
-							Iterator<String> iterator = set.iterator();
-							while (iterator.hasNext()) {
-								String key = iterator.next();
-								Float confidenceScore = returnMap.get(key);
-								int keyInt = 0;
+							Set<FuzzyDBResultInfo> set = fetchDocumentHavingThresholdValue(resultSet, thresholdValue);
+							for (FuzzyDBResultInfo fuzzyDBResultInfo : set) {
+								Float confidenceScore = fuzzyDBResultInfo.getConfidence();
+								long keyLong = 0;
 								try {
-									keyInt = Integer.parseInt(key);
+									keyLong = Long.parseLong(fuzzyDBResultInfo.getRowId());
 								} catch (NumberFormatException nfe) {
 									LOGGER.error(nfe.getMessage(), nfe);
 									return null;
 								}
-								extractedData.addAll(fetchFuzzySearchResult(keyInt, confidenceScore.toString(), tableName,
+								extractedData.addAll(fetchFuzzySearchResult(keyLong, confidenceScore.toString(), tableName,
 										dbConnectionURL, dbName, dbDriver, dbUserName, dbPassword, eachConfig, isHeaderAdded));
 								isHeaderAdded = false;
-								LOGGER.info("Extracted data is : " + extractedData);
+								LOGGER.info(FuzzyDBSearchConstants.EXTRACTED_DATA_MESSAGE + extractedData);
 							}
 						} else {
 							LOGGER.info("No record found ");
 						}
 					} else {
-						LOGGER.info("Empty query generated for Document : " + searchTextInLowerCase);
+						LOGGER.info(FuzzyDBSearchConstants.EMPTY_QUERY_MESSAGE + searchTextInLowerCase);
 					}
 				}
 			}
 		} else {
 			LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
 		}
-
 		if (extractedData != null && extractedData.isEmpty()) {
 			return null;
 		}
-
 		return extractedData;
-
 	}
 
-	/**
-	 * This method fetches the document type from document ID.
-	 * 
-	 * @param docID
-	 * @param batch
-	 * @return
-	 */
+	private StringBuffer createQueryForTextSearch(StringTokenizer tokens) {
+		StringBuffer query = new StringBuffer();
+		while (tokens.hasMoreTokens()) {
+			query.append(FuzzyDBSearchConstants.INDEX_FIELD);
+			query.append(FuzzyDBSearchConstants.QUERY_STRING_DELIMITER);
+			query.append(tokens.nextToken());
+			query.append(FuzzyDBSearchConstants.SPACE_DELIMITER);
+		}
+		return query;
+	}
+
 	private String getDocTypeByID(String docID, Batch batch) {
-		String returnValue = EMPTY_STRING;
+		String returnValue = FuzzyDBSearchConstants.EMPTY_STRING;
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
 		for (Document eachDocType : xmlDocuments) {
 			if (eachDocType.getIdentifier().equals(docID)) {
@@ -1143,18 +1268,18 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method updated the batch xml for all the document level fields for which values are found in database.
-	 * 
-	 * @param batch
-	 * @param extractedData
-	 * @param documentId
-	 * @param batchInstanceId
-	 * @param eachConfig
+	 * @param batch {@link Batch}
+	 * @param extractedData {@link List<Object []>}
+	 * @param documentId {@link String}
+	 * @param batchInstanceId {@link String}
+	 * @param eachConfig {@link com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchDynamicPluginConfiguration}
+	 * @param confidenceScore {@link Float}
 	 */
 	public void updateBatchXML(final Batch batch, final List<Object[]> extractedData, final String documentId, String batchInstanceId,
-			final BatchDynamicPluginConfiguration eachConfig) {
+			final BatchDynamicPluginConfiguration eachConfig, Float confidenceScore) {
 
 		BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesService.getDynamicPluginProperties(batchInstanceId,
-				FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
 		if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
 			for (BatchDynamicPluginConfiguration tempConfig : pluginPropsDocType) {
 				if (tempConfig.getId().equals(eachConfig.getId())) {
@@ -1174,6 +1299,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 											newDocLevelField.setFieldOrderNumber(eachDocLevelField.getFieldOrderNumber());
 											newDocLevelField.setValue(newValue.toString());
 											newDocLevelField.setType(eachDocLevelField.getType());
+											newDocLevelField.setConfidence(confidenceScore);
 											docLevelFields.set(index, newDocLevelField);
 										}
 									}
@@ -1193,6 +1319,7 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 										docLevelField.setType(fdType.getDataType().name());
 										Object newValue = getValueForDocField(fdType.getName(), allColumnNames, extractedData);
 										docLevelField.setValue(newValue.toString());
+										docLevelField.setConfidence(confidenceScore);
 										docLevelFields.add(docLevelField);
 									}
 								} else {
@@ -1208,16 +1335,15 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method updated the batch xml for all the document level fields for which values are found in database.
-	 * 
-	 * @param batch
-	 * @param extractedData
-	 * @param documentId
-	 * @param batchInstanceId
-	 * @param eachConfig
+	 * @param extractedData {@link List<Object []>}
+	 * @param eachConfig {@link com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer.BatchDynamicPluginConfiguration}
+	 * @param batchClassIdentifier {@link String}
+	 * @param documentType {@link String}
+	 * @return {@link Document}
 	 */
-	public void updateDocument(Documents documents, final List<Object[]> extractedData,
-			final BatchDynamicPluginConfiguration eachConfig, String batchClassIdentifier, String documentType) {
-
+	public Documents updateDocument(final List<Object[]> extractedData, final BatchDynamicPluginConfiguration eachConfig,
+			String batchClassIdentifier, String documentType) {
+		Documents documents = new Documents();
 		Set<BatchDynamicPluginConfiguration> allColumnNames = eachConfig.getChildren();
 		List<Document> docList = documents.getDocument();
 		if (docList.isEmpty()) {
@@ -1244,8 +1370,8 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			}
 		} else {
 
-			List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = fieldTypeService.getFdTypeByDocTypeNameForBatchClass(documentType,
-					batchClassIdentifier);
+			List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = fieldTypeService.getFdTypeByDocTypeNameForBatchClass(
+					documentType, batchClassIdentifier);
 
 			if (allFdTypes != null) {
 				for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
@@ -1254,22 +1380,20 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 					docLevelField.setFieldOrderNumber(fdType.getFieldOrderNumber());
 					docLevelField.setType(fdType.getDataType().name());
 					Object newValue = getValueForDocField(fdType.getName(), allColumnNames, extractedData);
-					docLevelField.setValue(newValue.toString());
+					if (newValue != null) {
+						docLevelField.setValue(newValue.toString());
+					} else {
+						docLevelField.setValue(FuzzyDBSearchConstants.EMPTY_STRING);
+					}
 					docLevelFields.add(docLevelField);
 				}
 			} else {
 				LOGGER.info("No field types could be found for document type :" + documentType);
 			}
 		}
+		return documents;
 	}
 
-	/**
-	 * This method finds the index of specified document Level Field in the specified List of Document Level Fields.
-	 * 
-	 * @param docLevelFields
-	 * @param eachDocLevelField
-	 * @return
-	 */
 	private int findIndexOfDocLevelFieldInList(List<DocField> docLevelFields, DocField eachDocLevelField) {
 		int returnValue = -1;
 		if (docLevelFields != null && !docLevelFields.isEmpty()) {
@@ -1291,11 +1415,10 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method fetches the value for each document level field.
-	 * 
-	 * @param docField
-	 * @param allColumnNames
-	 * @param extractedData
-	 * @return
+	 * @param docField {@link String}
+	 * @param allColumnNames {@link Set<BatchDynamicPluginConfiguration>}
+	 * @param extractedData {@link List<Object []>}
+	 * @return {@link Object}
 	 */
 	public Object getValueForDocField(String docField, Set<BatchDynamicPluginConfiguration> allColumnNames,
 			List<Object[]> extractedData) {
@@ -1326,58 +1449,57 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 
 	/**
 	 * This method finds the highest score among all the scores inside batchDocNameScore.
-	 * 
-	 * @param batchDocNameScore Map<String, Float>
-	 * @return float
+	 * @param batchDocNameScore {@link Map<String, Float>}
+	 * @param thresholdValue {@link String}
+	 * @return {@link FuzzyDBResultInfo}
 	 */
-	public int fetchDocumentWithHighestScoreValue(Map<String, Float> batchDocNameScore, String thresholdValue) {
+	public FuzzyDBResultInfo fetchDocumentWithHighestScoreValue(Map<String, Float> batchDocNameScore, String thresholdValue) {
+		FuzzyDBResultInfo fuzzyDBResultInfo = null;
 		float highestValue = 0f;
-		int highestScoreDoc = 0;
 		Set<String> set = batchDocNameScore.keySet();
 		Iterator<String> iterator = set.iterator();
+		String rowId = null;
 		while (iterator.hasNext()) {
 			String learnName = iterator.next();
 			float eachValue = batchDocNameScore.get(learnName);
 			if (eachValue > highestValue) {
 				highestValue = eachValue;
-				highestScoreDoc = Integer.parseInt(learnName);
+				rowId = learnName;
 			}
 		}
 		if (highestValue > Float.valueOf(thresholdValue)) {
-			return highestScoreDoc;
-		} else {
-			return 0;
+			fuzzyDBResultInfo = new FuzzyDBResultInfo(highestValue, rowId);
+
 		}
+		return fuzzyDBResultInfo;
 	}
 
 	/**
-	 * @param batchDocNameScore
-	 * @param thresholdValue
-	 * @return
+	 * To fetch the documents that have threshold value.
+	 * @param resultSet {@link Set<FuzzyDBResultInfo>}
+	 * @param thresholdValue {@link String}
+	 * @return {@link Set<FuzzyDBResultInfo>}
 	 */
-	public Set<String> fetchDocumentHavingThresholdValue(Map<String, Float> batchDocNameScore, String thresholdValue) {
-		Set<String> resultSet = new HashSet<String>();
-		Set<String> set = batchDocNameScore.keySet();
-		Iterator<String> iterator = set.iterator();
-		while (iterator.hasNext()) {
-			String learnName = iterator.next();
-			float eachValue = batchDocNameScore.get(learnName);
+	public Set<FuzzyDBResultInfo> fetchDocumentHavingThresholdValue(Set<FuzzyDBResultInfo> resultSet, String thresholdValue) {
+		Set<FuzzyDBResultInfo> thresholdSet = new TreeSet<FuzzyDBResultInfo>();
+		for (FuzzyDBResultInfo fuzzyDBResultInfo : resultSet) {
+			float eachValue = fuzzyDBResultInfo.getConfidence();
 			if (eachValue > Float.valueOf(thresholdValue)) {
-				resultSet.add(learnName);
+				thresholdSet.add(fuzzyDBResultInfo);
 			}
 		}
-		return resultSet;
+		return thresholdSet;
 	}
 
 	/**
-	 * @param batchClassIDList
+	 * @param batchClassIDList {@link String}
 	 */
 	public void setBatchClassIDList(String batchClassIDList) {
 		this.batchClassIDList = batchClassIDList;
 	}
 
 	/**
-	 * @return
+	 * @return {@link String}
 	 */
 	public String getBatchClassIDList() {
 		return batchClassIDList;
@@ -1386,78 +1508,60 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 	/**
 	 * This method creates/updates the value of document level fields for each document by searching for similarities in HOCR content
 	 * with the data in database tables mapped for each document type.
-	 * 
-	 * @param batchInstanceIdentifier String
-	 * @param createIndex boolean
+	 * @param batchClassIdentifier {@link String}
+	 * @param documentType {@link String}
+	 * @param hocrPage {@link HocrPages}
+	 * @return {@link Documents}
+	 * @throws DCMAApplicationException if there is no index file present inside folder.
 	 */
 	public Documents extractDataBaseFields(final String batchClassIdentifier, String documentType, HocrPages hocrPage)
 			throws DCMAApplicationException {
-		LOGGER.info("Initializing properties...");
 		Documents documents = null;
-
-		String indexFields = INDEX_FIELD;
-		String stopWords = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_STOP_WORDS);
-		String minTermFreq = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
-		String minDocFreq = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
-		String minWordLength = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
-		String maxQueryTerms = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
-
-		String numOfPages = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
-
-		String dbDriver = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_DRIVER);
-		String dbConnectionURL = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
-		String dbUserName = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
-		String dbPassword = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
-		String thresholdValue = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier, FUZZYDB_PLUGIN,
-				FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
-		String dbName = EMPTY_STRING;
+		String indexFields = FuzzyDBSearchConstants.INDEX_FIELD;
+		String stopWords = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_STOP_WORDS);
+		String minTermFreq = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MIN_TERM_FREQ);
+		String minDocFreq = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MIN_DOC_FREQ);
+		String minWordLength = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MIN_WORD_LENGTH);
+		String maxQueryTerms = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_MAX_QUERY_TERMS);
+		String numOfPages = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_NO_OF_PAGES);
+		String dbDriver = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DB_DRIVER);
+		String dbConnectionURL = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_CONNECTION_URL);
+		String dbUserName = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DB_USER_NAME);
+		String dbPassword = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DB_PASSWORD);
+		String thresholdValue = pluginPropertiesServiceBatchClass.getPropertyValue(batchClassIdentifier,
+				FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_THRESHOLD_VALUE);
+		String dbName = FuzzyDBSearchConstants.EMPTY_STRING;
 
 		if (dbConnectionURL != null && dbConnectionURL.length() > 0) {
-			dbName = dbConnectionURL.substring(dbConnectionURL.lastIndexOf('/') + 1, dbConnectionURL.length());
+			dbName = getDatabaseName(dbConnectionURL, dbDriver);
 		}
 		LOGGER.info("Properties Initialized Successfully");
-
 		String indexFolder = batchSchemaService.getFuzzyDBIndexFolder(batchClassIdentifier, false);
-
 		if (dbName.length() <= 0) {
-			LOGGER.error("Wrong DB name found");
-			throw new DCMAApplicationException("Wrong DB name found");
+			throw new DCMAApplicationException(FuzzyDBSearchConstants.WRONG_DB_NAME_MESSAGE);
 		}
-
 		File baseFuzzyDbIndexFolder = new File(indexFolder);
 		if (baseFuzzyDbIndexFolder != null && !baseFuzzyDbIndexFolder.exists()) {
-			LOGGER.info("The base fuzzy db index folder does not exist. So cannot extract database fields.");
-			throw new DCMAApplicationException("The base fuzzy db index folder does not exist. So cannot extract database fields.");
+			throw new DCMAApplicationException(FuzzyDBSearchConstants.FUZZY_DB_INDEX_FOLDER_DOES_NOT_EXIST_MESSAGE);
 		}
-
-		String[] allIndexFields = indexFields.split(SPLIT_CONSTANT);
-		String[] allStopWords = stopWords.split(SPLIT_CONSTANT);
+		String[] allIndexFields = indexFields.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
+		String[] allStopWords = stopWords.split(FuzzyDBSearchConstants.SPLIT_CONSTANT);
 		IndexReader reader = null;
 		Query query = null;
 		Map<String, Float> returnMap = new HashMap<String, Float>();
-
-		// List<com.ephesoft.dcma.da.domain.PageType> allPageTypes =
-		// pageTypeService.getPageTypesByBatchInstanceID(batchInstanceID);
 		try {
-			// List<com.ephesoft.dcma.da.domain.PageType> allPageTypes =
-			// pluginPropertiesServiceBatchClass.getPageTypes(batchInstanceIdentifier);
-			// if (!(allPageTypes != null && !allPageTypes.isEmpty())) {
-			// LOGGER.info("Page Types not configured in Database");
-			// return false;
-			// }
-
 			BatchDynamicPluginConfiguration[] pluginPropsDocType = pluginPropertiesServiceBatchClass.getDynamicPluginProperties(
-					batchClassIdentifier, FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
+					batchClassIdentifier, FuzzyDBSearchConstants.FUZZYDB_PLUGIN, FuzzyDBProperties.FUZZYDB_DOCUMENT_TYPE);
 			if (pluginPropsDocType != null && pluginPropsDocType.length > 0) {
 				for (BatchDynamicPluginConfiguration eachConfig : pluginPropsDocType) {
 					String tableName = eachConfig.getValue();
@@ -1469,43 +1573,16 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 							LOGGER.info("No index files exist inside folder : " + indexFolderDirectory);
 							continue;
 						}
-						try {
-							reader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
-						} catch (CorruptIndexException e) {
-							LOGGER.error("CorruptIndexException while reading Index" + e.getMessage(), e);
-							cleanUpResource(reader);
-							throw new DCMAApplicationException("CorruptIndexException while reading Index" + e.getMessage(), e);
-						} catch (IOException e) {
-							LOGGER.error("IOException while reading Index" + e.getMessage(), e);
-							cleanUpResource(reader);
-							throw new DCMAApplicationException("IOException while reading Index" + e.getMessage(), e);
-						}
+						reader = getReader(reader, fuzzyIndexFolder);
 					} else {
 						LOGGER.info("No index created for : " + eachConfig.getKey());
 						continue;
 					}
-					MoreLikeThis moreLikeThis = new MoreLikeThis(reader);
-					moreLikeThis.setFieldNames(allIndexFields);
-					moreLikeThis.setMinTermFreq(Integer.parseInt(minTermFreq));
-					moreLikeThis.setMinDocFreq(Integer.parseInt(minDocFreq));
-					moreLikeThis.setMinWordLen(Integer.parseInt(minWordLength));
-					moreLikeThis.setMaxQueryTerms(Integer.parseInt(maxQueryTerms));
-					if (allStopWords != null && allStopWords.length > 0) {
-						Set<String> stopWordsTemp = new HashSet<String>();
-						for (int i = 0; i < allStopWords.length; i++) {
-							stopWordsTemp.add(allStopWords[i]);
-						}
-						moreLikeThis.setStopWords(stopWordsTemp);
-					}
-
+					MoreLikeThis moreLikeThis = updateQueryInfo(reader, minTermFreq, minDocFreq, minWordLength, maxQueryTerms,
+							allStopWords, allIndexFields);
 					Map<String, String> docHocrContent = new HashMap<String, String>();
-
-					String hocrContent = EMPTY_STRING;
-					if (hocrPage.getHocrPage() != null && hocrPage.getHocrPage().size() > 0) {
-						hocrContent = hocrPage.getHocrPage().get(0).getHocrContent();
-					}
+					String hocrContent = getHocrContent(hocrPage);
 					docHocrContent.put(documentType, hocrContent);
-
 					if (docHocrContent.size() > 0) {
 						Set<String> docIds = docHocrContent.keySet();
 						for (String eachDoc : docIds) {
@@ -1521,55 +1598,48 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 										inputStream = new ByteArrayInputStream(docHocr.getBytes("UTF-8"));
 										query = moreLikeThis.like(inputStream);
 									} catch (UnsupportedEncodingException e) {
-										LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
+										LOGGER.error(FuzzyDBSearchConstants.PROBLEM_GENERATING_QUERY_MESSAGE + eachDoc, e);
 										continue;
 									} catch (IOException e) {
-										LOGGER.error("Problem generating query for Document :  " + eachDoc, e);
+										LOGGER.error(FuzzyDBSearchConstants.PROBLEM_GENERATING_QUERY_MESSAGE + eachDoc, e);
 										continue;
 									} finally {
-										if (inputStream != null) {
-											try {
-												inputStream.close();
-											} catch (IOException e) {
-												LOGGER.error("Problem in closing input stream. " + e.getMessage(), e);
-											}
-										}
+										IOUtils.closeQuietly(inputStream);
 									}
 								} else {
 									LOGGER.info("Empty HOCR content found for Document :  " + eachDoc);
 									continue;
 								}
 								if (query != null && query.toString() != null && query.toString().length() > 0) {
-									LOGGER.info("Generating confidence score for Document: " + eachDoc);
+									LOGGER.info(FuzzyDBSearchConstants.GENERATING_CONFIDENCE_MESSAGE + eachDoc);
 									try {
-										returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(), INDEX_FIELD,
-												Integer.valueOf(numOfPages), ignoreWordList);
+										returnMap = SearchFiles.generateConfidence(fuzzyIndexFolder, query.toString(),
+												FuzzyDBSearchConstants.INDEX_FIELD, Integer.valueOf(numOfPages), ignoreWordList);
 									} catch (NumberFormatException e) {
-										LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
+										LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
 										continue;
 									} catch (Exception e) {
-										LOGGER.error(CONFIDENCE_ERROR_MSG + eachDoc, e);
+										LOGGER.error(FuzzyDBSearchConstants.CONFIDENCE_ERROR_MSG + eachDoc, e);
 										continue;
 									}
-									LOGGER.info("Return Map is : " + returnMap);
-									int highestScoreDoc = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
-									if (highestScoreDoc != 0) {
+									LOGGER.info(FuzzyDBSearchConstants.RETURN_MAP_MESSAGE + returnMap);
+									FuzzyDBResultInfo fuzzyDBResultInfo = fetchDocumentWithHighestScoreValue(returnMap, thresholdValue);
+									if (fuzzyDBResultInfo != null) {
+										long highestScoreDoc = parsingConfidenceScore(fuzzyDBResultInfo);
 										List<Object[]> extractedData = fetchDataForRow(highestScoreDoc, tableName, dbConnectionURL,
 												dbName, dbDriver, dbUserName, dbPassword, eachConfig);
-										documents = new Documents();
-										updateDocument(documents, extractedData, eachConfig, batchClassIdentifier, documentType);
-										LOGGER.info("Extracted data is : " + extractedData);
+										documents = updateDocument(extractedData, eachConfig, batchClassIdentifier, documentType);
+										LOGGER.info(FuzzyDBSearchConstants.EXTRACTED_DATA_MESSAGE + extractedData);
 									} else {
 										LOGGER.info("No document found with confidence score greater than threshold value : "
 												+ thresholdValue);
 									}
 								} else {
-									LOGGER.info("Empty query generated for Document : " + eachDoc);
+									LOGGER.info(FuzzyDBSearchConstants.EMPTY_QUERY_MESSAGE + eachDoc);
 								}
 							}
 						}
 					}
-
 				}
 			} else {
 				LOGGER.info("No properties configured for FUZZYDB_DOCUMENT_TYPE");
@@ -1579,5 +1649,102 @@ public class FuzzyLuceneEngine implements ICommonConstants {
 			cleanUpResource(reader);
 		}
 		return documents;
+	}
+
+	private String getHocrContent(HocrPages hocrPage) {
+		String hocrContent = FuzzyDBSearchConstants.EMPTY_STRING;
+		if (hocrPage.getHocrPage() != null && hocrPage.getHocrPage().size() > 0) {
+			hocrContent = hocrPage.getHocrPage().get(0).getHocrContent();
+		}
+		return hocrContent;
+	}
+
+	private long parsingConfidenceScore(FuzzyDBResultInfo fuzzyDBResultInfo) {
+		long highestScoreDoc = 0;
+		try {
+			highestScoreDoc = Long.parseLong(fuzzyDBResultInfo.getRowId());
+		} catch (NumberFormatException e) {
+			LOGGER.error("Unable to fetch Fuzzy DB result. Non Integer RowId returned.");
+		}
+		return highestScoreDoc;
+	}
+
+	private IndexReader getReader(IndexReader reader, String fuzzyIndexFolder) throws DCMAApplicationException {
+		IndexReader localReader = reader;
+		try {
+			localReader = IndexReader.open(FSDirectory.open(new File(fuzzyIndexFolder)), true);
+		} catch (CorruptIndexException e) {
+			cleanUpResource(localReader);
+			throw new DCMAApplicationException("CorruptIndexException while reading Index" + e.getMessage(), e);
+		} catch (IOException e) {
+			cleanUpResource(localReader);
+			throw new DCMAApplicationException("IOException while reading Index" + e.getMessage(), e);
+		}
+		return localReader;
+	}
+
+	/**
+	 * The results info class for fuzzy db process.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * @see com.ephesoft.dcma.core.component.ICommonConstants 
+	 */
+	public class FuzzyDBResultInfo implements Comparable<FuzzyDBResultInfo> {
+
+		/**
+		 * Confidence score.
+		 */
+		private Float confidence;
+		/**
+		 * To store row id.
+		 */
+		private String rowId;
+		/**
+		 * Parameterized constructor.
+		 * @param confidence {@link Float}
+		 * @param rowId {@link String}
+		 */
+		public FuzzyDBResultInfo(Float confidence, String rowId) {
+			this.confidence = confidence;
+			this.rowId = rowId;
+		}
+		/**
+		 * getter for confidence.
+		 * @return {@link Float}
+		 */
+		public Float getConfidence() {
+			return confidence;
+		}
+		/**
+		 * Setter for confidence.
+		 * @param confidence {@link Float}
+		 */
+		public void setConfidence(Float confidence) {
+			this.confidence = confidence;
+		}
+		/**
+		 * getter for rowId.
+		 * @return {@link String}
+		 */
+		public String getRowId() {
+			return rowId;
+		}
+		/**
+		 * setter for rowId.
+		 * @param rowId {@link String}
+		 */
+		public void setRowId(String rowId) {
+			this.rowId = rowId;
+		}
+
+		@Override
+		public int compareTo(FuzzyDBResultInfo fuzzyDBResultInfo) {
+			if (this.getConfidence() > fuzzyDBResultInfo.getConfidence()) {
+				return -1;
+			} else {
+				return 1;
+			}
+		}
 	}
 }

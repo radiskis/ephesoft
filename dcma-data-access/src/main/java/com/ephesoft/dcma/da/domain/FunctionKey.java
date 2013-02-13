@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,30 +46,56 @@ import javax.persistence.Table;
 import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for function_key.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "function_key")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class FunctionKey extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * docType DocumentType.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "document_type_id")
 	private DocumentType docType;
 
+	/**
+	 * shortcutKeyname String.
+	 */
 	@Column(name = "shortcut_key_name")
 	private String shortcutKeyname;
 
+	/**
+	 * methodName String.
+	 */
 	@Column(name = "method_name")
 	private String methodName;
 	
+	/**
+	 * uiLabel String.
+	 */
 	@Column(name = "ui_label")
 	private String uiLabel;
 
+	/**
+	 * identifier String.
+	 */
 	@Column(name = "identifier")
 	private String identifier;
 	
 	/**
+	 * To get Doc Type.
 	 * @return the docType
 	 */
 	public DocumentType getDocType() {
@@ -77,13 +103,15 @@ public class FunctionKey extends AbstractChangeableEntity implements Serializabl
 	}
 
 	/**
-	 * @param docType the docType to set
+	 * To set Doc Type.
+	 * @param docType DocumentType
 	 */
 	public void setDocType(DocumentType docType) {
 		this.docType = docType;
 	}
 
 	/**
+	 * To get Shortcut Key name.
 	 * @return the shortcutKeyname
 	 */
 	public String getShortcutKeyname() {
@@ -91,13 +119,15 @@ public class FunctionKey extends AbstractChangeableEntity implements Serializabl
 	}
 
 	/**
-	 * @param shortcutKeyname the shortcutKeyname to set
+	 * To set Shortcut Key name.
+	 * @param shortcutKeyname String
 	 */
 	public void setShortcutKeyname(String shortcutKeyname) {
 		this.shortcutKeyname = shortcutKeyname;
 	}
 
 	/**
+	 * To get Method Name.
 	 * @return the methodName
 	 */
 	public String getMethodName() {
@@ -105,13 +135,15 @@ public class FunctionKey extends AbstractChangeableEntity implements Serializabl
 	}
 
 	/**
-	 * @param methodName the methodName to set
+	 * To set Method Name.
+	 * @param methodName String
 	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
 
 	/**
+	 * To get Ui Label.
 	 * @return the uiLabel
 	 */
 	public String getUiLabel() {
@@ -119,13 +151,15 @@ public class FunctionKey extends AbstractChangeableEntity implements Serializabl
 	}
 
 	/**
-	 * @param uiLabel the uiLabel to set
+	 * To set Ui Label.
+	 * @param uiLabel String
 	 */
 	public void setUiLabel(String uiLabel) {
 		this.uiLabel = uiLabel;
 	}
 
 	/**
+	 * To get Serialversionuid.
 	 * @return the serialversionuid
 	 */
 	public static long getSerialversionuid() {
@@ -133,19 +167,24 @@ public class FunctionKey extends AbstractChangeableEntity implements Serializabl
 	}
 
 	/**
-	 * @param identifier the identifier to set
+	 * To set identifier.
+	 * @param identifier String
 	 */
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
 	/**
+	 * To get Identifier.
 	 * @return the identifier
 	 */
 	public String getIdentifier() {
 		return identifier;
 	}
 	
+	/**
+	 * To add variables other than in pojo.
+	 */
 	public void postPersist() {
 		super.postPersist();
 		this.identifier = EphesoftProperty.FUNCTION_KEY.getProperty() + Long.toHexString(this.getId()).toUpperCase();

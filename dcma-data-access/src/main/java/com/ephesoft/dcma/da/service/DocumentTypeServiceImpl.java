@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.DocumentTypeDao;
 import com.ephesoft.dcma.da.domain.DocumentType;
 
@@ -55,18 +55,21 @@ import com.ephesoft.dcma.da.domain.DocumentType;
  * @see com.ephesoft.dcma.da.service.DocumentTypeService
  */
 @Service
-public class DocumentTypeServiceImpl extends DataAccessService implements DocumentTypeService {
+public class DocumentTypeServiceImpl implements DocumentTypeService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentTypeServiceImpl.class);
 
+	/**
+	 * documentTypeDao {@link DocumentTypeDao}.
+	 */
 	@Autowired
 	private DocumentTypeDao documentTypeDao;
 
 	/**
-	 * An api to fetch all DocumentType by document type name.
+	 * An API to fetch all DocumentType by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @return List<DocumentType>
@@ -75,7 +78,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	@Override
 	public List<DocumentType> getDocTypeByDocTypeName(String docTypeName) {
 		List<DocumentType> documentType = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
 			LOGGER.info("Input docTypeName is null or empty.");
 		} else {
 			documentType = documentTypeDao.getDocTypeByDocTypeName(docTypeName);
@@ -84,7 +87,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	}
 
 	/**
-	 * An api to insert the documentType object.
+	 * An API to insert the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -99,7 +102,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	}
 
 	/**
-	 * An api to update the documentType object.
+	 * An API to update the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -114,7 +117,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	}
 
 	/**
-	 * An api to remove the documentType object.
+	 * An API to remove the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -129,7 +132,7 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	}
 
 	/**
-	 * An api to fetch all DocumentType by batch instance id.
+	 * An API to fetch all DocumentType by batch instance id.
 	 * 
 	 * @param batchInstanceIdentifier String
 	 * @return List<DocumentType>
@@ -147,9 +150,9 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 	}
 
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID Long
+	 * @param batchClassIdentifier String
 	 * @param firstIndex int
 	 * @param maxResults int
 	 * @return List<DocumentType>
@@ -167,6 +170,12 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 		return documentType;
 	}
 
+	/**
+	 * An API to fetch the document type based on identifier.
+	 * 
+	 * @param identifier {@link String}, the document type identifier
+	 * @return {@link DocumentType}
+	 */
 	@Override
 	public DocumentType getDocTypeByIdentifier(String identifier) {
 		DocumentType returnVal = null;
@@ -180,11 +189,22 @@ public class DocumentTypeServiceImpl extends DataAccessService implements Docume
 		return returnVal;
 	}
 
+	/**
+	 * API to evict a document type object.
+	 * 
+	 * @param documentType {@link DocumentType}
+	 */
 	@Override
 	public void evict(DocumentType documentType) {
 		documentTypeDao.evict(documentType);
 	}
-	
+
+	/**
+	 * An API to fetch all DocumentType by batch class id.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return List<{@link DocumentType}>
+	 */
 	@Transactional
 	@Override
 	public List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier) {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,44 +55,97 @@
 package org.artofsolving.jodconverter.office;
 
 /**
- * Configuration class for remote connections
+ * Configuration class for remote connections.
  * 
- * @author Ephesoft
- * 
+ * @author Ephesoft 
+ * @version 1.0
  */
+@SuppressWarnings("PMD")
 public class ExternalOfficeManagerConfiguration {
 
+	/**
+	 * PORT_NO int.
+	 */
+	private static final int PORT_NO = 2002;
+
+	/**
+	 * connectionProtocol OfficeConnectionProtocol.
+	 */
 	private OfficeConnectionProtocol connectionProtocol = OfficeConnectionProtocol.SOCKET;
-	private int portNumber = 2002;
+	
+	/**
+	 * portNumber int.
+	 */
+	private int portNumber = PORT_NO;
+	
+	/**
+	 * pipeName String.
+	 */
 	private String pipeName = "office";
+	
+	/**
+	 * connectOnStart boolean.
+	 */
 	private boolean connectOnStart = true;
 
+	/**
+	 * To set connection protocol.
+	 * 
+	 * @param connectionProtocol {@link OfficeConnectionProtocol}
+	 * @return ExternalOfficeManagerConfiguration
+	 */
 	public ExternalOfficeManagerConfiguration setConnectionProtocol(OfficeConnectionProtocol connectionProtocol) {
 		this.connectionProtocol = connectionProtocol;
 		return this;
 	}
 
+	/**
+	 * To set port number.
+	 * 
+	 * @param portNumber int
+	 * @return ExternalOfficeManagerConfiguration
+	 */
 	public ExternalOfficeManagerConfiguration setPortNumber(int portNumber) {
 		this.portNumber = portNumber;
 		return this;
 	}
 
+	/**
+	 * To set pipe name.
+	 * 
+	 * @param pipeName String
+	 * @return ExternalOfficeManagerConfiguration
+	 */
 	public ExternalOfficeManagerConfiguration setPipeName(String pipeName) {
 		this.pipeName = pipeName;
 		return this;
 	}
 
+	/**
+	 * To set Connect On Start.
+	 * @param connectOnStart boolean
+	 * @return ExternalOfficeManagerConfiguration
+	 */
 	public ExternalOfficeManagerConfiguration setConnectOnStart(boolean connectOnStart) {
 		this.connectOnStart = connectOnStart;
 		return this;
 	}
 
+	/**
+	 * To build office manager.
+	 * @return OfficeManager
+	 */
 	public OfficeManager buildOfficeManager() {
 		UnoUrl unoUrl = connectionProtocol == OfficeConnectionProtocol.SOCKET ? UnoUrl.socket("192.168.109.63", portNumber) : UnoUrl
 				.pipe(pipeName);
 		return new ExternalOfficeManager(unoUrl, connectOnStart);
 	}
 
+	/**
+	 * To build office manager.
+	 * @param host String
+	 * @return OfficeManager
+	 */
 	public OfficeManager buildOfficeManager(String host) {
 		UnoUrl unoUrl = connectionProtocol == OfficeConnectionProtocol.SOCKET ? UnoUrl.socket(host, portNumber) : UnoUrl
 				.pipe(pipeName);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client;
+package com.ephesoft.dcma.gwt.customworkflow.client;
 
 import java.util.List;
 
@@ -46,28 +46,37 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface CustomWorkflowService extends DCMARemoteService {
 
 	/**
-	 * API to add new plugin given the new plugin name, plugin xml path and plugin jar path
+	 * API to add new plugin given the new plugin name, plugin xml path and plugin jar path.
 	 * 
 	 * @param pluginName {@link String}
 	 * @param xmlSourcePath {@link String}
 	 * @param jarSourcePath {@link String}
 	 * @return {@link Boolean} if plugin is added successfully or not
-	 * @throws GWTException 
+	 * @throws GWTException
 	 */
-	public Boolean addNewPlugin(String pluginName, String xmlSourcePath, String jarSourcePath) throws GWTException;
+	Boolean addNewPlugin(String pluginName, String xmlSourcePath, String jarSourcePath) throws GWTException;
 
 	/**
-	 * API to get the list of all plugins from the database
+	 * API to get the list of all plugins from the database.
 	 * 
 	 * @return {@link List}< {@link PluginDetailsDTO}>
 	 */
-	public List<PluginDetailsDTO> getAllPluginDetailDTOs();
+	List<PluginDetailsDTO> getAllPluginDetailDTOs();
 
 	/**
-	 * API to update all the dirty plugins
+	 * API to update all the dirty plugins.
 	 * 
 	 * @param allPluginDetailsDTO {@link List}< {@link PluginDetailsDTO}>
 	 * @return {@link List}< {@link PluginDetailsDTO}>
 	 */
-	public List<PluginDetailsDTO> updateAllPluginDetailsDTOs(List<PluginDetailsDTO> allPluginDetailsDTO);
+	List<PluginDetailsDTO> updateAllPluginDetailsDTOs(List<PluginDetailsDTO> allPluginDetailsDTO);
+
+	/**
+	 * API to delete a plugin.
+	 * 
+	 * @param pluginDetailsDTO {@link PluginDetailsDTO}
+	 * @return {@link Boolean} whether the plugin could be deleted or not.
+	 * @throws GWTException
+	 */
+	Boolean deletePlugin(PluginDetailsDTO pluginDetailsDTO) throws GWTException;
 }

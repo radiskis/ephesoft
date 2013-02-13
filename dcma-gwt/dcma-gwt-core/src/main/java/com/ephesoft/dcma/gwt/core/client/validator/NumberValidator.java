@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,48 +39,69 @@ import com.google.gwt.user.client.ui.HasValue;
 
 public class NumberValidator implements Validator {
 
-	private HasValue<String> _value;
+	private HasValue<String> value;
 	private boolean isFloat;
 	private boolean skipNullCheck;
+	/**
+	 * If this boolean variable is true, then number validator invalidates the negative numbers. 
+	 */
+	private boolean isOnlyPositive;
 
 	public NumberValidator(HasValue<String> value) {
-		_value = value;
+		this.value = value;
 	}
 
 	public NumberValidator(HasValue<String> value, boolean isFloat) {
-		_value = value;
+		this.value = value;
 		this.isFloat = isFloat;
 	}
 
 	public NumberValidator(HasValue<String> value, boolean isFloat, boolean skipNullCheck) {
-		_value = value;
+		this.value = value;
 		this.isFloat = isFloat;
 		this.skipNullCheck = skipNullCheck;
 	}
 
+	public NumberValidator(HasValue<String> value, boolean isFloat, boolean skipNullCheck, boolean isOnlyPositive) {
+		this.value = value;
+		this.isFloat = isFloat;
+		this.skipNullCheck = skipNullCheck;
+		this.isOnlyPositive = isOnlyPositive;
+	}
+
 	public void setValue(HasValue<String> value) {
-		_value = value;
+		this.value = value;
 	}
 
 	@Override
 	public boolean validate() {
+		boolean isValid = true;
 		try {
-			if (_value.getValue() == null || _value.getValue().length()==0) {
-				if (skipNullCheck) {
-					return true;
-				} else {
-					return false;
+			if (value.getValue() == null || value.getValue().length() == 0) {
+				if (!skipNullCheck) {
+					isValid = false;
 				}
-			}
-			if (!isFloat) {
-				Long.parseLong(_value.getValue());
 			} else {
-				Float.parseFloat(_value.getValue());
+				if (isFloat) {
+					float floatValue = Float.parseFloat(value.getValue());
+					
+					//checking for the negative numbers
+					if (isOnlyPositive && (floatValue < 0)) {
+						isValid = false;
+					}
+				} else {
+					long longValue = Long.parseLong(value.getValue());
+					
+					//checking for the negative numbers
+					if (isOnlyPositive && (longValue < 0)) {
+						isValid = false;
+					}
+				}
 			}
 		} catch (Exception e) {
 			// the value couldn't be parsed by the pattern, return false
-			return false;
+			isValid = false;
 		}
-		return true;
+		return isValid;
 	}
 }

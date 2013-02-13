@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,8 +53,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * 
  * The first table column is considered row identifier (primary key).
  * 
- *@author Ephesoft
- *@version 1.0
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.DCMARemoteService
  */
 
 @RemoteServiceRelativePath("batchListService")
@@ -62,6 +63,7 @@ public interface TableModelService extends DCMARemoteService {
 
 	/**
 	 * API to get total Rows Count for the given data filters.
+	 * 
 	 * @param filters {@link DataFilter}[ ]
 	 * @return {@link Integer}
 	 */
@@ -69,10 +71,11 @@ public interface TableModelService extends DCMARemoteService {
 
 	/**
 	 * API to get Rows of the table in the form of BatchInstanceDTO for the given batch and filters.
+	 * 
 	 * @param batchNameToBeSearched {@link String}
-	 * @param startRow int 
+	 * @param startRow int
 	 * @param rowsCount int
-	 * @param filters {@link DataFilter}[ ] 
+	 * @param filters {@link DataFilter}[ ]
 	 * @param order {@link Order}
 	 * @return List< {@link BatchInstanceDTO}>
 	 */
@@ -80,20 +83,23 @@ public interface TableModelService extends DCMARemoteService {
 
 	/**
 	 * API to get Individual Row Counts for each batch.
-	 * @return {@link Integer}[ ] 
+	 * 
+	 * @return {@link Integer}[]
 	 */
 	Integer[] getIndividualRowCounts();
 
 	/**
 	 * API to get Next Batch Instance.
+	 * 
 	 * @return {@link String}
 	 */
 	String getNextBatchInstance();
 
 	/**
 	 * API to get Rows Count of a batch passing the given data filters.
+	 * 
 	 * @param batchName {@link String}
-	 * @param filters {@link DataFilter}[ ] 
+	 * @param filters {@link DataFilter}[ ]
 	 * @return {@link Integer}
 	 */
 	Integer getRowsCount(String batchName, DataFilter[] filters);

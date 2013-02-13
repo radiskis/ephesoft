@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,7 +41,7 @@ public interface Validatable {
 	 *
 	 * @return true if validation succeeded, false if validation failed
 	 */
-	public boolean validate();
+	boolean validate();
 	
 	/**
 	 * Toggle the visual state of the date box so the user receives feedback
@@ -51,5 +51,5 @@ public interface Validatable {
 	 *            Whether or not the control should reflect a valid date entry
 	 *            (true) or an invalid one (false)
 	 */
-	public void toggleValidDateBox();
+	void toggleValidDateBox();
 }

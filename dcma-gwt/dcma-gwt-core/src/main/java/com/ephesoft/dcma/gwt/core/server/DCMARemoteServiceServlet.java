@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -53,14 +55,19 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.ephesoft.dcma.batch.dao.xml.UploadBatchXmlDao;
+import com.ephesoft.dcma.batch.schema.UploadBatchMetaData;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
+import com.ephesoft.dcma.core.common.UserType;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.service.BatchClassGroupsService;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceGroupsService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
+import com.ephesoft.dcma.da.service.ManualStepHistoryService;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
+import com.ephesoft.dcma.gwt.core.shared.constants.CoreCommonConstants;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.ephesoft.dcma.user.service.UserConnectivityService;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
@@ -68,7 +75,11 @@ import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet implements DCMARemoteService {
+public class DCMARemoteServiceServlet extends RemoteServiceServlet implements DCMARemoteService {
+
+	private static final String SPACE = " ";
+
+	private static final String REVIEW = "Review";
 
 	private static final String ALL_GROUPS = "allGroups";
 
@@ -88,36 +99,64 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	private static final String IS_SUPER_ADMIN = "isSuperAdmin";
 
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String SELECTED_BATCH_CLASS = "selectedBatchClass";
+
+	private static final String HELP_URL_LINK = "help_url";
+
+	protected static final Logger LOG = LoggerFactory.getLogger(DCMARemoteServiceServlet.class);
+
+	private static final String FOOTER_TEXT = "Powered by Ephesoft";
+
+	private static final String FOOTER_LINK = "http://www.ephesoft.com";
+
+	/**
+	 * The USER_TYPE {@link String} is a constant for Ephesoft Cloud user type key.
+	 */
+	private static final String USER_TYPE = "user_type";
 
 	@Override
 	public void setup() {
-
+		/*
+		 * for further use
+		 */
 	}
 
 	@Override
 	public void setUpForLicenseExpiryAlert() {
+		/*
+		 * for further use
+		 */
 
 	}
 
 	@Override
-	public void initRemoteService() throws Exception {
+	public void initRemoteService() throws GWTException {
 		this.getThreadLocalRequest().getSession().removeAttribute(ALL_GROUPS);
 		this.getThreadLocalRequest().getSession().removeAttribute(ALL_USERS);
+		this.getThreadLocalRequest().getSession().removeAttribute(IS_SUPER_ADMIN);
 		try {
 			setup();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			throw new GWTException(e.getCause().getMessage());
 		}
 	}
 
 	@Override
-	public void initRemoteServiceForLicenseAlert() throws Exception {
+	public String getBatchClassInfoFromSession() {
+		return (String) this.getThreadLocalRequest().getSession().getAttribute(SELECTED_BATCH_CLASS);
+	}
+
+	@Override
+	public void setBatchClassInfoFromSession(String batchClassInfo) {
+		this.getThreadLocalRequest().getSession().setAttribute(SELECTED_BATCH_CLASS, batchClassInfo);
+	}
+
+	@Override
+	public void initRemoteServiceForLicenseAlert() throws GWTException {
 		try {
 			setUpForLicenseExpiryAlert();
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 			throw new GWTException(e.getMessage());
 		}
 	}
@@ -134,34 +173,38 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 
 	@Override
 	public String getUserName() {
-		if (this.getThreadLocalRequest().getUserPrincipal() == null)
-			return StringUtils.EMPTY;
-
-		return this.getThreadLocalRequest().getUserPrincipal().getName();
-
+		String userName;
+		if (this.getThreadLocalRequest().getUserPrincipal() == null) {
+			userName = StringUtils.EMPTY;
+		} else {
+			userName = this.getThreadLocalRequest().getUserPrincipal().getName();
+		}
+		return userName;
 	}
 
 	@Override
 	public Set<String> getUserRoles() {
-		log.info("========Getting the user roles=========");
+		LOG.info("========Getting the user roles=========");
 		Set<String> allGroups = getAllGroups();
-		if (null == allGroups || allGroups.isEmpty()) {
-			log.error("No groups fetched from Authenticated User.....All groups is empty.Returning null");
-			return null;
-		}
-
 		Set<String> userGroups = new HashSet<String>();
-		for (String group : allGroups) {
-			if (null != group && !group.isEmpty()) {
-				if (this.getThreadLocalRequest().isUserInRole(group)) {
-					log.info("Added group is: " + group);
+		if (null == allGroups || allGroups.isEmpty()) {
+			LOG.error("No groups fetched from Authenticated User.....All groups is empty.Returning null");
+			userGroups = null;
+		} else if (isSuperAdmin()) {
+			for (String group : allGroups) {
+				userGroups.add(group);
+			}
+		} else {
+			for (String group : allGroups) {
+				if (null != group && !group.isEmpty() && this.getThreadLocalRequest().isUserInRole(group)) {
+					LOG.info("Added group is: " + group);
 					userGroups.add(group);
 				}
 			}
-		}
-		if (userGroups.isEmpty()) {
-			log.error("No roles found in Authenticated User for " + getUserName());
-			userGroups = null;
+			if (userGroups.isEmpty()) {
+				LOG.error("No roles found in Authenticated User for " + getUserName());
+				userGroups = null;
+			}
 		}
 		return userGroups;
 	}
@@ -183,12 +226,9 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			if (isSuperAdmin == null) {
 				isSuperAdmin = Boolean.FALSE;
 			}
-
 			this.getThreadLocalRequest().getSession().setAttribute(IS_SUPER_ADMIN, isSuperAdmin);
-
 		}
 		return isSuperAdmin;
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -214,11 +254,11 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		try {
 			processPost(request, response);
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (ServletException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (SerializationException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -258,21 +298,43 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 				batchInstanceService.unlockCurrentBatchInstance(batchIdentifier);
 			}
 		} else {
-			log.error(COULD_NOT_CLEAR_CURRENT_USER_ERROR_MSG + batchIdentifier);
+			LOG.error(COULD_NOT_CLEAR_CURRENT_USER_ERROR_MSG + batchIdentifier);
 		}
 	}
 
 	@Override
-	public void logout() {
+	public void logout(String httpUrl) {
+
 		cleanup();
+		calculateUserReviewValidationTime(httpUrl);
 		this.getThreadLocalRequest().getSession().invalidate();
+	}
+
+	/**
+	 * API to calculate the actual user review and validation time of batch instance
+	 * 
+	 * @param httpUrl
+	 * @throws NoSuchBeanDefinitionException
+	 */
+	private void calculateUserReviewValidationTime(String httpUrl) throws NoSuchBeanDefinitionException {
+		String batchInstanceId = null;
+		if (httpUrl.contains(REVIEW)) {
+			int index = httpUrl.lastIndexOf(SPACE);
+			batchInstanceId = httpUrl.substring(index + 1);
+			BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+			BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+			ManualStepHistoryService manualStepHistoryService = this.getSingleBeanOfType(ManualStepHistoryService.class);
+			manualStepHistoryService.updateEndTimeAndCalculateDuration(batchInstanceId, batchInstance.getStatus().name(),
+					getUserName());
+		}
 	}
 
 	@Override
 	public String getLocale() {
 		String locale = (String) this.getServletContext().getInitParameter("locale");
-		if (locale.equalsIgnoreCase("default"))
+		if (locale.equalsIgnoreCase("default")) {
 			locale = "";
+		}
 		return locale;
 	}
 
@@ -283,7 +345,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			isReportingEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.reporting"));
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			isReportingEnabled = false;
 		}
 		return isReportingEnabled;
@@ -296,10 +358,22 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			isUploadBatchEnabled = Boolean.parseBoolean(configProperties.getProperty("enable.uploadBatch"));
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			isUploadBatchEnabled = false;
 		}
 		return isUploadBatchEnabled;
+	}
+
+	@Override
+	public void createXmlForUploadBatchInfo(String uploadBatchFolderPath) {
+
+		// create xml object for the upload batch meta-data
+		UploadBatchMetaData uploadBatchMetaDataXMLObj = new UploadBatchMetaData();
+		uploadBatchMetaDataXMLObj.setUserName(getUserName());
+
+		// creating the xml file for storing the upload batch
+		UploadBatchXmlDao uploadBatchxmlDao = this.getSingleBeanOfType(UploadBatchXmlDao.class);
+		uploadBatchxmlDao.update(uploadBatchMetaDataXMLObj, uploadBatchFolderPath);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -391,7 +465,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 				isRestartAllBatchEnabled = (Boolean) restartAllStatus;
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			isRestartAllBatchEnabled = false;
 		}
 		return isRestartAllBatchEnabled;
@@ -404,7 +478,7 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 			ApplicationConfigProperties configProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 			rowCount = Integer.parseInt(configProperties.getProperty("batchlist.table_row_count"));
 		} catch (Exception e) {
-			log.info("batchlist.table_row_count is invalid or not exist in application.properties.Using default value: 15");
+			LOG.info("batchlist.table_row_count is invalid or not exist in application.properties.Using default value: 15");
 		}
 		return rowCount;
 
@@ -432,5 +506,85 @@ public abstract class DCMARemoteServiceServlet extends RemoteServiceServlet impl
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceIdentifier);
 		return batchInstance.getCurrentUser();
+	}
+
+	@Override
+	public Boolean validateRegEx(final String regex) {
+		boolean isValidRegExp = true;
+		try {
+			Pattern.compile(regex);
+		} catch (Exception e) {
+			isValidRegExp = false;
+		}
+		return isValidRegExp;
+	}
+
+	@Override
+	public Boolean validateValueWithRegEx(final String input, final String regex) {
+		boolean isValidInput = true;
+		try {
+			isValidInput = Pattern.matches(regex, input);
+		} catch (PatternSyntaxException e) {
+			isValidInput = false;
+		}
+		return isValidInput;
+	}
+
+	/**
+	 * API to get the help url from properties file
+	 * 
+	 * @return
+	 * @throws GWTException
+	 */
+	@Override
+	public String getHelpUrl() throws GWTException {
+		String url = null;
+		try {
+			ApplicationConfigProperties prop = ApplicationConfigProperties.getApplicationConfigProperties();
+			url = prop.getProperty(HELP_URL_LINK);
+			if (url == null) {
+				LOG.error("Unable to read the help url from properties file");
+				throw new GWTException("Unable to get help url from properties file.");
+			}
+		} catch (IOException ioe) {
+			LOG.error("Unable to read the help url from properties file .Exception thrown is:" + ioe.getMessage(), ioe);
+			throw new GWTException("Unable to get help url from properties file.");
+		}
+		return url;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ephesoft.dcma.gwt.core.client.DCMARemoteService#getFooterProperties()
+	 */
+	@Override
+	public Map<String, String> getFooterProperties() {
+
+		Map<String, String> footerProperties = new HashMap<String, String>();
+
+		footerProperties.put(CoreCommonConstants.FOOTER_TEXT_KEY, FOOTER_TEXT);
+		footerProperties.put(CoreCommonConstants.FOOTER_LINK_KEY, FOOTER_LINK);
+
+		return footerProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ephesoft.dcma.gwt.core.client.DCMARemoteService#getUserType()
+	 */
+	public Integer getUserType() {
+		Integer userType = null;
+		try {
+			userType = Integer.parseInt(ApplicationConfigProperties.getApplicationConfigProperties().getProperty(USER_TYPE).trim());
+		} catch (NumberFormatException numberFormatException) {
+			userType = UserType.OTHERS.getUserType();
+			LOG.error("user type property is in wrong format in property file");
+		} catch (IOException ioException) {
+			userType = UserType.OTHERS.getUserType();
+			LOG.error("user type property is missing from property file");
+		}
+		return userType;
 	}
 }

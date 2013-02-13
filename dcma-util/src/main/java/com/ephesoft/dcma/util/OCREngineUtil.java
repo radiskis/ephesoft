@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,30 +37,50 @@ package com.ephesoft.dcma.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class OCREngineUtil {
+import com.ephesoft.dcma.constant.UtilConstants;
 
-	private static final String ID_ATTR = "id";
+/**
+ * This is util class for OCREngine.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see javax.xml.xpath.XPath
+ */
+public class OCREngineUtil {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(OCREngineUtil.class);
 
+	/**
+	 * To format HOCR for Tesseract.
+	 * @param outputFilePath {@link String}
+	 * @param actualFolderLocation  {@link String}
+	 * @param pageId {@link String}
+	 * @throws XPathExpressionException if error occurs
+	 * @throws TransformerException if error occurs
+	 * @throws IOException if error occurs
+	 */
 	public static void formatHOCRForTesseract(final String outputFilePath, final String actualFolderLocation, final String pageId)
-			throws Exception {
+			throws XPathExpressionException, TransformerException, IOException {
 		LOGGER.info("Entering format HOCR for tessearct . outputfilepath : " + outputFilePath);
 		InputStream inputStream = new FileInputStream(outputFilePath);
 		XPathFactory xFactory = new org.apache.xpath.jaxp.XPathFactoryImpl();
@@ -80,33 +100,21 @@ public class OCREngineUtil {
 		} catch (Exception e) {
 			LOGGER.info("Premature end of file for " + outputFilePath + e);
 		} finally {
-			if (inputStream != null) {
-				inputStream.close();
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 		if (doc2 != null) {
 			LOGGER.info("document is not null.");
 			NodeList wordList = (NodeList) wordExpr.evaluate(doc2, XPathConstants.NODESET);
 			for (int wordNodeIndex = 0; wordNodeIndex < wordList.getLength(); wordNodeIndex++) {
-				Node wordNode = wordList.item(wordNodeIndex);
-				if (wordNode != null) {
-					Node word = (Node) xOcrWordExpr.evaluate(wordNode, XPathConstants.NODE);
-					if (word != null) {
-						wordNode.setTextContent(word.getTextContent());
-					} else {
-						word = (Node) ocrXWordExpr.evaluate(wordNode, XPathConstants.NODE);
-						if (word != null) {
-							wordNode.setTextContent(word.getTextContent());
-						}
-					}
-				}
+				setWordNodeTextContent(xOcrWordExpr, ocrXWordExpr, wordList,
+						wordNodeIndex);
 			}
 
 			NodeList pageList = (NodeList) pageExpr.evaluate(doc2, XPathConstants.NODESET);
 			for (int pageNodeIndex = 0; pageNodeIndex < pageList.getLength(); pageNodeIndex++) {
 				Node pageNode = pageList.item(pageNodeIndex);
-				if (pageNode != null && ((Node) pageNode.getAttributes().getNamedItem(ID_ATTR)) != null) {
-					String pageID = ((Node) pageNode.getAttributes().getNamedItem(ID_ATTR)).getTextContent();
+				if (pageNode != null && ((Node) pageNode.getAttributes().getNamedItem(UtilConstants.ID_ATTR)) != null) {
+					String pageID = ((Node) pageNode.getAttributes().getNamedItem(UtilConstants.ID_ATTR)).getTextContent();
 					wordExpr = xpath.compile("//div[@id='" + pageID + "']//span[@class='ocr_word']");
 					NodeList wordInPageList = (NodeList) wordExpr.evaluate(pageNode, XPathConstants.NODESET);
 
@@ -130,5 +138,22 @@ public class OCREngineUtil {
 			}
 		}
 		LOGGER.info("Exiting format HOCR for tessearct . outputfilepath : " + outputFilePath);
+	}
+
+	private static void setWordNodeTextContent(XPathExpression xOcrWordExpr,
+			XPathExpression ocrXWordExpr, NodeList wordList, int wordNodeIndex)
+			throws XPathExpressionException {
+		Node wordNode = wordList.item(wordNodeIndex);
+		if (wordNode != null) {
+			Node word = (Node) xOcrWordExpr.evaluate(wordNode, XPathConstants.NODE);
+			if (word != null) {
+				wordNode.setTextContent(word.getTextContent());
+			} else {
+				word = (Node) ocrXWordExpr.evaluate(wordNode, XPathConstants.NODE);
+				if (word != null) {
+					wordNode.setTextContent(word.getTextContent());
+				}
+			}
+		}
 	}
 }

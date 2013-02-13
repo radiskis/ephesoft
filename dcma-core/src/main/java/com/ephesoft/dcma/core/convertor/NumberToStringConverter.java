@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,8 +35,18 @@
 
 package com.ephesoft.dcma.core.convertor;
 
+/**
+ * This class converts number to string.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class NumberToStringConverter implements IConverter<Object, String> {
 
+	/**
+	 * Converter method.
+	 * @param input Object
+	 */
 	@Override
 	public String convert(Object input) {
 		return String.valueOf(input);

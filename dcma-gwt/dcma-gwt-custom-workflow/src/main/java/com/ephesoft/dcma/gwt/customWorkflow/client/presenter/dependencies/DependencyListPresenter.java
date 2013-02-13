@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,12 +33,12 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies;
 
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.AbstractCustomWorkflowPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.DependencyListView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.AbstractCustomWorkflowPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyListView;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class DependencyListPresenter extends AbstractCustomWorkflowPresenter<DependencyListView> implements DoubleClickListner {
@@ -49,12 +49,16 @@ public class DependencyListPresenter extends AbstractCustomWorkflowPresenter<Dep
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void bind() {
-
+		/**
+		 * Bind the view with the values here
+		 */
 	}
 
 	@Override

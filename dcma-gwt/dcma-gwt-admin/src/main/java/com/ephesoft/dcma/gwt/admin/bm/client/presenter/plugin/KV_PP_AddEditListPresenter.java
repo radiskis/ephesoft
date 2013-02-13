@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,43 +40,79 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_AddEditListView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows KV_PP add and edit list.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KV_PP_AddEditListPresenter extends AbstractBatchClassPresenter<KV_PP_AddEditListView> {
 
+	/**
+	 * kvPPAddEditDetailPresenter KV_PP_AddEditDetailPresenter.
+	 */
 	private final KV_PP_AddEditDetailPresenter kvPPAddEditDetailPresenter;
 
+	/**
+	 * kvPPAddEditPresenter KV_PP_AddEditPresenter.
+	 */
 	private final KV_PP_AddEditPresenter kvPPAddEditPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_AddEditListView
+	 */
 	public KV_PP_AddEditListPresenter(BatchClassManagementController controller, KV_PP_AddEditListView view) {
 		super(controller, view);
 		this.kvPPAddEditDetailPresenter = new KV_PP_AddEditDetailPresenter(controller, view.getKvPPDetailView());
 		this.kvPPAddEditPresenter = new KV_PP_AddEditPresenter(controller, view.getEditKVPPView());
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// no implementation
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		kvPPAddEditDetailPresenter.bind();
 		kvPPAddEditPresenter.bind();
 	}
 
+	/**
+	 * To show KV_PP Detail View.
+	 */
 	public void showKVPPDetailView() {
 		view.getKvPPTypeConfigVerticalPanel().setVisible(Boolean.FALSE);
 		view.getKvPPTypeVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To show KV_PP Edit View.
+	 */
 	public void showKVPPEditView() {
 		view.getKvPPTypeConfigVerticalPanel().setVisible(Boolean.TRUE);
 		view.getKvPPTypeVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To bind in case of edit KV_PP properties button click.
+	 */
 	public void onEditKVPPPropertiesButtonClicked() {
 		controller.setAdd(false);
-		kvPPAddEditPresenter.bind();
 		showKVPPEditView();
+		kvPPAddEditPresenter.bind();
 	}
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,32 +42,45 @@ import com.ephesoft.dcma.core.common.PluginProperty;
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.core.common.PluginProperty
  */
 public enum TesseractProperties implements PluginProperty {
 
 	/**
-	 * Valid extensions for tesseract.
+	 * TESSERACT_VALID_EXTNS.
 	 */
-	TESSERACT_VALID_EXTNS("tesseract.valid_extensions"),
+	TESSERACT_VALID_EXTNS("tesseract.valid_extensions"),	
 	/**
-	 * Languages supported in tesseract.
+	 * TESSERACT_LANGUAGE.
 	 */
 	TESSERACT_LANGUAGE("tesseract.commands_language"),
-
-	TESSERACT_COLOR_SWITCH("tesseract.color_switch"),
-	
+	/**
+	 * TESSERACT_COLOR_SWITCH.
+	 */
+	TESSERACT_COLOR_SWITCH("tesseract.color_switch"),	
+	/**
+	 * TESSERACT_SWITCH.
+	 */
 	TESSERACT_SWITCH("tesseract.switch");
 
 	/**
 	 * Property key.
+	 * @return String
 	 */
 	private String key;
 
+	/**
+	 * Constructor.
+	 * @param key String
+	 */
 	TesseractProperties(final String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get Property Key.
+	 * @return String
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

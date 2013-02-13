@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,21 +37,69 @@ package com.ephesoft.dcma.da.property;
 
 import com.ephesoft.dcma.core.common.DomainProperty;
 
+/**
+ * Enum to specify batch instance property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DomainProperty
+ */
 public enum BatchInstanceProperty implements DomainProperty {
 
-	ID("id"), PRIORITY("priority"), REVIEWUSERNAME("reviewUserName"), VALIDATIONUSERNAME("validationUserName"), STATUS("status"),
-	BATCHCLASSNAME("batchClass.name"), BATCHNAME("batchName"), LASTMODIFIED("lastModified"), CREATIONDATE("creationDate");
+	/**
+	 * ID.
+	 */
+	ID("id"),
+	/**
+	 * PRIORITY.
+	 */
+	PRIORITY("priority"),
+	/**
+	 * REVIEWUSERNAME.
+	 */
+	REVIEWUSERNAME("reviewUserName"),
+	/**
+	 * VALIDATIONUSERNAME.
+	 */
+	VALIDATIONUSERNAME("validationUserName"),
+	/**
+	 * STATUS.
+	 */
+	STATUS("status"),
+	/**
+	 * BATCHCLASSNAME.
+	 */
+	BATCHCLASSNAME("batchClass.name"),
+	/**
+	 * BATCHNAME.
+	 */
+	BATCHNAME("batchName"),
+	/**
+	 * LASTMODIFIED.
+	 */
+	LASTMODIFIED("lastModified"),
+	/**
+	 * CREATIONDATE.
+	 */
+	CREATIONDATE("creationDate");
 
+	/**
+	 * property String.
+	 */
 	private String property;
 
 	/**
-	 * @param property
+	 * Constructor.
+	 * 
+	 * @param property String
 	 */
 	BatchInstanceProperty(String property) {
 		this.property = property;
 	}
 
 	/**
+	 * To get property.
+	 * 
 	 * @return the property
 	 */
 	@Override

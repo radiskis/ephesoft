@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -66,6 +66,7 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 		private final CalendarWidget calendar;
 
 		public NavBar(CalendarWidget calendar) {
+			super();
 			this.calendar = calendar;
 
 			setWidget(bar);
@@ -92,13 +93,13 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 		}
 
 		public void onClick(Widget sender) {
-			if (sender == prevMonth) {
+			if (sender.equals(prevMonth)) {
 				calendar.prevMonth();
-			} else if (sender == prevYear) {
+			} else if (sender.equals(prevYear)) {
 				calendar.prevYear();
-			} else if (sender == nextYear) {
+			} else if (sender.equals(nextYear)) {
 				calendar.nextYear();
-			} else if (sender == nextMonth) {
+			} else if (sender.equals(nextMonth)) {
 				calendar.nextMonth();
 			}
 		}
@@ -106,7 +107,7 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 
 	private static class CellHTML extends HTML {
 
-		private int day;
+		private final int day;
 
 		public CellHTML(String text, int day) {
 			super(text);
@@ -126,8 +127,8 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 		public boolean clearCell(int row, int column) {
 			boolean retValue = super.clearCell(row, column);
 
-			Element td = getCellFormatter().getElement(row, column);
-			DOM.setInnerHTML(td, "");
+			Element tableColumn = getCellFormatter().getElement(row, column);
+			DOM.setInnerHTML(tableColumn, "");
 			return retValue;
 		}
 	};
@@ -136,12 +137,13 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 
 	private ChangeListenerCollection changeListeners;
 
-	private String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	private final String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-	private String[] months = new String[] {"January", "February", "March", "April", "May", "June", "July", "August", "September",
+	private final String[] months = new String[] {"January", "February", "March", "April", "May", "June", "July", "August", "September",
 			"October", "November", "December"};
 
 	public CalendarWidget() {
+		super();
 		setWidget(outer);
 		grid.setStyleName("table");
 		grid.setCellSpacing(0);
@@ -169,50 +171,59 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 		int firstDay = new Date(year - 1900, month, 1).getDay();
 		int numOfDays = getDaysInMonth(year, month);
 
-		int j = 0;
-		for (int i = 1; i < 6; i++) {
-			for (int k = 0; k < 7; k++, j++) {
-				int displayNum = (j - firstDay + 1);
-				if (j < firstDay || displayNum > numOfDays) {
-					grid.getCellFormatter().setStyleName(i, k, "empty");
-					grid.setHTML(i, k, "&nbsp;");
+		int colCount = 0;
+		for (int rowCount = 1; rowCount < 6; rowCount++) {
+			for (int colIterator = 0; colIterator < 7; colIterator++, colCount++) {
+				int displayNum = (colCount - firstDay + 1);
+				if (colCount < firstDay || displayNum > numOfDays) {
+					grid.getCellFormatter().setStyleName(rowCount, colIterator, "empty");
+					grid.setHTML(rowCount, colIterator, "&nbsp;");
 				} else {
-					HTML html = new CellHTML("<span>" + String.valueOf(displayNum) + "</span>", displayNum);
+					HTML html = new CellHTML("<span>" + displayNum + "</span>", displayNum);
 					html.addClickListener(this);
-					grid.getCellFormatter().setStyleName(i, k, "cell");
+					grid.getCellFormatter().setStyleName(rowCount, colIterator, "cell");
 					if (displayNum == today) {
-						grid.getCellFormatter().addStyleName(i, k, "today");
+						grid.getCellFormatter().addStyleName(rowCount, colIterator, "today");
 					} else if (displayNum == sameDay) {
-						grid.getCellFormatter().addStyleName(i, k, "day");
+						grid.getCellFormatter().addStyleName(rowCount, colIterator, "day");
 					}
-					grid.setWidget(i, k, html);
+					grid.setWidget(rowCount, colIterator, html);
 				}
 			}
 		}
 	}
 
-	protected void setHeaderText(int year, int month) {
+	protected final void setHeaderText(int year, int month) {
 		navbar.title.setText(months[month] + ", " + year);
 	}
 
 	private int getDaysInMonth(int year, int month) {
+		int noOfDays;
 		switch (month) {
 			case 1:
-				if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
-					return 29; // leap year
-				else
-					return 28;
+				if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0){
+					noOfDays = 29; // leap year
+				}
+				else{
+					noOfDays = 28;
+				}
+				break;
 			case 3:
-				return 30;
+				noOfDays = 30;
+				break;
 			case 5:
-				return 30;
+				noOfDays = 30;
+				break;
 			case 8:
-				return 30;
+				noOfDays = 30;
+				break;
 			case 10:
-				return 30;
+				noOfDays = 30;
+				break;
 			default:
-				return 31;
+				noOfDays = 31;
 		}
+		return noOfDays;
 	}
 
 	public void prevMonth() {
@@ -257,15 +268,15 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 		date.setMonth(month);
 	}
 
-	public int getYear() {
+	public final int getYear() {
 		return 1900 + date.getYear();
 	}
 
-	public int getMonth() {
+	public final int getMonth() {
 		return date.getMonth();
 	}
 
-	public int getDay() {
+	public final int getDay() {
 		return date.getDate();
 	}
 
@@ -283,14 +294,16 @@ public class CalendarWidget extends Composite implements ClickListener, SourcesC
 	}
 
 	public void addChangeListener(ChangeListener listener) {
-		if (changeListeners == null)
+		if (changeListeners == null){
 			changeListeners = new ChangeListenerCollection();
+		}
 		changeListeners.add(listener);
 	}
 
 	public void removeChangeListener(ChangeListener listener) {
-		if (changeListeners != null)
+		if (changeListeners != null){
 			changeListeners.remove(listener);
+		}
 	}
 
 	public void hide() {

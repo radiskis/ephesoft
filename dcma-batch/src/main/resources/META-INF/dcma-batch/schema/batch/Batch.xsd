@@ -155,7 +155,7 @@
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:complexType name="document">
+	<xs:complexType name="document" > 
 		<xs:sequence>
 			<xs:element name="Identifier" type="xs:string" />
 			<xs:element name="Type" type="xs:string" />
@@ -165,6 +165,8 @@
 			<xs:element name="Valid" type="xs:boolean" />
 			<xs:element name="Reviewed" type="xs:boolean" />
 			<xs:element name="ErrorMessage" type="xs:string" />
+			<xs:element name="DocumentDisplayInfo" type="xs:string" default=""/>
+			<xs:element name="DocumentTypeChanged" type="xs:boolean" />
 			<xs:element name="DocumentLevelFields">
 				<xs:complexType>
 					<xs:sequence>
@@ -214,6 +216,8 @@
 				<xs:element name="BatchStatus" type="batchStatus" />
 				<xs:element name="BatchLocalPath" type="xs:string" />
 				<xs:element name="CurrentModule" type="xs:string" />
+				<xs:element name="InputPageCount" type="xs:int" />
+				<xs:element name="UserName" type="xs:string" />
 				<xs:element name="DocumentClassificationTypes">
 					<xs:complexType>
 						<xs:sequence>

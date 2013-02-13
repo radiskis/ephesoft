@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,12 +33,14 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.imagemagick.imageClassifier;
+package com.ephesoft.dcma.imagemagick.imageclassifier;
 
 /**
  * This bean simply maintains the.SamplePageName and the confidence score.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
  * 
  */
 public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
@@ -53,8 +55,8 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 
 	/**
 	 * The constructor.
-	 * @param samplePageName
-	 * @param confidence
+	 * @param samplePageName {@link String}
+	 * @param confidence double
 	 */
 	public SampleConfidenceBean(String samplePageName, double confidence) {
 		this.samplePageName = samplePageName;
@@ -65,12 +67,12 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 	 * No-Arg Constructor.
 	 */
 	public SampleConfidenceBean() {
-
+		// Empty constructor
 	}
 
 	/**
 	 * Getter for samplePageName.
-	 * @return samplePageName
+	 * @return {@link String}
 	 */
 	public String getSamplePageName() {
 		return samplePageName;
@@ -78,7 +80,7 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 
 	/**
 	 * The setter for samplePageName.
-	 * @param samplePageName
+	 * @param samplePageName {@link String}
 	 */
 	public void setSamplePageName(String samplePageName) {
 		this.samplePageName = samplePageName;
@@ -86,7 +88,7 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 
 	/**
 	 * Getter for confidence.
-	 * @return confidence
+	 * @return double
 	 */
 	public double getConfidence() {
 		return confidence;
@@ -94,7 +96,7 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 
 	/**
 	 * Setter for confidence.
-	 * @param confidence
+	 * @param confidence double
 	 */
 	public void setConfidence(double confidence) {
 		this.confidence = confidence;
@@ -111,6 +113,7 @@ public class SampleConfidenceBean implements Comparable<SampleConfidenceBean> {
 	/**
 	 * The Compare to method of the interface Comparable.
 	 * This is used to sort the list containing SampleConfidenceBeans.
+	 * @return int
 	 */
 	public int compareTo(SampleConfidenceBean compareToBean) {
 		int returnValue = 0;

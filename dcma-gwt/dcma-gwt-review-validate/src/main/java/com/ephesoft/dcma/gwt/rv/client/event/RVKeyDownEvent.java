@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,11 +40,12 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class RVKeyDownEvent extends GwtEvent<RVKeyDownEventHandler> {
 
-	public static Type<RVKeyDownEventHandler> TYPE = new Type<RVKeyDownEventHandler>();
+	public static Type<RVKeyDownEventHandler> type = new Type<RVKeyDownEventHandler>();
 
-	private KeyDownEvent event;
+	private final KeyDownEvent event;
 
 	public RVKeyDownEvent(KeyDownEvent event) {
+		super();
 		this.event = event;
 	}
 
@@ -55,7 +56,7 @@ public class RVKeyDownEvent extends GwtEvent<RVKeyDownEventHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<RVKeyDownEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public KeyDownEvent getEvent() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,23 +42,46 @@ import org.jbpm.api.model.OpenExecution;
 import org.jbpm.pvm.internal.env.EnvironmentImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.BackUpFileService;
 import com.ephesoft.dcma.workflow.constant.WorkFlowConstants;
-import com.ephesoft.dcma.workflow.service.common.JBPMVariables;
 
+/**
+ * This class is used to validate evaluation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.api.jpdl.DecisionHandler
+ */
 public class ValidationEvaluation implements DecisionHandler {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 936791060838469598L;
+
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReviewEvaluation.class);
 
+	/**
+	 * To decide which transition will execute.
+	 * 
+	 * @param execution OpenExecution
+	 * @return String
+	 */
 	public String decide(OpenExecution execution) {
 
 		Map<String, Object> map = execution.getVariables();
@@ -66,11 +89,12 @@ public class ValidationEvaluation implements DecisionHandler {
 		boolean isValidationRequired = true;
 
 		if (null != map) {
-			batchInstanceID = (BatchInstanceID) map.get(JBPMVariables.BATCH_INSTANCE_ID);
+			batchInstanceID = (BatchInstanceID) map.get(WorkFlowConstants.BATCH_INSTANCE_ID);
 		}
+		final String batchInstanceIdentifier = batchInstanceID.getID();
 		try {
 			BatchSchemaService batchSchemaService = EnvironmentImpl.getCurrent().get(BatchSchemaService.class);
-			isValidationRequired = batchSchemaService.isValidationRequired(batchInstanceID.getID());
+			isValidationRequired = batchSchemaService.isValidationRequired(batchInstanceIdentifier);
 
 		} catch (DCMAApplicationException e) {
 			LOGGER.error(e.getMessage(), e);
@@ -83,7 +107,8 @@ public class ValidationEvaluation implements DecisionHandler {
 			content = WorkFlowConstants.NO_STRING;
 
 			// Explicitly copy the batch xml for "resume" batch functionality
-			BackUpFileService.backUpBatch(batchInstanceID.getID(), WorkFlowConstants.VALIDATE_DOCUMENT_PLUGIN);
+			BackUpFileService.backUpBatch(batchInstanceIdentifier, WorkFlowConstants.VALIDATE_DOCUMENT_PLUGIN, batchInstanceService
+					.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 		}
 
 		return content;

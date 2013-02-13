@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,6 +44,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batchclassfield.EditBatchClassFieldPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,83 +56,229 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit individual batch class field and it's child.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditBatchClassFieldView> {
 	}
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * nameStar Label.
+	 */
 	@UiField
 	protected Label nameStar;
+
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
 
+	/**
+	 * descriptionLabel Label.
+	 */
 	@UiField
 	protected Label descriptionLabel;
+
+	/**
+	 * descriptionStar Label.
+	 */
 	@UiField
 	protected Label descriptionStar;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
 
+	/**
+	 * dataTypeLabel Label.
+	 */
 	@UiField
 	protected Label dataTypeLabel;
+
+	/**
+	 * dataTypeStar Label.
+	 */
 	@UiField
 	protected Label dataTypeStar;
+
+	/**
+	 * dataType ListBox.
+	 */
 	@UiField
 	protected ListBox dataType;
 
+	/**
+	 * fieldOrderNumberLabel Label.
+	 */
 	@UiField
 	protected Label fieldOrderNumberLabel;
+
+	/**
+	 * fieldOrderNumberStar Label.
+	 */
 	@UiField
 	protected Label fieldOrderNumberStar;
+
+	/**
+	 * fieldOrderNumber TextBox.
+	 */
 	@UiField
 	protected TextBox fieldOrderNumber;
 
+	/**
+	 * sampleValueLabel Label.
+	 */
 	@UiField
 	protected Label sampleValueLabel;
+
+	/**
+	 * sampleValue TextBox.
+	 */
 	@UiField
 	protected TextBox sampleValue;
 
+	/**
+	 * validationPatternLabel Label.
+	 */
 	@UiField
 	protected Label validationPatternLabel;
+
+	/**
+	 * validationPattern TextBox.
+	 */
 	@UiField
 	protected TextBox validationPattern;
 
+	/**
+	 * To get Validation Pattern Label.
+	 * 
+	 * @return Label
+	 */
+	public Label getValidationPatternLabel() {
+		return validationPatternLabel;
+	}
+
+	/**
+	 * To set Validation Pattern Label.
+	 * 
+	 * @param validationPatternLabel Label
+	 */
+	public void setValidationPatternLabel(Label validationPatternLabel) {
+		this.validationPatternLabel = validationPatternLabel;
+	}
+
+	/**
+	 * fieldOptionValueListLabel Label.
+	 */
 	@UiField
 	protected Label fieldOptionValueListLabel;
+
+	/**
+	 * fieldOptionValueList TextBox.
+	 */
 	@UiField
 	protected TextBox fieldOptionValueList;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
+	@UiField
+	protected ScrollPanel scrollPanel;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
+
+	/**
+	 * samplePatternButton Button.
+	 */
 	@UiField
 	protected Button samplePatternButton;
 
-	private ValidatableWidget<TextBox> validateNameTextBox;
-	private ValidatableWidget<TextBox> validateDescriptionTextBox;
-	private ValidatableWidget<TextBox> validateFieldOrderNumberTextBox;
-	private ValidatableWidget<TextBox> validateValidationPatternTextBox;
+	/**
+	 * validateButton Button.
+	 */
+	@UiField
+	protected Button validateButton;
 
+	/**
+	 * validateNameTextBox ValidatableWidget<TextBox>.
+	 */
+	private ValidatableWidget<TextBox> validateNameTextBox;
+
+	/**
+	 * validateDescriptionTextBox ValidatableWidget<TextBox>.
+	 */
+	private ValidatableWidget<TextBox> validateDescriptionTextBox;
+
+	/**
+	 * validateFieldOrderNumberTextBox ValidatableWidget<TextBox>.
+	 */
+	private ValidatableWidget<TextBox> validateFieldOrderNumberTextBox;
+
+	/**
+	 * validateValidationPatternTextBox RegExValidatableWidget<TextBox>.
+	 */
+	private RegExValidatableWidget<TextBox> validateValidationPatternTextBox;
+
+	/**
+	 * editBatchClassFieldViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editBatchClassFieldViewPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditBatchClassFieldView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		samplePatternButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		validateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		validateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
 		createValidatableWidgets();
 
-		editBatchClassFieldViewPanel.setSpacing(5);
+		editBatchClassFieldViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BATCH_CLASS_FIELD_NAME)
 				+ AdminConstants.COLON);
@@ -167,58 +314,117 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		descriptionStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		dataTypeStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		fieldOrderNumberStar.setStyleName(AdminConstants.FONT_RED_STYLE);
+		scrollPanel.setStyleName(AdminConstants.SCROLL_PANEL_HEIGHT);
 
 	}
 
+	/**
+	 * To do operations on save click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
+	/**
+	 * To do operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
+
+	/**
+	 * To do operations on sample pattern button click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("samplePatternButton")
 	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
 		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
+
+	/**
+	 * To do operations on validate pattern button click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("validateButton")
+	public void onValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onValidateButtonClicked();
+	}
+
+	/**
+	 * To get name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return this.name.getValue();
 	}
 
+	/**
+	 * To get name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setValue(name);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return this.description.getValue();
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Data Type.
+	 * 
+	 * @return DataType
+	 */
 	public DataType getDataType() {
 		String selected = this.dataType.getItemText(this.dataType.getSelectedIndex());
 		DataType[] allDataTypes = DataType.values();
-		for (DataType dataType2 : allDataTypes) {
-			if (dataType2.name().equals(selected)) {
-				return dataType2;
+		DataType tempDataType = allDataTypes[0];
+		for (DataType dType : allDataTypes) {
+			if (dType.name().equals(selected)) {
+				tempDataType = dType;
+				break;
 			}
 		}
-		return allDataTypes[0];
+		return tempDataType;
 	}
 
 	private int findIndex(DataType datatype) {
-		if (datatype == null) {
-			return 0;
+		int index = 0;
+		if (datatype != null) {
+			DataType[] allDataTypes = DataType.values();
+			List<DataType> tempList = Arrays.asList(allDataTypes);
+			index = tempList.indexOf(datatype);
 		}
-		DataType[] allDataTypes = DataType.values();
-		List<DataType> tempList = Arrays.asList(allDataTypes);
-		return tempList.indexOf(datatype);
+		return index;
 	}
 
+	/**
+	 * To set Data Type.
+	 */
 	public void setDataType() {
 		this.dataType.setVisibleItemCount(1);
 		DataType[] allDataTypes = DataType.values();
@@ -227,6 +433,11 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		}
 	}
 
+	/**
+	 * To set Data Type.
+	 * 
+	 * @param datatype DataType
+	 */
 	public void setDataType(DataType datatype) {
 		if (this.dataType.getItemCount() == 0) {
 			setDataType();
@@ -234,83 +445,181 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 		this.dataType.setSelectedIndex(findIndex(datatype));
 	}
 
+	/**
+	 * To get Field Order Number.
+	 * 
+	 * @return String
+	 */
 	public String getFieldOrderNumber() {
 		return this.fieldOrderNumber.getValue();
 	}
 
+	/**
+	 * To set Field Order Number.
+	 * 
+	 * @param fieldOrderNumber String
+	 */
 	public void setFieldOrderNumber(String fieldOrderNumber) {
 		this.fieldOrderNumber.setValue(fieldOrderNumber);
 	}
 
+	/**
+	 * To get Sample Value.
+	 * 
+	 * @return String
+	 */
 	public String getSampleValue() {
 		return this.sampleValue.getValue();
 	}
 
+	/**
+	 * To set Sample Value.
+	 * 
+	 * @param sampleValue String
+	 */
 	public void setSampleValue(String sampleValue) {
 		this.sampleValue.setValue(sampleValue);
 	}
 
+	/**
+	 * To get Validation Pattern.
+	 * 
+	 * @return String
+	 */
 	public String getValidationPattern() {
 		return this.validationPattern.getValue();
 	}
 
+	/**
+	 * To set Validation Pattern.
+	 * 
+	 * @param validationPattern String
+	 */
 	public void setValidationPattern(String validationPattern) {
 		this.validationPattern.setValue(validationPattern);
 	}
 
+	/**
+	 * To get Field Option Value List.
+	 * 
+	 * @return String
+	 */
 	public String getFieldOptionValueList() {
 		return this.fieldOptionValueList.getValue();
 	}
 
+	/**
+	 * To set Field Option Value List.
+	 * 
+	 * @param fieldOptionValueList String
+	 */
 	public void setFieldOptionValueList(String fieldOptionValueList) {
 		this.fieldOptionValueList.setValue(fieldOptionValueList);
 	}
 
+	/**
+	 * To get Validate Name TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}
 
+	/**
+	 * To get Validate Description TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescriptionTextBox() {
 		return validateDescriptionTextBox;
 	}
 
+	/**
+	 * To get Validate Field Order Number TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateFieldOrderNumberTextBox() {
 		return validateFieldOrderNumberTextBox;
 	}
 
-	public ValidatableWidget<TextBox> getValidateValidationPatternTextBox() {
+	/**
+	 * To get Validate Validation Pattern TextBox.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidateValidationPatternTextBox() {
 		return validateValidationPatternTextBox;
 	}
 
+	/**
+	 * To get Name TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getNameTextBox() {
 		return this.name;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return this.description;
 	}
 
+	/**
+	 * To get Field Order Number TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getFieldOrderNumberTextBox() {
 		return this.fieldOrderNumber;
 	}
 
+	/**
+	 * To get Sample Value TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getSampleValueTextBox() {
 		return this.sampleValue;
 	}
 
+	/**
+	 * To get Validation Pattern TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getValidationPatternTextBox() {
 		return this.validationPattern;
 	}
 
+	/**
+	 * To get Field Option Value List TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getFieldOptionValueListTextBox() {
 		return this.fieldOptionValueList;
 	}
 
+	/**
+	 * To get Field Order Number Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getFieldOrderNumberLabel() {
 		return fieldOrderNumberLabel;
 	}
 
-	public void createValidatableWidgets() {
+	/**
+	 * To create Validatable Widgets.
+	 */
+	public final void createValidatableWidgets() {
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
 		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -338,14 +647,27 @@ public class EditBatchClassFieldView extends View<EditBatchClassFieldPresenter> 
 			}
 		});
 
-		validateValidationPatternTextBox = new ValidatableWidget<TextBox>(validationPattern);
+		validateValidationPatternTextBox = new RegExValidatableWidget<TextBox>(validationPattern, true);
 		validateValidationPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validateValidationPatternTextBox.toggleValidDateBox();
+				if (validateValidationPatternTextBox.getWidget().getText().isEmpty()) {
+					validateValidationPatternTextBox.setValid(true);
+				} else {
+					validateValidationPatternTextBox.setValid(false);
+				}
 			}
 		});
+	}
+
+	/**
+	 * To set Save Button Enable.
+	 * 
+	 * @param isEnable boolean
+	 */
+	public void setSaveButtonEnable(boolean isEnable) {
+		saveButton.setEnabled(isEnable);
 	}
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,9 +43,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ephesoft.dcma.da.dao.PluginConfigDao;
 import com.ephesoft.dcma.da.dao.PluginDao;
+import com.ephesoft.dcma.da.domain.Dependency;
 import com.ephesoft.dcma.da.domain.Plugin;
+import com.ephesoft.dcma.da.domain.PluginConfig;
 
+/**
+ * This is a database service to get the plugin details for a plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.PluginService
+ */
 @Service
 public class PluginServiceImpl implements PluginService {
 
@@ -54,26 +64,50 @@ public class PluginServiceImpl implements PluginService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassServiceImpl.class);
 
+	/**
+	 * pluginDao {@link PluginDao}.
+	 */
 	@Autowired
 	private PluginDao pluginDao;
 
+	/**
+	 * pluginConfigDao {@link PluginConfigDao}.
+	 */
+	@Autowired
+	private PluginConfigDao pluginConfigDao;
+
+	/**
+	 * API to get the plugin details by Id.
+	 * 
+	 * @param pluginId {@link Long}
+	 * @return Plugin {@link Plugin}
+	 */
 	@Override
+	@Transactional
 	public Plugin getPluginPropertiesForPluginId(Long pluginId) {
 		LOGGER.info("plugin id : " + pluginId);
 		return pluginDao.getPluginPropertiesForPluginId(pluginId);
 	}
-	
+
+	/**
+	 * API to get the plugin details by Id.
+	 * 
+	 * @param pluginId {@link String}
+	 * @return Plugin {@link Plugin}
+	 */
 	@Override
-	public Plugin getPluginPropertiesForPluginName(String pluginName){
+	public Plugin getPluginPropertiesForPluginName(String pluginName) {
 		LOGGER.info("plugin name : " + pluginName);
 		return pluginDao.getPluginByName(pluginName);
 	}
 
 	/**
-	 * @param moduleId Long
+	 * API to get plugins.
+	 * 
+	 * @param moduleId {@link Long}
 	 * @param startResult int
 	 * @param maxResult int
-	 * @return List<Plugin>
+	 * @return List<{@link Plugin}>
 	 */
 	@Override
 	public List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult) {
@@ -86,13 +120,30 @@ public class PluginServiceImpl implements PluginService {
 		return pluginList;
 	}
 
+	/**
+	 * API to get all the plugins.
+	 * 
+	 * @return {@link List} <{@link Plugin}>
+	 */
 	@Override
-	public List<Plugin> getAllPluginsNames() {
+	@Transactional
+	public List<Plugin> getAllPlugins() {
 		LOGGER.info("Getting list of all plugins");
-		List<Plugin> allPluginsNames = pluginDao.getAll();
-		return allPluginsNames;
+		List<Plugin> allPlugins = pluginDao.getAll();
+		for (Plugin plugin : allPlugins) {
+			List<Dependency> dependencies = plugin.getDependencies();
+			for (Dependency dependency : dependencies) {
+				dependency.getDependencies();
+			}
+		}
+		return allPlugins;
 	}
 
+	/**
+	 * API to create a new plugin.
+	 * 
+	 * @param plugin {@link Plugin}
+	 */
 	@Override
 	@Transactional(readOnly = false)
 	public void createNewPlugin(Plugin plugin) {
@@ -100,11 +151,55 @@ public class PluginServiceImpl implements PluginService {
 		pluginDao.create(plugin);
 	}
 
+	/**
+	 * API to merge/update the given plugin.
+	 * 
+	 * @param plugin {@link Plugin}
+	 */
 	@Override
 	@Transactional(readOnly = false)
 	public void mergePlugin(Plugin plugin) {
 		LOGGER.info("Updating plugin: " + plugin.getPluginName());
 		pluginDao.saveOrUpdate(plugin);
+	}
+
+	/**
+	 * API To delete the given plugin.
+	 * 
+	 * @param plugin {@link Plugin}
+	 * @param removeReferences boolean
+	 */
+	@Override
+	@Transactional
+	public void removePluginAndReferences(Plugin plugin, boolean removeReferences) {
+		LOGGER.info("Entering method removePluginAndReferences.");
+		if (plugin != null) {
+			LOGGER.info("Deleting plugin with id: " + plugin.getId() + " with name: " + plugin.getPluginName());
+			pluginDao.remove(plugin);
+
+			LOGGER.debug("Remove references is " + removeReferences);
+			if (removeReferences) {
+				LOGGER.info("Removing the plugin configs associated with the plugin.");
+				final List<PluginConfig> pluginConfigs = pluginConfigDao.getPluginConfigForPluginId(plugin.getId());
+
+				for (PluginConfig pluginConfig : pluginConfigs) {
+					LOGGER.info("Removing plugin config with id : " + pluginConfig.getId() + " and name : " + pluginConfig.getName());
+					pluginConfigDao.remove(pluginConfig);
+				}
+			}
+		}
+		LOGGER.info("Exiting method removePluginAndReferences.");
+	}
+
+	/**
+	 * API to retrieve names of all the plugins.
+	 * 
+	 * @return {@link List}< {@link String}>
+	 */
+	@Override
+	public List<String> getAllPluginsNames() {
+		LOGGER.info("Retriving all plugin names.");
+		return pluginDao.getAllPluginsNames();
 	}
 
 }

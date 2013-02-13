@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,63 +43,128 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for server_registry.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "server_registry")
 public class ServerRegistry extends AbstractChangeableEntity {
 
+	/**
+	 * Serial version UID long.
+	 */
 	private static final long serialVersionUID = 6213724039823490819L;
 
+	/**
+	 * ipAddress String.
+	 */
 	@Column(name = "ip_address")
 	private String ipAddress;
 
+	/**
+	 * port String.
+	 */
 	@Column(name = "port_number")
 	private String port;
 
+	/**
+	 * appContext String.
+	 */
 	@Column(name = "app_context")
 	private String appContext;
 
+	/**
+	 * active boolean.
+	 */
 	@Column(name = "is_active")
 	private boolean active;
 
+	/**
+	 * lastUpdatedBatchTime Date.
+	 */
 	@Column(name = "last_updated_batch_time")
 	private Date lastUpdatedBatchTime;
 
+	/**
+	 * To get IP Address.
+	 * @return String
+	 */
 	public String getIpAddress() {
 		return ipAddress;
 	}
 
+	/**
+	 * To set IP Address.
+	 * @param ipAddress String
+	 */
 	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 
+	/**
+	 * To get port.
+	 * @return String
+	 */
 	public String getPort() {
 		return port;
 	}
 
+	/**
+	 * To set port.
+	 * @param port String
+	 */
 	public void setPort(String port) {
 		this.port = port;
 	}
 
+	/**
+	 * To get Application Context.
+	 * @return String
+	 */
 	public String getAppContext() {
 		return appContext;
 	}
 
+	/**
+	 * To set Application Context.
+	 * @param appContext String
+	 */
 	public void setAppContext(String appContext) {
 		this.appContext = appContext;
 	}
 
+	/**
+	 * To check whether active or not.
+	 * @return boolean
+	 */
 	public boolean isActive() {
 		return active;
 	}
 
+	/**
+	 * To set active.
+	 * @param active boolean
+	 */
 	public void setActive(boolean active) {
 		this.active = active;
 	}
 
+	/**
+	 * To get Last Updated Batch Time.
+	 * @return Date
+	 */
 	public Date getLastUpdatedBatchTime() {
 		return lastUpdatedBatchTime;
 	}
 
+	/**
+	 * To set Last Updated Batch Time.
+	 * @param lastUpdatedBatchTime Date
+	 */
 	public void setLastUpdatedBatchTime(Date lastUpdatedBatchTime) {
 		this.lastUpdatedBatchTime = lastUpdatedBatchTime;
 	}

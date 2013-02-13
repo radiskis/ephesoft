@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,30 +33,80 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction;
+package com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.advancedkvextraction;
 
+/**
+ * This is class to handle coordinates.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class Coordinates {
 
+	/**
+	 * xCoordinate0 int.
+	 */
 	private int xCoordinate0;
+
+	/**
+	 * yCoordinate0 int.
+	 */
 	private int yCoordinate0;
+
+	/**
+	 * xCoordinate1 int.
+	 */
 	private int xCoordinate1;
+
+	/**
+	 * yCoordinate1 int.
+	 */
 	private int yCoordinate1;
+
+	/**
+	 * advancedKVExtractionView AdvancedKVExtractionView.
+	 */
 	private AdvancedKVExtractionView advancedKVExtractionView;
+
+	/**
+	 * CROSSHAIR_REDUCTION_FACTOR int.
+	 */
 	private static final int CROSSHAIR_REDUCTION_FACTOR = 5;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param advancedKVExtractionView AdvancedKVExtractionView
+	 */
 	public Coordinates(AdvancedKVExtractionView advancedKVExtractionView) {
 		this.advancedKVExtractionView = advancedKVExtractionView;
 	}
 
+	/**
+	 * Constructor.
+	 */
 	public Coordinates() {
 		super();
 	}
 
+	/**
+	 * To set Initial Coordinates.
+	 * 
+	 * @param xCoordinate0 int
+	 * @param yCoordinate0 int
+	 */
 	public void setInitialCoordinates(int xCoordinate0, int yCoordinate0) {
 		this.xCoordinate0 = xCoordinate0;
 		this.yCoordinate0 = yCoordinate0;
 	}
 
+	/**
+	 * To set Other Coordinates.
+	 * 
+	 * @param xCoordinate1 int
+	 * @param yCoordinate1 int
+	 * @param isFinal boolean
+	 */
 	public void setOtherCoordinates(int xCoordinate1, int yCoordinate1, boolean isFinal) {
 		this.xCoordinate1 = xCoordinate1;
 		this.yCoordinate1 = yCoordinate1;
@@ -65,8 +115,14 @@ public class Coordinates {
 		}
 	}
 
+	/**
+	 * To get Quadrant Values.
+	 * 
+	 * @return Coordinates
+	 */
 	public Coordinates getQuadrantValues() {
 		Coordinates returnVal;
+
 		int initialX = this.xCoordinate0;
 		int initialY = this.yCoordinate0;
 		int finalX = this.xCoordinate1;
@@ -82,7 +138,7 @@ public class Coordinates {
 			returnVal = getCoordinates(initialX, finalY, finalX, initialY);
 		} else if (initialX >= finalX && initialY >= finalY) {
 			// it is in I quadrant.
-			returnVal = getCoordinates(finalX+CROSSHAIR_REDUCTION_FACTOR, finalY+CROSSHAIR_REDUCTION_FACTOR, initialX, initialY);
+			returnVal = getCoordinates(finalX + CROSSHAIR_REDUCTION_FACTOR, finalY + CROSSHAIR_REDUCTION_FACTOR, initialX, initialY);
 		} else {
 			returnVal = getCoordinates(initialX, initialY, finalX, finalY);
 		}
@@ -95,6 +151,14 @@ public class Coordinates {
 		return coordinates;
 	}
 
+	/**
+	 * To set all coordinates.
+	 * 
+	 * @param initialX int
+	 * @param initialY int
+	 * @param finalX int
+	 * @param finalY int
+	 */
 	public void set(int initialX, int initialY, int finalX, int finalY) {
 		this.xCoordinate0 = initialX;
 		this.xCoordinate1 = finalX;
@@ -102,6 +166,9 @@ public class Coordinates {
 		this.yCoordinate1 = finalY;
 	}
 
+	/**
+	 * To do overlay.
+	 */
 	public void doOverlay() {
 		this.advancedKVExtractionView.removeOverlay();
 		Coordinates coordinates = this.getQuadrantValues();
@@ -109,6 +176,12 @@ public class Coordinates {
 				coordinates.getY1(), 1);
 	}
 
+	/**
+	 * To do overlay.
+	 * 
+	 * @param coordinates Coordinates
+	 * @param forValue boolean
+	 */
 	public void doOverlay(Coordinates coordinates, boolean forValue) {
 		this.advancedKVExtractionView.removeOverlay();
 		this.advancedKVExtractionView.createOverlay(coordinates.getX0(), coordinates.getX1(), coordinates.getY0(),
@@ -118,38 +191,83 @@ public class Coordinates {
 				.getY1(), 1, false, forValue);
 	}
 
+	/**
+	 * To get X0.
+	 * 
+	 * @return int
+	 */
 	public int getX0() {
 		return xCoordinate0;
 	}
 
+	/**
+	 * To set X0.
+	 * 
+	 * @param xCoordinate0 int
+	 */
 	public void setX0(int xCoordinate0) {
 		this.xCoordinate0 = xCoordinate0;
 	}
 
+	/**
+	 * To get Y0.
+	 * 
+	 * @return int
+	 */
 	public int getY0() {
 		return yCoordinate0;
 	}
 
+	/**
+	 * To set Y0.
+	 * 
+	 * @param yCoordinate0 int
+	 */
 	public void setY0(int yCoordinate0) {
 		this.yCoordinate0 = yCoordinate0;
 	}
 
+	/**
+	 * To get X1.
+	 * 
+	 * @return int
+	 */
 	public int getX1() {
 		return xCoordinate1;
 	}
 
+	/**
+	 * To set X1.
+	 * 
+	 * @param xCoordinate1 int
+	 */
 	public void setX1(int xCoordinate1) {
 		this.xCoordinate1 = xCoordinate1;
 	}
 
+	/**
+	 * To get Y1.
+	 * 
+	 * @return int
+	 */
 	public int getY1() {
 		return yCoordinate1;
 	}
 
+	/**
+	 * To set Y1.
+	 * 
+	 * @param yCoordinate1
+	 */
 	public void setY1(int yCoordinate1) {
 		this.yCoordinate1 = yCoordinate1;
 	}
 
+	/**
+	 * To set Coordinates.
+	 * 
+	 * @param valueCoordinates Coordinates
+	 */
 	public void setCoordinates(Coordinates valueCoordinates) {
 		this.xCoordinate0 = valueCoordinates.getX0();
 		this.xCoordinate1 = valueCoordinates.getX1();
@@ -157,6 +275,9 @@ public class Coordinates {
 		this.yCoordinate1 = valueCoordinates.getY1();
 	}
 
+	/**
+	 * To clear all coordinates value.
+	 */
 	public void clear() {
 		this.xCoordinate0 = 0;
 		this.xCoordinate1 = 0;
@@ -165,6 +286,11 @@ public class Coordinates {
 
 	}
 
+	/**
+	 * To check whether any coordinate is empty.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isEmpty() {
 		boolean returnVal = false;
 		if (this.xCoordinate0 == 0 && this.xCoordinate1 == 0 && this.yCoordinate0 == 0 && this.yCoordinate1 == 0) {

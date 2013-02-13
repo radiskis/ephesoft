@@ -2,42 +2,74 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
 
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="nameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="name" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="startPatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="startPattern" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="endPatternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="endPattern" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="tableExtractionAPILabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="tableExtractionAPI" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="widthOfMultiLineLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="widthOfMultiLine" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="nameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="name" />
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editTableInfoPropertiesButton"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="startPatternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="startPattern" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="endPatternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="endPattern" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
 	</g:VerticalPanel>
 </ui:UiBinder>   

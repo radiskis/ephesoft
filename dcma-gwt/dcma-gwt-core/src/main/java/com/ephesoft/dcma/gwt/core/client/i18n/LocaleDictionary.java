@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,46 +36,56 @@
 package com.ephesoft.dcma.gwt.core.client.i18n;
 
 import com.ephesoft.dcma.gwt.core.client.util.MessageFormat;
+import com.ephesoft.dcma.gwt.core.shared.exception.GWTRunTImeException;
 import com.google.gwt.i18n.client.Dictionary;
 
-public class LocaleDictionary {
-	
-	private static LocaleDictionary localeDictionary;
+public final class LocaleDictionary {
+
+	private static LocaleDictionary localeDictionaryInstance;
 	
 	private static CommonLocaleInfo commonLocaleInfo;
 	private static LocaleInfo pageLocaleInfo;
-	
-	private LocaleDictionary() {}
+
+	private LocaleDictionary() {
+	}
 
 	public static LocaleDictionary create(LocaleInfo localeInfo) {
 		commonLocaleInfo = CommonLocaleInfo.get(localeInfo.getLocale());
 		pageLocaleInfo = localeInfo;
-		if(localeDictionary == null) {
-			localeDictionary = new LocaleDictionary();
+		if(localeDictionaryInstance == null) {
+			localeDictionaryInstance = new LocaleDictionary();
 		}
-		return localeDictionary;
+		return localeDictionaryInstance;
 	}
-	
-	public static LocaleDictionary get() {
-		if(localeDictionary == null) throw new RuntimeException("Dictionary not Intailazed properly.");
-		return localeDictionary;
+
+	public static LocaleDictionary get() throws GWTRunTImeException {
+		if (localeDictionaryInstance == null) {
+			throw new GWTRunTImeException("Dictionary not Initialized properly.");
+		}
+		return localeDictionaryInstance;
 	}
-	
+
 	public String getConstantValue(String key) {
-		if(commonLocaleInfo.isExist(key)) {
-			return Dictionary.getDictionary(commonLocaleInfo.getConstantVarName()).get(key);
+		String constantValue = null;
+		if (commonLocaleInfo.isExist(key)) {
+			constantValue = Dictionary.getDictionary(commonLocaleInfo.getConstantVarName()).get(key);
+		} else {
+			constantValue = Dictionary.getDictionary(pageLocaleInfo.getConstantVarName()).get(key);
 		}
-		return Dictionary.getDictionary(pageLocaleInfo.getConstantVarName()).get(key);
+		return constantValue;
 	}
-	
-	public String getMessageValue(String key, Object... arguments ) {
-		if(commonLocaleInfo.isExist(key)) {
-			return MessageFormat.format(Dictionary.getDictionary(commonLocaleInfo.getMessageVarName()).get(key), arguments);
+
+	public String getMessageValue(String key, Object... arguments) {
+		String messageValue = null;
+		if (commonLocaleInfo.isExist(key)) {
+			messageValue = MessageFormat.format(Dictionary.getDictionary(commonLocaleInfo.getMessageVarName()).get(key), arguments);
+		} else {
+			messageValue = MessageFormat.format(Dictionary.getDictionary(pageLocaleInfo.getMessageVarName()).get(key), arguments);
 		}
-		return MessageFormat.format(Dictionary.getDictionary(pageLocaleInfo.getMessageVarName()).get(key),arguments);
+		return messageValue;
 	}
-	
-	public LocaleInfo getLocaleInfo(){
+
+	public LocaleInfo getLocaleInfo() {
 		return pageLocaleInfo;
 	}
 }

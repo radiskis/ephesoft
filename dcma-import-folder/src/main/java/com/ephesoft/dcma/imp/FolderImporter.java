@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,6 +37,7 @@ package com.ephesoft.dcma.imp;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +53,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
+import com.ephesoft.dcma.batch.dao.xml.UploadBatchXmlDao;
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.BatchLevelField;
 import com.ephesoft.dcma.batch.schema.BatchStatus;
@@ -59,6 +62,7 @@ import com.ephesoft.dcma.batch.schema.Direction;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.ObjectFactory;
 import com.ephesoft.dcma.batch.schema.Page;
+import com.ephesoft.dcma.batch.schema.UploadBatchMetaData;
 import com.ephesoft.dcma.batch.schema.Batch.BatchLevelFields;
 import com.ephesoft.dcma.batch.schema.Batch.Documents;
 import com.ephesoft.dcma.batch.schema.Document.Pages;
@@ -74,49 +78,57 @@ import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassField;
 import com.ephesoft.dcma.da.domain.BatchInstance;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileNameFormatter;
 import com.ephesoft.dcma.util.FileUtils;
+import com.ephesoft.dcma.util.PDFUtil;
+import com.ephesoft.dcma.util.TIFFUtil;
 
 /**
  * This class implements the functionality of moving a particular folder to its destination folder. If the move is successful the
  * original folder is deleted.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.imp.service.ImportService
  */
 @Component
 public final class FolderImporter implements ICommonConstants {
 
-	private static final String DOT_DELIMITER = ".";
-
-	private static final String SEMICOLON_DELIMITER = ";";
-
-	private static final String SER_EXTENSION = SEMICOLON_DELIMITER + FileType.SER.getExtension();
-
-	private static final String IMPORT_MULTIPAGE_FILES_PLUGIN = "IMPORT_MULTIPAGE_FILES";
-
-	private static final String IMPORT_BATCH_FOLDER_PLUGIN = "IMPORT_BATCH_FOLDER";
-
-	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
-	private static final String BCF_SER_FILE_NAME = "BCF_ASSO";
+	/**
+	 * Logger for proper logging using slf4j.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(FolderImporter.class);
 
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
+	/**
+	 * An instance of {@link ImageProcessService}.
+	 */
 	@Autowired
 	private ImageProcessService imageProcessService;
+	
 	/**
-	 * Instance of PluginPropertiesService.
+	 * An instance of {@link UploadBatchXmlDao}.
+	 */
+	@Autowired
+	private UploadBatchXmlDao uploadBatchXmlDao;
+	
+	/**
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * File name ignore char list with semi colon.
+	 * File name ignore char list with semicolon.
 	 */
 	private String folderIgnoreCharList;
 
@@ -131,76 +143,90 @@ public final class FolderImporter implements ICommonConstants {
 	private String invalidCharList;
 
 	/**
-	 * @return the batchSchemaService
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get Batch Schema Service.
+	 * @return the {@link BatchSchemaService}
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService the {@link BatchSchemaService}
 	 */
-	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
+	public void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @return the pluginPropertiesService
+	 * To get Plugin Properties Service.
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set Plugin Properties Service.
+	 * @param pluginPropertiesService the {@link PluginPropertiesService}
 	 */
-	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
+	public void setPluginPropertiesService(final PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
-	 * @return the folderIgnoreCharList
+	 * To get Folder Ignore Char List.
+	 * @return {@link String}
 	 */
 	public String getFolderIgnoreCharList() {
 		return folderIgnoreCharList;
 	}
 
 	/**
-	 * @param folderIgnoreCharList the folderIgnoreCharList to set
+	 * To set Folder Ignore Char List.
+	 * @param folderIgnoreCharList {@link String}
 	 */
-	public void setFolderIgnoreCharList(String folderIgnoreCharList) {
+	public void setFolderIgnoreCharList(final String folderIgnoreCharList) {
 		this.folderIgnoreCharList = folderIgnoreCharList;
 	}
 
 	/**
-	 * @return the ignoreReplaceChar
+	 * To get Ignore Replace Char.
+	 * @return {@link String}
 	 */
 	public String getIgnoreReplaceChar() {
 		return ignoreReplaceChar;
 	}
 
 	/**
-	 * @param ignoreReplaceChar the ignoreReplaceChar to set
+	 * To set Ignore Replace Char.
+	 * @param ignoreReplaceChar {@link String}
 	 */
-	public void setIgnoreReplaceChar(String ignoreReplaceChar) {
+	public void setIgnoreReplaceChar(final String ignoreReplaceChar) {
 		this.ignoreReplaceChar = ignoreReplaceChar;
 	}
 
 	/**
-	 * invalidCharList.
+	 * To get invalid Character List.
 	 * 
 	 * @return {@link String} invalidCharList.
 	 */
-	public final String getInvalidCharList() {
+	public String getInvalidCharList() {
 		return invalidCharList;
 	}
 
 	/**
-	 * invalidCharList.
+	 * To set invalid Character List.
 	 * 
 	 * @param invalidCharList {@link String}
 	 */
-	public final void setInvalidCharList(final String invalidCharList) {
+	public void setInvalidCharList(final String invalidCharList) {
 		this.invalidCharList = invalidCharList;
 	}
 
@@ -208,26 +234,22 @@ public final class FolderImporter implements ICommonConstants {
 	 * This constructor takes the moveToFolder as an argument since the move to folder is going to be predefined we are storing it as a
 	 * instance variable so that while calling copyAndMove method we need to specify the full path of the folder to be moved.
 	 * 
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException if error occurs
 	 */
-
 	public FolderImporter() throws DCMAApplicationException {
 		super();
 	}
 
 	/**
-	 * This method moves the given folder under the moveToFolder (specified in the constructor)
-	 * 
-	 * @param batchInstance
-	 * 
-	 * @param sFolderToBeMoved
-	 * @param batchInstanceIdentifier full path of the folder which has to be moved
-	 * @return returns true if the folder move was sucsessful.False otherwise.
-	 * @throws DCMAApplicationException
+	 * This method moves the given folder under the moveToFolder (specified in the constructor).
+	 * @param batchInstance {@link BatchInstance}
+	 * @param sFolderToBeMoved {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return boolean
+	 * @throws DCMAApplicationException if error occurs
 	 */
-	public boolean copyAndMove(BatchInstance batchInstance, final String sFolderToBeMoved, final String batchInstanceIdentifier)
+	public boolean copyAndMove(final BatchInstance batchInstance, final String sFolderToBeMoved, final String batchInstanceIdentifier)
 			throws DCMAApplicationException {
-
 		String sMoveToFolder;
 		File fFolderToBeMoved;
 		File fMoveToFolder;
@@ -238,40 +260,51 @@ public final class FolderImporter implements ICommonConstants {
 			throw new DCMAApplicationException("Unable to initialize in valid character list from properties file.");
 		}
 
-		String[] invalidCharList = this.getInvalidCharList().split(SEMICOLON_DELIMITER);
+		final String[] invalidCharList = this.getInvalidCharList().split(IFolderImporterConstants.SEMICOLON_DELIMITER);
 		// Initialize properties
 		LOGGER.info("Initializing properties...");
-		String validExt = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(), IMPORT_BATCH_FOLDER_PLUGIN,
+		final String validExt = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(), IFolderImporterConstants.IMPORT_BATCH_FOLDER_PLUGIN,
 				FolderImporterProperties.FOLDER_IMPORTER_VALID_EXTNS);
 		LOGGER.info("Properties Initialized Successfully");
 		// If folder name contains invalid character throw batch to error.
-		for (String inValidChar : invalidCharList) {
+		for (final String inValidChar : invalidCharList) {
 			if (inValidChar != null && !inValidChar.trim().isEmpty() && sFolderToBeMoved.contains(inValidChar)) {
 				throw new DCMAApplicationException("Invalid characters present in folder name. Charater is " + inValidChar);
 			}
 		}
 
-		// ADD extension to the serialized file in case of Batch class field association
+		// ADD extension to the serialized file in case of Batch class field
+		// association
+		StringBuilder validExtBuilder = null;
+		String[] validExtensions = null;
 		if (null != validExt) {
-			validExt = validExt + SER_EXTENSION;
+			validExtBuilder = new StringBuilder(validExt);
+			validExtBuilder.append(IFolderImporterConstants.SER_EXTENSION);
+			validExtensions = validExtBuilder.toString().split(IFolderImporterConstants.SEMICOLON_DELIMITER);
 		}
 
-		String[] validExtensions = validExt.split(SEMICOLON_DELIMITER);
 		if (validExtensions == null || validExtensions.length == 0) {
 			throw new DCMABusinessException("Could not find validExtensions properties in the property file");
 		}
 
+		// retrieving the data of UploadBatchMetaData.xml from unc folder in uploadBatchMetaDataXMLObject
+		UploadBatchMetaData uploadBatchMetaDataXMLObject = getUploadBatchMetaData(sFolderToBeMoved);
+
+		// Checking for the batch having files with valid extensions.If not throws exception.
 		if (!isFolderValid(sFolderToBeMoved, validExtensions, invalidCharList)) {
 			throw new DCMABusinessException("Folder Invalid Folder name = " + sFolderToBeMoved);
 
 		}
-		sMoveToFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
+		sMoveToFolder = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier) + File.separator
+				+ batchInstanceIdentifier;
 
-		File folderToBeMovedTo = new File(sMoveToFolder);
+		final File folderToBeMovedTo = new File(sMoveToFolder);
 		if (folderToBeMovedTo.exists()) {
+
+			// Deleting the batch from unc folder
 			FileUtils.deleteContentsOnly(sMoveToFolder);
 		} else {
-			boolean newDirCreationSuccess = new File(sMoveToFolder).mkdir();
+			final boolean newDirCreationSuccess = new File(sMoveToFolder).mkdir();
 			if (!newDirCreationSuccess) {
 				throw new DCMABusinessException("Unable To Create directory" + newDirCreationSuccess);
 
@@ -279,55 +312,121 @@ public final class FolderImporter implements ICommonConstants {
 		}
 		fMoveToFolder = new File(sMoveToFolder);
 		try {
+
+			// Copying the batch from unc folder to ephesoft-system-folder
 			copyDirectoryWithContents(fFolderToBeMoved, fMoveToFolder);
 			isCopySuccesful = true;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			isCopySuccesful = false;
 			throw new DCMAApplicationException("Unable to Copy Directory", e);
 		}
 		if (isCopySuccesful) {
-			renameFiles(batchInstance, fMoveToFolder, batchInstanceIdentifier);
+			renameFiles(batchInstance, fMoveToFolder, batchInstanceIdentifier, uploadBatchMetaDataXMLObject);
 		}
 
 		return isCopySuccesful;
 	}
 
-	/**
-	 * This method renames all the moved files.
-	 * 
-	 * @param fMoveToFolder
-	 * @param batchInstanceIdentifier
-	 * @throws DCMAApplicationException
-	 */
-	private void renameFiles(final BatchInstance batchInstance, File fMoveToFolder, String batchInstanceIdentifier)
-			throws DCMAApplicationException {
-		ObjectFactory objectFactory = new ObjectFactory();
-		String[] files = fMoveToFolder.list(new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+	private UploadBatchMetaData getUploadBatchMetaData(final String sourceFolderPath) {
+		UploadBatchMetaData uploadBatchMetaDataXMLObject = null;
+		final File sourceFolder = new File(sourceFolderPath);
+
+		// Getting the list of all the xml file in the given folder
+		final File[] xmlFiles = sourceFolder.listFiles(new CustomFileFilter(false, FileType.XML.getExtensionWithDot()));
+		for (final File file : xmlFiles) {
+
+			// Retrieve the data from upload batch info xml file
+			if (file.getName().equals(ICommonConstants.UPLOAD_BATCH_META_DATA_XML_FILE_NAME)) {
+				uploadBatchMetaDataXMLObject = uploadBatchXmlDao.getObjectFromFilePath(file.getAbsolutePath());
+				break;
+			}
+		}
+		return uploadBatchMetaDataXMLObject;
+	}
+
+	private String createUNCFolderBackup(final String sFolderToBeMoved) throws DCMAException {
+		String backUpFolderName = null;
+
+		if (sFolderToBeMoved != null) {
+			backUpFolderName = sFolderToBeMoved + File.separator + ICommonConstants.DOWNLOAD_FOLDER_NAME;
+			File emailBackUpFolder = new File(backUpFolderName);
+			File folderBackup = null;
+			if (!emailBackUpFolder.exists()) {
+				backUpFolderName = sFolderToBeMoved + File.separator + new File(sFolderToBeMoved).getName()
+						+ ICommonConstants.BACK_UP_FOLDER_NAME;
+				folderBackup = new File(backUpFolderName);
+			} else {
+				folderBackup = emailBackUpFolder;
+			}
+			if (folderBackup != null && !folderBackup.exists()) {
+				File[] filesToCopy = new File(sFolderToBeMoved).listFiles();
+				if (filesToCopy != null && (filesToCopy.length != 0)) {
+					folderBackup.mkdir();
+					for (File srcFile : filesToCopy) {
+						if (srcFile != null && srcFile.exists()) {
+							File destFile = new File(folderBackup.getAbsolutePath() + File.separator + srcFile.getName());
+							try {
+								if (srcFile.isFile()) {
+									FileUtils.copyFile(srcFile, destFile);
+								}
+							} catch (FileNotFoundException e) {
+								LOGGER.error("Exception while copying file from source to destination folder" + e.getMessage());
+							} catch (IOException e) {
+								LOGGER.error("Exception while reading or writing file" + e.getMessage());
+							} catch (Exception e) {
+								LOGGER.error("Exception while reading or writing file" + e.getMessage());
+							}
+						}
+					}
+				}
+			} else if (folderBackup.isDirectory() && folderBackup.exists()) {
+				FileUtils.deleteContentsOnly(sFolderToBeMoved);
+				try {
+					FileUtils.copyDirectoryWithContents(folderBackup.getAbsolutePath(), sFolderToBeMoved);
+				} catch (IOException e) {
+					throw new DCMAException("Error in copying file from backup to unc folder. Throwing batch into error"
+							+ e.getMessage(), e);
+				}
+			}
+		}
+		return backUpFolderName;
+	}
+
+	private void renameFiles(final BatchInstance batchInstance, final File fMoveToFolder, final String batchInstanceIdentifier,
+			final UploadBatchMetaData uploadBatchMetaDataXMLObj) throws DCMAApplicationException {
+		final ObjectFactory objectFactory = new ObjectFactory();
+
+		// getting the name-list of tiff files in batch folder.
+		// In case of multipage tiff/PDF files, this list contains all the tiff
+		// files after breaking the multipage files.
+		final String[] files = fMoveToFolder.list(new CustomFileFilter(false, FileType.TIF.getExtensionWithDot(), FileType.TIFF
 				.getExtensionWithDot(), FileType.PDF.getExtensionWithDot()));
-		Batch batchXmlObj = generateBatchObject(batchInstance, batchInstanceIdentifier);
-		Pages pages = new Pages();
-		List<Page> listOfPages = pages.getPage();
+
+		// Creating the batch.xml file for the given batch
+		final Batch batchXmlObj = generateBatchObject(batchInstance, batchInstanceIdentifier);
+		final Pages pages = new Pages();
+		final List<Page> listOfPages = pages.getPage();
 		Arrays.sort(files);
 
 		LOGGER.info("Starting rename of folder <<" + fMoveToFolder + ">>" + " total number of files=" + files.length);
 		int pageId = 0;
-		for (String fileName : files) {
-			File movedFile = new File(fMoveToFolder.getAbsolutePath() + File.separator + fileName);
+		for (final String fileName : files) {
+			final File movedFile = new File(fMoveToFolder.getAbsolutePath() + File.separator + fileName);
 			FileNameFormatter formatter = null;
 			try {
 				formatter = new FileNameFormatter();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new DCMAApplicationException("Could not instantiate FileNameFormatter", e);
 			}
-			String extension = getFileExtension(fileName);
-			String newFileName = "";
+			final String extension = getFileExtension(fileName);
+			String newFileName = IFolderImporterConstants.EMPTY;
 			try {
 				newFileName = formatter.getNewFileName(batchInstanceIdentifier, fileName, Integer.toString(pageId), extension);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new DCMAApplicationException("Problem in obtaining the new file name", e);
 			}
-			File renamedFile = new File(fMoveToFolder.getAbsolutePath() + File.separator + newFileName);
-			Page pageType = objectFactory.createPage();
+			final File renamedFile = new File(fMoveToFolder.getAbsolutePath() + File.separator + newFileName);
+			final Page pageType = objectFactory.createPage();
 			pageType.setIdentifier(EphesoftProperty.PAGE.getProperty() + pageId);
 			pageType.setNewFileName(newFileName);
 			pageType.setOldFileName(fileName);
@@ -339,40 +438,48 @@ public final class FolderImporter implements ICommonConstants {
 			pageId++;
 		}
 
-		Documents documents = new Documents();
+		final Documents documents = new Documents();
 
-		List<Document> listOfDocuments = documents.getDocument();
-		Document document = objectFactory.createDocument();
+		final List<Document> listOfDocuments = documents.getDocument();
+		final Document document = objectFactory.createDocument();
 		document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + IFolderImporterConstants.ZERO);
 		document.setConfidence(IFolderImporterConstants.ZERO);
 		document.setType(EphesoftProperty.UNKNOWN.getProperty());
 		document.setPages(pages);
+		document.setErrorMessage(BatchConstants.EMPTY);
+		document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 		listOfDocuments.add(document);
+		
+		// storing the initial count of total pages of the input batch in batch.xml file
+		batchXmlObj.setInputPageCount(pageId);
 
+		// Storing the user name in batch xml,for uploaded batches
+		if (uploadBatchMetaDataXMLObj != null) {
+			final String userName = uploadBatchMetaDataXMLObj.getUserName();
+			LOGGER.info("User name of uploded batch:" + userName);
+			if (userName != null) {
+				batchXmlObj.setUserName(userName);
+			}
+		}
+
+		// storing the documents information of the batch in batch.xml file
 		batchXmlObj.setDocuments(documents);
 		addBatchClassFieldToBatch(batchXmlObj, batchInstance, objectFactory);
 		batchSchemaService.updateBatch(batchXmlObj, true);
 
 	}
 
-	/**
-	 * 
-	 * @param batchXmlObj
-	 * @param batchInstance
-	 * @param objectFactory
-	 */
-	private void addBatchClassFieldToBatch(Batch batchXmlObj, BatchInstance batchInstance, ObjectFactory objectFactory) {
-
-		String localFolder = batchInstance.getLocalFolder();
-		String batchInstanceIdentifier = batchInstance.getIdentifier();
-		String sFinalFolder = localFolder + File.separator + batchInstanceIdentifier;
-		List<BatchClassField> batchClassFieldList = readBatchClassFieldSerializeFile(sFinalFolder);
+	private void addBatchClassFieldToBatch(final Batch batchXmlObj, final BatchInstance batchInstance, final ObjectFactory objectFactory) {
+		final String localFolder = batchInstance.getLocalFolder();
+		final String batchInstanceIdentifier = batchInstance.getIdentifier();
+		final String sFinalFolder = localFolder + File.separator + batchInstanceIdentifier;
+		final List<BatchClassField> batchClassFieldList = readBatchClassFieldSerializeFile(sFinalFolder);
 		if (batchClassFieldList != null && !batchClassFieldList.isEmpty()) {
-			BatchLevelFields batchLevelFields = new BatchLevelFields();
-			List<BatchLevelField> listOfBatchLevelFields = batchLevelFields.getBatchLevelField();
-			for (BatchClassField batchClassField : batchClassFieldList) {
+			final BatchLevelFields batchLevelFields = new BatchLevelFields();
+			final List<BatchLevelField> listOfBatchLevelFields = batchLevelFields.getBatchLevelField();
+			for (final BatchClassField batchClassField : batchClassFieldList) {
 
-				BatchLevelField batchlLevelField = objectFactory.createBatchLevelField();
+				final BatchLevelField batchlLevelField = objectFactory.createBatchLevelField();
 				batchlLevelField.setName(batchClassField.getName());
 				batchlLevelField.setValue(batchClassField.getValue());
 				batchlLevelField.setType(batchClassField.getDataType().name());
@@ -382,34 +489,18 @@ public final class FolderImporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This method returns the extension of the file.
-	 * 
-	 * @param fileName
-	 * @return extension of file name.
-	 */
-	private String getFileExtension(String fileName) {
-		String extension = "";
-		String[] strArr = fileName.split("\\.");
+	private String getFileExtension(final String fileName) {
+		String extension = IFolderImporterConstants.EMPTY;
+		final String[] strArr = fileName.split("\\.");
 		if (strArr.length == 2) {
 			extension = strArr[1];
 		}
 		if (strArr.length > 2) {
 			extension = strArr[strArr.length - 1];
 		}
-		return DOT_DELIMITER + extension;
+		return IFolderImporterConstants.DOT_DELIMITER + extension;
 	}
 
-	/**
-	 * This method copies a folder with all its contents from the source path to the destination path if the destination path does not
-	 * exist it is created first.
-	 * 
-	 * @param batchInstance
-	 * 
-	 * @param srcPath The source folder whose contents are to be moved
-	 * @param dstPath The destination folder to which all the contents are to be moved.
-	 * @throws IOException
-	 */
 	private void copyDirectoryWithContents(final File srcPath, final File dstPath) throws IOException {
 
 		if (srcPath.isDirectory()) {
@@ -417,7 +508,7 @@ public final class FolderImporter implements ICommonConstants {
 				dstPath.mkdir();
 			}
 
-			String[] files = srcPath.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
+			final String[] files = srcPath.list(new CustomFileFilter(false, FileType.PDF.getExtension(), FileType.TIF.getExtension(),
 					FileType.TIFF.getExtension(), FileType.SER.getExtension()));
 			if (null == files || files.length == IFolderImporterConstants.ZERO) {
 				throw new DCMABusinessException("Source directory is empty" + srcPath);
@@ -425,7 +516,7 @@ public final class FolderImporter implements ICommonConstants {
 
 			Arrays.sort(files);
 			LOGGER.info("Starting copy of folder <<" + srcPath + ">>" + " total number of files=" + files.length);
-			for (String fileName : files) {
+			for (final String fileName : files) {
 				LOGGER.info("\tcopying file " + fileName);
 				copyDirectoryWithContents(new File(srcPath, fileName), new File(dstPath, fileName));
 			}
@@ -436,49 +527,46 @@ public final class FolderImporter implements ICommonConstants {
 				LOGGER.error("File or directory does not exist.");
 				throw new DCMABusinessException("Source file does not exist Path=" + srcPath);
 			} else {
-				InputStream inStream = new FileInputStream(srcPath);
-				OutputStream out = new FileOutputStream(dstPath);
+				final InputStream inStream = new FileInputStream(srcPath);
+				final OutputStream out = new FileOutputStream(dstPath);
 				// Transfer bytes from in to out
-				byte[] buf = new byte[IFolderImporterConstants.KBYTE];
+				final byte[] buf = new byte[IFolderImporterConstants.KBYTE];
 				int len;
-				while ((len = inStream.read(buf)) > 0) {
-					out.write(buf, 0, len);
-				}
-				if (inStream != null) {
-					inStream.close();
-				}
-				if (out != null) {
-					out.close();
+				try {
+					while ((len = inStream.read(buf)) > 0) {
+						out.write(buf, 0, len);
+					}
+				} finally {
+					if (inStream != null) {
+						inStream.close();
+					}
+					if (out != null) {
+						out.close();
+					}
 				}
 			}
 		}
 
 	}
 
-	/**
-	 * Validates Business rules for folder validity. A folder is valid if it contains files with valid extensions a folder is invalid
-	 * if 1. It is empty. 2. It contains sub folders. 3. It contains files with extensions other than the valid extensions.
-	 * 
-	 * @param sFolderToBeMoved
-	 * @return boolean
-	 */
 	private boolean isFolderValid(final String sFolderToBeMoved, final String[] validExtensions, final String[] invalidCharList) {
 		boolean folderValid = true;
 		LOGGER.info("Validating buisiness Rules for folder <<" + sFolderToBeMoved + ">>");
 
-		File fFolderToBeMoved = new File(sFolderToBeMoved);
-		String[] files = fFolderToBeMoved.list();
+		final File fFolderToBeMoved = new File(sFolderToBeMoved);
+		final String[] files = fFolderToBeMoved.list();
 		Arrays.sort(files);
 
 		// Do not Move if Folder Empty
 		if (files.length == 0) {
-			LOGGER.info("\tBuisiness Rule Violation --Empty Folder--  Folder" + fFolderToBeMoved + " will not be moved");
+			LOGGER.error("\tBuisiness Rule Violation --Empty Folder--  Folder" + fFolderToBeMoved + " will not be moved");
 			folderValid = false;
 		}
 
-		for (String fileName : files) {
-			// if any of file name contains invalid character move batch to error.
-			for (String inValidChar : invalidCharList) {
+		for (final String fileName : files) {
+			// if any of file name contains invalid character move batch to
+			// error.
+			for (final String inValidChar : invalidCharList) {
 				if (inValidChar != null && !inValidChar.trim().isEmpty() && fileName.contains(inValidChar)) {
 					folderValid = false;
 					LOGGER.error("In valid characters present in the file name. File name is " + fileName + ". Charater is "
@@ -488,20 +576,12 @@ public final class FolderImporter implements ICommonConstants {
 			}
 
 			if (folderValid) {
-				File indivisualFile = new File(fFolderToBeMoved, fileName);
-
-				/*if (indivisualFile.isDirectory()) {
-					LOGGER.info("\tBuisiness Rule Violation Folder --Contains " + "Subfolders -- " + fFolderToBeMoved
-							+ " will not be moved");
-					folderValid = false;
-					break;
-				}*/
-
-				String nameOfFile = fileName;
+				final File indivisualFile = new File(fFolderToBeMoved, fileName);
+				final String nameOfFile = fileName;
 				boolean invalidFileExtension = true;
-				for (String validExt : validExtensions) {
+				for (final String validExt : validExtensions) {
 					if (indivisualFile.isDirectory()
-							|| nameOfFile.substring(nameOfFile.indexOf(DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
+							|| nameOfFile.substring(nameOfFile.lastIndexOf(IFolderImporterConstants.DOT_DELIMITER.charAt(0)) + 1).equalsIgnoreCase(validExt)) {
 						invalidFileExtension = false;
 					}
 
@@ -521,20 +601,19 @@ public final class FolderImporter implements ICommonConstants {
 
 	/**
 	 * Generates the batch.xml file.
-	 * 
-	 * @param batchInstance
-	 * @param batchInstanceID
-	 * @throws DCMAApplicationException
+	 * @param batchInstance {@link BatchInstance}
+	 * @param batchInstanceID {@link String}
+	 * @throws DCMAApplicationException if error occurs
 	 */
 	public void generateBatchXML(final BatchInstance batchInstance, final String batchInstanceID) throws DCMAApplicationException {
-		BatchClass batchClass = batchInstance.getBatchClass();
-		String localFolder = batchInstance.getLocalFolder();
-		String batchInstanceIdentifier = batchInstance.getIdentifier();
-		String sFianlFolder = localFolder + File.separator + batchInstanceIdentifier;
-		File fFinalFolder = new File(sFianlFolder);
-		ObjectFactory objectFactory = new ObjectFactory();
+		final BatchClass batchClass = batchInstance.getBatchClass();
+		final String localFolder = batchInstance.getLocalFolder();
+		final String batchInstanceIdentifier = batchInstance.getIdentifier();
+		final String sFinalFolder = localFolder + File.separator + batchInstanceIdentifier;
+		final File fFinalFolder = new File(sFinalFolder);
+		final ObjectFactory objectFactory = new ObjectFactory();
 
-		Batch objBatchXml = objectFactory.createBatch();
+		final Batch objBatchXml = objectFactory.createBatch();
 		objBatchXml.setBatchInstanceIdentifier(batchInstanceID);
 		objBatchXml.setBatchClassIdentifier(batchClass.getIdentifier());
 		objBatchXml.setBatchClassName(batchClass.getName());
@@ -545,16 +624,16 @@ public final class FolderImporter implements ICommonConstants {
 		objBatchXml.setBatchPriority(Integer.toString(batchClass.getPriority()));
 		objBatchXml.setBatchStatus(BatchStatus.READY);
 
-		String[] listOfFiles = fFinalFolder.list();
+		final String[] listOfFiles = fFinalFolder.list();
 		Arrays.sort(listOfFiles);
-		Pages pages = new Pages();
-		List<Page> listOfPages = pages.getPage();
+		final Pages pages = new Pages();
+		final List<Page> listOfPages = pages.getPage();
 		int identifierValue = 0;
-		for (String fileName : listOfFiles) {
-			Page pageType = objectFactory.createPage();
+		for (final String fileName : listOfFiles) {
+			final Page pageType = objectFactory.createPage();
 			pageType.setIdentifier(EphesoftProperty.PAGE.getProperty() + identifierValue);
 			pageType.setNewFileName(fileName);
-			String[] strArr = fileName.split(batchInstanceIdentifier + "_");
+			final String[] strArr = fileName.split(batchInstanceIdentifier + IFolderImporterConstants.UNDERSCORE);
 			pageType.setOldFileName(strArr[1]);
 			pageType.setDirection(Direction.NORTH);
 			pageType.setIsRotated(false);
@@ -562,21 +641,23 @@ public final class FolderImporter implements ICommonConstants {
 			identifierValue++;
 		}
 
-		Documents documents = new Documents();
-		BatchLevelFields batchLevelFields = new BatchLevelFields();
+		final Documents documents = new Documents();
+		final BatchLevelFields batchLevelFields = new BatchLevelFields();
 		if (listOfFiles.length > IFolderImporterConstants.ZERO) {
-			List<Document> listOfDocuments = documents.getDocument();
-			Document document = objectFactory.createDocument();
+			final List<Document> listOfDocuments = documents.getDocument();
+			final Document document = objectFactory.createDocument();
 			document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + IFolderImporterConstants.ONE);
 			document.setConfidence(IFolderImporterConstants.ZERO);
 			document.setType(EphesoftProperty.UNKNOWN.getProperty());
 			document.setPages(pages);
+			document.setErrorMessage(BatchConstants.EMPTY);
+			document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 			listOfDocuments.add(document);
 
-			ArrayList<BatchClassField> batchClassFieldList = readBatchClassFieldSerializeFile(sFianlFolder);
-			List<BatchLevelField> listOfBatchLevelFields = batchLevelFields.getBatchLevelField();
-			for (BatchClassField batchClassField : batchClassFieldList) {
-				BatchLevelField batchlLevelField = objectFactory.createBatchLevelField();
+			final List<BatchClassField> batchClassFieldList = readBatchClassFieldSerializeFile(sFinalFolder);
+			final List<BatchLevelField> listOfBatchLevelFields = batchLevelFields.getBatchLevelField();
+			for (final BatchClassField batchClassField : batchClassFieldList) {
+				final BatchLevelField batchlLevelField = objectFactory.createBatchLevelField();
 				batchlLevelField.setName(batchClassField.getName());
 				batchlLevelField.setValue(batchClassField.getValue());
 				batchlLevelField.setType(batchClassField.getDataType().name());
@@ -590,26 +671,26 @@ public final class FolderImporter implements ICommonConstants {
 
 	}
 
-	private ArrayList<BatchClassField> readBatchClassFieldSerializeFile(String sFinalFolder) {
+	private List<BatchClassField> readBatchClassFieldSerializeFile(final String sFinalFolder) {
 		FileInputStream fileInputStream = null;
-		ArrayList<BatchClassField> batchClassFieldList = null;
+		List<BatchClassField> batchClassFieldList = null;
 		File serializedFile = null;
 		try {
-			String serializedFilePath = sFinalFolder + File.separator + BCF_SER_FILE_NAME + SERIALIZATION_EXT;
+			final String serializedFilePath = sFinalFolder + File.separator + IFolderImporterConstants.BCF_SER_FILE_NAME + IFolderImporterConstants.SERIALIZATION_EXT;
 			serializedFile = new File(serializedFilePath);
 			fileInputStream = new FileInputStream(serializedFile);
-			batchClassFieldList = (ArrayList<BatchClassField>) SerializationUtils.deserialize(fileInputStream);
+			batchClassFieldList = (List<BatchClassField>) SerializationUtils.deserialize(fileInputStream);
 			// updateFile(serializedFile, serializedFilePath);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.info("Error during reading the serialized file. ");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error during de-serializing the properties for Database Upgrade: ", e);
 		} finally {
 			try {
 				if (fileInputStream != null) {
 					fileInputStream.close();
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				if (serializedFile != null) {
 					LOGGER.error("Problem closing stream for file :" + serializedFile.getName());
 				}
@@ -621,17 +702,17 @@ public final class FolderImporter implements ICommonConstants {
 
 	/**
 	 * Generates the batch.xml file.
-	 * 
-	 * @param batchInstance
-	 * @param batchInstanceID
-	 * @throws DCMAApplicationException
+	 * @param batchInstance {@link BatchInstance}
+	 * @param batchInstanceID {@link String}
+	 * @return {@link Batch}
+	 * @throws DCMAApplicationException if error occurs
 	 */
 	public Batch generateBatchObject(final BatchInstance batchInstance, final String batchInstanceID) throws DCMAApplicationException {
-		BatchClass batchClass = batchInstance.getBatchClass();
+		final BatchClass batchClass = batchInstance.getBatchClass();
 
-		ObjectFactory objectFactory = new ObjectFactory();
+		final ObjectFactory objectFactory = new ObjectFactory();
 
-		Batch objBatchXml = objectFactory.createBatch();
+		final Batch objBatchXml = objectFactory.createBatch();
 		objBatchXml.setBatchInstanceIdentifier(batchInstanceID);
 		objBatchXml.setBatchClassIdentifier(batchClass.getIdentifier());
 		objBatchXml.setBatchClassName(batchClass.getName());
@@ -645,137 +726,188 @@ public final class FolderImporter implements ICommonConstants {
 
 	}
 
-	public void createMultiPageTiff(BatchInstance batchInstance, final String folderPath) throws DCMAException {
+	/**
+	 * This method is used to create the multi page tiff files.
+	 * @param batchInstance {@link BatchInstance}
+	 * @param folderPath {@link String}
+	 * @throws DCMAException if error occurs
+	 */
+	public void createMultiPageTiff(final BatchInstance batchInstance, final String folderPath) throws DCMAException {
+		String backUpFolderPath = createUNCFolderBackup(folderPath);
+
 		BatchClass batchClass = batchInstance.getBatchClass();
 		String importMultiPage = pluginPropertiesService.getPropertyValue(batchInstance.getIdentifier(),
-				IMPORT_MULTIPAGE_FILES_PLUGIN, FolderImporterProperties.FOLDER_IMPORTER_MULTI_PAGE_IMPORT);
+				IFolderImporterConstants.IMPORT_MULTIPAGE_FILES_PLUGIN, FolderImporterProperties.FOLDER_IMPORTER_MULTI_PAGE_IMPORT);
 		if (!(importMultiPage.equalsIgnoreCase(IFolderImporterConstants.TRUE) || importMultiPage
 				.equalsIgnoreCase(IFolderImporterConstants.YES))) {
 			return;
 		}
 		File folder = new File(folderPath);
-		if (folder != null) {
-			String[] pdfFolderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension()));
+		File backUpFolder = new File(backUpFolderPath);
+		if (folder != null && backUpFolder != null && folder.exists() && backUpFolder.exists()) {
+			// FileType.TIF.getExtension(), FileType.TIFF.getExtension())).length;
+			int expectedTifFilesCount = getTiffPagesCount(backUpFolder);
 			String folderIgnoreCharList = getFolderIgnoreCharList();
 			if (null == folderIgnoreCharList || getIgnoreReplaceChar() == null || folderIgnoreCharList.isEmpty()
 					|| getIgnoreReplaceChar().isEmpty() || getIgnoreReplaceChar().length() > 1) {
-				throw new DCMAException("Invalid property file configuration...");
+				throw new DCMAException("Invalid property file configuration....");
 			}
 
-			String fdIgList[] = folderIgnoreCharList.split(SEMICOLON_DELIMITER);
-			List<File> deleteFileList = new ArrayList<File>();
+			String fdIgList[] = folderIgnoreCharList.split(IFolderImporterConstants.SEMICOLON_DELIMITER);
+			final List<File> deleteFileList = new ArrayList<File>();
 
-			boolean isFound = false;
 			BatchInstanceThread threadList = new BatchInstanceThread(batchInstance.getIdentifier());
+			threadList.setUsingGhostScript(true);
+			processInputPDFFiles(folderPath, batchClass, folder, fdIgList, deleteFileList, threadList);
 
-			if (pdfFolderList != null) {
-				for (String string : pdfFolderList) {
-
-					if (string == null || string.isEmpty()) {
-						continue;
-					}
-
-					try {
-						isFound = false;
-						File fileOriginal = new File(folderPath + File.separator + string);
-						File fileNew = null;
-
-						for (String nameStr : fdIgList) {
-							if (string.contains(nameStr)) {
-								isFound = true;
-								string = string.replaceAll(nameStr, getIgnoreReplaceChar());
-							}
-						}
-
-						if (isFound) {
-							fileNew = new File(folderPath + File.separator + string);
-							fileOriginal.renameTo(fileNew);
-
-							LOGGER.info("Converting multi page pdf file : " + fileNew.getAbsolutePath());
-							imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileNew, threadList);
-							deleteFileList.add(fileNew);
-						} else {
-							LOGGER.info("Converting multi page pdf file : " + fileOriginal.getAbsolutePath());
-							imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileOriginal, threadList);
-							deleteFileList.add(fileOriginal);
-						}
-					} catch (Exception e) {
-						LOGGER.error("Error in converting multi page pdf file to mutli page tiff file", e);
-						throw new DCMAException("Error in converting pdf file to multi page tiff file" + e.getMessage(), e);
-					}
-				}
-				try {
-					LOGGER.info("Executing conversion of multi page pdf file using thread pool");
-					threadList.execute();
-					LOGGER.info("Completed conversion of multi page pdf file using thread pool");
-				} catch (DCMAApplicationException e) {
-					LOGGER.error(e.getMessage(), e);
-					throw new DCMAException(e.getMessage(), e);
-				}
-			}
-
-			String[] tiffFolderList = folder.list(new CustomFileFilter(false, FileType.TIF.getExtension(), FileType.TIFF
-					.getExtension()));
-			isFound = false;
 			threadList = new BatchInstanceThread(batchInstance.getIdentifier());
+			processInputTiffFiles(folderPath, batchClass, fdIgList, deleteFileList, threadList, folder);
+			// Deleting the intermediate files.
+			deleteTempFiles(deleteFileList);
 
-			if (tiffFolderList != null) {
-				if (deleteFileList == null) {
-					deleteFileList = new ArrayList<File>();
-				}
-				for (String string : tiffFolderList) {
-
-					if (string == null || string.isEmpty()) {
-						continue;
-					}
-
-					try {
-						isFound = false;
-						File fileOriginal = new File(folderPath + File.separator + string);
-						File fileNew = null;
-
-						for (String nameStr : fdIgList) {
-							if (string.contains(nameStr)) {
-								isFound = true;
-								string = string.replaceAll(nameStr, getIgnoreReplaceChar());
-							}
-						}
-
-						if (isFound) {
-							fileNew = new File(folderPath + File.separator + string);
-							fileOriginal.renameTo(fileNew);
-
-							LOGGER.info("Converting multi page tiff file : " + fileNew.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, null, threadList, false);
-							deleteFileList.add(fileNew);
-						} else {
-							LOGGER.info("Converting multi page tiff file : " + fileOriginal.getAbsolutePath());
-							imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, null, threadList, false);
-							deleteFileList.add(fileOriginal);
-						}
-					} catch (Exception e) {
-						LOGGER.error("Error in converting multi page tiff file to single page tiff files", e);
-						throw new DCMAException("Error in breaking image to single pages " + e.getMessage(), e);
-					}
-				}
-				try {
-					LOGGER.info("Executing conversion of multi page tiff file using thread pool");
-					threadList.execute();
-					LOGGER.info("Completed conversion of multi page tiff file using thread pool");
-				} catch (DCMAApplicationException e) {
-					LOGGER.error(e.getMessage(), e);
-					throw new DCMAException(e.getMessage(), e);
-				}
-			}
-			// Clean up operation
-			if (deleteFileList != null) {
-				LOGGER.info("Cleaning up the old pdf and tiff files.");
-				for (File file : deleteFileList) {
-					boolean isDeleted = file.delete();
-					LOGGER.debug(" File " + file.getAbsolutePath() + " deleted " + isDeleted);
-				}
+			// Counting the number of files converted in the batch folder.
+			int actualTiffFilesCount = folder.list(new CustomFileFilter(false, FileType.TIF.getExtension(), FileType.TIFF
+					.getExtension())).length;
+			LOGGER.info("expectedTifFilesCount :: " + expectedTifFilesCount);
+			LOGGER.info("Actual tiff files count :: " + actualTiffFilesCount);
+			if (actualTiffFilesCount != expectedTifFilesCount) {
+				LOGGER.error("Converted Tiff files count not equal to the the TIFF pages count. actualTiffFilesCount :: "
+						+ actualTiffFilesCount + ", expectedTifFilesCount :: " + expectedTifFilesCount, " for batch instance ::"
+						+ batchInstance.getIdentifier());
+				throw new DCMAException("Converted Tiff files count not equal to the the TIFF pages count.");
 			}
 		}
+	}
+
+	private void deleteTempFiles(final List<File> deleteFileList) {
+		if (deleteFileList != null) {
+			LOGGER.info("Cleaning up the old pdf and tiff files.");
+			for (File file : deleteFileList) {
+				boolean isDeleted = file.delete();
+				LOGGER.debug(" File " + file.getAbsolutePath() + " deleted " + isDeleted);
+			}
+		}
+	}
+
+	private void processInputTiffFiles(final String folderPath, final BatchClass batchClass, final String[] fdIgList,
+			final List<File> deleteFileList, final BatchInstanceThread threadList, final File folder) throws DCMAException {
+		String[] tiffFolderList = folder.list(new CustomFileFilter(false, FileType.TIF.getExtension(), FileType.TIFF.getExtension()));
+		boolean isFound = false;
+		if (tiffFolderList != null) {
+			for (String fileName : tiffFolderList) {
+
+				if (fileName == null || fileName.isEmpty()) {
+					continue;
+				}
+
+				try {
+					isFound = false;
+					LOGGER.info("File Name = " + fileName);
+					File fileOriginal = new File(folderPath + File.separator + fileName);
+					File fileNew = null;
+					for (String nameStr : fdIgList) {
+						if (fileName.contains(nameStr)) {
+							isFound = true;
+							fileName = fileName.replaceAll(nameStr, getIgnoreReplaceChar());
+						}
+					}
+
+					if (isFound) {
+						fileNew = new File(folderPath + File.separator + fileName);
+						fileOriginal.renameTo(fileNew);
+						LOGGER.info("Converting multi page tiff file : " + fileNew.getAbsolutePath());
+						imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileNew, null, threadList, false);
+						deleteFileList.add(fileNew);
+					} else {
+						LOGGER.info("Converting multi page tiff file : " + fileOriginal.getAbsolutePath());
+						imageProcessService.convertPdfOrMultiPageTiffToTiff(batchClass, fileOriginal, null, threadList, false);
+						deleteFileList.add(fileOriginal);
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error in converting multi page tiff file to single page tiff files", e);
+					throw new DCMAException("Error in breaking image to single pages " + e.getMessage(), e);
+				}
+			}
+			try {
+				LOGGER.info("Executing conversion of multi page tiff file using thread pool");
+				threadList.execute();
+				LOGGER.info("Completed conversion of multi page tiff file using thread pool");
+			} catch (DCMAApplicationException e) {
+				LOGGER.error(e.getMessage(), e);
+				throw new DCMAException(e.getMessage(), e);
+			}
+		}
+	}
+
+	private void processInputPDFFiles(final String folderPath, BatchClass batchClass, File folder, String[] fdIgList,
+			final List<File> deleteFileList, BatchInstanceThread threadList) throws DCMAException {
+		boolean isFound = false;
+		String[] pdfFolderList = folder.list(new CustomFileFilter(false, FileType.PDF.getExtension()));
+		if (pdfFolderList != null) {
+
+			for (String fileName : pdfFolderList) {
+
+				if (fileName == null || fileName.isEmpty()) {
+					continue;
+				}
+
+				try {
+					isFound = false;
+					File fileOriginal = new File(folderPath + File.separator + fileName);
+					LOGGER.info("File Name = " + fileName);
+					File fileNew = null;
+					for (String nameStr : fdIgList) {
+						if (fileName.contains(nameStr)) {
+							isFound = true;
+							fileName = fileName.replaceAll(nameStr, getIgnoreReplaceChar());
+						}
+					}
+
+					if (isFound) {
+						fileNew = new File(folderPath + File.separator + fileName);
+						fileOriginal.renameTo(fileNew);
+						LOGGER.info("Converting multi page pdf file : " + fileNew.getAbsolutePath());
+						imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileNew, threadList);
+						deleteFileList.add(fileNew);
+					} else {
+						LOGGER.info("Converting multi page pdf file : " + fileOriginal.getAbsolutePath());
+						imageProcessService.convertPdfToSinglePageTiffs(batchClass, fileOriginal, threadList);
+						deleteFileList.add(fileOriginal);
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error in converting multi page pdf file to mutli page tiff file", e);
+					throw new DCMAException("Error in converting pdf file to multi page tiff file" + e.getMessage(), e);
+				}
+			}
+			try {
+				LOGGER.info("Executing conversion of multi page pdf file using thread pool");
+				threadList.execute();
+				LOGGER.info("Completed conversion of multi page pdf file using thread pool");
+			} catch (DCMAApplicationException e) {
+				LOGGER.error(e.getMessage(), e);
+				throw new DCMAException(e.getMessage(), e);
+			}
+		}
+	}
+
+		private int getTiffPagesCount(final File folder) {
+		LOGGER.info("Inside getTiffFilesCount ....");
+		int tiffFileCount = 0;
+		File[] pdfFileList = folder.listFiles(new CustomFileFilter(false, FileType.PDF.getExtension()));
+		File[] tiffFilesList = folder
+				.listFiles(new CustomFileFilter(false, FileType.TIF.getExtension(), FileType.TIFF.getExtension()));
+		if (pdfFileList != null) {
+			for (File file : pdfFileList) {
+				tiffFileCount += PDFUtil.getPDFPageCount(file.getAbsolutePath());
+			}
+		}
+		if (tiffFilesList != null) {
+			for (File file : tiffFilesList) {
+				tiffFileCount += TIFFUtil.getTIFFPageCount(file.getAbsolutePath());
+			}
+		}
+		LOGGER.info("Exiting getTiffFilesCount ....");
+		return tiffFileCount;
 	}
 
 }

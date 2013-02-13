@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,14 +37,38 @@ package com.ephesoft.dcma.export;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * This enum contains all the properties required for this plug in from properties file.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.export.service.ExportServiceImpl
+ */
 public enum ExportProperties implements PluginProperty {
 
+	/**
+	 * batch export to folder property.
+	 */
 	EXPORT_FOLDER("batch.export_to_folder"),
+	/**
+	 * batch export to folder switch property.
+	 */
 	EXPORT_TO_FOLDER_SWITCH("batch.export_to_folder_switch"),
+	/**
+	 * batch folder name.
+	 */
 	FOLDER_NAME("batch.folder_name"),
+	/**
+	 * batch file name.
+	 */
 	FILE_NAME("batch.file_name"),
+	/**
+	 * batch xml export folder.
+	 */
 	BATCH_XML_EXPORT_FOLDER("batch.batch_xml_export_folder");
-
+	/**
+	 * The property key.
+	 */
 	String key;
 
 	ExportProperties(String key) {

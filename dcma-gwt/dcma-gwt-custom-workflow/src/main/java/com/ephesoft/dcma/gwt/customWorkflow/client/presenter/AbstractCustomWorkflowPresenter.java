@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,13 +33,13 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
-import com.ephesoft.dcma.gwt.core.client.BasePresenter;
+import com.ephesoft.dcma.gwt.core.client.AbstractBasePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
 
-public abstract class AbstractCustomWorkflowPresenter<V extends View<?>> extends BasePresenter<CustomWorkflowController, V> {
+public abstract class AbstractCustomWorkflowPresenter<V extends View<?>> extends AbstractBasePresenter<CustomWorkflowController, V> {
 
 	public AbstractCustomWorkflowPresenter(CustomWorkflowController controller, V view) {
 		super(controller, view);

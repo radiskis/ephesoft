@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,15 @@
 
 package com.ephesoft.dcma.gwt.core.client.view;
 
+import java.util.Map;
+
+import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.constants.CoreCommonConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -44,18 +52,49 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class Footer extends DCMAComplexPanel {
 
+	private static final String FOOTER_CSS = "footer";
+
 	interface Binder extends UiBinder<HorizontalPanel, Footer> {
 	}
 
 	@UiField
-	Anchor link;
+	protected Anchor link;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public Footer() {
-		initWidget(binder.createAndBindUi(this));
-		link.setText(LocaleCommonConstants.footer_information);
-		link.setHref(LocaleCommonConstants.ephesoft_url);
-		link.setStyleName("footer");
+		super();
+		initWidget(BINDER.createAndBindUi(this));
+	}
+
+	/**
+	 * API to set the footer content from the server side.
+	 * 
+	 * @param rpcService
+	 */
+	public void setFooterContent(DCMARemoteServiceAsync rpcService) {
+		if (rpcService != null) {
+			ScreenMaskUtility.maskScreen("Loading application.");
+			rpcService.getFooterProperties(new EphesoftAsyncCallback<Map<String, String>>() {
+
+				@Override
+				public void onSuccess(Map<String, String> footerProperties) {
+					link.setText(footerProperties.get(CoreCommonConstants.FOOTER_TEXT_KEY));
+					link.setHref(footerProperties.get(CoreCommonConstants.FOOTER_LINK_KEY));
+					link.setStyleName(FOOTER_CSS);
+					ScreenMaskUtility.unmaskScreen();
+				}
+
+				@Override
+				public void customFailure(Throwable arg0) {
+					// Can be called when we want to initialize the view even if footer is not set
+					// initializeView(body);
+					ScreenMaskUtility.unmaskScreen();
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getConstantValue(
+							LocaleCommonConstants.FOOTER_WARNING_MESSAGE));
+
+				}
+			});
+		}
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,8 +40,8 @@ import java.util.List;
 
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
-import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.Validator;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchMessages;
@@ -69,7 +69,7 @@ public class AssociateBCFView extends View<AssociateBCFPresenter> {
 	}
 
 	@UiField
-	FlexTable flexEditTable;
+	protected FlexTable flexEditTable;
 
 	private Label validationMessage;
 
@@ -80,10 +80,11 @@ public class AssociateBCFView extends View<AssociateBCFPresenter> {
 
 	private DialogBox dialogBox;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public AssociateBCFView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		validationMessage = new Label();
 	}
 
@@ -155,14 +156,16 @@ public class AssociateBCFView extends View<AssociateBCFPresenter> {
 		editTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
-	public ValidatableWidget<TextBox> addTextBox(final BatchClassFieldDTO batchClassFieldDTO) {
+	public RegExValidatableWidget<TextBox> addTextBox(final BatchClassFieldDTO batchClassFieldDTO) {
 		TextBox fieldValue = new TextBox();
 		fieldValue.setText(batchClassFieldDTO.getValue());
-		final ValidatableWidget<TextBox> validatableTextBox = new ValidatableWidget<TextBox>(fieldValue);
-		if (batchClassFieldDTO != null) {
-			if(batchClassFieldDTO.getValidationPattern()!=null && !batchClassFieldDTO.getValidationPattern().isEmpty()){
-			validatableTextBox.addValidator((Validator) new RegExValidator(batchClassFieldDTO.getValidationPattern(), fieldValue));
+		final RegExValidatableWidget<TextBox> validatableTextBox = new RegExValidatableWidget<TextBox>(fieldValue);
+		if (batchClassFieldDTO != null && batchClassFieldDTO.getValidationPattern() != null
+				&& !batchClassFieldDTO.getValidationPattern().isEmpty()) {
+			validatableTextBox.addValidator((Validator) new RegExValidator(validatableTextBox, batchClassFieldDTO
+					.getValidationPattern(), fieldValue, presenter.getController().getRpcService()));
 			validatableTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
 				@Override
 				public void onValueChange(ValueChangeEvent<String> event) {
 					validatableTextBox.toggleValidDateBox();
@@ -177,7 +180,6 @@ public class AssociateBCFView extends View<AssociateBCFPresenter> {
 				}
 			});
 			validatableTextBox.toggleValidDateBox();
-			}
 		}
 
 		return validatableTextBox;
@@ -188,14 +190,12 @@ public class AssociateBCFView extends View<AssociateBCFPresenter> {
 		fieldValue.setVisibleItemCount(1);
 		String[] selectedValue = fieldOptionValueList.split(";");
 		List<String> selectedValueList = Arrays.asList(selectedValue);
-		int i = 0;
 		for (String item : selectedValueList) {
 			if (!item.trim().isEmpty()) {
 				fieldValue.addItem(item);
-				i++;
 			}
 		}
-		if(value!=null && !value.isEmpty()){
+		if (value != null && !value.isEmpty()) {
 			fieldValue.setItemSelected(selectedValueList.indexOf(value), true);
 		}
 		return fieldValue;

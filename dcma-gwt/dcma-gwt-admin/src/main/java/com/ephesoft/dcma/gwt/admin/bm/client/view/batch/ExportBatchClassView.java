@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,10 +35,11 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.batch;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.ExportBatchClassPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
@@ -60,56 +61,92 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
+/**
+ * This class provides functionality to export batch class view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class ExportBatchClassView extends View<ExportBatchClassPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, ExportBatchClassView> {
 	}
 
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * exportBatchClassViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel exportBatchClassViewPanel;
 
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
+
+	/**
+	 * exportBatchClassIdentifier String.
+	 */
 	private String exportBatchClassIdentifier;
-	
+
+	/**
+	 * exportFormPanel FormPanel.
+	 */
 	@UiField
 	protected FormPanel exportFormPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public ExportBatchClassView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-				
+
 		final Hidden exportIdentifierHidden = new Hidden("identifier");
 		exportBatchClassViewPanel.add(exportIdentifierHidden);
-		
-		exportBatchClassViewPanel.setSpacing(10);
-		
+
+		exportBatchClassViewPanel.setSpacing(BatchClassManagementConstants.TEN);
+
 		exportFormPanel.setMethod(FormPanel.METHOD_POST);
 		exportFormPanel.setAction("dcma-gwt-admin/exportBatchClassDownload");
-		
+
 		exportFormPanel.addSubmitHandler(new SubmitHandler() {
 
 			@Override
 			public void onSubmit(SubmitEvent event) {
 				exportIdentifierHidden.setValue(getExportBatchClassIdentifier());
-				
+
 			}
 		});
-		
+
 		exportFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			
+
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent event) {
-				if(event.getResults().toLowerCase().indexOf(AdminConstants.ERROR_CODE_TEXT) > -1) {
+				if (event.getResults().toLowerCase().indexOf(AdminConstants.ERROR_CODE_TEXT) > -1) {
 					ConfirmationDialogUtil.showConfirmationDialogSuccess(MessageConstants.EXPORT_UNSUCCESSFUL);
 					getDialogBox().hide(true);
 					return;
@@ -118,7 +155,13 @@ public class ExportBatchClassView extends View<ExportBatchClassPresenter> {
 		});
 
 	}
-	public void getbatchFolderListView(HashMap<String, String> propertyMap) {
+
+	/**
+	 * To get batch Folder List View.
+	 * 
+	 * @param propertyMap Map<String, String>
+	 */
+	public void getbatchFolderListView(Map<String, String> propertyMap) {
 		HorizontalPanel horizontalPanel = new HorizontalPanel();
 		horizontalPanel.addStyleName("width100");
 
@@ -130,70 +173,131 @@ public class ExportBatchClassView extends View<ExportBatchClassPresenter> {
 		horizontalPanel.add(checkBox);
 		exportBatchClassViewPanel.add(horizontalPanel);
 	}
-	
+
+	/**
+	 * To get Save Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getSaveButton() {
 		return saveButton;
 	}
 
-	
+	/**
+	 * To set Save Button.
+	 * 
+	 * @param saveButton Button
+	 */
 	public void setSaveButton(Button saveButton) {
 		this.saveButton = saveButton;
 	}
 
-	
+	/**
+	 * To get Cancel Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getCancelButton() {
 		return cancelButton;
 	}
 
-	
+	/**
+	 * To set Cancel Button.
+	 * 
+	 * @param cancelButton Button
+	 */
 	public void setCancelButton(Button cancelButton) {
 		this.cancelButton = cancelButton;
 	}
 
-	
+	/**
+	 * To get Export Batch Class View Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getExportBatchClassViewPanel() {
 		return exportBatchClassViewPanel;
 	}
 
-	
+	/**
+	 * To set Export Batch Class View Panel.
+	 * 
+	 * @param exportBatchClassViewPanel VerticalPanel
+	 */
 	public void setExportBatchClassViewPanel(VerticalPanel exportBatchClassViewPanel) {
 		this.exportBatchClassViewPanel = exportBatchClassViewPanel;
 	}
 
-	
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
-	
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
-	
+	/**
+	 * To get Export Form Panel.
+	 * 
+	 * @return FormPanel
+	 */
 	public FormPanel getExportFormPanel() {
 		return exportFormPanel;
 	}
 
-	
+	/**
+	 * To set Export Form Panel.
+	 * 
+	 * @param exportFormPanel FormPanel
+	 */
 	public void setExportFormPanel(FormPanel exportFormPanel) {
 		this.exportFormPanel = exportFormPanel;
 	}
 
+	/**
+	 * To set Export Batch Class Identifier.
+	 * 
+	 * @param exportBatchClassIdentifier String
+	 */
 	public void setExportBatchClassIdentifier(String exportBatchClassIdentifier) {
 		this.exportBatchClassIdentifier = exportBatchClassIdentifier;
 	}
-	
+
+	/**
+	 * To get Export Batch Class Identifier.
+	 * 
+	 * @return String
+	 */
 	public String getExportBatchClassIdentifier() {
 		return exportBatchClassIdentifier;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onOkClick(ClickEvent clickEvent) {
 		presenter.onOkClicked();
-		
+
 	}
 
+	/**
+	 * To perform operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClick(ClickEvent clickEvent) {
 		dialogBox.hide(true);

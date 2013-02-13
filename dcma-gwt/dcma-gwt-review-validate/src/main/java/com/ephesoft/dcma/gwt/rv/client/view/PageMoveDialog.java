@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,7 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+
 public class PageMoveDialog extends DialogBox {
 
 	interface Binder extends UiBinder<Widget, PageMoveDialog> {
@@ -51,9 +52,10 @@ public class PageMoveDialog extends DialogBox {
 	// private static final Binder binder = GWT.create(Binder.class);
 
 	@UiField
-	VerticalPanel vPanel;
+	protected VerticalPanel vPanel;
 
 	public PageMoveDialog() {
+		super();
 		setAnimationEnabled(true);
 		setGlassEnabled(true);
 	}
@@ -71,15 +73,10 @@ public class PageMoveDialog extends DialogBox {
 		super.onPreviewNativeEvent(preview);
 
 		NativeEvent evt = preview.getNativeEvent();
-		if (evt.getType().equals("keydown")) {
+		if (evt.getType().equals("keydown") && evt.getKeyCode() == KeyCodes.KEY_ESCAPE) {
 			// Use the popup's key preview hooks to close the dialog when either
 			// enter or escape is pressed.
-			switch (evt.getKeyCode()) {
-				// case KeyCodes.KEY_ENTER:
-				case KeyCodes.KEY_ESCAPE:
-					hide();
-					break;
-			}
+			hide();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,7 @@
 
 package com.ephesoft.dcma.gwt.uploadbatch.client;
 
-import com.ephesoft.dcma.gwt.core.client.Controller;
+import com.ephesoft.dcma.gwt.core.client.AbstractController;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.uploadbatch.client.presenter.UploadBatchPresenter;
@@ -43,13 +43,13 @@ import com.ephesoft.dcma.gwt.uploadbatch.client.view.UploadBatchView;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 
-public class UploadBatchController extends Controller {
+public class UploadBatchController extends AbstractController {
 
 	private UploadBatchPresenter uploadBatchPresenter;
 	private UploadBatchView uploadBatchView;
 	private BatchClassFieldDTO selectedBatchClassField;
 	private String currentBatchUploadFolder;
-	private boolean isFinishButtonClicked;
+	private boolean finishButtonClicked;
 
 	public UploadBatchController(HandlerManager eventBus, DCMARemoteServiceAsync rpcService) {
 		super(eventBus, rpcService);
@@ -64,7 +64,9 @@ public class UploadBatchController extends Controller {
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/*
+		 * injectEvents
+		 */
 	}
 
 	@Override
@@ -74,7 +76,9 @@ public class UploadBatchController extends Controller {
 
 	@Override
 	public void refresh() {
-
+		/*
+		 * Refresh
+		 */
 	}
 
 	public UploadBatchView getUploadBatchView() {
@@ -102,10 +106,10 @@ public class UploadBatchController extends Controller {
 	}
 
 	public boolean isFinishButtonClicked() {
-		return isFinishButtonClicked;
+		return finishButtonClicked;
 	}
 
-	public void setIsFinishButtonClicked(boolean isFinishButtonClicked) {
-		this.isFinishButtonClicked = isFinishButtonClicked;
+	public void setIsFinishButtonClicked(boolean finishButtonClicked) {
+		this.finishButtonClicked = finishButtonClicked;
 	}
 }

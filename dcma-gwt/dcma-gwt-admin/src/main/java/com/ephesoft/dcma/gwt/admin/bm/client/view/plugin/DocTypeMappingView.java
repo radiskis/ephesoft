@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,34 +47,85 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 
+/**
+ * This class provides functionality to edit document type mapping.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class DocTypeMappingView extends View<DocTypeMappingPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, DocTypeMappingView> {
 	}
 
+	/**
+	 * flexEditTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable flexEditTable;
 
-	private FlexTable detailsTable;
+	/**
+	 * detailsTable FlexTable.
+	 */
+	private final FlexTable detailsTable;
 
+	/**
+	 * rowCounter int.
+	 */
 	private int rowCounter = 0;
-	
-	@UiField 
-	PluginData pluginData;
-	
-	@UiField 
+
+	/**
+	 * pluginData PluginData.
+	 */
+	@UiField
+	protected PluginData pluginData;
+
+	/**
+	 * dbMappingPanel CaptionPanel.
+	 */
+	@UiField
 	protected CaptionPanel dbMappingPanel;
-	@UiField 
+
+	/**
+	 * pluginDetailsPanel CaptionPanel.
+	 */
+	@UiField
 	protected CaptionPanel pluginDetailsPanel;
 
+	/**
+	 * driverName String.
+	 */
 	private String driverName;
+
+	/**
+	 * url String.
+	 */
 	private String url;
+
+	/**
+	 * userName String.
+	 */
 	private String userName;
+
+	/**
+	 * password String.
+	 */
 	private String password;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public DocTypeMappingView() {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		dbMappingPanel.setCaptionHTML(AdminConstants.DATABASE_MAPPING_HTML);
@@ -87,50 +138,103 @@ public class DocTypeMappingView extends View<DocTypeMappingPresenter> {
 
 	}
 
+	/**
+	 * To add row.
+	 * 
+	 * @param widget CustomWidget
+	 */
 	public void addRow(CustomWidget widget) {
 		detailsTable.setWidget(rowCounter, 0, widget);
 		rowCounter++;
 	}
 
+	/**
+	 * To clear Details Table.
+	 */
 	public void clearDetailsTable() {
 		detailsTable.clear();
 		rowCounter = 0;
 	}
 
+	/**
+	 * To get Driver Name.
+	 * 
+	 * @return String
+	 */
 	public String getDriverName() {
 		return driverName;
 	}
 
+	/**
+	 * To set Driver Name.
+	 * 
+	 * @param driverName String
+	 */
 	public void setDriverName(String driverName) {
 		this.driverName = driverName;
 	}
 
+	/**
+	 * To get URL.
+	 * 
+	 * @return String
+	 */
 	public String getUrl() {
 		return url;
 	}
 
+	/**
+	 * To set URL.
+	 * 
+	 * @param url String
+	 */
 	public void setUrl(String url) {
 		this.url = url;
 	}
 
+	/**
+	 * To get User Name.
+	 * 
+	 * @return String
+	 */
 	public String getUserName() {
 		return userName;
 	}
 
+	/**
+	 * To set User Name.
+	 * 
+	 * @param userName String
+	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
+	/**
+	 * To get Password.
+	 * 
+	 * @return String
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * To set Password.
+	 * 
+	 * @param password String
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
+	/**
+	 * To get Plugin Data View.
+	 * 
+	 * @return PluginData
+	 */
 	public PluginData getPluginDataView() {
 		return pluginData;
 	}
-	
+
 }

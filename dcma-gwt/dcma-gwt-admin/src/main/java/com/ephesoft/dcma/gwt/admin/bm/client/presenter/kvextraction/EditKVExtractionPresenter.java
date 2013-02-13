@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.EditKVExtractionView;
@@ -46,12 +47,28 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the edit KV extraction details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditKVExtractionView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditFunctionKeyView
+	 */
 	public EditKVExtractionPresenter(BatchClassManagementController controller, EditKVExtractionView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getMainPresenter().showFieldTypeView(controller.getSelectedDocument(), true);
@@ -60,16 +77,30 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 		controller.getMainPresenter().getKvExtractionPresenter().showKVExtractionView();
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		boolean validFlag = true;
-		if (validFlag && (!view.getValidateKeyPatternTextBox().validate() || !view.getValidateValuePatternTextBox().validate())) {
-			if (view.getValidateKeyPatternTextBox().getWidget().getText().isEmpty()
-					|| view.getValidateValuePatternTextBox().getWidget().getText().isEmpty()) {
+		if ((!view.getValidateKeyPatternTextBox().isValid())) {
+			if (view.getValidateKeyPatternTextBox().getWidget().getText().isEmpty()) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
 			} else {
+				String label = view.getKeyPatternLabel().getText();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.INVALID_REGEX_PATTERN));
+						BatchClassManagementMessages.VALIDATE_THE_REGEX_PATTERN, label.subSequence(0, label.length() - 1)));
+			}
+			validFlag = false;
+		}
+		if (validFlag && !view.getValidateValuePatternTextBox().isValid()) {
+			if (view.getValidateValuePatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+			} else {
+				String label = view.getValuePatternLabel().getText();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.VALIDATE_THE_REGEX_PATTERN, label.subSequence(0, label.length() - 1)));
 			}
 			validFlag = false;
 		}
@@ -84,7 +115,8 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 		if (validFlag && !view.getValidateNoOfWordsTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.NUMBER_ERROR)
-					+ " " + view.getNoOfWordsLabel().getText().substring(0, view.getNoOfWordsLabel().getText().length()));
+					+ BatchClassManagementConstants.SPACE
+					+ view.getNoOfWordsLabel().getText().substring(0, view.getNoOfWordsLabel().getText().length()));
 			validFlag = false;
 		}
 
@@ -107,6 +139,7 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 			controller.getSelectedKVExtraction().setMultiplier(null);
 			controller.getSelectedKVExtraction().setFetchValue(null);
 			controller.getSelectedKVExtraction().setKvPageValue(null);
+			controller.getSelectedKVExtraction().setUseExistingKey(false);
 			controller.getSelectedKVExtraction().setKeyPattern(view.getKeyPattern());
 			controller.getSelectedKVExtraction().setLocationType(view.getLocation());
 			controller.getSelectedKVExtraction().setValuePattern(view.getValuePattern());
@@ -118,6 +151,9 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 		}
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedKVExtraction() != null) {
@@ -132,24 +168,51 @@ public class EditKVExtractionPresenter extends AbstractBatchClassPresenter<EditK
 			kvExtractionDTO.setKeyPattern(view.getKeyPattern());
 			kvExtractionDTO.setValuePattern(view.getValuePattern());
 
-			controller.setAdd(true);
+			// controller.setAdd(true);
 			controller.setSelectedKVExtraction(kvExtractionDTO);
 		}
 
-		view.getValidateKeyPatternTextBox().addValidator(new RegExValidator(view.getKeyPatternTextBox(), true, false, true, null));
+		view.getValidateKeyPatternTextBox().addValidator(
+				new RegExValidator(view.getValidateKeyPatternTextBox(), view.getKeyPatternTextBox(), true, false, true, null,
+						controller.getRpcService()));
 		view.getValidateKeyPatternTextBox().toggleValidDateBox();
-		view.getValidateValuePatternTextBox().addValidator(new RegExValidator(view.getValuePatternTextBox(), true, false, true, null));
+		view.getValidateValuePatternTextBox().addValidator(
+				new RegExValidator(view.getValidateValuePatternTextBox(), view.getValuePatternTextBox(), true, false, true, null,
+						controller.getRpcService()));
 		view.getValidateValuePatternTextBox().toggleValidDateBox();
 		view.getValidateNoOfWordsTextBox().addValidator(new NumberValidator(view.getNoOfWordsTextBox(), false, false));
 		view.getValidateKeyPatternTextBox().toggleValidDateBox();
+		view.getKeyPatternTextBox().setFocus(true);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.
 	}
 
+	/**
+	 * To show Advanced KV Extraction View.
+	 */
 	public void showAdvancedKVExtractionView() {
 		controller.getMainPresenter().showAdvancedKVExtractionView();
+	}
+
+	/**
+	 * To perform operations on Key Pattern Validate button clicked.
+	 */
+	public void onKeyPatternValidateButtonClicked() {
+		view.getValidateKeyPatternTextBox().validate();
+	}
+
+	/**
+	 * To perform operations on Value Pattern Validate button clicked.
+	 */
+	public void onValuePatternValidateButtonClicked() {
+		view.getValidateValuePatternTextBox().validate();
 	}
 }

@@ -35,7 +35,8 @@ var batchListConstants = {
 		remote_tab_shortcut: "Remote (Ctrl + l)",
 		label_refresh_button : "Refresh",
 		search_batch_button : "Go",
-		search_batch_label : "Batch Name"
+		search_batch_label : "Batch Name",
+		label_table_column_batchCreatedOn: "Batch Created On"
 };
 
 var batchListMessages = {
@@ -85,7 +86,8 @@ var batchListConstants_tk = {
 		remote_tab_shortcut: "Remote (Ctrl + l)",
 		label_refresh_button : "Yenile",
 		search_batch_button : "gitmek",
-		search_batch_label : "Toplu is adi"
+		search_batch_label : "Toplu is adi",
+		label_table_column_batchCreatedOn: "Toplu Oluşturulma"
 };
 
 var batchListMessages_tk = {

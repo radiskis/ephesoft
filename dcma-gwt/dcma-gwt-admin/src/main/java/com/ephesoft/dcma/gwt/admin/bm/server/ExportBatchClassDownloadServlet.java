@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletOutputStream;
@@ -56,42 +57,71 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.service.BatchClassService;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.core.server.BatchClassUtil;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.util.FileUtils;
 
+/**
+ * This is class for exporting batch class download Servlet.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet
+ */
 public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 
 	/**
-	 * 
+	 * serialVersionUID long.
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * SERIALIZATION_EXT String.
+	 */
 	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
+
+	/**
+	 * ZIP_EXT String.
+	 */
 	private static final String ZIP_EXT = FileType.ZIP.getExtensionWithDot();
 
+	/**
+	 * Overriden doPost method.
+	 * 
+	 * @param request HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @throws IOException
+	 */
 	@Override
 	public final void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		doGet(request, response);
 	}
 
+	/**
+	 * Overriden doGet method.
+	 * 
+	 * @param request HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @throws IOException
+	 */
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		BatchClass batchClass = batchClassService.getLoadedBatchClassByIdentifier(req.getParameter("identifier"));
-		if(batchClass == null) {
-			log.error("Incorrect batch class identifier specified.");
+		if (batchClass == null) {
+			LOG.error("Incorrect batch class identifier specified.");
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Incorrect batch class identifier specified.");
 		} else {
 			Calendar cal = Calendar.getInstance();
 			String exportSerailizationFolderPath = batchSchemaService.getBatchExportFolderLocation();
 
-			SimpleDateFormat formatter = new SimpleDateFormat("MMddyy");
+			SimpleDateFormat formatter = new SimpleDateFormat("MMddyy", Locale.getDefault());
 			String formattedDate = formatter.format(new Date());
-			String zipFileName = batchClass.getIdentifier() + "_" + formattedDate + "_" + cal.get(Calendar.HOUR_OF_DAY)
-					+ cal.get(Calendar.SECOND);
+			String zipFileName = batchClass.getIdentifier() + BatchClassManagementConstants.UNDERSCORE + formattedDate
+					+ BatchClassManagementConstants.UNDERSCORE + cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.SECOND);
 
 			String tempFolderLocation = exportSerailizationFolderPath + File.separator + zipFileName;
 			File copiedFolder = new File(tempFolderLocation);
@@ -104,6 +134,7 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 
 			BatchClassUtil.copyModules(batchClass);
 			BatchClassUtil.copyDocumentTypes(batchClass);
+			BatchClassUtil.copyScannerConfig(batchClass);
 			BatchClassUtil.exportEmailConfiguration(batchClass);
 			BatchClassUtil.exportUserGroups(batchClass);
 			BatchClassUtil.exportBatchClassField(batchClass);
@@ -114,19 +145,17 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 				SerializationUtils.serialize(batchClass, new FileOutputStream(serializedExportFile));
 				boolean isImagemagickBaseFolder = false;
 				String imageMagickBaseFolderParam = req.getParameter(batchSchemaService.getImagemagickBaseFolderName());
-				if(imageMagickBaseFolderParam != null && (
-						imageMagickBaseFolderParam.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
-								||
-						Boolean.parseBoolean(imageMagickBaseFolderParam))){
+				if (imageMagickBaseFolderParam != null
+						&& (imageMagickBaseFolderParam.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName()) || Boolean
+								.parseBoolean(imageMagickBaseFolderParam))) {
 					isImagemagickBaseFolder = true;
 				}
-				
+
 				boolean isSearchSampleName = false;
 				String isSearchSampleNameParam = req.getParameter(batchSchemaService.getSearchSampleName());
-				if(isSearchSampleNameParam != null && (
-						isSearchSampleNameParam.equalsIgnoreCase(batchSchemaService.getSearchSampleName())
-								||
-						Boolean.parseBoolean(isSearchSampleNameParam))){
+				if (isSearchSampleNameParam != null
+						&& (isSearchSampleNameParam.equalsIgnoreCase(batchSchemaService.getSearchSampleName()) || Boolean
+								.parseBoolean(isSearchSampleNameParam))) {
 					isSearchSampleName = true;
 				}
 
@@ -134,41 +163,18 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 
 				if (originalFolder.isDirectory()) {
 
-					String[] folderList = originalFolder.list();
-					Arrays.sort(folderList);
-
-					for (int i = 0; i < folderList.length; i++) {
-						if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestKVExtractionFolderName())
-								|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestTableFolderName())
-								|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getFileboundPluginMappingFolderName())) {
-							// Skip this folder
-							continue;
-						} else if (FilenameUtils.getName(folderList[i])
-								.equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
-								&& isImagemagickBaseFolder) {
-							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-									folderList[i]));
-						} else if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getSearchSampleName())
-								&& isSearchSampleName) {
-							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-									folderList[i]));
-						} else if (!(FilenameUtils.getName(folderList[i]).equalsIgnoreCase(
-								batchSchemaService.getImagemagickBaseFolderName()) || FilenameUtils.getName(folderList[i])
-								.equalsIgnoreCase(batchSchemaService.getSearchSampleName()))) {
-							FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder,
-									folderList[i]));
-						}
-					}
+					validateFolderAndFile(batchSchemaService, copiedFolder, isImagemagickBaseFolder, isSearchSampleName,
+							originalFolder);
 				}
 
 			} catch (FileNotFoundException e) {
 				// Unable to read serializable file
-				log.error("Error occurred while creating the serializable file." + e, e);
+				LOG.error("Error occurred while creating the serializable file." + e, e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error occurred while creating the serializable file.");
 
 			} catch (IOException e) {
 				// Unable to create the temporary export file(s)/folder(s)
-				log.error("Error occurred while creating the serializable file." + e, e);
+				LOG.error("Error occurred while creating the serializable file." + e, e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 						"Error occurred while creating the serializable file.Please try again");
 			}
@@ -183,7 +189,7 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 				resp.setStatus(HttpServletResponse.SC_OK);
 			} catch (IOException e) {
 				// Unable to create the temporary export file(s)/folder(s)
-				log.error("Error occurred while creating the zip file." + e, e);
+				LOG.error("Error occurred while creating the zip file." + e, e);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to export.Please try again.");
 			} finally {
 				// clean up code
@@ -194,6 +200,30 @@ public class ExportBatchClassDownloadServlet extends DCMAHttpServlet {
 					out.flush();
 				}
 				FileUtils.deleteDirectoryAndContentsRecursive(copiedFolder);
+			}
+		}
+	}
+
+	private void validateFolderAndFile(BatchSchemaService batchSchemaService, File copiedFolder, boolean isImagemagickBaseFolder,
+			boolean isSearchSampleName, File originalFolder) throws IOException {
+		String[] folderList = originalFolder.list();
+		Arrays.sort(folderList);
+
+		for (int i = 0; i < folderList.length; i++) {
+			if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestKVExtractionFolderName())
+					|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getTestTableFolderName())
+					|| FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getFileboundPluginMappingFolderName())) {
+				// Skip this folder
+				continue;
+			} else if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())
+					&& isImagemagickBaseFolder) {
+				FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder, folderList[i]));
+			} else if (FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getSearchSampleName())
+					&& isSearchSampleName) {
+				FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder, folderList[i]));
+			} else if (!(FilenameUtils.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName()) || FilenameUtils
+					.getName(folderList[i]).equalsIgnoreCase(batchSchemaService.getSearchSampleName()))) {
+				FileUtils.copyDirectoryWithContents(new File(originalFolder, folderList[i]), new File(copiedFolder, folderList[i]));
 			}
 		}
 	}

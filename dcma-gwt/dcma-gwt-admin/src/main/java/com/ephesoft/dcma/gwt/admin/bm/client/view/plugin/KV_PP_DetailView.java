@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,21 +42,46 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlexTable;
 
+/**
+ * This class provides functionality to show KV PP detail.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KV_PP_DetailView extends View<KV_PP_DetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<FlexTable, KV_PP_DetailView> {
 	}
 
+	/**
+	 * viewTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable viewTable;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+
 	private final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public KV_PP_DetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
+	/**
+	 * To get View Table.
+	 * 
+	 * @return FlexTable
+	 */
 	public FlexTable getViewTable() {
 		return viewTable;
 	}

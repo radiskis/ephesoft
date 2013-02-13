@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,21 +42,48 @@ import com.ephesoft.dcma.core.common.DomainProperty;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DomainProperty
  */
 public enum BatchClassFieldProperty implements DomainProperty {
 
-	FIELDORDERNUMBER("fieldOrderNumber"), NAME("name"), TYPE("dataType"), DESCRIPTION("description");
+	/**
+	 * FIELDORDERNUMBER.
+	 */
+	FIELDORDERNUMBER("fieldOrderNumber"),
+	/**
+	 * NAME.
+	 */
+	NAME("name"),
+	/**
+	 * TYPE.
+	 */
+	TYPE("dataType"),
+	/**
+	 * DESCRIPTION.
+	 */
+	DESCRIPTION("description"),
+	/**
+	 * ORDER.
+	 */
+	ORDER("order");
 
+	/**
+	 * property String.
+	 */
 	private String property;
 
 	/**
-	 * @param property
+	 * Constructor.
+	 * 
+	 * @param property String
 	 */
 	BatchClassFieldProperty(String property) {
 		this.property = property;
 	}
 
 	/**
+	 * To get property.
+	 * 
 	 * @return the property
 	 */
 	@Override

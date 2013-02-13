@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.imagemagick.imageClassifier;
+package com.ephesoft.dcma.imagemagick.imageclassifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,6 +47,9 @@ import org.im4java.process.ErrorConsumer;
  * This class is an ErrorConsumer which saves the Error to an ArrayList.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
+ * 
  */
 
 public class ArrayListErrorConsumer implements ErrorConsumer {
@@ -57,23 +60,13 @@ public class ArrayListErrorConsumer implements ErrorConsumer {
 	 * The output list.
 	 */
 
-	private ArrayList<String> iOutputLines = new ArrayList<String>();
-
-	// ////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Default Constructor.
-	 */
-
-	public ArrayListErrorConsumer() {
-	}
+	private final ArrayList<String> iOutputLines = new ArrayList<String>();
 
 	// ////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Return array with output-lines.
 	 */
-
 	public ArrayList<String> getOutput() {
 		return iOutputLines;
 	}
@@ -92,14 +85,16 @@ public class ArrayListErrorConsumer implements ErrorConsumer {
 
 	/**
 	 * Read command Error and save in an internal field.
+	 * @param pInputStream {@link InputStream}
+	 * @throws IOException for any input output exceptions.
 	 */
-
 	public void consumeError(InputStream pInputStream) throws IOException {
 		InputStreamReader isr = new InputStreamReader(pInputStream);
 		BufferedReader reader = new BufferedReader(isr);
-		String line;
-		while ((line = reader.readLine()) != null) {
+		String line = reader.readLine();
+		while (line != null) {
 			iOutputLines.add(line);
+			line = reader.readLine();
 		}
 		if (reader != null) {
 			reader.close();

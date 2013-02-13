@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -68,6 +68,11 @@ public final class HOCRFileReader {
 	private static HOCRFileReader readerHOCRFile;
 
 	/**
+	 * object Object.
+	 */
+	private final Object object = new Object();
+
+	/**
 	 * private constructor.
 	 */
 	private HOCRFileReader() {
@@ -98,58 +103,60 @@ public final class HOCRFileReader {
 	 * @return infoHOCRFile String
 	 * @throws DCMAApplicationException Check for input parameters and read the file.
 	 */
-	public synchronized String readHOCRFile(final String pathOfHOCRFile) throws DCMAApplicationException {
-
-		String errMsg = null;
-		if (null == pathOfHOCRFile || RegexConstants.EMPTY.equals(pathOfHOCRFile)) {
-			errMsg = "Invalid HOCR file path.";
-			throw new DCMAApplicationException(errMsg);
-		}
+	public String readHOCRFile(final String pathOfHOCRFile) throws DCMAApplicationException {
 
 		final StringBuffer infoHOCRFile = new StringBuffer();
-		FileInputStream fstream = null;
-		DataInputStream dataInStr = null;
-		BufferedReader bufReader = null;
-		try {
-			// Open the file that is the first
-			// command line parameter
-			fstream = new FileInputStream(pathOfHOCRFile);
-			// Get the object of DataInputStream
-			dataInStr = new DataInputStream(fstream);
-			bufReader = new BufferedReader(new InputStreamReader(dataInStr));
-			String strLine;
-			// Read File Line By Line
-			while ((strLine = bufReader.readLine()) != null) {
-				infoHOCRFile.append(strLine);
+		synchronized (object) {
+			String errMsg = null;
+			if (null == pathOfHOCRFile || RegexConstants.EMPTY.equals(pathOfHOCRFile)) {
+				errMsg = "Invalid HOCR file path.";
+				throw new DCMAApplicationException(errMsg);
 			}
-		} catch (Exception e) {
-			// Catch exception if any
-			LOGGER.error("Error: " + e.getMessage());
-			throw new DCMAApplicationException(e.getMessage(), e);
-		} finally {
-			if (fstream != null) {
-				try {
-					fstream.close();
-				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+
+			FileInputStream fstream = null;
+			DataInputStream dataInStr = null;
+			BufferedReader bufReader = null;
+			try {
+				// Open the file that is the first
+				// command line parameter
+				fstream = new FileInputStream(pathOfHOCRFile);
+				// Get the object of DataInputStream
+				dataInStr = new DataInputStream(fstream);
+				bufReader = new BufferedReader(new InputStreamReader(dataInStr));
+				// Read File Line By Line
+				String strLine = bufReader.readLine();
+				while (strLine != null) {
+					infoHOCRFile.append(strLine);
+					strLine = bufReader.readLine();
 				}
-			}
-			if (dataInStr != null) {
-				try {
-					dataInStr.close();
-				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+			} catch (Exception e) {
+				// Catch exception if any
+				LOGGER.error("Error: " + e.getMessage());
+				throw new DCMAApplicationException(e.getMessage(), e);
+			} finally {
+				if (fstream != null) {
+					try {
+						fstream.close();
+					} catch (IOException e) {
+						LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+					}
 				}
-			}
-			if (bufReader != null) {
-				try {
-					bufReader.close();
-				} catch (IOException e) {
-					LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+				if (dataInStr != null) {
+					try {
+						dataInStr.close();
+					} catch (IOException e) {
+						LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+					}
+				}
+				if (bufReader != null) {
+					try {
+						bufReader.close();
+					} catch (IOException e) {
+						LOGGER.error("Problem in closing input stream: " + e.getMessage(), e);
+					}
 				}
 			}
 		}
-
 		return infoHOCRFile.toString();
 	}
 

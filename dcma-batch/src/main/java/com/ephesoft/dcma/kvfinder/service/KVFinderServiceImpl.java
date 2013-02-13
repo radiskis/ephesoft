@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,36 +35,49 @@
 
 package com.ephesoft.dcma.kvfinder.service;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
+import com.ephesoft.dcma.common.HocrUtil;
+import com.ephesoft.dcma.common.LineDataCarrier;
+import com.ephesoft.dcma.common.PatternMatcherUtil;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.kvfinder.KVFinderConstants;
-import com.ephesoft.dcma.kvfinder.LineDataCarrier;
 import com.ephesoft.dcma.kvfinder.LocationFinder;
 import com.ephesoft.dcma.kvfinder.data.CustomList;
 import com.ephesoft.dcma.kvfinder.data.InputDataCarrier;
+import com.ephesoft.dcma.kvfinder.data.KeyValueFieldCarrier;
 import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
+import com.ephesoft.dcma.kvfinder.data.ZonalKeyParameters;
+import com.ephesoft.dcma.kvfinder.data.KeyValueFieldCarrier.KeyValueProperties;
 
+/**
+ * This is a service to search for key value based extraction. Api will first search the key pattern and then search the value pattern
+ * on the basis of location.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.kvfinder.service.KVFinderService
+ */
 public class KVFinderServiceImpl implements KVFinderService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
-	private Logger logger = LoggerFactory.getLogger(KVFinderServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(KVFinderServiceImpl.class);
 
 	/**
 	 * Width of the line.
@@ -104,7 +117,7 @@ public class KVFinderServiceImpl implements KVFinderService {
 	}
 
 	/**
-	 * Confidence score.
+	 * Setter for confidence score.
 	 * 
 	 * @param confidenceScore the confidenceScore to set
 	 */
@@ -112,197 +125,223 @@ public class KVFinderServiceImpl implements KVFinderService {
 		this.confidenceScore = confidenceScore;
 	}
 
+	/**
+	 * This api will search all the input key, value and location pattern for the input hocr page and return the output values which
+	 * will satisfied for all the above patterns.
+	 * 
+	 * @param inputDataCarrier {@link List<{@link InputDataCarrier}>}
+	 * @param hocrPage {@link HocrPage}
+	 * @param fieldTypeKVMap {@link Map<{@link String}, {@link KeyValueFieldCarrier}>}
+	 * @param keyValueFieldCarrier {@link KeyValueFieldCarrier}
+	 * @param maxResults int
+	 * @return List<{@link OutputDataCarrier}>
+	 * @throws DCMAException if invalid value is specified
+	 */
 	public final List<OutputDataCarrier> findKeyValue(final List<InputDataCarrier> inputDataCarrierList, final HocrPage hocrPage,
+			final Map<String, KeyValueFieldCarrier> fieldTypeKVMap, final KeyValueFieldCarrier keyValueFieldCarrier,
 			final int maxResults) throws DCMAException {
 
-		logger.info("Key value search for hocr page.");
+		LOGGER.info("Key value search for hocr page.");
 
 		if (inputDataCarrierList == null || null == hocrPage) {
-			logger.error("Invalid InputDataCarrier. inputDataCarrier is null.");
+			LOGGER.error("Invalid InputDataCarrier. inputDataCarrier is null.");
 			throw new DCMAException("Invalid inputDataCarrier.");
 		}
-
-		final LocationFinder locationFinder = new LocationFinder();
-
-		locationFinder.setConfidenceScore(getConfidenceScore());
-		locationFinder.setWidthOfLine(getWidthOfLine());
-
+		int widthOfLineInt = BatchConstants.ZERO;
 		final CustomList outputDataCarrierList = new CustomList(maxResults);
-		for (InputDataCarrier inputDataCarrier : inputDataCarrierList) {
-			String keyPattern = inputDataCarrier.getKeyPattern();
-			final Spans spans = hocrPage.getSpans();
+		final Spans spans = hocrPage.getSpans();
+		if (null != spans) {
 			final String pageID = hocrPage.getPageID();
-			if (null != spans) {
+			LOGGER.info("page id: " + pageID);
+			final LocationFinder locationFinder = new LocationFinder();
+			try {
+				widthOfLineInt = Integer.parseInt(widthOfLine);
+			} catch (NumberFormatException nfe) {
+				LOGGER.error("Invalid value for widthOfLine specified. Setting it to its default value 15.");
+			}
+			final List<LineDataCarrier> lineDataCarrierList = HocrUtil.getLineDataCarrierList(spans, pageID, widthOfLineInt);
 
-				final List<LineDataCarrier> lineDataCarrierList = createLineDataCarrier(spans, pageID);
+			locationFinder.setConfidenceScore(getConfidenceScore());
+			locationFinder.setWidthOfLine(getWidthOfLine());
 
-				if (logger.isInfoEnabled()) {
+			for (InputDataCarrier inputDataCarrier : inputDataCarrierList) {
+				boolean useExistingKey = inputDataCarrier.isUseExistingField();
+				final String keyPattern = inputDataCarrier.getKeyPattern();
+				LOGGER.info("Key pattern : " + keyPattern);
+				LOGGER.info("Use Existing key : " + useExistingKey);
+
+				if (LOGGER.isInfoEnabled()) {
 					for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
 						final String lineRowData = lineDataCarrier.getLineRowData();
-						logger.info(lineRowData);
+						LOGGER.info(lineRowData);
 					}
 				}
-
-				for (int currentLineIndex = 0; currentLineIndex < lineDataCarrierList.size(); currentLineIndex++) {
-					LineDataCarrier lineDataCarrier = lineDataCarrierList.get(currentLineIndex);
-					final String lineRowData = lineDataCarrier.getLineRowData();
-					try {
-						final String pattern = keyPattern;
-						if (null == pattern) {
-							continue;
-						}
-
-						final List<Span> spanList = lineDataCarrier.getSpanList();
-						final List<OutputDataCarrier> dataCarrierList = locationFinder.findPattern(lineRowData, pattern, spanList);
-						// TODO check for all possible return value and get the span
-						// from the original list and then get the xox1 values for span
-						// write method to get the span coordinates for this.
-						if (null != dataCarrierList) {
-							for (OutputDataCarrier dataCarrier : dataCarrierList) {
-								String foundValue = dataCarrier.getValue();
-								Span span = dataCarrier.getSpan();
-								if (null == foundValue || foundValue.isEmpty() || null == span) {
-									continue;
-								}
-
-								String[] foundValArr = foundValue.split(KVFinderConstants.SPACE);
-								List<Coordinates> keyCoordinates = new ArrayList<Coordinates>();
-								keyCoordinates.add(span.getCoordinates());
-								Integer spanIndex = lineDataCarrier.getIndexOfSpan(span);
-								Span rightSpan = null;
-								if (null != spanIndex && null != foundValArr && foundValArr.length > 1) {
-									for (int p = 0; p < foundValArr.length - 1; p++) {
-										rightSpan = lineDataCarrier.getRightSpan(spanIndex);
-										if (null != rightSpan) {
-											keyCoordinates.add(rightSpan.getCoordinates());
-										}
-										spanIndex = spanIndex + 1;
-									}
-								}
-
-								Coordinates keyCoordinate = new Coordinates();
-								BigInteger minX0 = BigInteger.ZERO;
-								BigInteger minY0 = BigInteger.ZERO;
-								BigInteger maxX1 = BigInteger.ZERO;
-								BigInteger maxY1 = BigInteger.ZERO;
-								boolean isFirst = true;
-
-								for (Coordinates coordinates1 : keyCoordinates) {
-									BigInteger hocrX0 = coordinates1.getX0();
-									BigInteger hocrY0 = coordinates1.getY0();
-									BigInteger hocrX1 = coordinates1.getX1();
-									BigInteger hocrY1 = coordinates1.getY1();
-									if (isFirst) {
-										minX0 = hocrX0;
-										minY0 = hocrY0;
-										maxX1 = hocrX1;
-										maxY1 = hocrY1;
-										isFirst = false;
-									} else {
-										if (hocrX0.compareTo(minX0) < 0) {
-											minX0 = hocrX0;
-										}
-										if (hocrY0.compareTo(minY0) < 0) {
-											minY0 = hocrY0;
-										}
-										if (hocrX1.compareTo(maxX1) > 0) {
-											maxX1 = hocrX1;
-										}
-										if (hocrY1.compareTo(maxY1) > 0) {
-											maxY1 = hocrY1;
-										}
-									}
-								}
-
-								keyCoordinate.setX0(minX0);
-								keyCoordinate.setX1(maxX1);
-								keyCoordinate.setY0(minY0);
-								keyCoordinate.setY1(maxY1);
-								final CustomList outputDataCarrierListInner = new CustomList(maxResults);
-								valueExtraction(inputDataCarrier, outputDataCarrierListInner, lineDataCarrierList, currentLineIndex,
-										locationFinder, keyCoordinate);
-								for (OutputDataCarrier outputDataCarrier : outputDataCarrierListInner) {
-									outputDataCarrierList.add(outputDataCarrier);
-								}
-							}
-						}
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
+				if (useExistingKey) {
+					LOGGER.info("Extracting data using existing field as key. Field name : " + keyPattern);
+					extractKVUsingExistingField(inputDataCarrier, locationFinder, outputDataCarrierList, fieldTypeKVMap, keyPattern,
+							pageID, lineDataCarrierList, maxResults, keyValueFieldCarrier);
+				} else {
+					extractKey(keyValueFieldCarrier, maxResults, outputDataCarrierList, pageID, locationFinder, lineDataCarrierList,
+							inputDataCarrier, keyPattern);
 				}
 			}
 		}
 		return outputDataCarrierList.getList();
 	}
 
-	/**
-	 * Create the line data carrier.
-	 * 
-	 * @param spans {@link Spans}
-	 * @param pageID {@link String}
-	 * @return List<LineDataCarrier>
-	 */
-	private List<LineDataCarrier> createLineDataCarrier(final Spans spans, final String pageID) {
+	private void extractKey(final KeyValueFieldCarrier keyValueFieldCarrier, final int maxResults,
+			final CustomList outputDataCarrierList, final String pageID, final LocationFinder locationFinder,
+			final List<LineDataCarrier> lineDataCarrierList, InputDataCarrier inputDataCarrier, final String keyPattern) {
+		LOGGER.info("Inside method extractKey...");
+		if (null != keyPattern) {
+			boolean isZonalKV = isZonalKVExtraction(inputDataCarrier);
+			List<ZonalKeyParameters> foundKeyList = new ArrayList<ZonalKeyParameters>();
+			for (int currentLineIndex = BatchConstants.ZERO; currentLineIndex < lineDataCarrierList.size(); currentLineIndex++) {
+				LineDataCarrier lineDataCarrier = lineDataCarrierList.get(currentLineIndex);
+				try {
+					final List<OutputDataCarrier> dataCarrierList = PatternMatcherUtil.findPattern(lineDataCarrier, keyPattern,
+							getConfidenceScore());
+					for (OutputDataCarrier dataCarrier : dataCarrierList) {
+						String foundValue = dataCarrier.getValue();
+						Span span = dataCarrier.getSpan();
+						if (null == foundValue || foundValue.isEmpty() || null == span) {
+							continue;
+						}
 
-		final List<Span> mainSpanList = spans.getSpan();
-		List<LineDataCarrier> lineDataCarrierList = new ArrayList<LineDataCarrier>();
-
-		if (null == mainSpanList) {
-			return lineDataCarrierList;
+						String[] foundValArr = foundValue.split(KVFinderConstants.SPACE);
+						List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
+						coordinatesList.add(span.getCoordinates());
+						Integer spanIndex = lineDataCarrier.getIndexOfSpan(span);
+						Span rightSpan = null;
+						if (null != spanIndex && null != foundValArr && foundValArr.length > BatchConstants.ONE) {
+							for (int p = BatchConstants.ZERO; p < foundValArr.length - BatchConstants.ONE; p++) {
+								rightSpan = lineDataCarrier.getRightSpan(spanIndex);
+								if (null != rightSpan) {
+									coordinatesList.add(rightSpan.getCoordinates());
+								}
+								spanIndex = spanIndex + BatchConstants.ONE;
+							}
+						}
+						Coordinates keyCoordinate = HocrUtil.getRectangleCoordinates(coordinatesList);
+						if (!isZonalKV) {
+							extractValue(keyCoordinate, lineDataCarrierList, inputDataCarrier, keyValueFieldCarrier, maxResults,
+									outputDataCarrierList, locationFinder, currentLineIndex, pageID);
+						} else {
+							ZonalKeyParameters zonalKeyParameters = new ZonalKeyParameters(currentLineIndex, keyCoordinate, keyPattern);
+							double distanceFromZone = HocrUtil.calculateDistanceFromZone(keyCoordinate, inputDataCarrier
+									.getKeyRectangleCoordinates());
+							zonalKeyParameters.setDistanceFromZone(distanceFromZone);
+							foundKeyList.add(zonalKeyParameters);
+						}
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error while extracting key value data." + e.getMessage(), e);
+				}
+			}
+			if (isZonalKV) {
+				Collections.sort(foundKeyList, new CustomComparator());
+				for (ZonalKeyParameters zonalKeyParameters : foundKeyList) {
+					if (zonalKeyParameters != null) {
+						Coordinates keyCoordinates = zonalKeyParameters.getKeyCoordinates();
+						int currentLineIndex = zonalKeyParameters.getLineIndex();
+					
+						try {
+							extractValue(keyCoordinates, lineDataCarrierList, inputDataCarrier, keyValueFieldCarrier, maxResults,
+									outputDataCarrierList, locationFinder, currentLineIndex, pageID);
+						} catch (DCMAApplicationException e) {
+							LOGGER.error("Error while extracting key value data." + e.getMessage(), e);
+						}
+					}
+				}
+			}
 		}
+		LOGGER.info("Exiting method extractKey.....");
+	}
 
-		int defaultValue = 20;
+
+	private void extractValue(final Coordinates keyCoordinate, final List<LineDataCarrier> lineDataCarrierList,
+			final InputDataCarrier inputDataCarrier, final KeyValueFieldCarrier keyValueFieldCarrier, final int maxResults,
+			final CustomList outputDataCarrierList, final LocationFinder locationFinder, final int currentLineIndex,
+			final String pageID) throws DCMAApplicationException {
+		performValueExtraction(maxResults, locationFinder, outputDataCarrierList, inputDataCarrier, lineDataCarrierList,
+				currentLineIndex, keyCoordinate);
+		List<OutputDataCarrier> outDataList = outputDataCarrierList.getList();
+		List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
+		for (OutputDataCarrier outDataCarrier : outDataList) {
+			coordinatesList.add(outDataCarrier.getSpan().getCoordinates());
+		}
+		Coordinates recCoord = HocrUtil.getRectangleCoordinates(coordinatesList);
+		if (keyValueFieldCarrier != null) {
+			KeyValueProperties keyValueProperties = keyValueFieldCarrier.new KeyValueProperties();
+			keyValueProperties.setValueCoordinates(recCoord);
+			keyValueFieldCarrier.addKeyValueDataToPage(pageID, keyValueProperties);
+		}
+	}
+
+	private void extractKVUsingExistingField(final InputDataCarrier inputDataCarrier, final LocationFinder locationFinder,
+			final CustomList outputDataCarrierList, final Map<String, KeyValueFieldCarrier> fieldTypeKVMap, String keyPattern,
+			final String pageID, final List<LineDataCarrier> lineDataCarrierList, final int maxResults,
+			final KeyValueFieldCarrier keyValueFieldCarrier) {
+		LOGGER.info("Entering method extractKVUsingExistingField .....");
 		try {
-			defaultValue = Integer.parseInt(getWidthOfLine());
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-			defaultValue = 20;
-		}
-
-		final int compareValue = defaultValue;
-		// TODO optimize the set creation for document level fields.
-		final Set<Span> set = new TreeSet<Span>(new Comparator<Span>() {
-
-			public int compare(final Span firstSpan, final Span secSpan) {
-				BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
-				BigInteger s2Y1 = secSpan.getCoordinates().getY1();
-				int returnValue = 0;
-				int compare = s1Y1.intValue() - s2Y1.intValue();
-				if (compare >= -compareValue && compare <= compareValue) {
-					BigInteger s1X1 = firstSpan.getCoordinates().getX1();
-					BigInteger s2X1 = secSpan.getCoordinates().getX1();
-					returnValue = s1X1.compareTo(s2X1);
-				} else {
-					returnValue = s1Y1.compareTo(s2Y1);
-				}
-				return returnValue;
-			}
-		});
-
-		set.addAll(mainSpanList);
-
-		LineDataCarrier lineDataCarrier = new LineDataCarrier(pageID);
-		lineDataCarrierList.add(lineDataCarrier);
-		List<Span> spanList = lineDataCarrier.getSpanList();
-
-		for (Span span : set) {
-			if (spanList.isEmpty()) {
-				spanList.add(span);
-			} else {
-				Span lastSpan = spanList.get(spanList.size() - 1);
-				int compare = lastSpan.getCoordinates().getY1().intValue() - span.getCoordinates().getY1().intValue();
-				if (compare >= -defaultValue && compare <= defaultValue) {
-					spanList.add(span);
-				} else {
-					lineDataCarrier = new LineDataCarrier(pageID);
-					lineDataCarrierList.add(lineDataCarrier);
-					spanList = lineDataCarrier.getSpanList();
-					spanList.add(span);
+			if (keyPattern != null && !keyPattern.isEmpty() && fieldTypeKVMap != null && !fieldTypeKVMap.isEmpty()) {
+				LOGGER.info("Getting KeyValueFieldCarrier for field type : " + keyPattern);
+				KeyValueFieldCarrier keyPatternCarrier = fieldTypeKVMap.get(keyPattern);
+				if (keyPatternCarrier != null && keyPatternCarrier.getKeyValuePropertiesForPage(pageID) != null) {
+					LOGGER.info("Getting KeyValueProperties list for page id : " + pageID);
+					List<KeyValueProperties> keyValuePropertiesList = keyPatternCarrier.getKeyValuePropertiesForPage(pageID);
+					for (KeyValueProperties keyValueProperties : keyValuePropertiesList) {
+						LOGGER.info("Getting KeyCoordinates for page id : " + pageID);
+						Coordinates keyCoordinates = keyValueProperties.getValueCoordinates();
+						for (int currentLineIndex = BatchConstants.ZERO; currentLineIndex < lineDataCarrierList.size(); currentLineIndex++) {
+							LineDataCarrier lineDataCarrier = lineDataCarrierList.get(currentLineIndex);
+							List<Span> spanList = lineDataCarrier.getSpanList();
+							for (Span span : spanList) {
+								if (span == null || span.getCoordinates() == null) {
+									continue;
+								}
+								Coordinates spanCoord = span.getCoordinates();
+								if (spanCoord.getX0().compareTo(keyCoordinates.getX0()) == BatchConstants.ZERO
+										&& spanCoord.getX1().compareTo(keyCoordinates.getX1()) == BatchConstants.ZERO) {
+									// Value Coordinates for the previous field is now the key coordinate for this field.
+									performValueExtraction(maxResults, locationFinder, outputDataCarrierList, inputDataCarrier,
+											lineDataCarrierList, currentLineIndex, keyCoordinates);
+									List<OutputDataCarrier> outDataList = outputDataCarrierList.getList();
+									List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
+									for (OutputDataCarrier outDataCarrier : outDataList) {
+										coordinatesList.add(outDataCarrier.getSpan().getCoordinates());
+									}
+									Coordinates recCoord = HocrUtil.getRectangleCoordinates(coordinatesList);
+									if (keyValueFieldCarrier != null) {
+										KeyValueProperties newKeyValueProperties = keyValueFieldCarrier.new KeyValueProperties();
+										newKeyValueProperties.setValueCoordinates(recCoord);
+										keyValueFieldCarrier.addKeyValueDataToPage(pageID, newKeyValueProperties);
+									}
+								}
+							}
+						}
+					}
 				}
 			}
+		} catch (DCMAApplicationException dcmae) {
+			LOGGER.error("Error while extracting key value field using existing field. Field : " + dcmae.getMessage(), dcmae);
 		}
+		LOGGER.info("Exiting method extractKVUsingExistingField .....");
+	}
 
-		return lineDataCarrierList;
+	private CustomList performValueExtraction(final int maxResults, final LocationFinder locationFinder,
+			final CustomList outputDataCarrierList, InputDataCarrier inputDataCarrier,
+			final List<LineDataCarrier> lineDataCarrierList, int currentLineIndex, Coordinates keyCoordinate)
+			throws DCMAApplicationException {
+		final CustomList outputDataCarrierListInner = new CustomList(maxResults);
+		valueExtraction(inputDataCarrier, outputDataCarrierListInner, lineDataCarrierList, currentLineIndex, locationFinder,
+				keyCoordinate);
+		for (OutputDataCarrier outputDataCarrier : outputDataCarrierListInner) {
+			if (outputDataCarrier != null) {
+				outputDataCarrierList.add(outputDataCarrier);
+			}
+		}
+		return outputDataCarrierListInner;
 	}
 
 	/**
@@ -310,9 +349,10 @@ public class KVFinderServiceImpl implements KVFinderService {
 	 * 
 	 * @param inputDataCarrier {@link InputDataCarrier}
 	 * @param outputDataCarrierList CustomList
-	 * @param lineDataCarrierList List<Span>
+	 * @param lineDataCarrierList List
 	 * @param currentLineIndex int
 	 * @param locationFinder {@link LocationFinder}
+	 * @param keyCoordinate Coordinates
 	 * @throws DCMAApplicationException
 	 */
 	private void valueExtraction(final InputDataCarrier inputDataCarrier, final CustomList outputDataCarrierList,
@@ -321,108 +361,98 @@ public class KVFinderServiceImpl implements KVFinderService {
 
 		final LocationType locationType = inputDataCarrier.getLocationType();
 
-		if (null == locationType) {
-			return;
-		}
+		if (isZonalKVExtraction(inputDataCarrier)) {
+			locationFinder.extractValueFromZone(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
+					keyCoordinate);
+		} else if (null != locationType) {
 
-		switch (locationType) {
+			switch (locationType) {
 
-			case TOP:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.topLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case TOP:
 					locationFinder.topLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
-				break;
+					break;
 
-			case TOP_LEFT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.topLeftLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case TOP_LEFT:
 					locationFinder.topLeftLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
 
-				break;
+					break;
 
-			case TOP_RIGHT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.topRightLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case TOP_RIGHT:
 					locationFinder.topRightLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
-				break;
+					break;
 
-			case RIGHT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.rightLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case RIGHT:
 					locationFinder.rightLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
-				break;
+					break;
 
-			case LEFT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.leftLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case LEFT:
 					locationFinder.leftLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
-				break;
+					break;
 
-			case BOTTOM:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.bottomLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case BOTTOM:
 					locationFinder.bottomLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
 
-				break;
+					break;
 
-			case BOTTOM_LEFT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.bottomLeftLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case BOTTOM_LEFT:
 					locationFinder.bottomLeftLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
-				break;
+					break;
 
-			case BOTTOM_RIGHT:
-				if (isZonalKVExtraction(inputDataCarrier)) {
-					locationFinder.bottomRightLocationRectangle(inputDataCarrier, outputDataCarrierList, lineDataCarrierList,
-							currentLineIndex, keyCoordinate);
-				} else {
+				case BOTTOM_RIGHT:
 					locationFinder.bottomRightLocation(inputDataCarrier, outputDataCarrierList, lineDataCarrierList, currentLineIndex,
 							keyCoordinate);
-				}
+					break;
 
-				break;
-
-			default:
-				logger.info("***********  Default case found. In valid case.");
-				break;
+				default:
+					LOGGER.info("***********  Default case found. In valid case.");
+					break;
+			}
 		}
 
 	}
 
 	private boolean isZonalKVExtraction(InputDataCarrier inputDataCarrier) {
+		boolean isZonalKV = false;
 		if (inputDataCarrier.getLength() != null && inputDataCarrier.getWidth() != null
-				&& (inputDataCarrier.getLength() > 0 || inputDataCarrier.getWidth() > 0)) {
-			return true;
-		} else {
-			return false;
+				&& (inputDataCarrier.getLength() > BatchConstants.ZERO || inputDataCarrier.getWidth() > BatchConstants.ZERO)) {
+			isZonalKV = true;
+		}
+		return isZonalKV;
+	}
+
+	/**
+	 * This is comparator class.
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
+	class CustomComparator implements Comparator<ZonalKeyParameters> {
+
+		/**
+		 * This is override compare method to compare two objects.
+		 * @param zonalKeyParameter1 {@link ZonalKeyParameters}
+		 * @param zonalKeyParameter2 {@link ZonalKeyParameters}
+		 * @return int
+		 */
+		@Override
+		public int compare(final ZonalKeyParameters zonalKeyParameter1, final ZonalKeyParameters zonalKeyParameter2) {
+			int compare = BatchConstants.ZERO;
+			if (zonalKeyParameter1 != null && zonalKeyParameter2 != null) {
+				double distanceFromZone1 = zonalKeyParameter1.getDistanceFromZone();
+				double distanceFromZone2 = zonalKeyParameter2.getDistanceFromZone();
+				if (distanceFromZone2 > distanceFromZone1) {
+					compare = -BatchConstants.ONE;
+				} else if (distanceFromZone2 < distanceFromZone1) {
+					compare = BatchConstants.ONE;
+				}
+			}
+			return compare;
 		}
 	}
 

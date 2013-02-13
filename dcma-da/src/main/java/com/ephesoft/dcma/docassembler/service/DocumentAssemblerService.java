@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,10 +39,9 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
 /**
- * This service will read all the pages of the document type Unknown one by one
- * and then create new documents for all these pages found on the basis of
- * barcode found or not found. After creating new documents if the document type
- * Unknown have no more pages then it will delete the this document.
+ * This service will read all the pages of the document type Unknown one by one and then create new documents for all these pages found
+ * on the basis of barcode found or not found. After creating new documents if the document type Unknown have no more pages then it
+ * will delete the this document.
  * 
  * @author Ephesoft
  * @version 1.0
@@ -51,13 +50,12 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
 public interface DocumentAssemblerService {
 
 	/**
-	 * This is a service to access Document assembler plugin. This method will
-	 * create new documents for all the pages of the document type Unknown.
+	 * This is a service to access Document assembler plugin. This method will create new documents for all the pages of the document
+	 * type Unknown.
 	 * 
-	 * @param batchInstanceID
-	 *            {@link BatchInstanceID}
-	 * @throws DCMAException
-	 *             If not able to create document for document assembly plugin.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException {@link DCMAApplicationException} If not able to create document for document assembly plugin.
 	 */
 	void createDocumentXml(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
 

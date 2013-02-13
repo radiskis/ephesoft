@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,13 +57,15 @@ import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
+import com.ephesoft.dcma.tesseract.constant.TesseractConstants;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileUtils;
 
 /**
  * This class reads the image files from batch xml, generates HOCR file for each one of them and writes the name of each HOCR file in
- * build.xml.It uses Tesseract plugin for generating HOCR files which can accept images in three languages : english, french and
- * spanish.
+ * build.xml.It uses Tesseract plugin for generating HOCR files which can accept images in three languages : English, French and
+ * Spanish.
  * 
  * @author Ephesoft
  * @version 1.0
@@ -74,24 +76,14 @@ import com.ephesoft.dcma.util.FileUtils;
 @Component
 public class TesseractReader implements ICommonConstants {
 
-	private static final String TESSERACT_HOCR_PLUGIN = "TESSERACT_HOCR";
 	/**
-	 * Constant for tif file extension.
-	 */
-	public static final String TIF_FILE_EXT = ".tif";
-	/**
-	 * Constant for png file extension.
-	 */
-	public static final String PNG_FILE_EXT = ".png";
-
-	/**
-	 * Instance of BatchSchemaService.
+	 * Instance of {@link BatchSchemaService}.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
@@ -103,6 +95,14 @@ public class TesseractReader implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TesseractReader.class);
 
 	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get Batch Schema Service.
+	 * 
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -110,13 +110,17 @@ public class TesseractReader implements ICommonConstants {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * 
+	 * @param batchSchemaService BatchSchemaService
 	 */
 	public void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get Plugin Properties Service.
+	 * 
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -124,7 +128,9 @@ public class TesseractReader implements ICommonConstants {
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set Plugin Properties Service.
+	 * 
+	 * @param pluginPropertiesService PluginPropertiesService
 	 */
 	public void setPluginPropertiesService(final PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -144,64 +150,79 @@ public class TesseractReader implements ICommonConstants {
 	 * Tesseract command for overwriteHOCR.
 	 */
 	private transient String overwriteHOCR;
+
 	/**
-	 * Tesseract command parameters
+	 * Tesseract command parameters.
 	 */
 	private transient String cmdParams;
 
 	/**
-	 * hocr folder name
+	 * hocr folder name.
 	 */
 	private transient String defaultHocrfileFolder;
 
 	/**
-	 * hocr file name for error handling
+	 * hocr file name for error handling.
 	 */
 	private transient String defaultHocrfileName;
 
 	/**
-	 * @return
+	 * To get Default Hocr file name.
+	 * 
+	 * @return String
 	 */
 	public String getDefaultHocrfileName() {
 		return defaultHocrfileName;
 	}
 
 	/**
-	 * @param defaultHocrfileName
+	 * To set Default Hocr file name.
+	 * 
+	 * @param defaultHocrfileName String
 	 */
 	public void setDefaultHocrfileName(String defaultHocrfileName) {
 		this.defaultHocrfileName = defaultHocrfileName;
 	}
 
 	/**
-	 * @param defaultHocrfileFolder
+	 * To set Default Hocr file folder.
+	 * 
+	 * @param defaultHocrfileFolder String
 	 */
 	public void setDefaultHocrfileFolder(String defaultHocrfileFolder) {
 		this.defaultHocrfileFolder = defaultHocrfileFolder;
 	}
 
 	/**
-	 * @return
+	 * To get Default Hocr file folder.
+	 * 
+	 * @return String
 	 */
 	public String getDefaultHocrfileFolder() {
 		return defaultHocrfileFolder;
 	}
 
 	/**
-	 * @return
+	 * To get Cmd Params.
+	 * 
+	 * @return String
 	 */
 	public String getCmdParams() {
 		return cmdParams;
 	}
 
 	/**
-	 * @param cmdParams
+	 * To set Cmd Params.
+	 * 
+	 * @param cmdParams String
 	 */
 	public void setCmdParams(String cmdParams) {
 		this.cmdParams = cmdParams;
 	}
 
 	/**
+	 * To get Overwrite HOCR.
+	 * 
 	 * @return the overwriteHOCR
 	 */
 	public String getOverwriteHOCR() {
@@ -209,21 +230,27 @@ public class TesseractReader implements ICommonConstants {
 	}
 
 	/**
-	 * @param overwriteHOCR the overwriteHOCR to set
+	 * To set Overwrite HOCR.
+	 * 
+	 * @param overwriteHOCR String
 	 */
 	public void setOverwriteHOCR(String overwriteHOCR) {
 		this.overwriteHOCR = overwriteHOCR;
 	}
 
 	/**
-	 * @param windowsCmd the windowsCmd to set
+	 * To set Windows Cmd.
+	 * 
+	 * @param windowsCmd String
 	 */
 	public void setWindowsCmd(String windowsCmd) {
 		this.windowsCmd = windowsCmd;
 	}
 
 	/**
-	 * @param unixCmd the unixCmd to set
+	 * To set Unix Cmd.
+	 * 
+	 * @param unixCmd String
 	 */
 	public void setUnixCmd(String unixCmd) {
 		this.unixCmd = unixCmd;
@@ -232,15 +259,15 @@ public class TesseractReader implements ICommonConstants {
 	/**
 	 * This method cleans up all the intermediate PNG files which are formed by tesseract plugin in process of creation of HOCR files.
 	 * 
-	 * @param folderName
+	 * @param folderName String
 	 */
 	public void cleanUpIntrmediatePngs(final String folderName) {
 		File file = new File(folderName);
 		if (file.isDirectory()) {
 			File[] allFiles = file.listFiles();
 			for (int i = 0; i < allFiles.length; i++) {
-				if (allFiles[i].getName().toLowerCase().contains(TIF_FILE_EXT)
-						&& allFiles[i].getName().toLowerCase().contains(PNG_FILE_EXT)) {
+				if (allFiles[i].getName().toLowerCase().contains(TesseractConstants.TIF_FILE_EXT)
+						&& allFiles[i].getName().toLowerCase().contains(TesseractConstants.PNG_FILE_EXT)) {
 					allFiles[i].delete();
 				}
 			}
@@ -250,31 +277,30 @@ public class TesseractReader implements ICommonConstants {
 	/**
 	 * This method generates HOCR files for each image file and updates the batch xml with each HOCR file name.
 	 * 
-	 * @param batchInstanceID
-	 * @param pluginName
-	 * @return
-	 * @throws DCMAApplicationException
-	 * @throws DCMABusinessException
+	 * @param batchInstanceID String
+	 * @param pluginName String
+	 * @throws DCMAApplicationException in case of error
 	 */
 	public void readOCR(final String batchInstanceID, String pluginName) throws DCMAApplicationException {
-		String tesseractSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+		String tesseractSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TesseractConstants.TESSERACT_HOCR_PLUGIN,
 				TesseractProperties.TESSERACT_SWITCH);
-		if (("ON").equalsIgnoreCase(tesseractSwitch)) {
+		if ("ON".equalsIgnoreCase(tesseractSwitch)) {
 			LOGGER.info("Started Processing image at " + new Date());
-			String actualFolderLocation = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+			String actualFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID) + File.separator
+					+ batchInstanceID;
 			// Initialize properties
 			LOGGER.info("Initializing properties...");
-			String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+			String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, TesseractConstants.TESSERACT_HOCR_PLUGIN,
 					TesseractProperties.TESSERACT_VALID_EXTNS);
-			String cmdLanguage = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+			String cmdLanguage = pluginPropertiesService.getPropertyValue(batchInstanceID, TesseractConstants.TESSERACT_HOCR_PLUGIN,
 					TesseractProperties.TESSERACT_LANGUAGE);
-			String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
-					TesseractVersionProperty.TESSERACT_VERSIONS);
-			String colorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TESSERACT_HOCR_PLUGIN,
+			String tesseractVersion = pluginPropertiesService.getPropertyValue(batchInstanceID,
+					TesseractConstants.TESSERACT_HOCR_PLUGIN, TesseractVersionProperty.TESSERACT_VERSIONS);
+			String colorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, TesseractConstants.TESSERACT_HOCR_PLUGIN,
 					TesseractProperties.TESSERACT_COLOR_SWITCH);
 			LOGGER.info("Properties Initialized Successfully");
 
-			String[] validExtensions = validExt.split(";");
+			String[] validExtensions = validExt.split(TesseractConstants.SEMI_COLON);
 			Batch batch = batchSchemaService.getBatch(batchInstanceID);
 			List<String> allPages = null;
 			try {
@@ -287,13 +313,12 @@ public class TesseractReader implements ICommonConstants {
 			String defaultHocrFilePath = batchSchemaService.getBaseFolderLocation() + File.separator + defaultHocrfileFolder;
 			List<TesseractProcessExecutor> tesseractProcessExecutors = new ArrayList<TesseractProcessExecutor>();
 			if (!allPages.isEmpty()) {
-				for (int i = 0; i < allPages.size(); i++) {
-					String eachPage = allPages.get(i);
+				for (String eachPage : allPages) {
 					eachPage = eachPage.trim();
 					boolean isFileValid = false;
 					if (validExtensions != null && validExtensions.length > 0) {
 						for (int l = 0; l < validExtensions.length; l++) {
-							if (eachPage.substring(eachPage.indexOf('.') + 1).equalsIgnoreCase(validExtensions[l])) {
+							if (eachPage.substring(eachPage.indexOf(TesseractConstants.DOT) + 1).equalsIgnoreCase(validExtensions[l])) {
 								isFileValid = true;
 								break;
 							}
@@ -346,26 +371,8 @@ public class TesseractReader implements ICommonConstants {
 			String[] listOfHtmlFiles = fPageFolder.list(new CustomFileFilter(false, FileType.HTML.getExtensionWithDot()));
 
 			for (TesseractProcessExecutor tesseractProcessExecutor : tesseractProcessExecutors) {
-				boolean isHOCRCreated = checkHocrExists(tesseractProcessExecutor.getTargetHOCR(), listOfHtmlFiles);
-
-				if (!isHOCRCreated) {
-					LOGGER.info("HOCR file is not generated by tesseract.Target hocr file name "
-							+ tesseractProcessExecutor.getTargetHOCR() + ".Trying to copy the template hocr file.");
-					try {
-						// Error handling for those cases where html file is not formed and batch proceeds further
-						FileUtils.copyFile(new File(defaultHocrFilePath + File.separator + defaultHocrfileName), new File(
-								actualFolderLocation + File.separator + tesseractProcessExecutor.getTargetHOCR()));
-					} catch (Exception e1) {
-						LOGGER.error("Exception copying the HOCR file" + e1.getMessage(), e1);
-						throw new DCMAApplicationException("Exception copying the HOCR file" + e1.getMessage(), e1);
-					}
-				} else {
-					LOGGER.info("HOCR file is generated successfully by tesseract.Target hocr file name "
-							+ tesseractProcessExecutor.getTargetHOCR() + ".Skipping to copy the template hocr file.");
-				}
-				// END Changes for :Error handling for those cases where html file is not formed and batch proceeds further
+				validateTesseractProcessExecutor(actualFolderLocation, defaultHocrFilePath, listOfHtmlFiles, tesseractProcessExecutor);
 			}
-
 			LOGGER.info("Started Updating batch XML");
 			batchSchemaService.updateBatch(batch);
 			LOGGER.info("Finished Updating batch XML");
@@ -373,14 +380,37 @@ public class TesseractReader implements ICommonConstants {
 		} else {
 			LOGGER.info("Skipping tesseract plgugin. Switch set as OFF");
 		}
+	}
 
+	private void validateTesseractProcessExecutor(String actualFolderLocation, String defaultHocrFilePath, String[] listOfHtmlFiles,
+			TesseractProcessExecutor tesseractProcessExecutor) throws DCMAApplicationException {
+		boolean isHOCRCreated = checkHocrExists(tesseractProcessExecutor.getTargetHOCR(), listOfHtmlFiles);
+
+		if (!isHOCRCreated) {
+			LOGGER.info("HOCR file is not generated by tesseract.Target hocr file name " + tesseractProcessExecutor.getTargetHOCR()
+					+ ".Trying to copy the template hocr file.");
+			try {
+				// Error handling for those cases where html file is not formed and batch proceeds further
+				FileUtils.copyFile(new File(defaultHocrFilePath + File.separator + defaultHocrfileName), new File(actualFolderLocation
+						+ File.separator + tesseractProcessExecutor.getTargetHOCR()));
+			} catch (Exception e1) {
+				LOGGER.error("Exception copying the HOCR file" + e1.getMessage(), e1);
+				throw new DCMAApplicationException("Exception copying the HOCR file" + e1.getMessage(), e1);
+			}
+		} else {
+			LOGGER.info("HOCR file is generated successfully by tesseract.Target hocr file name "
+					+ tesseractProcessExecutor.getTargetHOCR() + ".Skipping to copy the template hocr file.");
+		}
+		// END Changes for :Error handling for those cases where html file is not formed and batch proceeds further
 	}
 
 	/**
 	 * This method finds all the processable pages from batch.xml using new file name.
 	 * 
+	 * @param batch Batch
+	 * @param colorSwitch String
 	 * @return List<String>
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException in case of error
 	 */
 	public List<String> findAllPagesFromXML(final Batch batch, final String colorSwitch) throws DCMAApplicationException {
 		List<String> allPages = new ArrayList<String>();
@@ -391,7 +421,7 @@ public class TesseractReader implements ICommonConstants {
 			for (int j = 0; j < listOfPages.size(); j++) {
 				Page page = listOfPages.get(j);
 				String sImageFile;
-				if ("ON".equals(colorSwitch)) {
+				if (TesseractConstants.ON.equals(colorSwitch)) {
 					sImageFile = page.getOCRInputFileName();
 				} else {
 					sImageFile = page.getNewFileName();
@@ -405,12 +435,13 @@ public class TesseractReader implements ICommonConstants {
 	}
 
 	/**
-	 * This method updates the batch.xml for each iamge file processed using tesseract engine.
+	 * This method updates the batch.xml for each image file processed using tesseract engine.
 	 * 
 	 * @param fileName String
 	 * @param targetHOCR String
 	 * @param batch Batch
-	 * @throws DCMAApplicationException
+	 * @param colorSwitch String
+	 * @throws DCMAApplicationException in case of error
 	 */
 	public void updateBatchXML(final String fileName, final String targetHOCR, final Batch batch, final String colorSwitch)
 			throws DCMAApplicationException {
@@ -422,7 +453,7 @@ public class TesseractReader implements ICommonConstants {
 			for (int j = 0; j < listOfPages.size(); j++) {
 				Page page = listOfPages.get(j);
 				String sImageFile;
-				if ("ON".equals(colorSwitch)) {
+				if (TesseractConstants.ON.equals(colorSwitch)) {
 					sImageFile = page.getOCRInputFileName();
 				} else {
 					sImageFile = page.getNewFileName();
@@ -457,7 +488,7 @@ public class TesseractReader implements ICommonConstants {
 	 * @param outputFolderLocation {@link String}
 	 * @param cmdLanguage {@link String}
 	 * @param tesseractVersion {@link String}
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException in case of error
 	 */
 	public void createOCR(final String actualFolderLocation, String colorSwitch, String imageName,
 			BatchInstanceThread batchInstanceThread, String outputFolderLocation, String cmdLanguage, String tesseractVersion)

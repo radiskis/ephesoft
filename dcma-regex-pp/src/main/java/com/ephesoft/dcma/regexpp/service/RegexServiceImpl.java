@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,29 +45,76 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.regexpp.RegexReader;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This service is used to read Key Value Pattern from an image file and writes the value, coordinates and confidence score in page
+ * level Fields inside batch.xml. Confidence score is decided on the basis of key value i.e. 100 if key and value is found and 0 if not
+ * found.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.barcode.service.RegexService
+ * 
+ */
 public class RegexServiceImpl implements RegexService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegexServiceImpl.class);
 
+	/**
+	 * regexReader {@link RegexReader}.
+	 */
 	@Autowired
 	private transient RegexReader regexReader;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * Pre-processing work.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * Post-processing work.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * This method extracts the Key values pattern, coordinates and confidence for each image file and updates the batch.xml for those
+	 * images respectively.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException if any error occur in reading and updating batch.xml
+	 */
 	@Override
 	public void regexPPReader(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
@@ -78,14 +125,20 @@ public class RegexServiceImpl implements RegexService {
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
-	
+
+	/**
+	 * Main method.
+	 * 
+	 * @param args String[]
+	 * @throws DCMAException in case error occurs
+	 */
 	public static void main(String[] args) throws DCMAException {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                                        "classpath:/META-INF/applicationContext-regex-pp.xml");
-        context.start();
-        RegexService regexService = ApplicationContextUtil.getSingleBeanOfType(context, RegexService.class);
-        BatchInstanceID batchInstanceID = new BatchInstanceID("BI8");
-        regexService.regexPPReader(batchInstanceID, "abc");
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"classpath:/META-INF/applicationContext-regex-pp.xml");
+		context.start();
+		RegexService regexService = ApplicationContextUtil.getSingleBeanOfType(context, RegexService.class);
+		BatchInstanceID batchInstanceID = new BatchInstanceID("BI8");
+		regexService.regexPPReader(batchInstanceID, "abc");
 	}
 
 }

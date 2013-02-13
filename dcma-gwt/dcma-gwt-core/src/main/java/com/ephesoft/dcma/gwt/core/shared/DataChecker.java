@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,18 +37,18 @@ package com.ephesoft.dcma.gwt.core.shared;
 
 public class DataChecker {
 
-	private boolean isWrong;
+	private boolean wrong;
 
 	private String message = "";
 
 	private BatchClassPluginConfigDTO parent;
 
 	public boolean isWrong() {
-		return isWrong;
+		return wrong;
 	}
 
-	public void setWrong(boolean isWrong) {
-		this.isWrong = isWrong;
+	public void setWrong(boolean wrong) {
+		this.wrong = wrong;
 	}
 
 	public String getMessage() {

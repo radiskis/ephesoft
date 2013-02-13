@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,16 +54,20 @@ import com.ephesoft.dcma.da.domain.TableInfo;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.TableColumnsInfoDao
  */
 @Repository
 public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> implements TableColumnsInfoDao {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TableColumnsInfoDaoImpl.class);
-
 	/**
-	 * An api to fetch all TableColumnsInfo by document type name.
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(TableColumnsInfoDaoImpl.class);
+	
+	/**
+	 * An API to fetch all TableColumnsInfo by TableInfo.
 	 * 
-	 * @param docTypeName
+	 * @param tableInfo TableInfo
 	 * @return List<TableColumnsInfo>
 	 */
 	@Override
@@ -78,10 +82,10 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	}
 
 	/**
-	 * An api to fetch all TableColumnsInfo by document type name and table name.
+	 * An API to fetch all TableColumnsInfo by document type name and table name.
 	 * 
-	 * @param docTypeName
-	 * @param tableName
+	 * @param docTypeName String
+	 * @param tableName String
 	 * @return List<TableInfo>
 	 */
 	@Override
@@ -99,7 +103,7 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	}
 
 	/**
-	 * An api to insert the TableColumnsInfo object.
+	 * An API to insert the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */
@@ -108,7 +112,7 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	}
 
 	/**
-	 * An api to update the TableColumnsInfo object.
+	 * An API to update the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */
@@ -117,7 +121,7 @@ public class TableColumnsInfoDaoImpl extends HibernateDao<TableColumnsInfo> impl
 	}
 
 	/**
-	 * An api to remove the TableColumnsInfo object.
+	 * An API to remove the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */

@@ -16,7 +16,7 @@
 				<g:Label ui:field="batchId"></g:Label>
 			</g:cell>
 			<g:cell width="11%" horizontalAlignment='ALIGN_LEFT'>
-				<g:Anchor href='javascript:;' ui:field='nextBatch'></g:Anchor>
+				<g:Label  ui:field='nextBatch'></g:Label>
 			</g:cell>
 			<g:cell width="11%" horizontalAlignment='ALIGN_RIGHT'>
 				<g:Anchor href='javascript:;' ui:field='saveBatch'></g:Anchor>

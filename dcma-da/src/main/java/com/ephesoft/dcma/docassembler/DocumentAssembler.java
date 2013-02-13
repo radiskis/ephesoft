@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -147,6 +147,7 @@ public class DocumentAssembler {
 	private DocumentTypeService docTypeService;
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public final BatchSchemaService getBatchSchemaService() {
@@ -154,13 +155,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService BatchSchemaService
 	 */
 	public final void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get Page Type Service.
 	 * @return the pageTypeService
 	 */
 	public final PageTypeService getPageTypeService() {
@@ -168,13 +171,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param pageTypeService the pageTypeService to set
+	 * To set Page Type Service.
+	 * @param pageTypeService PageTypeService
 	 */
 	public final void setPageTypeService(final PageTypeService pageTypeService) {
 		this.pageTypeService = pageTypeService;
 	}
 
 	/**
+	 * To get Barcode Classification.
 	 * @return the barcodeClassification
 	 */
 	public final String getBarcodeClassification() {
@@ -182,13 +187,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param barcodeClassification the barcodeClassification to set
+	 * To set Barcode Classification.
+	 * @param barcodeClassification String
 	 */
 	public final void setBarcodeClassification(final String barcodeClassification) {
 		this.barcodeClassification = barcodeClassification;
 	}
 
 	/**
+	 * To get Lucene Classification.
 	 * @return the luceneClassification
 	 */
 	public final String getLuceneClassification() {
@@ -196,13 +203,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param luceneClassification the luceneClassification to set
+	 * To set Lucene Classification.
+	 * @param luceneClassification String
 	 */
 	public final void setLuceneClassification(final String luceneClassification) {
 		this.luceneClassification = luceneClassification;
 	}
 
 	/**
+	 * To get Image Classification.
 	 * @return the imageClassification
 	 */
 	public final String getImageClassification() {
@@ -210,44 +219,47 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param imageClassification the imageClassification to set
+	 * To set Image Classification.
+	 * @param imageClassification String
 	 */
 	public final void setImageClassification(final String imageClassification) {
 		this.imageClassification = imageClassification;
 	}
 
 	/**
+	 * To get Automatic Include List.
 	 * @return the automaticClassification inclusion list
 	 */
-
 	public String getAutomaticIncludeList() {
 		return automaticIncludeList;
 	}
 
 	/**
-	 * @param automaticIncludeList the automaticClassification inclusion list to set
+	 * To set Automatic Include List.
+	 * @param automaticIncludeList String
 	 */
 	public void setAutomaticIncludeList(String automaticIncludeList) {
 		this.automaticIncludeList = automaticIncludeList;
 	}
 
 	/**
+	 * To get Automatic Classification.
 	 * @return the automaticClassification
 	 */
-
 	public String getAutomaticClassification() {
 		return automaticClassification;
 	}
 
 	/**
-	 * @param automaticClassification the automaticClassification to set
+	 * To set Automatic Classification.
+	 * @param automaticClassification String
 	 */
-
 	public void setAutomaticClassification(String automaticClassification) {
 		this.automaticClassification = automaticClassification;
 	}
 
 	/**
+	 * To get Doc Type Service.
 	 * @return the docTypeService
 	 */
 	public final DocumentTypeService getDocTypeService() {
@@ -255,13 +267,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param docTypeService the docTypeService to set
+	 * To set Doc Type Service.
+	 * @param docTypeService DocumentTypeService
 	 */
 	public final void setDocTypeService(final DocumentTypeService docTypeService) {
 		this.docTypeService = docTypeService;
 	}
 
 	/**
+	 * To get Check First Page.
 	 * @return the checkFirstPage
 	 */
 	public final String getCheckFirstPage() {
@@ -269,13 +283,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param checkFirstPage the checkFirstPage to set
+	 * To set Check First Page.
+	 * @param checkFirstPage String
 	 */
 	public final void setCheckFirstPage(final String checkFirstPage) {
 		this.checkFirstPage = checkFirstPage;
 	}
 
 	/**
+	 * To get Check Middle Page.
 	 * @return the checkMiddlePage
 	 */
 	public final String getCheckMiddlePage() {
@@ -283,13 +299,15 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param checkMiddlePage the checkMiddlePage to set
+	 * To set Check Middle Page.
+	 * @param checkMiddlePage String
 	 */
 	public final void setCheckMiddlePage(final String checkMiddlePage) {
 		this.checkMiddlePage = checkMiddlePage;
 	}
 
 	/**
+	 * To get Check last Page.
 	 * @return the checkLastPage
 	 */
 	public final String getCheckLastPage() {
@@ -297,22 +315,24 @@ public class DocumentAssembler {
 	}
 
 	/**
-	 * @param checkLastPage the checkLastPage to set
+	 * To set Check last Page.
+	 * @param checkLastPage String
 	 */
 	public final void setCheckLastPage(final String checkLastPage) {
 		this.checkLastPage = checkLastPage;
 	}
 
 	/**
+	 * To get Plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 	
-
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set Plugin Properties Service.
+	 * @param pluginPropertiesService PluginPropertiesService
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -344,8 +364,11 @@ public class DocumentAssembler {
 	/**
 	 * This method will create new documents for all the pages of the document type Unknown.
 	 * 
-	 * @param batchInstanceID String
-	 * @throws DCMAApplicationException Check for input parameters, read all pages of document and create document for every page.
+	 * @param batchClassID {@link String}
+	 * @param classType {@link DocumentClassificationFactory}
+	 * @param docPageInfo {@link List<Page>}
+	 * @return {@link List<Document>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, read all pages of document and create document for every page.
 	 */
 	public final List<Document> createDocumentAPI(final DocumentClassificationFactory classType, final String batchClassID, final List<Page> docPageInfo) throws DCMAApplicationException {
 		List<Document> doc = null;
@@ -366,8 +389,8 @@ public class DocumentAssembler {
 	/**
 	 * This method will check all the input parameters for document assembly.
 	 * 
-	 * @param batchInstanceID String
-	 * @throws DCMAApplicationException Check input parameters.
+	 * @param batchInstanceID {@link String}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check input parameters.
 	 */
 	private void checkInputParams(final String batchInstanceID) throws DCMAApplicationException {
 
@@ -385,28 +408,28 @@ public class DocumentAssembler {
 		LOGGER.info("Input batch instance ID for Document Assembler is " + batchInstanceID);
 
 		// check for barcode Classification name.
-		if (null == this.barcodeClassification || "".equals(this.barcodeClassification)) {
+		if (null == this.barcodeClassification || DocumentAssemblerConstants.EMPTY.equals(this.barcodeClassification)) {
 			errorMsg = "Invalid initalization of barcodeClassification with properties file.";
 			LOGGER.error(errorMsg);
 			throw new DCMAApplicationException(errorMsg);
 		}
 
 		// check for lucene Classification name.
-		if (null == this.luceneClassification || "".equals(this.luceneClassification)) {
+		if (null == this.luceneClassification || DocumentAssemblerConstants.EMPTY.equals(this.luceneClassification)) {
 			errorMsg = "Invalid initalization of luceneClassification with properties file.";
 			LOGGER.error(errorMsg);
 			throw new DCMAApplicationException(errorMsg);
 		}
 
 		// check for image Classification name.
-		if (null == this.imageClassification || "".equals(this.imageClassification)) {
+		if (null == this.imageClassification || DocumentAssemblerConstants.EMPTY.equals(this.imageClassification)) {
 			errorMsg = "Invalid initalization of imageClassification with properties file.";
 			LOGGER.error(errorMsg);
 			throw new DCMAApplicationException(errorMsg);
 		}
 
 		// check for automatic Classification name.
-		if (null == this.automaticClassification || "".equals(this.automaticClassification)) {
+		if (null == this.automaticClassification || DocumentAssemblerConstants.EMPTY.equals(this.automaticClassification)) {
 			errorMsg = "Invalid initalization of automaticClassification with properties file.";
 			LOGGER.error(errorMsg);
 			throw new DCMAApplicationException(errorMsg);

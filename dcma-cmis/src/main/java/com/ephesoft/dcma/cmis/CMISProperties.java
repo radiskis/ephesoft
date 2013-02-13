@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,21 +41,71 @@ import com.ephesoft.dcma.core.common.PluginProperty;
  * This enum is responsible for loading property fields with data base.
  * 
  * @author Ephesoft
- * 
  * @version 1.0
  * @see com.ephesoft.dcma.cmis.CMISExporter
  */
 public enum CMISProperties implements PluginProperty {
 	
+	/**
+	 * cmis root folder.
+	 */
 	CMIS_ROOT_FOLDER("cmis.root_folder"), 
+	/**
+	 * cmis upload file type extension.
+	 */
 	CMIS_UPLOAD_FILE_EXT("cmis.upload_file_type_ext"), 
+	/**
+	 * cmis server url.
+	 */
 	CMIS_SERVER_URL("cmis.server_URL"), 
+	/**
+	 * cmis server user name.
+	 */
 	CMIS_SERVER_USER_NAME("cmis.server_username"), 
+	/**
+	 * cmis server password.
+	 */
 	CMIS_SERVER_PASSWORD("cmis.server_password"), 
+	/**
+	 * cmis repository id.
+	 */
 	CMIS_REPOSITORY_ID("cmis.repository_id"), 
+	/**
+	 * cmis switch.
+	 */
 	CMIS_SWITCH("cmis.switch"),
-	CMIS_ASPECTS_SWITCH("cmis.aspects_switch");
+	/**
+	 * cmis aspects switch.
+	 */
+	CMIS_ASPECTS_SWITCH("cmis.aspects_switch"),
+	/**
+	 * cmis file name.
+	 */
+	CMIS_FILE_NAME("cmis.file_name"),
+	/**
+	 * cmis client key.
+	 */
+	CMIS_CLIENT_KEY("cmis.client_key"),
+	/**
+	 * cmis secret key.
+	 */
+	CMIS_SECRET_KEY("cmis.secret_key"),
+	/**
+	 * cmis refresh token.
+	 */
+	CMIS_REFRESH_TOKEN("cmis.refresh_token"),
+	/**
+	 * cmis network.
+	 */
+	CMIS_NETWROK("cmis.network"),
+	/**
+	 * cmis redirect url.
+	 */
+	CMIS_REDIRECT_URL("cmis.redirect_url");
 	
+	/**
+	 * A string to store key.
+	 */
 	String key;
 	
 	CMISProperties(String key) {

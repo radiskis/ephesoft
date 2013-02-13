@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,6 +54,7 @@ import com.ephesoft.dcma.da.domain.BatchInstanceGroups;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchInstanceGroupsDao
  */
 @Repository
 public class BatchInstanceGroupsDaoImpl extends HibernateDao<BatchInstanceGroups> implements BatchInstanceGroupsDao {
@@ -68,7 +69,11 @@ public class BatchInstanceGroupsDaoImpl extends HibernateDao<BatchInstanceGroups
 	 */
 	private static final String BATCH_INSTANCE_ID = "batchInstanceIdentifier";
 
-	
+	/**
+	 * API for getting the batch instance identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getBatchInstanceIdentifierForUserRoles(final Set<String> userRoles) {
 		boolean isValid = true;
@@ -81,18 +86,21 @@ public class BatchInstanceGroupsDaoImpl extends HibernateDao<BatchInstanceGroups
 			batchInstanceIdentifiers = new HashSet<String>();
 			final DetachedCriteria criteria = criteria();
 			final Disjunction disjunction = Restrictions.disjunction();
-			for (final String userRole : userRoles) {
-				disjunction.add(Restrictions.eq(GROUP_NAME, userRole));
-			}
+			disjunction.add(Restrictions.in(GROUP_NAME, userRoles));
 			criteria.add(disjunction);
-			final List<BatchInstanceGroups> batchClassGroups = find(criteria);
-			for (final BatchInstanceGroups batchInstanceGroup : batchClassGroups) {
+			final List<BatchInstanceGroups> batchInstanceGroups = find(criteria);
+			for (final BatchInstanceGroups batchInstanceGroup : batchInstanceGroups) {
 				batchInstanceIdentifiers.add(batchInstanceGroup.getBatchInstanceIdentifier());
 			}
 		}
 		return batchInstanceIdentifiers;
 	}
 	
+	/**
+	 * API for getting roles for the specified batch instance.
+	 * @param batchInstanceId String
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getRolesForBatchInstance(String batchInstanceId) {
 		Set<String> grps = new HashSet<String>();
@@ -107,6 +115,11 @@ public class BatchInstanceGroupsDaoImpl extends HibernateDao<BatchInstanceGroups
 		return grps;
 	}
 	
+	/**
+	 * API for adding user role to batch instance.
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param userRole {@link String}
+	 */
 	@Transactional
 	@Override
 	public void addUserRolesToBatchInstanceIdentifier(String batchInstanceIdentifier, String userRole) {
@@ -114,5 +127,25 @@ public class BatchInstanceGroupsDaoImpl extends HibernateDao<BatchInstanceGroups
 		batchInstanceGroups.setBatchInstanceIdentifier(batchInstanceIdentifier);
 		batchInstanceGroups.setGroupName(userRole);
 		create(batchInstanceGroups);
+	}
+	
+	/**
+	 * API for getting the batch instance identifiers except provided user roles.
+	 * 
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
+	@Override
+	public Set<String> getBatchInstanceIdentifiersExceptUserRoles(final Set<String> userRoles) {
+		Set<String> batchInstanceIdentifiers = new HashSet<String>();
+		final DetachedCriteria criteria = criteria();
+		final Disjunction disjunction = Restrictions.disjunction();
+		disjunction.add(Restrictions.not(Restrictions.in(GROUP_NAME, userRoles)));
+		criteria.add(disjunction);
+		final List<BatchInstanceGroups> batchInstanceGroups = find(criteria);
+		for (final BatchInstanceGroups batchInstanceGroup : batchInstanceGroups) {
+			batchInstanceIdentifiers.add(batchInstanceGroup.getBatchInstanceIdentifier());
+		}
+		return batchInstanceIdentifiers;
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,13 +41,44 @@ import com.ephesoft.dcma.core.common.PluginProperty;
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 
+/**
+ * This Dao deals with batch class dynamic plugin configuration.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.BatchClassDynamicPluginConfigDaoImpl
+ */
 public interface BatchClassDynamicPluginConfigDao extends CacheableDao<BatchClassDynamicPluginConfig> {
 
+	/**
+	 * To get Dynamic Plugin Properties for Batch class.
+	 * @param batchClassIdentifier String
+	 * @param pluginName String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName);
 
+	/**
+	 * To get all Dynamic Plugin Properties for Batch instance.
+	 * @param batchClassIdentifier String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchInstance(String batchInstanceIdentifier);
 
+	/**
+	 * To get all Dynamic Plugin Properties for Batch class.
+	 * @param batchClassIdentifier String
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	List<BatchClassDynamicPluginConfig> getAllDynamicPluginPropertiesForBatchClass(String batchClassIdentifier);
+
+	/**
+	 * To get Dynamic Plugin Properties for Batch Class.
+	 * @param batchClassIdentifier String
+	 * @param pluginName String
+	 * @param pluginProperty PluginProperty
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 
 	List<BatchClassDynamicPluginConfig> getDynamicPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty);

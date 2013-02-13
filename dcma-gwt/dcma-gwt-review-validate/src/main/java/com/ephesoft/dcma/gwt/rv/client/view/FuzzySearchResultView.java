@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -65,7 +65,7 @@ public class FuzzySearchResultView extends RVBasePanel {
 	interface Binder extends UiBinder<FlowPanel, FuzzySearchResultView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private List<String> tbHeaderNameList;
 
@@ -73,35 +73,33 @@ public class FuzzySearchResultView extends RVBasePanel {
 
 	private DialogBox dialogBox;
 
-	private HorizontalPanel buttonHorizontalPanel;
-
-	private Button cancelBtn;
-
-	private Button selectBtn;
+	private final HorizontalPanel buttonHorizontalPanel;
 
 	// FuzzySearchListView fuzzySearchListView;
-	FlexTable fuzzyTable;
+	private final FlexTable fuzzyTable;
 
-	Map<RadioButton, Integer> radioButtonVsRowIdMap = new HashMap<RadioButton, Integer>();
+	private final Map<RadioButton, Integer> radioButtonVsRowIdMap = new HashMap<RadioButton, Integer>();
 
 	@UiField
-	FlowPanel fuzzySearchListPanel;
+	protected FlowPanel fuzzySearchListPanel;
 	/*
 	 * @UiField ScrollPanel fuzzySearchScrollPanel;
 	 */
 
-	String selectedRowId = null;
+	private final Button selectBtn;
 
-	public FuzzySearchResultView(List<String> arg0, final ReviewValidatePresenter reviewValidatePresenter, String width, String height) {
-		initWidget(binder.createAndBindUi(this));
+	protected String selectedRowId = null;
+
+	public FuzzySearchResultView(final ReviewValidatePresenter reviewValidatePresenter, String width, String height) {
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		// fuzzySearchScrollPanel.setSize("100%", "100%");
 
 		fuzzyTable = new FlexTable();
 		fuzzyTable.setWidth("100%");
 
 		buttonHorizontalPanel = new HorizontalPanel();
-
-		cancelBtn = new Button();
+		Button cancelBtn = new Button();
 		selectBtn = new Button();
 		buttonHorizontalPanel.add(selectBtn);
 		buttonHorizontalPanel.add(cancelBtn);
@@ -117,8 +115,8 @@ public class FuzzySearchResultView extends RVBasePanel {
 		// cancelBtn.setText("Cancel");
 		// selectBtn.setText("Select");
 
-		cancelBtn.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.fuzzy_search_cancel_btn));
-		selectBtn.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.fuzzy_search_select_btn));
+		cancelBtn.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.FUZZY_SEARCH_CANCEL_BTN));
+		selectBtn.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.FUZZY_SEARCH_SELECT_BTN));
 
 		selectBtn.addClickHandler(new ClickHandler() {
 
@@ -158,12 +156,12 @@ public class FuzzySearchResultView extends RVBasePanel {
 
 	@Override
 	public void initializeWidget() {
-
+		// no need to do anything when initializing the widget
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// no need to inject any events for this view
 	}
 
 	public List<String> getTbHeaderNameList() {

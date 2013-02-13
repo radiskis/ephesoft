@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,32 +44,42 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
+/**
+ * To act as a module entry point.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint
+ * @param <R>
+ */
 public abstract class AdminEntryPoint<R extends DCMARemoteServiceAsync> extends DCMAEntryPoint<R> {
 
+	/**
+	 * To perform operations on load.
+	 */
 	@Override
 	public void onLoad() {
 		LayoutPanel layoutPanel = new LayoutPanel();
 		layoutPanel.add(getMainView());
 
-		final RootPanel rootPanel = new RootPanel(layoutPanel);
+		final RootPanel rootPanel = new RootPanel(layoutPanel, rpcService);
 		rootPanel.getHeader().setEventBus(eventBus);
 		rootPanel.getHeader().addNonClickableTab("Batch Class Management", "BatchClassManagement.html");
 		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
-		rootPanel.getHeader().addTab("Custom Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addTab("Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addTab("Folder Management", "FolderManager.html", false);
 		rpcService.isReportingEnabled(new AsyncCallback<Boolean>() {
 
 			@Override
 			public void onFailure(Throwable arg0) {
 				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void onSuccess(Boolean isReportingEnabled) {
-				if(isReportingEnabled) {
+				if (isReportingEnabled) {
 					rootPanel.getHeader().addTab("Reports", "Reporting.html", false);
 				}
-				
 			}
 		});
 		rootPanel.getHeader().getTabBar().selectTab(0);
@@ -91,11 +101,19 @@ public abstract class AdminEntryPoint<R extends DCMARemoteServiceAsync> extends 
 		RootLayoutPanel.get().add(rootPanel);
 	}
 
+	/**
+	 * To get Home Page.
+	 */
 	@Override
 	public String getHomePage() {
 		return "BatchClassManagement.html";
 	}
 
+	/**
+	 * To get the main view.
+	 * 
+	 * @return Composite
+	 */
 	public abstract Composite getMainView();
 
 }

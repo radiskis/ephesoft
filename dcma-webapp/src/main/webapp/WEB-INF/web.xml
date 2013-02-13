@@ -77,7 +77,7 @@
 	</servlet>
 	<servlet>
 		<servlet-name>batchInstanceService</servlet-name>
-		<servlet-class>com.ephesoft.dcma.gwt.batchInstance.server.BatchInstanceManagementServiceImpl</servlet-class>
+		<servlet-class>com.ephesoft.dcma.gwt.batchinstance.server.BatchInstanceManagementServiceImpl</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>reportingService</servlet-name>

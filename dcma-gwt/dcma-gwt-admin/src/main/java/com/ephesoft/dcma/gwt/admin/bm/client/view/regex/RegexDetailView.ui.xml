@@ -2,15 +2,24 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
+	<g:ScrollPanel height="7em" width="100%">
+		<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="patternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="pattern" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="20%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="patternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="pattern" />
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editRegexPropertiesBtn"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
 	</g:VerticalPanel>

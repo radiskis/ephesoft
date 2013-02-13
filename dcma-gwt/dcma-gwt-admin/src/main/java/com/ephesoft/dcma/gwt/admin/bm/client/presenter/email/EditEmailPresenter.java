@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,12 +47,28 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the edit email details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditEmailView
+	 */
 	public EditEmailPresenter(BatchClassManagementController controller, EditEmailView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getMainPresenter().showBatchClassView(controller.getBatchClass());
@@ -62,6 +78,9 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 		}
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		boolean validFlag = true;
 		if (controller.isAdd()) {
@@ -78,7 +97,8 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 			if (validFlag && view.getIsSSL() && !view.getValidatePortNumberTextBox().validate()) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.INTEGER_ERROR)
-						+ " " + view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
+						+ BatchClassManagementConstants.SPACE
+						+ view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
 						.getConstantValue(BatchClassManagementConstants.ADD_EMAIL_CONFIGURATION), Boolean.TRUE);
 				validFlag = false;
 			}
@@ -104,7 +124,8 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 			if (validFlag && view.getIsSSL() && !view.getValidatePortNumberTextBox().validate()) {
 				ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.INTEGER_ERROR)
-						+ " " + view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
+						+ BatchClassManagementConstants.SPACE
+						+ view.getPortNumberLabel().substring(0, view.getPortNumberLabel().length() - 1), LocaleDictionary.get()
 						.getConstantValue(BatchClassManagementConstants.EDIT_EMAIL_CONFIGURATION_TITLE), Boolean.TRUE);
 				validFlag = false;
 			}
@@ -134,6 +155,9 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 		}
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedEmailConfiguration() != null) {
@@ -151,7 +175,7 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 				view.getPortNumberStar().setVisible(Boolean.valueOf(isSSL));
 			}
 
-			String portNumber = "";
+			String portNumber = BatchClassManagementConstants.EMPTY_STRING;
 			if (controller.getSelectedEmailConfiguration().getPortNumber() != null) {
 				portNumber = controller.getSelectedEmailConfiguration().getPortNumber().toString();
 			}
@@ -171,7 +195,7 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 				emailConfigurationDTO.setIsSSL(Boolean.FALSE);
 			}
 
-			controller.setAdd(true);
+			// controller.setAdd(true);
 			controller.setSelectedEmailConfiguration(emailConfigurationDTO);
 		}
 		view.getValidateUserNameTextBox().addValidator(new EmptyStringValidator(view.getUserNameTextBox()));
@@ -187,8 +211,14 @@ public class EditEmailPresenter extends AbstractBatchClassPresenter<EditEmailVie
 		view.getValidateServerTypeTextBox().toggleValidDateBox();
 		view.getValidateFolderNameTextBox().toggleValidDateBox();
 		view.getValidatePortNumberTextBox().toggleValidDateBox();
+		view.getUserNameTextBox().setFocus(true);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.

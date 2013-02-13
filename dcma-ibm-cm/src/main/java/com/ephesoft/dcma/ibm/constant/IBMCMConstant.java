@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -149,6 +149,31 @@ public enum IBMCMConstant {
 	 * Identifier for content.
 	 */
 	private String identifier;
+	/**
+	 * Constant for int value 3.
+	 */
+	public static final int CONSTANT_3 = 3;
+
+	/**
+	 * Variable for offset.
+	 */
+	public static final String OFFSET = "Offset";
+
+	/**
+	 * Variable for docID.
+	 */
+	public static final String DOC_ID = "DocId";
+
+	/**
+	 * Variable for document.
+	 */
+	public static final String DOCUMENT = "Document";
+
+	/**
+	 * String for ON switch.
+	 */
+	public static final String ON_STRING = "ON";
+
 
 	private IBMCMConstant(final String identifier) {
 		this.identifier = identifier;

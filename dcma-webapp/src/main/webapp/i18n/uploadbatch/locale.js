@@ -11,6 +11,7 @@ var uploadBatchConstants = {
 		bcf_name: "Name",
 		bcf_value: "Value",
 		upload_text: "Select image(s) to upload",
+		upload_label: "<b><font color=\"black\">Upload Image(s)</font></b>",
 		upload_button_label: "Upload Image(s)",
 		reset: "Reset",
 		finish_button_label : "Start Batch",
@@ -18,9 +19,9 @@ var uploadBatchConstants = {
 		cancel: "Cancel",
 		delete_button_label : "Delete",
 		select_all : "Select all",
-		batch_detail : "Batch Detail",
-		action : "Action",
-		file_list : "File List",
+		batch_detail : "<b><font color=\"black\">Batch Detail</font></b>",
+		action : "<b><font color=\"black\">Action</font></b>",
+		file_list : "<b><font color=\"black\">File List</font></b>",
 		file_types : "tiff, tif and pdf files",
 		upload_progress : "Uploaded: "
 };
@@ -46,7 +47,12 @@ var uploadBatchMesseges = {
 		error_deleting_files: "Error deleting the files at server. Please try again.",
 		few_files_not_deleted: "Error deleting few files at server. Please try again.",
 		success_deleting_files: "File(s) deleted successfully.",
-		none_file_to_delete_selected_warning: "No files selected to delete.Please select at least one file"
+		none_file_to_delete_selected_warning: "No files selected to delete.Please select at least one file",
+		upload_image_limit_message: "Maximum permissible upload limit is ",
+		upload_instance_limit_message: "Maximum batch processing limit has been reached.",
+		limit_reached : "Limit Reached",
+		file_size_exceed_meesage : " file(s) exceeded permissible file size limit of",
+		upload_instance_limit_appended_message : "files. One or more uploaded files may contain more than 1 images."
 };
 
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -59,6 +65,7 @@ var uploadBatchConstants_tk = {
 		bcf_name: "Isim",
 		bcf_value: "Değer",
 		upload_text: "Yüklemek için resim seçin (ler)",
+		upload_label: "<b><font color=\"black\">Yükle Görüntü (ler)</font></b>",
 		upload_button_label: "Yükle Görüntü (ler)",
 		reset: "Sıfırla",
 		finish_button_label : "Toplu Başlat",
@@ -66,9 +73,9 @@ var uploadBatchConstants_tk = {
 		cancel: "iptal",
 		delete_button_label : "silmek",
 		select_all : "Hepsini Seç",
-		batch_detail : "Toplu Detay",
-		action : "Eylem",
-		file_list : "Dosya Listesi",
+		batch_detail : "<b><font color=\"black\">Toplu Detay</font></b>",
+		action : "<b><font color=\"black\">Eylem</font></b>",
+		file_list : "<b><font color=\"black\">Dosya Listesi</font></b>",
 		file_types : "tiff, tif ve pdf dosyalarını",
 		upload_progress : "Gönderildi: "
 };
@@ -94,5 +101,10 @@ var uploadBatchMesseges_tk = {
 		error_deleting_files: "Sunucuda dosyaları silerek hata. Lütfen yeniden deneyin.",
 		few_files_not_deleted: "Sunucuda birkaç dosya silme hatası. Lütfen yeniden deneyin.",
 		success_deleting_files: "Dosya (lar) başarıyla silindi.",
-		none_file_to_delete_selected_warning: "Delete.Please için seçilen hiçbir dosya en az bir dosya seçin"
+		none_file_to_delete_selected_warning: "Delete.Please için seçilen hiçbir dosya en az bir dosya seçin",
+		upload_image_limit_message: "İzin verilen maksimum yükleme sınırı",
+		upload_instance_limit_message: "Maksimum toplu işlem sınırına ulaşıldı.",
+		limit_reached : "Ulaşıldı sınırlayın",
+		file_size_exceed_meesage : " dosya (lar) aşıldı müsaade dosya boyutu limiti",
+		upload_instance_limit_appended_message : "dosyaları. Bir veya daha fazla yüklenen dosyalar en fazla 1 görüntüler içerebilir."
 };

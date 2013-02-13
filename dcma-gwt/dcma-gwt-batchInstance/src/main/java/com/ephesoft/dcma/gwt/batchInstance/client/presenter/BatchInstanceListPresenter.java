@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,24 +33,45 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client.presenter;
+package com.ephesoft.dcma.gwt.batchinstance.client.presenter;
 
-import com.ephesoft.dcma.gwt.batchInstance.client.BatchInstanceController;
-import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceListView;
+import com.ephesoft.dcma.gwt.batchinstance.client.BatchInstanceController;
+import com.ephesoft.dcma.gwt.batchinstance.client.view.BatchInstanceListView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for the view the user gets on reaching batch instance page.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.batchinstance.client.view.BatchInstanceListView
+ */
 public class BatchInstanceListPresenter extends AbstractBatchInstancePresenter<BatchInstanceListView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchInstanceController
+	 * @param view BatchInstanceListView
+	 */
 	public BatchInstanceListPresenter(BatchInstanceController controller, BatchInstanceListView view) {
 		super(controller, view);
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// TODO Auto-generated method stub

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.FieldTypeDao;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.FieldType;
@@ -55,25 +55,33 @@ import com.ephesoft.dcma.da.domain.FieldType;
  * @version 1.0
  * @see com.ephesoft.dcma.da.service.FieldTypeService
  */
-@Service
-public class FieldTypeServiceImpl extends DataAccessService implements FieldTypeService {
-
-	private static final String DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY = "Document type name is null or empty.";
+@Service("fieldTypeService")
+public class FieldTypeServiceImpl implements FieldTypeService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(FieldTypeServiceImpl.class);
 
+	/**
+	 * fieldTypeDao {@link FieldTypeDao}.
+	 */
 	@Autowired
 	private FieldTypeDao fieldTypeDao;
 
+	/**
+	 * An API to fetch all Field types by document type name.
+	 * 
+	 * @param docTypeName {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return List<{@link FieldType}>
+	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<FieldType> getFdTypeByDocTypeNameForBatchInstance(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
+			LOGGER.info(DataAccessConstant.DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocTypeNameForBatchInstance(docTypeName, batchInstanceIdentifier);
 		}
@@ -81,18 +89,19 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * API to get value of particular field type for a batch for a particular document.
+	 * An API to fetch Field types by document type name.
 	 * 
-	 * @param fieldTypeName
-	 * @param docTypeName
-	 * @param batchInstanceIdentifier
+	 * @param fieldTypeName {@link String}
+	 * @param docTypeName  {@link String}
+	 * @param batchInstanceIdentifier   {@link String}
+	 * @return FieldType {@link FieldType}
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier) {
 		FieldType fdTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
+			LOGGER.info(DataAccessConstant.DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFieldType(fieldTypeName, docTypeName, batchInstanceIdentifier);
 		}
@@ -100,18 +109,18 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to fetch all Field types by document type name
+	 * An API to fetch all Field types by document type name.
 	 * 
-	 * @param docTypeName
-	 * @param batchInstanceID
-	 * @return List<FieldType>
+	 * @param docTypeName {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return List<{@link FieldType}>
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<FieldType> getFdTypeByDocTypeName(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
+			LOGGER.info(DataAccessConstant.DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocumentTypeName(docTypeName, batchInstanceIdentifier, false);
 		}
@@ -119,20 +128,20 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to fetch all Field types and KV Extraction by document type name
+	 * An API to fetch all Field types and KV Extraction by document type name.
 	 * 
-	 * @param docTypeName
-	 * @param batchInstanceID
+	 * @param docTypeName {@link String}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @param isKVExtraction boolean
-	 * @return List<FieldType>
+	 * @return List<{@link FieldType}>
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<FieldType> getFdTypeAndKVExtractionByDocTypeName(String docTypeName, String batchInstanceIdentifier,
 			boolean isKVExtraction) {
 		List<FieldType> fdTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
+			LOGGER.info(DataAccessConstant.DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeByDocumentTypeName(docTypeName, batchInstanceIdentifier, isKVExtraction);
 		}
@@ -140,18 +149,18 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to fetch all Field types and Regex Validation type name
+	 * An API to fetch all Field types and Regex Validation type name.
 	 * 
-	 * @param docTypeName
-	 * @param batchInstanceID
-	 * @return List<FieldType>
+	 * @param docTypeName {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return List<{@link FieldType}>
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<FieldType> getFdTypeAndRegexValidationByDocTypeName(String docTypeName, String batchInstanceIdentifier) {
 		List<FieldType> fdTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
-			LOGGER.info(DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
+			LOGGER.info(DataAccessConstant.DOCUMENT_TYPE_NAME_IS_NULL_OR_EMPTY);
 		} else {
 			fdTypes = fieldTypeDao.getFdTypeAndRegexValidationByDocTypeName(docTypeName, batchInstanceIdentifier);
 		}
@@ -160,9 +169,9 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to fetch all Field types by document type.
+	 * An API to fetch all Field types by document type.
 	 * 
-	 * @param documentType DocumentType
+	 * @param documentType {@link DocumentType}
 	 * @return List<FieldType>
 	 */
 	@Transactional(readOnly = true)
@@ -178,9 +187,9 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to insert the fieldType object.
+	 * An API to insert the fieldType object.
 	 * 
-	 * @param fieldType FieldType
+	 * @param fieldType {@link FieldType}
 	 */
 	@Transactional
 	@Override
@@ -193,9 +202,9 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to update the fieldType object.
+	 * An API to update the fieldType object.
 	 * 
-	 * @param fieldType FieldType
+	 * @param fieldType {@link FieldType}
 	 */
 	@Transactional
 	@Override
@@ -208,9 +217,9 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 	}
 
 	/**
-	 * An api to remove the fieldType object.
+	 * An API to remove the fieldType object.
 	 * 
-	 * @param fieldType FieldType
+	 * @param fieldType {@link FieldType}
 	 */
 	@Transactional
 	@Override
@@ -222,6 +231,13 @@ public class FieldTypeServiceImpl extends DataAccessService implements FieldType
 		}
 	}
 
+	/**
+	 * An API to fetch all Field types by document type name for batch class.
+	 * 
+	 * @param docTypeName {@link String}
+	 * @param batchClassIdentifier {@link String}
+	 * @return List<{@link FieldType}>
+	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<FieldType> getFdTypeByDocTypeNameForBatchClass(String docTypeName, String batchClassIdentifier) {

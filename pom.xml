@@ -58,7 +58,7 @@
 		<module>dcma-csv-file-creation</module>
 		<module>dcma-ibm-cm</module>
 		<module>dcma-key-value-learning</module>
-		<module>dcma-xml-to-database</module>
+		<module>dcma-db-export</module>
 	</modules>
 
 	<build>
@@ -77,7 +77,7 @@
 					<excludePackageNames>
 						*com.ephesoft.dcma.twain.*:
 						*com.ephesoft.dcma.recostar.*:
-						*com.ephesoft.dcma.recostarExtraction.*:
+						*com.ephesoft.dcma.recostarextraction.*:
 						*com.ephesoft.dcma.ftp.*:
 						*org.*
 					</excludePackageNames>
@@ -271,7 +271,7 @@
 			</dependency>
 			<dependency>
 				<groupId>com.ephesoft.dcma</groupId>
-				<artifactId>dcma-xml-to-database</artifactId>
+				<artifactId>dcma-db-export</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Dependencies for using Maven Javadoc Plugin -->

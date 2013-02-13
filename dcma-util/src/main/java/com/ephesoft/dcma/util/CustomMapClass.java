@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,41 +35,89 @@
 
 package com.ephesoft.dcma.util;
 
+import com.ephesoft.dcma.constant.UtilConstants;
+
+/**
+ * This is Custom Map class to check equality of two objects.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.constant.UtilConstants
+ */
 public class CustomMapClass {
 
+    /**
+	 * Key String.
+	 */
 	private String key;
+	
+	/**
+	 * value Double.
+	 */
 	private Double value;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param key {@link String}
+	 * @param value {@link Double}
+	 */
 	CustomMapClass(String key, Double value) {
 		this.key = key;
 		this.value = value;
 	}
 
+	/**
+	 * To get key.
+	 * @return key
+	 */
 	public String getKey() {
 		return key;
 	}
 
+	/**
+	 * To set key.
+	 * @param key {@link String}
+	 */
 	public void setKey(String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get value.
+	 * @return value
+	 */
 	public Double getValue() {
 		return value;
 	}
 
+	/**
+	 * To set value.
+	 * @param value {@link Double}
+	 */
 	public void setValue(Double value) {
 		this.value = value;
 	}
 
+	/**
+	 * This is an override method that generates hashcode.
+	 * @return int
+	 */
 	@Override
 	public int hashCode() {
-		int prime = 31;
-		int result = 1;
-		result = prime * result + ((key == null) ? 0 : key.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		int prime = UtilConstants.PRIME_CONST;
+		int result = UtilConstants.ONE;
+		result = prime * result + ((key == null) ? UtilConstants.ZERO : key.hashCode());
+		result = prime * result + ((value == null) ? UtilConstants.ZERO : value.hashCode());
 		return result;
 	}
 
+	/**
+	 * This is an override method that checks for equality.
+	 * 
+	 * @param anObject {@link Object}
+	 * @return boolean
+	 */
 	@Override
 	public boolean equals(Object anObject) {
 		boolean equal = false;

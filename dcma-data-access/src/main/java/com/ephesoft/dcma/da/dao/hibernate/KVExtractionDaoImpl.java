@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,10 +58,13 @@ import com.ephesoft.dcma.da.domain.KVExtraction;
 @Repository
 public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements KVExtractionDao {
 
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KVExtractionDaoImpl.class);
 
 	/**
-	 * An api to fetch all KV Extraction by field type.
+	 * An API to fetch all KV Extraction by field type.
 	 * 
 	 * @param fieldType FieldType
 	 * @return List<KVExtraction>
@@ -75,7 +78,7 @@ public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements K
 	}
 
 	/**
-	 * An api to insert the kvExtraction object.
+	 * An API to insert the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -85,7 +88,7 @@ public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements K
 	}
 
 	/**
-	 * An api to update the kvExtraction object.
+	 * An API to update the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -95,7 +98,7 @@ public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements K
 	}
 
 	/**
-	 * An api to remove the kvExtraction object.
+	 * An API to remove the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -103,15 +106,15 @@ public class KVExtractionDaoImpl extends HibernateDao<KVExtraction> implements K
 	public void removeKVExtraction(KVExtraction kvExtraction) {
 		remove(kvExtraction);
 	}
-
+	
 	/**
-	 * An api to check whether KVExtraction field already exists for a field type.
+	 * An API to check whether KVExtraction field already exists for a field type.
 	 * 
-	 * @param fieldType
-	 * @param locationType
-	 * @param valuePattern
-	 * @param keyPattern
-	 * @return
+	 * @param fieldType FieldType
+	 * @param locationType LocationType
+	 * @param valuePattern String
+	 * @param keyPattern String
+	 * @return List<KVExtraction> 
 	 */
 	@Override
 	public List<KVExtraction> getDuplicateKVFields(FieldType fieldType, LocationType locationType, String keyPattern,

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,13 +33,13 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.ViewType;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.CustomWorkflowBreadCrumbView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.ViewType;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.CustomWorkflowBreadCrumbView;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class CustomWorkflowBreadCrumbPresenter extends AbstractCustomWorkflowPresenter<CustomWorkflowBreadCrumbView> {
@@ -55,41 +55,48 @@ public class CustomWorkflowBreadCrumbPresenter extends AbstractCustomWorkflowPre
 	}
 
 	public void createBreadCrumbForDependenciesList() {
-		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getMessageValue(
-				CustomWorkflowMessages.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()),
-				new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.DEPENDENCIES_VIEW, LocaleDictionary.get().getMessageValue(
-						CustomWorkflowMessages.DEPENDENCIES), ViewType.DEPENDENCIES_VIEW.getValue()));
+		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getConstantValue(
+				CustomWorkflowConstants.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()),
+				new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.DEPENDENCIES_VIEW, LocaleDictionary.get().getConstantValue(
+						CustomWorkflowConstants.DEPENDENCIES), ViewType.DEPENDENCIES_VIEW.getValue()));
 		view.createBreadCrumbString();
 	}
 
 	public void createBreadCrumbForDependenciesAddView(String viewName) {
-		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getMessageValue(
-				CustomWorkflowMessages.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()),
-				new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.DEPENDENCIES_VIEW, LocaleDictionary.get().getMessageValue(
-						CustomWorkflowMessages.DEPENDENCIES), ViewType.DEPENDENCIES_VIEW.getValue()),
+		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getConstantValue(
+				CustomWorkflowConstants.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()),
+				new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.DEPENDENCIES_VIEW, LocaleDictionary.get().getConstantValue(
+						CustomWorkflowConstants.DEPENDENCIES), ViewType.DEPENDENCIES_VIEW.getValue()),
 				new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ADD_DEPENDENCY_VIEW, viewName, ViewType.ADD_DEPENDENCY_VIEW
 						.getValue()));
 		view.createBreadCrumbString();
 	}
 
-	public void createBreadCrumbForEntryView() {
-		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getMessageValue(
-				CustomWorkflowMessages.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()));
+	public final void createBreadCrumbForEntryView() {
+		view.create(new CustomWorkflowBreadCrumbView.BreadCrumbView(ViewType.ENTRY_VIEW, LocaleDictionary.get().getConstantValue(
+				CustomWorkflowConstants.PLUGINS_LIST), ViewType.ENTRY_VIEW.getValue()));
 		view.createBreadCrumbString();
 	}
 
-	public void initializeBreadCrumb() {
+	public final void initializeBreadCrumb() {
 
 		createBreadCrumbForEntryView();
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
-	public void setbackButtonVisibility(boolean visibility) {
+	public void setBackButtonVisibility(boolean visibility) {
 		view.getPreviousButton().setEnabled(visibility);
+	}
+
+	public void checkForDirtyPlugin() {
+		controller.getCustomWorkflowManagementPresenter().checkForDirtyPlugin();
+			
 	}
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,14 +46,36 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.ServerRegistryDao;
 import com.ephesoft.dcma.da.domain.ServerRegistry;
 
+/**
+ * A Dao representing Server_Registry table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.ServerRegistryDao
+ */
 @Repository
 public class ServerRegistryDaoImpl extends HibernateDao<ServerRegistry> implements ServerRegistryDao {
 
+	/**
+	 * API to fetch a Server Registry.
+	 * 
+	 * @param identifier Serializable
+	 * @return ServerRegistry
+	 */
 	@Override
 	public ServerRegistry getServerRegistry(Serializable identifier) {
 		return get(identifier);
 	}
 
+	/**
+	 * An api to fetch all the Server Registry by IP address, port number and context.
+	 * 
+	 * @param ipAddress String
+	 * @param portNumber String
+	 * @param context String
+	 * 
+	 * @return ServerRegistry return the server registry.
+	 */
 	@Override
 	public ServerRegistry getServerRegistry(String ipAddress, String portNumber, String context) {
 		DetachedCriteria criteria = criteria();
@@ -63,27 +85,52 @@ public class ServerRegistryDaoImpl extends HibernateDao<ServerRegistry> implemen
 		return findSingle(criteria);
 	}
 
+	/**
+	 * An API to fetch all Server Registry.
+	 * 
+	 * @return List<ServerRegistry> return the server registry list.
+	 */
 	@Override
 	public List<ServerRegistry> getAllServerRegistry() {
 		DetachedCriteria criteria = criteria();
 		return find(criteria);
 	}
 
+	/**
+	 * API to save or update a Server Registry.
+	 * 
+	 * @param serverRegistry ServerRegistry
+	 */
 	@Override
 	public void updateServerRegistry(ServerRegistry serverRegistry) {
 		saveOrUpdate(serverRegistry);
 	}
 
+	/**
+	 * API to create a new Server Registry.
+	 * 
+	 * @param serverRegistry ServerRegistry
+	 */
 	@Override
 	public void createServerRegistry(ServerRegistry serverRegistry) {
 		create(serverRegistry);
 	}
 
+	/**
+	 * API to remove an existing Server Registry.
+	 * 
+	 * @param serverRegistry ServerRegistry
+	 */
 	@Override
 	public void removeServerRegistry(ServerRegistry serverRegistry) {
 		remove(serverRegistry);
 	}
 
+	/**
+	 * API to get Inactive Servers.
+	 * 
+	 * @return List<ServerRegistry>
+	 */
 	@Override
 	public List<ServerRegistry> getInactiveServers() {
 		DetachedCriteria criteria = criteria();

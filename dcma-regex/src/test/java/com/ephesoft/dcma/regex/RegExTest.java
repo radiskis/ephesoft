@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -138,20 +138,21 @@ public class RegExTest extends AbstractRegExTest {
 	/**
 	 * Initalizes the unit tests.
 	 * 
-	 * @throws IOException
+	 * @throws IOException if error occurs
 	 */
 	@Before
 	public void setUp() throws IOException {
 		boolean result = false;
 		Properties prop = new Properties();
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
-		testFolderLocation = batchSchemaService.getTestFolderLocation();
+		
 		batchInstanceIdSuccess = "BI7F";
 		batchClassIdSuccess = "BC1";
 		batchInstanceIdFailure = "BI7D";
 		batchClassIdFailure = "BC1";
 
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassIdSuccess);
+		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		try {
 			prop.load(RegExTest.class.getClassLoader().getResourceAsStream(PROP_FILE_REG_EXP_TEST));
 		} catch (IOException e) {

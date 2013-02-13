@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,14 +37,21 @@ package com.ephesoft.dcma.imagemagick;
 
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
 
+/**
+ * This class handles all the details required for overlay creation.
+ *  
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public class OverlayDetails {
 
 	/**
-	 * Document Id
+	 * Document Id.
 	 */
 	private String documentId;
 	/**
-	 * Field Name
+	 * Field Name.
 	 */
 	private String fieldName;
 	/**
@@ -64,7 +71,7 @@ public class OverlayDetails {
 	 */
 	private String ocrFileName;
 	/**
-	 * Alternate Vlaue.
+	 * Alternate Value.
 	 */
 	private boolean alternateValue;
 	/**
@@ -72,19 +79,19 @@ public class OverlayDetails {
 	 */
 	private int alternateValueIndex;
 	/**
-	 * OCR File Path
+	 * OCR File Path.
 	 */
 	private String ocrFilePath;
 	/**
-	 * Overlayed File Name.
+	 * Overlay File Name.
 	 */
 	private String overlayedFileName;
 	/**
-	 * Overlayed File Path.
+	 * Overlay File Path.
 	 */
 	private String overlayedFilePath;
 	/**
-	 * Coordinates
+	 * Coordinates.
 	 */
 	private CoordinatesList coordinatesList;
 	/**
@@ -95,7 +102,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for documentId.
 	 * 
-	 * @return documentId
+	 * @return documentId {@link String}
 	 */
 	public String getDocumentId() {
 		return documentId;
@@ -104,7 +111,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for documentId.
 	 * 
-	 * @param documentId
+	 * @param documentId {@link String}
 	 */
 	public void setDocumentId(String documentId) {
 		this.documentId = documentId;
@@ -113,7 +120,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for fieldName.
 	 * 
-	 * @return fieldName
+	 * @return fieldName {@link String}
 	 */
 	public String getFieldName() {
 		return fieldName;
@@ -122,7 +129,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for fieldName.
 	 * 
-	 * @param fieldName
+	 * @param fieldName {@link String}
 	 */
 	public void setFieldName(String fieldName) {
 		this.fieldName = fieldName;
@@ -131,7 +138,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for documentIndex.
 	 * 
-	 * @return documentIndex
+	 * @return documentIndex int
 	 */
 	public int getDocumentIndex() {
 		return documentIndex;
@@ -140,7 +147,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for documentIndex.
 	 * 
-	 * @param documentIndex
+	 * @param documentIndex int
 	 */
 	public void setDocumentIndex(int documentIndex) {
 		this.documentIndex = documentIndex;
@@ -149,7 +156,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for fieldIndex.
 	 * 
-	 * @return fieldIndex
+	 * @return fieldIndex int
 	 */
 	public int getFieldIndex() {
 		return fieldIndex;
@@ -158,7 +165,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for fieldIndex.
 	 * 
-	 * @param fieldIndex
+	 * @param fieldIndex int
 	 */
 	public void setFieldIndex(int fieldIndex) {
 		this.fieldIndex = fieldIndex;
@@ -167,7 +174,7 @@ public class OverlayDetails {
 	/**
 	 * This is a getter for alternateValue.
 	 * 
-	 * @return alternateValue
+	 * @return alternateValue boolean
 	 */
 	public boolean isAlternateValue() {
 		return alternateValue;
@@ -176,7 +183,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for alternateValue.
 	 * 
-	 * @param alternateValue
+	 * @param alternateValue boolean
 	 */
 	public void setAlternateValue(boolean alternateValue) {
 		this.alternateValue = alternateValue;
@@ -185,7 +192,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for alternateValueIndex.
 	 * 
-	 * @return alternateValueIndex
+	 * @return alternateValueIndex int
 	 */
 	public int getAlternateValueIndex() {
 		return alternateValueIndex;
@@ -194,7 +201,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for alternateValueIndex.
 	 * 
-	 * @param alternateValueIndex
+	 * @param alternateValueIndex int
 	 */
 	public void setAlternateValueIndex(int alternateValueIndex) {
 		this.alternateValueIndex = alternateValueIndex;
@@ -203,7 +210,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for overlayedFilePath.
 	 * 
-	 * @return overlayedFilePath
+	 * @return overlayedFilePath {@link String}
 	 */
 	public String getOverlayedFilePath() {
 		return overlayedFilePath;
@@ -212,22 +219,16 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for overlayedFilePath.
 	 * 
-	 * @param overlayedFilePath
+	 * @param overlayedFilePath {@link String}
 	 */
 	public void setOverlayedFilePath(String overlayedFilePath) {
 		this.overlayedFilePath = overlayedFilePath;
 	}
 
 	/**
-	 * This is the getter for coordinates.
-	 * 
-	 * @return coordinates
-	 */
-
-	/**
 	 * This is the setter for pageID.
 	 * 
-	 * @param pageID
+	 * @param pageID {@link String}
 	 */
 	public void setPageID(String pageID) {
 		this.pageID = pageID;
@@ -236,7 +237,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for pageID.
 	 * 
-	 * @return pageID
+	 * @return pageID {@link String}
 	 */
 	public String getPageID() {
 		return pageID;
@@ -245,7 +246,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for ocrFileName.
 	 * 
-	 * @param ocrFileName
+	 * @param ocrFileName {@link String}
 	 */
 	public void setOcrFileName(String ocrFileName) {
 		this.ocrFileName = ocrFileName;
@@ -254,7 +255,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for ocrFileName.
 	 * 
-	 * @return ocrFileName
+	 * @return ocrFileName {@link String}
 	 */
 	public String getOcrFileName() {
 		return ocrFileName;
@@ -263,7 +264,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for ocrFilePath.
 	 * 
-	 * @param ocrFilePath
+	 * @param ocrFilePath {@link String}
 	 */
 	public void setOcrFilePath(String ocrFilePath) {
 		this.ocrFilePath = ocrFilePath;
@@ -272,7 +273,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for ocrFilePath.
 	 * 
-	 * @return ocrFilePath
+	 * @return ocrFilePath {@link String}
 	 */
 	public String getOcrFilePath() {
 		return ocrFilePath;
@@ -281,7 +282,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for overlayedFileName.
 	 * 
-	 * @param overlayedFileName
+	 * @param overlayedFileName {@link String}
 	 */
 	public void setOverlayedFileName(String overlayedFileName) {
 		this.overlayedFileName = overlayedFileName;
@@ -290,7 +291,7 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for overlayedFileName.
 	 * 
-	 * @return overlayedFileName
+	 * @return overlayedFileName {@link String}
 	 */
 	public String getOverlayedFileName() {
 		return overlayedFileName;
@@ -299,7 +300,7 @@ public class OverlayDetails {
 	/**
 	 * This is the setter for fieldValue.
 	 * 
-	 * @param fieldValue
+	 * @param fieldValue {@link String}
 	 */
 	public void setFieldValue(String fieldValue) {
 		this.fieldValue = fieldValue;
@@ -308,21 +309,21 @@ public class OverlayDetails {
 	/**
 	 * This is the getter for fieldValue.
 	 * 
-	 * @return fieldValue
+	 * @return fieldValue {@link String}
 	 */
 	public String getFieldValue() {
 		return fieldValue;
 	}
 
 	/**
-	 * @return the coordinatesList
+	 * @return {@link com.ephesoft.dcma.batch.schema.Field.CoordinatesList}
 	 */
 	public CoordinatesList getCoordinatesList() {
 		return coordinatesList;
 	}
 
 	/**
-	 * @param coordinatesList the coordinatesList to set
+	 * @param coordinatesList {@link com.ephesoft.dcma.batch.schema.Field.CoordinatesList}
 	 */
 	public void setCoordinatesList(CoordinatesList coordinatesList) {
 		this.coordinatesList = coordinatesList;

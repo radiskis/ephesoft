@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,32 +40,60 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 
+/**
+ * Entity class for role.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "role")
 public class Role extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "name")
 	private String name;
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Override method to get hashcode.
+	 */
 	@Override
 	public int hashCode() {
-		int prime = 31;
+		int prime = DataAccessConstant.PRIME_CONST;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
+	/**
+	 * Override method to check for equals.
+	 */
 	@Override
 	public boolean equals(Object anObject) {
 		boolean equal = false;

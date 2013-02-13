@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,9 +47,9 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
  */
 public class BatchClassPluginComparator implements Comparator<Object> {
 
-	private final Order order;
-	String PLUGIN_NAME = "name";
-	String PLUGIN_DESCRIPTION = "description";
+	private final Order order;/*
+	private static final String PLUGIN_NAME = "name";
+	private static final String PLUGIN_DESCRIPTION = "description";*/
 
 	public BatchClassPluginComparator(final Order order) {
 
@@ -70,8 +70,44 @@ public class BatchClassPluginComparator implements Comparator<Object> {
 		final BatchClassPluginDTO batchClassPluginDTOTwo = (BatchClassPluginDTO) pluginDTOTwo;
 		final Boolean isAsc = order.isAscending();
 
+		if (!order.getSortProperty().getProperty().equals(PluginProperty.ORDER.getProperty())) {
+			isEqualOrGreater = compareStringValues(batchClassPluginDTOOne, batchClassPluginDTOTwo, isAsc);
+		} else {
+			isEqualOrGreater = compareIntValues(batchClassPluginDTOOne, batchClassPluginDTOTwo, isAsc);
+		}
+		return isEqualOrGreater;
+	}
+
+	/**
+	 * @param batchClassPluginDTOOne
+	 * @param batchClassPluginDTOTwo
+	 * @param isAsc
+	 * @return
+	 */
+	private int compareStringValues(final BatchClassPluginDTO batchClassPluginDTOOne,
+			final BatchClassPluginDTO batchClassPluginDTOTwo, final Boolean isAsc) {
+		int isEqualOrGreater;
 		final String PluginDetailsPropertyOne = getProperty(order.getSortProperty(), batchClassPluginDTOOne);
 		final String PluginDetailsPropertyTwo = getProperty(order.getSortProperty(), batchClassPluginDTOTwo);
+		if (isAsc) {
+			isEqualOrGreater = PluginDetailsPropertyOne.compareTo(PluginDetailsPropertyTwo);
+		} else {
+			isEqualOrGreater = PluginDetailsPropertyTwo.compareTo(PluginDetailsPropertyOne);
+		}
+		return isEqualOrGreater;
+	}
+	
+	/**
+	 * @param batchClassPluginDTOOne
+	 * @param batchClassPluginDTOTwo
+	 * @param isAsc
+	 * @return
+	 */
+	private int compareIntValues(final BatchClassPluginDTO batchClassPluginDTOOne,
+			final BatchClassPluginDTO batchClassPluginDTOTwo, final Boolean isAsc) {
+		int isEqualOrGreater;
+		final Integer PluginDetailsPropertyOne = batchClassPluginDTOOne.getOrderNumber();
+		final Integer PluginDetailsPropertyTwo = batchClassPluginDTOTwo.getOrderNumber();
 		if (isAsc) {
 			isEqualOrGreater = PluginDetailsPropertyOne.compareTo(PluginDetailsPropertyTwo);
 		} else {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.gwt.core.client.view;
 
+import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,17 +49,54 @@ public class RootPanel extends Composite {
 	}
 
 	@UiField
-	Header header;
+	protected Header header;
 	@UiField(provided = true)
-	Panel body;
+	protected Panel body;
 	@UiField
-	Footer footer;
+	protected Footer footer;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Only body argument constructor.
+	 * 
+	 * @param body
+	 */
 	public RootPanel(Panel body) {
+		this(body, null);
+	}
+
+	/**
+	 * @param body
+	 */
+	private void initializeView(Panel body) {
 		this.body = body;
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
+	}
+
+	/**
+	 * Body and Rpc Service constructor used to load footer from server side.
+	 * 
+	 * @param body
+	 * @param rpcService
+	 */
+	public RootPanel(final Panel body, DCMARemoteServiceAsync rpcService) {
+		this(body, rpcService, true);
+	}
+
+	/**
+	 * Constructor used for enabling the use of root panel for Login page. Future use.
+	 * 
+	 * @param body
+	 * @param rpcService
+	 * @param showHeader
+	 */
+	public RootPanel(final Panel body, DCMARemoteServiceAsync rpcService, boolean showHeader) {
+		super();
+		initializeView(body);
+		if (showHeader) {
+			footer.setFooterContent(rpcService);
+		}
 	}
 
 	public Header getHeader() {

@@ -27,7 +27,6 @@ input[type="text"],input[type="password"],select,textarea {
 
 .loginBody_bg {
 	background: url(../images/loginPage_bg.png) bottom repeat-x;
-	padding: 20px 15px 15px 35px
 }
 
 .text_bold {

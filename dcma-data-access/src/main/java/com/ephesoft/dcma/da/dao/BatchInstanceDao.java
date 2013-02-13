@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,35 +55,37 @@ import com.ephesoft.dcma.da.property.BatchPriority;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see ephesoft.dcma.da.dao.hibernate.BatchInstanceDaoImpl
  */
 public interface BatchInstanceDao extends Dao<BatchInstance> {
 
 	/**
-	 * An api to fetch all batch instances by matching batch name.
+	 * An API to fetch all batch instances by matching batch name or batch identifier.
 	 * 
-	 * @param batchName {@link String}
+	 * @param searchString {@link String}
 	 * @param userRoles Set<{@link String}>
-	 * 
-	 * */
-	List<BatchInstance> getBatchInstancesByBatchName(String batchName, Set<String> userRoles);
+	 * @return List<BatchInstance>
+	 */
+	List<BatchInstance> getBatchInstancesByBatchNameOrId(String searchString, Set<String> userRoles);
 
 	/**
-	 * An api to fetch a single batch instance by batch identifier.
+	 * An API to fetch a single batch instance by batch identifier.
 	 * 
-	 * */
+	 * @param identifier String
+	 * @return BatchInstance
+	 */
 	BatchInstance getBatchInstancesForIdentifier(String identifier);
 
 	/**
-	 * An api to fetch all batch instance by batch class.
+	 * An API to fetch all batch instance by batch class.
 	 * 
-	 * @param batchClass BatchClass BatchClass
+	 * @param batchClass BatchClass
 	 * @return List<BatchInstance>
 	 */
-
 	List<BatchInstance> getBatchInstByBatchClass(BatchClass batchClass);
 
 	/**
-	 * An api to fetch all batch instance by review user name.
+	 * An API to fetch all batch instance by review user name.
 	 * 
 	 * @param reviewUserName String
 	 * @return List<BatchInstance>
@@ -91,7 +93,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstByReviewUserName(String reviewUserName);
 
 	/**
-	 * An api to fetch all batch instance by validation user name.
+	 * An API to fetch all batch instance by validation user name.
 	 * 
 	 * @param validationUserName String
 	 * @return List<BatchInstance>
@@ -99,7 +101,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstByValidationUserName(String validationUserName);
 
 	/**
-	 * An api to fetch all batch instance by BatchInstanceStatus.
+	 * An API to fetch all batch instance by BatchInstanceStatus.
 	 * 
 	 * @param batchInstanceStatus BatchInstanceStatus
 	 * @return List<BatchInstance>
@@ -107,7 +109,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstByStatus(BatchInstanceStatus batchInstanceStatus);
 
 	/**
-	 * An api to fetch the count of the batch instances on batch instance status and batch priority basis. API will return those batch
+	 * An API to fetch the count of the batch instances on batch instance status and batch priority basis. API will return those batch
 	 * instance having access by the user roles on the basis of ephesoft user.
 	 * 
 	 * @param batchName {@link String}
@@ -122,7 +124,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 			Set<String> userRoles, EphesoftUser ephesoftUser);
 
 	/**
-	 * An api to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
+	 * An API to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
 	 * retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the sort property and order of
 	 * that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
@@ -137,15 +139,16 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
 	 * @param userName Current User.
 	 * @param userRoles Current User Role.
-	 * * @param ephesoftUser EphesoftUser
+	 * @param ephesoftUser EphesoftUser
+	 * @param searchString the searchString on which batch instances have to be fetched
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, Set<String> userRoles,EphesoftUser ephesoftUser);
+			String userName, Set<String> userRoles, EphesoftUser ephesoftUser, String searchString);
 
 	/**
-	 * An api to fetch all the batch instance for status list input. API will return those batch
+	 * An API to fetch all the batch instance for status list input. API will return those batch
 	 * instance having access by the user roles on the basis of ephesoft user.
 	 * 
 	 * @param statusList List<BatchInstanceStatus>
@@ -159,7 +162,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 			final Set<String> userRoles, EphesoftUser ephesoftUser);
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance filters.
+	 * An API to fetch count of the batch instance table for batch instance filters.
 	 * 
 	 * @param filterClauseList List<BatchInstanceFilter>
 	 * @return count of the batch instance present for the batch instance filters.
@@ -167,7 +170,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	int getCount(final List<BatchInstanceFilter> filterClauseList);
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance status list, batch priority list on the basis of the user
+	 * An API to fetch count of the batch instance table for batch instance status list, batch priority list on the basis of the user
 	 * roles. API will return the count for the batch instance having access by the user roles and current user name on the basis of
 	 * the ephesoft user.
 	 * 
@@ -182,23 +185,25 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 			final Set<String> userRoles, final String currentUserName, EphesoftUser ephesoftUser);
 
 	/**
-	 * An api to fetch count of the batch instances for a given status list and batch priority and isCurrUsrNotReq is used for adding
+	 * An API to fetch count of the batch instances for a given status list and batch priority and isCurrUsrNotReq is used for adding
 	 * the batch instance access by the current user. This API will return the batch instance having access by the user roles on the
 	 * basis of ephesoft user.
 	 * 
 	 * @param batchInstStatusList List<{@link BatchInstanceStatus}>
 	 * @param batchPriorities the priority list of the batches
 	 * @param isCurrUsrNotReq true if the current user can be anyone. False if current user cannot be null.
-	 * @param currentUser {@link String}
+	 * @param currentUserName {@link String}
 	 * @param userRoles Set<{@link String}>
 	 * @param ephesoftUser {@link EphesoftUser}
+	 * @param searchString the searchString on which batch instances have to be fetched
 	 * @return int, the count satisfying the above requirements
 	 */
 	int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
-			final boolean isCurrUsrNotReq, final Set<String> userRoles, final String currentUserName, EphesoftUser ephesoftUser);
+			final boolean isCurrUsrNotReq, final Set<String> userRoles, final String currentUserName, EphesoftUser ephesoftUser,
+			final String searchString);
 
 	/**
-	 * An api to return total count of batches from the batch instance table having access by the user roles on the basis of ephesoft
+	 * An API to return total count of batches from the batch instance table having access by the user roles on the basis of ephesoft
 	 * user.
 	 * 
 	 * @param currentUser {@link String}
@@ -209,7 +214,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	int getAllCount(final String currentUser, final Set<String> currentRole, EphesoftUser ephesoftUser);
 
 	/**
-	 * An api to fetch all the batch instance by BatchPriority.
+	 * An API to fetch all the batch instance by BatchPriority.
 	 * 
 	 * @param batchPriority BatchPriority this will add the where clause to the criteria query based on the priority column.
 	 * @return List<BatchInstance> return the batch instance list.
@@ -217,7 +222,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstance(BatchPriority batchPriority);
 
 	/**
-	 * An api to fetch all batch instance by batch Class Name.
+	 * An API to fetch all batch instance by batch Class Name.
 	 * 
 	 * @param batchClassName String
 	 * @return List<BatchInstance>
@@ -225,7 +230,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstByBatchClassName(String batchClassName);
 
 	/**
-	 * An api to fetch all batch instance by batch Class Process Name.
+	 * An API to fetch all batch instance by batch Class Process Name.
 	 * 
 	 * @param batchClassProcessName String
 	 * @return List<BatchInstance>
@@ -273,9 +278,10 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	void removeBatchInstance(BatchInstance batchInstance);
 
 	/**
-	 * An api to fetch all batch instance by batch Class Name and batch instance id's list.
+	 * An API to fetch all batch instance by batch Class Name and batch instance id's list.
 	 * 
 	 * @param batchClassName String
+	 * @param batchInstanceIDList List<String>
 	 * @return List<BatchInstance>
 	 */
 	List<BatchInstance> getBatchInstanceList(String batchClassName, List<String> batchInstanceIDList);
@@ -283,8 +289,8 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * API to fetch BatchInstance for the current user.
 	 * 
-	 * @param currentUser
-	 * @return
+	 * @param currentUser String
+	 * @return List<BatchInstance>
 	 */
 	List<BatchInstance> getAllBatchInstancesForCurrentUser(String currentUser);
 
@@ -292,7 +298,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * API to get all batch instances which are currently being executed for a specific IP Address. Output will be all batch instances
 	 * which are not in NEW, ERROR or FINISHED state.
 	 * 
-	 * @param serverInfo
+	 * @param lockOwner ServerRegistry
 	 * @return List<BatchInstance>
 	 */
 	List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner);
@@ -300,8 +306,8 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * API to get a batch by applying Hibernate level optimistic locking.
 	 * 
-	 * @param batchId
-	 * @param lockMode
+	 * @param batchId long
+	 * @param lockMode LockMode
 	 * @return BatchInstance
 	 */
 	BatchInstance getBatch(long batchId, LockMode lockMode);
@@ -309,6 +315,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * API to get all the batch instances in sorted order.
 	 * 
+	 * @param orders List<Order>
 	 * @return List<BatchInstance> - List of all batch instances.
 	 */
 	List<BatchInstance> getAllBatchInstances(List<Order> orders);
@@ -316,7 +323,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * API to get all unfinished batch instances.
 	 * 
-	 * @param uncFolder
+	 * @param uncFolder String
 	 * @return List<BatchInstance> - List of all batch instances.
 	 */
 	List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder);
@@ -324,16 +331,16 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * API to update local folder for a batch.
 	 * 
-	 * @param batchInsctance
-	 * @param localFolder
+	 * @param batchInsctance BatchInstance
+	 * @param localFolder String
 	 */
 	void updateBatchInstanceLocalFolder(BatchInstance batchInsctance, String localFolder);
 
 	/**
 	 * API to update unc folder for a batch.
 	 * 
-	 * @param batchInsctance
-	 * @param uncFolder
+	 * @param batchInsctance BatchInstance
+	 * @param uncFolder String 
 	 */
 	void updateBatchInstanceUncFolder(BatchInstance batchInsctance, String uncFolder);
 
@@ -345,7 +352,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance();
 
 	/**
-	 * An api to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit
+	 * An API to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit
 	 * upon the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set
 	 * the sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided. This will
 	 * return only those batch instance which having access by the user roles on the basis of the ephesoft user.
@@ -360,7 +367,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 *            property name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<{@link BatchPriority}> this will add the where clause to the criteria query based on the priority
 	 *            list selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 * @param currentUser {@link String}
+	 * @param userName {@link String}
 	 * @param userRoles Set<{@link String}>
 	 * @param ephesoftUser {@link EphesoftUser}
 	 * @return List<{@link BatchInstance}> return the batch instance list.
@@ -371,7 +378,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 			final Set<String> userRoles, EphesoftUser ephesoftUser);
 
 	/**
-	 * An api to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
+	 * An API to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
 	 * the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the
 	 * sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
@@ -386,7 +393,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
 	 * @param userName Current User.
 	 * @param userRoles Current User Role.
-	 * @return List<BatchInstance> return the batch instance list.
+	 * @return List<{@link BatchInstance}> return the batch instance list.
 	 */
 	List<BatchInstance> getRemoteBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
@@ -395,28 +402,29 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * This API returns the list of running job executing on the server by the server IP.
 	 * 
-	 * @param serverIP
-	 * @return
+	 * @param serverIP String
+	 * @return List<{@link BatchInstance}>
 	 */
 	List<BatchInstance> getExecutingJobByServerIP(String serverIP);
 
 	/**
-	 * This API returns the list of batch instance on the basis of executing server IP and batch status.
+	 * API to fetch Batch Instance by executing Job Server IP and batch status.
 	 * 
-	 * @param executingServerIP
-	 * @param batchInstanceStatus
-	 * @return
+	 * @param executingServerIP String
+	 * @param batchInstanceStatus BatchInstanceStatus
+	 * @return List<BatchInstance>
 	 */
 	List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP,
 			BatchInstanceStatus batchInstanceStatus);
 
 	/**
-	 * This API returns the list of batch instances for current user by matching batch name and batch status.
+	 * API to fetch batch instance list by Batch name and status.
 	 * 
-	 * @param batchName
-	 * @param batchStatus
-	 * @param userName
-	 * @param userRoles
+	 * @param batchName String
+	 * @param batchStatus BatchInstanceStatus
+	 * @param userName String
+	 * @param userRoles Set<String>
+	 * @return List<BatchInstance>
 	 */
 	List<BatchInstance> getBatchInstanceListByBatchNameAndStatus(String batchName, BatchInstanceStatus batchStatus, String userName,
 			Set<String> userRoles);
@@ -424,7 +432,7 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	/**
 	 * This API for clearing the current user for given batch instance identifier.
 	 * 
-	 * @param batchInstanceIdentifier
+	 * @param batchInstanceIdentifier String
 	 */
 	void clearCurrentUser(String batchInstanceIdentifier);
 
@@ -437,14 +445,14 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList);
 
 	/**
-	 * This API fetches batch instances which having access by the user roles on the basis of ephesoft user.
+	 * This API fetches batch instance on the basis of user name and the roles defined for that user name in the batch class.
 	 * 
-	 * @param userRoles
-	 * @param batchInstanceIdentifier
-	 * @param currentUserName
-	 * @param ephesoftUser
-	 * @return
-	 */
+	 * @param userRoles Set<String>
+	 * @param batchInstanceIdentifier String
+	 * @param currentUserName String
+	 * @param ephesoftUser EphesoftUser
+	 * @return {@link BatchInstance}
+	 */ 
 	BatchInstance getBatchInstanceByUserRole(Set<String> userRoles, String batchInstanceIdentifier, String currentUserName,
 			EphesoftUser ephesoftUser);
 
@@ -454,9 +462,42 @@ public interface BatchInstanceDao extends Dao<BatchInstance> {
 	 * @param statusList batch status list
 	 * @param batchPriorities batch priorities
 	 * @param userRoles batch class id's for the role for which the current user is logged in
-	 * @return
+	 * @return List<{@link BatchInstance}>
 	 */
 	List<BatchInstance> getBatchInstancesForStatusPriority(List<BatchInstanceStatus> statusList, List<BatchPriority> batchPriorities,
 			Set<String> userRoles);
+
+	/**
+	 * API to fetch all batch instance by BatchInstanceStatus for a batch class.
+	 * 
+	 * @param statusList List<BatchInstanceStatus>
+	 * @param batchClass BatchClass
+	 * @return List<BatchInstance>
+	 */
+	List<BatchInstance> getBatchInstByStatusAndBatchClass(List<BatchInstanceStatus> statusList, BatchClass batchClass);
+
+	/**
+	 * API to fetch the system folder for the given batch instance id.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return {@link String} the system folder path.
+	 */
+	String getSystemFolderForBatchInstanceId(String batchInstanceIdentifier);
+
+	/**
+	 * API to fetch whether the batch class has any of its batches under processing i.e. not finished.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return int, count of batch instances
+	 */
+	int getAllUnFinishedBatchInstancesCount(String batchClassIdentifier);
+
+	/**
+	 * This API fetches all the batch instances on the basis of batch status list passed.
+	 * 
+	 * @param batchStatusList List<{@link BatchInstanceStatus}>
+	 * @return List<{@link BatchInstance}>
+	 */
+	List<BatchInstance> getBatchInstanceByStatusListBatchClass(List<BatchInstanceStatus> batchStatusList);
 
 }

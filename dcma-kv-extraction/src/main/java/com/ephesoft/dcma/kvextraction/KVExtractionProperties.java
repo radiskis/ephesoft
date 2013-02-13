@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,10 +37,22 @@ package com.ephesoft.dcma.kvextraction;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * Enum comprising of all the properties for this plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public enum KVExtractionProperties implements PluginProperty {
 
+	/**
+	 * Property name for KV extraction switch.
+	 */
 	KV_EXTRACTION_SWITCH("kvextraction.switch");
 
+	/**
+	 * The key used to access the property values by using its getter.
+	 */
 	String key;
 
 	private KVExtractionProperties(String key) {

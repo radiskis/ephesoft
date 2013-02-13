@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,25 +41,57 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
+import com.ephesoft.dcma.constant.UtilConstants;
+
+/**
+ * This is Custom Value Sorted Map Class to add new objects and reverse the map.
+ *  
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.util.Comparator
+ */
 public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 
+	/**
+	 * serialVersionUID, constant long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * maxValue int.
+	 */
 	private int maxValue;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param maxValue int
+	 */
 	public CustomValueSortedMap(int maxValue) {
 		this(maxValue, new DoubleComparator());
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param maxValue int
+	 * @param comparator Comparator<CustomMapClass> 
+	 */
 	public CustomValueSortedMap(int maxValue, Comparator<CustomMapClass> comparator) {
 		super(comparator);
 		this.maxValue = maxValue;
 	}
 
+	/**
+	 * To add values.
+	 * 
+	 * @param clazz CustomMapClass
+	 * @return boolean
+	 */
 	@Override
 	public boolean add(CustomMapClass clazz) {
 		boolean returnValue = true;
-		if (maxValue == 0) {
+		if (maxValue == UtilConstants.ZERO) {
 			returnValue = super.add(clazz);
 		} else {
 			if (super.size() == maxValue) {
@@ -73,7 +105,7 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 					Iterator<CustomMapClass> itr = super.iterator();
 					while (itr.hasNext()) {
 						CustomMapClass customMapClass = itr.next();
-						if (customMapClass.equals(clazz) && clazz.getValue().compareTo(customMapClass.getValue()) > 0) {
+						if (customMapClass.equals(clazz) && clazz.getValue().compareTo(customMapClass.getValue()) > UtilConstants.ZERO) {
 							super.remove(customMapClass);
 							super.add(clazz);
 							returnValue = true;
@@ -88,11 +120,23 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 		return returnValue;
 	}
 
+	/**
+	 *  To add values.
+	 * 
+	 * @param key {@link String}
+	 * @param value {@link Double}
+	 * @return boolean
+	 */
 	public boolean add(String key, Double value) {
 		CustomMapClass customMapClass = new CustomMapClass(key, value);
 		return this.add(customMapClass);
 	}
 
+	/**
+	 * To get values.
+	 * 
+	 * @return Map<String, Double> 
+	 */
 	public Map<String, Double> getMap() {
 		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();
 		Iterator<CustomMapClass> itr = super.iterator();
@@ -102,13 +146,18 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 			Double newValue = customMapClass.getValue();
 			if (doubleValue == null) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
-			} else if (doubleValue.compareTo(newValue) < 0) {
+			} else if (doubleValue.compareTo(newValue) < UtilConstants.ZERO) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
 			}
 		}
 		return linkedHashMap;
 	}
 
+	/**
+	 * To get reverse sorted Map.
+	 * 
+	 * @return Map<String, Double>
+	 */
 	public Map<String, Double> getReverseSortedMap() {
 		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();
 		Iterator<CustomMapClass> itr = super.descendingIterator();
@@ -118,13 +167,18 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 			Double newValue = customMapClass.getValue();
 			if (doubleValue == null) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
-			} else if (doubleValue.compareTo(newValue) < 0) {
+			} else if (doubleValue.compareTo(newValue) < UtilConstants.ZERO) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
 			}
 		}
 		return linkedHashMap;
 	}
 
+	/**
+	 * To get reverse sorted Map value in float.
+	 * 
+	 * @return Map<String, Float>
+	 */
 	public Map<String, Float> getReverseSortedMapValueInFloat() {
 		Map<String, Float> linkedHashMap = new LinkedHashMap<String, Float>();
 		Iterator<CustomMapClass> itr = super.descendingIterator();
@@ -134,7 +188,7 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 			Float newValue = (float) ((double) customMapClass.getValue());
 			if (doubleValue == null) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
-			} else if (doubleValue.compareTo(newValue) < 0) {
+			} else if (doubleValue.compareTo(newValue) < UtilConstants.ZERO) {
 				linkedHashMap.put(customMapClass.getKey(), newValue);
 			}
 		}
@@ -143,21 +197,24 @@ public class CustomValueSortedMap extends TreeSet<CustomMapClass> {
 
 }
 
+/**
+ * This class contains compare method.
+ */
 class DoubleComparator implements Comparator<CustomMapClass> {
 
+	/**
+	 * To compare 2 objects.
+	 * 
+	 * @param object1 CustomMapClass
+	 * @param object CustomMapClass
+	 * @return int
+	 */
 	@Override
 	public int compare(CustomMapClass object1, CustomMapClass object) {
 		int returnValue = object1.getValue().compareTo(object.getValue());
-		if (returnValue == 0) {
-			returnValue = -1;
+		if (returnValue == UtilConstants.ZERO) {
+			returnValue = -UtilConstants.ONE;
 		}
-		// if (!o1.getKey().equalsIgnoreCase(o2.getKey())) {
-		// returnValue = o1.getValue().compareTo(o2.getValue());
-		// if (returnValue == 0) {
-		// returnValue = o1.getKey().compareTo(o2.getKey());
-		// }
-		// System.out.println("");
-		// }
 		return returnValue;
 	}
 }

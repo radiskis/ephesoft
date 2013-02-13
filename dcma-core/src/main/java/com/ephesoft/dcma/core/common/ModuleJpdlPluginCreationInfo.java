@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,6 @@
 
 package com.ephesoft.dcma.core.common;
 
-
 /**
  * Enumerating all possible batch instance status.
  * 
@@ -43,38 +42,103 @@ package com.ephesoft.dcma.core.common;
  * @version 1.0
  */
 public class ModuleJpdlPluginCreationInfo {
-	private String subProcessName;
-	private boolean isScriptingPlugin;
-	private String scriptingFileName;
-	private String backUpFileName;
 
-	public ModuleJpdlPluginCreationInfo(String subProcessName) {
-		this(subProcessName, false,"","");
-	}
+	/** 
+	 * subProcessName String.
+	 */
+	private String subProcessName;
 	
-	public ModuleJpdlPluginCreationInfo(String subProcessName, boolean isScriptingPlugin, String scriptingFileName, String backUpFileName) {
+	/**
+	 * scriptingPlugin boolean.
+	 */
+	private boolean scriptingPlugin;
+	
+	/**
+	 * scriptingFileName String.
+	 */
+	private String scriptingFileName;
+	
+	/**
+	 * backUpFileName String.
+	 */
+	private String backUpFileName;
+	
+	/**
+	 * subProcessKey String.
+	 */
+	private String subProcessKey;
+
+	/**
+	 * Constructor.
+	 * @param subProcessName String
+	 */
+	public ModuleJpdlPluginCreationInfo(String subProcessName) {
+		this(subProcessName, false, "", "", subProcessName);
+	}
+
+	/**
+	 * To get Sub Process Key.
+	 * @return the subProcessKey
+	 */
+	public String getSubProcessKey() {
+		return subProcessKey;
+	}
+
+	/**
+	 * To set Sub Process Name.
+	 * @param subProcessName String
+	 */
+	public void setSubProcessName(String subProcessName) {
 		this.subProcessName = subProcessName;
-		this.isScriptingPlugin = isScriptingPlugin;
+	}
+
+	/**
+	 * Constructor.
+	 * @param subProcessName String
+	 * @param isScriptingPlugin boolean
+	 * @param scriptingFileName String
+	 * @param backUpFileName String
+	 * @param subProcessKey String
+	 */
+	public ModuleJpdlPluginCreationInfo(String subProcessName, boolean isScriptingPlugin, String scriptingFileName,
+			String backUpFileName, String subProcessKey) {
+		this.subProcessName = subProcessName;
+		this.scriptingPlugin = isScriptingPlugin;
 		this.scriptingFileName = scriptingFileName;
 		this.backUpFileName = backUpFileName;
+		this.subProcessKey = subProcessKey;
 	}
-	
-	
+
+	/**
+	 * To get Scripting File Name.
+	 * @return String
+	 */
 	public String getScriptingFileName() {
 		return scriptingFileName;
 	}
-	
-	
+
+	/**
+	 * To get Back up File Name.
+	 * @return String
+	 */
 	public String getBackUpFileName() {
 		return backUpFileName;
 	}
-	
+
+	/**
+	 * To get Sub Process Name.
+	 * @return String
+	 */
 	public String getSubProcessName() {
 		return subProcessName;
 	}
-	
+
+	/**
+	 * To check whether Scripting Plugin or not.
+	 * @return boolean
+	 */
 	public boolean isScriptingPlugin() {
-		return isScriptingPlugin;
+		return scriptingPlugin;
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,41 +49,54 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
+/**
+ * This class performs some post-processing in executing the batch.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.aspectj.lang.annotation.AfterReturning
+ */
 @Aspect
 public class DCMAPostProcessAspect {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAPostProcessAspect.class);
 
-	@AfterReturning("execution(* com.ephesoft.dcma.*.service.*.*(..)) " +
-			"&& !within(com.ephesoft.dcma.da.service.*) " +
-			"&& !within(com.ephesoft.dcma.workflows.service.*)")
+	/**
+	 * To perform post-processing.
+	 * 
+	 * @param joinPoint JoinPoint
+	 * @throws DCMAException in case of error
+	 */
+	@AfterReturning("execution(* com.ephesoft.dcma.*.service.*.*(..)) " + "&& !within(com.ephesoft.dcma.da.service.*) "
+			+ "&& !within(com.ephesoft.dcma.workflows.service.*)")
 	public void postprocess(JoinPoint joinPoint) throws DCMAException {
 
 		try {
 			Object target = joinPoint.getTarget();
-			if(target == null) {
+			if (target == null) {
 				return;
 			}
-			
+
 			Class<?> clazz = ClassUtils.getUserClass(target);
 			Method[] methods = clazz.getMethods();
-			if(methods != null && methods.length > 0) {
+			if (methods != null && methods.length > 0) {
 				for (int i = 0; i < methods.length; i++) {
-					Annotation annotation =  methods[i].getAnnotation(PostProcess.class);
-					if(annotation != null) {
-						if(joinPoint.getArgs().length >= 1 && 
-								(joinPoint.getArgs()[0] instanceof BatchInstanceID)) { 
+					Annotation annotation = methods[i].getAnnotation(PostProcess.class);
+					if (annotation != null) {
+						if (joinPoint.getArgs().length >= 1 && (joinPoint.getArgs()[0] instanceof BatchInstanceID)) {
 							methods[i].invoke(target, joinPoint.getArgs()[0], joinPoint.getArgs()[1]);
-						}
-						else {
-							LOGGER.info("Method " + methods[i]+ " does not comply to Post-process agreement. So.. not invoked.");
+						} else {
+							LOGGER.info("Method " + methods[i] + " does not comply to Post-process agreement. So.. not invoked.");
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception in Post-processing", e);
-			throw new DCMAException("Exception in Post-processing",e);
+			throw new DCMAException("Exception in Post-processing", e);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,12 +48,33 @@ import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.da.domain.BatchClass;
 
+/**
+ * This class is used to give folder details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.monitor.service.FolderMonitorService
+ */
 public final class PrioritizedFolderContainer {
 
+	/**
+	 * Logger instance for proper message logging.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizedFolderContainer.class);
 
+	/**
+	 * A long variable to store wait time.
+	 */
 	final private long waitTime;
 
+	/**
+	 * A new object used for synchronizing.
+	 */
+	final private Object object = new Object();
+
+	/**
+	 * A map of unc folders.
+	 */
 	public Map<BatchClass, UncFolder> uncFolders = new TreeMap<BatchClass, UncFolder>(new Comparator<BatchClass>() {
 
 		@Override
@@ -71,51 +92,89 @@ public final class PrioritizedFolderContainer {
 			return result;
 		}
 	});
-
+	/**
+	 * Parameterized constructor.
+	 * @param waitTime long
+	 */
 	public PrioritizedFolderContainer(long waitTime) {
 		this.waitTime = waitTime;
 	}
-
+	/**
+	 * To add the batch class.
+	 * @param batchClass {@link BatchClass}
+	 */
 	public void addBatchClasss(BatchClass batchClass) {
 		uncFolders.put(batchClass, new UncFolder(batchClass.getUncFolder()));
 	}
-
-	public synchronized void addFolderDetail(FolderDetail folderDetail) {
-		final Collection<UncFolder> folders = uncFolders.values();
-		for (UncFolder uncFolder : folders) {
-			if (uncFolder.getUncFolderPath().equals(folderDetail.getParentPath())) {
-				uncFolder.addFolderDetail(folderDetail);
-				break;
+	/**
+	 * This method is used to add the folder details.
+	 * @param folderDetail {@link FolderDetail}
+	 */
+	public void addFolderDetail(FolderDetail folderDetail) {
+		synchronized (object) {
+			final Collection<UncFolder> folders = uncFolders.values();
+			for (UncFolder uncFolder : folders) {
+				if (uncFolder.getUncFolderPath().equals(folderDetail.getParentPath())) {
+					uncFolder.addFolderDetail(folderDetail);
+					break;
+				}
 			}
 		}
 	}
-
-	public synchronized FolderDetail next() {
+	
+	/**
+	 * The next unc folder.
+	 * @return {@link FolderDetail}
+	 */
+	public FolderDetail next() {
 		FolderDetail detail = null;
-		final Set<Map.Entry<BatchClass, UncFolder>> uncFolderSet = uncFolders.entrySet();
-		for (Map.Entry<BatchClass, UncFolder> entry : uncFolderSet) {
-			detail = entry.getValue().poll();
-			if (detail != null) {
-				break;
+		synchronized (object) {
+			final Set<Map.Entry<BatchClass, UncFolder>> uncFolderSet = uncFolders.entrySet();
+			for (Map.Entry<BatchClass, UncFolder> entry : uncFolderSet) {
+				detail = entry.getValue().poll();
+				if (detail != null) {
+					break;
+				}
 			}
 		}
 		return detail;
 	}
 
+	/**
+	 * This class consists of all the properties of Unc folder.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * @see com.ephesoft.dcma.monitor.service.FolderMonitorService
+	 */
 	private class UncFolder {
 
+		/**
+		 * A string of unc folder path.
+		 */
 		final private String uncFolderPath;
+		/**
+		 * A set of type {@link FolderDetail} .
+		 */
 		final private Set<FolderDetail> folderDetails = new TreeSet<FolderDetail>();
-
+		/**
+		 * Parameterized constructor.
+		 * @param uncFolderPath {@link String}
+		 */
 		public UncFolder(final String uncFolderPath) {
 			this.uncFolderPath = uncFolderPath;
 		}
-
+		/**
+		 * This method is used to add details to the folder.
+		 * @param folderDetail {@link FolderDetail}
+		 */
 		public void addFolderDetail(FolderDetail folderDetail) {
 			folderDetails.add(folderDetail);
 			LOGGER.trace("PUSH::" + folderDetail.getFullPath());
 		}
-
+		/**
+		 * @return {@link FolderDetail}
+		 */
 		public FolderDetail poll() {
 			FolderDetail folderDetail = null;
 			try {
@@ -125,11 +184,14 @@ public final class PrioritizedFolderContainer {
 					folderDetail = ((TreeSet<FolderDetail>) this.folderDetails).pollFirst();
 				}
 			} catch (NoSuchElementException e) {
-				LOGGER.error("No such element is found:" +e.getMessage(),e);
+				LOGGER.error("No such element is found:" + e.getMessage(), e);
 			}
 			return folderDetail;
 		}
-
+		/**
+		 * getter for uncFolderPath.
+		 * @return {@link String}
+		 */
 		public String getUncFolderPath() {
 			return uncFolderPath;
 		}

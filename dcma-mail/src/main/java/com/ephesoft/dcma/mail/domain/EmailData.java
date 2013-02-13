@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,10 +45,19 @@ import javax.persistence.Table;
 import com.ephesoft.dcma.core.common.MailMetaData;
 import com.ephesoft.dcma.core.model.common.AbstractEntity;
 
+/**
+ * This class is the pojo for the table email_data.
+ * 
+ * @author Ephesoft
+ *
+ */
 @Entity
 @Table(name = "email_data")
 public class EmailData extends AbstractEntity implements Serializable, Cloneable {
 
+	/**
+	 * Serial version id used for serialization.
+	 */
 	private static final long serialVersionUID = 8351775124202755008L;
 
 	public EmailData() {
@@ -77,28 +86,52 @@ public class EmailData extends AbstractEntity implements Serializable, Cloneable
 		this.contentTypeHtml = mailMetaData.isContentTypeHtml();
 	}
 
+	/**
+	 * The content of mail column.
+	 */
 	@Lob
 	@Column(length = 100000)
 	private String content; // sync size with Message.content!
 
+	/**
+	 * The recipient column.
+	 */
 	@Column(nullable = false)
 	private String recipient;
 
+	/**
+	 * The sender column.
+	 */
 	@Column(nullable = false)
 	private String sender;
 
+	/**
+	 * The sender name column.
+	 */
 	@Column
 	private String senderName;
 
+	/**
+	 * The subject of mail column.
+	 */
 	@Column
 	private String subject;
 
+	/**
+	 * Content type html boolean type column.
+	 */
 	@Column(name = "isContentTypeHtml")
 	private boolean contentTypeHtml;
 
+	/**
+	 * The cc list column.
+	 */
 	@Column(length = 500)
 	private String ccList;
 
+	/**
+	 * The bcc list column.
+	 */
 	@Column(length = 500)
 	private String bccList;
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,21 +45,38 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for regex_validation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "regex_validation")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class RegexValidation extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 7642611056970227215L;
 
+	/**
+	 * fieldType FieldType.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "field_type_id")
 	private FieldType fieldType;
 
+	/**
+	 * pattern String.
+	 */
 	@Column(name = "pattern", nullable = false)
 	private String pattern;
 
 	/**
+	 * To get Field Type.
 	 * @return the fieldType
 	 */
 	public FieldType getFieldType() {
@@ -67,13 +84,15 @@ public class RegexValidation extends AbstractChangeableEntity implements Seriali
 	}
 
 	/**
-	 * @param fieldType the fieldType to set
+	 * To set Field Type.
+	 * @param fieldType FieldType
 	 */
 	public void setFieldType(FieldType fieldType) {
 		this.fieldType = fieldType;
 	}
 
 	/**
+	 * To get pattern.
 	 * @return the pattern
 	 */
 	public String getPattern() {
@@ -81,7 +100,8 @@ public class RegexValidation extends AbstractChangeableEntity implements Seriali
 	}
 
 	/**
-	 * @param pattern the pattern to set
+	 * To set pattern.
+	 * @param pattern String
 	 */
 	public void setPattern(String pattern) {
 		this.pattern = pattern;

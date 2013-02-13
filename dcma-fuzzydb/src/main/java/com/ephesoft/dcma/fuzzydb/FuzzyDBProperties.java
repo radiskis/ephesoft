@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,26 +37,94 @@ package com.ephesoft.dcma.fuzzydb;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * This class contains all the properties of Fuzzy DB plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ *
+ */
 public enum FuzzyDBProperties implements PluginProperty {
 	
-	FUZZYDB_DATE_FORMAT("fuzzydb.dateFormat"), 
-	FUZZYDB_THRESHOLD_VALUE("fuzzydb.thresholdValue"), 
-	FUZZYDB_CONNECTION_URL("fuzzydb.database.connectionURL"), 
-	FUZZYDB_DB_DRIVER("fuzzydb.database.driver"), 
-	FUZZYDB_DB_USER_NAME("fuzzydb.database.userName"), 
-	FUZZYDB_DB_PASSWORD("fuzzydb.database.password"), 
-	FUZZYDB_MIN_TERM_FREQ("fuzzydb.min_term_freq"), 
-	FUZZYDB_MIN_DOC_FREQ("fuzzydb.min_doc_freq"), 
-	FUZZYDB_MIN_WORD_LENGTH("fuzzydb.min_word_length"), 
-	FUZZYDB_MAX_QUERY_TERMS("fuzzydb.max_query_terms"), 
-	FUZZYDB_NO_OF_PAGES("fuzzydb.no_of_pages"), 
+	/**
+	 * fuzzy db date format property.
+	 */
+	FUZZYDB_DATE_FORMAT("fuzzydb.dateFormat"),
+	/**
+	 * fuzzy db threshold value property.
+	 */
+	FUZZYDB_THRESHOLD_VALUE("fuzzydb.thresholdValue"),
+	/**
+	 * fuzzy db connection url property.
+	 */
+	FUZZYDB_CONNECTION_URL("fuzzydb.database.connectionURL"),
+	/**
+	 * fuzzy db database driver property.
+	 */
+	FUZZYDB_DB_DRIVER("fuzzydb.database.driver"),
+	/**
+	 * fuzzy db database username property.
+	 */
+	FUZZYDB_DB_USER_NAME("fuzzydb.database.userName"),
+	/**
+	 * fuzzy db database password property.
+	 */
+	FUZZYDB_DB_PASSWORD("fuzzydb.database.password"),
+	/**
+	 * fuzzy db minimum term frequency property.
+	 */
+	FUZZYDB_MIN_TERM_FREQ("fuzzydb.min_term_freq"),
+	/**
+	 * fuzzy db minimum doc frequency property.
+	 */
+	FUZZYDB_MIN_DOC_FREQ("fuzzydb.min_doc_freq"),
+	/**
+	 * fuzzy db minimum word length property.
+	 */
+	FUZZYDB_MIN_WORD_LENGTH("fuzzydb.min_word_length"),
+	/**
+	 * fuzzy db maximum query terms property.
+	 */
+	FUZZYDB_MAX_QUERY_TERMS("fuzzydb.max_query_terms"),
+	/**
+	 * fuzzy db no of pages property.
+	 */
+	FUZZYDB_NO_OF_PAGES("fuzzydb.no_of_pages"),
+	/**
+	 * fuzzy db include pages property.
+	 */
 	FUZZYDB_INCLUDE_PAGES("fuzzydb.include_pages"),
+	/**
+	 * fuzzy db document type property.
+	 */
 	FUZZYDB_DOCUMENT_TYPE("document.type"),
+	/**
+	 * fuzzy db field type property.
+	 */
 	FUZZYDB_FIELD_TYPE("field.type"),
+	/**
+	 * fuzzy db stop words property.
+	 */
 	FUZZYDB_STOP_WORDS("fuzzydb.stop_words"),
+	/**
+	 * fuzzy db query delimiters property.
+	 */
 	FUZZYDB_QUERY_DELIMITERS("fuzzydb.query_delimiters"),
-	FUZZYDB_SWITCH("fuzzydb.switch");
-	
+	/**
+	 * fuzzy db switch.
+	 */
+	FUZZYDB_SWITCH("fuzzydb.switch"),
+	/**
+	 * fuzzy db search switch.
+	 */
+	FUZZYDB_HOCR_SWITCH("fuzzydb.search.switch"),
+	/**
+	 * fuzzy db search column name.
+	 */
+	FUZZYDB_SEARCH_COLUMNS("fuzzydb.search.columnName");
+	/**
+	 * String type key.
+	 */
 	String key;
 	
 	FuzzyDBProperties(String key) {

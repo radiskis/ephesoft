@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,8 +40,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.LockMode;
+import org.hibernate.criterion.Conjunction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.LogicalExpression;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinFragment;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +56,7 @@ import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.core.hibernate.EphesoftCriteria;
-import com.ephesoft.dcma.da.dao.BatchClassDao;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.BatchClassGroupsDao;
 import com.ephesoft.dcma.da.dao.BatchInstanceDao;
 import com.ephesoft.dcma.da.dao.BatchInstanceGroupsDao;
@@ -69,44 +73,105 @@ import com.ephesoft.dcma.da.property.BatchPriority;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchInstanceDao
  */
 @Repository
 public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements BatchInstanceDao {
 
+	/**
+	 * REPLACEMENT_STRING String.
+	 */
+	private static final String REPLACEMENT_STRING = "\\\\%";
+
+	/**
+	 * BATCH_CLASS_PROCESS_NAME String.
+	 */
 	private static final String BATCH_CLASS_PROCESS_NAME = "batchClass.processName";
+
+	/**
+	 * BATCH_CLASS_NAME String.
+	 */
 	private static final String BATCH_CLASS_NAME = "batchClass.name";
+
+	/**
+	 * VALIDATION_USER_NAME String.
+	 */
 	private static final String VALIDATION_USER_NAME = "validationUserName";
+
+	/**
+	 * REVIEW_USER_NAME String.
+	 */
 	private static final String REVIEW_USER_NAME = "reviewUserName";
+
+	/**
+	 * BATCH_NAME String.
+	 */
 	private static final String BATCH_NAME = "batchName";
+
+	/**
+	 * BATCH_CLASS_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+
+	/**
+	 * CURRENT_USER String.
+	 */
 	private static final String CURRENT_USER = "currentUser";
-	private static final String IS_REMOTE = "isRemote";
+
+	/**
+	 * IS_REMOTE String.
+	 */
+	private static final String IS_REMOTE = "remote";
+
+	/**
+	 * PRIORITY String.
+	 */
 	private static final String PRIORITY = "priority";
+
+	/**
+	 * STATUS String.
+	 */
 	private static final String STATUS = "status";
+
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+
+	/**
+	 * EXECUTING_SERVER String.
+	 */
 	private static final String EXECUTING_SERVER = "executingServer";
+
+	/**
+	 * BATCH_INSTANCE_IDENTIFIER String.
+	 */
 	private static final String BATCH_INSTANCE_IDENTIFIER = "identifier";
+
+	/**
+	 * LOCAL_FOLDER String.
+	 */
+	private static final String LOCAL_FOLDER = "localFolder";
+
+	/**
+	 * LAST_MODIFIED String.
+	 */
+	private static final String LAST_MODIFIED = "lastModified";
 
 	/**
 	 * Instance of {@link BatchInstanceGroupsDao}.
 	 */
 	@Autowired
-	BatchInstanceGroupsDao batchInstanceGroupsDao;
+	private BatchInstanceGroupsDao batchInstanceGroupsDao;
 
 	/**
 	 * Instance of {@link BatchClassGroups}.
 	 */
 	@Autowired
-	BatchClassGroupsDao batchClassGroupsDao;
+	private BatchClassGroupsDao batchClassGroupsDao;
 
 	/**
-	 * Instance of {@link BatchClassDao}.
-	 */
-	@Autowired
-	BatchClassDao batchClassDao;
-
-	/**
-	 * An api to fetch all batch instance by batch class.
+	 * An API to fetch all batch instance by batch class.
 	 * 
 	 * @param batchClass BatchClass BatchClass
 	 * @return List<BatchInstance>
@@ -118,16 +183,29 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * An API to fetch all batch instance by batch name or id.
+	 * 
+	 * @param searchString String
+	 * @param userRoles Set<String>
+	 * @return List<BatchInstance>
+	 */
 	@Override
-	public List<BatchInstance> getBatchInstancesByBatchName(String batchName, Set<String> userRoles) {
+	public List<BatchInstance> getBatchInstancesByBatchNameOrId(String searchString, Set<String> userRoles) {
 		DetachedCriteria criteria = criteria();
 
 		List<BatchInstance> batchInstances = new ArrayList<BatchInstance>();
 
 		Set<String> batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
 
-		String batchNameLocal = batchName.replaceAll("%", "\\\\%");
-		criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+		String searchStringLocal = searchString.replaceAll(DataAccessConstant.PERCENTAGE, REPLACEMENT_STRING);
+		Criterion nameLikeCriteria = Restrictions.like(BATCH_NAME, DataAccessConstant.PERCENTAGE + searchStringLocal
+				+ DataAccessConstant.PERCENTAGE);
+		Criterion idLikeCriteria = Restrictions.like(BATCH_INSTANCE_IDENTIFIER, DataAccessConstant.PERCENTAGE + searchStringLocal
+				+ DataAccessConstant.PERCENTAGE);
+
+		LogicalExpression searchCriteria = Restrictions.or(nameLikeCriteria, idLikeCriteria);
+		criteria.add(searchCriteria);
 		if (batchClassIdentifiers != null && batchClassIdentifiers.size() > 0) {
 			criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 			criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
@@ -136,6 +214,12 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return batchInstances;
 	}
 
+	/**
+	 * An API to fetch batch instance for specified identifier.
+	 * 
+	 * @param identifier String
+	 * @return BatchInstance
+	 */
 	@Override
 	public BatchInstance getBatchInstancesForIdentifier(String identifier) {
 
@@ -146,7 +230,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by review user name.
+	 * An API to fetch all batch instance by review user name.
 	 * 
 	 * @param reviewUserName String
 	 * @return List<BatchInstance>
@@ -159,7 +243,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by validation user name.
+	 * An API to fetch all batch instance by validation user name.
 	 * 
 	 * @param validationUserName String
 	 * @return List<BatchInstance>
@@ -172,21 +256,25 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by BatchInstanceStatus.
+	 * An API to fetch all batch instance by BatchInstanceStatus.
 	 * 
-	 * @param batchInstanceStatus BatchInstanceStatus
+	 * @param batchInstanceStatus {@link BatchInstanceStatus}
 	 * @return List<BatchInstance>
 	 */
 	@Override
 	public List<BatchInstance> getBatchInstByStatus(BatchInstanceStatus batchInstanceStatus) {
-		DetachedCriteria criteria = criteria();
+		EphesoftCriteria criteria = criteria();
 		criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
-		criteria.addOrder(org.hibernate.criterion.Order.asc(PRIORITY));
-		return find(criteria);
+		List<Order> orderList = new ArrayList<Order>();
+		Order orderForHighestBatchPriority = new Order(BatchInstanceProperty.PRIORITY, true);
+		Order orderForLastModified = new Order(BatchInstanceProperty.ID, true);
+		orderList.add(orderForLastModified);
+		orderList.add(orderForHighestBatchPriority);
+		return find(criteria, orderList.toArray(new Order[orderList.size()]));
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance status and batch priority. API will return those batch
+	 * An API to fetch count of the batch instance table for batch instance status and batch priority. API will return those batch
 	 * instance having access by the user roles on the basis of ephesoft user.
 	 * 
 	 * @param batchName {@link String}
@@ -203,8 +291,11 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		int count = 0;
 		DetachedCriteria criteria = criteria();
 		if (batchName != null && !batchName.isEmpty()) {
-			String batchNameLocal = batchName.replaceAll("%", "\\\\%");
-			criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+			String batchNameLocal = batchName.replaceAll(DataAccessConstant.PERCENTAGE, REPLACEMENT_STRING);
+			Criterion nameLikeCriteria = Restrictions.like(BATCH_NAME, DataAccessConstant.PERCENTAGE + batchNameLocal + DataAccessConstant.PERCENTAGE);
+			Criterion idLikeCriteria = Restrictions.like(BATCH_INSTANCE_IDENTIFIER, DataAccessConstant.PERCENTAGE + batchNameLocal + DataAccessConstant.PERCENTAGE);
+			LogicalExpression searchCriteria = Restrictions.or(nameLikeCriteria, idLikeCriteria);
+			criteria.add(searchCriteria);
 		} else if (null != batchPriority) {
 			Disjunction disjunction = Restrictions.disjunction();
 			Integer lowValue = batchPriority.getLowerLimit();
@@ -214,37 +305,26 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		}
 		Set<String> batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
 
-		switch (ephesoftUser) {
-			case NORMAL_USER:
-				Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+		if (EphesoftUser.NORMAL_USER.equals(ephesoftUser)) {
+			Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
 
-				if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
-						|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
-					criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
-					criteria.add(Restrictions.eq(IS_REMOTE, false));
-					criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
-					final Disjunction disjunction = Restrictions.disjunction();
-					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
-						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
-						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
-					}
-					if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
-						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
-					}
-					criteria.add(disjunction);
-					count = count(criteria);
+			if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
+					|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
+				criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
+				criteria.add(Restrictions.eq(IS_REMOTE, false));
+				criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
+				final Disjunction disjunction = Restrictions.disjunction();
+				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
 				}
-				break;
-			case SUPER_ADMIN:
-				List<String> allBatchClassIdentifiers = batchClassDao.getAllBatchClassIdentifiers();
-				if (null != allBatchClassIdentifiers && allBatchClassIdentifiers.size() > 0) {
-					criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
-					criteria.add(Restrictions.eq(IS_REMOTE, false));
-					criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
-					count = count(criteria);
+				if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+					disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
 				}
-				break;
-			default:
+				criteria.add(disjunction);
+				count = count(criteria);
+
+			} else {
 				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
 					criteria.add(Restrictions.eq(STATUS, batchInstanceStatus));
 					criteria.add(Restrictions.eq(IS_REMOTE, false));
@@ -253,14 +333,14 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 					criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
 					count = count(criteria);
 				}
-				break;
+			}
 		}
 		return count;
 
 	}
 
 	/**
-	 * An api to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
+	 * An API to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
 	 * retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the sort property and order of
 	 * that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
@@ -273,26 +353,28 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 *@param userName Current user name.
-	 *@param currentUserRoles
+	 * @param userName Current user name.
+	 * @param userRoles Set<String>
+	 * @param ephesoftUser EphesoftUser
+	 * @param identifier String
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Override
 	public List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, final Set<String> userRoles, EphesoftUser ephesoftUser) {
+			String userName, final Set<String> userRoles, EphesoftUser ephesoftUser, String identifier) {
 		return getBatchInstances(statusList, firstResult, maxResults, orderList, filterClauseList, batchPriorities, userName,
-				userRoles, ephesoftUser, null);
+				userRoles, ephesoftUser, null, identifier);
 
 	}
 
 	/**
-	 * An api to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit
+	 * An API to fetch all the batch instances excluding remotely executing batches by status list. Parameter firstResult set a limit
 	 * upon the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set
 	 * the sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided. This will
 	 * return only those batch instance which having access by the user roles on the basis of the ephesoft user.
 	 * 
-	 * @param batchNameToBeSearched {@link String}
+	 * @param searchString {@link String}
 	 * @param statusList List<{@link BatchInstanceStatus}> status list of batch instance status.
 	 * @param firstResult the first result to retrieve, numbered from <tt>0</tt>
 	 * @param maxResults maxResults the maximum number of results
@@ -302,21 +384,25 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 *            property name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<{@link BatchPriority}> this will add the where clause to the criteria query based on the priority
 	 *            list selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 * @param currentUser {@link String}
+	 * @param userName {@link String}
 	 * @param userRoles Set<{@link String}>
 	 * @param ephesoftUser {@link EphesoftUser}
 	 * @return List<{@link BatchInstance}> return the batch instance list.
 	 */
 	@Override
-	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String batchNameToBeSearched,
-			List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults, final List<Order> orderList,
+	public List<BatchInstance> getBatchInstancesExcludedRemoteBatch(final String searchString, List<BatchInstanceStatus> statusList,
+			final int firstResult, final int maxResults, final List<Order> orderList,
 			final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities, String userName,
 			final Set<String> userRoles, EphesoftUser ephesoftUser) {
 		EphesoftCriteria criteria = criteria();
 
-		if (batchNameToBeSearched != null && !batchNameToBeSearched.isEmpty()) {
-			String batchNameLocal = batchNameToBeSearched.replaceAll("%", "\\\\%");
-			criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+		if (searchString != null && !searchString.isEmpty()) {
+			String batchNameLocal = searchString.replaceAll("%", "\\\\%");
+			Criterion nameLikeCriteria = Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%");
+			Criterion idLikeCriteria = Restrictions.like(BATCH_INSTANCE_IDENTIFIER, "%" + batchNameLocal + "%");
+
+			LogicalExpression searchCriteria = Restrictions.or(nameLikeCriteria, idLikeCriteria);
+			criteria.add(searchCriteria);
 		}
 
 		if (null != statusList) {
@@ -346,7 +432,10 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 		switch (ephesoftUser) {
 			case NORMAL_USER:
+				batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
+				Set<String> batchInstanceIdentifierSet = batchInstanceGroupsDao.getBatchInstanceIdentifiersExceptUserRoles(userRoles);
 				Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+
 				if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
 						|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
 					BatchInstanceFilter[] filters = null;
@@ -357,33 +446,48 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 					if (orderList != null) {
 						orders = orderList.toArray(new Order[orderList.size()]);
 					}
-					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
-					final Disjunction disjunction = Restrictions.disjunction();
-					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
-						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
-					}
-					if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
-						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
-					}
-					criteria.add(disjunction);
-					batchInstanceList = find(criteria, firstResult, maxResults, filters, orders);
-				}
-				break;
-			case SUPER_ADMIN:
-				List<String> allBatchClassIdentifiers = batchClassDao.getAllBatchClassIdentifiers();
-				if (null != allBatchClassIdentifiers && allBatchClassIdentifiers.size() > 0) {
-					BatchInstanceFilter[] filters = null;
-					if (filterClauseList != null) {
-						filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
-					}
-					Order[] orders = null;
-					if (orderList != null) {
-						orders = orderList.toArray(new Order[orderList.size()]);
-					}
-					batchInstanceList = find(criteria, firstResult, maxResults, filters, orders);
-				}
-				break;
 
+					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						final Disjunction disjunction = Restrictions.disjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						conjunction.add(disjunction);
+						criteria.add(conjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0) {
+						final Disjunction disjunction = Restrictions.disjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						criteria.add(disjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						conjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0
+							&& null != batchInstanceIdentifierSet && batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						conjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+						criteria.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+					}
+
+					batchInstanceList = find(criteria, firstResult, maxResults, filters, orders);
+				}
+				break;
 			default:
 				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
 					BatchInstanceFilter[] filters = null;
@@ -405,18 +509,20 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all the batch instance for status list input. API will return those batch instance having access by the user
+	 * An API to fetch all the batch instance for status list input. API will return those batch instance having access by the user
 	 * roles on the basis of ephesoft user.
 	 * 
 	 * @param statusList List<BatchInstanceStatus>
 	 * @param firstResult int
 	 * @param maxResults int
+	 * @param userRoles Set<String>
 	 * @param ephesoftUser EphesoftUser
 	 * @return List<BatchInstance>
 	 */
 	@Override
 	public List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final Set<String> userRoles, EphesoftUser ephesoftUser) {
+
 		List<BatchInstance> batchInstances = new ArrayList<BatchInstance>();
 
 		Set<String> batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
@@ -429,28 +535,46 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		switch (ephesoftUser) {
 			case NORMAL_USER:
 				Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+				Set<String> batchInstanceIdentifierSet = batchInstanceGroupsDao.getBatchInstanceIdentifiersExceptUserRoles(userRoles);
 				if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
 						|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
-					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
-					final Disjunction disjunction = Restrictions.disjunction();
-					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						final Disjunction disjunction = Restrictions.disjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
-					}
-					if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
 						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						conjunction.add(disjunction);
+						criteria.add(conjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0) {
+						final Disjunction disjunction = Restrictions.disjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						criteria.add(disjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						conjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0
+							&& null != batchInstanceIdentifierSet && batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						conjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+						criteria.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
 					}
-					criteria.add(disjunction);
-					List<Order> orderList = new ArrayList<Order>();
-					Order orderForHighestBatchPriority = new Order(BatchInstanceProperty.PRIORITY, true);
-					Order orderForLastModified = new Order(BatchInstanceProperty.LASTMODIFIED, false);
-					orderList.add(orderForLastModified);
-					orderList.add(orderForHighestBatchPriority);
-					batchInstances = find(criteria, firstResult, maxResults, orderList.toArray(new Order[orderList.size()]));
-				}
-				break;
-			case SUPER_ADMIN:
-				List<String> allBatchClassIdentifiers = batchClassDao.getAllBatchClassIdentifiers();
-				if (null != allBatchClassIdentifiers && allBatchClassIdentifiers.size() > 0) {
 					List<Order> orderList = new ArrayList<Order>();
 					Order orderForHighestBatchPriority = new Order(BatchInstanceProperty.PRIORITY, true);
 					Order orderForLastModified = new Order(BatchInstanceProperty.LASTMODIFIED, false);
@@ -473,20 +597,22 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 				break;
 		}
 		return batchInstances;
+	
 	}
 
 	/**
 	 * This API fetches batch instance on the basis of user name and the roles defined for that user name in the batch class.
 	 * 
-	 * @param userRoles
-	 * @param batchInstanceIdentifier
-	 * @param currentUserName
-	 * @param ephesoftUser
-	 * @return
+	 * @param userRoles Set<String>
+	 * @param batchInstanceIdentifier String
+	 * @param currentUserName String
+	 * @param ephesoftUser EphesoftUser
+	 * @return {@link BatchInstance}
 	 */
 	@Override
 	public BatchInstance getBatchInstanceByUserRole(final Set<String> userRoles, String batchInstanceIdentifier,
 			String currentUserName, EphesoftUser ephesoftUser) {
+
 
 		BatchInstance batchInstances = null;
 
@@ -496,6 +622,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 			case NORMAL_USER:
 				batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
 				Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+				Set<String> batchInstanceIdentifierSet = batchInstanceGroupsDao.getBatchInstanceIdentifiersExceptUserRoles(userRoles);
 
 				if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
 						|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
@@ -503,27 +630,43 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 					criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
 					criteria.add(Restrictions.eq(IS_REMOTE, false));
 					criteria.add(Restrictions.eq(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifier));
-					final Disjunction disjunction = Restrictions.disjunction();
-					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						final Disjunction disjunction = Restrictions.disjunction();
 						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
-					}
-					if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
 						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						conjunction.add(disjunction);
+						criteria.add(conjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+							&& batchInstanceIdentifiers.size() > 0) {
+						final Disjunction disjunction = Restrictions.disjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						criteria.add(disjunction);
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+							&& batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						conjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0
+							&& null != batchInstanceIdentifierSet && batchInstanceIdentifierSet.size() > 0) {
+						final Conjunction conjunction = Restrictions.conjunction();
+						conjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+						conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+						criteria.add(conjunction);
+					} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+						criteria.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+						criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
 					}
-					criteria.add(disjunction);
-					batchInstances = findSingle(criteria);
-				}
-				break;
-			case SUPER_ADMIN:
-				List<String> allBatchClassIdentifiers = batchClassDao.getAllBatchClassIdentifiers();
-				if (null != allBatchClassIdentifiers && allBatchClassIdentifiers.size() > 0) {
-					EphesoftCriteria criteria = criteria();
-					criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
-					criteria.add(Restrictions.eq(IS_REMOTE, false));
-					criteria.add(Restrictions.eq(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifier));
-					final Disjunction disjunction = Restrictions.disjunction();
-					criteria.add(disjunction);
 					batchInstances = findSingle(criteria);
 				}
 				break;
@@ -542,10 +685,11 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 				break;
 		}
 		return batchInstances;
+	
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance filters.
+	 * An API to fetch count of the batch instance table for batch instance filters.
 	 * 
 	 * @param filterClauseList List<BatchInstanceFilter>
 	 * @return count of the batch instance present for the batch instance filters.
@@ -565,7 +709,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch count of the batch instance table for batch instance status list, batch priority list on the basis of the user
+	 * An API to fetch count of the batch instance table for batch instance status list, batch priority list on the basis of the user
 	 * roles. API will return the count for the batch instance having access by the user roles and current user name on the basis of
 	 * the ephesoft user.
 	 * 
@@ -579,11 +723,11 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
 			final Set<String> userRoles, final String currentUserName, EphesoftUser ephesoftUser) {
-		return getCount(batchInstStatusList, batchPriorities, false, userRoles, currentUserName, ephesoftUser);
+		return getCount(batchInstStatusList, batchPriorities, false, userRoles, currentUserName, ephesoftUser, null);
 	}
 
 	/**
-	 * An api to return total count of batches from the batch instance table having access by the user roles on the basis of ephesoft
+	 * An API to return total count of batches from the batch instance table having access by the user roles on the basis of ephesoft
 	 * user.
 	 * 
 	 * @param currentUser {@link String}
@@ -593,30 +737,42 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 */
 	@Override
 	public int getAllCount(final String currentUser, final Set<String> userRoles, EphesoftUser ephesoftUser) {
-		return getCount(null, null, true, userRoles, currentUser, ephesoftUser);
+		return getCount(null, null, true, userRoles, currentUser, ephesoftUser, null);
 	}
 
 	/**
-	 * An api to fetch count of the batch instances for a given status list and batch priority and isCurrUsrNotReq is used for adding
+	 * An API to fetch count of the batch instances for a given status list and batch priority and isCurrUsrNotReq is used for adding
 	 * the batch instance access by the current user. This API will return the batch instance having access by the user roles on the
 	 * basis of ephesoft user.
 	 * 
 	 * @param batchInstStatusList List<{@link BatchInstanceStatus}>
 	 * @param batchPriorities the priority list of the batches
-	 * @param isCurrUsrNotReq true if the current user can be anyone. False if current user cannot be null.
-	 * @param currentUser {@link String}
+	 * @param isNotCurrentUserCheckReq true if the current user can be anyone. False if current user cannot be null.
+	 * @param currentUserName {@link String}
 	 * @param userRoles Set<{@link String}>
 	 * @param ephesoftUser {@link EphesoftUser}
+	 * @param searchString the searchString on which batch instances have to be fetched
 	 * @return int, the count satisfying the above requirements
 	 */
 	@Override
 	public int getCount(final List<BatchInstanceStatus> batchInstStatusList, final List<BatchPriority> batchPriorities,
 			final boolean isNotCurrentUserCheckReq, final Set<String> userRoles, final String currentUserName,
-			EphesoftUser ephesoftUser) {
+			EphesoftUser ephesoftUser, final String searchString) {
 		DetachedCriteria criteria = criteria();
 
 		if (null != batchInstStatusList) {
 			criteria.add(Restrictions.in(STATUS, batchInstStatusList));
+		}
+
+		if (null != searchString && !searchString.isEmpty()) {
+			String searchStringLocal = searchString.replaceAll(DataAccessConstant.PERCENTAGE, REPLACEMENT_STRING);
+			Criterion nameLikeCriteria = Restrictions.like(BATCH_NAME, DataAccessConstant.PERCENTAGE + searchStringLocal
+					+ DataAccessConstant.PERCENTAGE);
+			Criterion idLikeCriteria = Restrictions.like(BATCH_INSTANCE_IDENTIFIER, DataAccessConstant.PERCENTAGE + searchStringLocal
+					+ DataAccessConstant.PERCENTAGE);
+
+			LogicalExpression searchCriteria = Restrictions.or(nameLikeCriteria, idLikeCriteria);
+			criteria.add(searchCriteria);
 		}
 
 		if (null != batchPriorities && !(batchPriorities.isEmpty())) {
@@ -636,43 +792,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		int count = 0;
 
 		Set<String> batchClassIdentifiers = null;
-		switch (ephesoftUser) {
-			case ADMIN_USER:
-				batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
-				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
-					final Disjunction disjunction = Restrictions.disjunction();
-					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
-						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
-						disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
-					}
-					// Add check for null current users only.
-					// Now we will count only for those current users those are null.
-					if (!isNotCurrentUserCheckReq && null != currentUserName) {
-						criteria.add(Restrictions
-								.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
-					}
-					criteria.add(disjunction);
-					count = count(criteria);
-				}
-				break;
-			case SUPER_ADMIN:
-				List<String> allBatchClassIdentifiers = batchClassDao.getAllBatchClassIdentifiers();
-				if (null != allBatchClassIdentifiers && allBatchClassIdentifiers.size() > 0) {
-					// Add check for null current users only.
-					// Now we will count only for those current users those are null.
-					if (!isNotCurrentUserCheckReq && null != currentUserName) {
-						criteria.add(Restrictions
-								.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
-					}
-					count = count(criteria);
-				}
-				break;
-			default:
-				batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
-				Set<String> batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+		Set<String> batchInstanceIdentifiers = null;
 
-				if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
-						|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
+		if (ephesoftUser.equals(EphesoftUser.ADMIN_USER)) {
+			batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
+			batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+			if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
+					|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
+				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+						&& batchInstanceIdentifiers.size() > 0) {
 					final Disjunction disjunction = Restrictions.disjunction();
 					if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
 						criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
@@ -681,23 +809,76 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 					if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
 						disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
 					}
-					// Add check for null current users only.
-					// Now we will count only for those current users those are null.
-					if (!isNotCurrentUserCheckReq && null != currentUserName) {
-						criteria.add(Restrictions
-								.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
-					}
 					criteria.add(disjunction);
-					count = count(criteria);
+				} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+				} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+					criteria.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
 				}
-				break;
-		}
+				// Add check for null current users only.
+				// Now we will count only for those current users those are null.
+				if (!isNotCurrentUserCheckReq && null != currentUserName) {
+					criteria.add(Restrictions
+							.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
+				}
+				count = count(criteria);
+			}
+		} else {
+			batchClassIdentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
+			batchInstanceIdentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
 
+			if ((null != batchClassIdentifiers && batchClassIdentifiers.size() > 0)
+					|| (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0)) {
+				Set<String> batchInstanceIdentifierSet = batchInstanceGroupsDao.getBatchInstanceIdentifiersExceptUserRoles(userRoles);
+				if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+						&& batchInstanceIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+						&& batchInstanceIdentifierSet.size() > 0) {
+					final Conjunction conjunction = Restrictions.conjunction();
+					final Disjunction disjunction = Restrictions.disjunction();
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+					disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+					conjunction.add(disjunction);
+					criteria.add(conjunction);
+				} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifiers
+						&& batchInstanceIdentifiers.size() > 0) {
+					final Disjunction disjunction = Restrictions.disjunction();
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+					disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					criteria.add(disjunction);
+				} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0 && null != batchInstanceIdentifierSet
+						&& batchInstanceIdentifierSet.size() > 0) {
+					final Conjunction conjunction = Restrictions.conjunction();
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					conjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+					conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+					criteria.add(conjunction);
+				} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0
+						&& null != batchInstanceIdentifierSet && batchInstanceIdentifierSet.size() > 0) {
+					final Conjunction conjunction = Restrictions.conjunction();
+					conjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+					conjunction.add(Restrictions.not(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifierSet)));
+					criteria.add(conjunction);
+				} else if (null != batchInstanceIdentifiers && batchInstanceIdentifiers.size() > 0) {
+					criteria.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifiers));
+				} else if (null != batchClassIdentifiers && batchClassIdentifiers.size() > 0) {
+					criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
+					criteria.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIdentifiers));
+				}
+				if (!isNotCurrentUserCheckReq && null != currentUserName) {
+					criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, currentUserName)));
+				}
+				count = count(criteria);
+			}
+		}
 		return count;
 	}
 
 	/**
-	 * An api to fetch all the batch instance by BatchPriority.
+	 * An API to fetch all the batch instance by BatchPriority.
 	 * 
 	 * @param batchPriority BatchPriority this will add the where clause to the criteria query based on the priority column.
 	 * @return List<BatchInstance> return the batch instance list.
@@ -712,7 +893,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by batch Class Name.
+	 * An API to fetch all batch instance by batch Class Name.
 	 * 
 	 * @param batchClassName String
 	 * @return List<BatchInstance>
@@ -726,7 +907,7 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by batch Class Process Name.
+	 * An API to fetch all batch instance by batch Class Process Name.
 	 * 
 	 * @param batchClassProcessName String
 	 * @return List<BatchInstance>
@@ -820,9 +1001,10 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	}
 
 	/**
-	 * An api to fetch all batch instance by batch Class Process and batch instance id's list.
+	 * An API to fetch all batch instance by batch Class Process and batch instance id's list.
 	 * 
 	 * @param batchClassName String
+	 * @param batchInstanceIDList List<String>
 	 * @return List<BatchInstance>
 	 */
 	@Override
@@ -834,6 +1016,12 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * An API to fetch all batch instance for current user.
+	 * 
+	 * @param currentUser String
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getAllBatchInstancesForCurrentUser(String currentUser) {
 		DetachedCriteria criteria = criteria();
@@ -841,11 +1029,24 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * An API to fetch batch by id.
+	 * 
+	 * @param batchId long
+	 * @param lockMode LockMode
+	 * @return BatchInstance
+	 */
 	@Override
 	public BatchInstance getBatch(long batchId, LockMode lockMode) {
-		return get(batchId, lockMode);
+		return get(batchId);
 	}
 
+	/**
+	 * API to fetch running batch instances.
+	 * 
+	 * @param lockOwner ServerRegistry
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getRunningBatchInstancesFor(ServerRegistry lockOwner) {
 		DetachedCriteria criteria = criteria();
@@ -858,12 +1059,24 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * API to fetch all batch instances.
+	 * 
+	 * @param orders List<Order>
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getAllBatchInstances(List<Order> orders) {
 		EphesoftCriteria criteria = criteria();
 		return find(criteria, orders.toArray(new Order[orders.size()]));
 	}
 
+	/**
+	 * API to fetch all unfinished batch instances.
+	 * 
+	 * @param uncFolder String
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getAllUnFinishedBatchInstances(String uncFolder) {
 		DetachedCriteria criteria = criteria();
@@ -884,12 +1097,24 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * API to update Batch Instance Local Folder.
+	 * 
+	 * @param batchInsctance BatchInstance
+	 * @param localFolder String
+	 */
 	@Override
 	public void updateBatchInstanceLocalFolder(BatchInstance batchInsctance, String localFolder) {
 		batchInsctance.setLocalFolder(localFolder);
 		saveOrUpdate(batchInsctance);
 	}
 
+	/**
+	 * API to update Batch Instance UNC Folder.
+	 * 
+	 * @param batchInsctance BatchInstance
+	 * @param uncFolder String
+	 */
 	@Override
 	public void updateBatchInstanceUncFolder(BatchInstance batchInsctance, String uncFolder) {
 		batchInsctance.setUncSubfolder(uncFolder);
@@ -898,6 +1123,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 
 	/**
 	 * An API return all unfinished remotely executing batch instances.
+	 * 
+	 * @return List<BatchInstance>
 	 */
 	@Override
 	public List<BatchInstance> getAllUnfinshedRemotelyExecutedBatchInstance() {
@@ -909,13 +1136,15 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		statusList.add(BatchInstanceStatus.RUNNING);
 		statusList.add(BatchInstanceStatus.TRANSFERRED);
 		statusList.add(BatchInstanceStatus.READY);
+		statusList.add(BatchInstanceStatus.REMOTE);
+		statusList.add(BatchInstanceStatus.ERROR);
 		criteria.add(Restrictions.in(STATUS, statusList));
 		return find(criteria);
 
 	}
 
 	/**
-	 * An api to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
+	 * An API to fetch all the batch instances only remotely executing batches by status list. Parameter firstResult set a limit upon
 	 * the number of objects to be retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the
 	 * sort property and order of that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
@@ -928,8 +1157,8 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 *@param userName Current user name.
-	 *@param currentUserRoles
+	 * @param userName Current user name.
+	 * @param userRoles Set<String>
 	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	@Override
@@ -982,6 +1211,12 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return batchInstances;
 	}
 
+	/**
+	 * API to fetch Executing Job by Server IP.
+	 * 
+	 * @param serverIP String
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getExecutingJobByServerIP(String serverIP) {
 		EphesoftCriteria criteria = criteria();
@@ -992,6 +1227,13 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * API to fetch Batch Instance by executing Job Server IP and batch status.
+	 * 
+	 * @param executingServerIP String
+	 * @param batchInstanceStatus BatchInstanceStatus
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getBatchInstanceByExecutingServerIPAndBatchStatus(String executingServerIP,
 			BatchInstanceStatus batchInstanceStatus) {
@@ -1003,14 +1245,24 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		return find(criteria);
 	}
 
+	/**
+	 * API to fetch batch instance list by Batch name and status.
+	 * 
+	 * @param batchName String
+	 * @param batchStatus BatchInstanceStatus
+	 * @param userName String
+	 * @param userRoles Set<String>
+	 * @return List<BatchInstance>
+	 */
 	@Override
 	public List<BatchInstance> getBatchInstanceListByBatchNameAndStatus(String batchName, BatchInstanceStatus batchStatus,
 			String userName, Set<String> userRoles) {
 		EphesoftCriteria criteria = criteria();
 		List<BatchInstance> batchInstanceList = null;
-		String batchNameLocal = batchName.replaceAll("%", "\\\\%");
+		String batchNameLocal = batchName.replaceAll(DataAccessConstant.PERCENTAGE, REPLACEMENT_STRING);
 		if (batchStatus != null) {
-			criteria.add(Restrictions.like(BATCH_NAME, "%" + batchNameLocal + "%"));
+			criteria
+					.add(Restrictions.like(BATCH_NAME, DataAccessConstant.PERCENTAGE + batchNameLocal + DataAccessConstant.PERCENTAGE));
 			criteria.add(Restrictions.eq(STATUS, batchStatus));
 			criteria.add(Restrictions.or(Restrictions.isNull(CURRENT_USER), Restrictions.eq(CURRENT_USER, userName)));
 
@@ -1031,15 +1283,23 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 * @param batchStatusList List<{@link BatchInstanceStatus}>
 	 * @return List<{@link BatchInstance}>
 	 */
+
 	@Override
 	public List<BatchInstance> getBatchInstanceByStatusList(List<BatchInstanceStatus> batchStatusList) {
-		DetachedCriteria criteria = criteria();
+		EphesoftCriteria criteria = criteria();
 		if (null != batchStatusList && !batchStatusList.isEmpty()) {
 			criteria.add(Restrictions.in(STATUS, batchStatusList));
 		}
-		return find(criteria);
+		Order orderForHighestBatchPriority = new Order(BatchInstanceProperty.PRIORITY, true);
+		List<BatchInstance> batchInstances = find(criteria, orderForHighestBatchPriority);
+		return batchInstances;
 	}
 
+	/**
+	 * This API for clearing the current user for given batch instance identifier.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 */
 	@Override
 	public void clearCurrentUser(String batchInstanceIdentifier) {
 		BatchInstance batchInstance = getBatchInstancesForIdentifier(batchInstanceIdentifier);
@@ -1047,21 +1307,25 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		updateBatchInstance(batchInstance);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * This API performs a fetch over all the batch instances on the basis of status, priority and for the given user role.
 	 * 
-	 * @see com.ephesoft.dcma.da.dao.BatchInstanceDao#getBatchInstancesForStatusPriority(java.util.List, java.util.List, java.util.Set)
+	 * @param statusList batch status list
+	 * @param batchPriorities batch priorities
+	 * @param userRoles batch class id's for the role for which the current user is logged in
+	 * @return List<{@link BatchInstance}>
 	 */
 	@Override
 	public List<BatchInstance> getBatchInstancesForStatusPriority(List<BatchInstanceStatus> statusList,
 			final List<BatchPriority> batchPriorities, final Set<String> userRoles) {
 		EphesoftCriteria criteria = criteria();
 		criteria.add(Restrictions.isNull(CURRENT_USER));
-		return getBatchInstances(statusList, -1, -1, null, null, batchPriorities, null, userRoles, EphesoftUser.ADMIN_USER, criteria);
+		return getBatchInstances(statusList, -1, -1, null, null, batchPriorities, null, userRoles, EphesoftUser.ADMIN_USER, criteria,
+				null);
 	}
 
 	/**
-	 * An api to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
+	 * An API to fetch all the batch instances by status list. Parameter firstResult set a limit upon the number of objects to be
 	 * retrieved. Parameter maxResults set the first result to be retrieved. Parameter orderList set the sort property and order of
 	 * that property. If orderList parameter is null or empty then this parameter is avoided.
 	 * 
@@ -1074,19 +1338,32 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 	 *            name and value. If filterClauseList parameter is null or empty then this parameter is avoided.
 	 * @param batchPriorities List<BatchPriority> this will add the where clause to the criteria query based on the priority list
 	 *            selected. If batchPriorities parameter is null or empty then this parameter is avoided.
-	 *@param userName Current user name.
-	 *@param userRoles currentUserRoles
-	 *@param EphesoftUser current ephesoft-user
-	 *@return List<BatchInstance> return the batch instance list.
+	 * @param userName Current user name.
+	 * @param userRoles currentUserRoles
+	 * @param EphesoftUser current ephesoft-user
+	 * @param criteria EphesoftCriteria
+	 * @param searchString the searchString on which batch instances have to be fetched
+	 * @return List<BatchInstance> return the batch instance list.
 	 */
 	public List<BatchInstance> getBatchInstances(List<BatchInstanceStatus> statusList, final int firstResult, final int maxResults,
 			final List<Order> orderList, final List<BatchInstanceFilter> filterClauseList, final List<BatchPriority> batchPriorities,
-			String userName, final Set<String> userRoles, EphesoftUser ephesoftUser, final EphesoftCriteria criteria) {
+			String userName, final Set<String> userRoles, EphesoftUser ephesoftUser, final EphesoftCriteria criteria,
+			final String searchString) {
 		EphesoftCriteria criteriaLocal = null;
 		if (criteria == null) {
 			criteriaLocal = criteria();
 		} else {
 			criteriaLocal = criteria;
+		}
+
+		// For adding identifier as an criteria for result
+		if (null != searchString && !searchString.isEmpty()) {
+			String searchStringLocal = searchString.replaceAll("%", "\\\\%");
+			Criterion nameLikeCriteria = Restrictions.like(BATCH_NAME, "%" + searchStringLocal + "%");
+			Criterion idLikeCriteria = Restrictions.like(BATCH_INSTANCE_IDENTIFIER, "%" + searchStringLocal + "%");
+
+			LogicalExpression searchCriteria = Restrictions.or(nameLikeCriteria, idLikeCriteria);
+			criteriaLocal.add(searchCriteria);
 		}
 
 		if (null != statusList) {
@@ -1114,32 +1391,120 @@ public class BatchInstanceDaoImpl extends HibernateDao<BatchInstance> implements
 		BatchInstanceFilter[] filters = null;
 		Order[] orders = null;
 		switch (ephesoftUser) {
-			case SUPER_ADMIN:
-				if (filterClauseList != null) {
-					filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
-				}
-				if (orderList != null) {
-					orders = orderList.toArray(new Order[orderList.size()]);
-				}
-				batchInstaceList = find(criteriaLocal, firstResult, maxResults, filters, orders);
-				break;
 			default:
 				Set<String> batchClassIndentifiers = batchClassGroupsDao.getBatchClassIdentifierForUserRoles(userRoles);
-				if (null != batchClassIndentifiers && batchClassIndentifiers.size() > 0) {
-
+				Set<String> batchInstanceIndentifiers = batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
+				if ((null != batchClassIndentifiers && batchClassIndentifiers.size() > 0)
+						|| (null != batchInstanceIndentifiers && batchInstanceIndentifiers.size() > 0)) {
 					if (filterClauseList != null) {
 						filters = filterClauseList.toArray(new BatchInstanceFilter[filterClauseList.size()]);
 					}
 					if (orderList != null) {
 						orders = orderList.toArray(new Order[orderList.size()]);
 					}
-					criteriaLocal.createAlias(BATCH_CLASS, BATCH_CLASS);
-					criteriaLocal.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIndentifiers));
+					if (null != batchClassIndentifiers && batchClassIndentifiers.size() > 0 && null != batchInstanceIndentifiers
+							&& batchInstanceIndentifiers.size() > 0) {
+						final Disjunction disjunction = Restrictions.disjunction();
+						if (null != batchClassIndentifiers && batchClassIndentifiers.size() > 0) {
+							criteriaLocal.createAlias(BATCH_CLASS, BATCH_CLASS);
+							disjunction.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIndentifiers));
+						}
+						if (null != batchInstanceIndentifiers && batchInstanceIndentifiers.size() > 0) {
+							disjunction.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIndentifiers));
+						}
+						criteriaLocal.add(disjunction);
+					} else if (null != batchClassIndentifiers && batchClassIndentifiers.size() > 0) {
+						criteriaLocal.createAlias(BATCH_CLASS, BATCH_CLASS);
+						criteriaLocal.add(Restrictions.in(BATCH_CLASS_IDENTIFIER, batchClassIndentifiers));
+					} else if (null != batchInstanceIndentifiers && batchInstanceIndentifiers.size() > 0) {
+						criteriaLocal.add(Restrictions.in(BATCH_INSTANCE_IDENTIFIER, batchInstanceIndentifiers));
+					}
 					batchInstaceList = find(criteriaLocal, firstResult, maxResults, filters, orders);
 				}
 				break;
 		}
 		return batchInstaceList;
+	}
+
+	/**
+	 * API to fetch all batch instance by BatchInstanceStatus for a batch class.
+	 * 
+	 * @param statusList List<BatchInstanceStatus>
+	 * @param batchClass BatchClass
+	 * @return List<BatchInstance>
+	 */
+	@Override
+	public List<BatchInstance> getBatchInstByStatusAndBatchClass(List<BatchInstanceStatus> statusList, BatchClass batchClass) {
+		List<BatchInstance> batchInstances = null;
+		DetachedCriteria criteria = criteria();
+
+		if (statusList == null) {
+			batchInstances = new ArrayList<BatchInstance>();
+		} else {
+			criteria.add(Restrictions.in(STATUS, statusList));
+			criteria.add(Restrictions.eq(BATCH_CLASS, batchClass));
+			criteria.addOrder(org.hibernate.criterion.Order.asc(PRIORITY));
+			criteria.addOrder(org.hibernate.criterion.Order.desc(LAST_MODIFIED));
+			batchInstances = find(criteria);
+		}
+		return batchInstances;
+	}
+
+	/**
+	 * API to fetch the system folder for the given batch instance id.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return {@link String} the system folder path.
+	 */
+	@Override
+	public String getSystemFolderForBatchInstanceId(String batchInstanceIdentifier) {
+		EphesoftCriteria criteria = criteria();
+		criteria.add(Restrictions.eq(BATCH_INSTANCE_IDENTIFIER, batchInstanceIdentifier));
+		criteria.setProjection(Projections.property(LOCAL_FOLDER));
+		return findSingle(criteria);
+
+	}
+
+	/**
+	 * API to fetch whether the batch class has any of its batches under processing i.e. not finished.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return int, count of batch instances
+	 */
+	@Override
+	public int getAllUnFinishedBatchInstancesCount(String batchClassIdentifier) {
+		EphesoftCriteria criteria = criteria();
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
+
+		List<BatchInstanceStatus> statusList = new ArrayList<BatchInstanceStatus>();
+		statusList.add(BatchInstanceStatus.NEW);
+		statusList.add(BatchInstanceStatus.ERROR);
+		statusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
+		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
+		statusList.add(BatchInstanceStatus.RUNNING);
+		statusList.add(BatchInstanceStatus.READY);
+		statusList.add(BatchInstanceStatus.RESTART_IN_PROGRESS);
+		statusList.add(BatchInstanceStatus.LOCKED);
+		statusList.add(BatchInstanceStatus.REMOTE);
+		criteria.add(Restrictions.in(STATUS, statusList));
+		return count(criteria);
+	}
+
+	/**
+	 * This API fetches all the batch instances on the basis of batch status list passed.
+	 * 
+	 * @param batchStatusList List<{@link BatchInstanceStatus}>
+	 * @return List<{@link BatchInstance}>
+	 */
+	@Override
+	public List<BatchInstance> getBatchInstanceByStatusListBatchClass(List<BatchInstanceStatus> batchStatusList) {
+		DetachedCriteria criteria = criteria();
+		if (null != batchStatusList && !batchStatusList.isEmpty()) {
+			criteria.add(Restrictions.in(STATUS, batchStatusList));
+			criteria.addOrder(org.hibernate.criterion.Order.asc(BATCH_CLASS_IDENTIFIER));
+		}
+		return find(criteria);
 	}
 
 }

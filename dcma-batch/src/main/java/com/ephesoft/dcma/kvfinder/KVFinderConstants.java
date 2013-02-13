@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -82,4 +82,14 @@ public interface KVFinderConstants {
 	 * String constant for base angle of rectangle.
 	 */
 	String RECTANGLE_BASE_ANGLE_VALUE = "45";
+
+	/**
+	 * Default width of line.
+	 */
+	int DEFAULT_WIDTH_OF_LINE = 15;
+	
+	/**
+	 * Default multiplier for calculating confidence score.
+	 */
+	float DEFAULT_CONFIDENCE_SCORE = 100;
 }

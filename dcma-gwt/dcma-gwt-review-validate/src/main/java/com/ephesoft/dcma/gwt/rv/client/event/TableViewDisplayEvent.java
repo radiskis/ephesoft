@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,17 +39,18 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class TableViewDisplayEvent extends GwtEvent<TableViewDisplayEventHandler> {
 
-	public static Type<TableViewDisplayEventHandler> TYPE = new Type<TableViewDisplayEventHandler>();
+	public static Type<TableViewDisplayEventHandler> type = new Type<TableViewDisplayEventHandler>();
 
-	private int tablesCount;
+	private final int tablesCount;
 
 	public TableViewDisplayEvent(int tablesCount) {
+		super();
 		this.tablesCount = tablesCount;
 	}
 
 	@Override
 	public Type<TableViewDisplayEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	@Override

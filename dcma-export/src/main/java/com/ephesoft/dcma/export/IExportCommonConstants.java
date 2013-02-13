@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,13 @@
 
 package com.ephesoft.dcma.export;
 
+/**
+ * The constants interface.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * 
+ */
 public interface IExportCommonConstants {
 
 	/**
@@ -53,7 +60,7 @@ public interface IExportCommonConstants {
 	String EMPTY_STRING = "";
 
 	/**
-	 * Parameter start delimeter.
+	 * Parameter start delimiter.
 	 */
 	String PARAM_START_DELIMETER = "$";
 
@@ -63,7 +70,7 @@ public interface IExportCommonConstants {
 	String DEFAULT_FOLDER_NAME = "Unknown";
 
 	/**
-	 * Separator between the parameters specified by admin.
+	 * Separator between the parameters specified by administrator.
 	 */
 	String FILE_FORMAT_SEPARATOR = "&&";
 

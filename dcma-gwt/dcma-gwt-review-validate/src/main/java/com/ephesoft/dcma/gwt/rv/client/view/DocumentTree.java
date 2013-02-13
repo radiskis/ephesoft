@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -70,10 +70,13 @@ import com.ephesoft.dcma.gwt.rv.client.event.TreeRefreshEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.TreeRefreshEventHandler;
 import com.ephesoft.dcma.gwt.rv.client.event.ValidationFieldChangeEvent;
 import com.ephesoft.dcma.gwt.rv.client.event.ValidationFieldChangeEventHandler;
+import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateMessages;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -97,19 +100,20 @@ public class DocumentTree extends RVBasePanel {
 	}
 
 	@UiField
-	Tree docTree;
+	protected Tree docTree;
 
-	TreeItem selectedDocItem;
-	RotatableImage selectedImage;
+	private TreeItem selectedDocItem;
+	private RotatableImage selectedImage;
 	@UiField
-	ScrollPanel scrollPanel;
+	protected ScrollPanel scrollPanel;
 	@UiField
-	RotatableImage tempImage;
+	protected RotatableImage tempImage;
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DocumentTree() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		tempImage.setVisible(false);
 	}
 
@@ -117,7 +121,9 @@ public class DocumentTree extends RVBasePanel {
 		return tempImage;
 	}
 
-	private void setDocumentSelected(TreeItem item) {
+	private boolean setDocumentSelected(TreeItem selectedItem) {
+		TreeItem item = selectedItem;
+		boolean isAlreadySelected = false;
 		if (item == null) {
 			item = docTree.getItem(0);
 		}
@@ -125,46 +131,51 @@ public class DocumentTree extends RVBasePanel {
 			if (!item.getState()) {
 				selectedDocItem.setState(true);
 				selectedDocItem.setSelected(true);
+			} else {
+				isAlreadySelected = true;
 			}
 			DocumentTreeItem documentTreeItem = getdocTreeItemByTitle(item.getTitle());
 
-			documentTreeItem.icon.setStyleName("no_error_icon");
+			documentTreeItem.icon.setStyleName(ReviewValidateConstants.NO_ERROR_ICON);
 			if (presenter.batchDTO.isErrorContained(documentTreeItem.document)) {
-				documentTreeItem.icon.setStyleName("error_icon");
+				documentTreeItem.icon.setStyleName(ReviewValidateConstants.ERROR_ICON);
 			}
-			return;
-		}
+		} else {
+			if (selectedDocItem != null) {
+				selectedDocItem.setState(false);
+				selectedDocItem.setSelected(false);
+				DocumentTreeItem previousDocumentTreeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
+				previousDocumentTreeItem.treeItem.removeStyleName(ReviewValidateConstants.DOCUMENT_STYLE);
 
-		if (selectedDocItem != null) {
-			selectedDocItem.setState(false);
-			selectedDocItem.setSelected(false);
-			DocumentTreeItem previousDocumentTreeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
-			previousDocumentTreeItem.treeItem.removeStyleName("document-style");
+			}
 
-		}
+			selectedDocItem = item;
+			selectedDocItem.setState(true);
+			selectedDocItem.setSelected(true);
+			DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
+			presenter.document = treeItem.document;
+			selectedDocItem.addStyleName(ReviewValidateConstants.DOCUMENT_STYLE);
+			if (presenter.batchDTO.isErrorContained(treeItem.document)) {
+				treeItem.icon.setStyleName(ReviewValidateConstants.ERROR_ICON);
+			}
+			// treeItem.docTitleLabel.setStyleName("highlight_documentTitle");
 
-		selectedDocItem = item;
-		selectedDocItem.setState(true);
-		selectedDocItem.setSelected(true);
-		DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
-		presenter.document = treeItem.document;
-		selectedDocItem.addStyleName("document-style");
-		if (presenter.batchDTO.isErrorContained(treeItem.document)) {
-			treeItem.icon.setStyleName("error_icon");
-		}
-		// treeItem.docTitleLabel.setStyleName("highlight_documentTitle");
-
-		// setting the scroll
-		int count = 0;
-		for (Document docType : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
-			if (docType.getIdentifier().equals(presenter.document.getIdentifier())) {
+			// setting the scroll
+			int count = 0;
+			for (Document docType : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
+				if (docType.getIdentifier().equals(presenter.document.getIdentifier())) {
+					count++;
+					break;
+				}
 				count++;
-				break;
 			}
-			count++;
 		}
-		scrollPanel.setScrollPosition((count - 1) * 40);
+		return isAlreadySelected;
 	}
+
+	private native void scrollIntoView(Element element) /*-{
+						element.scrollIntoView(true);
+						}-*/;
 
 	public void setPageSelected(final RotatableImage image, boolean fireEvent) {
 		setPageSelected(image, null, null, fireEvent, false);
@@ -177,11 +188,11 @@ public class DocumentTree extends RVBasePanel {
 			return;
 		}
 		if (selectedImage != null) {
-			selectedImage.removeStyleName("thumbnailHighlighted");
-			selectedImage.setStyleName("thumbnailDefault");
+			selectedImage.removeStyleName(ReviewValidateConstants.THUMBNAIL_HIGHLIGHTED);
+			selectedImage.setStyleName(ReviewValidateConstants.THUMBNAIL_DEFAULT);
 		}
 		selectedImage = image;
-		selectedImage.setStyleName("thumbnailHighlighted");
+		selectedImage.setStyleName(ReviewValidateConstants.THUMBNAIL_HIGHLIGHTED);
 
 		ThumbnailSelectionEvent thumbnailSelectionEvent = new ThumbnailSelectionEvent(pageImageMap.get(image.getTitle()).page,
 				coordinatesList, removeOverlay);
@@ -213,34 +224,17 @@ public class DocumentTree extends RVBasePanel {
 			docTitlePanel.add(docTitleLabel);
 
 			Label icon = new Label();
-			icon.setStyleName("no_error_icon");
+			icon.setStyleName(ReviewValidateConstants.NO_ERROR_ICON);
 
 			docTitlePanel.add(icon);
 			docTitleVerticalPanel.add(docType);
 			final TreeItem docItem = docTree.addItem(docTitleVerticalPanel);
 
-			String docDisplayProperty = getDocDisplayProperty(docBean, presenter.batchDTO.getDocDisplayName());
-			DocumentTreeItem documentTreeItem = new DocumentTreeItem(docItem, docBean, icon, docTitleLabel, docDisplayProperty);
-			addDocTreeItem(documentTreeItem);
-
-			docItem.setTitle(documentTreeItem.documentTitle);
-			docTitleLabel.setText(documentTreeItem.documentTitle);
-			docType.setText(documentTreeItem.displayName);
-			docTitleLabel.addClickHandler(new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent arg0) {
-					if (docItem.getState()) {
-						docItem.setState(Boolean.FALSE);
-					} else {
-						OpenEvent.fire(docTree, docItem);
-					}
-				}
-			});
+			addDocDisplayItemsAndHandlers(docBean, docTitleLabel, docType, icon, docItem);
 
 			if (presenter.batchDTO.isErrorContained(docBean)) {
 				isThumbNailLoaded = true;
-				icon.setStyleName("error_icon");
+				icon.setStyleName(ReviewValidateConstants.ERROR_ICON);
 				if (counter == 0) {
 					item = docItem;
 					counter++;
@@ -265,7 +259,7 @@ public class DocumentTree extends RVBasePanel {
 										pageTypeBean.getDirection().toString()), pageTypeBean.getDirection());
 							}
 						}
-						image.addStyleName("thumbnailDefault");
+						image.addStyleName(ReviewValidateConstants.THUMBNAIL_DEFAULT);
 
 						image.addClickHandler(new ClickHandler() {
 
@@ -275,25 +269,7 @@ public class DocumentTree extends RVBasePanel {
 							}
 						});
 
-						PageImage pageImage = new PageImage(pageTypeBean, image);
-						addPageImage(pageImage);
-
-						Label pageId = new Label(pageImage.pageTitle);
-						pageId.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
-						VerticalPanel imagePanel = new VerticalPanel();
-						imagePanel.setWidth("70px");
-						imagePanel.setHeight("82px");
-						image.setWidth("66px");
-						image.setHeight("66px");
-
-						image.setTitle(pageImage.pageTitle);
-
-						pageId.setWidth("66px");
-						pageId.setHeight("12px");
-
-						imagePanel.add(image);
-						imagePanel.add(pageId);
+						VerticalPanel imagePanel = setImagesForTree(pageTypeBean, image);
 						flexTable.setWidget(0, j, imagePanel);
 					}
 					docItem.addItem(flexTable);
@@ -311,25 +287,86 @@ public class DocumentTree extends RVBasePanel {
 		}
 	}
 
+	/**
+	 * @param docBean
+	 * @param docTitleLabel
+	 * @param docType
+	 * @param icon
+	 * @param docItem
+	 */
+	private void addDocDisplayItemsAndHandlers(final Document docBean, Label docTitleLabel, Label docType, Label icon,
+			final TreeItem docItem) {
+		String docDisplayProperty = getDocDisplayProperty(docBean, presenter.batchDTO.getDocDisplayName());
+		DocumentTreeItem documentTreeItem = new DocumentTreeItem(docItem, docBean, icon, docDisplayProperty);
+		addDocTreeItem(documentTreeItem);
+
+		docItem.setTitle(documentTreeItem.documentTitle);
+		docTitleLabel.setText(documentTreeItem.documentTitle);
+		docType.setText(documentTreeItem.displayName);
+		docTitleLabel.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if (docItem.getState()) {
+					docItem.setState(Boolean.FALSE);
+				} else {
+					OpenEvent.fire(docTree, docItem);
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param pageTypeBean
+	 * @param image
+	 * @return
+	 */
+	private VerticalPanel setImagesForTree(final Page pageTypeBean, final RotatableImage image) {
+		PageImage pageImage = new PageImage(pageTypeBean, image);
+		addPageImage(pageImage);
+
+		Label pageId = new Label(pageImage.pageTitle);
+		pageId.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+		VerticalPanel imagePanel = new VerticalPanel();
+		imagePanel.setWidth("70px");
+		imagePanel.setHeight("82px");
+		image.setWidth("66px");
+		image.setHeight("66px");
+
+		image.setTitle(pageImage.pageTitle);
+
+		pageId.setWidth("66px");
+		pageId.setHeight("12px");
+
+		imagePanel.add(image);
+		imagePanel.add(pageId);
+		return imagePanel;
+	}
+
 	public String getDocDisplayProperty(Document document, int displayName) {
 		String docDisplayName = "";
-		switch (displayName) {
-			case 1: // display document type
-				docDisplayName = document.getType();
-				break;
-			case 2: // display document size
-				docDisplayName = document.getSize();
-				break;
+		if (null != document.getDocumentDisplayInfo() && !document.getDocumentDisplayInfo().isEmpty()) {
+			docDisplayName = document.getDocumentDisplayInfo();
+		} else {
+			switch (displayName) {
+				case 1: // display document type
+					docDisplayName = document.getType();
+					break;
+				case 2: // display document size
+					docDisplayName = document.getSize();
+					break;
 
-			case 3: // display document confidence
-				docDisplayName = String.valueOf(document.getConfidence());
-				break;
-			case 4: // display document confidence threshold
-				docDisplayName = String.valueOf(document.getConfidenceThreshold());
-				break;
+				case 3: // display document confidence
+					docDisplayName = String.valueOf(document.getConfidence());
+					break;
+				case 4: // display document confidence threshold
+					docDisplayName = String.valueOf(document.getConfidenceThreshold());
+					break;
 
-			default:
+				default:
 
+			}
 		}
 		return docDisplayName;
 	}
@@ -370,15 +407,15 @@ public class DocumentTree extends RVBasePanel {
 
 	private static class DocumentTreeItem {
 
-		String documentTitle;
-		String displayName;
-		Document document;
-		TreeItem treeItem;
-		Label icon;
+		protected String documentTitle;
+		protected String displayName;
+		protected Document document;
+		protected TreeItem treeItem;
+		protected Label icon;
 
 		// Label docTitleLabel;
 
-		DocumentTreeItem(TreeItem treeItem, Document document, Label icon, Label docTitleLabel, String docDisplayName) {
+		DocumentTreeItem(TreeItem treeItem, Document document, Label icon, String docDisplayName) {
 			this.document = document;
 			this.displayName = docDisplayName;
 			this.treeItem = treeItem;
@@ -387,8 +424,8 @@ public class DocumentTree extends RVBasePanel {
 			// this.docTitleLabel = docTitleLabel;
 		}
 
-		static String createDocumentTitle(String id) {
-			return id;
+		public static String createDocumentTitle(String identifier) {
+			return identifier;
 		}
 
 		@Override
@@ -404,10 +441,10 @@ public class DocumentTree extends RVBasePanel {
 
 	}
 
-	private Map<String, DocumentTreeItem> docTreeItemMap = new LinkedHashMap<String, DocumentTreeItem>();
+	private final Map<String, DocumentTreeItem> docTreeItemMap = new LinkedHashMap<String, DocumentTreeItem>();
 
-	private DocumentTreeItem getdocTreeItemById(String id) {
-		return docTreeItemMap.get(DocumentTreeItem.createDocumentTitle(id));
+	private DocumentTreeItem getdocTreeItemById(String identifier) {
+		return docTreeItemMap.get(DocumentTreeItem.createDocumentTitle(identifier));
 	}
 
 	private DocumentTreeItem getdocTreeItemByTitle(String title) {
@@ -462,23 +499,23 @@ public class DocumentTree extends RVBasePanel {
 			index = docTreeItemMap.size();
 		}
 		index--;
-		int j = 0;
+		int counter = 0;
 		while (secondIterator.hasNext()) {
 			Entry<String, DocumentTreeItem> docTreeMapItem = secondIterator.next();
-			if (index == j) {
+			if (index == counter) {
 				returnValue = docTreeMapItem.getValue();
 				break;
 			}
-			j++;
+			counter++;
 		}
 		return returnValue;
 	}
 
 	private static class PageImage {
 
-		String pageTitle;
-		Page page;
-		RotatableImage image;
+		protected String pageTitle;
+		protected Page page;
+		protected RotatableImage image;
 
 		public PageImage(Page page, RotatableImage image) {
 			this.page = page;
@@ -501,10 +538,10 @@ public class DocumentTree extends RVBasePanel {
 		}
 	}
 
-	private Map<String, PageImage> pageImageMap = new LinkedHashMap<String, PageImage>();
+	private final Map<String, PageImage> pageImageMap = new LinkedHashMap<String, PageImage>();
 
-	private PageImage getPageImageById(String id) {
-		return pageImageMap.get(id);
+	private PageImage getPageImageById(String identifier) {
+		return pageImageMap.get(identifier);
 	}
 
 	private PageImage getPageImageByTitle(String title) {
@@ -535,7 +572,7 @@ public class DocumentTree extends RVBasePanel {
 			nextIndex = 0;
 		}
 		String nextPageTitle = presenter.document.getPages().getPage().get(nextIndex).getIdentifier();
-		return (getPageImageByTitle(nextPageTitle));
+		return getPageImageByTitle(nextPageTitle);
 	}
 
 	private PageImage getPreviousPageImage() {
@@ -546,7 +583,7 @@ public class DocumentTree extends RVBasePanel {
 			prevIndex = pageList.size() - 1;
 		}
 		String nextPageTitle = presenter.document.getPages().getPage().get(prevIndex).getIdentifier();
-		return (getPageImageByTitle(nextPageTitle));
+		return getPageImageByTitle(nextPageTitle);
 	}
 
 	@Override
@@ -558,130 +595,177 @@ public class DocumentTree extends RVBasePanel {
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 
-		docTree.addOpenHandler(new OpenHandler<TreeItem>() {
+		addDocTreeOpenHandler();
+
+		addTreeRefreshHandler(eventBus);
+
+		addValidationFieldChange(eventBus);
+
+		addIconRefreshEvent(eventBus);
+		addPageChangeHandler(eventBus);
+
+		addDocTypeChangeHandler(eventBus);
+
+		addDocumentRefreshHandler(eventBus);
+
+		addRVKeyDownEvent(eventBus);
+
+		addRVKeyUpEvent(eventBus);
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addRVKeyUpEvent(HandlerManager eventBus) {
+		eventBus.addHandler(RVKeyUpEvent.type, new RVKeyUpEventHandler() {
 
 			@Override
-			public void onOpen(OpenEvent<TreeItem> arg0) {
-				presenter.document = getdocTreeItemByTitle(arg0.getTarget().getTitle()).document;
-				setDocumentSelected(arg0.getTarget());
-
-				List<Page> pageList = presenter.document.getPages().getPage();
-				for (Page page : pageList) {
-					String identifier = page.getIdentifier();
-					PageImage pageImage = pageImageMap.get(identifier);
-					RotatableImage image = pageImage.getImage();
-					if (!page.isIsRotated()) {
-						image.setUrl(presenter.batchDTO.getAbsoluteURLFor(page.getThumbnailFileName()), page.getDirection());
-					} else {
-						image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(page.getThumbnailFileName(), page.getDirection()
-								.toString()), page.getDirection());
+			public void onKeyUp(RVKeyUpEvent event) {
+				KeyUpEvent keyEvent = event.getEvent();
+				if (keyEvent.isControlKeyDown()) {
+					int keyCode = keyEvent.getNativeEvent().getKeyCode();
+					switch (keyCode) {
+						case 'n':
+						case 'N':
+							keyNUpEvent(keyEvent);
+							break;
+						case 'p':
+						case 'P':
+							keyPUpEvent(keyEvent);
+							break;
+						default:
+							break;
 					}
 				}
-
-				presenter.page = presenter.document.getPages().getPage().get(0);
-
-				setPageSelected(getPageImageById(presenter.page.getIdentifier()).image, false);
-				DocumentTree.this.fireEvent(new DocExpandEvent(presenter.document));
 			}
+
 		});
+	}
 
-		eventBus.addHandler(TreeRefreshEvent.TYPE, new TreeRefreshEventHandler() {
-
-			@Override
-			public void refresh(TreeRefreshEvent event) {
-				handleRefreshEvent(event.getBatchDTO(), event.getDocument(), event.getPage());
+	/**
+	 * @param keyEvent
+	 */
+	private void keyPUpEvent(KeyUpEvent keyEvent) {
+		if (!presenter.isTableView()) {
+			if (!keyEvent.isShiftKeyDown()) {
+				keyEvent.getNativeEvent().preventDefault();
+				openNextPage();
+			} else {
+				keyEvent.getNativeEvent().preventDefault();
+				openPreviousPage();
 			}
-		});
+		}
+	}
 
-		eventBus.addHandler(ValidationFieldChangeEvent.TYPE, new ValidationFieldChangeEventHandler() {
+	/**
+	 * @param keyEvent
+	 */
+	private void keyNUpEvent(KeyUpEvent keyEvent) {
+		if (!presenter.isTableView()) {
 
-			@Override
-			public void onFieldChange(ValidationFieldChangeEvent event) {
-				String page = event.getField().getPage();
-				if (page != null && getPageImageById(page) != null) {
-					setPageSelected(getPageImageById(page).image, event.getField(), event.getCoordinatesList(), true, event
-							.isRemoveOverlay());
-				} else {
-					setPageSelected(null, event.getField(), event.getCoordinatesList(), true, event.isRemoveOverlay());
-				}
+			if (!keyEvent.isShiftKeyDown()) {
+				keyNShiftDownHandler(keyEvent);
+			} else {
+				keyNShiftUpHandler(keyEvent);
 			}
+		}
+	}
 
-			@Override
-			public void onValueChange(ValidationFieldChangeEvent event) {
-				// TODO Auto-generated method stub
+	/**
+	 * @param keyEvent
+	 */
+	private void keyNShiftUpHandler(KeyUpEvent keyEvent) {
+		keyEvent.getNativeEvent().preventDefault();
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
+				&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
+			Batch batch = presenter.batchDTO.getBatch();
+			ScreenMaskUtility.maskScreen("Executing Script.....");
+			presenter.rpcService.executeScript(batch, presenter.document, new AsyncCallback<BatchDTO>() {
 
-			}
-		});
-
-		eventBus.addHandler(IconRefreshEvent.TYPE, new IconRefreshEventHandler() {
-
-			@Override
-			public void refresh(IconRefreshEvent iconRefreshEvent) {
-				TreeItem item = getdocTreeItemById(iconRefreshEvent.getDocument().getIdentifier()).treeItem;
-				selectedDocItem = item;
-				selectedDocItem.setState(false);
-				selectedDocItem.setSelected(false);
-				DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
-				selectedDocItem.addStyleName("document-style");
-				treeItem.icon.setStyleName("no_error_icon");
-				if (presenter.batchDTO.isErrorContained(presenter.document)) {
-					treeItem.icon.setStyleName("error_icon");
-				}
-			}
-		});
-		eventBus.addHandler(PageChangeEvent.TYPE, new PageChangeEventHandler() {
-
-			@Override
-			public void onPageChange(PageChangeEvent event) {
-				PageImage pageImage = getPageImageById(event.getPage().getIdentifier());
-				if (!event.getPage().isIsRotated()) {
-					pageImage.image.setUrl(presenter.batchDTO.getAbsoluteURLFor(event.getPage().getThumbnailFileName()), event
-							.getPage().getDirection());
-				} else {
-					pageImage.image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(event.getPage().getThumbnailFileName(),
-							event.getPage().getDirection().toString()), event.getPage().getDirection());
-				}
-			}
-		});
-
-		eventBus.addHandler(DocTypeChangeEvent.TYPE, new DocTypeChangeEventHandler() {
-
-			@Override
-			public void onDocumentTypeChange(DocTypeChangeEvent event) {
-				handleRefreshEvent(event.getBatchDTO(), event.getDocumentType(), event.getDocumentType().getPages().getPage().get(0));
-			}
-		});
-
-		eventBus.addHandler(DocumentRefreshEvent.TYPE, new DocumentRefreshHandler() {
-
-			@Override
-			public void onUpdate(DocumentRefreshEvent event) {
-				setDocumentSelected(getdocTreeItemById(event.getDocument().getIdentifier()).treeItem);
-				if (presenter.batchDTO.isErrorContained(presenter.document))
-					return;
-				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
-					for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
-						if (!doc.isValid()) {
-							presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
+				@Override
+				public void onSuccess(final BatchDTO batchDTO) {
+					List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
+					for (Document doc : documents) {
+						final DocumentTreeItem docTreeItem = docTreeItemMap.get(selectedDocItem.getTitle());
+						if (docTreeItem != null && doc.getIdentifier().equalsIgnoreCase(docTreeItem.document.getIdentifier())) {
+							if (!doc.isValid()) {
+								docTreeItem.document = doc;
+								DocumentTree.this.eventBus.fireEvent(new TreeRefreshEvent(batchDTO, docTreeItem.document,
+										docTreeItem.document.getPages().getPage().get(0)));
+							} else {
+								openPreviousDocument();
+							}
 							break;
 						}
 					}
+					ScreenMaskUtility.unmaskScreen();
 				}
-				if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
-					for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
-						if (!doc.isReviewed()) {
-							presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
+
+				@Override
+				public void onFailure(Throwable paramThrowable) {
+					if (!presenter.displayErrorMessage(paramThrowable)) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
+					}
+					ScreenMaskUtility.unmaskScreen();
+
+				}
+			});
+		} else {
+			openPreviousDocument();
+		}
+	}
+
+	/**
+	 * @param keyEvent
+	 */
+	private void keyNShiftDownHandler(KeyUpEvent keyEvent) {
+		final DocumentTreeItem nextDocTreeItem = getNextDocTreeItem();
+		keyEvent.getNativeEvent().preventDefault();
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
+				&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
+			Batch batch = presenter.batchDTO.getBatch();
+			ScreenMaskUtility.maskScreen("Executing Script.....");
+			presenter.rpcService.executeScript(batch, presenter.document, new AsyncCallback<BatchDTO>() {
+
+				@Override
+				public void onSuccess(final BatchDTO batchDTO) {
+					List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
+					for (Document doc : documents) {
+						final DocumentTreeItem docTreeItem = docTreeItemMap.get(selectedDocItem.getTitle());
+						if (docTreeItem != null && doc.getIdentifier().equalsIgnoreCase(docTreeItem.document.getIdentifier())) {
+							if (!doc.isValid()) {
+								docTreeItem.document = doc;
+								DocumentTree.this.eventBus.fireEvent(new TreeRefreshEvent(batchDTO, docTreeItem.document,
+										docTreeItem.document.getPages().getPage().get(0)));
+							} else {
+								openDocument(nextDocTreeItem);
+							}
 							break;
 						}
 					}
+					ScreenMaskUtility.unmaskScreen();
 				}
-				if (presenter.document != null) {
-					setDocumentSelected(getdocTreeItemById(presenter.document.getIdentifier()).treeItem);
-				}
-			}
-		});
 
-		eventBus.addHandler(RVKeyDownEvent.TYPE, new RVKeyDownEventHandler() {
+				@Override
+				public void onFailure(Throwable paramThrowable) {
+					if (!presenter.displayErrorMessage(paramThrowable)) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
+					}
+					ScreenMaskUtility.unmaskScreen();
+
+				}
+			});
+		} else {
+			openDocument(nextDocTreeItem);
+		}
+	}
+	/**
+	 * @param eventBus
+	 */
+	private void addRVKeyDownEvent(HandlerManager eventBus) {
+		eventBus.addHandler(RVKeyDownEvent.type, new RVKeyDownEventHandler() {
 
 			@Override
 			public void onKeyDown(RVKeyDownEvent event) {
@@ -702,124 +786,175 @@ public class DocumentTree extends RVBasePanel {
 
 			}
 		});
+	}
 
-		eventBus.addHandler(RVKeyUpEvent.TYPE, new RVKeyUpEventHandler() {
+	/**
+	 * @param eventBus
+	 */
+	private void addDocumentRefreshHandler(HandlerManager eventBus) {
+		eventBus.addHandler(DocumentRefreshEvent.type, new DocumentRefreshHandler() {
 
 			@Override
-			public void onKeyUp(RVKeyUpEvent event) {
-				if (event.getEvent().isControlKeyDown()) {
-					switch (event.getEvent().getNativeEvent().getKeyCode()) {
-						case 'n':
-						case 'N':
-							if (!presenter.isTableView()) {
+			public void onUpdate(DocumentRefreshEvent event) {
+				setDocumentSelected(getdocTreeItemById(event.getDocument().getIdentifier()).treeItem);
+				if (!presenter.batchDTO.isErrorContained(presenter.document)) {
 
-								if (!event.getEvent().isShiftKeyDown()) {
-									final DocumentTreeItem nextDocTreeItem = getNextDocTreeItem();
-									event.getEvent().getNativeEvent().preventDefault();
-									if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
-											&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
-										Batch batch = presenter.batchDTO.getBatch();
-										ScreenMaskUtility.maskScreen("Executing Script.....");
-										presenter.rpcService.executeScript(batch, new AsyncCallback<BatchDTO>() {
-
-											@Override
-											public void onSuccess(final BatchDTO batchDTO) {
-												List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
-												for (Document doc : documents) {
-													final DocumentTreeItem docTreeItem = docTreeItemMap
-															.get(selectedDocItem.getTitle());
-													if (docTreeItem != null
-															&& doc.getIdentifier().equalsIgnoreCase(
-																	docTreeItem.document.getIdentifier())) {
-														if (!doc.isValid()) {
-															docTreeItem.document = doc;
-															DocumentTree.this.eventBus.fireEvent(new TreeRefreshEvent(batchDTO,
-																	docTreeItem.document, docTreeItem.document.getPages().getPage()
-																			.get(0)));
-														} else {
-															openDocument(nextDocTreeItem);
-														}
-														break;
-													}
-												}
-												ScreenMaskUtility.unmaskScreen();
-											}
-
-											@Override
-											public void onFailure(Throwable paramThrowable) {
-												if (!presenter.displayErrorMessage(paramThrowable)) {
-													ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
-															.getMessageValue(ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
-												}
-												ScreenMaskUtility.unmaskScreen();
-
-											}
-										});
-									} else {
-										openDocument(nextDocTreeItem);
-									}
-								} else {
-									event.getEvent().getNativeEvent().preventDefault();
-									if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)
-											&& "ON".equalsIgnoreCase(presenter.batchDTO.getIsValidationScriptEnabled())) {
-										Batch batch = presenter.batchDTO.getBatch();
-										ScreenMaskUtility.maskScreen("Executing Script.....");
-										presenter.rpcService.executeScript(batch, new AsyncCallback<BatchDTO>() {
-
-											@Override
-											public void onSuccess(final BatchDTO batchDTO) {
-												List<Document> documents = batchDTO.getBatch().getDocuments().getDocument();
-												for (Document doc : documents) {
-													final DocumentTreeItem docTreeItem = docTreeItemMap
-															.get(selectedDocItem.getTitle());
-													if (docTreeItem != null
-															&& doc.getIdentifier().equalsIgnoreCase(
-																	docTreeItem.document.getIdentifier())) {
-														if (!doc.isValid()) {
-															docTreeItem.document = doc;
-															DocumentTree.this.eventBus.fireEvent(new TreeRefreshEvent(batchDTO,
-																	docTreeItem.document, docTreeItem.document.getPages().getPage()
-																			.get(0)));
-														} else {
-															openPreviousDocument();
-														}
-														break;
-													}
-												}
-												ScreenMaskUtility.unmaskScreen();
-											}
-
-											@Override
-											public void onFailure(Throwable paramThrowable) {
-												if (!presenter.displayErrorMessage(paramThrowable)) {
-													ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
-															.getMessageValue(ReviewValidateMessages.SCRIPT_EXECUTION_ERROR));
-												}
-												ScreenMaskUtility.unmaskScreen();
-
-											}
-										});
-									} else {
-										openPreviousDocument();
-									}
-								}
+					if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+						for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
+							if (!doc.isValid()) {
+								presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
+								break;
 							}
-							break;
-						case 'p':
-						case 'P':
-							if (!presenter.isTableView()) {
-								if (!event.getEvent().isShiftKeyDown()) {
-									event.getEvent().getNativeEvent().preventDefault();
-									openNextPage();
-								} else {
-									event.getEvent().getNativeEvent().preventDefault();
-									openPreviousPage();
-								}
-							}
-							break;
-						default:
-							break;
+						}
 					}
+					if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
+						for (Document doc : presenter.batchDTO.getBatch().getDocuments().getDocument()) {
+							if (!doc.isReviewed()) {
+								presenter.document = presenter.batchDTO.getNextDocumentTo(presenter.document, true);
+								break;
+							}
+						}
+					}
+					if (presenter.document != null) {
+						setDocumentSelected(getdocTreeItemById(presenter.document.getIdentifier()).treeItem);
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addDocTypeChangeHandler(HandlerManager eventBus) {
+		eventBus.addHandler(DocTypeChangeEvent.type, new DocTypeChangeEventHandler() {
+
+			@Override
+			public void onDocumentTypeChange(DocTypeChangeEvent event) {
+				handleRefreshEvent(event.getBatchDTO(), event.getDocumentType(), event.getDocumentType().getPages().getPage().get(0));
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addPageChangeHandler(HandlerManager eventBus) {
+		eventBus.addHandler(PageChangeEvent.type, new PageChangeEventHandler() {
+
+			@Override
+			public void onPageChange(PageChangeEvent event) {
+				PageImage pageImage = getPageImageById(event.getPage().getIdentifier());
+				if (!event.getPage().isIsRotated()) {
+					pageImage.image.setUrl(presenter.batchDTO.getAbsoluteURLFor(event.getPage().getThumbnailFileName()), event
+							.getPage().getDirection());
+				} else {
+					pageImage.image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(event.getPage().getThumbnailFileName(),
+							event.getPage().getDirection().toString()), event.getPage().getDirection());
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addIconRefreshEvent(HandlerManager eventBus) {
+		eventBus.addHandler(IconRefreshEvent.type, new IconRefreshEventHandler() {
+
+			@Override
+			public void refresh(IconRefreshEvent iconRefreshEvent) {
+				TreeItem item = getdocTreeItemById(iconRefreshEvent.getDocument().getIdentifier()).treeItem;
+				selectedDocItem = item;
+				selectedDocItem.setState(false);
+				selectedDocItem.setSelected(false);
+				DocumentTreeItem treeItem = getdocTreeItemByTitle(selectedDocItem.getTitle());
+				selectedDocItem.addStyleName(ReviewValidateConstants.DOCUMENT_STYLE);
+				treeItem.icon.setStyleName(ReviewValidateConstants.NO_ERROR_ICON);
+				if (presenter.batchDTO.isErrorContained(presenter.document)) {
+					treeItem.icon.setStyleName(ReviewValidateConstants.ERROR_ICON);
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addValidationFieldChange(HandlerManager eventBus) {
+		eventBus.addHandler(ValidationFieldChangeEvent.type, new ValidationFieldChangeEventHandler() {
+
+			@Override
+			public void onFieldChange(ValidationFieldChangeEvent event) {
+				String page = event.getField().getPage();
+				if (page != null && getPageImageById(page) != null) {
+					setPageSelected(getPageImageById(page).image, event.getField(), event.getCoordinatesList(), true, event
+							.isRemoveOverlay());
+				} else {
+					setPageSelected(null, event.getField(), event.getCoordinatesList(), true, event.isRemoveOverlay());
+				}
+			}
+
+			@Override
+			public void onValueChange(ValidationFieldChangeEvent event) {
+				/*
+				 * Add value change handling code
+				 */
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addTreeRefreshHandler(HandlerManager eventBus) {
+		eventBus.addHandler(TreeRefreshEvent.type, new TreeRefreshEventHandler() {
+
+			@Override
+			public void refresh(TreeRefreshEvent event) {
+				handleRefreshEvent(event.getBatchDTO(), event.getDocument(), event.getPage());
+			}
+		});
+	}
+
+	/**
+	 * 
+	 */
+	private void addDocTreeOpenHandler() {
+		docTree.addOpenHandler(new OpenHandler<TreeItem>() {
+
+			@Override
+			public void onOpen(OpenEvent<TreeItem> arg0) {
+				TreeItem target = arg0.getTarget();
+				String title = target.getTitle();
+				String text = target.getText();
+				presenter.document = getdocTreeItemByTitle(arg0.getTarget().getTitle()).document;
+				boolean isAlreadySelected = setDocumentSelected(arg0.getTarget());
+
+				List<Page> pageList = presenter.document.getPages().getPage();
+				for (Page page : pageList) {
+					String identifier = page.getIdentifier();
+					PageImage pageImage = pageImageMap.get(identifier);
+					RotatableImage image = pageImage.getImage();
+					if (!page.isIsRotated()) {
+						image.setUrl(presenter.batchDTO.getAbsoluteURLFor(page.getThumbnailFileName()), page.getDirection());
+					} else {
+						image.setUrl(presenter.batchDTO.getAbsoluteURLForRotatedImage(page.getThumbnailFileName(), page.getDirection()
+								.toString()), page.getDirection());
+					}
+				}
+
+				presenter.page = presenter.document.getPages().getPage().get(0);
+
+				setPageSelected(getPageImageById(presenter.page.getIdentifier()).image, false);
+				int itemCount = presenter.getView().getRvPanel().getReviewPanel().documentTypes.getItemCount();
+				if (target.getChildCount() > 0 && !(title.isEmpty() && text.isEmpty())) {
+					scrollIntoView(target.getElement());
+				}
+				if (!isAlreadySelected || itemCount == 0) {
+					DocumentTree.this.fireEvent(new DocExpandEvent(presenter.document));
+				} else {
+					DocumentTree.this.fireEvent(new DocExpandEvent(presenter.document, false));
 				}
 			}
 		});
@@ -852,12 +987,6 @@ public class DocumentTree extends RVBasePanel {
 		presenter.page = presenter.document.getPages().getPage().get(0);
 		setPageSelected(getPageImageById(presenter.page.getIdentifier()).image, false);
 		DocumentTree.this.fireEvent(new DocExpandEvent(presenter.document));
-	}
-
-	public void createDocumentNode(Document document) {
-		DocumentTreeItem docTreeItem = getdocTreeItemById(document.getIdentifier());
-		List<Page> pageList = docTreeItem.document.getPages().getPage();
-
 	}
 
 	private void openNextPage() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,23 +35,35 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.ephesoft.dcma.gwt.core.shared.importTree.Node;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Node;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ImportBatchClassSuperConfig implements IsSerializable {
 
-	private Map<String, String> uncFolderList;
 	private Node uiConfigRoot;
+	private List<UNCFolderConfig> uncFolderConfigList;
 
-	public Map<String, String> getUncFolderList() {
-		return uncFolderList;
+	public ImportBatchClassSuperConfig() {
+		super();
+		this.uncFolderConfigList = new ArrayList<UNCFolderConfig>();
+		this.uiConfigRoot = new Node();
 	}
 
-	public void setUncFolderList(Map<String, String> uncFolderList) {
-		this.uncFolderList = uncFolderList;
+	public ImportBatchClassSuperConfig(List<UNCFolderConfig> uncFolderConfig, Node uiConfigList) {
+		super();
+		this.uncFolderConfigList = uncFolderConfig;
+		this.uiConfigRoot = uiConfigList;
+	}
+
+	public List<UNCFolderConfig> getUncFolderConfigList() {
+		return uncFolderConfigList;
+	}
+
+	public void setUncFolderConfigList(List<UNCFolderConfig> uncFolderConfig) {
+		this.uncFolderConfigList = uncFolderConfig;
 	}
 
 	public Node getUiConfigRoot() {
@@ -62,15 +74,16 @@ public class ImportBatchClassSuperConfig implements IsSerializable {
 		this.uiConfigRoot = uiConfigRoot;
 	}
 
-	public ImportBatchClassSuperConfig() {
-		super();
-		this.uncFolderList = new HashMap<String, String>();
-		this.uiConfigRoot = new Node();
+	public void addUncFolderConfig(final String identifier, final String batchClassName, final String uncFolder) {
+		if (uncFolderConfigList == null) {
+			uncFolderConfigList = new ArrayList<UNCFolderConfig>();
+		}
+		UNCFolderConfig uncFolderConfig = new UNCFolderConfig();
+		uncFolderConfigList.add(uncFolderConfig);
+		uncFolderConfig.setBatchClassId(identifier);
+		uncFolderConfig.setBatchClassName(batchClassName);
+		uncFolderConfig.setUncFolder(uncFolder);
 	}
 
-	public ImportBatchClassSuperConfig(Map<String, String> uncFolderList, Node uiConfigList) {
-		super();
-		this.uncFolderList = uncFolderList;
-		this.uiConfigRoot = uiConfigList;
-	}
+	
 }

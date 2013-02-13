@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,23 +45,24 @@ import com.ephesoft.dcma.da.domain.ModuleConfig;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.ModuleConfigDaoImpl
  */
 public interface ModuleConfigDao extends CacheableDao<ModuleConfig> {
 
 	/**
 	 * API to get module by child name.
 	 * 
-	 * @param childName
-	 * @return List<ModuleConfig> list of module configs.
+	 * @param childName String
+	 * @return List<ModuleConfig>
 	 */
 	List<ModuleConfig> getModuleByChildName(String childName);
 	
 	/**
-	 * API to get the moduleconfig by key and mandatory.
+	 * API to get the module configuration by key and mandatory.
 	 * 
-	 * @param moduleConfigKey
-	 * @param isMandatory
-	 * @return
+	 * @param moduleConfigKey String
+	 * @param isMandatory boolean
+	 * @return ModuleConfig
 	 */
 	ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory);
 }

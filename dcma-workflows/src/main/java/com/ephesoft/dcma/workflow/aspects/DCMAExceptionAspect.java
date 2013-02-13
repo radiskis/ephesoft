@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,22 +55,49 @@ import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
+/**
+ * This class throws exception in case of error in executing the batch.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.batch.service.BatchSchemaService
+ * @see com.ephesoft.dcma.da.service.BatchInstanceService
+ */
 @Aspect
 public class DCMAExceptionAspect {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAExceptionAspect.class);
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
 	@Autowired
 	private BatchInstanceService batchInstanceService;
 
+	/**
+	 * Instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
+	/**
+	 * Instance of {@link WorkflowService}.
+	 */
 	@Autowired
 	private WorkflowService workflowService;
 
-	@AfterThrowing(pointcut = "execution(* com.ephesoft.dcma.*.service.*.*(..))", throwing = "e")
-	public void afterThrowing(JoinPoint joinPoint, DCMAException e) throws Throwable {
+	/**
+	 * To run the thread and throw exception in case of any error.
+	 * 
+	 * @param joinPoint JoinPoint
+	 * @param dcmaException DCMAException
+	 * @throws Throwable
+	 */
+	@AfterThrowing(pointcut = "execution(* com.ephesoft.dcma.*.service.*.*(..))", throwing = "dcmaException")
+	public void afterThrowing(JoinPoint joinPoint, DCMAException dcmaException) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		if (args[0] instanceof BatchInstanceID) {
 			String batchInstanceIdentifier = args[0].toString();
@@ -101,28 +128,36 @@ public class DCMAExceptionAspect {
 
 				Thread thread = new Thread(runnable);
 				thread.start();
-				try {
-					// RESTART BATCH functionality changes.
-					// Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING
-					LOGGER.info("Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING.");
-					String threadPoolLockFolderPath = batchSchemaService.getLocalFolderLocation() + File.separator
-							+ batchInstance.getIdentifier() + File.separator + batchSchemaService.getThreadpoolLockFolderName();
-					File threadPoolLockFolder = new File(threadPoolLockFolderPath);
-					if (threadPoolLockFolder != null && threadPoolLockFolder.isDirectory()) {
-						boolean deleteSrcDir = false;
-						FileUtils.deleteDirectoryAndContentsRecursive(threadPoolLockFolder, deleteSrcDir);
-						String[] fileList = threadPoolLockFolder.list();
-						if (fileList.length == 0) {
-							LOGGER.info("Successfully deleted all the locked file from the system path location : " + threadPoolLockFolderPath);
-						} else {
-							LOGGER.info("No able to deleted all the locked file from the system path location : " + threadPoolLockFolderPath);
-						}
-					}
-					workflowService.mailOnError(batchInstance);
-				} catch (Exception mailExp) {
-					LOGGER.error("Some internal error occured during sending the mail. Check the mail configuration.", mailExp);
+				releaseLockFromBatchInstanceFolder(batchInstanceIdentifier, batchInstance);
+			}
+		}
+	}
+
+	private void releaseLockFromBatchInstanceFolder(String batchInstanceIdentifier, final BatchInstance batchInstance) {
+		try {
+			// RESTART BATCH functionality changes.
+			// Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING
+			LOGGER
+					.info("Explicitly delete the lock file in case the batch goes in ERROR so that the batch is not blocked from RESTARTING.");
+			String threadPoolLockFolderPath = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier)
+					+ File.separator + batchInstance.getIdentifier() + File.separator
+					+ batchSchemaService.getThreadpoolLockFolderName();
+			File threadPoolLockFolder = new File(threadPoolLockFolderPath);
+			if (threadPoolLockFolder != null && threadPoolLockFolder.isDirectory()) {
+				boolean deleteSrcDir = false;
+				FileUtils.deleteDirectoryAndContentsRecursive(threadPoolLockFolder, deleteSrcDir);
+				String[] fileList = threadPoolLockFolder.list();
+				if (fileList.length == 0) {
+					LOGGER
+							.info("Successfully deleted all the locked file from the system path location : "
+									+ threadPoolLockFolderPath);
+				} else {
+					LOGGER.info("No able to deleted all the locked file from the system path location : " + threadPoolLockFolderPath);
 				}
 			}
+			workflowService.mailOnError(batchInstance);
+		} catch (Exception mailExp) {
+			LOGGER.error("Some internal error occured during sending the mail. Check the mail configuration.", mailExp);
 		}
 	}
 }

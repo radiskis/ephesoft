@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,9 +45,7 @@ public class GWTListBoxControl {
 
 	public static ValidatableWidget<ListBox> createGWTListControl(String type, String actualValue, final String fieldName,
 			List<String> regexPatterns, List<String> values) {
-
-		actualValue = null == actualValue ? "" : actualValue;
-
+		
 		ListBox optionList = new ListBox();
 		ValidatableWidget<ListBox> optionListWidget = new ValidatableWidget<ListBox>(optionList);
 		if (regexPatterns != null && !regexPatterns.isEmpty()) {
@@ -60,19 +58,17 @@ public class GWTListBoxControl {
 			item = values.get(itemIndex).trim();
 			if (!item.isEmpty()) {
 				optionList.addItem(item);
-				if (actualValue.trim().length() > 0) {
-					if (item.equalsIgnoreCase(actualValue)) {
-						selectedIndex = itemIndex;
-					}
+				if (!actualValue.trim().isEmpty() && item.equalsIgnoreCase(actualValue)) {
+					selectedIndex = itemIndex;
 				}
 			}
 		}
 
 		if (selectedIndex > -1) {
-			optionList.getElement().setAttribute("isActualValueFound", Boolean.TRUE + "");
+			optionList.getElement().setAttribute("isActualValueFound", Boolean.TRUE.toString());
 			optionList.setSelectedIndex(selectedIndex);
 		} else {
-			optionList.getElement().setAttribute("isActualValueFound", Boolean.FALSE + "");
+			optionList.getElement().setAttribute("isActualValueFound", Boolean.FALSE.toString());
 		}
 
 		return optionListWidget;

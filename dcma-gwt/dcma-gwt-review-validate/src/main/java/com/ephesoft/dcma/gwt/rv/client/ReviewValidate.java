@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.rv.client;
 
 import com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -54,7 +55,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
@@ -63,89 +63,64 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 	@Override
 	public void onLoad() {
 		defineBridgeMethod();
-		Document.get().setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.rv_title));
+		Document.get().setTitle(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.RV_TITLE));
 		final ReviewValidateController controller = new ReviewValidateController(rpcService, eventBus);
 
 		ReviewValidateView view = controller.getPresenter().getView();
-		
-		final RootPanel rootPanel = new RootPanel(view.getOuter());
+
+		final RootPanel rootPanel = new RootPanel(view.getOuter(), rpcService);
 		rootPanel.getHeader().setEventBus(eventBus);
 		rootPanel.getHeader().setShowDialogBoxOnTabClick(true);
-		rootPanel.getHeader().setDialogMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_backButton_confm));
-		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_home), "BatchList.html",true);
-		rootPanel.getHeader().addNonClickableTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_batch_detail), "ReviewValidate.html");
-		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_web_scanner),"WebScanner.html",true);
-		
-		rpcService.isUploadBatchEnabled(new AsyncCallback<Boolean>() {
+		rootPanel.getHeader().setDialogMessage(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.MSG_BACKBUTTON_CONFM));
+		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TAB_LABEL_HOME),
+				"BatchList.html", true);
+		rootPanel.getHeader().addNonClickableTab(
+				LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TAB_LABEL_BATCH_DETAIL), "ReviewValidate.html");
+		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TAB_LABEL_WEB_SCANNER),
+				"WebScanner.html", true);
 
-			@Override
-			public void onFailure(Throwable arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+		checkAndDisplayUploadBatchTab(rootPanel);
 
-			@Override
-			public void onSuccess(Boolean isUploadBatchEnabled) {
-				if(isUploadBatchEnabled) {
-					rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.tabLabel_upload_batch),"UploadBatch.html",true);
-				}
-			}
-		});
-		
-		rootPanel.getHeader().getTabBar().selectTab(1);
 		ScreenMaskUtility.maskScreen();
-		
-		rpcService.getRowsCount(new AsyncCallback<Integer>() {
 
-			public void onFailure(Throwable caught) {
+		rpcService.getRowsCount(new EphesoftAsyncCallback<Integer>() {
+
+			public void customFailure(Throwable caught) {
+				// no change needed if there is a failure in getting row count
 			}
 
 			public void onSuccess(Integer result) {
-				if(result == null || result.intValue() == 0){
+				if (result == null || result.intValue() == 0) {
 					rootPanel.getHeader().getTabBar().setTabEnabled(1, false);
 				}
 			}
 		});
-		
-		rpcService.getUserName(new AsyncCallback<String>() {
-			
+
+		rpcService.getUserName(new EphesoftAsyncCallback<String>() {
+
 			@Override
 			public void onSuccess(String userName) {
 				rootPanel.getHeader().setUserName(userName);
 				ScreenMaskUtility.unmaskScreen();
 			}
-			
+
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
-				 ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						 ReviewValidateMessages.msg_userName_error));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						ReviewValidateMessages.MSG_USERNAME_ERROR));
 			}
 		});
-		
+
 		RootLayoutPanel rootLayoutPanel = RootLayoutPanel.get();
 		rootLayoutPanel.clear();
 		rootLayoutPanel.add(rootPanel);
 
 		final FocusPanel focusPanel = new FocusPanel();
 		focusPanel.add(rootLayoutPanel);
-		
-		focusPanel.addKeyUpHandler(new KeyUpHandler() {
-			
-			@Override
-			public void onKeyUp(KeyUpEvent event) {
-				eventBus.fireEvent(new RVKeyUpEvent(event));
-			}
-		});
-		
-		focusPanel.addKeyDownHandler(new KeyDownHandler() {
-			
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				eventBus.fireEvent(new RVKeyDownEvent(event));
-			}
-		});
-		
+
+		addFocusPanelHandlers(focusPanel);
+
 		com.google.gwt.user.client.ui.RootPanel.get().add(focusPanel);
 
 		Window.addWindowClosingHandler(new Window.ClosingHandler() {
@@ -157,8 +132,56 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 			}
 		});
 
-		controller.go(null);
-		
+		controller.onPresenterLoad(null);
+
+	}
+
+	/**
+	 * @param focusPanel
+	 */
+	private void addFocusPanelHandlers(final FocusPanel focusPanel) {
+		focusPanel.addKeyUpHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				eventBus.fireEvent(new RVKeyUpEvent(event));
+			}
+		});
+
+		focusPanel.addKeyDownHandler(new KeyDownHandler() {
+
+			@Override
+			public void onKeyDown(KeyDownEvent event) {
+				eventBus.fireEvent(new RVKeyDownEvent(event));
+			}
+		});
+	}
+
+	/**
+	 * @param rootPanel
+	 */
+	private void checkAndDisplayUploadBatchTab(final RootPanel rootPanel) {
+		rpcService.isUploadBatchEnabled(new EphesoftAsyncCallback<Boolean>() {
+
+			@Override
+			public void customFailure(Throwable arg0) {
+
+				/*
+				 * On failure handling to be done.
+				 */
+			}
+
+			@Override
+			public void onSuccess(Boolean isUploadBatchEnabled) {
+				if (isUploadBatchEnabled) {
+					rootPanel.getHeader().addTab(
+							LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TAB_LABEL_UPLOAD_BATCH),
+							"UploadBatch.html", true);
+				}
+			}
+		});
+
+		rootPanel.getHeader().getTabBar().selectTab(1);
 	}
 
 	@Override
@@ -175,13 +198,13 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 	public LocaleInfo createLocaleInfo(String locale) {
 		return new LocaleInfo(locale, "rvConstants", "rvMessages");
 	}
-	
+
 	public native void defineBridgeMethod() /*-{
-	var _this = this;
-	$wnd.onunload = function() {
-	return _this.@com.ephesoft.dcma.gwt.rv.client.ReviewValidate::onWindowClose()();
-	}
-	}-*/;
+											var _this = this;
+											$wnd.onunload = function() {
+											return _this.@com.ephesoft.dcma.gwt.rv.client.ReviewValidate::onWindowClose()();
+											}
+											}-*/;
 
 	private void onWindowClose() {
 		String title = Window.getTitle();
@@ -189,21 +212,46 @@ public class ReviewValidate extends DCMAEntryPoint<ReviewValidateDocServiceAsync
 			int index = title.indexOf(ReviewValidateConstants.BATCH_INSTANCE_ABBREVIATION);
 			if (index != -1) {
 				String batchInstanceIdentifier = title.substring(index);
-				if (batchInstanceIdentifier != null && !batchInstanceIdentifier.isEmpty()) {
-					rpcService.cleanUpCurrentBatch(batchInstanceIdentifier, new AsyncCallback<Void>() {
-
-						@Override
-						public void onFailure(Throwable arg0) {
-
-						}
-
-						@Override
-						public void onSuccess(Void arg0) {
-
-						}
-					});
-				}
+				updateEndTimeAndCleanCurrentBatch(batchInstanceIdentifier);
 			}
+		}
+	}
+
+	/**
+	 * @param batchInstanceIdentifier
+	 */
+	private void updateEndTimeAndCleanCurrentBatch(String batchInstanceIdentifier) {
+		if (batchInstanceIdentifier != null && !batchInstanceIdentifier.isEmpty()) {
+			rpcService.updateEndTimeAndCalculateDuration(batchInstanceIdentifier, new EphesoftAsyncCallback<Void>() {
+
+				@Override
+				public void customFailure(Throwable arg0) {
+					// no need to do anything on the failure of updation of Review-Valudate end time
+				}
+
+				@Override
+				public void onSuccess(Void arg0) {
+					// no need to do anything on the success of updation of Review-Valudate end time
+				}
+
+			});
+			rpcService.cleanUpCurrentBatch(batchInstanceIdentifier, new EphesoftAsyncCallback<Void>() {
+
+				@Override
+				public void customFailure(Throwable arg0) {
+					// no need to do anything if there is a failure in cleaning the current user of the current batch
+				}
+
+				@Override
+				public void onFailure(Throwable arg0) {
+					// no need to do anything if there is a failure in cleaning the current user of the current batch
+				}
+
+				@Override
+				public void onSuccess(Void arg0) {
+					// no need to do anything if the current user of the current batch is cleaned successfully
+				}
+			});
 		}
 	}
 }

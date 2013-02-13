@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,20 +37,45 @@ package com.ephesoft.dcma.da.property;
 
 import com.ephesoft.dcma.core.common.DomainProperty;
 
+/**
+ * Enum to specify document type property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DomainProperty
+ */
 public enum DocumentTypeProperty implements DomainProperty {
 
-	DESC("description"), NAME("name");
+	/**
+	 * DESC.
+	 */
+	DESC("description"),
+	/**
+	 * NAME.
+	 */
+	NAME("name"),
+	/**
+	 * ORDER.
+	 */
+	ORDER("order");
 
+	/**
+	 * property String.
+	 */
 	private String property;
 
 	/**
-	 * @param property
+	 * Constructor.
+	 * 
+	 * @param property String
 	 */
 	DocumentTypeProperty(String property) {
 		this.property = property;
 	}
 
 	/**
+	 * To get property.
+	 * 
 	 * @return the property
 	 */
 	@Override

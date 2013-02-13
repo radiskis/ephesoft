@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.i18n;
+package com.ephesoft.dcma.gwt.customworkflow.client.i18n;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonMessages;
 
@@ -48,8 +48,6 @@ public interface CustomWorkflowMessages extends LocaleCommonMessages {
 	String PLUGIN_ALREADY_DEPENDENT = "plugin_already_dependent";
 
 	String NO_DEPENDENCY_SELECTED = "no_dependency_selected";
-
-	String DEPENDENCIES_SUCCESSFULLY_VALIDATED = "dependencies_successfully_validated";
 
 	String NO_RECORD_TO_EDIT = "no_record_to_edit";
 
@@ -67,10 +65,6 @@ public interface CustomWorkflowMessages extends LocaleCommonMessages {
 
 	String IMPORT_FILE_INVALID_TYPE = "import_file_invalid_type";
 
-	String IMPORT_UNSUCCESSFUL = "import_unsuccessful";
-
-	String NO_ZIP_ATTACHED = "no_zip_attached";
-
 	String DEPENDENCY_VIOLATED = "dependency_violated";
 
 	String UNABLE_TO_GET_ALL_PLUGINS_LIST = "unable_to_get_all_plugins_list";
@@ -81,10 +75,44 @@ public interface CustomWorkflowMessages extends LocaleCommonMessages {
 
 	String PLUGIN_ADDED_SUCCESSFULLY = "plugin_added_successfully";
 
-	String ADD_NEW_PLUGIN = "add_new_plugin";
+	String INVALID_DEPENDENCY_NAME = "invalid_dependency_name";
 
-	String DEPENDENCIES = "dependencies";
+	String ALREADY_EXISTS_CORRECT_AND_TRY_AGAIN = "already_exists_correct_and_try_again";
 
-	String PLUGINS_LIST = "plugins_list";
+	String UNIQUE_DEPENDENCY_FOR = "unique_dependency_for";
+
+	String TRY_AGAIN = "try_again";
+
+	String DEPENDENCIES_CONTAINS_DUPLICATE_ENTRY = "dependencies_contains_duplicate_entry";
+
+	String DEPENDENCY_ALREADY_EXISTS_TRY_AGAIN = "dependency_already_exists_try_again";
+
+	String ERROR_UPDATING_PLUGINS = "error_updating_plugins";
+
+	String UPDATING_PLUGINS_LIST = "updating_plugins_list";
+
+	String REQUIRED_CONTENT = "required_content";
+
+	String FILE_CANNOT_BE_VERIFIED_WARNING = "file_cannot_be_verified_warning";
+
+	String FILE_SAME_NAME = "file_same_name";
+
+	String FILE_AND = "file_and";
+
+	String FILE_CONTAIN_TWO_FILES = "file_contain_two_files";
+
+	String FILE_INFORMATION_ABOUT_THE_PLUGIN = "file_information_about_the_plugin";
+
+	String JAR_FOR_THE_PLUGIN_TO_BE_ADDED = "jar_for_the_plugin_to_be_added";
+
+	String PLUGIN_HAVING_TWO_FILES = "plugin_having_two_files";
+
+	String MAKE = "make";
+
+	String PLUGIN_ADDING_STEPS = "plugin_adding_steps";
+	
+	String UNSAVED_CHANGES_LOST_WARNING = "unsaved_changes_lost_warning";
+	
+	String RESTART_TOMCAT_WARNING = "tomcat_restart_warning";
 
 }

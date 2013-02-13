@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,7 +52,7 @@ import com.ephesoft.dcma.da.service.ServerRegistryService;
 
 /**
  * This class is responsible for watching all the servers registered with the common database pool. If any of the server is down or not
- * active this service will mark that registry entry as in active such that other servers can pick the entry corresponding to this shut
+ * active this service will mark that register entry as in active such that other servers can pick the entry corresponding to this shut
  * down server.
  * 
  * @author Ephesoft
@@ -78,12 +78,12 @@ public final class HeartBeat {
 	private ServerRegistryService serverRegistryService;
 
 	/**
-	 * Number of pings count.
+	 * Number of ping's count.
 	 */
 	private String numberOfPings;
 
 	/**
-	 * Number of pings count.
+	 * Number of ping's count.
 	 * 
 	 * @return numberOfPings
 	 */
@@ -92,7 +92,7 @@ public final class HeartBeat {
 	}
 
 	/**
-	 * Number of pings count.
+	 * Number of ping's count.
 	 * 
 	 * @param numberOfPings String
 	 */
@@ -166,8 +166,8 @@ public final class HeartBeat {
 	/**
 	 * This method will return true if the server is active other wise false.
 	 * 
-	 * @param url String
-	 * @return true if the serve is active other wise false.
+	 * @param url {@link String}
+	 * @return boolean true if the serve is active other wise false.
 	 */
 	private boolean checkHealth(final String url) {
 

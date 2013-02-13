@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,10 +47,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 
-/** Methods to manipulate spring's application context. */
+/** 
+ * This class contains methods to manipulate spring's application context. 
+ * 
+ * @author Ephesoft
+ * @version 1.0 
+ * @see org.springframework.context.ApplicationContext
+ */
 public class ApplicationContextUtil {
 
 	/**
+	 * To initialize the beans.
 	 * @param <T> the type of beans to be created (for type safety in caller method).
 	 * @param context the context
 	 * @param res the resource containing new context information
@@ -69,6 +76,7 @@ public class ApplicationContextUtil {
 	}
 
 	/**
+	 * To get beans from context.
 	 * @param <T> the type (for type safety in caller method)
 	 * @param beanFactory the bean factory
 	 * @param names a list of names to be retrieved from {@code bf}
@@ -85,6 +93,7 @@ public class ApplicationContextUtil {
 	}
 
 	/**
+	 * To get beans from context.
 	 * @param <T> the type (for type safety in caller method)
 	 * @param beanFactory the bean factory
 	 * @param names a list of names to be retrieved from {@code bf}
@@ -96,6 +105,7 @@ public class ApplicationContextUtil {
 	}
 
 	/**
+	 * To get beans of specified type.
 	 * @param ctx the application context
 	 * @param type the type to be returned
 	 * @param <T> type parameter
@@ -107,6 +117,7 @@ public class ApplicationContextUtil {
 	}
 
 	/**
+	 * To get Single Bean of specified type.
 	 * @param <T> the type of the bean
 	 * @param ctx the context holding the bean
 	 * @param type the typed class

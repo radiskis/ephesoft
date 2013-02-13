@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="GridComputingTemplate" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="314,1,55,42">
+		<transition to="Resume_Option" />
+	</start>
+
+	<decision g="309,63,80,40" name="check_point1">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Folder_Import_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point2">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Recostar_Page_Process_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point3">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Document_Assembler_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point4">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Recostar_Extraction_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point5">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Automated_Validation_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point6">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Review_Document_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point7">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Validate_Document_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<decision g="309,63,80,40" name="check_point8">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.RemoteEvaluation" />
+		<transition g="-21,-22" name="no" to="Export_Module" />
+		<transition g="-21,-22" name="yes" to="Workflow_Status_Remote" />
+		<transition g="-21,-22" name="invalid" to="Workflow_Status_Error" />
+	</decision>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Folder-Import-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point1" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Recostar-Page-Process-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point2" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Document-Assembler-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point3" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Recostar-Extraction-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point4" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Automated-Validation-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point5" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Review-Document-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point6" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68"
+		name="Is-Validate-Document-Module-Remote" sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point7" />
+	</sub-process>
+
+	<sub-process continue="async" g="81,82,176,68" name="Is-Export-Module-Remote"
+		sub-process-key="Workflow_Continue_Check">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<parameter-in subvar="isModuleRemote" var="isModuleRemote" />
+		<transition to="check_point8" />
+	</sub-process>
+
+	<decision g="309,63,80,40" name="Resume_Option">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ResumeEvaluation" />
+		<transition g="-26,-22" name="Workflow_Status_Running" to="Workflow_Status_Running" />
+		<transition g="-21,-22" name="Folder_Import_Module" to="Folder_Import_Module" />
+		<transition g="-21,-22" name="Recostar_Page_Process_Module"
+			to="Recostar_Page_Process_Module" />
+		<transition g="-21,-22" name="Document_Assembler_Module"
+			to="Document_Assembler_Module" />
+		<transition g="-21,-22" name="Recostar_Extraction_Module"
+			to="Recostar_Extraction_Module" />
+		<transition g="-21,-22" name="Automated_Validation_Module"
+			to="Automated_Validation_Module" />
+		<transition g="-21,-22" name="Review_Document_Module" to="is-review-required" />
+		<transition g="-21,-22" name="Validate_Document_Module" to="is-validation-required" />
+		<transition g="-21,-22" name="Export_Module" to="Export_Module" />
+	</decision>
+
+	<sub-process continue="async" g="81,82,176,68" name="Workflow_Status_Running"
+		sub-process-key="Workflow_Status_Running">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Is-Folder-Import-Module-Remote" />
+	</sub-process>
+
+	<sub-process continue="async" g="66,259,176,49" name="Folder_Import_Module"
+		sub-process-key="Folder_Import_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Is-Recostar-Page-Process-Module-Remote" />
+	</sub-process>
+
+	<sub-process continue="async" g="486,229,204,60"
+		name="Recostar_Page_Process_Module" sub-process-key="Recostar_Page_Process_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Is-Document-Assembler-Module-Remote" />
+	</sub-process>
+
+	<sub-process continue="async" g="522,431,183,55" name="Document_Assembler_Module"
+		sub-process-key="Document_Assembler_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="is-review-required" />
+	</sub-process>
+
+	<decision g="196,432,80,40" name="is-review-required">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ReviewEvaluation" />
+		<transition g="-26,-22" name="yes"
+			to="Is-Review-Document-Module-Remote" />
+		<transition g="-21,-22" name="no"
+			to="Is-Recostar-Extraction-Module-Remote" />
+	</decision>
+
+	<sub-process continue="async" g="203,667,207,54"
+		name="Recostar_Extraction_Module" sub-process-key="Recostar_Extraction_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Is-Automated-Validation-Module-Remote" />
+	</sub-process>
+
+	<sub-process continue="async" g="297,800,191,54"
+		name="Automated_Validation_Module" sub-process-key="Automated_Validation_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="is-validation-required" />
+	</sub-process>
+
+	<decision g="378,958,80,40" name="is-validation-required">
+		<handler
+			class="com.ephesoft.dcma.workflow.decisionhandler.ValidationEvaluation" />
+		<transition g="-26,-22" name="yes"
+			to="Is-Validate-Document-Module-Remote" />
+		<transition g="-21,-22" name="no" to="Is-Export-Module-Remote" />
+	</decision>
+
+	<sub-process continue="async" g="221,594,157,54" name="Review_Document_Module"
+		sub-process-key="Review_Document_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<parameter-out var="currentModule" expr="Review_Document_Module" />
+		<transition to="Is-Recostar-Extraction-Module-Remote" />
+	</sub-process>
+
+
+	<sub-process continue="async" g="486,1132,173,54" name="Validate_Document_Module"
+		sub-process-key="Validate_Document_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Is-Export-Module-Remote" />
+	</sub-process>
+
+	<sub-process continue="async" g="215,1149,142,54" name="Export_Module"
+		sub-process-key="Export_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Workflow_Status_Finished" />
+	</sub-process>
+
+	<sub-process continue="async" g="212,1260,199,54" name="Workflow_Status_Finished"
+		sub-process-key="Workflow_Status_Finished">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="end" />
+	</sub-process>
+
+	<sub-process continue="async" g="212,1260,199,54" name="Workflow_Status_Remote"
+		sub-process-key="Workflow_Status_Remote">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="end" />
+	</sub-process>
+
+	<sub-process continue="async" g="212,1260,199,54" name="Workflow_Status_Error"
+		sub-process-key="Workflow_Status_Error">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="end" />
+	</sub-process>
+
+	<end g="254,1356,80,40" name="end" />
+
+</process>

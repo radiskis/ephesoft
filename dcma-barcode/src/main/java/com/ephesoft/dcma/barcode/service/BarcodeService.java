@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,8 +45,8 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
 
 /**
  * This service is used to read Barcode from an image file and writes the value, coordinates and confidence score in page level Fields
- * inside batch.xml.The service can read images of type Code 39, QR and Datamatrix. If more than one barcode is found a seperate page
- * level field is created for it. Confidence score is decided on the basis of barcode value ie. 100 if barcode is found a and 0 if not
+ * inside batch.xml.The service can read images of type CODE39,QR, DATAMATRIX, PDF417,CODE128, CODE93,ITF, CODABAR and EAN13. If more than one barcode is found a separate page
+ * level field is created for it. Confidence score is decided on the basis of barcode value i.e. 100 if barcode is found a and 0 if not
  * found.
  * 
  * @author Ephesoft
@@ -62,18 +62,18 @@ public interface BarcodeService {
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param pluginWorkflow {@link String}
-	 * @throws DCMAException
+	 * @throws DCMAException if any exception occurs during reading of barcode.
 	 */
 	void extractPageBarCode(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
 
 	/**
 	 *  This method extracts the Barcode values, co-ordinates and confidence for each image file for web service.
 	 * 
-	 * @param xmlDocuments
-	 * @param batchInstanceIdentifier
-	 * @param workingDir
-	 * @param propertyMap
-	 * @throws DCMAException
+	 * @param xmlDocuments {@link List<Document>}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param workingDir {@link String}
+	 * @param propertyMap {@link Map<BarcodeProperties, String>}
+	 * @throws DCMAException if any exception occurs during reading of barcode.
 	 */
 	void extractPageBarCodeAPI(List<Document> xmlDocuments, String batchInstanceIdentifier, String workingDir,
 			Map<BarcodeProperties, String> propertyMap) throws DCMAException;

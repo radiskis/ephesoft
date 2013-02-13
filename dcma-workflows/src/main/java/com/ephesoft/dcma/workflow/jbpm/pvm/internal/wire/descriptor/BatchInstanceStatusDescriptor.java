@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,32 +40,50 @@ import org.jbpm.pvm.internal.wire.descriptor.AbstractDescriptor;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 
-
+/**
+ * This class gives description of the status of batch instance.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.pvm.internal.wire.descriptor.AbstractDescriptor
+ * 
+ */
 public class BatchInstanceStatusDescriptor extends AbstractDescriptor {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
-	
-	private BatchInstanceStatus status;
-	
-	public BatchInstanceStatusDescriptor(BatchInstanceStatus batchInstanceStatus) {
+
+	/**
+	 * status {@link BatchInstanceStatus}.
+	 */
+	private final BatchInstanceStatus status;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param batchInstanceStatus {@link BatchInstanceStatus}
+	 */
+	public BatchInstanceStatusDescriptor(final BatchInstanceStatus batchInstanceStatus) {
 		super();
-		status = batchInstanceStatus; 
+		status = batchInstanceStatus;
 	}
 
+	/**
+	 * Returns the status.
+	 * 
+	 * @param wireContext WireContext
+	 * @return Object
+	 */
 	@Override
 	public Object construct(WireContext wireContext) {
 		return status;
 	}
-	
+
 	/*
-	  <java expr="#{batchInstanceService}" g="81,90,207,60" method="updateBatchInstanceStatus" name="set-status-to-running">
-		<arg type="com.ephesoft.dcma.core.id.BatchInstanceID">
-			<object expr="#{batchIDD}"/>
-		</arg>
-		<arg>
-			<batch-instance-status value="RUNNING"/>
-		</arg>
-      	<transition name="to folder-import" to="folder-import" g="-80,-18"/>
-	  </java>
+	 * <java expr="#{batchInstanceService}" g="81,90,207,60" method="updateBatchInstanceStatus" name="set-status-to-running"> <arg
+	 * type="com.ephesoft.dcma.core.id.BatchInstanceID"> <object expr="#{batchIDD}"/> </arg> <arg> <batch-instance-status
+	 * value="RUNNING"/> </arg> <transition name="to folder-import" to="folder-import" g="-80,-18"/> </java>
 	 */
 }

@@ -145,7 +145,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ephesoft.dcma</groupId>
-			<artifactId>dcma-xml-to-database</artifactId>
+			<artifactId>dcma-db-export</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

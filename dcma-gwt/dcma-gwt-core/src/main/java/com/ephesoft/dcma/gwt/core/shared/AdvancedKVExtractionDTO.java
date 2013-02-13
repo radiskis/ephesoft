@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,24 +59,24 @@ public class AdvancedKVExtractionDTO implements IsSerializable {
 
 	private Integer valueY1Coord;
 
-	private boolean isDeleted;
+	private boolean deleted;
 
-	private boolean isNew;
+	private boolean newPlugin;
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return newPlugin;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newPlugin) {
+		this.newPlugin = newPlugin;
 	}
 
 	public String getImageName() {

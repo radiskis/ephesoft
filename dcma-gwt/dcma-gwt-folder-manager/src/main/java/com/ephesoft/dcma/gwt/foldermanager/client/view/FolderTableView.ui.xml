@@ -1,0 +1,19 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<g:DockLayoutPanel>
+		<g:north size="90" width="100%">
+			<g:VerticalPanel width="100%">
+				<g:HorizontalPanel ui:field="optionsPanel" width="100%" />
+				<g:FlexTable ui:field="headers" width="100%" />
+			</g:VerticalPanel>
+		</g:north>
+		<g:center>
+			<g:ScrollPanel ui:field="folderScrollPanel">
+				<g:FlexTable ui:field="folderDisplayTable" width="100%" />
+			</g:ScrollPanel>
+		</g:center>
+		<g:south size="20">
+			<g:VerticalPanel ui:field="footerPanel" />
+		</g:south>
+	</g:DockLayoutPanel>
+</ui:UiBinder>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,17 +36,33 @@
 package com.ephesoft.dcma.encryption.exception;
 
 
+/**
+ * This class is used to set cryptographic exceptions.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.encryption.core.EncryptorDecryptor
+ */
 public class CryptographyException extends Exception{
 
 	/**
-	 * 
+	 * Default serial version id.
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Parameterized constructor.
+	 * @param message {@link String}
+	 * @param cause {@link Throwable}
+	 */
 	public CryptographyException(String message, Throwable cause) {
 		super(message, cause);
 	}
 	
+	/**
+	 * Parameterized constructor.
+	 * @param message {@link String}
+	 */
 	public CryptographyException(String message){
 		super(message);
 	}

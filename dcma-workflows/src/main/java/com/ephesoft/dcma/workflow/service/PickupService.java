@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,14 +44,15 @@ package com.ephesoft.dcma.workflow.service;
  * 
  */
 public interface PickupService {
-	
+
 	/**
 	 * This method is used to pick up batch instances.
 	 */
 	void pickupBatchInstance();
-	
+
 	/**
 	 * This will return maxCapacity (Maximum number of batches in RUNNING state) for the server.
+	 * 
 	 * @return int
 	 */
 	int getMaxCapacity();

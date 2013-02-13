@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -113,16 +113,17 @@ public class UploadBatchImageServlet extends DCMAHttpServlet {
 
 							out = new FileOutputStream(tempFile);
 							byte buf[] = new byte[1024];
-							int len;
-							while ((len = instream.read(buf)) > 0) {
+							int len = instream.read(buf);
+							while (len > 0) {
 								out.write(buf, 0, len);
+								len = instream.read(buf);
 							}
 						} catch (FileNotFoundException e) {
-							log.error("Unable to create the upload folder." + e, e);
+							LOG.error("Unable to create the upload folder." + e, e);
 							printWriter.write("Unable to create the upload folder.Please try again.");
 
 						} catch (IOException e) {
-							log.error("Unable to read the file." + e, e);
+							LOG.error("Unable to read the file." + e, e);
 							printWriter.write("Unable to read the file.Please try again.");
 						} finally {
 							if (out != null) {
@@ -135,12 +136,12 @@ public class UploadBatchImageServlet extends DCMAHttpServlet {
 					}
 				}
 			} catch (FileUploadException e) {
-				log.error("Unable to read the form contents." + e, e);
+				LOG.error("Unable to read the form contents." + e, e);
 				printWriter.write("Unable to read the form contents.Please try again.");
 			}
 
 		} else {
-			log.error("Request contents type is not supported.");
+			LOG.error("Request contents type is not supported.");
 			printWriter.write("Request contents type is not supported.");
 		}
 		printWriter.write("currentBatchUploadFolderName:" + currentBatchUploadFolderName);

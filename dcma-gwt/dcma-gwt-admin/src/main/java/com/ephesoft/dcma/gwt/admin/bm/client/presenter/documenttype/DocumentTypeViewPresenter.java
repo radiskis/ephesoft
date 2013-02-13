@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,15 +35,20 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.DocumentTypeView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.TableTestResultView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -55,17 +60,38 @@ import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
 
+/**
+ * The presenter for view that shows the document type view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<DocumentTypeView> {
 
+	/**
+	 * documentTypeDetailPresenter DocumentTypeDetailPresenter.
+	 */
 	private final DocumentTypeDetailPresenter documentTypeDetailPresenter;
 
+	/**
+	 * editDocumentTypePresenter EditDocumentTypePresenter.
+	 */
 	private final EditDocumentTypePresenter editDocumentTypePresenter;
 
+	/**
+	 * tableTestResultView TableTestResultView.
+	 */
 	private final TableTestResultView tableTestResultView = new TableTestResultView();
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view DocumentTypeView
+	 */
 	public DocumentTypeViewPresenter(BatchClassManagementController controller, DocumentTypeView view) {
 
 		super(controller, view);
@@ -73,27 +99,43 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 		this.editDocumentTypePresenter = new EditDocumentTypePresenter(controller, view.getEditDocumentTypeView());
 	}
 
+	/**
+	 * To show Document Type View.
+	 */
 	public void showDocumentTypeView() {
 		view.getDocumentTypeVerticalPanel().setVisible(Boolean.TRUE);
 		view.getDocumentTypeConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show edit Document Type View.
+	 */
 	public void showEditDocumentTypeView() {
 		view.getDocumentTypeVerticalPanel().setVisible(Boolean.FALSE);
 		view.getDocumentTypeConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * In case of Detail View Clicked.
+	 */
 	public void onDetailViewClicked() {
 		documentTypeDetailPresenter.bind();
 	}
 
+	/**
+	 * To get Document Type Detail Presenter.
+	 * 
+	 * @return DocumentTypeDetailPresenter
+	 */
 	public DocumentTypeDetailPresenter getDocumentTypeDetailPresenter() {
 		return documentTypeDetailPresenter;
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		this.editDocumentTypePresenter.bind();
 		this.documentTypeDetailPresenter.bind();
 		if (controller.getSelectedDocument() != null) {
 			view.createDocumentFunctionKeyList(controller.getSelectedDocument().getFunctionKeys());
@@ -101,56 +143,109 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 			view.createFieldTypeList(controller.getSelectedDocument().getFields());
 			view.createTableInfoList(controller.getSelectedDocument().getTableInfos());
 		}
+		this.editDocumentTypePresenter.bind();
 	}
 
+	/**
+	 * To perform operations in case of add Field Button Clicked.
+	 */
 	public void onAddFieldButtonClicked() {
 		if (controller.isAdd()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_DOCUMENT_TYPE)); 
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
 			return;
 		}
 		FieldTypeDTO fieldTypeDTO = createFieldTypeDTOObject();
-		
+
 		controller.setAdd(true);
 		controller.setSelectedDocumentLevelField(fieldTypeDTO);
 		controller.getMainPresenter().showFieldTypeView(true);
 	}
 
+	/**
+	 * To create Field Type DTO Object.
+	 * 
+	 * @return FieldTypeDTO
+	 */
 	public FieldTypeDTO createFieldTypeDTOObject() {
 		FieldTypeDTO fieldTypeDTO = new FieldTypeDTO();
 		fieldTypeDTO.setNew(true);
 		fieldTypeDTO.setDocTypeDTO(controller.getSelectedDocument());
-		fieldTypeDTO.setName("");
+		fieldTypeDTO.setName(BatchClassManagementConstants.EMPTY_STRING);
 		fieldTypeDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		// setting field order number
+		if (controller.getSelectedDocument() != null) {
+			Collection<FieldTypeDTO> dlfList = controller.getSelectedDocument().getFields();
+			if (null != dlfList && !dlfList.isEmpty()) {
+				ArrayList<Integer> fieldOrderList = new ArrayList<Integer>();
+				for (FieldTypeDTO fieldTypeDto : dlfList) {
+					fieldOrderList.add(Integer.parseInt(fieldTypeDto.getFieldOrderNumber()));
+				}
+				Integer maxFieldOrder = Collections.max(fieldOrderList);
+				if (maxFieldOrder > (Integer.MAX_VALUE - BatchClassManagementConstants.FIELD_ORDER_DIFFERENCE)) {
+					// setting the field order to be empty if generated field order is not in integer range
+					fieldTypeDTO.setFieldOrderNumber(BatchClassManagementConstants.EMPTY_STRING);
+				} else {
+					Integer newFieldOrder = Collections.max(fieldOrderList) + BatchClassManagementConstants.FIELD_ORDER_DIFFERENCE;
+					fieldTypeDTO.setFieldOrderNumber(newFieldOrder.toString());
+				}
+			} else {
+				fieldTypeDTO.setFieldOrderNumber(BatchClassManagementConstants.INITIAL_FIELD_ORDER_NUMBER);
+			}
+		}
 		return fieldTypeDTO;
 	}
 
+	/**
+	 * To perform operations in case of edit document properties button clicked.
+	 */
 	public void onEditDocumentPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editDocumentTypePresenter.bind();
+
 		showEditDocumentTypeView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editDocumentTypePresenter.bind();
 	}
 
+	/**
+	 * To perform operations in case of delete Field button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteFieldButtonClicked(String identifier) {
 		controller.getSelectedDocument().getFieldTypeByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);
 		controller.getMainPresenter().showDocumentTypeView(false);
 	}
 
+	/**
+	 * To perform operations in case of delete Field button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditFieldButtonClicked(String identifier) {
 		controller.setSelectedDocumentLevelField(controller.getSelectedDocument().getFieldTypeByIdentifier(identifier));
 		controller.setAdd(false);
-		controller.getMainPresenter().showFieldTypeView(true);
+		controller.getMainPresenter().showFieldTypeView(false);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * To perform operations in case of add table info field button clicked.
+	 */
 	public void onAddTableInfoFieldButtonClicked() {
 		if (controller.isAdd()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
 			return;
 		}
 		TableInfoDTO tableInfoDTO = createTableInfoDTOObject();
@@ -160,38 +255,59 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 
 	}
 
+	/**
+	 * To create Table Info DTO Object.
+	 * 
+	 * @return TableInfoDTO
+	 */
 	public TableInfoDTO createTableInfoDTOObject() {
 		TableInfoDTO tableInfoDTO = new TableInfoDTO();
 		tableInfoDTO.setNew(true);
 		tableInfoDTO.setDocTypeDTO(controller.getSelectedDocument());
-		tableInfoDTO.setName("");
+		tableInfoDTO.setName(BatchClassManagementConstants.EMPTY_STRING);
 		tableInfoDTO.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
 		return tableInfoDTO;
 	}
 
+	/**
+	 * To perform operations in case of edit table info field button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditTableInfoFieldButtonClicked(String identifier) {
 		controller.setTableInfoSelectedField(controller.getSelectedDocument().getTableInfoByIdentifier(identifier));
 		controller.setAdd(false);
-		controller.getMainPresenter().showTableInfoView(true);
+		controller.getMainPresenter().showTableInfoView(false);
 	}
 
+	/**
+	 * To perform operations in case of delete table info button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteTableInfoButtonClicked(String identifier) {
 		controller.getSelectedDocument().getTableInfoByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);
 		controller.getMainPresenter().showDocumentTypeView(false);
 	}
 
+	/**
+	 * To perform operations in case of test table button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onTestTableButtonClicked(String identifier) {
 		ScreenMaskUtility.maskScreen();
 		controller.setTableInfoSelectedField(controller.getSelectedDocument().getTableInfoByIdentifier(identifier));
 
 		controller.getRpcService().testTablePattern(controller.getBatchClass(), controller.getSelectedTableInfoField(),
-				new AsyncCallback<List<TestTableResultDTO>>() {
+				new EphesoftAsyncCallback<List<TestTableResultDTO>>() {
 
 					@Override
-					public void onFailure(Throwable throwable) {
+					public void customFailure(Throwable throwable) {
 						ScreenMaskUtility.unmaskScreen();
-						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(), MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE,Boolean.TRUE);
+						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(),
+								MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE, Boolean.TRUE);
 						dialog.addDialogListener(new DialogListener() {
 
 							@Override
@@ -204,9 +320,9 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 								// TODO Auto-generated method stub
 							}
 						});
-						
+
 						dialog.okButton.setStyleName(AdminConstants.BUTTON_STYLE);
-						
+
 					}
 
 					@Override
@@ -226,16 +342,25 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 				});
 	}
 
+	/**
+	 * To perform operations in case of edit function key button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditFunctionKeyButtonClicked(String identifier) {
 		controller.setSelectedFunctionKeyDTO(controller.getSelectedDocument().getFunctionKeyByIdentifier(identifier));
 		controller.setAdd(false);
-		controller.getMainPresenter().showFunctionKeyView(true);
+		controller.getMainPresenter().showFunctionKeyView(false);
 
 	}
 
+	/**
+	 * To perform operations in case of add function key button clicked.
+	 */
 	public void onAddFunctionKeyButtonClicked() {
 		if (controller.isAdd()) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.ADD_DOCUMENT_TYPE));
 			return;
 		}
 		controller.getMainPresenter().getFunctionKeyViewPresenter().getEditFunctionKeyPresenter().clearFields();
@@ -245,6 +370,11 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 		controller.getMainPresenter().showFunctionKeyView(true);
 	}
 
+	/**
+	 * To create Function Key DTO Object.
+	 * 
+	 * @return FunctionKeyDTO
+	 */
 	public FunctionKeyDTO createFunctionKeyDTOObject() {
 		FunctionKeyDTO functionKeyDTO = new FunctionKeyDTO();
 		functionKeyDTO.setDocTypeDTO(controller.getSelectedDocument());
@@ -253,6 +383,11 @@ public class DocumentTypeViewPresenter extends AbstractBatchClassPresenter<Docum
 		return functionKeyDTO;
 	}
 
+	/**
+	 * To perform operations in case of delete function key button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteFunctionKeyButtonClicked(String identifier) {
 		controller.getSelectedDocument().getFunctionKeyByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);

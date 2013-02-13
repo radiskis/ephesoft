@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,9 +55,19 @@ import com.ephesoft.dcma.da.domain.KVPageProcess;
 import com.ephesoft.dcma.da.domain.Module;
 import com.ephesoft.dcma.da.domain.ModuleConfig;
 
+/**
+ * This is a database service to get the modules related to a batch class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchClassModuleService
+ */
 @Service
 public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
+	/**
+	 * BATCH_CLASS_ID String.
+	 */
 	private static final String BATCH_CLASS_ID = "Batch class id : ";
 
 	/**
@@ -65,26 +75,57 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassModuleServiceImpl.class);
 
+	/**
+	 * batchClassModuleDao {@link BatchClassModuleDao}.
+	 */
 	@Autowired
 	private BatchClassModuleDao batchClassModuleDao;
 
+	/**
+	 * API to fetch count of modules inside a batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link Integer} count of Modules.
+	 */
 	@Override
 	public Integer countModules(String batchClassIdentifier) {
 		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		return batchClassModuleDao.countModules(batchClassIdentifier);
 	}
 
+	/**
+	 * API to fetch all the modules contained in the batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return List<{@link Module}>.
+	 */
 	@Override
 	public List<Module> getBatchClassModule(String batchClassIdentifier) {
 		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		return batchClassModuleDao.getBatchClassModule(batchClassIdentifier);
 	}
 
+	/**
+	 * API to fetch Modules starting from firstIndex and as many results as MaxResults from a batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param firstResult int
+	 * @param maxResults int
+	 * @return List<{@link Module}>
+	 */
 	@Override
 	public List<Module> getModules(String batchClassIdentifier, int firstIndex, int maxResults) {
 		return batchClassModuleDao.getModules(batchClassIdentifier, firstIndex, maxResults);
 	}
 
+	/**
+	 * API to fetch BatchClassModule by batch class id and module name.
+	 * 
+	 * @param batchClassIdentifier {@link String}	 
+	 * @param moduleName {@link String}
+	 * @return {@link BatchClassModule}
+	 */
+	@Transactional
 	@Override
 	public BatchClassModule getBatchClassModuleByName(String batchClassIdentifier, String moduleName) {
 		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
@@ -128,15 +169,20 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 		return batchClassModule;
 	}
 
+	/**
+	 * API to fetch BatchClassModule by workflow name.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param workflowName {@link String}
+	 * @return {@link BatchClassModule}
+	 */
 	@Override
 	public BatchClassModule getBatchClassModuleByWorkflowName(String batchClassIdentifier, String workflowName) {
 		LOGGER.info(BATCH_CLASS_ID + batchClassIdentifier);
 		BatchClassModule batchClassModule = batchClassModuleDao.getModuleByWorkflowName(batchClassIdentifier, workflowName);
-		if(batchClassModule == null) {
-			LOGGER.error("No module found with workflowName:" + workflowName + " in batch class id:" + batchClassIdentifier + ". Skipping the updates for this module.");
-		} else {
+		if (batchClassModule != null) {
 			List<BatchClassModuleConfig> modConfigs = batchClassModule.getBatchClassModuleConfig();
-			
+
 			for (BatchClassModuleConfig BCModConfig : modConfigs) {
 				ModuleConfig moduleConfig = BCModConfig.getModuleConfig();
 				if (LOGGER.isDebugEnabled() && moduleConfig != null) {
@@ -174,12 +220,22 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 		return batchClassModule;
 	}
 
+	/**
+	 * API to evict a batch class module object.
+	 * 
+	 * @param batchClassModule {@link BatchClassModule}
+	 */
 	@Override
 	@Transactional
 	public void evict(BatchClassModule batchClassModule) {
 		batchClassModuleDao.evict(batchClassModule);
 	}
 
+	/**
+	 * API to get list of all batch class modules given the batch class identifier.
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
 	@Override
 	public List<BatchClassModule> getAllBatchClassModulesByIdentifier(String batchClassIdentifier) {
 		List<BatchClassModule> batchClassModules = null;
@@ -197,12 +253,21 @@ public class BatchClassModuleServiceImpl implements BatchClassModuleService {
 
 	}
 
+	/**
+	 * API to get all the batch class modules available.
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
 	@Override
 	public List<BatchClassModule> getAllBatchClassModules() {
 		LOGGER.info("Getting list of all batch class modules");
 		return batchClassModuleDao.getAll();
 	}
 
+	/**
+	 * API to get the list of all batch class modules in ascending or descending workflow name order.
+	 * @param order Order
+	 * @return {@link List}< {@link BatchClassModule}>
+	 */
 	@Override
 	public List<BatchClassModule> getAllBatchClassModules(Order order) {
 		return batchClassModuleDao.getAllBatchClassModulesInOrder(order);

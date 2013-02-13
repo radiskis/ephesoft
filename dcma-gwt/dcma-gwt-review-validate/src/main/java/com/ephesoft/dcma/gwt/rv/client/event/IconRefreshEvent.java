@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,18 +36,18 @@
 package com.ephesoft.dcma.gwt.rv.client.event;
 
 import com.ephesoft.dcma.batch.schema.Document;
-import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 public class IconRefreshEvent extends GwtEvent<IconRefreshEventHandler> {
 
-	public static Type<IconRefreshEventHandler> TYPE = new Type<IconRefreshEventHandler>();
+	public static Type<IconRefreshEventHandler> type = new Type<IconRefreshEventHandler>();
 
-	private BatchDTO batchDTO;
-	private Document document;
+	private final BatchDTO batchDTO;
+	private final Document document;
 
-	public IconRefreshEvent(BatchDTO batchDTO, Document document, Page page) {
+	public IconRefreshEvent(BatchDTO batchDTO, Document document) {
+		super();
 		this.batchDTO = batchDTO;
 		this.document = document;
 	}
@@ -59,7 +59,7 @@ public class IconRefreshEvent extends GwtEvent<IconRefreshEventHandler> {
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<IconRefreshEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public BatchDTO getBatchDTO() {

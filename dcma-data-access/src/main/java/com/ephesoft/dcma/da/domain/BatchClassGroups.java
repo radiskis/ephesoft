@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,20 +45,37 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_groups.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_groups")
 public class BatchClassGroups extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * groupName String.
+	 */
 	@Column(name = "group_name")
 	private String groupName;
 
+	/**
+	 * batchClass BatchClass.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "batch_class_id")
 	private BatchClass batchClass;
 
 	/**
+	 * To get Batch Class.
 	 * @return the batchClass
 	 */
 	public BatchClass getBatchClass() {
@@ -66,13 +83,15 @@ public class BatchClassGroups extends AbstractChangeableEntity implements Serial
 	}
 
 	/**
-	 * @param batchClass the batchClass to set
+	 * To set Batch Class.
+	 * @param batchClass BatchClass
 	 */
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
 
 	/**
+	 * To get Group Name.
 	 * @return the groupName
 	 */
 	public String getGroupName() {
@@ -80,7 +99,8 @@ public class BatchClassGroups extends AbstractChangeableEntity implements Serial
 	}
 
 	/**
-	 * @param groupName the groupName to set
+	 * To set Group Name.
+	 * @param groupName String
 	 */
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;

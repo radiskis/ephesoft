@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,12 +55,10 @@ public class BatchClassPluginDTO implements IsSerializable {
 
 	private int orderNumber;
 	
-	private boolean isDeleted;
+	private boolean deleted;
 	
-	private boolean isNew;
-	
-	
-
+	private boolean newPlugin;
+ 
 	private List<BatchClassPluginConfigDTO> batchClassPluginConfigsList = new LinkedList<BatchClassPluginConfigDTO>();
 
 	private Map<String, BatchClassDynamicPluginConfigDTO> batchClassDynamicPluginConfigsMap = new LinkedHashMap<String, BatchClassDynamicPluginConfigDTO>();
@@ -76,11 +74,11 @@ public class BatchClassPluginDTO implements IsSerializable {
 		Collections.sort(batchClassPluginConfigsList, new Comparator<BatchClassPluginConfigDTO>() {
 
 			@Override
-			public int compare(BatchClassPluginConfigDTO batchClassPluginConfigDTOOne,
-					BatchClassPluginConfigDTO batchClassPluginConfigDTOTwo) {
+			public int compare(final BatchClassPluginConfigDTO batchClassPluginConfigDTOOne,
+					final BatchClassPluginConfigDTO batchClassPluginConfigDTOTwo) {
 				int result;
-				Integer orderNumberOne = batchClassPluginConfigDTOOne.getOrderNumber();
-				Integer orderNumberTwo = batchClassPluginConfigDTOTwo.getOrderNumber();
+				final Integer orderNumberOne = batchClassPluginConfigDTOOne.getOrderNumber();
+				final Integer orderNumberTwo = batchClassPluginConfigDTOTwo.getOrderNumber();
 				if (orderNumberOne != null && orderNumberTwo != null) {
 					result = orderNumberOne.compareTo(orderNumberTwo);
 				} else if (orderNumberOne == null && orderNumberTwo == null) {
@@ -94,45 +92,47 @@ public class BatchClassPluginDTO implements IsSerializable {
 			}
 
 		});
-
 	}
 
-	public void addBatchClassPluginConfig(BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
+	public void addBatchClassPluginConfig(final BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
 		this.batchClassPluginConfigsList.add(batchClassPluginConfigDTO);
 	}
 
-	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByName(String name) {
-		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
+	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByName(final String name) {
+		BatchClassPluginConfigDTO batchClassPluginConfigDTO = null;
+		for (final BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
 			if (dto != null && dto.getName() != null && dto.getName().equals(name)) {
-				return dto;
+				batchClassPluginConfigDTO = dto;
 			}
 		}
-		return null;
+		return batchClassPluginConfigDTO;
 	}
 
-	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByQualifier(String qualifier) {
-		for (BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
+	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTOByQualifier(final String qualifier) {
+		BatchClassPluginConfigDTO batchClassPluginConfigDTO = null;
+		for (final BatchClassPluginConfigDTO dto : batchClassPluginConfigsList) {
 			if (dto.getQualifier() != null && dto.getQualifier().equals(qualifier)) {
-				return dto;
+				batchClassPluginConfigDTO = dto;
 			}
 		}
-		return null;
+		return batchClassPluginConfigDTO;
 	}
 
-	public BatchClassDynamicPluginConfigDTO getBatchClassPluginConfigDTOByDescription(String description) {
-		for (BatchClassDynamicPluginConfigDTO dto : batchClassDynamicPluginConfigsMap.values()) {
+	public BatchClassDynamicPluginConfigDTO getBatchClassPluginConfigDTOByDescription(final String description) {
+		BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO = null;
+		for (final BatchClassDynamicPluginConfigDTO dto : batchClassDynamicPluginConfigsMap.values()) {
 			if (dto.getDescription() != null && dto.getDescription().equals(description)) {
-				return dto;
+				batchClassDynamicPluginConfigDTO = dto;
 			}
 		}
-		return null;
+		return batchClassDynamicPluginConfigDTO;
 	}
 
 	public int getOrderNumber() {
 		return orderNumber;
 	}
 
-	public void setOrderNumber(int orderNumber) {
+	public void setOrderNumber(final int orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
@@ -140,7 +140,7 @@ public class BatchClassPluginDTO implements IsSerializable {
 		return batchClassModule;
 	}
 
-	public void setBatchClassModule(BatchClassModuleDTO batchClassModule) {
+	public void setBatchClassModule(final BatchClassModuleDTO batchClassModule) {
 		this.batchClassModule = batchClassModule;
 	}
 
@@ -148,7 +148,7 @@ public class BatchClassPluginDTO implements IsSerializable {
 		return plugin;
 	}
 
-	public void setPlugin(PluginDetailsDTO plugin) {
+	public void setPlugin(final PluginDetailsDTO plugin) {
 		this.plugin = plugin;
 	}
 
@@ -156,7 +156,7 @@ public class BatchClassPluginDTO implements IsSerializable {
 		return identifier;
 	}
 
-	public void setIdentifier(String identifier) {
+	public void setIdentifier(final String identifier) {
 		this.identifier = identifier;
 	}
 
@@ -164,48 +164,40 @@ public class BatchClassPluginDTO implements IsSerializable {
 		return batchClassDynamicPluginConfigsMap.values();
 	}
 
-	public void addBatchClassDynamicPluginConfig(BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
+	public void addBatchClassDynamicPluginConfig(final BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
 		this.batchClassDynamicPluginConfigsMap.put(batchClassDynamicPluginConfigDTO.getIdentifier(), batchClassDynamicPluginConfigDTO);
 	}
 
-	public void addBatchClassDynamicPluginConfig(String identifier, BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
+	public void addBatchClassDynamicPluginConfig(final String identifier, final BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
 		this.batchClassDynamicPluginConfigsMap.put(identifier, batchClassDynamicPluginConfigDTO);
 	}
 
-	public BatchClassDynamicPluginConfigDTO getBatchClassDynamicPluginConfigDTOById(String identifier) {
+	public BatchClassDynamicPluginConfigDTO getBatchClassDynamicPluginConfigDTOById(final String identifier) {
 		return batchClassDynamicPluginConfigsMap.get(identifier);
 	}
 
-	
-	/**
-	 * @return the isDeleted
-	 */
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
-
 	
-	/**
-	 * @param isDeleted the isDeleted to set
-	 */
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	
+	public void setDeleted(final boolean deleted) {
+		this.deleted = deleted;
 	}
-
 	
 	/**
 	 * @return the isNew
 	 */
 	public boolean isNew() {
-		return isNew;
+		return newPlugin;
 	}
 
 	
 	/**
 	 * @param isNew the isNew to set
 	 */
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(final boolean isNew) {
+		this.newPlugin = isNew;
 	}
 
 }

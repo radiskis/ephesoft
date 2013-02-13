@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,16 +54,18 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ConfirmationDialog extends DialogBox {
 
+	private static final String KEYDOWN = "keydown";
+
 	interface Binder extends UiBinder<Widget, ConfirmationDialog> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public interface DialogListener {
 
-		public void onOkClick();
+		void onOkClick();
 
-		public void onCancelClick();
+		void onCancelClick();
 	}
 
 	@UiField
@@ -76,10 +78,10 @@ public class ConfirmationDialog extends DialogBox {
 	public Button thirdButton;
 
 	@UiField
-	HTML centerWidget;
+	protected HTML centerWidget;
 
 	@UiField
-	HTMLPanel panel;
+	protected HTMLPanel panel;
 
 	private DialogListener listener;
 
@@ -94,10 +96,11 @@ public class ConfirmationDialog extends DialogBox {
 	}
 
 	public ConfirmationDialog(boolean thirdButtonVisibility) {
-		setWidget(binder.createAndBindUi(this));
-		okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_ok));
-		cancelButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_cancel));
-		thirdButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_discard));
+		super();
+		setWidget(BINDER.createAndBindUi(this));
+		okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_CONFIRMATION_OK));
+		cancelButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_CONFIRMATION_CANCEL));
+		thirdButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_CONFIRMATION_DISCARD));
 		thirdButton.setVisible(thirdButtonVisibility);
 		setAnimationEnabled(true);
 		setGlassEnabled(true);
@@ -105,7 +108,7 @@ public class ConfirmationDialog extends DialogBox {
 		setDefaultListener();
 	}
 
-	public void setDefaultListener() {
+	public final void setDefaultListener() {
 		addDialogListener(new DialogListener() {
 
 			@Override
@@ -140,43 +143,39 @@ public class ConfirmationDialog extends DialogBox {
 	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
 		super.onPreviewNativeEvent(preview);
 
+		// Use the popup's key preview hooks to close the dialog when either
+		// enter or escape is pressed.
 		NativeEvent evt = preview.getNativeEvent();
-		if (evt.getType().equals("keydown")) {
-			// Use the popup's key preview hooks to close the dialog when either
-			// enter or escape is pressed.
-			switch (evt.getKeyCode()) {
-				// case KeyCodes.KEY_ENTER:
-				case KeyCodes.KEY_ESCAPE:
-					if (performCancelOnEscape && listener != null && cancelButton.isVisible()) {
-						listener.onCancelClick();
-					}
-					hide();
-					break;
-			}
+		if (evt.getType().equals(KEYDOWN) && evt.getKeyCode() == KeyCodes.KEY_ESCAPE && performCancelOnEscape && listener != null
+				&& cancelButton.isVisible()) {
+			listener.onCancelClick();
+			hide();
 		}
+
 	}
+	
 
 	@UiHandler("okButton")
-	void onOk(ClickEvent event) {
+	protected void onOk(ClickEvent event) {
 		listener.onOkClick();
 		hide();
 	}
 
 	@UiHandler("cancelButton")
-	void OnCancel(ClickEvent event) {
+	protected void onCancel(ClickEvent event) {
 		listener.onCancelClick();
 		hide();
 	}
 
 	@UiHandler("thirdButton")
-	void OnDiscard(ClickEvent event) {
+	protected void onDiscard(ClickEvent event) {
 		if (listener instanceof ThirdButtonListener) {
 			((ThirdButtonListener) listener).onThirdButtonClick();
 			hide();
 		}
 	}
 
-	public void addDialogListener(DialogListener dialogListener) {
+	public final void addDialogListener(DialogListener dialogListener) {
 		this.listener = dialogListener;
 	}
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,17 +44,26 @@ import com.ephesoft.dcma.core.component.JAXB2Template;
 import com.ephesoft.dcma.core.dao.xml.XmlDao;
 
 /**
+ * This class is used to read HOCR object.
+ * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.batch.schema.HocrPages
  */
 @Repository
 public class HocrSchemaDao extends XmlDao<HocrPages> {
 
+	/**
+	 * jaxb2Template JAXB2Template.
+	 */
 	@Autowired
 	@Qualifier("hocrJAXB2Template")
 	private JAXB2Template jaxb2Template;
 
+	/**
+	 * To get JAXB2 object.
+	 * @return JAXB2Template
+	 */
 	@Override
 	public JAXB2Template getJAXB2Template() {
 		return this.jaxb2Template;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,13 +37,14 @@ package com.ephesoft.dcma.gwt.reporting.client.view;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
-import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.ReportDTO;
 import com.ephesoft.dcma.gwt.reporting.client.i18n.ReportingConstants;
 import com.ephesoft.dcma.gwt.reporting.client.presenter.ReportingPresenter;
@@ -77,87 +78,88 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class ReportingView extends View<ReportingPresenter> {
 
 	@UiField
-	Label completeInfo;
+	protected Label completeInfo;
 	@UiField
-	Label totalBatchesLabel;
+	protected Label totalBatchesLabel;
 	@UiField
-	Label totalBatches;
+	protected Label totalBatches;
 	@UiField
-	Label totalDocumentsLabel;
+	protected Label totalDocumentsLabel;
 	@UiField
-	Label totalDocuments;
+	protected Label totalDocuments;
 	@UiField
-	Label totalPagesLabel;
+	protected Label totalPagesLabel;
 	@UiField
-	Label totalPages;
+	protected Label totalPages;
 	@UiField
-	Button syncButton;
+	protected Button syncButton;
 
 	@UiField
-	RadioButton moduleSelection;
+	protected RadioButton moduleSelection;
 	@UiField
-	RadioButton pluginSelection;
+	protected RadioButton pluginSelection;
 	@UiField
-	RadioButton userSelection;
+	protected RadioButton userSelection;
 
 	@UiField
-	ListBox userList;
+	protected ListBox userList;
 	@UiField
-	ListBox intervalListBox;
+	protected ListBox intervalListBox;
 	@UiField
-	ListBox batchClassList;
+	protected ListBox batchClassList;
 
 	@UiField
-	Button goButton;
+	protected Button goButton;
 
 	@UiField
-	Button commonButton;
+	protected Button commonButton;
 
 	@UiField
-	LayoutPanel reportTablePanel;
+	protected LayoutPanel reportTablePanel;
 
 	/*
 	 * @UiField CalendarWidget startDateCalendar;
 	 */
 
 	@UiField
-	TextBox startDateText;
+	protected TextBox startDateText;
 
 	@UiField
-	TextBox endDateText;
+	protected TextBox endDateText;
 
 	@UiField
-	VerticalPanel labelPanel;
+	protected VerticalPanel labelPanel;
 
 	@UiField
-	DockLayoutPanel reportPanel;
+	protected DockLayoutPanel reportPanel;
 
 	@UiField
-	HorizontalPanel datePanel;
+	protected HorizontalPanel datePanel;
 
 	@UiField
-	HorizontalPanel batchClassPanel;
+	protected HorizontalPanel batchClassPanel;
 
 	@UiField
-	Label startDateFormat;
+	protected Label startDateFormat;
 
 	@UiField
-	Label endDateFormat;
+	protected Label endDateFormat;
 
-	ReportingListView reportingListView;
+	protected final ReportingListView reportingListView;
 
-	List<ReportDTO> reportList;
+	private List<ReportDTO> reportList;
 
-	private ValidatableWidget<TextBox> startDateWidget;
-	private ValidatableWidget<TextBox> endDateWidget;
+	private final RegExValidatableWidget<TextBox> startDateWidget;
+	private final RegExValidatableWidget<TextBox> endDateWidget;
 
 	interface Binder extends UiBinder<DockLayoutPanel, ReportingView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ReportingView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		completeInfo.setText(LocaleDictionary.get().getConstantValue(ReportingConstants.SYSTEM_STATISTICS_LABEL));
 		completeInfo.addStyleName(ReportingConstants.BOLD_TEXT_CSS);
@@ -204,7 +206,7 @@ public class ReportingView extends View<ReportingPresenter> {
 
 		reportingListView = new ReportingListView();
 
-		reportingListView.listView.initTable(0, presenter, null, new ArrayList<Record>(), false, false);
+		reportingListView.listView.initTable(0, presenter, null, new ArrayList<Record>(), false, false, null, false);
 
 		reportTablePanel.add(reportingListView.listView);
 
@@ -227,7 +229,7 @@ public class ReportingView extends View<ReportingPresenter> {
 
 		addIntervalChangeHandler();
 
-		startDateWidget = new ValidatableWidget<TextBox>(startDateText);
+		startDateWidget = new RegExValidatableWidget<TextBox>(startDateText);
 
 		startDateWidget.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -237,7 +239,7 @@ public class ReportingView extends View<ReportingPresenter> {
 			}
 		});
 
-		endDateWidget = new ValidatableWidget<TextBox>(endDateText);
+		endDateWidget = new RegExValidatableWidget<TextBox>(endDateText);
 
 		endDateWidget.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -253,6 +255,7 @@ public class ReportingView extends View<ReportingPresenter> {
 	}
 
 	private void addCalendarListener() {
+		// add calender listener
 	}
 
 	private void addSelectionHandler(final RadioButton radioButton) {
@@ -279,7 +282,7 @@ public class ReportingView extends View<ReportingPresenter> {
 		}
 	}
 
-	public void populateBatchClassListBox(HashMap<String, String> batchClasses) {
+	public void populateBatchClassListBox(Map<String, String> batchClasses) {
 		batchClassList.clear();
 		for (Iterator<String> iterator = batchClasses.keySet().iterator(); iterator.hasNext();) {
 			String optionValue = (String) iterator.next();
@@ -288,7 +291,7 @@ public class ReportingView extends View<ReportingPresenter> {
 		batchClassList.setSelectedIndex(0);
 	}
 
-	public void populateIntervalListBox() {
+	public final void populateIntervalListBox() {
 		intervalListBox.addItem(LocaleDictionary.get().getConstantValue(ReportingConstants.INTERVAL_LISTBOX_TEXT_SECONDS),
 				ReportingConstants.INTERVAL_LISTBOX_VALUE_SECONDS);
 		intervalListBox.addItem(LocaleDictionary.get().getConstantValue(ReportingConstants.INTERVAL_LISTBOX_TEXT_MINUTES),
@@ -302,7 +305,7 @@ public class ReportingView extends View<ReportingPresenter> {
 		presenter.onGoClicked();
 	}
 
-	public String getSelectedRadioValue() {
+	public final String getSelectedRadioValue() {
 		String value = null;
 		if (moduleSelection.getValue()) {
 			value = ReportingConstants.MODULE;
@@ -364,7 +367,7 @@ public class ReportingView extends View<ReportingPresenter> {
 		return reportTablePanel;
 	}
 
-	private void addIntervalChangeHandler() {
+	private final void addIntervalChangeHandler() {
 		intervalListBox.addChangeHandler(new ChangeHandler() {
 
 			@Override
@@ -381,7 +384,7 @@ public class ReportingView extends View<ReportingPresenter> {
 		});
 	}
 
-	public List<Record> createTableData(List<ReportDTO> reports, int divisor) {
+	public final List<Record> createTableData(List<ReportDTO> reports, int divisor) {
 		reportList = reports;
 		List<Record> recordList = new ArrayList<Record>();
 		if (reports != null && !reports.isEmpty()) {
@@ -404,11 +407,11 @@ public class ReportingView extends View<ReportingPresenter> {
 		return reportingListView;
 	}
 
-	public ValidatableWidget<TextBox> getStartDateWidget() {
+	public RegExValidatableWidget<TextBox> getStartDateWidget() {
 		return startDateWidget;
 	}
 
-	public ValidatableWidget<TextBox> getEndDateWidget() {
+	public RegExValidatableWidget<TextBox> getEndDateWidget() {
 		return endDateWidget;
 	}
 

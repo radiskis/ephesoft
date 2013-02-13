@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -56,10 +56,18 @@ public enum OCRProperties implements PluginProperty {
 	 */
 	private String key;
 
+	/**
+	 * Constructor.
+	 * @param key String
+	 */
 	OCRProperties(final String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get property key.
+	 * @return key
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

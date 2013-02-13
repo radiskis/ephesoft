@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Automatic_Learning_Classification_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="95,16,80,40">
+		<transition to="automatic_learning_classification_plugin"/>
+	</start>
+
+	<java continue="async" expr="#{autoLearnService}" g="18,88,163,59" method="learnFilesForClassification" name="automatic_learning_classification_plugin"> 
+		<arg type="com.ephesoft.dcma.da.id.BatchInstanceID">
+			<object expr="#{batchInstanceID}"/>
+		</arg>
+		<arg>
+			<object expr="Auto_Learn_Classification_Plugin"/>
+		</arg>
+		<transition to="end"/>
+	</java>
+	
+	<end g="90,270,80,40" name="end"/>
+	
+</process>

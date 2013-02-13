@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,24 +42,51 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
+/**
+ * Class for Annotated Entities.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.exception.DCMAApplicationException
+ *
+ */
 public class AnnotatedEntities implements ApplicationContextAware {
 
-	private ApplicationContext applicationContext;
+	/**
+	 * applicationContext applicationContext.
+	 */
+	private  ApplicationContext applicationContext;
 
+	/**
+	 * To set application context.
+	 * @param applicationContext ApplicationContext
+	 * @throws BeansException in case of error
+	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
 
+	/**
+	 * To get locations.
+	 * 
+	 * @return Collection<?>
+	 * @throws DCMAApplicationException in case of error
+	 */
 	@SuppressWarnings("unchecked")
-	public Collection<Class<?>> getEntities() throws Exception {
+	public Collection<Class<?>> getEntities() throws DCMAApplicationException {
 		Collection<EntityFactoryBean> entityListColl = ApplicationContextUtil.getBeansOfType(applicationContext,
 				EntityFactoryBean.class);
 		Collection<Class<?>> entities = new LinkedHashSet<Class<?>>();
 		for (EntityFactoryBean bean : entityListColl) {
-			entities.addAll(bean.getObject());
+			try {
+				entities.addAll(bean.getObject());
+			} catch (Exception e) {
+				throw new DCMAApplicationException(e.getMessage(), e);
+			}
 		}
 		return entities;
 	}

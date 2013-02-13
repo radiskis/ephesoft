@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,6 +38,7 @@ package com.ephesoft.dcma.barcodeextraction;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -62,24 +63,65 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.GenericMultipleBarcodeReader;
 
+/**
+ * This class performs the functionality of barcode extraction for documents.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.barcodeextraction.BarcodeExtractionReader
+ *
+ */
 public class BarcodeExtractionExecutor extends AbstractRunnable {
 
+	/**
+	 * To store source path.
+	 */
 	private final String sourcePath;
+	/**
+	 * To store file name.
+	 */
 	private final String fileName;
+	/**
+	 * To store array of app reader types.
+	 */
 	private final String[] appReaderTypes;
+	/**
+	 * Array of type barcode results.
+	 */
 	private BarcodeExtractionResult[] barCodeResults;
+	/**
+	 * To store Document.
+	 */
 	private final Document document;
+	/**
+	 * To store Page.
+	 */
 	private final Page page;
 
+	/**
+	 * A logger instance.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeExtractionExecutor.class);
 
-	public BarcodeExtractionExecutor(String sourcePath, String fileName, String[] appReaderTypes, Page page, Document document) {
+	/**
+	 * Parameterized constructor.
+	 * @param sourcePath {@link String}
+	 * @param fileName {@link String}
+	 * @param newAppReaderTypes {@link String []}
+	 * @param page {@link Page}
+	 * @param document {@link Document}
+	 */
+	public BarcodeExtractionExecutor(final String sourcePath, final String fileName, final String[] newAppReaderTypes, final Page page, final Document document) {
 		super();
 		this.sourcePath = sourcePath;
 		this.fileName = fileName;
-		this.appReaderTypes = appReaderTypes;
 		this.page = page;
 		this.document = document;
+		if(newAppReaderTypes == null){
+			this.appReaderTypes = new String[0];
+		} else {
+			this.appReaderTypes = Arrays.copyOf(newAppReaderTypes, newAppReaderTypes.length);
+		}
 	}
 
 	/**
@@ -92,22 +134,22 @@ public class BarcodeExtractionExecutor extends AbstractRunnable {
 		LOGGER.info("Running barcode for the file " + fileName);
 		BufferedImage sourceImage = null;
 		Result[] codeResults = null;
-		Vector<BarcodeFormat> barCodeFormatVector = new Vector<BarcodeFormat>();
+		Vector<BarcodeFormat> barCodeFormatVector = new Vector<BarcodeFormat>(); // NOPMD . Required to work with Vector for Barcode
 		try {
 			if (sourcePath != null && !sourcePath.isEmpty()) {
 				sourceImage = ImageIO.read(new File(sourcePath));
 			} else {
 				LOGGER.error("No valid extensions are specified in resources");
 				setDcmaApplicationException(new DCMAApplicationException("No valid extensions are specified in resources"));
-				return;
+				return; // NOPMD
 			}
 			if (sourceImage == null) {
 				LOGGER.error("Source image is null for image : " + sourcePath);
 				setDcmaApplicationException(new DCMAApplicationException("Source image is null for image : " + sourcePath));
-				return;
+				return; // NOPMD
 			}
 			if (appReaderTypes != null && appReaderTypes.length > 0) {
-				for (String appReaderType : appReaderTypes) {
+				for (final String appReaderType : appReaderTypes) {
 
 					if (appReaderType.equalsIgnoreCase(BarcodeReaderTypes.CODE39.name())) {
 						barCodeFormatVector.add(BarcodeFormat.CODE_39);
@@ -139,13 +181,13 @@ public class BarcodeExtractionExecutor extends AbstractRunnable {
 				setDcmaApplicationException(new DCMAApplicationException("No proper Barcode type is specified in resources"));
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Could not read sourceImage " + sourcePath);
 			setDcmaApplicationException(new DCMAApplicationException("Could not read sourceImage " + sourcePath));
 		} finally {
 			if (sourceImage != null) {
 				sourceImage.flush();
-				barCodeFormatVector = null;
+				barCodeFormatVector = null; // NOPMD
 			}
 		}
 	}
@@ -153,44 +195,44 @@ public class BarcodeExtractionExecutor extends AbstractRunnable {
 	/**
 	 * This method scans the barcode information for images . If image is of different format this method will return null.
 	 * 
-	 * @param sourceImage
-	 * @param fileName
-	 * @param barCodeFormatVector
-	 * @return Result[]
+	 * @param sourceImage {@link BufferedImage}
+	 * @param fileName {@link String}
+	 * @param barCodeFormatVector {@link Vector <BarcodeFormat>}
+	 * @return {@link Result []} 
 	 */
 	public Result[] getBarCodeResults(final BufferedImage sourceImage, final String fileName,
-			final Vector<BarcodeFormat> barCodeFormatVector) {
+			final Vector<BarcodeFormat> barCodeFormatVector) { // NOPMD .
 		Result[] codeResults = null;
-		LuminanceSource source = new BufferedImageLuminanceSource(sourceImage);
-		BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-		Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>();
+		final LuminanceSource source = new BufferedImageLuminanceSource(sourceImage);
+		final BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+		Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>(); // NOPMD . Required to work with Hashtable for Barcode
 
-		MultiFormatReader mfr = new MultiFormatReader();
+		final MultiFormatReader mfr = new MultiFormatReader();
 
 		hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
 		hints.put(DecodeHintType.POSSIBLE_FORMATS, barCodeFormatVector);
 
-		GenericMultipleBarcodeReader genericReader = new GenericMultipleBarcodeReader(mfr);
+		final GenericMultipleBarcodeReader genericReader = new GenericMultipleBarcodeReader(mfr);
 		try {
 
 			codeResults = genericReader.decodeMultiple(bitmap, hints);
-		} catch (ReaderException re) {
+		} catch (final ReaderException re) {
 			LOGGER.info("The image was not of types defined in the system" + re.getMessage());
-		} catch (Exception re) {
+		} catch (final Exception re) {
 			LOGGER.info("Barcode Reader could not read image file: " + fileName);
 		} finally {
-			hints = null;
+			hints = null; // NOPMD
 		}
 		return codeResults;
 	}
 
 	/**
-	 * This method populates BarcodeResult array from Result array fetched by uzing Zxing libraries.
+	 * This method populates BarcodeResult array from Result array fetched by using Zxing libraries.
 	 * 
-	 * @param results
-	 * @return BarcodeResult[]
+	 * @param results {@link Result}
+	 * @return {@link BarcodeExtractionResult []}
 	 */
-	public BarcodeExtractionResult[] setBarcodeResults(Result[] results) {
+	public BarcodeExtractionResult[] setBarcodeResults(final Result[] results) {
 		BarcodeExtractionResult[] barcodeResults = null;
 		if (results != null && results.length > 0) {
 			barcodeResults = new BarcodeExtractionResult[results.length];
@@ -225,18 +267,41 @@ public class BarcodeExtractionExecutor extends AbstractRunnable {
 		return barcodeResults;
 	}
 
+	/**
+	 * getter for fileName.
+	 * @return {@link String}
+	 */
 	public String getFileName() {
 		return fileName;
 	}
 
+	/**
+	 * getter for barCodeResult.
+	 * @return {@link BarcodeExtractionResult []}
+	 */
 	public BarcodeExtractionResult[] getBarCodeResults() {
-		return barCodeResults;
+		BarcodeExtractionResult[] newBarCodeResults;
+		if(barCodeResults == null){
+			newBarCodeResults = new BarcodeExtractionResult[0];
+		}
+		else {
+			newBarCodeResults = Arrays.copyOf(barCodeResults, barCodeResults.length);
+		}
+		return newBarCodeResults;
 	}
 
+	/**
+	 * getter for document.
+	 * @return {@link Document}
+	 */
 	public Document getDocument() {
 		return document;
 	}
 
+	/**
+	 * getter for page.
+	 * @return {@link Page}
+	 */
 	public Page getPage() {
 		return page;
 	}

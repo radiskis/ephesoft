@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,19 @@ import com.ephesoft.dcma.core.common.PluginProperty;
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.core.common.PluginProperty
  */
 public enum RegexProperties implements PluginProperty {
 	/**
-	 * Key value
+	 * Key value.
 	 */
 	KEY_VALUE_PATTERNS("kvpageprocess.key_value_patterns"),
 	/**
-	 * Switch for regex
+	 * Switch for regex.
 	 */
 	KVPAGEPROCESS_SWITCH("kvpageprocess.switch"),
 	/**
-	 * Max result count
+	 * Max result count.
 	 */
 	KVPAGEPROCESS_MAX_RESULT_COUNT("kvpageprocess.max_result_count");
 
@@ -63,10 +63,19 @@ public enum RegexProperties implements PluginProperty {
 	 */
 	private String key;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param key String
+	 */
 	RegexProperties(final String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get property key.
+	 * @return String
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

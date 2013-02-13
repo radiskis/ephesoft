@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,12 +35,21 @@
 
 package com.ephesoft.dcma.cleanup.constant;
 
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 
+/**
+ * Constants interface for clean up plug in.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.cleanup.service.CleanupServiceImpl
+ *
+ */
 public interface CleanupConstant extends ICommonConstants {
 
 	/**
-	 * String for clean up plugin name specified in database.
+	 * String for clean up plug in name specified in database.
 	 */
 	String CLEAN_UP_PLUGIN_NAME = "CLEANUP";
 	
@@ -48,4 +57,30 @@ public interface CleanupConstant extends ICommonConstants {
 	 * String for true.
 	 */
 	String TRUE = "True";
+	
+	/**
+	 * A constant to denote switch state.
+	 */
+	String EXCEPTION_WHILE_DELETING_FOLDER = "Exception while deleting folder : ";
+
+	/**
+	 * A constant to store not enough permissions to delete folder.
+	 */
+	String NOT_ENOUGH_PERMISSION_TO_DELETE_FOLDER = "Not enough permission to delete folder : ";
+
+	/**
+	 * A constant to store could not delete folder.
+	 */
+	String COULD_NOT_DELETE_FOLDER = "Could not delete folder : ";
+
+	/**
+	 * A constant to store properties.
+	 */
+	String PROPERTIES_DIRECTORY = "properties";
+
+	/**
+	 * A constant to denote serialize extension.
+	 */
+	String SER_EXTENSION = FileType.SER.getExtensionWithDot();
+
 }

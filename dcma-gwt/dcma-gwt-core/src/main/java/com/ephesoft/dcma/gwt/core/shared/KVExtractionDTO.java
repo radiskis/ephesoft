@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,6 +44,8 @@ public class KVExtractionDTO implements IsSerializable {
 
 	private FieldTypeDTO fieldTypeDTO;
 
+	private boolean useExistingKey;
+
 	private String keyPattern;
 
 	private String valuePattern;
@@ -52,9 +54,9 @@ public class KVExtractionDTO implements IsSerializable {
 
 	private String identifier;
 
-	private boolean isDeleted;
+	private boolean deleted;
 
-	private boolean isNew;
+	private boolean newKV;
 
 	private Integer noOfWords;
 
@@ -127,12 +129,12 @@ public class KVExtractionDTO implements IsSerializable {
 		this.locationType = locationType;
 	}
 
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	public String getIdentifier() {
@@ -144,11 +146,11 @@ public class KVExtractionDTO implements IsSerializable {
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return newKV;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newKV) {
+		this.newKV = newKV;
 	}
 
 	/**
@@ -165,10 +167,11 @@ public class KVExtractionDTO implements IsSerializable {
 	 * @param noOfWords the noOfWords to set
 	 */
 	public void setNoOfWords(Integer noOfWords) {
+		Integer noOFWords = noOfWords;
 		if (null == noOfWords) {
-			noOfWords = 0;
+			noOFWords = 0;
 		}
-		this.noOfWords = noOfWords;
+		this.noOfWords = noOFWords;
 	}
 
 	public Float getMultiplier() {
@@ -253,5 +256,13 @@ public class KVExtractionDTO implements IsSerializable {
 
 	public void setKvPageValue(KVPageValue kvPageValue) {
 		this.kvPageValue = kvPageValue;
+	}
+
+	public boolean isUseExistingKey() {
+		return useExistingKey;
+	}
+
+	public void setUseExistingKey(boolean useExistingKey) {
+		this.useExistingKey = useExistingKey;
 	}
 }

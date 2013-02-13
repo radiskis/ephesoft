@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,11 +43,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.csv.constant.CSVFileCreationConstant;
+
 /**
  * This API is using for generating CSV file and writing data into CSV file.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.csv.service.CSVFileCreationService
  */
 public class WriteToCSVFile {
 
@@ -67,19 +70,16 @@ public class WriteToCSVFile {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WriteToCSVFile.class);
 
 	/**
-	 * Variable for comma character.
+	 * Empty constructor.
 	 */
-	private static final char COMMA = ',';
-
-	/**
-	 * Variable for quotes character.
-	 */
-	private static final String QUOTES = "\"";
-
 	public WriteToCSVFile() {
 		// Empty constructor.
 	}
 
+	/**
+	 * Parameterized constructor.
+	 * @param csvFileName {@link String}
+	 */
 	public WriteToCSVFile(final String csvFileName) {
 		this.csvFileName = csvFileName;
 	}
@@ -88,8 +88,8 @@ public class WriteToCSVFile {
 	 * This API is used to create and write data into it.
 	 * 
 	 * @param csvFileName {@link String}
-	 * @param headerList List<string>
-	 * @param data List<List<String>>
+	 * @param headerList {@link List<string>}
+	 * @param data {@link List<List<String>>}
 	 * @throws IOException if any exception or error occur.
 	 */
 	public WriteToCSVFile(final String csvFileName, final List<String> headerList, final List<List<String>> data) throws IOException {
@@ -98,9 +98,9 @@ public class WriteToCSVFile {
 			this.csvFileName = csvFileName;
 			this.columnSize = headerList.size();
 			writer = new BufferedWriter(new FileWriter(this.csvFileName));
-			this.addHeaderRow(writer, headerList);
+			addHeaderRow(writer, headerList);
 			for (List<String> list : data) {
-				this.addDataRow(writer, list);
+				addDataRow(writer, list);
 			}
 		} finally {
 			if (writer != null) {
@@ -110,33 +110,19 @@ public class WriteToCSVFile {
 		}
 	}
 
-	/**
-	 * This API is used to add header row.
-	 * 
-	 * @param writer
-	 * @param headerRow
-	 * @throws IOException
-	 */
-	public void addHeaderRow(final BufferedWriter writer, final List<String> headerRow) throws IOException {
+	private void addHeaderRow(final BufferedWriter writer, final List<String> headerRow) throws IOException {
 		this.columnSize = headerRow.size();
 		for (int index = 0; index < this.columnSize; index++) {
 			String header = headerRow.get(index);
-			writer.append(QUOTES + header + QUOTES);
+			writer.append(CSVFileCreationConstant.QUOTES + header + CSVFileCreationConstant.QUOTES);
 			if (index < this.columnSize - 1) {
-				writer.append(COMMA);
+				writer.append(CSVFileCreationConstant.COMMA_STRING);
 			}
 		}
 		writer.newLine();
 	}
 
-	/**
-	 * This API is used to add data to CSV file.
-	 * 
-	 * @param writer {@link FileWriter}
-	 * @param dataRow List<String>
-	 * @throws IOException
-	 */
-	public void addDataRow(final BufferedWriter writer, final List<String> dataRow) throws IOException {
+	private void addDataRow(final BufferedWriter writer, final List<String> dataRow) throws IOException {
 		boolean isValid = true;
 		if (dataRow != null) {
 			int dataRowLength = dataRow.size();
@@ -148,9 +134,9 @@ public class WriteToCSVFile {
 		if (isValid) {
 			for (int i = 0; i < dataRow.size(); i++) {
 				String data = dataRow.get(i);
-				writer.append(QUOTES + data + QUOTES);
+				writer.append(CSVFileCreationConstant.QUOTES + data + CSVFileCreationConstant.QUOTES);
 				if (i < columnSize - 1 && i < dataRow.size() - 1) {
-					writer.append(COMMA);
+					writer.append(CSVFileCreationConstant.COMMA_STRING);
 				}
 			}
 			writer.newLine();

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,9 +57,9 @@ public class DocumentTypeDTO implements IsSerializable {
 
 	private String identifier;
 
-	private boolean isDeleted;
+	private boolean deleted;
 
-	private boolean isNew;
+	private boolean newDocument;
 
 	private Map<String, PageTypeDTO> pagesMap = new LinkedHashMap<String, PageTypeDTO>();
 
@@ -69,13 +69,13 @@ public class DocumentTypeDTO implements IsSerializable {
 
 	private Map<String, FunctionKeyDTO> functionKeyMap = new LinkedHashMap<String, FunctionKeyDTO>();
 	
-	private boolean isHidden;
+	private boolean hidden;
 
 	public BatchClassDTO getBatchClass() {
 		return batchClass;
 	}
 
-	public void setBatchClass(BatchClassDTO batchClass) {
+	public void setBatchClass(final BatchClassDTO batchClass) {
 		this.batchClass = batchClass;
 	}
 
@@ -83,7 +83,7 @@ public class DocumentTypeDTO implements IsSerializable {
 		return priority;
 	}
 
-	public void setPriority(int priority) {
+	public void setPriority(final int priority) {
 		this.priority = priority;
 	}
 
@@ -91,7 +91,7 @@ public class DocumentTypeDTO implements IsSerializable {
 		return minConfidenceThreshold;
 	}
 
-	public void setMinConfidenceThreshold(float minConfidenceThreshold) {
+	public void setMinConfidenceThreshold(final float minConfidenceThreshold) {
 		this.minConfidenceThreshold = minConfidenceThreshold;
 	}
 
@@ -99,7 +99,7 @@ public class DocumentTypeDTO implements IsSerializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -107,7 +107,7 @@ public class DocumentTypeDTO implements IsSerializable {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 
@@ -116,7 +116,7 @@ public class DocumentTypeDTO implements IsSerializable {
 	}
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class DocumentTypeDTO implements IsSerializable {
 	/**
 	 * @param rspProjectFileName the rspProjectFileName to set
 	 */
-	public void setRspProjectFileName(String rspProjectFileName) {
+	public void setRspProjectFileName(final String rspProjectFileName) {
 		this.rspProjectFileName = rspProjectFileName;
 	}
 
@@ -138,81 +138,95 @@ public class DocumentTypeDTO implements IsSerializable {
 	 * 
 	 * @param isDeleted
 	 */
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(final boolean deleted) {
+		this.deleted = deleted;
 	}
 
-	public void setIdentifier(String identifier) {
+	public void setIdentifier(final String identifier) {
 		this.identifier = identifier;
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return newDocument;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(final boolean newDocument) {
+		this.newDocument = newDocument;
 	}
 
-	public void addFieldType(FieldTypeDTO fieldTypeDTO) {
-		fieldsMap.put("" + fieldTypeDTO.getIdentifier(), fieldTypeDTO);
+	public void addFieldType(final FieldTypeDTO fieldTypeDTO) {
+		fieldsMap.put(fieldTypeDTO.getIdentifier().toString(), fieldTypeDTO);
 	}
 
-	public void addPageType(PageTypeDTO pageTypeDTO) {
-		pagesMap.put("" + pageTypeDTO.getIdentifier(), pageTypeDTO);
+	public void addPageType(final PageTypeDTO pageTypeDTO) {
+		pagesMap.put(pageTypeDTO.getIdentifier().toString(), pageTypeDTO);
 	}
 
-	public void addFunctionKey(FunctionKeyDTO functionKeyDTO) {
-		functionKeyMap.put("" + functionKeyDTO.getIdentifier(), functionKeyDTO);
+	public void addFunctionKey(final FunctionKeyDTO functionKeyDTO) {
+		functionKeyMap.put(functionKeyDTO.getIdentifier().toString(), functionKeyDTO);
 	}
 
-	public Collection<FieldTypeDTO> getFields(boolean includeDeleted) {
-		if (includeDeleted)
-			return fieldsMap.values();
-		return getFields();
+	public Collection<FieldTypeDTO> getFields(final boolean includeDeleted) {
+		Collection<FieldTypeDTO> fieldTypeDTO;
+		if (includeDeleted){
+			fieldTypeDTO = fieldsMap.values();
+		}else{
+			fieldTypeDTO = getFields();
+		}
+		return fieldTypeDTO;
 	}
 
 	public Collection<FieldTypeDTO> getFields() {
-		Map<String, FieldTypeDTO> fieldTypeDTOs = new LinkedHashMap<String, FieldTypeDTO>();
-		for (FieldTypeDTO fieldTypeDTO : fieldsMap.values()) {
-			if (!(fieldTypeDTO.isDeleted()))
+		final Map<String, FieldTypeDTO> fieldTypeDTOs = new LinkedHashMap<String, FieldTypeDTO>();
+		for (final FieldTypeDTO fieldTypeDTO : fieldsMap.values()) {
+			if (!(fieldTypeDTO.isDeleted())){
 				fieldTypeDTOs.put(fieldTypeDTO.getIdentifier(), fieldTypeDTO);
+			}
 		}
 		return fieldTypeDTOs.values();
 	}
 
-	public Collection<TableInfoDTO> getTableInfos(boolean includeDeleted) {
-		if (includeDeleted)
-			return tableInfoMap.values();
-		return getTableInfos();
+	public Collection<TableInfoDTO> getTableInfos(final boolean includeDeleted) {
+		Collection<TableInfoDTO> tableInfoDTO;
+		if (includeDeleted){
+			tableInfoDTO = tableInfoMap.values();
+		}else{
+			tableInfoDTO = getTableInfos();
+		}
+		return tableInfoDTO;
 	}
 
 	public Collection<TableInfoDTO> getTableInfos() {
-		Map<String, TableInfoDTO> tableInfoDTOs = new LinkedHashMap<String, TableInfoDTO>();
-		for (TableInfoDTO tableInfoDTO : tableInfoMap.values()) {
-			if (!(tableInfoDTO.isDeleted()))
+		final Map<String, TableInfoDTO> tableInfoDTOs = new LinkedHashMap<String, TableInfoDTO>();
+		for (final TableInfoDTO tableInfoDTO : tableInfoMap.values()) {
+			if (!(tableInfoDTO.isDeleted())){
 				tableInfoDTOs.put(tableInfoDTO.getIdentifier(), tableInfoDTO);
+			}
 		}
 		return tableInfoDTOs.values();
 	}
 
-	public void addFieldTypeDTO(FieldTypeDTO fieldTypeDTO) {
-		fieldsMap.put("" + fieldTypeDTO.getIdentifier(), fieldTypeDTO);
+	public void addFieldTypeDTO(final FieldTypeDTO fieldTypeDTO) {
+		fieldsMap.put(fieldTypeDTO.getIdentifier(), fieldTypeDTO);
 	}
 
-	public void addTableInfoDTO(TableInfoDTO tableInfoDTO) {
-		tableInfoMap.put("" + tableInfoDTO.getIdentifier(), tableInfoDTO);
+	public void addTableInfoDTO(final TableInfoDTO tableInfoDTO) {
+		tableInfoMap.put(tableInfoDTO.getIdentifier(), tableInfoDTO);
 	}
 
-	public Collection<PageTypeDTO> getPages(boolean includeDeleted) {
-		if (includeDeleted)
-			return pagesMap.values();
-		return getPages();
+	public Collection<PageTypeDTO> getPages(final boolean includeDeleted) {
+		Collection<PageTypeDTO> pageTypeDTO;
+		if (includeDeleted){
+			pageTypeDTO = pagesMap.values();
+		}else{
+			pageTypeDTO = getPages();
+		}
+		return pageTypeDTO;
 	}
 
 	public Collection<PageTypeDTO> getPages() {
-		Map<String, PageTypeDTO> pageTypeDTOs = new LinkedHashMap<String, PageTypeDTO>();
-		for (PageTypeDTO pageTypeDTO : pagesMap.values()) {
+		final Map<String, PageTypeDTO> pageTypeDTOs = new LinkedHashMap<String, PageTypeDTO>();
+		for (final PageTypeDTO pageTypeDTO : pagesMap.values()) {
 			if (!(pageTypeDTO.isDeleted())) {
 				pageTypeDTOs.put(pageTypeDTO.getIdentifier(), pageTypeDTO);
 			}
@@ -220,67 +234,77 @@ public class DocumentTypeDTO implements IsSerializable {
 		return pageTypeDTOs.values();
 	}
 
-	public void removeFieldTypeDTO(FieldTypeDTO fieldTypeDTO) {
+	public void removeFieldTypeDTO(final FieldTypeDTO fieldTypeDTO) {
 		fieldsMap.remove(fieldTypeDTO.getIdentifier());
 	}
 
-	public void removeTableInfoDTO(TableInfoDTO tableInfoDTO) {
+	public void removeTableInfoDTO(final TableInfoDTO tableInfoDTO) {
 		tableInfoMap.remove(tableInfoDTO.getIdentifier());
 	}
 
-	public FieldTypeDTO getFieldTypeByName(String name) {
-		Collection<FieldTypeDTO> dtos = fieldsMap.values();
-		if (dtos != null)
-			for (FieldTypeDTO fieldTypeDTO : dtos) {
-				if (fieldTypeDTO.getName().equals(name)) {
-					return fieldTypeDTO;
+	public FieldTypeDTO getFieldTypeByName(final String name) {
+		FieldTypeDTO fieldTypeDTO = null;
+		final Collection<FieldTypeDTO> dtos = fieldsMap.values();
+		if (dtos != null){
+			for (final FieldTypeDTO dto : dtos) {
+				if (dto.getName().equals(name)) {
+					fieldTypeDTO = dto;
 				}
 			}
-		return null;
+		}
+		return fieldTypeDTO;
 	}
 
-	public FieldTypeDTO getFieldTypeByIdentifier(String identifier) {
-		Collection<FieldTypeDTO> dtos = fieldsMap.values();
-		if (dtos != null)
-			for (FieldTypeDTO fieldTypeDTO : dtos) {
-				if (fieldTypeDTO.getIdentifier().equals(identifier)) {
-					return fieldTypeDTO;
+	public FieldTypeDTO getFieldTypeByIdentifier(final String identifier) {
+		FieldTypeDTO fieldTypeDTO = null;
+		final Collection<FieldTypeDTO> dtos = fieldsMap.values();
+		if (dtos != null){
+			for (final FieldTypeDTO dto : dtos) {
+				if (dto.getIdentifier().equals(identifier)) {
+					fieldTypeDTO = dto;
 				}
 			}
-		return null;
+		}
+		return fieldTypeDTO;
 	}
 
-	public boolean checkFieldTypeName(String name) {
-		if (getFieldTypeByName(name) != null)
-			return true;
-		return false;
+	public boolean checkFieldTypeName(final String name) {
+		boolean validName = false;
+		if (getFieldTypeByName(name) != null){
+			validName = true;
+		}
+		return validName;
 	}
 
-	public TableInfoDTO getTableInfoByIdentifier(String identifier) {
-		Collection<TableInfoDTO> dtos = tableInfoMap.values();
-		if (dtos != null)
-			for (TableInfoDTO tableInfoDTO : dtos) {
-				if (tableInfoDTO.getIdentifier().equals(identifier)) {
-					return tableInfoDTO;
+	public TableInfoDTO getTableInfoByIdentifier(final String identifier) {
+		TableInfoDTO tableInfoDTO = null;
+		final Collection<TableInfoDTO> dtos = tableInfoMap.values();
+		if (dtos != null){
+			for (final TableInfoDTO dto : dtos) {
+				if (dto.getIdentifier().equals(identifier)) {
+					tableInfoDTO = dto;
 				}
 			}
-		return null;
+		}
+		return tableInfoDTO;
 	}
 
-	public TableInfoDTO getTableInfoByName(String name) {
-		Collection<TableInfoDTO> dtos = tableInfoMap.values();
-		if (dtos != null)
-			for (TableInfoDTO tableInfoDTO : dtos) {
-				if (tableInfoDTO.getName().equals(name)) {
-					return tableInfoDTO;
+	public TableInfoDTO getTableInfoByName(final String name) {
+		TableInfoDTO tableInfoDTO = null;
+		final Collection<TableInfoDTO> dtos = tableInfoMap.values();
+		if (dtos != null){
+			for (final TableInfoDTO dto : dtos) {
+				if (dto.getName().equals(name)) {
+					tableInfoDTO = dto;
 				}
 			}
-		return null;
+		}
+		return tableInfoDTO;
 	}
 
 	public Collection<FunctionKeyDTO> getFunctionKeys() {
-		Map<String, FunctionKeyDTO> functionKeyDTOs = new LinkedHashMap<String, FunctionKeyDTO>();
-		for (FunctionKeyDTO functionKeyDTO : functionKeyMap.values()) {
+		final Map<String, FunctionKeyDTO> functionKeyDTOs = new LinkedHashMap<String, FunctionKeyDTO>();
+		for (final FunctionKeyDTO functionKeyDTO : functionKeyMap.values()) {
 			if (!functionKeyDTO.isDeleted()) {
 				functionKeyDTOs.put(functionKeyDTO.getIdentifier(), functionKeyDTO);
 			}
@@ -288,41 +312,49 @@ public class DocumentTypeDTO implements IsSerializable {
 		return functionKeyDTOs.values();
 	}
 
-	public Collection<FunctionKeyDTO> getFunctionKeys(boolean includeDeleted) {
-		if (includeDeleted)
-			return functionKeyMap.values();
-		return getFunctionKeys();
+	public Collection<FunctionKeyDTO> getFunctionKeys(final boolean includeDeleted) {
+		Collection<FunctionKeyDTO> functionKeyDTOs;
+		if (includeDeleted){
+			functionKeyDTOs = functionKeyMap.values();
+		}else{
+			functionKeyDTOs= getFunctionKeys();
+		}
+		return functionKeyDTOs;
 	}
 
-	public FunctionKeyDTO getFunctionKeyByIdentifier(String identifier) {
-		Collection<FunctionKeyDTO> dtos = functionKeyMap.values();
-		if (dtos != null)
-			for (FunctionKeyDTO functionKeyDTO : dtos) {
-				if (functionKeyDTO.getIdentifier().equals(identifier)) {
-					return functionKeyDTO;
+	public FunctionKeyDTO getFunctionKeyByIdentifier(final String identifier) {
+		FunctionKeyDTO functionKeyDTO = null;
+		final Collection<FunctionKeyDTO> dtos = functionKeyMap.values();
+		if (dtos != null){
+			for (final FunctionKeyDTO dto : dtos) {
+				if (dto.getIdentifier().equals(identifier)) {
+					functionKeyDTO = dto;
 				}
 			}
-		return null;
+		}
+		return functionKeyDTO;
 	}
 
-	public FunctionKeyDTO getFunctionKeyDTOByShorcutKeyName(String shortcutKeyName) {
-		Collection<FunctionKeyDTO> dtos = functionKeyMap.values();
-		if (dtos != null)
-			for (FunctionKeyDTO functionKeyDTO : dtos) {
-				if (functionKeyDTO.getShortcutKeyName().equals(shortcutKeyName)) {
-					return functionKeyDTO;
+	public FunctionKeyDTO getFunctionKeyDTOByShorcutKeyName(final String shortcutKeyName) {
+		FunctionKeyDTO functionKeyDTO = null;
+		final Collection<FunctionKeyDTO> dtos = functionKeyMap.values();
+		if (dtos != null){
+			for (final FunctionKeyDTO dto : dtos) {
+				if (dto.getShortcutKeyName().equals(shortcutKeyName)) {
+					functionKeyDTO = dto;
 				}
 			}
-		return null;
+		}
+		return functionKeyDTO;
 	}
 	
 	public boolean isHidden() {
-		return isHidden;
+		return hidden;
 	}
 
 	
-	public void setHidden(boolean isHidden) {
-		this.isHidden = isHidden;
+	public void setHidden(final boolean hidden) {
+		this.hidden = hidden;
 	}
 
 }
