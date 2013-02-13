@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,21 +50,83 @@ import com.ephesoft.dcma.da.dao.BatchClassPluginConfigDao;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 
+/**
+ * This is dao class for batch class plugin configuration.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassPluginConfigDao
+ */
 @Repository
 public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPluginConfig> implements BatchClassPluginConfigDao {
 
+	/**
+	 * BATCH_CLASS_PLUGIN_CONFIGS String.
+	 */
 	private static final String BATCH_CLASS_PLUGIN_CONFIGS = "batchClassPluginConfigs";
+	
+	/**
+	 * BATCH_CLASS_PLUGIN_BATCH_CLASS_PLUGIN_CONFIGS String.
+	 */
 	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_PLUGIN_CONFIGS = "batchClassPlugin.batchClassPluginConfigs";
-	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
-	private static final String PLUGIN_PLUGIN_NAME = "plugin.pluginName";
-	private static final String PLUGIN = "plugin";
-	private static final String BATCH_CLASS_PLUGIN_PLUGIN = "batchClassPlugin.plugin";
-	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE_BATCH_CLASS = "batchClassPlugin.batchClassModule.batchClass";
-	private static final String BATCH_CLASS = "batchClass";
-	private static final String BATCH_CLASS_MODULE = "batchClassModule";
-	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE = "batchClassPlugin.batchClassModule";
-	private static final String BATCH_CLASS_PLUGIN = "batchClassPlugin";
 
+	/** 
+	 * BATCH_CLASS_IDENTIFIER String.
+	 */
+	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	
+	/**
+	 * PLUGIN_PLUGIN_NAME String.
+	 */
+	private static final String PLUGIN_PLUGIN_NAME = "plugin.pluginName";
+	
+	/**
+	 * PLUGIN String.
+	 */ 
+	private static final String PLUGIN = "plugin";
+	
+	/**
+	 * BATCH_CLASS_PLUGIN_PLUGIN String.
+	 */
+	private static final String BATCH_CLASS_PLUGIN_PLUGIN = "batchClassPlugin.plugin";
+	
+	/**
+	 * BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE_BATCH_CLASS String.
+	 */
+	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE_BATCH_CLASS = "batchClassPlugin.batchClassModule.batchClass";
+	
+	/**
+	 * BATCH_CLASS String.
+	 */
+	private static final String BATCH_CLASS = "batchClass";
+	
+	/**
+	 * BATCH_CLASS_MODULE String.
+	 */
+	private static final String BATCH_CLASS_MODULE = "batchClassModule";
+	
+	/**
+	 * BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE String.
+	 */
+	private static final String BATCH_CLASS_PLUGIN_BATCH_CLASS_MODULE = "batchClassPlugin.batchClassModule";
+	
+	/**
+	 * BATCH_CLASS_PLUGIN String.
+	 */
+	private static final String BATCH_CLASS_PLUGIN = "batchClassPlugin";
+	
+	/**
+	 * PLUGIN_CONFIG_ID String.
+	 */
+	private static final String PLUGIN_CONFIG_ID = "pluginConfig.id";
+
+	/**
+	 * API to get plugin properties for Batch.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pluginName {@link String}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getPluginPropertiesForBatch(String batchInstanceIdentifier, String pluginName) {
 
@@ -83,6 +145,14 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 
 	}
 
+	/**
+	 * API to get plugin properties for Batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param pluginName {@link String}
+	 * @param pluginProperty {@link PluginProperty}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty) {
@@ -101,6 +171,12 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to get plugin configuration for plugin id.
+	 * 
+	 * @param pluginId {@link Long}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getPluginConfigurationForPluginId(Long pluginId) {
 		DetachedCriteria criteria = criteria();
@@ -109,6 +185,11 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to update plugin configuration.
+	 * 
+	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
+	 */
 	@Override
 	public void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs) {
 
@@ -117,6 +198,12 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		}
 	}
 
+	/**
+	 * API to get all plugin properties for Batch instance.
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchInstance(String batchInstanceIdentifier) {
 		DetachedCriteria criteria = criteria();
@@ -133,6 +220,14 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to get all plugin properties for Batch class by qualifier.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param pluginName {@link String}
+	 * @param qualifier {@link String}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier,
 			String pluginName, String qualifier) {
@@ -150,6 +245,12 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to get all plugin properties for Batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getAllPluginPropertiesForBatchClass(String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
@@ -162,6 +263,13 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to get plugin properties for Batch class.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param pluginName {@link String}
+	 * @return List<BatchClassPluginConfig> 
+	 */
 	@Override
 	public List<BatchClassPluginConfig> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName) {
 		DetachedCriteria criteria = criteria();
@@ -175,6 +283,11 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		return find(criteria);
 	}
 
+	/**
+	 * API to update the single plugin configuration.
+	 * 
+	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
+	 */
 	@Override
 	public void updateSinglePluginConfiguration(BatchClassPluginConfig batchClassPluginConfig) {
 		if (batchClassPluginConfig.getId() != 0l) {
@@ -184,9 +297,28 @@ public class BatchClassPluginConfigDaoImpl extends HibernateDao<BatchClassPlugin
 		}
 	}
 
+	/**
+	 * API to remove the batch class plugin configuration.
+	 * 
+	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
+	 */
 	@Override
 	public void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig) {
 		remove(batchClassPluginConfig);
 
 	}
+
+	/**
+	 * API to get the batch class plugin configuration details by plugin config Id.
+	 * 
+	 * @param pluginConfigId {@link Long}
+	 * @return List<{@link BatchClassPluginConfig}>
+	 */
+	@Override
+	public List<BatchClassPluginConfig> getBatchClassPluginConfigurationForPluginConfigId(Long pluginConfigId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq(PLUGIN_CONFIG_ID, pluginConfigId));
+		return find(criteria);
+	}
+
 }

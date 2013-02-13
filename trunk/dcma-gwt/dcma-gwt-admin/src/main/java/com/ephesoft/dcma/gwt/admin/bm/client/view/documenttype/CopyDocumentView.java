@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.CopyDocumentTypePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
@@ -55,58 +56,136 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to copy document.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class CopyDocumentView extends View<CopyDocumentTypePresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, CopyDocumentView> {
 	}
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * nameStar Label.
+	 */
 	@UiField
 	protected Label nameStar;
+
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
 
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * descStar Label.
+	 */
 	@UiField
 	protected Label descStar;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
 
+	/**
+	 * minConfidenceThresholdLabel Label.
+	 */
 	@UiField
 	protected Label minConfidenceThresholdLabel;
+
+	/**
+	 * minConfidenceThresholdStar Label.
+	 */
 	@UiField
 	protected Label minConfidenceThresholdStar;
+
+	/**
+	 * minConfidenceThreshold TextBox.
+	 */
 	@UiField
 	protected TextBox minConfidenceThreshold;
 
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * editDocumentPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel editDocumentPanel;
 
-	private ValidatableWidget<TextBox> validateNameTextBox;
-	private ValidatableWidget<TextBox> validateDescriptionTextBox;
-	private ValidatableWidget<TextBox> validatePriorityTextBox;
+	/**
+	 * validateNameTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateNameTextBox;
 
+	/**
+	 * validateDescriptionTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateDescriptionTextBox;
+
+	/**
+	 * validatePriorityTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validatePriorityTextBox;
+
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
 
+	/**
+	 * editDocumentViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editDocumentViewPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public CopyDocumentView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.SAVE_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
-		
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+
 		validatePriorityTextBox = new ValidatableWidget<TextBox>(minConfidenceThreshold);
 		validatePriorityTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -139,7 +218,7 @@ public class CopyDocumentView extends View<CopyDocumentTypePresenter> {
 		});
 		validateNameTextBox.addValidator(new EmptyStringValidator(name));
 
-		editDocumentViewPanel.setSpacing(5);
+		editDocumentViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		nameLabel.setText(AdminConstants.NAME);
 		minConfidenceThresholdLabel.setText(AdminConstants.MIN_CONFIDENCE_THRESHOLD);
@@ -157,78 +236,168 @@ public class CopyDocumentView extends View<CopyDocumentTypePresenter> {
 		descStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		nameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 
-		editDocumentPanel.setSpacing(10);
+		editDocumentPanel.setSpacing(BatchClassManagementConstants.TEN);
 	}
 
+	/**
+	 * To get Minimum Confidence Threshold.
+	 * 
+	 * @return String
+	 */
 	public String getMinConfidenceThreshold() {
 		return minConfidenceThreshold.getValue();
 	}
 
+	/**
+	 * To set Minimum Confidence Threshold.
+	 * 
+	 * @param priority String
+	 */
 	public void setMinConfidenceThreshold(String priority) {
 		this.minConfidenceThreshold.setValue(priority);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return description.getValue();
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Validate Name TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}
 
+	/**
+	 * To get Validate Description TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescriptionTextBox() {
 		return validateDescriptionTextBox;
 	}
 
+	/**
+	 * To get Validate Priority TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidatePriorityTextBox() {
 		return validatePriorityTextBox;
 	}
 
+	/**
+	 * To get Minimum Confidence Threshold TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getMinConfidenceThresholdTextBox() {
 		return minConfidenceThreshold;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return description;
 	}
 
+	/**
+	 * To get Save Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getSaveButton() {
 		return saveButton;
 	}
 
+	/**
+	 * To get Cancel Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getCancelButton() {
 		return cancelButton;
 	}
 
+	/**
+	 * To get Name TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getNameTextBox() {
 		return name;
 	}
 
+	/**
+	 * To get Name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return name.getValue();
 	}
 
+	/**
+	 * To set name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setValue(name);
 	}
 
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onOkClick(ClickEvent clickEvent) {
 		presenter.onOkClicked();
 	}
 
+	/**
+	 * To perform operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClick(ClickEvent clickEvent) {
 		dialogBox.hide(true);

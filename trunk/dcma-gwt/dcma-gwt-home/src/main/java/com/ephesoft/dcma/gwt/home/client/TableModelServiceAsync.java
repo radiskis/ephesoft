@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,8 +44,8 @@ import com.ephesoft.dcma.gwt.core.shared.DataFilter;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * TableModelServiceAsync is a service interface that asynchronously provides data for displaying in a GWT AdvancedTable widget. The implementing class
- * should provide paging, filtering and sorting as this interface specifies.
+ * TableModelServiceAsync is a service interface that asynchronously provides data for displaying in a GWT AdvancedTable widget. The
+ * implementing class should provide paging, filtering and sorting as this interface specifies.
  * 
  * Life-cycle: 1) getColumns() is called by the client to populate the table columns 2) getRowsCount() is called by the client to
  * estimate the number of available records on the server. 3) getRows() is called by the client to display a particular page (a subset
@@ -56,12 +56,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * id when a row is selected.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync
  */
 
 public interface TableModelServiceAsync extends DCMARemoteServiceAsync {
 
 	/**
 	 * API to get total Rows Count for the given data filters asynchronously.
+	 * 
 	 * @param filters {@link DataFilter}[ ]
 	 * @param callback {@link AsyncCallback} < {@link Integer} >
 	 */
@@ -69,10 +72,11 @@ public interface TableModelServiceAsync extends DCMARemoteServiceAsync {
 
 	/**
 	 * API to get Rows of the table in the form of BatchInstanceDTO for the given batch and filters asynchronously.
+	 * 
 	 * @param batchNameToBeSearched {@link String}
-	 * @param startRow int 
+	 * @param startRow int
 	 * @param rowsCount int
-	 * @param filters {@link DataFilter}[ ] 
+	 * @param filters {@link DataFilter}[ ]
 	 * @param order {@link Order}
 	 * @param callback {@link AsyncCallback} < List< {@link BatchInstanceDTO}> >
 	 */
@@ -81,20 +85,23 @@ public interface TableModelServiceAsync extends DCMARemoteServiceAsync {
 
 	/**
 	 * API to get Individual Row Counts for each batch asynchronously.
-	 * @param callback {@link AsyncCallback} < {@link Integer}[ ]  >
+	 * 
+	 * @param callback {@link AsyncCallback} < {@link Integer}[ ] >
 	 */
 	void getIndividualRowCounts(AsyncCallback<Integer[]> asyncCallback);
 
 	/**
 	 * API to get Next Batch Instance asynchronously.
+	 * 
 	 * @param callback {@link AsyncCallback} < {@link String} >
 	 */
 	void getNextBatchInstance(AsyncCallback<String> callback);
 
 	/**
 	 * API to get Rows Count of a batch passing the given data filters asynchronously.
+	 * 
 	 * @param batchName {@link String}
-	 * @param filters {@link DataFilter}[ ] 
+	 * @param filters {@link DataFilter}[ ]
 	 * @param callback {@link AsyncCallback} < {@link Integer} >
 	 */
 	void getRowsCount(String batchName, DataFilter[] filters, AsyncCallback<Integer> callback);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,20 +50,73 @@ import com.ephesoft.dcma.da.dao.PluginDao;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.Plugin;
 
+/**
+ * Dao representing plugin table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.PluginDao
+ */
 @Repository
 public class PluginDaoImpl extends HibernateDao<Plugin> implements PluginDao {
 
+	/**
+	 * PLUGIN_NAME String.
+	 */
+	private static final String PLUGIN_NAME = "pluginName";
+	
+	/**
+	 * PLUGIN String.
+	 */
+	private static final String PLUGIN = "plugin";
+	
+	/**
+	 * MODULE_ID String.
+	 */
+	private static final String MODULE_ID = "module.id";
+	
+	/**
+	 * PLUGIN_ID String.
+	 */
+	private static final String PLUGIN_ID = "id";
+	
+	/**
+	 * MODULE String.
+	 */
+	private static final String MODULE = "module";
+	
+	/**
+	 * BATCH_CLASS_MODULE_MODULE String.
+	 */
+	private static final String BATCH_CLASS_MODULE_MODULE = "batchClassModule.module";
+	
+	/**
+	 * BATCH_CLASS_MODULE String.
+	 */
+	private static final String BATCH_CLASS_MODULE = "batchClassModule";
+	
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(PluginDaoImpl.class);
-
+	
+	/**
+	 * API to get the plugin properties by plugin Id.
+	 * 
+	 * @param pluginId Long
+	 * @return Plugin
+	 */
 	@Override
 	public Plugin getPluginPropertiesForPluginId(Long pluginId) {
 		LOG.info("pluginId : " + pluginId);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("id", pluginId));
+		criteria.add(Restrictions.eq(PLUGIN_ID, pluginId));
 		return this.findSingle(criteria);
 	}
 
 	/**
+	 * API to get plugins.
+	 * 
 	 * @param moduleId Long
 	 * @param startResult int
 	 * @param maxResult int
@@ -72,18 +125,37 @@ public class PluginDaoImpl extends HibernateDao<Plugin> implements PluginDao {
 	@Override
 	public List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult) {
 		DetachedCriteria criteria = criteria(BatchClassPlugin.class);
-		criteria.createAlias("batchClassModule", "batchClassModule", JoinFragment.INNER_JOIN);
-		criteria.createAlias("batchClassModule.module", "module", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("module.id", moduleId));
-		criteria.setProjection(Projections.property("plugin"));
+		criteria.createAlias(BATCH_CLASS_MODULE, BATCH_CLASS_MODULE, JoinFragment.INNER_JOIN);
+		criteria.createAlias(BATCH_CLASS_MODULE_MODULE, MODULE, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(MODULE_ID, moduleId));
+		criteria.setProjection(Projections.property(PLUGIN));
 		return find(criteria, startResult, maxResult);
 	}
 
+	/**
+	 * API to get Plugin by Name.
+	 * 
+	 * @param pluginName String
+	 * @return Plugin
+	 */
 	@Override
 	public Plugin getPluginByName(String pluginName) {
 		DetachedCriteria criteria = criteria(Plugin.class);
-		criteria.add(Restrictions.eq("pluginName", pluginName));
+		criteria.add(Restrictions.eq(PLUGIN_NAME, pluginName));
 		return this.findSingle(criteria);
 	}
-
+	
+	/**
+	 * API to get all plugin names.
+	 * 
+	 * @return List<String>
+	 */
+	@Override
+	public List<String> getAllPluginsNames()
+	{
+		LOG.info("Getting names of all the plugins.");
+		DetachedCriteria criteria = criteria();
+		criteria.setProjection(Projections.property(PLUGIN_NAME));
+		return find(criteria);
+	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,37 +54,57 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
 import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
 
+/**
+ * This is class for uploading Image File Servlet.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet
+ */
 public class UploadImageFileServlet extends DCMAHttpServlet {
 
 	/**
-	 * 
+	 * serialVersionUID long.
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Overridden doGet method.
+	 * 
+	 * @param request HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @throws IOException
+	 */
 	@Override
 	public final void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		doPost(request, response);
 	}
 
+	/**
+	 * Overridden doPost method.
+	 * 
+	 * @param request HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @throws IOException
+	 */
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String batchClassId = null;
 		String docName = null;
 		String fileName = null;
+		String isAdvancedTableInfo = null;
 		InputStream instream = null;
 		OutputStream out = null;
 		PrintWriter printWriter = resp.getWriter();
 		if (ServletFileUpload.isMultipartContent(req)) {
-
 			// Create a factory for disk-based file items
 			FileItemFactory factory = new DiskFileItemFactory();
-
 			// Create a new file upload handler
 			ServletFileUpload upload = new ServletFileUpload(factory);
-
 			List<FileItem> items;
 			BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 			String uploadPath = null;
@@ -98,6 +118,8 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 							batchClassId = item.getString();
 						} else if (item.getFieldName().equalsIgnoreCase("docName")) {
 							docName = item.getString();
+						} else if (item.getFieldName().equalsIgnoreCase("isAdvancedTableInfo")) {
+							isAdvancedTableInfo = item.getString();
 						}
 					} else if (!item.isFormField() && "importFile".equals(item.getFieldName())) {
 						fileName = item.getName();
@@ -107,43 +129,49 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 						instream = item.getInputStream();
 					}
 				}
-				uploadPath = batchSchemaService.getTestAdvancedKvExtractionFolderPath(batchClassId, true);
-				uploadPath += File.separator + docName + File.separator;
-				File uploadFolder = new File(uploadPath);
-
-				if (!uploadFolder.exists()) {
-					try {
-						boolean tempPath = uploadFolder.mkdirs();
-						if (!tempPath) {
-							log
-									.error("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
-							printWriter
-									.write("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
+				if (batchClassId == null || docName == null) {
+					LOG.error("Error while loading image... Either batchClassId or doc type is null. Batch Class Id :: "
+							+ batchClassId + " Doc Type :: " + docName);
+					printWriter.write("Error while loading image... Either batchClassId or doc type is null.");
+				} else {
+					StringBuilder uploadPathString = uploadPath(batchClassId, docName, isAdvancedTableInfo, batchSchemaService);
+					File uploadFolder = new File(uploadPathString.toString());
+					if (!uploadFolder.exists()) {
+						try {
+							boolean tempPath = uploadFolder.mkdirs();
+							if (!tempPath) {
+								LOG
+										.error("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
+								printWriter
+										.write("Unable to create the folders in the temp directory specified. Change the path and permissions in dcma-batch.properties");
+								return;
+							}
+						} catch (Exception e) {
+							LOG.error("Unable to create the folders in the temp directory.", e);
+							printWriter.write("Unable to create the folders in the temp directory." + e.getMessage());
 							return;
 						}
-					} catch (Exception e) {
-						log.error("Unable to create the folders in the temp directory.", e);
-						printWriter.write("Unable to create the folders in the temp directory." + e.getMessage());
-						return;
 					}
+					uploadPathString.append(File.separator);
+					uploadPathString.append(fileName);
+					uploadPath = uploadPathString.toString();
+					out = new FileOutputStream(uploadPath);
+					byte buf[] = new byte[BatchClassManagementConstants.BUFFER_SIZE];
+					int len = instream.read(buf);
+					while ((len) > 0) {
+						out.write(buf, 0, len);
+						len = instream.read(buf);
+					}
+					// convert tiff to png
+					ImageProcessService imageProcessService = this.getSingleBeanOfType(ImageProcessService.class);
+					imageProcessService.generatePNGForImage(new File(uploadPath));
+					LOG.info("Png file created successfully for file: " + uploadPath);
 				}
-				uploadPath += File.separator + fileName;
-				out = new FileOutputStream(uploadPath);
-				byte buf[] = new byte[1024];
-				int len;
-				while ((len = instream.read(buf)) > 0) {
-					out.write(buf, 0, len);
-				}
-
-				// convert tiff to png
-				ImageProcessService imageProcessService = this.getSingleBeanOfType(ImageProcessService.class);
-				imageProcessService.generatePNGForImage(new File(uploadPath));
-				log.info("Png file created successfully for file: " + uploadPath);
 			} catch (FileUploadException e) {
-				log.error("Unable to read the form contents." + e, e);
+				LOG.error("Unable to read the form contents." + e, e);
 				printWriter.write("Unable to read the form contents.Please try again.");
 			} catch (DCMAException e) {
-				log.error("Unable to generate PNG." + e, e);
+				LOG.error("Unable to generate PNG." + e, e);
 				printWriter.write("Unable to generate PNG.Please try again.");
 			} finally {
 				if (out != null) {
@@ -156,5 +184,25 @@ public class UploadImageFileServlet extends DCMAHttpServlet {
 			printWriter.write("file_seperator:" + File.separator);
 			printWriter.write("|");
 		}
+	}
+
+	private StringBuilder uploadPath(String batchClassId, String docName, String isAdvancedTableInfo,
+			BatchSchemaService batchSchemaService) {
+		String batchClassIdTemp = batchClassId;
+		String docNameTemp = docName;
+		String uploadPath;
+		batchClassIdTemp = batchClassIdTemp.trim();
+		docNameTemp = docNameTemp.trim();
+		if (isAdvancedTableInfo != null && isAdvancedTableInfo.equalsIgnoreCase("true")) {
+			uploadPath = batchSchemaService.getAdvancedTestTableFolderPath(batchClassIdTemp, true);
+		} else {
+			uploadPath = batchSchemaService.getTestAdvancedKvExtractionFolderPath(batchClassIdTemp, true);
+		}
+		StringBuilder uploadPathString = new StringBuilder();
+		uploadPathString.append(uploadPath);
+		uploadPathString.append(File.separator);
+		uploadPathString.append(docNameTemp);
+		uploadPathString.append(File.separator);
+		return uploadPathString;
 	}
 }

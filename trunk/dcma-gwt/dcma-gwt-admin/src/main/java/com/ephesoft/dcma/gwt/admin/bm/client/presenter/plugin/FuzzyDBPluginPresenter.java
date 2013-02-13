@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,14 +43,36 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the Fuzzy DB plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class FuzzyDBPluginPresenter extends AbstractBatchClassPresenter<FuzzyDBPluginView> {
 
+	/**
+	 * fuzzyDBPropertiesViewPresenter FuzzyDBPropertiesViewPresenter.
+	 */
 	private final FuzzyDBPropertiesViewPresenter fuzzyDBPropertiesViewPresenter;
 
+	/**
+	 * editFuzzyDBPropertiesPresenter EditFuzzyDBPropertiesPresenter.
+	 */
 	private final EditFuzzyDBPropertiesPresenter editFuzzyDBPropertiesPresenter;
 
+	/**
+	 * pluginDataPresenter PluginDataPresenter.
+	 */
 	private final PluginDataPresenter pluginDataPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FuzzyDBPluginView
+	 */
 	public FuzzyDBPluginPresenter(BatchClassManagementController controller, FuzzyDBPluginView view) {
 		super(controller, view);
 
@@ -59,6 +81,9 @@ public class FuzzyDBPluginPresenter extends AbstractBatchClassPresenter<FuzzyDBP
 		this.editFuzzyDBPropertiesPresenter = new EditFuzzyDBPropertiesPresenter(controller, view.getEditFuzzyDBPropertiesView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null
@@ -70,35 +95,42 @@ public class FuzzyDBPluginPresenter extends AbstractBatchClassPresenter<FuzzyDBP
 			view.getPropertyDetailsViewPanel().setVisible(true);
 			view.getEditPropertyDetailPanel().setVisible(false);
 
-			view.getEditButton().addClickHandler(new ClickHandler() {
+			view.getFuzzyDBPropertiesView().getEditButton().addClickHandler(new ClickHandler() {
 
 				@Override
 				public void onClick(ClickEvent arg0) {
 					view.getPropertyDetailsViewPanel().setVisible(false);
 					view.getEditPropertyDetailPanel().setVisible(true);
 					controller.getBatchClass().setDirty(Boolean.TRUE);
+					editFuzzyDBPropertiesPresenter.bind();
 				}
 			});
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
-		view.getMappingButton().addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				controller.getMainPresenter().showDocTypeMappingView();
-			}
-		});
-
 	}
 
+	/**
+	 * To get Fuzzy DB Properties View Presenter.
+	 * 
+	 * @return FuzzyDBPropertiesViewPresenter
+	 */
 	public FuzzyDBPropertiesViewPresenter getFuzzyDBPropertiesViewPresenter() {
 		return fuzzyDBPropertiesViewPresenter;
 	}
 
+	/**
+	 * To get edit Fuzzy DB Properties Presenter.
+	 * 
+	 * @return EditFuzzyDBPropertiesPresenter
+	 */
 	public EditFuzzyDBPropertiesPresenter getEditFuzzyDBPropertiesPresenter() {
 		return editFuzzyDBPropertiesPresenter;
 	}

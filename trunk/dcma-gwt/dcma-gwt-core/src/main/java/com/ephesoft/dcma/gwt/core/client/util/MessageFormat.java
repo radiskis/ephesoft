@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,7 @@ public class MessageFormat {
 		applyPattern(pattern);
 	}
 
-	public void applyPattern(String pattern) {
+	public final void applyPattern(String pattern) {
 		this.pattern = pattern;
 	}
 
@@ -52,23 +52,26 @@ public class MessageFormat {
 	}
 
 	public final String format(Object obj) {
+		Object [] tempObj = null;
 		if (obj instanceof Object[]) {
-			return doFormat(pattern, (Object[]) obj);
+			tempObj =  (Object[]) obj;
 		}
-		return doFormat(pattern, new Object[] {obj});
+		tempObj = new Object[] {obj};
+		return doFormat(pattern, tempObj);
 	}
 
-	private static String doFormat(String s, Object[] arguments) {
+	private static String doFormat(String pattern, Object[] arguments) {
 		// A very simple implementation of format
-		int i = 0;
-		while (i < arguments.length) {
-			String delimiter = "{" + i + "}";
-			while (s.contains(delimiter)) {
-				s = s.replace(delimiter, String.valueOf(arguments[i]));
+		int counter = 0;
+		String newPattern = pattern;
+		while (counter < arguments.length) {
+			String delimiter = "{" + counter + "}";
+			while (newPattern.contains(delimiter)) {
+				newPattern = newPattern.replace(delimiter, String.valueOf(arguments[counter]));
 			}
-			i++;
+			counter++;
 		}
-		return s;
+		return newPattern;
 	}
 
 }

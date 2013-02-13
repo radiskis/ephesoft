@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,28 +44,55 @@ import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the regex list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class RegexListPresenter extends AbstractBatchClassPresenter<RegexListView> implements DoubleClickListner {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view RegexListView
+	 */
 	public RegexListPresenter(BatchClassManagementController controller, RegexListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// processing to be done when this presenter is loaded.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// event handling code goes here.
 	}
 
-	@Override
+	/**
+	 * In case of Double Click on Table.
+	 */
+ 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 
 	}
 
+ 	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getRegexListView().getSelectedRowIndex();
 		int rowCount = view.getRegexListView().getTableRecordCount();

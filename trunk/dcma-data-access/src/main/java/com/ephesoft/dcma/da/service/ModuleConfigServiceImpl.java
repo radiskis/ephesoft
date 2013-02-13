@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,13 @@ import org.springframework.stereotype.Service;
 import com.ephesoft.dcma.da.dao.ModuleConfigDao;
 import com.ephesoft.dcma.da.domain.ModuleConfig;
 
+/**
+ * This is a database service to get the module configuration details for a module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.ModuleConfigService
+ */
 @Service
 public class ModuleConfigServiceImpl implements ModuleConfigService {
 
@@ -51,9 +58,19 @@ public class ModuleConfigServiceImpl implements ModuleConfigService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleConfigServiceImpl.class);
 
+	/**
+	 * moduleConfigDao {@link ModuleConfigDao}.
+	 */
 	@Autowired
 	private ModuleConfigDao moduleConfigDao;
 
+	/**
+	 * API to get the module configuration by key and mandatory.
+	 * 
+	 * @param moduleConfigKey {@link String}
+	 * @param isMandatory boolean
+	 * @return {@link ModuleConfig}
+	 */
 	@Override
 	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory) {
 		LOGGER.debug(moduleConfigKey);

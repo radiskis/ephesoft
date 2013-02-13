@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -65,28 +65,48 @@ public interface PluginService {
 	Plugin getPluginPropertiesForPluginName(String pluginName);
 
 	/**
+	 * API to get plugins.
+	 * 
 	 * @param moduleId {@link Long}
 	 * @param startResult int
 	 * @param maxResult int
 	 * @return List<{@link Plugin}>
 	 */
 	List<Plugin> getPlugins(Long moduleId, int startResult, int maxResult);
-	
+
 	/**
+	 * API to get all the plugins.
 	 * 
 	 * @return {@link List} <{@link Plugin}>
 	 */
-	List<Plugin> getAllPluginsNames();
-	
+	List<Plugin> getAllPlugins();
+
 	/**
 	 * API to create a new plugin.
+	 * 
 	 * @param plugin {@link Plugin}
 	 */
 	void createNewPlugin(Plugin plugin);
-	
+
 	/**
 	 * API to merge/update the given plugin.
+	 * 
 	 * @param plugin {@link Plugin}
 	 */
 	void mergePlugin(Plugin plugin);
+
+	/**
+	 * API To delete the given plugin.
+	 * 
+	 * @param plugin {@link Plugin}
+	 * @param removeReferences boolean
+	 */
+	void removePluginAndReferences(Plugin plugin, boolean removeReferences);
+
+	/**
+	 * API to retrieve names of all the plugins.
+	 * 
+	 * @return {@link List}< {@link String}>
+	 */
+	List<String> getAllPluginsNames();
 }

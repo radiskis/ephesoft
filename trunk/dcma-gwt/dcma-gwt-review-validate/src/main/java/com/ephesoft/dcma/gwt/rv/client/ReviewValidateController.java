@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,9 +42,9 @@ import com.google.gwt.user.client.ui.HasWidgets;
 
 public class ReviewValidateController implements Presenter {
 
-//	private ReviewValidateDocServiceAsync service;
-//	private HandlerManager eventBus;
-	private ReviewValidatePresenter presenter;
+	// private ReviewValidateDocServiceAsync service;
+	// private HandlerManager eventBus;
+	private final ReviewValidatePresenter presenter;
 
 	public ReviewValidateController(ReviewValidateDocServiceAsync service, HandlerManager eventBus) {
 		// this.service = service;
@@ -53,8 +53,8 @@ public class ReviewValidateController implements Presenter {
 	}
 
 	@Override
-	public void go(HasWidgets container) {
-		this.presenter.go(container);
+	public void onPresenterLoad(HasWidgets container) {
+		this.presenter.onPresenterLoad(container);
 	}
 
 	public ReviewValidatePresenter getPresenter() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,25 +46,45 @@ import javax.persistence.Table;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 import com.ephesoft.dcma.da.property.DependencyTypeProperty;
 
+/**
+ * Entity class for plugin_dependency.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
-@Table(name = "dependency")
+@Table(name = "plugin_dependency")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
-public class Dependency extends AbstractChangeableEntity{
+public class Dependency extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 5694761325202724712L;
 
+	/**
+	 * plugin Plugin.
+	 */
 	@OneToOne
-	@JoinColumn(name = "plugin_id", nullable = false)
+	@JoinColumn(name = "plugin_id")
 	private Plugin plugin;
 
+	/**
+	 * dependencyType DependencyTypeProperty.
+	 */
 	@Enumerated(EnumType.STRING)
 	@Column(name = "dependency_type")
 	private DependencyTypeProperty dependencyType;
 
+	/**
+	 * dependencies String.
+	 */
 	@Column(name = "dependencies")
 	private String dependencies;
 
 	/**
+	 * To get Plugin.
 	 * @return the plugin
 	 */
 	public Plugin getPlugin() {
@@ -72,27 +92,31 @@ public class Dependency extends AbstractChangeableEntity{
 	}
 
 	/**
-	 * @param plugin the plugin to set
+	 * To set Plugin.
+	 * @param plugin Plugin
 	 */
 	public void setPlugin(Plugin plugin) {
 		this.plugin = plugin;
 	}
 
 	/**
-	 * @return the depndencies
+	 * To get Dependencies.
+	 * @return the dependencies
 	 */
 	public String getDependencies() {
 		return dependencies;
 	}
 
 	/**
-	 * @param depndencies the depndencies to set
+	 * To set Dependencies.
+	 * @param dependencies String
 	 */
 	public void setDependencies(String dependencies) {
 		this.dependencies = dependencies;
 	}
 
 	/**
+	 * To get Dependency Type.
 	 * @return the dependencyType
 	 */
 	public DependencyTypeProperty getDependencyType() {
@@ -100,7 +124,8 @@ public class Dependency extends AbstractChangeableEntity{
 	}
 
 	/**
-	 * @param dependencyType the dependencyType to set
+	 * To set Dependency Type.
+	 * @param dependencyType DependencyTypeProperty
 	 */
 	public void setDependencyType(DependencyTypeProperty dependencyType) {
 		this.dependencyType = dependencyType;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,40 +50,96 @@ import com.ephesoft.dcma.da.dao.BatchClassModuleDao;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.Module;
 
+/**
+ * This is dao class for batch class module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassModuleDao
+ */
 @Repository
 public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> implements BatchClassModuleDao {
 
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+	
+	/**
+	 * MODULE String.
+	 */
 	private static final String MODULE = "module";
+	
+	/**
+	 * BATCH_CLASS_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(BatchClassModuleDaoImpl.class);
+	
+	/**
+	 * WORKFLOW_NAME String.
+	 */
 	private static final String WORKFLOW_NAME = "workflowName";
 
+	/**
+	 * API to get the count of modules related to a batch class.
+	 * 
+	 * @param batchClassId
+	 * @return Integer (count of modules)
+	 */
 	@Override
 	public Integer countModules(String batchClassIdentifier) {
 		LOG.info("batchClassIdentifier : " + batchClassIdentifier);
 		DetachedCriteria criteria = criteria();
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return count(criteria);
 	}
 
+	/**
+	 * API to fetch List of modules corresponding to a batch class.
+	 * 
+	 * @param batchClassId
+	 * @return List<Module>
+	 */
 	@Override
 	public List<Module> getBatchClassModule(String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		criteria.setProjection(Projections.property(MODULE));
 		return find(criteria);
 	}
 
+	/**
+	 * API to fetch Modules starting from firstIndex and as many results as MaxResults from a batch class.
+	 * 
+	 * @param batchClassId
+	 * @param firstIndex
+	 * @param maxResults
+	 * @return List<Module>
+	 */
 	@Override
 	public List<Module> getModules(String batchClassIdentifier, int firstIndex, int maxResults) {
 		DetachedCriteria criteria = criteria();
+		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		criteria.setProjection(Projections.property(MODULE));
 		criteria.addOrder(Order.asc("orderNumber"));
 		return find(criteria, firstIndex, maxResults);
 	}
 
+	/**
+	 * API to fetch the modules by name.
+	 * 
+	 * @param batchClassIdentifier
+	 * @param moduleName
+	 * @return BatchClassModule
+	 */ 
 	@Override
 	public BatchClassModule getModuleByName(String batchClassIdentifier, String moduleName) {
 		DetachedCriteria criteria = criteria();
@@ -94,15 +150,27 @@ public class BatchClassModuleDaoImpl extends HibernateDao<BatchClassModule> impl
 		return findSingle(criteria);
 	}
 
+	/**
+	 * API to fetch the modules by workflow name.
+	 * 
+	 * @param batchClassIdentifier
+	 * @param workflowName
+	 * @return batch class module object
+	 */
 	@Override
 	public BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName) {
 		DetachedCriteria criteria = criteria();
 		criteria.createAlias(BATCH_CLASS, BATCH_CLASS);
 		criteria.add(Restrictions.eq(BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		criteria.add(Restrictions.eq(WORKFLOW_NAME, workflowName));
-		return (BatchClassModule) find(criteria).get(0);
+		return findSingle(criteria);
 	}
 
+	/**
+	 * API to fetch all batch class modules in order.
+	 * @param order Order
+	 * @return List<BatchClassModule>
+	 */
 	@Override
 	public List<BatchClassModule> getAllBatchClassModulesInOrder(com.ephesoft.dcma.core.common.Order order) {
 

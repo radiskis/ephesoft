@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,34 +44,36 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class ThumbnailSelectionEvent extends GwtEvent<ThumbnailSelectionEventHandler> {
 
-	public static Type<ThumbnailSelectionEventHandler> TYPE = new Type<ThumbnailSelectionEventHandler>();
+	public static Type<ThumbnailSelectionEventHandler> type = new Type<ThumbnailSelectionEventHandler>();
 
-	private Page page;
+	private final Page page;
 	private Field field;
 	private List<Coordinates> coordinatesList;
-	private boolean removeOverlay;
+	private final boolean removeOverlay;
 
 	public ThumbnailSelectionEvent(Page page) {
+		super();
 		this.page = page;
-		this.coordinatesList = null;
 		this.removeOverlay = Boolean.FALSE;
 	}
 
 	public ThumbnailSelectionEvent(Page page, Field field) {
+		super();
 		this.page = page;
 		this.field = field;
-		this.coordinatesList = null;
 		this.removeOverlay = Boolean.FALSE;
 	}
 
 	public ThumbnailSelectionEvent(Page page, Field field, List<Coordinates> coordinatesList) {
+		super();
 		this.page = page;
 		this.field = field;
 		this.coordinatesList = coordinatesList;
 		this.removeOverlay = Boolean.FALSE;
 	}
-	
+
 	public ThumbnailSelectionEvent(Page page, Field field, List<Coordinates> coordinatesList, boolean removeOverlay) {
+		super();
 		this.page = page;
 		this.field = field;
 		this.coordinatesList = coordinatesList;
@@ -79,16 +81,19 @@ public class ThumbnailSelectionEvent extends GwtEvent<ThumbnailSelectionEventHan
 	}
 
 	public ThumbnailSelectionEvent(Page page, List<Coordinates> coordinatesList) {
+		super();
 		this.page = page;
 		this.coordinatesList = coordinatesList;
 		this.removeOverlay = Boolean.FALSE;
 	}
-	
+
 	public ThumbnailSelectionEvent(Page page, List<Coordinates> coordinatesList, boolean removeOverlay) {
+		super();
 		this.page = page;
 		this.coordinatesList = coordinatesList;
 		this.removeOverlay = removeOverlay;
 	}
+
 	@Override
 	protected void dispatch(ThumbnailSelectionEventHandler handler) {
 		handler.onThumbnailSelection(this);
@@ -96,7 +101,7 @@ public class ThumbnailSelectionEvent extends GwtEvent<ThumbnailSelectionEventHan
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<ThumbnailSelectionEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	public Page getPage() {
@@ -110,7 +115,7 @@ public class ThumbnailSelectionEvent extends GwtEvent<ThumbnailSelectionEventHan
 	public List<Coordinates> getCoordinatesList() {
 		return coordinatesList;
 	}
-	
+
 	public boolean isRemoveOverlay() {
 		return removeOverlay;
 	}

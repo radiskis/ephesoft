@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,13 @@ import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.Module;
 
+/**
+ * This is dao class for batch class module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.BatchClassModuleDaoImpl
+ */
 public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 
 	/**
@@ -71,16 +78,16 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	List<Module> getModules(String batchClassIdentifier, final int firstIndex, final int maxResults);
 
 	/**
-	 * API to fetch the modules by name
+	 * API to fetch the modules by name.
 	 * 
 	 * @param batchClassIdentifier
 	 * @param moduleName
-	 * @return
-	 */
+	 * @return BatchClassModule
+	 */ 
 	BatchClassModule getModuleByName(String batchClassIdentifier, String moduleName);
 
 	/**
-	 * API to fetch the modules by workflow name
+	 * API to fetch the modules by workflow name.
 	 * 
 	 * @param batchClassIdentifier
 	 * @param workflowName
@@ -89,9 +96,9 @@ public interface BatchClassModuleDao extends CacheableDao<BatchClassModule> {
 	BatchClassModule getModuleByWorkflowName(String batchClassIdentifier, String workflowName);
 
 	/**
-	 * 
-	 * @param order
-	 * @return
+	 * API to fetch all batch class modules in order.
+	 * @param order Order
+	 * @return List<BatchClassModule>
 	 */
 	List<BatchClassModule> getAllBatchClassModulesInOrder(Order order);
 

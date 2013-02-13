@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,10 +35,13 @@
 
 package com.ephesoft.dcma.kvextraction;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +70,12 @@ import com.ephesoft.dcma.core.common.KVFetchValue;
 import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.domain.AdvancedKVExtraction;
 import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.service.FieldTypeService;
 import com.ephesoft.dcma.kvextraction.constant.KVExtractionConstants;
 import com.ephesoft.dcma.kvfinder.data.InputDataCarrier;
+import com.ephesoft.dcma.kvfinder.data.KeyValueFieldCarrier;
 import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
 import com.ephesoft.dcma.kvfinder.service.KVFinderService;
 
@@ -90,29 +95,32 @@ public class KeyValueExtraction {
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeyValueExtraction.class);
+	/**
+	 * Plug in name for KV extraction.
+	 */
 	private static final String KEY_VALUE_EXTRACTION_PLUGIN = "KEY_VALUE_EXTRACTION";
 
 	/**
-	 * fieldService FieldService.
+	 * fieldService {@link FieldTypeService}.
 	 */
 	@Autowired
 	private FieldTypeService fieldTypeService;
 
 	/**
-	 * Reference of BatchSchemaService.
+	 * Reference of {@link BatchSchemaService}.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * Reference of KVFinderService.
+	 * Reference of {@link KVFinderService}.
 	 */
 	@Autowired
 	private KVFinderService kvFinderService;
@@ -125,7 +133,7 @@ public class KeyValueExtraction {
 	/**
 	 * Reference of FieldTypeService.
 	 * 
-	 * @param fieldTypeService FieldService
+	 * @param fieldTypeService {@link FieldTypeService}.
 	 */
 	public final void setFieldService(final FieldTypeService fieldTypeService) {
 		this.fieldTypeService = fieldTypeService;
@@ -153,7 +161,7 @@ public class KeyValueExtraction {
 	/**
 	 * Reference fieldTypeService.
 	 * 
-	 * @return fieldTypeService
+	 * @return fieldTypeService {@link FieldTypeService}
 	 */
 	public final FieldTypeService getFieldTypeService() {
 		return fieldTypeService;
@@ -169,28 +177,28 @@ public class KeyValueExtraction {
 	}
 
 	/**
-	 * @return the batchSchemaService
+	 * @return the {@link BatchSchemaService}
 	 */
 	public final BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * @param batchSchemaService the {@link BatchSchemaService}
 	 */
 	public final void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public final PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService the {@link PluginPropertiesService}
 	 */
 	public final void setPluginPropertiesService(final PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -200,12 +208,13 @@ public class KeyValueExtraction {
 	 * This method is used to extract the document level fields using key value based extraction. Update the extracted data to the
 	 * batch.xml file.
 	 * 
-	 * @param batchInstanceId String
+	 * @param batchInstanceId {@link String}
 	 * @return isSuccessful boolean
 	 * @throws DCMAApplicationException Check for all the input parameters.
 	 */
 	public final boolean extractFields(final String batchInstanceId) throws DCMAApplicationException {
 
+		boolean isSuccessful = false;
 		String errMsg = null;
 		if (null == batchInstanceId) {
 			errMsg = "Invalid batchInstanceId.";
@@ -214,7 +223,7 @@ public class KeyValueExtraction {
 		}
 		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceId, KEY_VALUE_EXTRACTION_PLUGIN,
 				KVExtractionProperties.KV_EXTRACTION_SWITCH);
-		if (("ON".equalsIgnoreCase(switchValue))) {
+		if ("ON".equalsIgnoreCase(switchValue)) {
 
 			if (null == fieldTypeService) {
 				errMsg = "Invalid intialization of FieldService.";
@@ -226,7 +235,6 @@ public class KeyValueExtraction {
 
 			final Batch batch = batchSchemaService.getBatch(batchInstanceId);
 
-			boolean isSuccessful = false;
 			try {
 
 				final List<Document> docTypeList = batch.getDocuments().getDocument();
@@ -244,14 +252,20 @@ public class KeyValueExtraction {
 				LOGGER.error(e.getMessage());
 				throw new DCMAApplicationException(e.getMessage(), e);
 			}
-			return isSuccessful;
 		} else {
 			LOGGER.info("Skipping KV extraction. Switch set as off.");
-			return true;
 		}
-
+		return isSuccessful;
 	}
 
+	/**
+	 * This api is used to extract the field values from the HOCR file.
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param params {@link ExtractKVParams}
+	 * @return boolean
+	 * @throws DCMAApplicationException
+	 */
 	public final boolean extractFieldsFromHOCR(final List<DocField> updtDocList, final HocrPages hocrPages,
 			final ExtractKVParams params) throws DCMAApplicationException {
 
@@ -268,7 +282,8 @@ public class KeyValueExtraction {
 		return isSuccessful;
 	}
 
-	private boolean performKVExtractionAPI(final List<DocField> updtDocFdTyList, final HocrPages hocrPages, ExtractKVParams params) throws DCMAApplicationException {
+	private boolean performKVExtractionAPI(final List<DocField> updtDocFdTyList, final HocrPages hocrPages, ExtractKVParams params)
+			throws DCMAApplicationException {
 		boolean isSuccessful = false;
 		final List<Boolean> isValidateDataList = new ArrayList<Boolean>();
 
@@ -276,7 +291,6 @@ public class KeyValueExtraction {
 		// read the params from web service
 		Params paramList = params.getParams().get(0);
 
-		String batchInstanceID = null;
 		String pageID = null;
 		String key = paramList.getKeyPattern();
 		final int fieldOrderNumber = -1;
@@ -288,24 +302,24 @@ public class KeyValueExtraction {
 		setFirstFieldValue(true);
 
 		try {
-			InputDataCarrier inputDataCarrier = new InputDataCarrier(
-					LocationType.valueOf(paramList.getLocationType()),paramList.getKeyPattern(),paramList.getValuePattern(), 
-					Integer.valueOf(paramList.getNoOfWords()),paramList.getMultiplier(), paramList.getKVFetchValue() == null ? null : KVFetchValue.valueOf(paramList.getKVFetchValue()), 
-					Integer.valueOf(paramList.getLength()), Integer.valueOf(paramList.getWidth()), 
-					Integer.valueOf(paramList.getXoffset()), Integer.valueOf(paramList.getYoffset()));			
-			
-			performKVExtraction(updtDocFdType, alternateValues, fieldOrderNumber, batchInstanceID, key, fdTypeName, hocrPages, pageID,
-					inputDataCarrier);
-			
+			InputDataCarrier inputDataCarrier = new InputDataCarrier(LocationType.valueOf(paramList.getLocationType()), paramList
+					.getKeyPattern(), paramList.getValuePattern(), Integer.valueOf(paramList.getNoOfWords()), paramList
+					.getMultiplier(), paramList.getKVFetchValue() == null ? null : KVFetchValue.valueOf(paramList.getKVFetchValue()),
+					Integer.valueOf(paramList.getLength()), Integer.valueOf(paramList.getWidth()), Integer.valueOf(paramList
+							.getXoffset()), Integer.valueOf(paramList.getYoffset()), false, null, null);
+
+			performKVExtraction(updtDocFdType, alternateValues, fieldOrderNumber, key, fdTypeName, hocrPages, pageID,
+					inputDataCarrier, null, null);
+
 			sortDocFdWithConfidence(updtDocFdType);
-			
+
 			// populating the default values
 			updtDocFdType.setFieldOrderNumber(0);
-			updtDocFdType.setFieldValueOptionList("");
-			updtDocFdType.setOverlayedImageFileName("");
-			updtDocFdType.setPage("");
-			updtDocFdType.setType("");
-			
+			updtDocFdType.setFieldValueOptionList(KVExtractionConstants.EMPTY);
+			updtDocFdType.setOverlayedImageFileName(KVExtractionConstants.EMPTY);
+			updtDocFdType.setPage(KVExtractionConstants.EMPTY);
+			updtDocFdType.setType(KVExtractionConstants.EMPTY);
+
 		} catch (DCMAApplicationException dcma) {
 			LOGGER.error(dcma.getMessage());
 		} catch (Exception e) {
@@ -329,15 +343,6 @@ public class KeyValueExtraction {
 
 	}
 
-	/**
-	 * This method will process for each page for each document.
-	 * 
-	 * @param xmlDocuments List<DocumentType>
-	 * @param batchInstanceID {@link String}
-	 * @param batch {@link Batch}
-	 * @return isSuccessful
-	 * @throws DCMAApplicationException Check for all the input parameters.
-	 */
 	private boolean processDocPage(final List<Document> xmlDocuments, final String batchInstanceID, final Batch batch)
 			throws DCMAApplicationException {
 
@@ -352,7 +357,7 @@ public class KeyValueExtraction {
 
 		for (Document document : xmlDocuments) {
 			final List<Page> pageList = document.getPages().getPage();
-			final String docTypeName = document.getType();
+			String docTypeName = document.getType();
 			LOGGER.info("docTypeName : " + docTypeName);
 			// read all the extraction fields one by one to all the
 			// pages document.
@@ -369,10 +374,10 @@ public class KeyValueExtraction {
 				isValidateDataList.add(null);
 				continue;
 			}
-
 			final List<DocField> updtDocFdTyList = new ArrayList<DocField>();
 
 			LOGGER.info("FieldType data found from data base for document type : " + docTypeName);
+			Map<String, KeyValueFieldCarrier> fieldTypeKVMap = new HashMap<String, KeyValueFieldCarrier>(allFdTypes.size());
 
 			for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
 				final String key = fdType.getName();
@@ -389,7 +394,10 @@ public class KeyValueExtraction {
 				setFirstFieldValue(true);
 
 				try {
-					keyExtraction(updtDocFdType, alternateValues, pageList, fdType, batchInstanceID);
+					KeyValueFieldCarrier keyValueFieldCarrier = new KeyValueFieldCarrier();
+					fieldTypeKVMap.put(key, keyValueFieldCarrier);
+					keyExtraction(updtDocFdType, alternateValues, pageList, fdType, fieldTypeKVMap, batchInstanceID,
+							keyValueFieldCarrier);
 					sortDocFdWithConfidence(updtDocFdType);
 				} catch (DCMAApplicationException dcma) {
 					LOGGER.error(dcma.getMessage());
@@ -397,16 +405,16 @@ public class KeyValueExtraction {
 					LOGGER.error(e.getMessage());
 				}
 
-				if (!isFirstFieldValue()) {
-					updtDocFdTyList.add(updtDocFdType);
-				} else {
-					updtDocFdType.setName(key);
-					updtDocFdType.setType(fdTypeName);
-					updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
-					updtDocFdTyList.add(updtDocFdType);
-					isValidateData = true;
-				}
-
+				// Code commented as it could be a probable cause for blank document level fields.
+				// if (!isFirstFieldValue()) {
+				// updtDocFdTyList.add(updtDocFdType);
+				// } else {
+				updtDocFdType.setName(key);
+				updtDocFdType.setType(fdTypeName);
+				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
+				updtDocFdTyList.add(updtDocFdType);
+				// isValidateData = true;
+				// }
 			}
 
 			isSuccessful = true;
@@ -420,19 +428,9 @@ public class KeyValueExtraction {
 		return isSuccessful;
 	}
 
-	/**
-	 * Key based extraction.
-	 * 
-	 * @param updtDocFdType {@link DocField}
-	 * @param alternateValues {@link AlternateValues}
-	 * @param pageList List<PageType>
-	 * @param fdType {@link com.ephesoft.dcma.da.domain.FieldType}
-	 * @param locationFinder LocationFinder
-	 * @param batchInstanceID {@link String}
-	 * @throws DCMAApplicationException Check for input parameters.
-	 */
 	private void keyExtraction(final DocField updtDocFdType, final AlternateValues alternateValues, final List<Page> pageList,
-			final com.ephesoft.dcma.da.domain.FieldType fdType, final String batchInstanceID) throws DCMAApplicationException {
+			final com.ephesoft.dcma.da.domain.FieldType fdType, final Map<String, KeyValueFieldCarrier> fieldTypeKVMap,
+			final String batchInstanceID, final KeyValueFieldCarrier keyValueFieldCarrier) throws DCMAApplicationException {
 
 		final List<KVExtraction> kvExtractionList = fdType.getKvExtraction();
 
@@ -444,19 +442,13 @@ public class KeyValueExtraction {
 			return;
 		}
 
-		String fdTypeName = null;
-
-		if (fdType.getDataType() != null) {
-			fdTypeName = fdType.getDataType().name();
-		}
-
 		for (KVExtraction kVExtraction : kvExtractionList) {
 			if (null == kVExtraction) {
 				continue;
 			}
 
 			KVPageValue kvPageValue = kVExtraction.getPageValue();
-			if (kvPageValue == null || kvPageValue.equals(KVPageValue.ALL)) {
+			if (kvPageValue == null) {
 				LOGGER.info("Page Value null. Setting its value to ALL.");
 				kvPageValue = KVPageValue.ALL;
 			}
@@ -464,53 +456,74 @@ public class KeyValueExtraction {
 			switch (kvPageValue) {
 				case ALL:
 					for (Page pageType : pageList) {
-						extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, key, fdTypeName, kVExtraction, pageType);
+						LOGGER.info("Extract Key value data for page : " + pageType.getIdentifier());
+						extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, kVExtraction, pageType, fieldTypeKVMap,
+								keyValueFieldCarrier);
 					}
 					break;
 				case FIRST:
-					extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, key, fdTypeName, kVExtraction, pageList
-							.get(0));
+					if (pageList != null && pageList.size() > 0) {
+						extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, kVExtraction, pageList.get(0),
+								fieldTypeKVMap, keyValueFieldCarrier);
+					}
 					break;
-
 				case LAST:
-					extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, key, fdTypeName, kVExtraction, pageList
-							.get(pageList.size() - 1));
+					if (pageList != null && pageList.size() > 0) {
+						extractData(updtDocFdType, alternateValues, fdType, batchInstanceID, kVExtraction, pageList.get(pageList
+								.size() - 1), fieldTypeKVMap, keyValueFieldCarrier);
+					}
+					break;
+				default:
 					break;
 			}
 		}
 	}
 
 	private void extractData(final DocField updtDocFdType, final AlternateValues alternateValues,
-			final com.ephesoft.dcma.da.domain.FieldType fdType, final String batchInstanceID, final String key, String fdTypeName,
-			KVExtraction kVExtraction, Page pageType) throws DCMAApplicationException {
+			final com.ephesoft.dcma.da.domain.FieldType fdType, final String batchInstanceID, KVExtraction kVExtraction,
+			Page pageType, final Map<String, KeyValueFieldCarrier> fieldTypeKVMap, final KeyValueFieldCarrier keyValueFieldCarrier)
+			throws DCMAApplicationException {
 		final String pageID = pageType.getIdentifier();
+		String key = null;
+		String fdTypeName = null;
 		final HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceID, pageID);
 		if (null == hocrPages) {
 			throw new DCMAApplicationException("In valid parameters. HocrPages is null for page id : " + pageID);
 		}
 		LOGGER.info("HocrPage page ID : " + pageID);
+		AdvancedKVExtraction advancedKVExtraction = kVExtraction.getAdvancedKVExtraction();
+		Coordinates keyRectangleCoordinates = null;
+		Coordinates valueRectangleCoordinates = null;
+		if (advancedKVExtraction != null) {
+			keyRectangleCoordinates = new Coordinates();
+			valueRectangleCoordinates = new Coordinates();
+			keyRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getKeyX0Coord()));
+			keyRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getKeyY0Coord()));
+			keyRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getKeyX1Coord()));
+			keyRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getKeyY1Coord()));
+			valueRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getValueX0Coord()));
+			valueRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getValueY0Coord()));
+			valueRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getValueX1Coord()));
+			valueRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getValueY1Coord()));
+		}
+		if (fdType != null) {
+			key = fdType.getName();
+			if (fdType.getDataType() != null) {
+				fdTypeName = fdType.getDataType().name();
+			}
+		}
 		InputDataCarrier inputDataCarrier = new InputDataCarrier(kVExtraction.getLocationType(), kVExtraction.getKeyPattern(),
 				kVExtraction.getValuePattern(), kVExtraction.getNoOfWords(), kVExtraction.getMultiplier(), kVExtraction
 						.getFetchValue(), kVExtraction.getLength(), kVExtraction.getWidth(), kVExtraction.getXoffset(), kVExtraction
-						.getYoffset());
-		performKVExtraction(updtDocFdType, alternateValues, fdType.getFieldOrderNumber(), batchInstanceID, key, fdTypeName, hocrPages,
-				pageID, inputDataCarrier);
+						.getYoffset(), kVExtraction.isUseExistingKey(), keyRectangleCoordinates, valueRectangleCoordinates);
+		performKVExtraction(updtDocFdType, alternateValues, fdType.getFieldOrderNumber(), key, fdTypeName, hocrPages, pageID,
+				inputDataCarrier, fieldTypeKVMap, keyValueFieldCarrier);
 	}
 
-	/**
-	 * @param updtDocFdType
-	 * @param alternateValues
-	 * @param fdType
-	 * @param batchInstanceID
-	 * @param key
-	 * @param fdTypeName
-	 * @param kVExtraction
-	 * @param pageType
-	 * @throws DCMAApplicationException
-	 */
 	private void performKVExtraction(final DocField updtDocFdType, final AlternateValues alternateValues, final int fieldOrderNumber,
-			final String batchInstanceID, final String key, String fdTypeName, final HocrPages hocrPages, final String pageID,
-			final InputDataCarrier inputDataCarrier) throws DCMAApplicationException {
+			final String key, String fdTypeName, final HocrPages hocrPages, final String pageID,
+			final InputDataCarrier inputDataCarrier, final Map<String, KeyValueFieldCarrier> fieldTypeKVMap,
+			KeyValueFieldCarrier keyValueFieldCarrier) throws DCMAApplicationException {
 
 		final List<HocrPage> hocrPageList = hocrPages.getHocrPage();
 
@@ -522,7 +535,8 @@ public class KeyValueExtraction {
 		inputDataCarrierList.add(inputDataCarrier);
 
 		try {
-			valueFoundData = kvFinderService.findKeyValue(inputDataCarrierList, hocrPage, Integer.MAX_VALUE);
+			valueFoundData = kvFinderService.findKeyValue(inputDataCarrierList, hocrPage, fieldTypeKVMap, keyValueFieldCarrier,
+					Integer.MAX_VALUE);
 		} catch (DCMAException e) {
 			LOGGER.error(e.getMessage(), e);
 		}
@@ -532,11 +546,6 @@ public class KeyValueExtraction {
 		}
 	}
 
-	/**
-	 * Sort the document level fields on the basis of confidence score.
-	 * 
-	 * @param updtDocFdType DocFieldType
-	 */
 	private void sortDocFdWithConfidence(final DocField updtDocFdType) {
 
 		if (null != updtDocFdType) {
@@ -595,18 +604,6 @@ public class KeyValueExtraction {
 		}
 	}
 
-	/**
-	 * This method will process each page of one document.
-	 * 
-	 * @param updtDocFdType DocFieldType
-	 * @param foundData List<DataCarrier>
-	 * @param key String
-	 * @param pageID String
-	 * @param alternateValues AlternateValues
-	 * @param fdTypeName String
-	 * @param fieldOrderNumber int
-	 * @throws DCMAApplicationException Check for input parameters and process the document page.
-	 */
 	private void processPageType(final DocField updtDocFdType, final List<OutputDataCarrier> foundData, final String key,
 			final String pageID, final AlternateValues alternateValues, final String fdTypeName, final int fieldOrderNumber)
 			throws DCMAApplicationException {
@@ -662,15 +659,6 @@ public class KeyValueExtraction {
 		}
 	}
 
-	/**
-	 * Update Batch XML file.
-	 * 
-	 * @param batchInstanceId String
-	 * @param updtDocList List<List<DocFieldType>>
-	 * @param batch Batch
-	 * @param isValidateDataList List<Boolean>
-	 * @throws DCMAApplicationException Check for input parameters and update the file having file name batch.xml.
-	 */
 	private void updateBatchXML(final String batchInstanceId, final List<List<DocField>> updtDocList, final Batch batch,
 			final List<Boolean> isValidateDataList) throws DCMAApplicationException {
 
@@ -733,8 +721,6 @@ public class KeyValueExtraction {
 						}
 					}
 				}
-				// DONE.
-
 				document.setDocumentLevelFields(documentLevelFields);
 				// document.setValid(!isValidateData);
 				isWrite = true;
@@ -753,4 +739,108 @@ public class KeyValueExtraction {
 
 	}
 
+	/**
+	 * This api is used to extract the values from HOCR file for batch class.
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param batchClassId {@link String}
+	 * @param docTypeName {@link String}
+	 * @return boolean
+	 */
+	public boolean extractFromHOCRForBatchClass(final List<DocField> updtDocList, final HocrPages hocrPages,
+			final String batchClassId, final String docTypeName) {
+		String errMsg = "";
+		boolean isSuccessful = false;
+
+		final List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = fieldTypeService.getFdTypeByDocTypeNameForBatchClass(
+				docTypeName, batchClassId);
+
+		if (null == allFdTypes || allFdTypes.isEmpty()) {
+			errMsg = "No FieldType data found from data base for document type : " + docTypeName;
+			LOGGER.error(errMsg);
+			updtDocList.add(null);
+		}
+
+		LOGGER.info("FieldType data found from data base for document type : " + docTypeName);
+		Map<String, KeyValueFieldCarrier> fieldTypeKVMap = new HashMap<String, KeyValueFieldCarrier>(allFdTypes.size());
+
+		for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
+			final String key = fdType.getName();
+			final int fieldOrderNumber = fdType.getFieldOrderNumber();
+			String fdTypeName = null;
+
+			if (fdType.getDataType() != null) {
+				fdTypeName = fdType.getDataType().name();
+			}
+
+			final DocField updtDocFdType = new DocField();
+			final AlternateValues alternateValues = new AlternateValues();
+
+			setFirstFieldValue(true);
+
+			try {
+				KeyValueFieldCarrier keyValueFieldCarrier = new KeyValueFieldCarrier();
+				fieldTypeKVMap.put(key, keyValueFieldCarrier);
+
+				List<KVExtraction> kvExtractionList = fdType.getKvExtraction();
+				for (KVExtraction kvExtraction : kvExtractionList) {
+					extractData(updtDocFdType, alternateValues, fdType, kvExtraction, fieldTypeKVMap, keyValueFieldCarrier, null, key,
+							fdTypeName, hocrPages);
+				}
+
+				sortDocFdWithConfidence(updtDocFdType);
+			} catch (DCMAApplicationException dcma) {
+				LOGGER.error(dcma.getMessage());
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+			}
+
+			if (!isFirstFieldValue()) {
+				updtDocList.add(updtDocFdType);
+			} else {
+				updtDocFdType.setName(key);
+				updtDocFdType.setType(fdTypeName);
+				updtDocFdType.setFieldOrderNumber(fieldOrderNumber);
+				updtDocList.add(updtDocFdType);
+			}
+
+		}
+		isSuccessful = true;
+		// updtDocList.add(updtDocFdTyList);
+		// updtDocList.addAll(updtDocFdTyList);
+		return isSuccessful;
+	}
+
+	private void extractData(final DocField updtDocFdType, final AlternateValues alternateValues,
+			final com.ephesoft.dcma.da.domain.FieldType fdType, KVExtraction kVExtraction,
+			final Map<String, KeyValueFieldCarrier> fieldTypeKVMap, final KeyValueFieldCarrier keyValueFieldCarrier,
+			final String pageID, String key, String fdTypeName, final HocrPages hocrPages) throws DCMAApplicationException {
+		AdvancedKVExtraction advancedKVExtraction = kVExtraction.getAdvancedKVExtraction();
+		Coordinates keyRectangleCoordinates = null;
+		Coordinates valueRectangleCoordinates = null;
+		if (advancedKVExtraction != null) {
+			keyRectangleCoordinates = new Coordinates();
+			valueRectangleCoordinates = new Coordinates();
+			keyRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getKeyX0Coord()));
+			keyRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getKeyY0Coord()));
+			keyRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getKeyX1Coord()));
+			keyRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getKeyY1Coord()));
+			valueRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getValueX0Coord()));
+			valueRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getValueY0Coord()));
+			valueRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getValueX1Coord()));
+			valueRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getValueY1Coord()));
+		}
+		if (fdType != null) {
+			key = fdType.getName();
+			if (fdType.getDataType() != null) {
+				fdTypeName = fdType.getDataType().name();
+			}
+		}
+		InputDataCarrier inputDataCarrier = new InputDataCarrier(kVExtraction.getLocationType(), kVExtraction.getKeyPattern(),
+				kVExtraction.getValuePattern(), kVExtraction.getNoOfWords(), kVExtraction.getMultiplier(), kVExtraction
+						.getFetchValue(), kVExtraction.getLength(), kVExtraction.getWidth(), kVExtraction.getXoffset(), kVExtraction
+						.getYoffset(), kVExtraction.isUseExistingKey(), keyRectangleCoordinates, valueRectangleCoordinates);
+		performKVExtraction(updtDocFdType, alternateValues, fdType.getFieldOrderNumber(), key, fdTypeName, hocrPages, pageID,
+				inputDataCarrier, fieldTypeKVMap, keyValueFieldCarrier);
+	}
 }

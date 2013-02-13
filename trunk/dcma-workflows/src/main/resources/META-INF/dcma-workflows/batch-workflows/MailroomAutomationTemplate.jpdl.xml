@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="MailroomAutomationTemplate" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="254,16,55,42">
+		<transition to="Resume_Option"/>
+	</start>
+
+	<decision g="206,803,80,40" name="Resume_Option">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ResumeEvaluation" />
+		<transition g="-26,-22" name="Workflow_Status_Running" to="Workflow_Status_Running" />
+		<transition g="-21,-22" name="Folder_Import_Module" to="Folder_Import_Module" />
+		<transition g="-21,-22" name="Recostar_Page_Process_Module"
+			to="Recostar_Page_Process_Module" />
+		<transition g="-21,-22" name="Document_Assembler_Module"
+			to="Document_Assembler_Module" />
+		<transition g="-21,-22" name="Recostar_Extraction_Module"
+			to="Recostar_Extraction_Module" />
+		<transition g="-21,-22" name="Automated_Validation_Module"
+			to="Automated_Validation_Module" />
+		<transition g="-21,-22" name="Review_Document_Module" to="is-review-required" />
+		<transition g="-21,-22" name="Validate_Document_Module" to="is-validation-required" />
+		<transition g="-21,-22" name="Export_Module" to="Export_Module" />
+	</decision>
+
+	<sub-process continue="async" g="37,162,176,68" name="Workflow_Status_Running" sub-process-key="Workflow_Status_Running">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="Folder_Import_Module"/>
+	</sub-process>
+
+	<sub-process continue="async" g="58,262,176,49" name="Folder_Import_Module" sub-process-key="Folder_Import_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Recostar_Page_Process_Module"/>
+	</sub-process>
+
+	<sub-process continue="async" g="51,343,204,60" name="Recostar_Page_Process_Module" sub-process-key="Recostar_Page_Process_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Document_Assembler_Module"/>
+	</sub-process>
+
+	<sub-process continue="async" g="93,435,183,55" name="Document_Assembler_Module" sub-process-key="Document_Assembler_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="is-review-required"/>
+	</sub-process>
+
+	<decision g="86,522,80,40" name="is-review-required">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ReviewEvaluation" />
+		<transition g="-26,-22" name="yes" to="Review_Document_Module"/>
+		<transition g="-21,-22" name="no" to="Recostar_Extraction_Module"/>
+	</decision>
+
+	<sub-process continue="async" g="25,929,207,54" name="Recostar_Extraction_Module" sub-process-key="Recostar_Extraction_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Automated_Validation_Module"/>
+	</sub-process>
+
+	<sub-process continue="async" g="127,1015,191,54" name="Automated_Validation_Module" sub-process-key="Automated_Validation_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="is-validation-required"/>
+	</sub-process>
+
+	<decision g="182,1101,80,40" name="is-validation-required">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ValidationEvaluation" />
+		<transition g="-26,-22" name="yes" to="Validate_Document_Module"/>
+		<transition g="-21,-22" name="no" to="Export_Module"/>
+	</decision>
+
+	<sub-process continue="async" g="140,594,157,54" name="Review_Document_Module" sub-process-key="Review_Document_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Recostar_Extraction_Module"/>
+	</sub-process>
+
+
+	<sub-process continue="async" g="258,1173,173,54" name="Validate_Document_Module" sub-process-key="Validate_Document_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Export_Module"/>
+	</sub-process>
+
+	<sub-process continue="async" g="372,1508,142,54" name="Export_Module" sub-process-key="Export_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Workflow_Status_Finished"/>
+	</sub-process>
+
+	<sub-process continue="async" g="344,1594,199,54" name="Workflow_Status_Finished" sub-process-key="Workflow_Status_Finished">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID"/>
+		<transition to="end"/>
+	</sub-process>
+
+	<end g="403,1680,80,40" name="end"/>
+
+</process>

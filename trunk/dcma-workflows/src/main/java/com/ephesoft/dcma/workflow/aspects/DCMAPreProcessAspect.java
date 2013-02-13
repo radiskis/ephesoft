@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,11 +49,27 @@ import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
+/**
+ * This class performs some pre-processing in executing the batch.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.aspectj.lang.annotation.Before
+ */
 @Aspect
 public class DCMAPreProcessAspect {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DCMAPreProcessAspect.class);
 	
+	/**
+	 * Pre-processing method.
+	 * 
+	 * @param joinPoint JoinPoint
+	 * @throws DCMAException in case of error
+	 */
 	@Before("execution(* com.ephesoft.dcma.*.service.*.*(..)) " +
 			"&& !within(com.ephesoft.dcma.da.service.*) " +
 			"&& !within(com.ephesoft.dcma.workflows.service.*)")

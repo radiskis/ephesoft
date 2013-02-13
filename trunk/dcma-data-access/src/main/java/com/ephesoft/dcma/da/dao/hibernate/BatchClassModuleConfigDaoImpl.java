@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,23 +35,39 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.BatchClassModuleConfigDao;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
+import com.ephesoft.dcma.da.domain.ModuleConfig;
 
 /**
- * This class is responsible to fetch data of import batch class module config from data base.
- * This table is from developers perspective.
+ * This class is responsible to fetch data of import batch class module config from data base. This table is from developers
+ * perspective.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassModuleConfigDao
  */
 @Repository
 public class BatchClassModuleConfigDaoImpl extends HibernateDao<BatchClassModuleConfig> implements BatchClassModuleConfigDao {
 
-	public BatchClassModuleConfigDaoImpl() {
-		super();		
+	/**
+	 * API for getting the module config using batch class module id.
+	 * 
+	 * @param batchClassModuleId String
+	 * @return List<ModuleConfig>
+	 */
+	@Override
+	public List<ModuleConfig> getModuleConfigForBatchClassModule(String batchClassModuleId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq("batch_class_module_id", batchClassModuleId));
+		return this.findSingle(criteria);
 	}
+
 }

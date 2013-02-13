@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,27 +36,75 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.view.batch;
 
 import com.ephesoft.dcma.da.property.BatchClassProperty;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.BatchClassListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show batch class list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class BatchClassListView extends View<BatchClassListPresenter> {
 
+	/**
+	 * To get module list view.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getModuleListView() {
 		return listView;
 	}
 
-	public HeaderColumn identifier = new HeaderColumn(0, "Identifier", 10, true, BatchClassProperty.IDENTIFIER);
-	public HeaderColumn name = new HeaderColumn(0, "Name", 20, true, BatchClassProperty.NAME);
-	public HeaderColumn description = new HeaderColumn(1, "Description", 20, true, BatchClassProperty.DESCRIPTION);
-	public HeaderColumn version = new HeaderColumn(2, "Version", 10);
-	public HeaderColumn priority = new HeaderColumn(3, "Priority", 10);
-	public HeaderColumn action = new HeaderColumn(5, "", 10);
-	// public HeaderColumn action2 = new HeaderColumn(6, "", 10);
+	/**
+	 * identifier HeaderColumn.
+	 */
+	public HeaderColumn identifier = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.IDENTIFIER), BatchClassManagementConstants.TEN, true, BatchClassProperty.IDENTIFIER);
 
+	/**
+	 * name HeaderColumn.
+	 */
+	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME),
+			BatchClassManagementConstants.TWENTY, true, BatchClassProperty.NAME);
+
+	/**
+	 * description HeaderColumn.
+	 */
+	public HeaderColumn description = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.DESCRIPTION), BatchClassManagementConstants.TWENTY, true, BatchClassProperty.DESCRIPTION);
+
+	/**
+	 * version HeaderColumn.
+	 */
+	public HeaderColumn version = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.VERSION), BatchClassManagementConstants.TEN);
+
+	/**
+	 * priority HeaderColumn.
+	 */
+	public HeaderColumn priority = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.PRIORITY), BatchClassManagementConstants.TEN);
+
+	/**
+	 * action HeaderColumn.
+	 */
+	public HeaderColumn action = new HeaderColumn(BatchClassManagementConstants.FIVE, BatchClassManagementConstants.EMPTY_STRING,
+			BatchClassManagementConstants.TEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public BatchClassListView() {
 		super();
 		listView.addHeaderColumns(identifier, name, description, version, priority, action);

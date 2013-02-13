@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,66 +54,128 @@ import org.hibernate.annotations.NaturalId;
 import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for plugin_config.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "plugin_config")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class PluginConfig extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -1959019321092627830L;
 
+	/**
+	 * plugin Plugin.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "plugin_id")
 	private Plugin plugin;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "config_name")
 	@NaturalId(mutable = true)
 	private String name;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "config_desc")
 	private String description;
 
+	/**
+	 * sampleValue List<PluginConfigSampleValue>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "plugin_config_id")
 	private List<PluginConfigSampleValue> sampleValue;
 
+	/**
+	 * dataType DataType.
+	 */
 	@Enumerated(EnumType.STRING)
 	@Column(name = "config_datatype")
 	private DataType dataType;
 
+	/**
+	 * multiValue Boolean.
+	 */
 	@Column(name = "config_multivalue")
 	private Boolean multiValue;
 
+	/**
+	 * mandatory boolean.
+	 */
 	@Column(name = "is_mandatory", columnDefinition = "bit default 1")
-	private boolean isMandatory;
+	private boolean mandatory;
 
+	/**
+	 * orderNumber Integer.
+	 */
 	@Column(name = "order_number")
 	private Integer orderNumber;
 
+	/**
+	 * To get Plugin.
+	 * @return Plugin
+	 */
 	public Plugin getPlugin() {
 		return plugin;
 	}
 
+	/**
+	 * To set Plugin.
+	 * @param plugin Plugin
+	 */
 	public void setPlugin(Plugin plugin) {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name. 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Sample Value.
+	 * @return List<String>
+	 */
 	public List<String> getSampleValue() {
 		List<String> returnList = new ArrayList<String>();
 		if (sampleValue != null && !sampleValue.isEmpty()) {
@@ -123,39 +185,83 @@ public class PluginConfig extends AbstractChangeableEntity {
 		}
 		return returnList;
 	}
-
-	/*
-	 * public void setSampleValue(List<String> sampleValue) { this.sampleValue = sampleValue; }
+	
+	/**
+	 * To get Plugin Config Sample Values.
+	 * @return List<PluginConfigSampleValue>
 	 */
+	public List<PluginConfigSampleValue> getPluginConfigSampleValues(){
+		return sampleValue;
+	}
 
+	/**
+	 * To set Plugin Config Sample Values.
+	 * @param sampleValue List<PluginConfigSampleValue>
+	 */
+	public void setPluginConfigSampleValues(List<PluginConfigSampleValue> sampleValue) {
+		this.sampleValue = sampleValue;
+	}
+
+	/**
+	 * To get Data Type.
+	 * @return DataType
+	 */
 	public DataType getDataType() {
 		return dataType;
 	}
 
+	/**
+	 * To set Data Type.
+	 * @param dataType DataType
+	 */
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
 	}
 
+	/**
+	 * To check whether multivalue.
+	 * @return Boolean
+	 */
 	public Boolean isMultiValue() {
 		return multiValue;
 	}
 
+	/**
+	 * To set MultiValue.
+	 * @param multiValue Boolean
+	 */
 	public void setMultiValue(Boolean multiValue) {
 		this.multiValue = multiValue;
 	}
 
+	/**
+	 * To check whether mandatory or not.
+	 * @return boolean
+	 */
 	public boolean isMandatory() {
-		return isMandatory;
+		return mandatory;
 	}
 
-	public void setMandatory(boolean isMandatory) {
-		this.isMandatory = isMandatory;
+	/**
+	 * To set Mandatory.
+	 * @param mandatory boolean
+	 */
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 
+	/**
+	 * To set Order Number.
+	 * @param orderNumber Integer
+	 */ 
 	public void setOrderNumber(Integer orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
+	/**
+	 * To get Order Number.
+	 * @return Integer
+	 */
 	public Integer getOrderNumber() {
 		return orderNumber;
 	}

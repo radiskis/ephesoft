@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,18 +33,17 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.ephesoft.dcma.da.property.DependencyTypeProperty;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
@@ -52,28 +51,37 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.AbstractCustomWorkflowPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.CustomWorkflowBreadCrumbPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.DependencyManagementView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowMessages;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.AbstractCustomWorkflowPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.CustomWorkflowBreadCrumbPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyManagementView;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
 
+/**
+ * The <code>DependencyManagementPresenter</code> class provides functionality for showing, adding, validating
+ * dependencies for different plugins.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.customworkflow.client.presenter.AbstractCustomWorkflowPresenter
+ * @see com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyManagementView
+ *
+ */
 public class DependencyManagementPresenter extends AbstractCustomWorkflowPresenter<DependencyManagementView> {
 
-	private static final String NO = "No";
-
-	private static final String YES = "Yes";
+	private static int newIdentifier = 1;
 
 	private final DependencyPresenter dependencyPresenter;
 
 	private final EditDependencyPresenter editDependencyPresenter;
 	private final CustomWorkflowBreadCrumbPresenter breadCrumbPresenter;
 
-	List<String> dependenciesListBuffer = new ArrayList<String>();
+	private final List<String> dependenciesListBuffer = new ArrayList<String>();
 
 	/**
 	 * @return the dependencyPresenter
@@ -89,23 +97,13 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 		return breadCrumbPresenter;
 	}
 
-	public final static String AND = ",";
-
-	public final static String OR = "/";
-
 	public boolean isCyclic = false;
 
 	public boolean isValidDependency = true;
 
-	boolean isDuplicate = false;
-
-	boolean isValidEntry = true;
-
 	public String selectedDependencyName;
 
 	public String conflictingDependencyName;
-
-	;
 
 	public DependencyManagementPresenter(CustomWorkflowController controller, DependencyManagementView view) {
 		super(controller, view);
@@ -116,49 +114,28 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void bind() {
 
 		if (controller.getAllPlugins() != null) {
-			Map<Integer, String> pluginIndexToNameMap = controller.getPluginIndexToNameMap();
-			// populate plugin names
-			if (pluginIndexToNameMap == null) {
-				pluginIndexToNameMap = new HashMap<Integer, String>(0);
-			} else {
-				pluginIndexToNameMap.clear();
-			}
-			int index = 0;
-			for (PluginDetailsDTO pluginDetailsDTO : controller.getAllPlugins()) {
-				pluginIndexToNameMap.put(index++, pluginDetailsDTO.getPluginName());
-			}
-			controller.setPluginIndexToNameMap(pluginIndexToNameMap);
-			view.populateListBoxWithValuesMap(view.getDependencyView().getPluginNames(), pluginIndexToNameMap);
-
-			// populate dependencies of selected plugin
-			getDependenciesList();
+			dependencyPresenter.bind();
 		}
 
 	}
 
-	/**
-	 * 
-	 */
-	private void getDependenciesList() {
-		int selectedIndex = Integer.parseInt(view.getDependencyView().getPluginNames().getValue(
-				view.getDependencyView().getPluginNames().getSelectedIndex()));
-		getView().createDependenciesList(controller.getAllPlugins().get(selectedIndex).getDependencies());
-	}
-
 	public void onSaveClicked() {
-		ScreenMaskUtility.maskScreen("Updating plugins list");
-		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new AsyncCallback<List<PluginDetailsDTO>>() {
+		ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.UPDATING_PLUGINS_LIST));
+		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError("Error updating plugins");
+			public void customFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						CustomWorkflowMessages.ERROR_UPDATING_PLUGINS));
 				ScreenMaskUtility.unmaskScreen();
 			}
 
@@ -174,12 +151,13 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	}
 
 	public void onApplyClicked() {
-		ScreenMaskUtility.maskScreen("Updating plugins list");
-		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new AsyncCallback<List<PluginDetailsDTO>>() {
+		ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.UPDATING_PLUGINS_LIST));
+		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-				ConfirmationDialogUtil.showConfirmationDialogError("Error updating plugins");
+			public void customFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						CustomWorkflowMessages.ERROR_UPDATING_PLUGINS));
 				ScreenMaskUtility.unmaskScreen();
 			}
 
@@ -189,19 +167,20 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 				String selectedPlugin = getSelectedValueFromList(view.getDependencyView().getPluginNames());
 				controller.setSelectedPlugin(selectedPlugin);
 				showDependenciesView();
+				populatePluginName(controller.getSelectedPlugin());
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
-						CustomWorkflowMessages.PLUGINS_UPDATED_SUCCESSFULLY));
+						CustomWorkflowMessages.DEPENDENCIES_LIST_UPDATED_SUCCESSFULLY));
 			}
 		});
 	}
 
 	public void onCancelClicked() {
 		ScreenMaskUtility.maskScreen();
-		controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
+		controller.getRpcService().getAllPluginDetailDTOs(new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 
@@ -226,10 +205,10 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 
 		if (controller.getAllPlugins() == null) {
 			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.LOADING_DEPENDENCIES));
-			controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
+			controller.getRpcService().getAllPluginDetailDTOs(new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 				@Override
-				public void onFailure(Throwable arg0) {
+				public void customFailure(Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
 				}
 
@@ -241,7 +220,10 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 			});
 		} else {
 			showDependenciesView(controller.getAllPlugins());
-			populateThePluginName(controller.getSelectedPlugin());
+			String selectedPlugin = controller.getSelectedPlugin();
+			if (selectedPlugin != null && !selectedPlugin.isEmpty()) {
+				populatePluginName(selectedPlugin);
+			}
 		}
 
 	}
@@ -254,14 +236,13 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 		breadCrumbPresenter.createBreadCrumbForDependenciesList();
 		dependencyPresenter.bind();
 
-		// getController().getCustomWorkflowManagementPresenter().getView().sho
 		view.showDependencyView();
-		breadCrumbPresenter.setbackButtonVisibility(true);
+		breadCrumbPresenter.setBackButtonVisibility(true);
 		ScreenMaskUtility.unmaskScreen();
 	}
 
 	private String getSelectedValueFromList(ListBox listBox) {
-		String value = "";
+		String value = CustomWorkflowConstants.EMPTY_STRING;
 		int selectedIndex = listBox.getSelectedIndex();
 		if (selectedIndex != -1) {
 
@@ -272,22 +253,23 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	}
 
 	public void updatePluginDependency() {
-		validateCurrentDependencies();
-		if (!isCyclic && isValidDependency && !isDuplicate && isValidEntry) {
+		reinitializeValidationParameters();
+		boolean dependenciesValidated = validateCurrentDependencies();
+		if (dependenciesValidated) {
 			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.UPDATING_DEPENDENCIES_LIST));
 			PluginDetailsDTO pluginDetailsDTO = getPluginForName(controller.getAllPlugins(), getEditDependencyPresenter().getView()
 					.getPluginNamesList().getText());
 			pluginDetailsDTO.setDirty(true);
 			DependencyDTO dependencyDTO = createDependencyDTO();
 			if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.UNIQUE.getProperty())) {
-				dependencyDTO.setDependencies("");
+				dependencyDTO.setDependencies(CustomWorkflowConstants.EMPTY_STRING);
 			}
 			if (pluginDetailsDTO.getDependencies() == null) {
 				pluginDetailsDTO.setDependencies(new ArrayList<DependencyDTO>(0));
 				pluginDetailsDTO.getDependencies().clear();
 			}
 			if (controller.getSelectedDependencyDTO() == null) {
-				dependencyDTO.setIdentifier("0");
+				dependencyDTO.setIdentifier(CustomWorkflowConstants.NEW + newIdentifier++);
 				dependencyDTO.setPluginDTO(pluginDetailsDTO);
 				dependencyDTO.setNew(true);
 				controller.setSelectedDependencyDTO(dependencyDTO);
@@ -307,7 +289,7 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 					CustomWorkflowMessages.DEPENDENCIES_LIST_UPDATED_SUCCESSFULLY));
 			ScreenMaskUtility.unmaskScreen();
 			showDependenciesView(controller.getAllPlugins());
-			populateThePluginName(dependencyDTO.getPluginDTO().getPluginName());
+			populatePluginName(dependencyDTO.getPluginDTO().getPluginName());
 		}
 
 	}
@@ -315,23 +297,25 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	/**
 	 * @param dependencyDTO
 	 */
-	private void populateThePluginName(String selectedPluginName) {
+	private void populatePluginName(String selectedPluginName) {
 		ListBox pluginNamesListBox = view.getDependencyView().getPluginNames();
 		int index = getIndexForValue(pluginNamesListBox, selectedPluginName);
 		pluginNamesListBox.setSelectedIndex(index);
 
 		PluginDetailsDTO pluginDTO = getPluginForName(controller.getAllPlugins(), selectedPluginName);
 		// Create the dependencies list for it
-		getView().createDependenciesList(pluginDTO.getDependencies());
+		view.createDependenciesList(pluginDTO.getDependencies());
 	}
 
 	public void updateAllPlugins(List<PluginDetailsDTO> allPluginDetailsDTOs) {
 
-		controller.getRpcService().updateAllPluginDetailsDTOs(allPluginDetailsDTOs, new AsyncCallback<List<PluginDetailsDTO>>() {
+		controller.getRpcService().updateAllPluginDetailsDTOs(allPluginDetailsDTOs, new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-
+			public void customFailure(Throwable arg0) {
+				/**
+				 * RPC call failure handling
+				 */
 			}
 
 			@Override
@@ -344,9 +328,13 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	private DependencyDTO createDependencyDTO() {
 		DependencyDTO dependencyDTO = new DependencyDTO();
 
-		dependencyDTO.setDependencyType(getSelectedValueFromList(getEditDependencyPresenter().getView().getDependencyTypeList()));
+		String dependencyType = getSelectedValueFromList(getEditDependencyPresenter().getView().getDependencyTypeList());
+		dependencyDTO.setDependencyType(dependencyType);
 
-		dependencyDTO.setDependencies((getEditDependencyPresenter().getView().getDependenciesTextArea().getText()));
+		String dependencies = getEditDependencyPresenter().getView().getDependenciesTextArea().getText();
+		dependencies = dependencies.replaceAll(CustomWorkflowConstants.NEXT_LINE, CustomWorkflowConstants.EMPTY_STRING).replaceAll(
+				CustomWorkflowConstants.CARRIAGE_RETURN, CustomWorkflowConstants.EMPTY_STRING);
+		dependencyDTO.setDependencies(dependencies);
 
 		return dependencyDTO;
 	}
@@ -373,9 +361,8 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 				CustomWorkflowMessages.ADD_DEPENDENCY));
 
 		controller.setSelectedDependencyDTO(null);
-		// disableUneditableFields(true);
 		populateEditDependencyView();
-		addValueForPluginNameForAdd(controller.getSelectedDependencyDTO());
+		addValueForPluginNameForAdd();
 		getEditDependencyPresenter().setAvailableDependenciesList();
 		view.showEditDependencyView();
 	}
@@ -423,12 +410,16 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 		getEditDependencyPresenter().setAvailableDependenciesList();
 		if (!dependencyType.equals(DependencyTypeProperty.UNIQUE.getProperty())) {
 			// Get List of plugin names for dependencies from allPluginList
-			String dependenciesNameString = (selectedDependencyDTO.getDependencies());
+			String dependenciesNameString = selectedDependencyDTO.getDependencies();
+			dependenciesNameString = dependenciesNameString.replaceAll(CustomWorkflowConstants.AND_SEPERATOR, CustomWorkflowConstants.AND_SEPERATOR
+					+ CustomWorkflowConstants.NEXT_LINE);
+			dependenciesNameString = dependenciesNameString.replaceAll(CustomWorkflowConstants.OR_SEPERATOR,
+					CustomWorkflowConstants.OR_SEPERATOR + CustomWorkflowConstants.NEXT_LINE);
 			getEditDependencyPresenter().getView().getDependenciesTextArea().setText(dependenciesNameString);
 			enableItemsOnDependencyTypeChange(true);
 		} else {
 			// Disable the items
-			getEditDependencyPresenter().getView().getDependenciesTextArea().setText("");
+			getEditDependencyPresenter().getView().getDependenciesTextArea().setText(CustomWorkflowConstants.EMPTY_STRING);
 			enableItemsOnDependencyTypeChange(false);
 		}
 	}
@@ -445,7 +436,7 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	/**
 	 * @param selectedDependencyDTO
 	 */
-	private void addValueForPluginNameForAdd(DependencyDTO selectedDependencyDTO) {
+	private void addValueForPluginNameForAdd() {
 		ListBox pluginNamesList = dependencyPresenter.getView().getPluginNames();
 		String pluginName = pluginNamesList.getItemText(pluginNamesList.getSelectedIndex());
 		controller.setSelectedPlugin(pluginName);
@@ -469,7 +460,7 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 		String dependencyType = getSelectedValueFromList(getEditDependencyPresenter().getView().getDependencyTypeList());
 		if (dependencyType.equals(DependencyTypeProperty.UNIQUE.getProperty())) {
 			enableItemsOnDependencyTypeChange(false);
-			editDependencyPresenter.getView().getDependenciesTextArea().setText("");
+			editDependencyPresenter.getView().getDependenciesTextArea().setText(CustomWorkflowConstants.EMPTY_STRING);
 			editDependencyPresenter.getView().getDependenciesList().setSelectedIndex(-1);
 		} else {
 			enableItemsOnDependencyTypeChange(true);
@@ -501,20 +492,24 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 
 	private boolean checkForDuplicateDependenciesEntry(List<DependencyDTO> dependencyDTOs, String newDependenciesString) {
 
-		isDuplicate = false;
+		boolean isDuplicate = false;
 		// Get list of and dependencies
-		List<String> uniqueAndDependency = getAndDependenciesAsSet(newDependenciesString);
+		List<String> uniqueAndDependency = getAndDependenciesAsList(newDependenciesString);
 
 		for (DependencyDTO dependencyDTO : dependencyDTOs) {
-			if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty())) {
+			if (!dependencyDTO.isDeleted()
+					&& (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty()))) {
 				String existingDependencies = dependencyDTO.getDependencies();
 
-				List<String> existingUniqueAndDependency = getAndDependenciesAsSet(existingDependencies);
+				List<String> existingUniqueAndDependency = getAndDependenciesAsList(existingDependencies);
 				for (String andDependency : uniqueAndDependency) {
-					if (existingUniqueAndDependency.contains(andDependency)) {
+					if (existingUniqueAndDependency.contains(andDependency.replaceAll(CustomWorkflowConstants.NEXT_LINE,
+							CustomWorkflowConstants.EMPTY_STRING))) {
 						isDuplicate = true;
-						ConfirmationDialogUtil.showConfirmationDialogError(andDependency
-								+ " dependency already exists. Please try again.");
+						String dependencyViewName = addStringAround(andDependency, CustomWorkflowConstants.OR_SEPERATOR,
+								CustomWorkflowConstants.SPACE);
+						ConfirmationDialogUtil.showConfirmationDialogError(dependencyViewName
+								+ LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.DEPENDENCY_ALREADY_EXISTS_TRY_AGAIN));
 						break;
 					}
 				}
@@ -522,14 +517,14 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 					break;
 				}
 			}
-
 		}
 		return isDuplicate;
 	}
 
 	private boolean checkInvalidDependencyEntry(String newDependenciesString) {
-		isValidEntry = true;
-		List<String> uniqueAndDependency = getAndDependenciesAsSet(newDependenciesString);
+
+		boolean isValidEntry = true;
+		List<String> uniqueAndDependency = getAndDependenciesAsList(newDependenciesString);
 
 		Set<String> uniqueDependencySet = new HashSet<String>();
 
@@ -538,8 +533,11 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 			if (!uniqueDependencySet.add(dependency)) {
 				// dependency is duplicate
 				isValidEntry = false;
-				ConfirmationDialogUtil.showConfirmationDialogError("Selected dependencies contains duplicate entry for " + dependency
-						+ " please try again.");
+				String dependencyViewName = addStringAround(dependency, CustomWorkflowConstants.OR_SEPERATOR,
+						CustomWorkflowConstants.SPACE);
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						CustomWorkflowMessages.DEPENDENCIES_CONTAINS_DUPLICATE_ENTRY)
+						+ dependencyViewName + LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.TRY_AGAIN));
 				break;
 			}
 
@@ -552,17 +550,17 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 		List<String> sortedDependenciesString = new ArrayList<String>();
 		String sortedOrDependenciesString = null;
 
-		String[] orDependencies = orDependenciesString.split(OR);
+		String[] orDependencies = orDependenciesString.split(CustomWorkflowConstants.OR_SEPERATOR);
 
 		for (String dependency : orDependencies) {
-			sortedDependenciesString.add(dependency);
+			sortedDependenciesString.add(dependency.trim());
 		}
 		Collections.sort(sortedDependenciesString);
 		StringBuffer sortedDependenciesStringBuffer = new StringBuffer();
 		// Prepare a new string for the sorted dependencies
 		for (String dependency : sortedDependenciesString) {
 			if (!sortedDependenciesStringBuffer.toString().isEmpty()) {
-				sortedDependenciesStringBuffer.append(OR);
+				sortedDependenciesStringBuffer.append(CustomWorkflowConstants.OR_SEPERATOR);
 			}
 			sortedDependenciesStringBuffer.append(dependency);
 		}
@@ -574,56 +572,93 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	 * @param newDependenciesString
 	 * @param uniqueAndDependency
 	 */
-	private List<String> getAndDependenciesAsSet(String newDependenciesString) {
+	private List<String> getAndDependenciesAsList(String newDependenciesString) {
 		List<String> uniqueAndDependency = new ArrayList<String>(0);
-		String[] andDependencies = newDependenciesString.split(AND);
+		String[] andDependencies = newDependenciesString.split(CustomWorkflowConstants.AND_SEPERATOR);
 
 		for (String andDependency : andDependencies) {
 			String sortedOrDependencies = sortOrDependencies(andDependency);
-			uniqueAndDependency.add(sortedOrDependencies);
+			uniqueAndDependency.add(sortedOrDependencies.trim());
 		}
 		return uniqueAndDependency;
 	}
 
-	public void validateCurrentDependencies() {
+	/**
+	 * The validateCurrentDependencies method validates entered dependencies for 
+	 * duplication, cycle etc.
+	 * @return true/false.
+	 */
+	public boolean validateCurrentDependencies() {
+		boolean dependenciesValidated = false;
+
+		boolean isCyclic = false;
+
+		// boolean isValidDependency = true;
+
+		boolean isDuplicate = false;
+
+		boolean isValidEntry = true;
+
 		String newDependencies = getEditDependencyPresenter().getView().getDependenciesTextArea().getText();
 		selectedDependencyName = getEditDependencyPresenter().getView().getPluginNamesList().getText();
 
 		dependenciesListBuffer.clear();
 		dependenciesListBuffer.add(selectedDependencyName);
+
+		PluginDetailsDTO pluginDetailsDTO = getPluginDetailsDTOByPluginName(controller.getAllPlugins(), selectedDependencyName);
+
+		List<DependencyDTO> dependenciesList = new ArrayList<DependencyDTO>(pluginDetailsDTO.getDependencies());
+		DependencyDTO selectedDependencyDTO = controller.getSelectedDependencyDTO();
+		if (selectedDependencyDTO != null) {
+			dependenciesList.remove(selectedDependencyDTO);
+		}
 		if (getEditDependencyPresenter().getView().getDependenciesList().isEnabled() && !newDependencies.isEmpty()) {
 			isCyclic = false;
 			isValidDependency = true;
-			// Check for duplicate entries
-			// Get plugin DTO for selected plugin
-			PluginDetailsDTO pluginDetailsDTO = getPluginDetailsDTOByPluginName(controller.getAllPlugins(), selectedDependencyName);
-
-			// Check if this entry already exists in the PDDTO
-			List<DependencyDTO> dependenciesList = new ArrayList<DependencyDTO>(pluginDetailsDTO.getDependencies());
-			DependencyDTO selectedDependencyDTO = controller.getSelectedDependencyDTO();
-			if (selectedDependencyDTO != null) {
-				dependenciesList.remove(selectedDependencyDTO);
-			}
-			boolean isDuplicate = checkForDuplicateDependenciesEntry(dependenciesList, newDependencies);
+			newDependencies = newDependencies.replaceAll(CustomWorkflowConstants.NEXT_LINE, CustomWorkflowConstants.EMPTY_STRING)
+					.replaceAll(CustomWorkflowConstants.CARRIAGE_RETURN, CustomWorkflowConstants.EMPTY_STRING);
+			isDuplicate = checkForDuplicateDependenciesEntry(dependenciesList, newDependencies);
 			if (!isDuplicate) {
-				boolean isValidEntry = checkInvalidDependencyEntry(newDependencies);
+				isValidEntry = checkInvalidDependencyEntry(newDependencies);
 				if (isValidEntry) {
-					checkCyclicDependencies(newDependencies, selectedDependencyName);
+					isCyclic = checkCyclicDependencies(newDependencies.trim(), selectedDependencyName);
 				}
 			}
 		} else if (!getEditDependencyPresenter().getView().getDependenciesList().isEnabled()) {
 			isCyclic = false;
 			isValidDependency = true;
-			isDuplicate = false;
 			isValidEntry = true;
-//			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-//					CustomWorkflowMessages.DEPENDENCIES_SUCCESSFULLY_VALIDATED));
+
+			isDuplicate = checkForDuplicateUniqueDependencyEntry(dependenciesList);
+
+			if (isDuplicate) {
+				String dependencyNameView = addStringAround(selectedDependencyName, CustomWorkflowConstants.OR_SEPERATOR,
+						CustomWorkflowConstants.SPACE);
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						CustomWorkflowMessages.UNIQUE_DEPENDENCY_FOR)
+						+ dependencyNameView
+						+ LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.ALREADY_EXISTS_CORRECT_AND_TRY_AGAIN));
+			}
 		} else {
 			isValidDependency = false;
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					CustomWorkflowMessages.NO_DEPENDENCY_SELECTED));
 		}
+		dependenciesValidated = !isCyclic && isValidDependency && !isDuplicate && isValidEntry;
+		return dependenciesValidated;
+	}
 
+	private boolean checkForDuplicateUniqueDependencyEntry(List<DependencyDTO> dependenciesList) {
+
+		boolean isDuplicate = false;
+		for (DependencyDTO dependencyDTO : dependenciesList) {
+
+			if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.UNIQUE.getProperty())) {
+				isDuplicate = true;
+				break;
+			}
+		}
+		return isDuplicate;
 	}
 
 	/**
@@ -635,11 +670,13 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 
 	private boolean checkCyclicDependencies(String newDependencies, String selectedDependency) {
 		Set<String> uniqueDependency = new HashSet<String>(0);
-		String[] andDependencies = newDependencies.split(AND);
+
+		String trimmedNewDependencies = newDependencies.trim();
+		String[] andDependencies = trimmedNewDependencies.split(CustomWorkflowConstants.AND_SEPERATOR);
 
 		for (String andDependency : andDependencies) {
 
-			String[] orDependencies = andDependency.split(OR);
+			String[] orDependencies = andDependency.split(CustomWorkflowConstants.OR_SEPERATOR);
 
 			for (String dependencyName : orDependencies) {
 				boolean validDependencyname = false;
@@ -649,7 +686,7 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 					uniqueDependency.add(dependencyName);
 					if (uniqueDependency.contains(selectedDependencyName)) {
 						// cyclic
-						if (isCyclic == true) {
+						if (isCyclic) {
 							break;
 						}
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -674,11 +711,11 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 					isValidDependency = false;
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 							CustomWorkflowMessages.DEPENDENCY_VIOLATED)
-							+ " Invalid dependency Name: " + dependencyName);
+							+ LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.INVALID_DEPENDENCY_NAME) + dependencyName);
 					break;
 				}
 			}
-			if (isCyclic == true || !isValidDependency) {
+			if (isCyclic || !isValidDependency) {
 				break;
 			}
 
@@ -697,10 +734,10 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 			for (DependencyDTO dependencyDTO : dependencyDTOs) {
 				if (dependencyDTO != null
 						&& dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty())) {
-					String dependencies = "";
-					dependencies = (dependencyDTO.getDependencies());
+					String dependencies = CustomWorkflowConstants.EMPTY_STRING;
+					dependencies = dependencyDTO.getDependencies();
 					if (!dependenciesBuffer.toString().isEmpty()) {
-						dependenciesBuffer.append(AND);
+						dependenciesBuffer.append(CustomWorkflowConstants.AND_SEPERATOR);
 					}
 					dependenciesBuffer.append(dependencies);
 
@@ -718,8 +755,8 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 			final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
 			confirmationDialog.setText(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.WARNING));
 			confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.DELETE_DEPENDENCY));
-			confirmationDialog.okButton.setText(YES);
-			confirmationDialog.cancelButton.setText(NO);
+			confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.YES));
+			confirmationDialog.cancelButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.NO_CONSTANT));
 			confirmationDialog.center();
 			confirmationDialog.show();
 			confirmationDialog.okButton.setFocus(true);
@@ -757,23 +794,6 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 
 	}
 
-	// private String getValueForSelectedIndex(ListBox fromList) {
-	// String value = null;
-	// if (fromList.getItemCount() > 0) {
-	//
-	// // populate all selected values from the list
-	// for (int index = 0; index < fromList.getItemCount(); index++) {
-	// if (fromList.isItemSelected(index)) {
-	// value = fromList.getItemText(index);
-	// break;
-	// }
-	// }
-	// }
-	//
-	// return value;
-	//
-	// }
-
 	private int getIndexForValue(ListBox fromList, String item) {
 		int position = -1;
 		if (fromList.getItemCount() > 0) {
@@ -791,20 +811,41 @@ public class DependencyManagementPresenter extends AbstractCustomWorkflowPresent
 	}
 
 	public void addToDependenciesList(String dependencyType) {
-		StringBuffer selectedDependencies = new StringBuffer(getEditDependencyPresenter().getView().getDependenciesTextArea()
-				.getText());
-
-		if (!selectedDependencies.toString().isEmpty()) {
-			if (dependencyType.equals(AND)) {
-				selectedDependencies.append(AND);
-			} else if (dependencyType.equals(OR)) {
-				selectedDependencies.append(OR);
+		String selectedDependency = getSelectedValueFromList(getEditDependencyPresenter().getView().getDependenciesList());
+		if (selectedDependency != null && !selectedDependency.isEmpty()) {
+			StringBuffer selectedDependencies = new StringBuffer(getEditDependencyPresenter().getView().getDependenciesTextArea()
+					.getText());
+			if (!selectedDependencies.toString().isEmpty()) {
+				if (dependencyType.equals(CustomWorkflowConstants.AND_SEPERATOR)) {
+					selectedDependencies.append(CustomWorkflowConstants.AND_SEPERATOR);
+					selectedDependencies.append(CustomWorkflowConstants.NEXT_LINE);
+				} else if (dependencyType.equals(CustomWorkflowConstants.OR_SEPERATOR)) {
+					selectedDependencies.append(CustomWorkflowConstants.OR_SEPERATOR);
+					selectedDependencies.append(CustomWorkflowConstants.NEXT_LINE);
+				}
 			}
+			selectedDependencies.append(selectedDependency);
+			TextArea dependenciesTextArea = editDependencyPresenter.getView().getDependenciesTextArea();
+			dependenciesTextArea.setText(selectedDependencies.toString());
+			dependenciesTextArea.setCursorPos(selectedDependencies.length());
 		}
-		selectedDependencies.append(getSelectedValueFromList(getEditDependencyPresenter().getView().getDependenciesList()));
-		getEditDependencyPresenter().getView().getDependenciesTextArea().setText(selectedDependencies.toString());
-
-		// toggleOkButtonEnable(false);
 	}
 
+	private String addStringAround(String originalString, String markedCharacter, String surrondingCharacter) {
+		StringBuffer replacementStringBuffer = new StringBuffer();
+		replacementStringBuffer.append(surrondingCharacter);
+		replacementStringBuffer.append(markedCharacter);
+		replacementStringBuffer.append(surrondingCharacter);
+
+		return originalString.replaceAll(markedCharacter, replacementStringBuffer.toString());
+	}
+	
+	/**
+	 * The <code>reinitializeValidationParameters</code> is a method that re initialize 
+	 * validation parameters used for validating dependency update.
+	 */
+	private void reinitializeValidationParameters() {
+		isCyclic = false;
+		isValidDependency = true;
+	}
 }

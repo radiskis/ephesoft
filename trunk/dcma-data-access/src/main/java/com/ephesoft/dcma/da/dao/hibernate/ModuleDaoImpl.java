@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,11 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,24 +49,69 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.ModuleDao;
 import com.ephesoft.dcma.da.domain.Module;
 
+/**
+ * A Dao representing module table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.ModuleDao
+ */
 @Repository
 public class ModuleDaoImpl extends HibernateDao<Module> implements ModuleDao {
 
+	/**
+	 * ID_STRING String.
+	 */
+	private static final String ID_STRING = "id";
+
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleDaoImpl.class);
 
+	/**
+	 * MODULE_NAME String.
+	 */
+	private static final String MODULE_NAME = "name";
+
+	/**
+	 * API to get Module by name.
+	 * 
+	 * @param moduleName name of the module
+	 * @return Module
+	 */
 	@Override
 	public Module getModuleByName(String moduleName) {
 		LOGGER.debug(moduleName);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", moduleName));
+		criteria.add(Restrictions.eq(MODULE_NAME, moduleName));
 		return this.findSingle(criteria);
 	}
 
+	/**
+	 * API to get Module by Id.
+	 * 
+	 * @param moduleId id of the module
+	 */
 	@Override
 	public Module getModulePropertiesForModuleId(Long moduleId) {
 		LOGGER.debug("moduleId : " + moduleId);
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("id", moduleId));
+		criteria.add(Restrictions.eq(ID_STRING, moduleId));
 		return this.findSingle(criteria);
+	}
+
+	/**
+	 * API to get all Module names.
+	 * 
+	 * @return {@link List}<{@link String}>
+	 */
+	@Override
+	public List<String> getModuleNames() {
+		LOGGER.info("Retrieving list of all module names in ascending order.");
+		DetachedCriteria criteria = criteria();
+		criteria.setProjection(Projections.property(MODULE_NAME));
+		criteria.addOrder(Order.asc(MODULE_NAME));
+		return find(criteria);
 	}
 }

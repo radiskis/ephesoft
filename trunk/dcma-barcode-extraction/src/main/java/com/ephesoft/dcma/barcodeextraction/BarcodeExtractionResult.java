@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,12 +38,11 @@ package com.ephesoft.dcma.barcodeextraction;
 import com.ephesoft.dcma.barcodeextraction.BarcodeExtractionReader.BarcodeReaderTypes;
 
 /**
- * This is a bean which stores the results of the scanning barcodes on each image file using Zxing barcode plugin.
+ * This is a bean which stores the results of the scanning barcodes on each image file using Zxing barcode plug in.
  * 
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.barcode.BarcodeExtractionReader
- * 
+ * @see com.ephesoft.dcma.barcodeextraction.BarcodeExtractionReader
  */
 public class BarcodeExtractionResult {
 
@@ -77,50 +76,98 @@ public class BarcodeExtractionResult {
 	 */
 	private BarcodeReaderTypes barcodeType;
 
+	/**
+	 * getter for x0Coordinate.
+	 * @return double
+	 */
 	public double getX0() {
 		return x0Coordinate;
 	}
 
+	/**
+	 * setter for x0Coordinate.
+	 * @param x0Coordinate double
+	 */
 	public void setX0Coordinate(final double x0Coordinate) {
 		this.x0Coordinate = x0Coordinate;
 	}
 
+	/**
+	 * getter for y0Coordinate.
+	 * @return double
+	 */
 	public double getY0Coordinate() {
 		return y0Coordinate;
 	}
 
+	/**
+	 * setter for y0Coordinate.
+	 * @param y0Coordinate double
+	 */
 	public void setY0Coordinate(final double y0Coordinate) {
 		this.y0Coordinate = y0Coordinate;
 	}
 
+	/**
+	 * getter for x1Coordinate.
+	 * @return double
+	 */
 	public double getX1Coordinate() {
 		return x1Coordinate;
 	}
 
+	/**
+	 * setter for x1Coordinate.
+	 * @param x1Coordinate double
+	 */
 	public void setX1Coordinate(final double x1Coordinate) {
 		this.x1Coordinate = x1Coordinate;
 	}
 
+	/**
+	 * getter for y1Coordinate.
+	 * @return double
+	 */
 	public double getY1Coordinate() {
 		return y1Coordinate;
 	}
 
+	/**
+	 * setter for y1Coordinate.
+	 * @param y1Coordinate double
+	 */
 	public void setY1Coordinate(final double y1Coordinate) {
 		this.y1Coordinate = y1Coordinate;
 	}
 
+	/**
+	 * getter for texts.
+	 * @return {@link String}
+	 */
 	public String getTexts() {
 		return texts;
 	}
 
+	/**
+	 * setter for texts.
+	 * @param texts {@link String}
+	 */
 	public void setTexts(final String texts) {
 		this.texts = texts;
 	}
 
+	/**
+	 * getter for barcodeType.
+	 * @return {@link BarcodeReaderTypes}
+	 */
 	public BarcodeReaderTypes getBarcodeType() {
 		return barcodeType;
 	}
 
+	/**
+	 * setter for barcodeType.
+	 * @param barcodeType {@link BarcodeReaderTypes}
+	 */
 	public void setBarcodeType(final BarcodeReaderTypes barcodeType) {
 		this.barcodeType = barcodeType;
 	}

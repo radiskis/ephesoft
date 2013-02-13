@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.imagemagick.imageClassifier;
+package com.ephesoft.dcma.imagemagick.imageclassifier;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +48,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.imagemagick.IImageMagickCommonConstants;
-import com.ephesoft.dcma.imagemagick.ImageMagicProperties;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.util.OSUtil;
 
@@ -57,32 +56,33 @@ import com.ephesoft.dcma.util.OSUtil;
  * IM4Java to talk to Image Magick. The other method does this using a normal Runtime.exec call.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
  * 
  */
 public class ImageComparisonUtil {
 
-	private static final String QUOTES = "\"";
-
-	private static final char SPACE = ' ';
-
+	/**
+	 * An instance of Logger for logging in this file.
+	 */
 	protected final static Logger LOGGER = LoggerFactory.getLogger(ImageComparisonUtil.class);
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService the {@link PluginPropertiesService} to set
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -90,100 +90,74 @@ public class ImageComparisonUtil {
 
 	/**
 	 * This Constructor is called by the Spring framework.
-	 * 
-	 * @param imMetric
-	 * @param imFuzz
 	 */
 	public ImageComparisonUtil() {
+		LOGGER.info("Inside constructor..");
 	}
 
 	/**
-	 * The Default Constructor.
+	 * The parameterized constructor.
+	 * @param isDefault boolean
 	 */
 	public ImageComparisonUtil(boolean isDefault) {
-
+		LOGGER.info("Inside constructor..");
+		LOGGER.debug("is default : " + isDefault);
 	}
-
-	/**
-	 * Calls the Image Magick command using IM4Java interface. The command line command created by this method is compare -metric
-	 * <imMetric> -fuzz <imFuzz> <path1> <path2> null
-	 * 
-	 * @param path1
-	 * @param path2
-	 * @return Similarity Percentage 100 for totally similar images.
-	 * @throws DCMAApplicationException
-	 */
-	/*
-	 * public double compareImagesIM4J(final String path1, final String path2) throws DCMAApplicationException { File image1 = new
-	 * File(path1); File image2 = new File(path2); if (!image1.exists() || !image2.exists()) { throw new
-	 * DCMABusinessException("One of the images not found images =" + image1 + " ," + image2); } IMOperation all = new IMOperation();
-	 * all.metric(imMetric); all.fuzz(Double.parseDouble(imFuzz)); all.addImage(); all.addImage(); all.addImage("null");
-	 * ArrayListErrorConsumer error = new ArrayListErrorConsumer(); ImageCommand compare = new ImageCommand();
-	 * compare.setErrorConsumer(error); compare.setCommand("compare"); try { compare.run(all, path1, path2); } catch (IOException e) {
-	 * throw new DCMAApplicationException("Unable to compare images", e); } catch (InterruptedException e) { throw new
-	 * DCMAApplicationException("Unable to compare images", e); } catch (IM4JavaException e) { throw new
-	 * DCMAApplicationException("Unable to compare images", e); }
-	 * 
-	 * ArrayList<String> cmdError = error.getOutput(); String output = cmdError.get(0); int openingBraces = output.indexOf('('); int
-	 * closingBraces = output.indexOf(')');
-	 * 
-	 * String strDisimilarity = output.substring(openingBraces + 1, closingBraces); double disimilarity =
-	 * Double.parseDouble(strDisimilarity);
-	 * 
-	 * double similarity = (1 - disimilarity) * 100; return similarity; }
-	 */
 
 	/**
 	 * Calls the Image Magick compare command using Runtime.execute. sample command is compare -dissimilarity-threshold 100% -metric
 	 * <imMetric> -fuzz <imFuzz>% <path1> <path2> null
-	 * 
-	 * @param path1 image file 1
-	 * @param path2 image file 2
-	 * @return Similarity Percentage 100 for totally similar images.
+	 * @param path1 {@link String}
+	 * @param path2 {@link String}
+	 * @param imMetric {@link String}
+	 * @param imFuzz {@link String}
+	 * @return double
 	 */
-	public double compareImagesRuntime(final String path1, final String path2, String imMetric, String imFuzz) {
+	public double compareImagesRuntime(final String path1, final String path2, final String imMetric, final String imFuzz) {
 		double similarity = 0;
+		String imMetricLocal = imFuzz;
+		String imFuzzLocal = imFuzz;
+		LOGGER.info("imMetric = " + imMetricLocal);
+		LOGGER.info("imFuzz = " + imFuzzLocal);
 
-		LOGGER.info("imMetric = " + imMetric);
-		LOGGER.info("imFuzz = " + imFuzz);
-
-		if (!(imMetric != null && imMetric.length() > 0)) {
-			imMetric = IImageMagickCommonConstants.DEFAULT_IM_COMP_METRIC;
+		if (imMetricLocal == null || imMetricLocal.isEmpty()) {
+			imMetricLocal = IImageMagickCommonConstants.DEFAULT_IM_COMP_METRIC;
 		}
-		if (!(imFuzz != null && imFuzz.length() > 0)) {
-			imFuzz = IImageMagickCommonConstants.DEFAULT_IM_COMP_FUZZ;
+		if (imFuzzLocal == null || imFuzzLocal.isEmpty()) {
+			imFuzzLocal = IImageMagickCommonConstants.DEFAULT_IM_COMP_FUZZ;
 		}
 
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			StringBuffer compareCommand = new StringBuffer(120);
-			if(OSUtil.isWindows()) {
+			StringBuffer compareCommand = new StringBuffer(ImageMagicKConstants.COMPARE_COMMAND_MAX_SIZE_120);
+			if (OSUtil.isWindows()) {
 				compareCommand.append("cmd /c");
-				compareCommand.append(" ");
+				compareCommand.append(ImageMagicKConstants.SPACE);
 			}
 			compareCommand.append("compare");
-			compareCommand.append(' ');
+			compareCommand.append(ImageMagicKConstants.SPACE);
 			compareCommand.append("-dissimilarity-threshold");
-			compareCommand.append(SPACE);
+			compareCommand.append(ImageMagicKConstants.SPACE);
 			compareCommand.append("100%");
-			compareCommand.append(SPACE);
+			compareCommand.append(ImageMagicKConstants.SPACE);
 			compareCommand.append("-metric");
-			compareCommand.append(SPACE);
-			compareCommand.append(imMetric);
-			compareCommand.append(SPACE);
+			compareCommand.append(ImageMagicKConstants.SPACE);
+			compareCommand.append(imMetricLocal);
+			compareCommand.append(ImageMagicKConstants.SPACE);
 			compareCommand.append("-fuzz");
-			compareCommand.append(SPACE);
-			compareCommand.append(imFuzz);
+			compareCommand.append(ImageMagicKConstants.SPACE);
+			compareCommand.append(imFuzzLocal);
 			compareCommand.append('%');
-			compareCommand.append(SPACE);  
-			compareCommand.append(QUOTES + path1 + QUOTES);
-			compareCommand.append(SPACE);
-			compareCommand.append(QUOTES + path2 + QUOTES);
-			compareCommand.append(SPACE);
+			compareCommand.append(ImageMagicKConstants.SPACE);
+			compareCommand.append(ImageMagicKConstants.QUOTES + path1 + ImageMagicKConstants.QUOTES);
+			compareCommand.append(ImageMagicKConstants.SPACE);
+			compareCommand.append(ImageMagicKConstants.QUOTES + path2 + ImageMagicKConstants.QUOTES);
+			compareCommand.append(ImageMagicKConstants.SPACE);
 			compareCommand.append("null");
 			String compareString = compareCommand.toString();
 			LOGGER.info("Compare command = " + compareString);
-			Process proc = runtime.exec(compareString, null, new File(System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE)));
+			Process proc = runtime.exec(compareString, null, new File(System
+					.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE)));
 
 			String cmdOutput = "";
 			InputStreamReader inputStreamReader = null;
@@ -209,7 +183,7 @@ public class ImageComparisonUtil {
 
 			LOGGER.info("openingBraces = " + openingBraces);
 			LOGGER.info("closingBraces = " + closingBraces);
-			
+
 			if (openingBraces != -1 && closingBraces != -1) {
 				String strDisimilarity = cmdOutput.substring(openingBraces + 1, closingBraces);
 				LOGGER.info("strDisimilarity = " + strDisimilarity);
@@ -222,7 +196,7 @@ public class ImageComparisonUtil {
 				}
 				LOGGER.info("disimilarity = " + disimilarity);
 
-				similarity = (1 - disimilarity) * 100;
+				similarity = (1 - disimilarity) * ImageMagicKConstants.CONSTANT_VALUE_100;
 				LOGGER.info("Similarity = " + similarity);
 			}
 		} catch (Exception e) {

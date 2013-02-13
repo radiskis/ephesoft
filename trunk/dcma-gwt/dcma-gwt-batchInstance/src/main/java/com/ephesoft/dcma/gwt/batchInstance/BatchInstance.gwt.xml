@@ -4,6 +4,6 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
 
-	<entry-point class='com.ephesoft.dcma.gwt.batchInstance.client.BatchInstance' />
+	<entry-point class='com.ephesoft.dcma.gwt.batchinstance.client.BatchInstance' />
 	<source path="client"></source>
 </module>

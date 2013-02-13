@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,8 +35,11 @@
 
 package com.ephesoft.dcma.gwt.core.client;
 
+import com.ephesoft.dcma.gwt.core.client.event.HelpClickEvent;
+import com.ephesoft.dcma.gwt.core.client.event.HelpClickEventHandler;
 import com.ephesoft.dcma.gwt.core.client.event.SignoutEvent;
 import com.ephesoft.dcma.gwt.core.client.event.SignoutEventHandler;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
@@ -47,7 +50,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implements EntryPoint {
 
@@ -57,7 +59,6 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 		@Source("global.css")
 		CssResource css();
 	}
-
 	protected R rpcService;
 
 	protected HandlerManager eventBus;
@@ -69,11 +70,11 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 		this.eventBus = new HandlerManager(null);
 		this.rpcService = createRpcService();
 
-		eventBus.addHandler(SignoutEvent.TYPE, new SignoutEventHandler() {
+		eventBus.addHandler(SignoutEvent.type, new SignoutEventHandler() {
 
 			@Override
 			public void onSignout(SignoutEvent event) {
-				rpcService.logout(new AsyncCallback<Void>() {
+				rpcService.logout(Window.getTitle(), new EphesoftAsyncCallback<Void>() {
 
 					@Override
 					public void onSuccess(Void voids) {
@@ -81,7 +82,32 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 					}
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
+						/*
+						 * On Failure
+						 */
+					}
+				});
+			}
+		});
+
+		eventBus.addHandler(HelpClickEvent.type, new HelpClickEventHandler() {
+
+			@Override
+			public void onHelpClicked(HelpClickEvent event) {
+				rpcService.getHelpUrl(new EphesoftAsyncCallback<String>() {
+
+					@Override
+					public void onSuccess(String url) {
+						// opening the help url in new tab
+						Window.open(url, "_blank", null);
+					}
+
+					@Override
+					public void customFailure(Throwable arg0) {
+						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
+								LocaleCommonConstants.HELP_URK_ERROR_MESSAGE), LocaleDictionary.get().getConstantValue(
+								LocaleCommonConstants.ERROR_TITLE), true);
 
 					}
 				});
@@ -93,37 +119,37 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 
 	private void initialize(String locale) {
 		LocaleDictionary.create(createLocaleInfo(locale));
-		this.rpcService.initRemoteService(new AsyncCallback<Void>() {
+		this.rpcService.initRemoteService(new EphesoftAsyncCallback<Void>() {
 
 			@Override
-			public void onFailure(Throwable throwable) {
+			public void customFailure(Throwable throwable) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getConstantValue(
 						throwable.getMessage().replace('.', '_')));
 			}
 
 			@Override
 			public void onSuccess(Void arg0) {
-				//defineBridgeMethod();
+				// defineBridgeMethod();
 				onLoad();
 			}
 		});
 	}
 
 	private void preprocess() {
-		this.rpcService.getUserName(new AsyncCallback<String>() {
+		this.rpcService.getUserName(new EphesoftAsyncCallback<String>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-
+			public void customFailure(Throwable arg0) {
+				// On Failure
 			}
 
 			@Override
 			public void onSuccess(String userName) {
 
-				rpcService.getLocale(new AsyncCallback<String>() {
+				rpcService.getLocale(new EphesoftAsyncCallback<String>() {
 
 					@Override
-					public void onFailure(Throwable throwable) {
+					public void customFailure(Throwable throwable) {
 						initialize("");
 					}
 
@@ -145,16 +171,22 @@ public abstract class DCMAEntryPoint<R extends DCMARemoteServiceAsync> implement
 	}
 
 	public void onCloseWindow() {
-		/*rpcService.cleanup(new AsyncCallback<Void>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-
-			@Override
-			public void onSuccess(Void arg0) {
-			}
-		});*/
+		// Empty Method
+		/*
+		 * rpcService.cleanup(new AsyncCallback<Void>() {
+		 * 
+		 * @Override public void onFailure(Throwable caught) {
+		 * 
+		 * On Failure
+		 * 
+		 * }
+		 * 
+		 * @Override public void onSuccess(Void arg0) {
+		 * 
+		 * On Success
+		 * 
+		 * } });
+		 */
 	}
 
 	public native void defineBridgeMethod() /*-{

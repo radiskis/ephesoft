@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,23 +46,54 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show fuzzy database document type detail.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FuzzyDBDocTypeDetailView extends View<FuzzyDBDocTypeDetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, FuzzyDBDocTypeDetailView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * docName Label.
+	 */
 	@UiField
 	protected Label docName;
+
+	/**
+	 * mappedTo Label.
+	 */
 	@UiField
 	protected Label mappedTo;
 
+	/**
+	 * docNameLabel Label.
+	 */
 	@UiField
 	protected Label docNameLabel;
+
+	/**
+	 * tableName Label.
+	 */
 	@UiField
 	protected Label tableName;
 
+	/**
+	 * Constructor.
+	 */
 	public FuzzyDBDocTypeDetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -74,10 +105,20 @@ public class FuzzyDBDocTypeDetailView extends View<FuzzyDBDocTypeDetailPresenter
 
 	}
 
+	/**
+	 * To get Doc Name Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getDocNameLabel() {
 		return docNameLabel;
 	}
 
+	/**
+	 * To get Table Name.
+	 * 
+	 * @return Label
+	 */
 	public Label getTableName() {
 		return tableName;
 	}

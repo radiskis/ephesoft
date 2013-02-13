@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.core.EphesoftProperty;
-import com.ephesoft.dcma.core.service.DataAccessService;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.PageTypeDao;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.PageType;
@@ -58,27 +58,30 @@ import com.ephesoft.dcma.da.domain.PageType;
  * @see com.ephesoft.dcma.da.service.PageTypeService
  */
 @Service
-public class PageTypeServiceImpl extends DataAccessService implements PageTypeService {
+public class PageTypeServiceImpl implements PageTypeService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PageTypeServiceImpl.class);
 
+	/**
+	 * pageTypeDao {@link PageTypeDao}.
+	 */
 	@Autowired
 	private transient PageTypeDao pageTypeDao;
 
 	/**
-	 * An api to fetch all Page types by document type name
+	 * An API to fetch all Page types by document type name.
 	 * 
-	 * @param docTypeName
+	 * @param docTypeName String
 	 * @return List<PageType>
 	 */
 	@Transactional(readOnly = true)
 	@Override
 	public List<PageType> getPageTypeByDocTypeName(String docTypeName) {
 		List<PageType> pageTypes = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
 			LOGGER.info("Document type name is null or empty.");
 		} else {
 			pageTypes = pageTypeDao.getPageTypeByDocTypeName(docTypeName);
@@ -87,7 +90,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to fetch all the page types for input document type ID.
+	 * An API to fetch all the page types for input document type ID.
 	 * 
 	 * @param documentTypeID String
 	 * @param startResult int
@@ -107,9 +110,9 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to fetch all Page types by batchInstanceID.
+	 * An API to fetch all Page types by batchInstanceID.
 	 * 
-	 * @param batchInstanceID String
+	 * @param batchInstanceIdentifier String
 	 * @return List<PageType>
 	 */
 	@Transactional(readOnly = true)
@@ -125,7 +128,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to fetch all Page types by batch Class ID.
+	 * An API to fetch all Page types by batch Class ID.
 	 * 
 	 * @param batchClassID String
 	 * @return List<PageType>
@@ -143,10 +146,10 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to fetch all document type by Page type name.
+	 * An API to fetch all document type by Page type name.
 	 * 
 	 * @param name String
-	 * @param batchInstanceID String
+	 * @param batchInstanceIdentifier String
 	 * @return List<DocumentType>
 	 */
 	@Transactional(readOnly = true)
@@ -170,7 +173,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to fetch all batch class id, document type names and Page type names corresponding to each other.
+	 * An API to fetch all batch class id, document type names and Page type names corresponding to each other.
 	 * 
 	 * @param batchClassIDList List<String>
 	 * @return List<List<String>>
@@ -212,7 +215,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to insert the page type object.
+	 * An API to insert the page type object.
 	 * 
 	 * @param pageType PageType
 	 */
@@ -227,7 +230,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to update the pageType object.
+	 * An API to update the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */
@@ -242,7 +245,7 @@ public class PageTypeServiceImpl extends DataAccessService implements PageTypeSe
 	}
 
 	/**
-	 * An api to remove the pageType object.
+	 * An API to remove the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */

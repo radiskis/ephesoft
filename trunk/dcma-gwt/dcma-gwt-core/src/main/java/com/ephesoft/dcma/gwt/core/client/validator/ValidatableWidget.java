@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,6 +38,9 @@ package com.ephesoft.dcma.gwt.core.client.validator;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ValidatableWidget<W extends Widget> implements Validatable, HasValidators {
@@ -48,7 +51,7 @@ public class ValidatableWidget<W extends Widget> implements Validatable, HasVali
 
 	private boolean validateWidget;
 
-	private boolean isForcedReviewDone = true;
+	private boolean forcedReviewDone = true;
 
 	public boolean isValidateWidget() {
 		return validateWidget;
@@ -58,16 +61,32 @@ public class ValidatableWidget<W extends Widget> implements Validatable, HasVali
 		this.validateWidget = validateWidget;
 	}
 
-	public ValidatableWidget(W w) {
-		this(w, true);
+	public ValidatableWidget(W widget) {
+		this(widget, true);
 	}
 
-	public ValidatableWidget(W w, boolean validateWidget) {
-		this.widget = w;
+	public ValidatableWidget(W widget, boolean validateWidget) {
+		this.widget = widget;
 		this.validateWidget = validateWidget;
+		addValueChangeHandler();
 	}
 
-	private Set<Validator> _validators = new HashSet<Validator>();
+	private void addValueChangeHandler() {
+		if (this.widget != null && this.widget instanceof TextBox) {
+			((TextBox) widget).addValueChangeHandler(new ValueChangeHandler<String>() {
+
+				@Override
+				public void onValueChange(ValueChangeEvent<String> val) {
+					String value = val.getValue();
+					if (value != null) {
+						((TextBox) widget).setValue(value.trim());
+					}
+				}
+			});
+		}
+	}
+
+	private final Set<Validator> _validators = new HashSet<Validator>();
 
 	@Override
 	public void addValidator(Validator validator) {
@@ -85,16 +104,18 @@ public class ValidatableWidget<W extends Widget> implements Validatable, HasVali
 	}
 
 	public void toggleValidateBox(boolean valid) {
-		if (valid)
+		if (valid){
 			widget.removeStyleName(DATE_BOX_FORMAT_ERROR);
-		else
+		}
+		else {
 			widget.addStyleName(DATE_BOX_FORMAT_ERROR);
+		}
 	}
 
 	@Override
 	public boolean validate() {
-		boolean valid = isForcedReviewDone;
-		if (isForcedReviewDone) {
+		boolean valid = forcedReviewDone;
+		if (forcedReviewDone) {
 			valid = validateThroughValidators();
 		}
 		toggleValidateBox(valid);
@@ -105,23 +126,22 @@ public class ValidatableWidget<W extends Widget> implements Validatable, HasVali
 		boolean valid = true;
 		if (validateWidget) {
 			for (Validator validator : _validators) {
-				if (validator != null) {
-					if (!validator.validate()) {
+				if (validator != null && !validator.validate()) {
 						valid = false;
 						break;
 					}
-				}
 			}
 		}
 		return valid;
 	}
 
 	public void setForcedReviewDone(boolean isForcedReviewDone) {
-		this.isForcedReviewDone = isForcedReviewDone;
+		this.forcedReviewDone = isForcedReviewDone;
 		validate();
 	}
 
 	public boolean isForcedReviewDone() {
-		return isForcedReviewDone;
+		return forcedReviewDone;
 	}
+
 }

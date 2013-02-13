@@ -100,7 +100,7 @@
 				<g:center>
 					<g:ScrollPanel height="100%" ui:field="scrollPanel">
 						<g:FocusPanel width="99.99%" ui:field="focusPanel">
-							<g:FlexTable ui:field='table' styleName='{style.table}'
+							<g:FlexTable ui:field='flexTable' styleName='{style.table}'
 								cellSpacing='0' cellPadding='0' width="100%" />
 						</g:FocusPanel>
 					</g:ScrollPanel>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,13 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class AnimationCompleteEvent extends GwtEvent<AnimationCompleteEventHandler>{
 	
-	public static Type<AnimationCompleteEventHandler> TYPE = new Type<AnimationCompleteEventHandler>();
+	public static Type<AnimationCompleteEventHandler> type = new Type<AnimationCompleteEventHandler>();
 	
-	private Widget widget;
-	private int index;
+	private final Widget widget;
+	private final int index;
 	
 	public AnimationCompleteEvent(Widget widget, int index) {
+		super();
 		this.widget = widget;
 		this.index = index;
 	}
@@ -64,7 +65,7 @@ public class AnimationCompleteEvent extends GwtEvent<AnimationCompleteEventHandl
 
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<AnimationCompleteEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 }

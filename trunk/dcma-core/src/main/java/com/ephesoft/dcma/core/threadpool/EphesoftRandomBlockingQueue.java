@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,14 +54,20 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This class is customized to get the random node from the Blocking Queue. This class is used for thread pool for picking random threads from the queue.
+ * This class is customized to get the random node from the Blocking Queue. This class is used for thread pool for picking random
+ * threads from the queue.
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see java.util.concurrent.BlockingQueue
+ * @param <E>
  */
+@SuppressWarnings("PMD")
 public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, java.io.Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -6903933977591709194L;
 
 	/*
@@ -74,45 +80,55 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	 */
 
 	/**
-	 * Linked list node class
+	 * Linked list node class.
 	 */
 	static class Node<E> {
 
-		/** The item, volatile to ensure barrier separating write and read */
+		/** 
+		 * The item, volatile to ensure barrier separating write and read .
+		 */
 		volatile E item;
+		
+		/**
+		 * next Node<E>.
+		 */
 		Node<E> next;
 
-		Node(E x) {
-			item = x;
+		/**
+		 * Constructor.
+		 * @param node E
+		 */
+		Node(E node) {
+			item = node;
 		}
 	}
 
-	/** The capacity bound, or Integer.MAX_VALUE if none */
+	/** The capacity bound, or Integer.MAX_VALUE if none. */
 	private final int capacity;
 
-	/** Current number of elements */
+	/** Current number of elements. */
 	private final AtomicInteger count = new AtomicInteger(0);
 
-	/** Head of linked list */
+	/** Head of linked list. */
 	private transient Node<E> head;
 
-	/** Tail of linked list */
+	/** Tail of linked list. */
 	private transient Node<E> last;
 
-	/** Lock held by take, poll, etc */
+	/** Lock held by take, poll, etc. */
 	private final ReentrantLock takeLock = new ReentrantLock();
 
-	/** Wait queue for waiting takes */
+	/** Wait queue for waiting takes. */
 	private final Condition notEmpty = takeLock.newCondition();
 
-	/** Lock held by put, offer, etc */
+	/** Lock held by put, offer, etc. */
 	private final ReentrantLock putLock = new ReentrantLock();
 
-	/** Wait queue for waiting puts */
+	/** Wait queue for waiting puts. */
 	private final Condition notFull = putLock.newCondition();
 
 	/**
-	 * Signals a waiting take. Called only from put/offer (which do not otherwise ordinarily lock takeLock.)
+	 * Signals a waiting take. Called only from put/offer (which do not otherwise ordinarily lock takeLock.).
 	 */
 	private void signalNotEmpty() {
 		final ReentrantLock takeLock = this.takeLock;
@@ -140,14 +156,14 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	/**
 	 * Creates a node and links it at end of queue.
 	 * 
-	 * @param x the item
+	 * @param node the item
 	 */
-	private void insert(E x) {
-		last = last.next = new Node<E>(x);
+	private void insert(E node) {
+		last = last.next = new Node<E>(node);
 	}
 
 	/**
-	 * Removes a node from head of queue,
+	 * Removes a node from head of queue.
 	 * 
 	 * @return the node
 	 */
@@ -167,9 +183,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		Node<E> nodeToBeRemoved = head.next;
 		head = first;
 		// Storing random node item.
-		E x = nodeToBeRemoved.item;
-		remove(x);
-		return x;
+		E node = nodeToBeRemoved.item;
+		remove(node);
+		return node;
 	}
 
 	/**
@@ -199,11 +215,11 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	 * Creates a <tt>LinkedBlockingQueue</tt> with the given (fixed) capacity.
 	 * 
 	 * @param capacity the capacity of this queue
-	 * @throws IllegalArgumentException if <tt>capacity</tt> is not greater than zero
 	 */
 	public EphesoftRandomBlockingQueue(int capacity) {
-		if (capacity <= 0)
+		if (capacity <= 0) {
 			throw new IllegalArgumentException();
+		}
 		this.capacity = capacity;
 		last = head = new Node<E>(null);
 	}
@@ -217,8 +233,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	 */
 	public EphesoftRandomBlockingQueue(Collection<? extends E> c) {
 		this(Integer.MAX_VALUE);
-		for (E e : c)
+		for (E e : c) {
 			add(e);
+		}
 	}
 
 	// this doc comment is overridden to remove the reference to collections
@@ -253,8 +270,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	 * @throws NullPointerException {@inheritDoc}
 	 */
 	public void put(E e) throws InterruptedException {
-		if (e == null)
+		if (e == null) {
 			throw new NullPointerException();
+		}
 		// Note: convention in all put/take/etc is to preset
 		// local var holding count negative to indicate failure unless set.
 		int c = -1;
@@ -268,21 +286,24 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 			 * ever changes from capacity. Similarly for all other uses of count in other wait guards.
 			 */
 			try {
-				while (count.get() == capacity)
+				while (count.get() == capacity) {
 					notFull.await();
+				}
 			} catch (InterruptedException ie) {
 				notFull.signal(); // propagate to a non-interrupted thread
 				throw ie;
 			}
 			insert(e);
 			c = count.getAndIncrement();
-			if (c + 1 < capacity)
+			if (c + 1 < capacity) {
 				notFull.signal();
+			}
 		} finally {
 			putLock.unlock();
 		}
-		if (c == 0)
+		if (c == 0) {
 			signalNotEmpty();
+		}
 	}
 
 	/**
@@ -360,6 +381,10 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		return c >= 0;
 	}
 
+	/**
+	 * Retrieves and removes the head of this queue, waiting if necessary until an element becomes available.
+     * @throws NullPointerException if the specified element is null
+     */
 	public E take() throws InterruptedException {
 		E x;
 		int c = -1;
@@ -388,6 +413,13 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		return x;
 	}
 
+	/**
+	 * Retrieves and removes the head of this queue, waiting up to the specified wait time if necessary for an element to become available.
+     *
+     * @param timeout long
+     * @param unit TimeUnit
+     * @throws NullPointerException if the specified element is null
+     */
 	public E poll(long timeout, TimeUnit unit) throws InterruptedException {
 		E x = null;
 		int c = -1;
@@ -421,6 +453,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		return x;
 	}
 
+	/**
+	 * Retrieves and removes the head of this queue, or returns null if this queue is empty.
+	 */
 	public E poll() {
 		final AtomicInteger count = this.count;
 		if (count.get() == 0)
@@ -444,6 +479,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		return x;
 	}
 
+	/**
+	 * Retrieves, but does not remove, the head of this queue, or returns null if this queue is empty.
+	 */
 	public E peek() {
 		if (count.get() == 0)
 			return null;
@@ -546,6 +584,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	 * 
 	 * 
 	 * 
+	 * 
+	 * 
+	 * 
 	 * String[] y = x.toArray(new String[0]);
 	 * </pre>
 	 * 
@@ -576,6 +617,10 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		}
 	}
 
+	/**
+	 * Returns a string representation of this collection. 
+	 * @return String
+	 */
 	public String toString() {
 		fullyLock();
 		try {
@@ -635,6 +680,11 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 	}
 
 	/**
+	 * Removes at most the given number of available elements from this queue and adds them to the given collection.
+	 * 
+	 * @param c Collection<? super E>
+	 * @param maxElements int
+	 * @return int
 	 * @throws UnsupportedOperationException {@inheritDoc}
 	 * @throws ClassCastException {@inheritDoc}
 	 * @throws NullPointerException {@inheritDoc}
@@ -680,16 +730,37 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 		return new Itr();
 	}
 
+	/**
+	 * Iterator class to iterate on the list and retrieve elements.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	private class Itr implements Iterator<E> {
 
 		/*
 		 * Basic weak-consistent iterator. At all times hold the next item to hand out so that if hasNext() reports true, we will still
 		 * have it to return even if lost race with a take etc.
 		 */
+		
+		/**
+		 * current Node<E>.
+		 */
 		private Node<E> current;
+		
+		/**
+		 * lastRet Node<E>.
+		 */
 		private Node<E> lastRet;
+		
+		/**
+		 * currentElement E.
+		 */
 		private E currentElement;
 
+		/**
+		 * Constructor.
+		 */
 		Itr() {
 			final ReentrantLock putLock = EphesoftRandomBlockingQueue.this.putLock;
 			final ReentrantLock takeLock = EphesoftRandomBlockingQueue.this.takeLock;
@@ -705,10 +776,18 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 			}
 		}
 
+		/**
+		 * Returns true if the iteration has more elements. (In other words, returns true if next would return an element rather than throwing an exception.)
+         * @return boolean
+     	 */
 		public boolean hasNext() {
 			return current != null;
 		}
 
+		/**
+		 * Returns the next element in the iteration.
+         * return E
+         */
 		public E next() {
 			final ReentrantLock putLock = EphesoftRandomBlockingQueue.this.putLock;
 			final ReentrantLock takeLock = EphesoftRandomBlockingQueue.this.takeLock;
@@ -729,6 +808,9 @@ public class EphesoftRandomBlockingQueue<E> extends AbstractQueue<E> implements 
 			}
 		}
 
+		/**
+		 * Removes from the underlying collection the last element returned by the iterator .
+		 */
 		public void remove() {
 			if (lastRet == null)
 				throw new IllegalStateException();

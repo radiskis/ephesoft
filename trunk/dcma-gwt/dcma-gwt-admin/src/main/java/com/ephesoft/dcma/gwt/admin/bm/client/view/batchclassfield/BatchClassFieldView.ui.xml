@@ -5,17 +5,11 @@
 		<g:north size="43">
 			<g:CaptionPanel ui:field="batchClassFieldCaptionPanel"
 				height="90%" width="97%">
-				<g:ScrollPanel height="100%" width="100%">
 					<g:VerticalPanel height="100%" width="100%">
 						<g:VerticalPanel ui:field="batchClassFieldVerticalPanel"
 							height="100%" width="100%">
 								<b:BatchClassFieldDetailView ui:field="batchClassFieldDetailView"
 								width='100%' height="100%" />
-							<g:HorizontalPanel width="100%">
-								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
-									<g:Button ui:field="editBatchClassFieldPropertiesButton"></g:Button>
-								</g:cell>
-							</g:HorizontalPanel>
 						</g:VerticalPanel>
 						<g:VerticalPanel ui:field="batchClassFieldConfigVerticalPanel"
 							height="100%" visible="false" width="100%">
@@ -23,7 +17,6 @@
 								width='100%' />
 						</g:VerticalPanel>
 					</g:VerticalPanel>
-				</g:ScrollPanel>
 			</g:CaptionPanel>
 		</g:north>
 	</g:DockLayoutPanel>

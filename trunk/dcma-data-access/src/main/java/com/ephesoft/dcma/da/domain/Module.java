@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,43 +43,86 @@ import org.hibernate.annotations.NaturalId;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "module")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class Module extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -9055084370114052249L;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "module_name")
 	@NaturalId
 	private String name;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "module_desc")
 	private String description;
 
+	/**
+	 * version String.
+	 */
 	@Column(name = "module_version")
 	private String version;
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Version.
+	 * @return String
+	 */
 	public String getVersion() {
 		return version;
 	}
 
+	/**
+	 * To set Version.
+	 * @param version String
+	 */
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}

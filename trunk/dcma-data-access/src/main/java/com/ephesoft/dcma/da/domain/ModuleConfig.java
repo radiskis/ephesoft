@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,56 +43,110 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for module_config.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "module_config")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class ModuleConfig extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -1959019321092627830L;
 
+	/**
+	 * module Module.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	private Module module;
 
+	/**
+	 * childKey String.
+	 */
 	@Column(name = "child_key")
 	private String childKey;
 
+	/**
+	 * childDisplayName String.
+	 */
 	@Column(name = "child_display_name")
 	private String childDisplayName;
 
+	/**
+	 * mandatory boolean.
+	 */
 	@Column(name = "is_mandatory", columnDefinition = "bit default 0")
-	private boolean isMandatory;
+	private boolean mandatory;
 
+	/**
+	 * To get Module.
+	 * @return Module
+	 */
 	public Module getModule() {
 		return module;
 	}
 
+	/**
+	 * To set Module.
+	 * @param module Module
+	 */
 	public void setModule(Module module) {
 		this.module = module;
 	}
 
+	/**
+	 * To get Child Key.
+	 * @return String
+	 */
 	public String getChildKey() {
 		return childKey;
 	}
 
+	/**
+	 * To set Child Key.
+	 * @param childKey String
+	 */ 
 	public void setChildKey(String childKey) {
 		this.childKey = childKey;
 	}
 
+	/**
+	 * To get Child Display Name.
+	 * @return String
+	 */
 	public String getChildDisplayName() {
 		return childDisplayName;
 	}
 
+	/**
+	 * To set Child Display Name.
+	 * @param childDisplayName String
+	 */
 	public void setChildDisplayName(String childDisplayName) {
 		this.childDisplayName = childDisplayName;
 	}
 
+	/**
+	 * To check whether mandatory or not.
+	 * @return boolean
+	 */
 	public boolean isMandatory() {
-		return isMandatory;
+		return mandatory;
 	}
 
-	public void setMandatory(boolean isMandatory) {
-		this.isMandatory = isMandatory;
+	/**
+	 * To set mandatory.
+	 * @param mandatory boolean
+	 */
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 
 }

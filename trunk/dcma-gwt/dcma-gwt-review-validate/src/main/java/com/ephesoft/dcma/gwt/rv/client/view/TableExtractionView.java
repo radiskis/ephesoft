@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -56,8 +56,8 @@ import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
-import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
@@ -241,8 +241,8 @@ public class TableExtractionView extends RVBasePanel {
 	 */
 	private final static int NUBER_OF_ROWS_WITH_INVALID_COLUMN = 3;
 	private final static String ALTERNATE_STRING_VALUE = LocaleDictionary.get().getConstantValue(
-			ReviewValidateConstants.alternate_value);
-	private final static String SEPERATOR = ReviewValidateConstants.seperator;
+			ReviewValidateConstants.ALTERNATE_VALUE);
+	private final static String SEPERATOR = ReviewValidateConstants.SEPERATOR;
 
 	private final static String GAP_BETWEEN_BUTTONS = "5px";
 
@@ -264,14 +264,14 @@ public class TableExtractionView extends RVBasePanel {
 
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
-		eventBus.addHandler(DocExpandEvent.TYPE, new DocExpandEventHandler() {
+		eventBus.addHandler(DocExpandEvent.type, new DocExpandEventHandler() {
 
 			@Override
 			public void onExpand(final DocExpandEvent event) {
 				createTableView(event.getDocument());
 			}
 		});
-		eventBus.addHandler(RVKeyDownEvent.TYPE, new RVKeyDownEventHandler() {
+		eventBus.addHandler(RVKeyDownEvent.type, new RVKeyDownEventHandler() {
 
 			@Override
 			public void onKeyDown(final RVKeyDownEvent event) {
@@ -453,7 +453,7 @@ public class TableExtractionView extends RVBasePanel {
 
 			@Override
 			public void onClick(final ClickEvent clickEvent) {
-				ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
+				ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.MSG_MASK_WAIT));
 				Button manualExtractionButton = null;
 				// boolean isValid = true;
 				if (clickEvent.getSource() instanceof Button) {
@@ -550,7 +550,7 @@ public class TableExtractionView extends RVBasePanel {
 			exitManualExtractionConfirmation(LocaleDictionary.get().getMessageValue(
 					ReviewValidateMessages.EXIT_MANUAL_EXTARCTION_CONFIRMATION, lockedTableName), title, button);
 		} else {
-			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
+			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.MSG_MASK_WAIT));
 			if (tableNameVsButtonMap != null && tableNameVsButtonMap.size() != 0
 					&& !tableNameVsButtonMap.get(button).equalsIgnoreCase(selectedDataTableName)
 					|| dataTable.getRows().getRow().isEmpty()) {
@@ -748,11 +748,12 @@ public class TableExtractionView extends RVBasePanel {
 					suggestBox.addStyleName("tableViewListBox");
 					suggestBox.setWidth("100%");
 
-					final ValidatableWidget<SuggestBox> validatableSuggestBox = new ValidatableWidget<SuggestBox>(suggestBox);
+					final RegExValidatableWidget<SuggestBox> validatableSuggestBox = new RegExValidatableWidget<SuggestBox>(suggestBox);
 
 					if ((columnPattern != null && columnPattern.size() > index1)
 							&& (!row.isMannualExtraction() || selectedColumn.isValidationRequired())) {
-						validatableSuggestBox.addValidator(new RegExValidator(columnPattern.get(index1), suggestBox));
+						validatableSuggestBox.addValidator(new RegExValidator(validatableSuggestBox, columnPattern.get(index1),
+								suggestBox, presenter.rpcService));
 					}
 
 					suggestBox.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -818,7 +819,7 @@ public class TableExtractionView extends RVBasePanel {
 	}
 
 	private void setSuggestBoxEvents(final Column column, final String originalString,
-			final ValidatableWidget<SuggestBox> validatableSuggestBox) {
+			final RegExValidatableWidget<SuggestBox> validatableSuggestBox) {
 		int pos = originalString.lastIndexOf(SEPERATOR);
 		int index = 0;
 		String inputString = originalString;
@@ -1201,7 +1202,7 @@ public class TableExtractionView extends RVBasePanel {
 					ReviewValidateMessages.EXIT_MANUAL_EXTARCTION_CONFIRMATION, lockedTableName), LocaleDictionary.get()
 					.getConstantValue(ReviewValidateConstants.ADD_NEW_TABLE_TITLE), addNewTableButton);
 		} else {
-			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
+			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.MSG_MASK_WAIT));
 			presenter.rpcService.executeAddNewTable(presenter.batchDTO.getBatch(), selectedDocument.getIdentifier(),
 					new AsyncCallback<BatchDTO>() {
 
@@ -1219,10 +1220,10 @@ public class TableExtractionView extends RVBasePanel {
 						@Override
 						public void onFailure(final Throwable arg0) {
 							ScreenMaskUtility.unmaskScreen();
-							if(!presenter.displayErrorMessage(arg0)){
-							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
-									ReviewValidateConstants.ADD_NEW_TABLE_FAIL_TITLE), LocaleDictionary.get().getMessageValue(
-									ReviewValidateMessages.ADD_NEW_TABLE_FAIL), Boolean.TRUE);
+							if (!presenter.displayErrorMessage(arg0)) {
+								ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getConstantValue(
+										ReviewValidateConstants.ADD_NEW_TABLE_FAIL_TITLE), LocaleDictionary.get().getMessageValue(
+										ReviewValidateMessages.ADD_NEW_TABLE_FAIL), Boolean.TRUE);
 							}
 							setFocusAfterAddNewTable();
 						}

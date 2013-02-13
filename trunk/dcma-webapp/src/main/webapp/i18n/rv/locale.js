@@ -127,7 +127,9 @@ var rvConstants = {
 	review_panel : "Review Panel",
 	save_button_tooltip : "Save(Ctrl + s)",
 	title_topPanel_save_anchor : "Save Batch",
-	regex_activate_deactivate_toggle_shortcut: "Regex Activate/Deactivate"
+	regex_activate_deactivate_toggle_shortcut: "Regex Activate/Deactivate",
+	shortcut_button_tooltip : "Shortcut(Ctrl + e)",
+	keyboard_shortcuts_pop_up : "Open keyboard shortcuts"
 };
 
 var rvMessages = {
@@ -199,8 +201,12 @@ var rvMessages = {
 	unable_to_get_zoom_count : "Unable to get zoom count value from properties file",
 	session_time_out : "Your session has timed out.",
 	unable_to_acquire_lock : "Batch is locked by some other user for editing.",
-	no_right_to_open_batch : "You do not have the rights to open this batch."
-
+	no_right_to_open_batch : "You do not have the rights to open this batch.",
+	no_batch_in_review_validation : "No batches found in Review/Validation states.",
+	unable_to_update_actual_review_validate_time: "Unable to update actual user review and validate time in database.",
+	executing_script : "Executing Script....",	
+	saving : "Saving....",
+	executing_and_saving : "Executing Script and Saving...."	
 };
 
 /** ************************** Turkish locale (suffix: _tk)****************** */
@@ -328,7 +334,9 @@ var rvConstants_tk = {
 	zoom_unlocked : "Yakınlaştırma kilidi",
 	save_button_tooltip : "Sakla(Ctrl + s)",
 	title_topPanel_save_anchor : "Sakla Toplu",
-	regex_activate_deactivate_toggle_shortcut: "Düzenli ifade aktif / deaktif"
+	regex_activate_deactivate_toggle_shortcut: "Düzenli ifade aktif / deaktif",
+	shortcut_button_tooltip : "Kısayol (Ctrl + e)",
+	keyboard_shortcuts_pop_up : "Açık klavye kısayolları"
 };
 
 var rvMessages_tk = {
@@ -398,5 +406,10 @@ var rvMessages_tk = {
 	unable_to_get_zoom_count : "Kıtlıklarını karşılamak zum kont değer özellikleri dosya.",
 	session_time_out : "Oturumunuz zaman aşımına uğradı.",
 	unable_to_acquire_lock : "Toplu düzenleme için başka bir kullanıcı tarafından kilitlenmiş durumda.",
-	no_right_to_open_batch : "Bu toplu iş açmak için haklara sahip değilsiniz."
+	no_right_to_open_batch : "Bu toplu iş açmak için haklara sahip değilsiniz.",
+	no_batch_in_review_validation : "Hiçbir toplu İnceleme / Onay devletler bulundu.",
+	unable_to_update_actual_review_validate_time:"Update beceriksiz gerçek kullanıcı zaman incele ve geçerli kıl veri tabanı.",
+	executing_script : "Komut yürütülüyor ....",
+	saving : "Tasarruf ...",
+	executing_and_saving: "Komut yürütme ve kaydetme ...."
 };

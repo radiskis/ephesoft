@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,27 +35,43 @@
 
 package com.ephesoft.dcma.user.service;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ephesoft.dcma.batch.schema.UserInformation;
 import com.ephesoft.dcma.user.connectivity.UserConnectivity;
 import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
 import com.ephesoft.dcma.user.connectivity.factory.UserConnectivityFactory;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
 
 /**
  * This class Implements the methood of the {@link UserConnectivityService}.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.user.connectivity.UserConnectivity
  */
 @Service
 public class UserConnectivityServiceImpl implements UserConnectivityService {
+
+	/**
+	 * USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING String.
+	 */
+	private static final String USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING = "User Connectivity Factory is null. Hence returning";
+
+	/**
+	 * USER_SUPER_ADMIN String.
+	 */
+	private static final String USER_SUPER_ADMIN = "user.super_admin";
 
 	/**
 	 * Used for handling logs.
@@ -67,12 +83,12 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 	 */
 	@Autowired
 	private UserConnectivityFactory factory;
-	
-	/**
-	 * This value get from the user.super_admin in user-connectivity.properties file.
-	 */
-	private String superAdmins;
 
+	/**
+	 * This method is used to return set of string of all the groups.
+	 * 
+	 * @return Set<{@link String}> if result is found else return null
+	 */
 	@Override
 	public Set<String> getAllGroups() {
 		LOG.info("Inside get all groups.");
@@ -80,7 +96,7 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		Set<String> allGroups = null;
 		Set<String> resultAllgroups = null;
 		if (factory == null) {
-			LOG.error("User Connectivity Factory is null. Hence returning");
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
 			isValid = false;
 		}
 		if (isValid) {
@@ -104,6 +120,11 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		return resultSet;
 	}
 
+	/**
+	 * This method is used to return set of string of all the users.
+	 * 
+	 * @return Set<{@link String}> if result is found else return null
+	 */
 	@Override
 	public Set<String> getAllUser() {
 		LOG.info("Inside get all users.");
@@ -111,7 +132,7 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		Set<String> resultAllUser = null;
 		boolean isValid = true;
 		if (factory == null) {
-			LOG.error("User Connectivity Factory is null. Hence returning");
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
 			isValid = false;
 		}
 		if (isValid) {
@@ -124,7 +145,13 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		LOG.info("Successfully returning users.");
 		return resultAllUser;
 	}
-	
+
+	/**
+	 * This method is used to return set of string of all the groups of a user.
+	 * 
+	 * @param userName String
+	 * @return Set<{@link String}> if result is found else return null
+	 */
 	@Override
 	public Set<String> getUserGroups(String userName) {
 		LOG.info("Inside get all groups.");
@@ -132,7 +159,7 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		Set<String> userGroups = null;
 		Set<String> resultAllgroups = null;
 		if (factory == null) {
-			LOG.error("User Connectivity Factory is null. Hence returning");
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
 			isValid = false;
 		}
 		if (isValid) {
@@ -145,59 +172,214 @@ public class UserConnectivityServiceImpl implements UserConnectivityService {
 		LOG.info("Successfully returning groups.");
 		return resultAllgroups;
 	}
-	
+
+	/**
+	 * This method is used to return set of string of all super admin groups.
+	 * 
+	 * @return Set<{@link String}> if result is found else return null
+	 */
 	@Override
-	public Set<String> getAllSuperAdminGroups(){
+	public Set<String> getAllSuperAdminGroups() {
 		LOG.info("Inside get all super admin groups.");
 		Set<String> allSuperAdminGroups = null;
 		Set<String> resultAllSuperAdminGroups = null;
+		allSuperAdminGroups = getAllSuperAdminRoles();
+		resultAllSuperAdminGroups = performAddtionToResultSet(allSuperAdminGroups);
+		LOG.info("Successfully returning super admin groups.");
+		return resultAllSuperAdminGroups;
+
+	}
+
+	/**
+	 * This method is used to return set of string of all super admin roles.
+	 * 
+	 * @return Set<{@link String}> if result is found else return null
+	 */
+	public Set<String> getAllSuperAdminRoles() {
+		String superAdminGroups = null;
+		Set<String> allSuperAdminRoles = null;
+		try {
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			superAdminGroups = applicationConfigProperties.getProperty(USER_SUPER_ADMIN);
+			allSuperAdminRoles = getAllSuperAdminRoles(superAdminGroups);
+		} catch (IOException e) {
+			LOG.error("Error in fetching roles for super admin");
+		}
+		return allSuperAdminRoles;
+	}
+
+	/**
+	 * This method is used to return set of string of all super admin roles.
+	 * @param superAdminGroups String
+	 * @return Set<{@link String}> if result is found else return null
+	 */
+	public Set<String> getAllSuperAdminRoles(String superAdminGroups) {
+		Set<String> superAdminGroupSet = null;
+		if (superAdminGroups != null && !superAdminGroups.isEmpty()) {
+			String delimiter = UserConnectivityConstant.DOUBLE_SEMICOLON_DELIMITER;
+			String[] superAdmins = superAdminGroups.split(delimiter);
+			if (superAdmins != null) {
+				superAdminGroupSet = new HashSet<String>();
+				for (String superAdmin : superAdmins) {
+					setSuperAdminGroupsSet(superAdminGroupSet, superAdmin);
+				}
+			}
+		}
+		return superAdminGroupSet;
+	}
+
+	private void setSuperAdminGroupsSet(Set<String> superAdminGroupSet, String superAdmin) {
+		if (superAdmin != null && !superAdmin.isEmpty()) {
+			superAdminGroupSet.add(superAdmin);
+		}
+	}
+
+	/**
+	 * This method is used to return add groups for user.
+	 * 
+	 * @param userInformation UserInformation
+	 * @throws NamingException if error occurs
+	 */
+	@Override
+	public void addGroup(UserInformation userInformation) throws NamingException {
 		boolean isValid = true;
 		if (factory == null) {
-			LOG.error("User Connectivity Factory is null. Hence returning");
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
 			isValid = false;
 		}
 		if (isValid) {
 			UserConnectivity userConnectivity = factory.getImplementation();
 			if (userConnectivity != null) {
-				//userConnectivity.setSuperAdminGroups(groups);
-				allSuperAdminGroups = getAllSuperAdminRoles();
-				resultAllSuperAdminGroups = performAddtionToResultSet(allSuperAdminGroups);
+				userConnectivity.addGroup(userInformation);
 			}
 		}
-		LOG.info("Successfully returning super admin groups.");
-		return resultAllSuperAdminGroups;
-		
-	}
-	
-	public Set<String> getAllSuperAdminRoles() {
-		String superAdminGroups = getSuperAdmins();
-		Set<String> superAdminGroupSet = new HashSet<String>();
-		if(superAdminGroups!=null && !superAdminGroups.isEmpty()){
-			String delimiter = UserConnectivityConstant.DOUBLE_SEMICOLON_DELIMITER;
-			String[] superAdmins = superAdminGroups.split(delimiter);
-			if(superAdmins != null){
-			for(String superAdmin : superAdmins){
-				if(superAdmin != null && !superAdmin.isEmpty())
-						superAdminGroupSet.add(superAdmin);
-				}
-			}
-		  }
-		return superAdminGroupSet;
-	}
-	
-	/**
-	 * @param superAdmins the superAdmins to set
-	 */
-	public void setSuperAdmins(String superAdmins) {
-		this.superAdmins = superAdmins;
 	}
 
 	/**
-	 * @return the superAdmins
+	 * This method is used to return set of string of all superAdmin groups.
+	 * 
+	 * @param userInformation UserInformation
+	 * @throws NamingException if error occurs
 	 */
-	public String getSuperAdmins() {
-		return superAdmins;
+	@Override
+	public void addUser(UserInformation userInformation) throws NamingException {
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userConnectivity.addUser(userInformation);
+			}
+		}
 	}
-	
-	
+
+	/**
+	 * API check the user exist in the LDAP.
+	 * 
+	 * @param userName {@link String}
+	 * @return boolean
+	 */
+	@Override
+	public boolean checkUserExistence(String userName) {
+		boolean isUserExist = false;
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				isUserExist = userConnectivity.checkUserExistence(userName);
+			}
+		}
+		return isUserExist;
+	}
+
+	/**
+	 * API delete the group name in the LDAP.
+	 * 
+	 * @param groupName {@link String}
+	 */
+	@Override
+	public void deleteGroup(String groupName) {
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userConnectivity.deleteGroup(groupName);
+			}
+		}
+	}
+
+	/**
+	 * API delete the user name in the LDAP.
+	 * 
+	 * @param userName {@link String}
+	 */
+	@Override
+	public void deleteUser(String userName) {
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userConnectivity.deleteUser(userName);
+			}
+		}
+	}
+
+	/**
+	 * API for updates the user password.
+	 * 
+	 * @param userName {@link String}
+	 * @param newPassword {@link String}
+	 */
+	@Override
+	public void modifyUserPassword(String userName, String newPassword) throws NamingException {
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userConnectivity.modifyUserPassword(userName, newPassword);
+			}
+		}
+	}
+
+	/**
+	 * API for verifying the user authentication and updates the user with new password.
+	 * 
+	 * @param userName {@link String}
+	 * @param oldPassword {@link String}
+	 * @param newPassword {@link String}
+	 */
+	@Override
+	public void verifyandmodifyUserPassword(String userName, String oldPassword, String newPassword) throws NamingException {
+		boolean isValid = true;
+		if (factory == null) {
+			LOG.error(USER_CONNECTIVITY_FACTORY_IS_NULL_HENCE_RETURNING);
+			isValid = false;
+		}
+		if (isValid) {
+			UserConnectivity userConnectivity = factory.getImplementation();
+			if (userConnectivity != null) {
+				userConnectivity.verifyandmodifyUserPassword(userName, oldPassword, newPassword);
+			}
+		}
+
+	}
 }

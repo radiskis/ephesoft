@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,6 +38,7 @@ package com.ephesoft.dcma.gwt.rv.client.view;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.ephesoft.dcma.batch.schema.Document;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
@@ -76,41 +77,46 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ReviewValidatePanel extends RVBasePanel {
 
+	private static final String REVIEW_STYLE = "review-style";
+	private static final String _92 = "92%";
+	private static final String _98 = "98%";
+	private static final String _100 = "100%";
+
 	interface Binder extends UiBinder<DockLayoutPanel, ReviewValidatePanel> {
 	}
 
-	HorizontalPanel urlButtonPanel = new HorizontalPanel();
+	private final HorizontalPanel urlButtonPanel = new HorizontalPanel();
 	@UiField
-	Label functionKeyLabel;
+	protected Label functionKeyLabel;
 	@UiField
-	SlidingPanel slidingPanel;
-	ReviewPanel reviewPanel = new ReviewPanel();
-	ValidatePanel validatePanel = new ValidatePanel();
-	Label separator = new Label();
-	LayoutPanel pageImageLayoutPanel = new LayoutPanel();
+	protected SlidingPanel slidingPanel;
+	protected ReviewPanel reviewPanel = new ReviewPanel();
+	protected ValidatePanel validatePanel = new ValidatePanel();
+	protected Label separator = new Label();
+	protected LayoutPanel pageImageLayoutPanel = new LayoutPanel();
 	@UiField
-	HorizontalPanel firstShortcutsPanel;
+	protected HorizontalPanel firstShortcutsPanel;
 	@UiField
-	HorizontalPanel lastShortcutsPanel;
+	protected HorizontalPanel lastShortcutsPanel;
 
 	@UiField
-	DockLayoutPanel reviewValidatePanel;
+	protected DockLayoutPanel reviewValidateDockLayoutPanel;
 
-	DockLayoutPanel tempPanel;
+	protected DockLayoutPanel tempPanel;
 
-	DisclosurePanel reviewDisclosurePanel = new DisclosurePanel(LocaleDictionary.get().getConstantValue(
+	protected DisclosurePanel reviewDisclosurePanel = new DisclosurePanel(LocaleDictionary.get().getConstantValue(
 			ReviewValidateConstants.REVIEW_PANEL), true);
 
-	FocusPanel reviewFocusPanel = new FocusPanel();
-	VerticalPanel reviewVerticalPanel = new VerticalPanel();
-	PageImagePanel pageImagePanel = new PageImagePanel();
+	protected FocusPanel reviewFocusPanel = new FocusPanel();
+	protected VerticalPanel reviewVerticalPanel = new VerticalPanel();
+	protected PageImagePanel pageImagePanel = new PageImagePanel();
 
-	LayoutPanel layoutPanel = new LayoutPanel();
+	protected LayoutPanel layoutPanel = new LayoutPanel();
 
-	VerticalPanel centerPanel = new VerticalPanel();
+	protected VerticalPanel centerPanel = new VerticalPanel();
 
-	FocusPanel focusPanel = new FocusPanel();
-	private static final Binder binder = GWT.create(Binder.class);
+	protected FocusPanel focusPanel = new FocusPanel();
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private Boolean isDocumentError = false;
 
@@ -119,31 +125,32 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private Map<String, String> urlAndTitleMap;
 
 	private Map<String, String> urlAndApplicationMap;
-	private String URL_CTRL_4;
-	private String URL_CTRL_7;
-	private String URL_CTRL_8;
-	private String URL_CTRL_9;
+	private String urlCTRL4;
+	private String urlCTRL7;
+	private String urlCTRL8;
+	private String urlCTRL9;
 
 	public ReviewValidatePanel() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 	}
 
 	@Override
 	public void initializeWidget() {
-		reviewPanel.setWidth("100%");
-		validatePanel.setWidth("98%");
-		validatePanel.setHeight("92%");
+		reviewPanel.setWidth(_100);
+		validatePanel.setWidth(_98);
+		validatePanel.setHeight(_92);
 		removeErrorText();
 		if (presenter.batchDTO.getBatch().getDocuments().getDocument() != null
 				&& presenter.batchDTO.getBatch().getDocuments().getDocument().size() != 0) {
 
 			reviewPanel.setPresenter(presenter);
 			reviewPanel.initializeWidget();
-			reviewPanel.addStyleName("review-style");
+			reviewPanel.addStyleName(REVIEW_STYLE);
 
 			validatePanel.setPresenter(presenter);
 			validatePanel.initializeWidget();
-			validatePanel.addStyleName("review-style");
+			validatePanel.addStyleName(REVIEW_STYLE);
 
 			pageImagePanel.setPresenter(presenter);
 			pageImagePanel.initializeWidget();
@@ -152,7 +159,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 		functionKeyLabel.setText(ReviewValidateConstants.FUNCTION_KEYS + ReviewValidateConstants.COLON);
 		functionKeyLabel.addStyleName(ReviewValidateConstants.BOLD_TEXT);
 		slidingPanel.setWidget(firstShortcutsPanel);
-		reviewDisclosurePanel.setWidth("100%");
+		reviewDisclosurePanel.setWidth(_100);
 		reviewDisclosurePanel.addEventHandler(new DisclosureHandler() {
 
 			public void onClose(DisclosureEvent event) {
@@ -172,12 +179,7 @@ public class ReviewValidatePanel extends RVBasePanel {
 		BatchInstanceStatus batchInstanceStatus = presenter.batchDTO.getBatchInstanceStatus();
 		setURLConstants(batchInstanceStatus);
 		setUrlAndApplicationMap();
-
-		if (batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_VALIDATION)
-				|| batchInstanceStatus.equals(BatchInstanceStatus.READY_FOR_REVIEW)) {
-			reviewDisclosurePanel.setOpen(false);
-		}
-
+		reviewDisclosurePanel.setOpen(false);
 		setVisibility();
 
 		slidingPanel.setEventBus(eventBus);
@@ -190,20 +192,20 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private void setURLConstants(BatchInstanceStatus batchInstanceStatus) {
 		switch (batchInstanceStatus) {
 			case READY_FOR_VALIDATION:
-				URL_CTRL_4 = ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey();
-				URL_CTRL_7 = ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey();
+				urlCTRL4 = ValidateProperties.EXTERNAL_APP_URL1.getPropertyKey();
+				urlCTRL7 = ValidateProperties.EXTERNAL_APP_URL2.getPropertyKey();
 
-				URL_CTRL_8 = ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey();
+				urlCTRL8 = ValidateProperties.EXTERNAL_APP_URL3.getPropertyKey();
 
-				URL_CTRL_9 = ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey();
+				urlCTRL9 = ValidateProperties.EXTERNAL_APP_URL4.getPropertyKey();
 				break;
 			case READY_FOR_REVIEW:
-				URL_CTRL_4 = ReviewProperties.EXTERNAL_APP_URL1.getPropertyKey();
-				URL_CTRL_7 = ReviewProperties.EXTERNAL_APP_URL2.getPropertyKey();
+				urlCTRL4 = ReviewProperties.EXTERNAL_APP_URL1.getPropertyKey();
+				urlCTRL7 = ReviewProperties.EXTERNAL_APP_URL2.getPropertyKey();
 
-				URL_CTRL_8 = ReviewProperties.EXTERNAL_APP_URL3.getPropertyKey();
+				urlCTRL8 = ReviewProperties.EXTERNAL_APP_URL3.getPropertyKey();
 
-				URL_CTRL_9 = ReviewProperties.EXTERNAL_APP_URL4.getPropertyKey();
+				urlCTRL9 = ReviewProperties.EXTERNAL_APP_URL4.getPropertyKey();
 				break;
 
 			default:
@@ -214,32 +216,144 @@ public class ReviewValidatePanel extends RVBasePanel {
 	private void setUrlAndApplicationMap() {
 
 		urlAndApplicationMap = new HashMap<String, String>();
-		urlAndApplicationMap.put(URL_CTRL_4, ReviewValidateConstants.APP_CTRL_4);
-		urlAndApplicationMap.put(URL_CTRL_7, ReviewValidateConstants.APP_CTRL_7);
-		urlAndApplicationMap.put(URL_CTRL_8, ReviewValidateConstants.APP_CTRL_8);
-		urlAndApplicationMap.put(URL_CTRL_9, ReviewValidateConstants.APP_CTRL_9);
+		urlAndApplicationMap.put(urlCTRL4, ReviewValidateConstants.APP_CTRL_4);
+		urlAndApplicationMap.put(urlCTRL7, ReviewValidateConstants.APP_CTRL_7);
+		urlAndApplicationMap.put(urlCTRL8, ReviewValidateConstants.APP_CTRL_8);
+		urlAndApplicationMap.put(urlCTRL9, ReviewValidateConstants.APP_CTRL_9);
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		eventBus.addHandler(ValidationFieldChangeEvent.TYPE, new ValidationFieldChangeEventHandler() {
+		addValidationFieldChangeHandler(eventBus);
+		addDocExpandEventHandler(eventBus);
+
+		addDocTypeChangeHandler(eventBus);
+		addRVKeyDownEventHandler(eventBus);
+		addRVKeyUpEventHandler(eventBus);
+
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addRVKeyUpEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(RVKeyUpEvent.type, new RVKeyUpEventHandler() {
+
+			@Override
+			public void onKeyUp(RVKeyUpEvent event) {
+				if (!presenter.isTableView() && event.getEvent().isControlKeyDown()) {
+					String urlToFire = null;
+					switch (event.getEvent().getNativeKeyCode()) {
+						case 52: // ctrl+4
+						case 100:
+							event.getEvent().preventDefault();
+							urlToFire = urlCTRL4;
+							break;
+						case 55:
+						case 103: // ctrl+7
+							event.getEvent().preventDefault();
+							urlToFire = urlCTRL7;
+							break;
+						case 56: // ctrl+8
+						case 104:
+							event.getEvent().preventDefault();
+							urlToFire = urlCTRL8;
+							break;
+						case 57:
+						case 105: // ctrl+9
+							event.getEvent().preventDefault();
+							urlToFire = urlCTRL9;
+							break;
+						default:
+							break;
+					}
+					if (null != urlToFire && null != urlAndShortcutMap && urlAndShortcutMap.containsKey(urlToFire)) {
+						presenter.showExternalAppForHtmlPattern(urlAndShortcutMap.get(urlToFire), urlAndTitleMap.get(urlToFire));
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addRVKeyDownEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(RVKeyDownEvent.type, new RVKeyDownEventHandler() {
+
+			@Override
+			public void onKeyDown(RVKeyDownEvent event) {
+				if (!presenter.isTableView() && event.getEvent().isControlKeyDown()) {
+					switch (event.getEvent().getNativeKeyCode()) {
+						case 52:
+						case 100:
+						case 55:
+						case 103:
+						case 56:
+						case 104:
+						case 57:
+						case 105:
+							event.getEvent().preventDefault();
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addDocTypeChangeHandler(HandlerManager eventBus) {
+		eventBus.addHandler(DocTypeChangeEvent.type, new DocTypeChangeEventHandler() {
+
+			@Override
+			public void onDocumentTypeChange(DocTypeChangeEvent event) {
+				presenter.document = event.getDocumentType();
+				presenter.setCustomizedShortcutPanels();
+			}
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addDocExpandEventHandler(HandlerManager eventBus) {
+		eventBus.addHandler(DocExpandEvent.type, new DocExpandEventHandler() {
+
+			@Override
+			public void onExpand(DocExpandEvent event) {
+				presenter.document = event.getDocument();
+				setErrorTextForDocument();
+				presenter.setCustomizedShortcutPanels();
+				if (event.isFireReviewPanelDefaultEvent()) {
+					setReviewPanelState();
+				}
+			}
+
+		});
+	}
+
+	/**
+	 * @param eventBus
+	 */
+	private void addValidationFieldChangeHandler(HandlerManager eventBus) {
+		eventBus.addHandler(ValidationFieldChangeEvent.type, new ValidationFieldChangeEventHandler() {
 
 			@Override
 			public void onValueChange(ValidationFieldChangeEvent event) {
-				if (!isDocumentError) {
-					if (event.getDocument() != null && !event.isValidated()) {
-						setErrorText(event.getDocument().getErrorMessage());
-					} else if (event.getDocument() != null && event.isValidated()) {
+				if (!setErrorTextForDocument()) {
+					if (event.getDocument() != null && event.isValidated()) {
 						removeErrorText();
+					} else if (!event.isValidatorsValidated() && event.getFieldName() != null && !event.getFieldName().isEmpty()
+							&& event.getSampleValue() != null && !event.getSampleValue().isEmpty()) {
+						setErrorText(event.getFieldName() + ReviewValidateConstants.SPACE
+								+ LocaleDictionary.get().getMessageValue(ReviewValidateMessages.REGEX_PATTERN_COMPLAINT) + " : "
+								+ event.getSampleValue());
 					} else {
-						if (!event.isValidatorsValidated() && event.getFieldName() != null && !event.getFieldName().isEmpty()
-								&& event.getSampleValue() != null && !event.getSampleValue().isEmpty()) {
-							setErrorText(event.getFieldName() + ReviewValidateConstants.SPACE
-									+ LocaleDictionary.get().getMessageValue(ReviewValidateMessages.REGEX_PATTERN_COMPLAINT) + " : "
-									+ event.getSampleValue());
-						} else {
-							removeErrorText();
-						}
+						removeErrorText();
 					}
 				}
 			}
@@ -250,191 +364,128 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 			}
 		});
-		eventBus.addHandler(DocExpandEvent.TYPE, new DocExpandEventHandler() {
-
-			@Override
-			public void onExpand(DocExpandEvent event) {
-				if (event.getDocument().getErrorMessage() != null && !event.getDocument().getErrorMessage().isEmpty()) {
-					isDocumentError = true;
-					setErrorText(event.getDocument().getErrorMessage());
-				} else {
-					isDocumentError = false;
-				}
-				if (!isDocumentError) {
-					setErrorText(ReviewValidateConstants.EMPTY_STRING);
-				}
-				presenter.document = event.getDocument();
-				presenter.setCustomizedShortcutPanels();
-			}
-
-		});
-
-		eventBus.addHandler(DocTypeChangeEvent.TYPE, new DocTypeChangeEventHandler() {
-
-			@Override
-			public void onDocumentTypeChange(DocTypeChangeEvent event) {
-				presenter.document = event.getDocumentType();
-				presenter.setCustomizedShortcutPanels();
-			}
-		});
-		eventBus.addHandler(RVKeyDownEvent.TYPE, new RVKeyDownEventHandler() {
-
-			@Override
-			public void onKeyDown(RVKeyDownEvent event) {
-				if (!presenter.isTableView()) {
-					if (event.getEvent().isControlKeyDown()) {
-						switch (event.getEvent().getNativeKeyCode()) {
-							case 52:
-							case 100:
-							case 55:
-							case 103:
-							case 56:
-							case 104:
-							case 57:
-							case 105:
-								event.getEvent().preventDefault();
-								break;
-						}
-
-					}
-				}
-			}
-		});
-		eventBus.addHandler(RVKeyUpEvent.TYPE, new RVKeyUpEventHandler() {
-
-			@Override
-			public void onKeyUp(RVKeyUpEvent event) {
-				if (!presenter.isTableView()) {
-					if (event.getEvent().isControlKeyDown()) {
-						String urlToFire = null;
-						switch (event.getEvent().getNativeKeyCode()) {
-							case 52: // ctrl+4
-							case 100:
-								event.getEvent().preventDefault();
-								urlToFire = URL_CTRL_4;
-								break;
-							case 55:
-							case 103: // ctrl+7
-								event.getEvent().preventDefault();
-								urlToFire = URL_CTRL_7;
-								break;
-							case 56: // ctrl+8
-							case 104:
-								event.getEvent().preventDefault();
-								urlToFire = URL_CTRL_8;
-								break;
-							case 57:
-							case 105: // ctrl+9
-								event.getEvent().preventDefault();
-								urlToFire = URL_CTRL_9;
-								break;
-						}
-						if (urlToFire != null) {
-							if (null != urlAndShortcutMap && urlAndShortcutMap.containsKey(urlToFire)) {
-								presenter.showExternalAppForHtmlPattern(urlAndShortcutMap.get(urlToFire), urlAndTitleMap
-										.get(urlToFire));
-							}
-						}
-					}
-				}
-			}
-		});
-
 	}
 
 	public void setVisibility() {
 		switch (presenter.batchDTO.getBatchInstanceStatus()) {
 			case READY_FOR_REVIEW:
-				// reviewPanel.clearPanel();
-				// validatePanel.clearPanel();
-				setErrorText(ReviewValidateConstants.EMPTY_STRING);
-				urlButtonPanel.setVisible(true);
-				slidingPanel.setVisible(false);
-				functionKeyLabel.setVisible(false);
-				pageImagePanel.setVisible(true);
-				validatePanel.setVisible(false);
-				layoutPanel.clear();
-				pageImageLayoutPanel.clear();
-				pageImageLayoutPanel.add(pageImagePanel);
-				layoutPanel.add(pageImageLayoutPanel);
-				reviewValidatePanel.clear();
-				reviewFocusPanel.setHeight("100%");
-				reviewFocusPanel.setWidth("100%");
-				reviewVerticalPanel.setWidth("100%");
-				reviewDisclosurePanel.setWidth("100%");
-				reviewVerticalPanel.add(reviewPanel);
-				reviewDisclosurePanel.add(reviewPanel);
-				if (reviewDisclosurePanel.isOpen()) {
-					reviewValidatePanel.addNorth(focusPanel, 31);
-					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
-						setButtonsForUrls();
-						reviewValidatePanel.addSouth(layoutPanel, 52);
-						centerPanel.add(urlButtonPanel);
-					} else {
-						reviewValidatePanel.addSouth(layoutPanel, 60);
-					}
-					centerPanel.add(separator);
-
-				} else {
-
-					reviewValidatePanel.addNorth(focusPanel, 8.5);
-					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
-						setButtonsForUrls();
-						reviewValidatePanel.addSouth(layoutPanel, 74.5);
-						centerPanel.add(urlButtonPanel);
-					} else {
-						reviewValidatePanel.addSouth(layoutPanel, 83.5);
-					}
-
-				}
-
-				reviewValidatePanel.add(centerPanel);
+				setVisibilityForBatchInReview();
 				break;
 			case READY_FOR_VALIDATION:
-				// reviewPanel.clearPanel();
-				// validatePanel.clearPanel();
-				urlButtonPanel.setVisible(true);
-				setErrorText(ReviewValidateConstants.EMPTY_STRING);
-				slidingPanel.setVisible(false);
-				functionKeyLabel.setVisible(false);
-				validatePanel.setVisible(true);
-				pageImagePanel.setVisible(false);
-				layoutPanel.clear();
-				layoutPanel.add(validatePanel);
-				reviewValidatePanel.clear();
-				reviewFocusPanel.setHeight("100%");
-				reviewFocusPanel.setWidth("100%");
-				reviewVerticalPanel.setWidth("100%");
-				reviewVerticalPanel.add(reviewPanel);
-				reviewDisclosurePanel.setWidth("100%");
-				reviewDisclosurePanel.add(reviewPanel);
-				if (reviewDisclosurePanel.isOpen()) {
-					reviewValidatePanel.addNorth(focusPanel, 31);
-					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
-						setButtonsForUrls();
-						reviewValidatePanel.addSouth(layoutPanel, 52);
-						centerPanel.add(urlButtonPanel);
-					} else {
-						reviewValidatePanel.addSouth(layoutPanel, 60);
-					}
-					centerPanel.add(separator);
-					reviewValidatePanel.add(centerPanel);
-				} else {
-					reviewValidatePanel.addNorth(focusPanel, 8.5);
-					if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
-						setButtonsForUrls();
-						reviewValidatePanel.addSouth(layoutPanel, 74.5);
-						centerPanel.add(urlButtonPanel);
-					} else {
-						reviewValidatePanel.addSouth(layoutPanel, 83.5);
-					}
-					reviewValidatePanel.add(centerPanel);
-				}
+				setVisibilityForBatchInValidation();
 				break;
 			default:
 				GWT.log("Unknown Status for validate Panel.");
 				break;
 		}
+	}
+
+	/**
+	 * 
+	 */
+	private void setVisibilityForBatchInValidation() {
+		// reviewPanel.clearPanel();
+		// validatePanel.clearPanel();
+		urlButtonPanel.setVisible(true);
+		slidingPanel.setVisible(false);
+		functionKeyLabel.setVisible(false);
+		validatePanel.setVisible(true);
+		pageImagePanel.setVisible(false);
+		layoutPanel.clear();
+		layoutPanel.add(validatePanel);
+		reviewValidateDockLayoutPanel.clear();
+		reviewFocusPanel.setHeight(_100);
+		reviewFocusPanel.setWidth(_100);
+		reviewVerticalPanel.setWidth(_100);
+		reviewVerticalPanel.add(reviewPanel);
+		reviewDisclosurePanel.setWidth(_100);
+		reviewDisclosurePanel.add(reviewPanel);
+		if (reviewDisclosurePanel.isOpen()) {
+			reviewValidateDockLayoutPanel.addNorth(focusPanel, 31);
+			if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+				setButtonsForUrls();
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 52);
+				centerPanel.add(urlButtonPanel);
+			} else {
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 60);
+			}
+			
+		} else {
+			reviewValidateDockLayoutPanel.addNorth(focusPanel, 8.5);
+			if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+				setButtonsForUrls();
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 74.5);
+				centerPanel.add(urlButtonPanel);
+			} else {
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 83.5);
+			}
+		}
+		centerPanel.add(separator);
+		reviewValidateDockLayoutPanel.add(centerPanel);
+	}
+	
+	private boolean setErrorTextForDocument() {
+		Document document = presenter.document;
+		boolean errorSet = false;
+		if (document != null) {
+			if (document.getErrorMessage() != null && !document.getErrorMessage().isEmpty()) {
+				errorSet = true;
+				setErrorText(document.getErrorMessage());
+			} else {
+				setErrorText(ReviewValidateConstants.EMPTY_STRING);
+			}
+		} else {
+			errorSet = true;
+		}
+		return errorSet;
+	}
+
+	/**
+	 * 
+	 */
+	private void setVisibilityForBatchInReview() {
+		// reviewPanel.clearPanel();
+		// validatePanel.clearPanel();
+		urlButtonPanel.setVisible(true);
+		slidingPanel.setVisible(false);
+		functionKeyLabel.setVisible(false);
+		pageImagePanel.setVisible(true);
+		validatePanel.setVisible(false);
+		layoutPanel.clear();
+		pageImageLayoutPanel.clear();
+		pageImageLayoutPanel.add(pageImagePanel);
+		layoutPanel.add(pageImageLayoutPanel);
+		reviewValidateDockLayoutPanel.clear();
+		reviewFocusPanel.setHeight(_100);
+		reviewFocusPanel.setWidth(_100);
+		reviewVerticalPanel.setWidth(_100);
+		reviewDisclosurePanel.setWidth(_100);
+		reviewVerticalPanel.add(reviewPanel);
+		reviewDisclosurePanel.add(reviewPanel);
+		if (reviewDisclosurePanel.isOpen()) {
+			reviewValidateDockLayoutPanel.addNorth(focusPanel, 31);
+			if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+				setButtonsForUrls();
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 52);
+				centerPanel.add(urlButtonPanel);
+			} else {
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 60);
+			}
+
+		} else {
+
+			reviewValidateDockLayoutPanel.addNorth(focusPanel, 8.5);
+			if (presenter.batchDTO.getExternalApplicationSwitchState().equals("ON")) {
+				setButtonsForUrls();
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 74.5);
+				centerPanel.add(urlButtonPanel);
+			} else {
+				reviewValidateDockLayoutPanel.addSouth(layoutPanel, 83.5);
+			}
+
+		}
+		centerPanel.add(separator);
+		reviewValidateDockLayoutPanel.add(centerPanel);
 	}
 
 	private void setErrorText(String errorText) {
@@ -503,5 +554,17 @@ public class ReviewValidatePanel extends RVBasePanel {
 
 	public DisclosurePanel getReviewDisclosurePanel() {
 		return reviewDisclosurePanel;
+	}
+
+	private void setReviewPanelState() {
+		if (presenter.batchDTO.getBatchInstanceStatus().equals(BatchInstanceStatus.READY_FOR_VALIDATION)) {
+			reviewDisclosurePanel.setOpen(presenter.batchDTO.isDefaultReviewPanelStateOpen());
+		} else {
+			reviewDisclosurePanel.setOpen(true);
+		}
+	}
+
+	public FocusPanel getFocusPanel() {
+		return focusPanel;
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,6 +40,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tablecolumninfo.EditTableColumnInfoPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -51,74 +52,256 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit table column info view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditTableColumnInfoView> {
 	}
 
+	/**
+	 * betweenLeftLabel Label.
+	 */
 	@UiField
 	protected Label betweenLeftLabel;
+
+	/**
+	 * betweenLeft TextBox.
+	 */
 	@UiField
 	protected TextBox betweenLeft;
 
+	/**
+	 * betweenLeftPatternValidateButton Button.
+	 */
+	@UiField
+	protected Button betweenLeftPatternValidateButton;
+
+	/**
+	 * betweenRightLabel Label.
+	 */
 	@UiField
 	protected Label betweenRightLabel;
+
+	/**
+	 * betweenRight TextBox.
+	 */
 	@UiField
 	protected TextBox betweenRight;
 
+	/**
+	 * betweenRightPatternValidateButton Button.
+	 */
+	@UiField
+	protected Button betweenRightPatternValidateButton;
+
+	/**
+	 * columnNameLabel Label.
+	 */
 	@UiField
 	protected Label columnNameLabel;
+
+	/**
+	 * columnNameStar Label.
+	 */
 	@UiField
 	protected Label columnNameStar;
+
+	/**
+	 * columnName TextBox.
+	 */
 	@UiField
 	protected TextBox columnName;
 
+	/**
+	 * columnHeaderPatternLabel Label.
+	 */
 	@UiField
 	protected Label columnHeaderPatternLabel;
+
+	/**
+	 * columnHeaderPattern TextBox.
+	 */
 	@UiField
 	protected TextBox columnHeaderPattern;
 
+	/**
+	 * columnHeaderPatternValidateButton Button.
+	 */
+	@UiField
+	protected Button columnHeaderPatternValidateButton;
+
+	/**
+	 * columnPatternLabel Label.
+	 */
 	@UiField
 	protected Label columnPatternLabel;
-	@UiField
-	protected Label columnPatternStar;
+
+	/**
+	 * columnPattern TextBox.
+	 */
 	@UiField
 	protected TextBox columnPattern;
 
+	/**
+	 * columnPatternValidateButton Button.
+	 */
+	@UiField
+	protected Button columnPatternValidateButton;
+
+	/**
+	 * isRequiredLabel Label.
+	 */
 	@UiField
 	protected Label isRequiredLabel;
-	@UiField
-	protected CheckBox isRequired;
 
+	/**
+	 * required CheckBox.
+	 */
+	@UiField
+	protected CheckBox required;
+
+	/**
+	 * isMandatoryLabel Label.
+	 */
+	@UiField
+	protected Label isMandatoryLabel;
+
+	/**
+	 * mandatory CheckBox.
+	 */
+	@UiField
+	protected CheckBox mandatory;
+
+	/**
+	 * columnStartCoordinateLabel Label.
+	 */
+	@UiField
+	protected Label columnStartCoordinateLabel;
+
+	/**
+	 * columnStartCoordinate TextBox.
+	 */
+	@UiField
+	protected TextBox columnStartCoordinate;
+
+	/**
+	 * columnEndCoordinateLabel Label.
+	 */
+	@UiField
+	protected Label columnEndCoordinateLabel;
+
+	/**
+	 * columnEndCoordinate TextBox.
+	 */
+	@UiField
+	protected TextBox columnEndCoordinate;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
-	
+
+	/**
+	 * samplePatternButton Button.
+	 */
 	@UiField
 	protected Button samplePatternButton;
-	
-	private ValidatableWidget<TextBox> validateColumnNameTextBox;
-	private ValidatableWidget<TextBox> validateColumnPatternTextBox;
-	private ValidatableWidget<TextBox> validateBetweenLeftTextBox;
-	private ValidatableWidget<TextBox> validateBetweenRightTextBox;
-	private ValidatableWidget<TextBox> validateColumnHeaderPatternTextBox;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
+	@UiField
+	protected ScrollPanel scrollPanel;
+
+	/**
+	 * validateColumnNameTextBox ValidatableWidget<TextBox>.
+	 */
+	private ValidatableWidget<TextBox> validateColumnNameTextBox;
+
+	/**
+	 * validateColumnPatternTextBox RegExValidatableWidget<TextBox>.
+	 */
+	private RegExValidatableWidget<TextBox> validateColumnPatternTextBox;
+
+	/**
+	 * validateBetweenLeftTextBox RegExValidatableWidget<TextBox>.
+	 */
+	private RegExValidatableWidget<TextBox> validateBetweenLeftTextBox;
+
+	/**
+	 * validateBetweenRightTextBox RegExValidatableWidget<TextBox>.
+	 */
+	private RegExValidatableWidget<TextBox> validateBetweenRightTextBox;
+
+	/**
+	 * validateColumnHeaderPatternTextBox RegExValidatableWidget<TextBox>.
+	 */
+	private final RegExValidatableWidget<TextBox> validateColumnHeaderPatternTextBox;
+
+	/**
+	 * validateColumnStartCoordTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateColumnStartCoordTextBox;
+
+	/**
+	 * validateColumnEndCoordTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateColumnEndCoordTextBox;
+
+	/**
+	 * editTableColumnInfoViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editTableColumnInfoViewPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditTableColumnInfoView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		samplePatternButton.setText(AdminConstants.SAMPLE_REGEX_BUTTON);
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		samplePatternButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		betweenLeftPatternValidateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		betweenRightPatternValidateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		betweenLeftPatternValidateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
+		betweenRightPatternValidateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
+		columnHeaderPatternValidateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		scrollPanel.setStyleName(AdminConstants.SCROLL_PANEL_HEIGHT);
+		columnPatternValidateButton.setTitle(AdminConstants.VALIDATE_BUTTON);
+		columnHeaderPatternValidateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
+		columnPatternValidateButton.setStyleName(AdminConstants.VALIDATE_BUTTON_IMAGE);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
+		scrollPanel.setStyleName(AdminConstants.SCROLL_PANEL_HEIGHT);
 		validateColumnNameTextBox = new ValidatableWidget<TextBox>(columnName);
 		validateColumnNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -128,39 +311,74 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 			}
 		});
 
-		validateColumnPatternTextBox = new ValidatableWidget<TextBox>(columnPattern);
+		validateColumnPatternTextBox = new RegExValidatableWidget<TextBox>(columnPattern);
 		validateColumnPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validateColumnPatternTextBox.toggleValidDateBox();
+				if (validateColumnPatternTextBox.getWidget().getText().isEmpty()) {
+					validateColumnPatternTextBox.setValid(true);
+				} else {
+					validateColumnPatternTextBox.setValid(false);
+				}
 			}
 		});
-		validateBetweenLeftTextBox = new ValidatableWidget<TextBox>(betweenLeft);
+		validateBetweenLeftTextBox = new RegExValidatableWidget<TextBox>(betweenLeft);
 		validateBetweenLeftTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validateBetweenLeftTextBox.toggleValidDateBox();
+				if (validateBetweenLeftTextBox.getWidget().getText().isEmpty()) {
+					validateBetweenLeftTextBox.setValid(true);
+				} else {
+					validateBetweenLeftTextBox.setValid(false);
+				}
 			}
 		});
-		validateBetweenRightTextBox = new ValidatableWidget<TextBox>(betweenRight);
+		validateBetweenRightTextBox = new RegExValidatableWidget<TextBox>(betweenRight);
 		validateBetweenRightTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validateBetweenRightTextBox.toggleValidDateBox();
+				if (validateBetweenRightTextBox.getWidget().getText().isEmpty()) {
+					validateBetweenRightTextBox.setValid(true);
+				} else {
+					validateBetweenRightTextBox.setValid(false);
+				}
 			}
 		});
-		validateColumnHeaderPatternTextBox = new ValidatableWidget<TextBox>(columnHeaderPattern);
+		validateColumnHeaderPatternTextBox = new RegExValidatableWidget<TextBox>(columnHeaderPattern);
 		validateColumnHeaderPatternTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				validateColumnHeaderPatternTextBox.toggleValidDateBox();
+				if (validateColumnHeaderPatternTextBox.getWidget().getText().isEmpty()) {
+					validateColumnHeaderPatternTextBox.setValid(true);
+				} else {
+					validateColumnHeaderPatternTextBox.setValid(false);
+				}
 			}
 		});
-		editTableColumnInfoViewPanel.setSpacing(5);
+
+		validateColumnStartCoordTextBox = new ValidatableWidget<TextBox>(columnStartCoordinate);
+		validateColumnStartCoordTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateColumnStartCoordTextBox.toggleValidDateBox();
+			}
+		});
+
+		validateColumnEndCoordTextBox = new ValidatableWidget<TextBox>(columnEndCoordinate);
+		validateColumnEndCoordTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateColumnEndCoordTextBox.toggleValidDateBox();
+			}
+		});
+
+		editTableColumnInfoViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		betweenLeftLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.BETWEEN_LEFT).toString()
 				+ AdminConstants.COLON);
@@ -172,10 +390,19 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 				+ AdminConstants.COLON);
 		isRequiredLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_REQUIRED).toString()
 				+ AdminConstants.COLON);
-		columnHeaderPatternLabel.setText("Column Header Pattern");
+		isMandatoryLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.IS_MANDATORY).toString()
+				+ AdminConstants.COLON);
+		columnHeaderPatternLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.COLUMN_HEADER_PATTERN)
+				.toString()
+				+ AdminConstants.COLON);
+		columnStartCoordinateLabel.setText(LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.COLUMN_START_COORDINATE_LABEL).toString()
+				+ AdminConstants.COLON);
+		columnEndCoordinateLabel.setText(LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.COLUMN_END_COORDINATE_LABEL).toString()
+				+ AdminConstants.COLON);
 
 		columnNameStar.setText(AdminConstants.STAR);
-		columnPatternStar.setText(AdminConstants.STAR);
 
 		betweenLeftLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		betweenRightLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -183,139 +410,513 @@ public class EditTableColumnInfoView extends View<EditTableColumnInfoPresenter> 
 		columnPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnHeaderPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isRequiredLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
-
+		isMandatoryLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		columnStartCoordinateLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		columnEndCoordinateLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		columnNameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
-		columnPatternStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 
 	}
 
-	public ValidatableWidget<TextBox> getValidateColumnHeaderPatternTextBox() {
+	/**
+	 * To get Between Left label.
+	 * 
+	 * @return Label
+	 */
+	public Label getBetweenLeftLabel() {
+		return betweenLeftLabel;
+	}
+
+	/**
+	 * To set Between Left label.
+	 * 
+	 * @param betweenLeftLabel Label
+	 */
+	public void setBetweenLeftLabel(Label betweenLeftLabel) {
+		this.betweenLeftLabel = betweenLeftLabel;
+	}
+
+	/**
+	 * To get Between right label.
+	 * 
+	 * @return Label
+	 */
+	public Label getBetweenRightLabel() {
+		return betweenRightLabel;
+	}
+
+	/**
+	 * To set Between right label.
+	 * 
+	 * @param betweenRightLabel Label
+	 */
+	public void setBetweenRightLabel(Label betweenRightLabel) {
+		this.betweenRightLabel = betweenRightLabel;
+	}
+
+	/**
+	 * To set Column Pattern.
+	 * 
+	 * @param columnPattern TextBox
+	 */
+	public void setColumnPattern(TextBox columnPattern) {
+		this.columnPattern = columnPattern;
+	}
+
+	/**
+	 * To get Column Header Pattern Label.
+	 * 
+	 * @return Label
+	 */
+	public Label getColumnHeaderPatternLabel() {
+		return columnHeaderPatternLabel;
+	}
+
+	/**
+	 * To set Column Header Pattern Label.
+	 * 
+	 * @param columnHeaderPatternLabel Label
+	 */
+	public void setColumnHeaderPatternLabel(Label columnHeaderPatternLabel) {
+		this.columnHeaderPatternLabel = columnHeaderPatternLabel;
+	}
+
+	/**
+	 * To get Column Start Coordinate Text Box.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getColumnStartCoordinateTextBox() {
+		return columnStartCoordinate;
+	}
+
+	/**
+	 * To get Column end Coordinate Text Box.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getColumnEndCoordinateTextBox() {
+		return columnEndCoordinate;
+	}
+
+	/**
+	 * To get Validate Column Header Pattern Text Box.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidateColumnHeaderPatternTextBox() {
 		return validateColumnHeaderPatternTextBox;
 	}
 
+	/**
+	 * To get Validate Column Start Coordinate Text Box.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
+	public ValidatableWidget<TextBox> getValidateColumnStartCoordTextBox() {
+		return validateColumnStartCoordTextBox;
+	}
+
+	/**
+	 * To get Validate Column End Coordinate Text Box.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
+	public ValidatableWidget<TextBox> getValidateColumnEndCoordTextBox() {
+		return validateColumnEndCoordTextBox;
+	}
+
+	/**
+	 * To perform operations on save click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
-	
+
+	/**
+	 * To get controller on Sample Pattern Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("samplePatternButton")
 	public void onSamplePatternButtonClicked(ClickEvent clickEvent) {
 		presenter.getController().getMainPresenter().getSamplePatterns();
 	}
 
+	/**
+	 * To perform operations on Between Left Pattern Validate Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("betweenLeftPatternValidateButton")
+	public void onBetweenLeftPatternValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onBetweenLeftPatternValidateButtonClicked();
+	}
+
+	/**
+	 * To perform operations on Between right Pattern Validate Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("betweenRightPatternValidateButton")
+	public void onBetweenRightPatternValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onBetweenRightPatternValidateButtonClicked();
+	}
+
+	/**
+	 * To perform operations on Column Header Pattern Validate Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("columnHeaderPatternValidateButton")
+	public void onColumnHeaderPatternValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onColumnHeaderPatternValidateButtonClicked();
+	}
+
+	/**
+	 * To perform operations on Column Pattern Validate Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("columnPatternValidateButton")
+	public void onColumnPatternValidateButtonClicked(ClickEvent clickEvent) {
+		presenter.onColumnPatternValidateButtonClicked();
+	}
+
+	/**
+	 * To perform operations on Cancel Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
+	/**
+	 * To set Column Name.
+	 * 
+	 * @param columnName String
+	 */
 	public void setColumnName(String columnName) {
 		this.columnName.setValue(columnName);
 	}
 
+	/**
+	 * To set Column Name.
+	 * 
+	 * @return String
+	 */
 	public String getColumnName() {
 		return this.columnName.getValue();
 	}
 
+	/**
+	 * To set Between Left.
+	 * 
+	 * @param betweenLeft String
+	 */
 	public void setBetweenLeft(String betweenLeft) {
 		this.betweenLeft.setValue(betweenLeft);
 	}
 
+	/**
+	 * To get Between Left.
+	 * 
+	 * @return String
+	 */
 	public String getBetweenLeft() {
 		return this.betweenLeft.getValue();
 	}
 
+	/**
+	 * To set Between right.
+	 * 
+	 * @param betweenRight String
+	 */
 	public void setBetweenRight(String betweenRight) {
 		this.betweenRight.setValue(betweenRight);
 	}
 
+	/**
+	 * To get Between right.
+	 * 
+	 * @return String
+	 */
 	public String getBetweenRight() {
 		return this.betweenRight.getValue();
 	}
 
+	/**
+	 * To set Column Pattern.
+	 * 
+	 * @param columnPattern String
+	 */
 	public void setColumnPattern(String columnPattern) {
 		this.columnPattern.setValue(columnPattern);
 	}
 
+	/**
+	 * To get column Pattern.
+	 * 
+	 * @return String
+	 */
 	public String getColumnPattern() {
 		return this.columnPattern.getValue();
 	}
 
+	/**
+	 * To set Required field.
+	 * 
+	 * @param isRequired boolean
+	 */
 	public void setRequired(boolean isRequired) {
-		this.isRequired.setValue(isRequired);
+		this.required.setValue(isRequired);
 	}
 
+	/**
+	 * To get value of required field.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isRequired() {
-		return this.isRequired.getValue();
+		return this.required.getValue();
 	}
 
+	/**
+	 * To set Mandatory.
+	 * 
+	 * @param isMandatory boolean
+	 */
+	public void setMandatory(boolean isMandatory) {
+		this.mandatory.setValue(isMandatory);
+	}
+
+	/**
+	 * To get value of mandatory field.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isMandatory() {
+		return this.mandatory.getValue();
+	}
+
+	/**
+	 * To get Column Header Pattern.
+	 * 
+	 * @return String
+	 */
 	public String getColumnHeaderPattern() {
 		return this.columnHeaderPattern.getValue();
 	}
 
+	/**
+	 * To set Column Header Pattern.
+	 * 
+	 * @param columnHeaderPattern String
+	 */
 	public void setColumnHeaderPattern(String columnHeaderPattern) {
 		this.columnHeaderPattern.setValue(columnHeaderPattern);
 	}
 
-	/*
-	 * public LocationType getLocation() { String selected = this.location.getItemText(this.location.getSelectedIndex());
-	 * LocationType[] allLocationTypes = LocationType.values(); for (LocationType locationType : allLocationTypes) { if
-	 * (locationType.name().equals(selected)) return locationType; } return allLocationTypes[0]; }
+	/**
+	 * To get Column Start Coordinate.
 	 * 
-	 * private int findIndex(LocationType locationType) { if (locationType == null) return 0; LocationType[] allLocationTypes =
-	 * LocationType.values(); List<LocationType> tempList = Arrays.asList(allLocationTypes); return tempList.indexOf(locationType); }
+	 * @return String
+	 */
+	public String getColumnStartCoordinate() {
+		return columnStartCoordinate.getValue();
+	}
+
+	/**
+	 * To set Column Start Coordinate.
 	 * 
-	 * public void setLocation() { this.location.setVisibleItemCount(1); LocationType[] allLocationTypes = LocationType.values(); for
-	 * (LocationType locationType2 : allLocationTypes) { this.location.addItem(locationType2.name()); } }
+	 * @param columnStartCoordinate String
+	 */
+	public void setColumnStartCoordinate(String columnStartCoordinate) {
+		this.columnStartCoordinate.setValue(columnStartCoordinate);
+	}
+
+	/**
+	 * To get Column End Coordinate.
 	 * 
-	 * public void setLocation(LocationType locationType) { if (this.location.getItemCount() == 0) setLocation();
-	 * this.location.setSelectedIndex(findIndex(locationType)); }
+	 * @return String
+	 */
+	public String getColumnEndCoordinate() {
+		return columnEndCoordinate.getValue();
+	}
+
+	/**
+	 * To set Column End Coordinate.
+	 * 
+	 * @param columnEndCoordinate String
+	 */
+	public void setColumnEndCoordinate(String columnEndCoordinate) {
+		this.columnEndCoordinate.setValue(columnEndCoordinate);
+	}
+
+	/**
+	 * To get Validate Column Name Text Box.
+	 * 
+	 * @return ValidatableWidget<TextBox>
 	 */
 	public ValidatableWidget<TextBox> getValidateColumnNameTextBox() {
 		return validateColumnNameTextBox;
 	}
 
+	/**
+	 * To set Validate Column Name Text Box.
+	 * 
+	 * @param validateColumnNameTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateColumnNameTextBox(ValidatableWidget<TextBox> validateColumnNameTextBox) {
 		this.validateColumnNameTextBox = validateColumnNameTextBox;
 	}
 
-	public ValidatableWidget<TextBox> getValidateColumnPatternTextBox() {
+	/**
+	 * To get Validate Column Pattern text Box.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidateColumnPatternTextBox() {
 		return validateColumnPatternTextBox;
 	}
 
-	public void setValidateColumnPatternTextBox(ValidatableWidget<TextBox> validateColumnPatternTextBox) {
+	/**
+	 * To set Validate Column Pattern Text Box.
+	 * 
+	 * @param validateColumnPatternTextBox RegExValidatableWidget<TextBox>
+	 */
+	public void setValidateColumnPatternTextBox(RegExValidatableWidget<TextBox> validateColumnPatternTextBox) {
 		this.validateColumnPatternTextBox = validateColumnPatternTextBox;
 	}
 
+	/**
+	 * To get Between Left Text Box.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getBetweenLeftTextBox() {
 		return betweenLeft;
 	}
 
+	/**
+	 * To get Between right Text Box.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getBetweenRightTextBox() {
 		return betweenRight;
 	}
 
+	/**
+	 * To get Column Name Text Box.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getColumnNameTextBox() {
 		return columnName;
 	}
 
+	/**
+	 * To get Column Pattern Text Box.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getColumnPatternTextBox() {
 		return columnPattern;
 	}
 
-	public ValidatableWidget<TextBox> getValidateBetweenLeftTextBox() {
+	/**
+	 * To get Column Pattern Label.
+	 * 
+	 * @return Label
+	 */
+	public Label getColumnPatternLabel() {
+		return columnPatternLabel;
+	}
+
+	/**
+	 * To set Column Pattern Label.
+	 * 
+	 * @param columnPatternLabel Label
+	 */
+	public void setColumnPatternLabel(Label columnPatternLabel) {
+		this.columnPatternLabel = columnPatternLabel;
+	}
+
+	/**
+	 * To get Column Header Pattern Text Box.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getColumnHeaderPatternTextBox() {
+		return columnHeaderPattern;
+	}
+
+	/**
+	 * To get Validate Between Left Text Box.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidateBetweenLeftTextBox() {
 		return validateBetweenLeftTextBox;
 	}
 
-	public void setValidateBetweenLeftTextBox(ValidatableWidget<TextBox> validateBetweenLeftTextBox) {
+	/**
+	 * To set Validate Between Left Text Box.
+	 * 
+	 * @param validateBetweenLeftTextBox RegExValidatableWidget<TextBox>
+	 */
+	public void setValidateBetweenLeftTextBox(RegExValidatableWidget<TextBox> validateBetweenLeftTextBox) {
 		this.validateBetweenLeftTextBox = validateBetweenLeftTextBox;
 	}
 
-	public ValidatableWidget<TextBox> getValidateBetweenRightTextBox() {
+	/**
+	 * To get Validate Between Right Text Box.
+	 * 
+	 * @return RegExValidatableWidget<TextBox>
+	 */
+	public RegExValidatableWidget<TextBox> getValidateBetweenRightTextBox() {
 		return validateBetweenRightTextBox;
 	}
 
-	public void setValidateBetweenRightTextBox(ValidatableWidget<TextBox> validateBetweenRightTextBox) {
+	/**
+	 * To set Validate Between Right Text Box.
+	 * 
+	 * @param validateBetweenRightTextBox RegExValidatableWidget<TextBox>
+	 */
+	public void setValidateBetweenRightTextBox(RegExValidatableWidget<TextBox> validateBetweenRightTextBox) {
 		this.validateBetweenRightTextBox = validateBetweenRightTextBox;
 	}
 
+	/**
+	 * To get Column Start Coordinates Label.
+	 * 
+	 * @return String
+	 */
+	public String getColumnStartCoordinatesLabel() {
+		return columnStartCoordinateLabel.getText();
+	}
+
+	/**
+	 * To get Column End Coordinates Label.
+	 * 
+	 * @return String
+	 */
+	public String getColumnEndCoordinatesLabel() {
+		return columnEndCoordinateLabel.getText();
+	}
+
+	/**
+	 * To set Save Button Enable.
+	 * 
+	 * @param isEnable boolean
+	 */
+	public void setSaveButtonEnable(boolean isEnable) {
+		saveButton.setEnabled(isEnable);
+
+	}
 }

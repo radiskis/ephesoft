@@ -6,26 +6,21 @@
 		<g:north size="43">
 			<g:CaptionPanel ui:field="tableInfoCaptionPanel"
 				height="90%" width="97%">
-				<g:ScrollPanel height="100%" width="100%">
-					<g:VerticalPanel height="100%" width="100%">
-						<g:VerticalPanel ui:field="tableInfoVerticalPanel"
-							height="100%" width="100%">
-							<table-info:TableInfoDetailView
-								ui:field="tableInfoDetailView" width='100%' height="100%" />
-							<g:HorizontalPanel width="100%">
-								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
-									<g:Button ui:field="editTableInfoPropertiesButton"></g:Button>
-								</g:cell>
-							</g:HorizontalPanel>
-						</g:VerticalPanel>
 
-						<g:VerticalPanel ui:field="tableInfoConfigVerticalPanel"
-							height="100%" visible="false" width="100%">
-							<table-info:EditTableInfoView
-								ui:field="editTableInfoView" width='100%' />
-						</g:VerticalPanel>
+				<g:VerticalPanel height="100%" width="100%">
+					<g:VerticalPanel ui:field="tableInfoVerticalPanel"
+						height="100%" width="100%">
+						<table-info:TableInfoDetailView
+							ui:field="tableInfoDetailView" width='100%' height="100%" />
 					</g:VerticalPanel>
-				</g:ScrollPanel>
+
+					<g:VerticalPanel ui:field="tableInfoConfigVerticalPanel"
+						height="100%" visible="false" width="100%">
+						<table-info:EditTableInfoView
+							ui:field="editTableInfoView" width='100%' />
+					</g:VerticalPanel>
+				</g:VerticalPanel>
+
 			</g:CaptionPanel>
 		</g:north>
 		<g:center>
@@ -37,8 +32,15 @@
 					<g:DockLayoutPanel ui:field="tableColumnInfoCompletePanel"
 						width="98%">
 						<g:north size="25">
-							<g:HorizontalPanel width="99%" ui:field="tableColumnInfoButtonPanel">
-								<g:cell width="95%" horizontalAlignment="ALIGN_RIGHT">
+							<g:HorizontalPanel width="99%"
+								ui:field="tableColumnInfoButtonPanel">
+								<g:cell width="15%" horizontalAlignment="ALIGN_LEFT">
+									<g:Button ui:field="testTableButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell width="56%" horizontalAlignment="ALIGN_RIGHT">
 									<g:Button ui:field="addTCButton"></g:Button>
 								</g:cell>
 								<g:cell width="1%">
@@ -52,6 +54,12 @@
 								</g:cell>
 								<g:cell horizontalAlignment="ALIGN_RIGHT">
 									<g:Button ui:field="deleteTCButton"></g:Button>
+								</g:cell>
+								<g:cell width="1%">
+									<g:Label></g:Label>
+								</g:cell>
+								<g:cell horizontalAlignment="ALIGN_RIGHT">
+									<g:Button ui:field="advEditButton"></g:Button>
 								</g:cell>
 							</g:HorizontalPanel>
 						</g:north>

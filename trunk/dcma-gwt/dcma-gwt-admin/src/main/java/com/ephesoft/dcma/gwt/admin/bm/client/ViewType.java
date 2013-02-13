@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,13 +37,14 @@ package com.ephesoft.dcma.gwt.admin.bm.client;
 
 public enum ViewType {
 
-	BATCH_CLASS_LISTING("Batch Class List"), BATCH_CLASS("Batch Class"), MODULE("Module"), PLUGIN("Plugin"),
-	KV_PP_PLUGIN("KV_Plugin"), DOCUMENT_TYPE("Document Type"), PAGE_TYPE("Page Type"), DOCUMENT_DETAIL("Document Detail"), FUZZY_DB(
+	BATCH_CLASS_LISTING("Batch Class List"), BATCH_CLASS("Batch Class"), MODULE("Module"), PLUGIN("Plugin"), KV_PP_PLUGIN(
+			"KV Page Process"), DOCUMENT_TYPE("Document Type"), PAGE_TYPE("Page Type"), DOCUMENT_DETAIL("Document Detail"), FUZZY_DB(
 			"Plugin"), DATABASE_MAPPING("Database Mapping"), TABLE_MAPPING("Table Mapping"), DOCUMENT_LEVEL_FIELD(
 			"Document Level Field"), KV_EXTRACTION("KV Extraction"), REGEX("Regex"), EMAIL("Email"), BATCH_CLASS_FIELD(
-			"Batch_Class_Field"), KV_PP_PLUGIN_CONFIG_ADD_EDIT("KV Page Process"), TABLE_INFO("Table Info"), TABLE_COLUMN_INFO(
-			"Table Column Info"), FUNCTION_KEY("Function Key"), CONFIGURE_MODULE("Configure modules"), CONFIGURE_PLUGIN(
-			"Configure plugins"), KV_PP_PLUGIN_CONFIG("Configure");
+			"Batch_Class_Field"), KV_PP_PLUGIN_CONFIG_ADD("Add KV Page Process"), KV_PP_PLUGIN_CONFIG_EDIT("Edit KV Page Process"),
+	TABLE_INFO("Table Info"), TABLE_COLUMN_INFO("Table Column Info"), FUNCTION_KEY("Function Key"), CONFIGURE_MODULE(
+			"Configure modules"), CONFIGURE_PLUGIN("Configure plugins"), KV_PP_PLUGIN_CONFIG("Configure"), WEB_SCANNER("Web Scanner"),
+	CMIS("Cmis"), BOX_EXPORTER("Box Exporter");
 
 	String value;
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -99,6 +99,7 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	}
 
 	/**
+	 * To get span.
 	 * @return the span
 	 */
 	public final Span getSpan() {
@@ -106,6 +107,7 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	}
 
 	/**
+	 * To get confidence.
 	 * @return the confidence
 	 */
 	public final float getConfidence() {
@@ -113,6 +115,7 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	}
 
 	/**
+	 * To get value.
 	 * @return the value
 	 */
 	public final String getValue() {
@@ -120,21 +123,24 @@ public class DataCarrier implements Comparable<DataCarrier> {
 	}
 
 	/**
-	 * @param span the span to set
+	 * To set span.
+	 * @param span 
 	 */
 	public final void setSpan(final Span span) {
 		this.span = span;
 	}
 
 	/**
-	 * @param confidence the confidence to set
+	 * To set confidence.
+	 * @param confidence
 	 */
 	public final void setConfidence(final float confidence) {
 		this.confidence = confidence;
 	}
 
 	/**
-	 * @param value the value to set
+	 * To set value.
+	 * @param value 
 	 */
 	public final void setValue(final String value) {
 		this.value = value;

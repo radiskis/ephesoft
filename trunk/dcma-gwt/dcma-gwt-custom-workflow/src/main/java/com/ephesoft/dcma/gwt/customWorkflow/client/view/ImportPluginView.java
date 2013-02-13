@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,15 +33,15 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view;
+package com.ephesoft.dcma.gwt.customworkflow.client.view;
 
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.ImportPluginPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowMessages;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.ImportPluginPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -61,14 +61,6 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 public class ImportPluginView extends View<ImportPluginPresenter> {
-
-	private static final char SERVLET_RESULT_SEPERATOR = '|';
-
-	private static final String LAST_ATTACHED_ZIP_SOURCE_PATH = "lastAttachedZipSourcePath=";
-
-	private static final String ZIP = "zip";
-
-	private static final String ATTACH_FORM_ACTION = "dcma-gwt-custom-workflow/importPluginUploadServlet?";
 
 	interface Binder extends UiBinder<VerticalPanel, ImportPluginView> {
 	}
@@ -94,11 +86,11 @@ public class ImportPluginView extends View<ImportPluginPresenter> {
 
 	private DialogBox dialogBox;
 
-	private Hidden zipFileName = new Hidden("zipFileName", "");
+	private final Hidden zipFileName = new Hidden("zipFileName", "");
 
-	private Hidden jarFileName = new Hidden("jarFileName", "");
+	private final Hidden jarFileName = new Hidden("jarFileName", "");
 
-	private Hidden xmlFileName = new Hidden("xmlFileName", "");
+	private final Hidden xmlFileName = new Hidden("xmlFileName", "");
 
 	@UiField
 	protected VerticalPanel importBatchClassViewPanel;
@@ -109,10 +101,10 @@ public class ImportPluginView extends View<ImportPluginPresenter> {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
-		saveButton.setText(CustomWorkflowConstants.SAVE_BUTTON);
-		cancelButton.setText(CustomWorkflowConstants.CANCEL_BUTTON);
+		saveButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.SAVE_BUTTON));
+		cancelButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.CANCEL_BUTTON));
 
-		importLabel.setText(CustomWorkflowConstants.IMPORT_FILE);
+		importLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.IMPORT_FILE));
 
 		importStar.setText(CustomWorkflowConstants.STAR);
 
@@ -124,22 +116,23 @@ public class ImportPluginView extends View<ImportPluginPresenter> {
 
 		attachZipFilePanel.setEncoding(FormPanel.ENCODING_MULTIPART);
 		attachZipFilePanel.setMethod(FormPanel.METHOD_POST);
-		attachZipFilePanel.setAction(ATTACH_FORM_ACTION);
+		attachZipFilePanel.setAction(CustomWorkflowConstants.ATTACH_FORM_ACTION);
 
 		attachZipFilePanel.addSubmitHandler(new SubmitHandler() {
 
 			@Override
 			public void onSubmit(SubmitEvent event) {
 				String fileName = importFile.getFilename();
-				String fileExt = fileName.substring(fileName.lastIndexOf('.') + 1);
-				if (!fileExt.equalsIgnoreCase(ZIP)) {
+				String fileExt = fileName.substring(fileName.lastIndexOf(CustomWorkflowConstants.EXT_SEPARATOR) + 1);
+				if (!fileExt.equalsIgnoreCase(CustomWorkflowConstants.ZIP)) {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 							CustomWorkflowMessages.IMPORT_FILE_INVALID_TYPE));
 					ScreenMaskUtility.unmaskScreen();
 					event.cancel();
 				} else {
-					String lastAttachedZipSourcePath = LAST_ATTACHED_ZIP_SOURCE_PATH + importFile.getFilename();
-					attachZipFilePanel.setAction(ATTACH_FORM_ACTION + lastAttachedZipSourcePath);
+					String lastAttachedZipSourcePath = CustomWorkflowConstants.LAST_ATTACHED_ZIP_SOURCE_PATH
+							+ importFile.getFilename();
+					attachZipFilePanel.setAction(CustomWorkflowConstants.ATTACH_FORM_ACTION + lastAttachedZipSourcePath);
 				}
 			}
 		});
@@ -151,8 +144,8 @@ public class ImportPluginView extends View<ImportPluginPresenter> {
 
 				String result = event.getResults();
 				if (result.toLowerCase().indexOf(CustomWorkflowConstants.ERROR_CODE_TEXT) > -1) {
-					ConfirmationDialogUtil.showConfirmationDialogError((result.substring(result.indexOf(CustomWorkflowConstants.CAUSE)
-							+ CustomWorkflowConstants.CAUSE.length())));
+					ConfirmationDialogUtil.showConfirmationDialogError(result.substring(result.indexOf(CustomWorkflowConstants.CAUSE)
+							+ CustomWorkflowConstants.CAUSE.length()));
 					// getDialogBox().hide(true);
 					ScreenMaskUtility.unmaskScreen();
 					return;
@@ -161,11 +154,11 @@ public class ImportPluginView extends View<ImportPluginPresenter> {
 				String keyXmlFolderPath = CustomWorkflowConstants.XML_FILE_PATH;
 				String keyJarFolderPath = CustomWorkflowConstants.JAR_FILE_PATH;
 				String pluginName = result.substring(result.indexOf(keyPluginName) + keyPluginName.length(), result.indexOf(
-						SERVLET_RESULT_SEPERATOR, result.indexOf(keyPluginName)));
+						CustomWorkflowConstants.SERVLET_RESULT_SEPERATOR, result.indexOf(keyPluginName)));
 				String xmlSourcePath = result.substring(result.indexOf(keyXmlFolderPath) + keyXmlFolderPath.length(), result.indexOf(
-						SERVLET_RESULT_SEPERATOR, result.indexOf(keyXmlFolderPath)));
+						CustomWorkflowConstants.SERVLET_RESULT_SEPERATOR, result.indexOf(keyXmlFolderPath)));
 				String jarSourcePath = result.substring(result.indexOf(keyJarFolderPath) + keyXmlFolderPath.length(), result.indexOf(
-						SERVLET_RESULT_SEPERATOR, result.indexOf(keyJarFolderPath)));
+						CustomWorkflowConstants.SERVLET_RESULT_SEPERATOR, result.indexOf(keyJarFolderPath)));
 
 				zipFileName.setValue(pluginName);
 				jarFileName.setValue(jarSourcePath);

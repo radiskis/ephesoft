@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,15 +39,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
-import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 
 /**
- * This is a database service to read data required by Batch Class Service.
+ * This is a database service to read data required by Batch Class plugin configuration Service.
  * 
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.da.service.BatchClassServiceImpl
+ * @see com.ephesoft.dcma.da.service.BatchClassPluginConfigServiceImpl
  */
 public interface BatchClassPluginConfigService {
 
@@ -79,20 +78,21 @@ public interface BatchClassPluginConfigService {
 	 * API to get Plugin Properties For Batch Class given it's identifier,plug-in name and plug-in property.
 	 * @param batchClassId {@link String}
 	 * @param pluginName {@link String}
+	 * @param pluginProperty {@link PluginProperty}
 	 * @return Map<{@link String}, {@link String}>
 	 */
 	Map<String, String> getPluginPropertiesForBatchClass(String batchClassIdentifier, String pluginName,
 			PluginProperty pluginProperty);
 
 	/**
-	 * API to save the plugin configuration values into db.
+	 * API to save the plugin configuration values into database.
 	 * 
 	 * @param batchClassPluginConfigs List<{@link BatchClassPluginConfig}>
 	 */
 	void updatePluginConfiguration(List<BatchClassPluginConfig> batchClassPluginConfigs);
 
 	/**
-	 * API to save the plugin configuration value into db.
+	 * API to save the plugin configuration value into database.
 	 * 
 	 * @param batchClassPluginConfig List<{@link BatchClassPluginConfig}>
 	 */
@@ -103,7 +103,7 @@ public interface BatchClassPluginConfigService {
 	 * 
 	 * @param batchClassIdentifier {@link String}
 	 * @param pluginName {@link String}
-	 * @param confType {@link String}
+	 * @param qualifier {@link String}
 	 * @return Map<{@link String}, {@link String}>
 	 */
 	Map<String, String> getPluginPropertiesForBatchClassByQualifier(String batchClassIdentifier, String pluginName,
@@ -116,11 +116,18 @@ public interface BatchClassPluginConfigService {
 	 */
 	void removeBatchClassPluginConfig(BatchClassPluginConfig batchClassPluginConfig);
 	
-	
 	/**
 	 * API to evict the batch class plugin config object.
 	 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
 	 */
 	void evict(BatchClassPluginConfig batchClassPluginConfig);
+	
+	/**
+	 * API to get the batch class plugin configuration details by plugin config Id.
+	 * 
+	 * @param pluginConfigId  {@link Long}
+	 * @return List<{@link BatchClassPluginConfig}>
+	 */
+	List<BatchClassPluginConfig> getBatchClassPluginConfigForPluginConfigId(Long pluginConfigId);
 
 }

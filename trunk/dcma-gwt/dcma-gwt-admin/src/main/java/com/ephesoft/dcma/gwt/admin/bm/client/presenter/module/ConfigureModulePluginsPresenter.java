@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,8 +50,10 @@ import com.ephesoft.dcma.da.property.DependencyTypeProperty;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.module.ConfigureModulesPluginSelectView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.event.ItemsAddedEvent;
 import com.ephesoft.dcma.gwt.core.client.event.ItemsAddedEventHandler;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -64,79 +66,105 @@ import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.listener.ThirdButtonListener;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 
+/**
+ * Presenter for configuring module plugins.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter<ConfigureModulesPluginSelectView> {
 
-	private static final String DEPENDENCY_COLOR = "dependency_color";
-	private static final String OPTION = "option";
+	/**
+	 * newIdentifier int.
+	 */
 	private static int newIdentifier = 1;
-	private static final String NEW = "New";
 
+	/**
+	 * selectedPluginDependenciesIndexSet Set<Integer>.
+	 */
 	private Set<Integer> selectedPluginDependenciesIndexSet;
 
+	/**
+	 * eventBus HandlerManager.
+	 */
 	private HandlerManager eventBus;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view ConfigureModulesPluginSelectView
+	 */
 	public ConfigureModulePluginsPresenter(BatchClassManagementController controller, ConfigureModulesPluginSelectView view) {
 		super(controller, view);
 		this.eventBus = controller.getEventBus();
 	}
 
-	Map<String, BatchClassModuleDTO> removedModulesMap = new HashMap<String, BatchClassModuleDTO>(0);
-
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Inject all events here
-		eventBus.addHandler(ItemsAddedEvent.TYPE, new ItemsAddedEventHandler() {
+		eventBus.addHandler(ItemsAddedEvent.type, new ItemsAddedEventHandler() {
 
 			@Override
 			public void onItemsAdded(ItemsAddedEvent event) {
 				Set<Integer> dependenciesIndexList = getSelectedPluginDependenciesIndex();
-				setSelectedPluginDependenciesIndexSet(dependenciesIndexList);
-				if (getSelectedPluginDependenciesIndexSet().size() > 0) {
-					final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
-					confirmationDialog.setText(MessageConstants.WARNING);
-					confirmationDialog.setMessage(MessageConstants.HIGHLIGHT_DEPENDENCY_ADD_MESSAGE);
-					confirmationDialog.okButton.setText(AdminConstants.YES);
-					confirmationDialog.cancelButton.setText(AdminConstants.NO);
-					confirmationDialog.thirdButton.setText(AdminConstants.CANCEL_BUTTON);
-					confirmationDialog.addDialogListener(new ThirdButtonListener() {
+				if (dependenciesIndexList != null) {
+					setSelectedPluginDependenciesIndexSet(dependenciesIndexList);
+					if (selectedPluginDependenciesIndexSet.size() > 0) {
+						final ConfirmationDialog confirmationDialog = new ConfirmationDialog(true);
+						confirmationDialog.setText(MessageConstants.WARNING);
+						confirmationDialog.setMessage(MessageConstants.HIGHLIGHT_DEPENDENCY_ADD_MESSAGE);
+						confirmationDialog.okButton.setText(AdminConstants.STRING_YES);
+						confirmationDialog.cancelButton.setText(AdminConstants.STRING_NO);
+						confirmationDialog.thirdButton.setText(AdminConstants.CANCEL_BUTTON);
+						confirmationDialog.addDialogListener(new ThirdButtonListener() {
 
-						@Override
-						public void onOkClick() {
-							// also shift the dependencies to right
-							moveDependenciesAlongWithplugin();
-							addSelectedPlugin();
-							removeHighlightedDependencies(view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(),
-									selectedPluginDependenciesIndexSet);
-							selectedPluginDependenciesIndexSet.clear();
-						}
+							@Override
+							public void onOkClick() {
+								// also shift the dependencies to right
+								moveDependenciesAlongWithplugin();
+								addSelectedPlugin();
+								removeHighlightedDependencies(view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(),
+										selectedPluginDependenciesIndexSet);
+								selectedPluginDependenciesIndexSet.clear();
+							}
 
-						@Override
-						public void onCancelClick() {
-							addSelectedPlugin();
-						}
+							@Override
+							public void onCancelClick() {
+								addSelectedPlugin();
+							}
 
-						@Override
-						public void onThirdButtonClick() {
-							confirmationDialog.hide();
+							@Override
+							public void onThirdButtonClick() {
+								confirmationDialog.hide();
 
-						}
-					});
+							}
+						});
 
-					confirmationDialog.center();
-					confirmationDialog.show();
-					confirmationDialog.okButton.setFocus(true);
+						confirmationDialog.center();
+						confirmationDialog.show();
+						confirmationDialog.okButton.setFocus(true);
 
-				} else {
-					addSelectedPlugin();
+					} else {
+						addSelectedPlugin();
+					}
 				}
 			}
 		});
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 
@@ -154,36 +182,29 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private void addSelectedPlugin() {
 		int selectedIndex = view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().getSelectedIndex();
 		if (selectedIndex != -1) {
 			String selectedValue = view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().getItemText(selectedIndex);
-			String selectedValueKey = "";
+			String selectedValueKey = BatchClassManagementConstants.EMPTY_STRING;
 			ListBox toList = view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox();
-			Map<String, String> pluginIdentifierToNameMap = view.getMultipleSelectTwoSidedListBox().getAllValuesMapFromList(
-					toList);
+			Map<String, String> pluginIdentifierToNameMap = view.getMultipleSelectTwoSidedListBox().getAllValuesMapFromList(toList);
 			do {
-				selectedValueKey = NEW + newIdentifier++;
+
+				selectedValueKey = BatchClassManagementConstants.NEW + newIdentifier++;
 			} while (pluginIdentifierToNameMap.keySet().contains(selectedValueKey));
 			toList.addItem(selectedValue, selectedValueKey);
-			int newIndex = toList.getItemCount()-1;
+			int newIndex = toList.getItemCount() - 1;
 			toList.getElement().getElementsByTagName("option").getItem(newIndex).setTitle(selectedValue);
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private void getPluginDTOs() {
-		controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
+		controller.getRpcService().getAllPluginDetailDTOs(new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-				// TODO Auto-generated method stub
-
+			public void customFailure(Throwable arg0) {
+				ConfirmationDialogUtil.showConfirmationDialogError("Unable to get the list of plugins. Check Logs for details.");
 			}
 
 			@Override
@@ -195,9 +216,6 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		});
 	}
 
-	/**
-	 * @param pluginDTOs
-	 */
 	private void populateAndShowPluginView(List<PluginDetailsDTO> pluginDTOs) {
 		controller.setAllPluginDetailsDTOs(pluginDTOs);
 		List<String> pluginNames = new ArrayList<String>(0);
@@ -209,19 +227,20 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		view.getMultipleSelectTwoSidedListBox().populateListBoxWithValues(
 				view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(), pluginNames);
 
-		// view.getMultipleSelectTwoSidedListBox().populateListBoxWithValues(
-		// view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox(), controller.getPluginsList());
-
 		view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox().clear();
 		view.getMultipleSelectTwoSidedListBox().populateListBoxWithMap(
 				view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox(), controller.getPluginIdentifierToNameMap());
 		ScreenMaskUtility.unmaskScreen();
 	}
 
+	/**
+	 * To set Batch Class DTO Plugins List.
+	 * 
+	 * @param pluginIdentifierToNameMap Map<String, String>
+	 */
 	public void setBatchClassDTOPluginsList(Map<String, String> pluginIdentifierToNameMap) {
 		// Clear current view dependencies list
-		if(selectedPluginDependenciesIndexSet != null)
-		{
+		if (selectedPluginDependenciesIndexSet != null) {
 			selectedPluginDependenciesIndexSet.clear();
 		}
 		ScreenMaskUtility.maskScreen(MessageConstants.UPDATING_PLUGINS_LIST);
@@ -268,7 +287,6 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 
 		}
 
-		// pluginIdentifierToNameMap.putAll(newPluginIdentifierToNameMap);
 		orderPluginsInBatchClass(new ArrayList<String>(pluginIdentifierToNameMap.keySet()));
 
 	}
@@ -284,8 +302,7 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 			if (!batchClassPlugin.isDeleted()) {
 				int order = AdminConstants.INITIAL_ORDER_NUMBER;
 				int index = pluginList.indexOf(batchClassPlugin.getIdentifier());
-				order = (index * AdminConstants.ORDER_NUMBER_OFFSET)
-						+ AdminConstants.INITIAL_ORDER_NUMBER;
+				order = (index * AdminConstants.ORDER_NUMBER_OFFSET) + AdminConstants.INITIAL_ORDER_NUMBER;
 				batchClassPlugin.setOrderNumber(order);
 			}
 
@@ -294,9 +311,6 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		editAndShowModuleView();
 	}
 
-	/**
-	 * 
-	 */
 	private void editAndShowModuleView() {
 		controller.getMainPresenter().showModuleView(
 				controller.getBatchClass().getModuleByIdentifier(controller.getSelectedModule().getIdentifier()));
@@ -316,6 +330,11 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		return pluginDetailsDTO;
 	}
 
+	/**
+	 * To sort plugin list.
+	 * 
+	 * @param pluginsList List<BatchClassPluginDTO>
+	 */
 	public void sortPluginList(List<BatchClassPluginDTO> pluginsList) {
 		Collections.sort(pluginsList, new Comparator<BatchClassPluginDTO>() {
 
@@ -338,6 +357,9 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		});
 	}
 
+	/**
+	 * To perform operations in case of plugin select.
+	 */
 	public void onPluginSelect() {
 
 		// Find new Dependencies
@@ -345,11 +367,8 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		setSelectedPluginDependenciesIndexSet(dependenciesIndexList);
 	}
 
-	/**
-	 * 
-	 */
 	private Set<Integer> getSelectedPluginDependenciesIndex() {
-
+		Set<Integer> dependenciesIndexList = null;
 		// remove already highlighted dependencies
 		removeHighlightedDependencies(view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(),
 				selectedPluginDependenciesIndexSet);
@@ -358,40 +377,39 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		Map<String, String> orderedPluginNames = getPluginIndexToNameMap();
 
 		int selectedIndex = view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().getSelectedIndex();
-		String selectedPluginName = "";
-		// make sure only this is the selected value
-		view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().setSelectedIndex(selectedIndex);
-
-		// Get plugin name
-		selectedPluginName = view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().getItemText(selectedIndex);
-
-		Set<String> dependenciesNameList = new HashSet<String>(0);
-
-		// Get list of dependencies
-		if (getPluginForPluginName(controller.getAllPluginDetailsDTOs(), selectedPluginName).getDependencies() != null) {
-			for (DependencyDTO dependencyDTO : getPluginForPluginName(controller.getAllPluginDetailsDTOs(), selectedPluginName)
-					.getDependencies()) {
-				if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty())) {
-					dependenciesNameList.addAll(getDependenciesSet(dependencyDTO.getDependencies()));
+		if (selectedIndex != -1) {
+			String selectedPluginName = BatchClassManagementConstants.EMPTY_STRING;
+			// make sure only this is the selected value
+			view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().setSelectedIndex(selectedIndex);
+			// Get plugin name
+			selectedPluginName = view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox().getItemText(selectedIndex);
+			Set<String> dependenciesNameList = new HashSet<String>(0);
+			// Get list of dependencies
+			if (getPluginForPluginName(controller.getAllPluginDetailsDTOs(), selectedPluginName).getDependencies() != null) {
+				for (DependencyDTO dependencyDTO : getPluginForPluginName(controller.getAllPluginDetailsDTOs(), selectedPluginName)
+						.getDependencies()) {
+					if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty())) {
+						dependenciesNameList.addAll(getDependenciesSet(dependencyDTO.getDependencies()));
+					}
+				}
+			}
+			// Get indexes of Dependencies if not in the above
+			dependenciesIndexList = new HashSet<Integer>(0);
+			for (String dependencyName : dependenciesNameList) {
+				if (!orderedPluginNames.values().contains(dependencyName)) {
+					dependenciesIndexList.add(getIndexForValueFromList(view.getMultipleSelectTwoSidedListBox()
+							.getLeftHandSideListBox(), dependencyName));
 				}
 			}
 		}
-		// Get indexes of Dependencies if not in the above
-		Set<Integer> dependenciesIndexList = new HashSet<Integer>(0);
-		for (String dependencyName : dependenciesNameList) {
-			if (!orderedPluginNames.values().contains(dependencyName)) {
-				dependenciesIndexList.add(getIndexForValueFromList(view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(),
-						dependencyName));
-			}
-		}
-
 		return dependenciesIndexList;
 	}
 
 	private void removeHighlightedDependencies(ListBox listBox, Set<Integer> selectedPluginDependenciesIndex) {
 		if (selectedPluginDependenciesIndex != null) {
 			for (Integer index : selectedPluginDependenciesIndex) {
-				listBox.getElement().getElementsByTagName(OPTION).getItem(index).removeClassName(DEPENDENCY_COLOR);
+				listBox.getElement().getElementsByTagName(BatchClassManagementConstants.OPTION).getItem(index).removeClassName(
+						BatchClassManagementConstants.DEPENDENCY_COLOR);
 			}
 		}
 	}
@@ -402,7 +420,8 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		for (int index = 0; index < listBox.getItemCount(); index++) {
 			if (listBox.getItemText(index).equals(dependencyName)) {
 				valueIndex = index;
-				listBox.getElement().getElementsByTagName(OPTION).getItem(valueIndex).addClassName(DEPENDENCY_COLOR);
+				listBox.getElement().getElementsByTagName(BatchClassManagementConstants.OPTION).getItem(valueIndex).addClassName(
+						BatchClassManagementConstants.DEPENDENCY_COLOR);
 				break;
 			}
 		}
@@ -411,9 +430,9 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 
 	private Set<String> getDependenciesSet(String dependencies) {
 		Set<String> dependenciesSet = new HashSet<String>(0);
-		String[] andDependencies = dependencies.split(AdminConstants.AND);
+		String[] andDependencies = dependencies.split(AdminConstants.SEPERATOR);
 		for (String andDependency : andDependencies) {
-			String[] orDependencies = andDependency.split(AdminConstants.OR);
+			String[] orDependencies = andDependency.split(AdminConstants.SLASH);
 			for (String dependencyName : orDependencies) {
 				dependenciesSet.add(dependencyName);
 			}
@@ -426,28 +445,16 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 				view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox());
 		Map<String, String> orderedPluginNames = new HashMap<String, String>(0);
 		int index = 0;
-		// Get Plugin Names in order for above moduleWorkflowNames
-		// and Distinct PDDTOs
-		// for (BatchClassModuleDTO module : controller.getBatchClass().getModules()) {
-		//
-		// if ((controller.getSelectedModule().getWorkflowName().equals(module.getWorkflowName()))) {
-		// List<BatchClassPluginDTO> batchClassPluginDTOs = new ArrayList<BatchClassPluginDTO>(module.getBatchClassPlugins());
-		// sortPluginList(batchClassPluginDTOs);
-		// for (BatchClassPluginDTO batchClassPluginDTO : batchClassPluginDTOs) {
-		// orderedPluginNames.put(String.valueOf(index++), batchClassPluginDTO.getPlugin().getPluginName());
-		// }
-		// } else
-		{
-			for (String pluginName : selectedModulePluginNames) {
-				orderedPluginNames.put(String.valueOf(index++), pluginName);
-			}
+		for (String pluginName : selectedModulePluginNames) {
+			orderedPluginNames.put(String.valueOf(index++), pluginName);
 		}
-		// }
 
 		return orderedPluginNames;
 	}
 
 	/**
+	 * To get Event Bus.
+	 * 
 	 * @return the eventBus
 	 */
 	public HandlerManager getEventBus() {
@@ -455,13 +462,17 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 	}
 
 	/**
-	 * @param eventBus the eventBus to set
+	 * To set Event Bus.
+	 * 
+	 * @param eventBus HandlerManager
 	 */
 	public void setEventBus(HandlerManager eventBus) {
 		this.eventBus = eventBus;
 	}
 
 	/**
+	 * To get Selected Plugin Dependencies IndexSet.
+	 * 
 	 * @return the selectedPluginDependenciesIndexSet
 	 */
 	public Set<Integer> getSelectedPluginDependenciesIndexSet() {
@@ -469,7 +480,9 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 	}
 
 	/**
-	 * @param selectedPluginDependenciesIndexSet the selectedPluginDependenciesIndexSet to set
+	 * To set Selected Plugin Dependencies IndexSet.
+	 * 
+	 * @param selectedPluginDependenciesIndexSet Set<Integer>
 	 */
 	public void setSelectedPluginDependenciesIndexSet(Set<Integer> selectedPluginDependenciesIndexSet) {
 		this.selectedPluginDependenciesIndexSet = selectedPluginDependenciesIndexSet;
@@ -479,6 +492,13 @@ public class ConfigureModulePluginsPresenter extends AbstractBatchClassPresenter
 		view.getMultipleSelectTwoSidedListBox().moveValuesOnIndexFromOneListToAnother(getSelectedPluginDependenciesIndexSet(),
 				view.getMultipleSelectTwoSidedListBox().getLeftHandSideListBox(),
 				view.getMultipleSelectTwoSidedListBox().getRightHandSideListBox());
+	}
+
+	/**
+	 * To show module view on cancel button clicked.
+	 */
+	public void onCancelButtonClicked() {
+		controller.getBatchClassManagementPresenter().showModuleView();
 	}
 
 }

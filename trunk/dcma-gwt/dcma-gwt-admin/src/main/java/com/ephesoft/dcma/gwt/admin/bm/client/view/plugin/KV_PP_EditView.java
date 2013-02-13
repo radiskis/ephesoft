@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,6 +39,7 @@ import java.util.List;
 
 import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.KV_PP_EditPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
@@ -60,30 +61,67 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * This class provides functionality to edit KV PP.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KV_PP_EditView extends View<KV_PP_EditPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<FlexTable, KV_PP_EditView> {
 	}
 
+	/**
+	 * flexEditTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable flexEditTable;
 
+	/**
+	 * editTable FlexTable.
+	 */
 	private FlexTable editTable;
 
+	/**
+	 * cancel Button.
+	 */
 	private Button cancel;
+
+	/**
+	 * save Button.
+	 */
 	private Button save;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public KV_PP_EditView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
+	/**
+	 * To get Flex Edit Table.
+	 * 
+	 * @return FlexTable
+	 */
 	public FlexTable getFlexEditTable() {
 		return flexEditTable;
 	}
 
+	/**
+	 * To set view.
+	 */
 	public void setView() {
 
 		cancel = new Button();
@@ -110,41 +148,84 @@ public class KV_PP_EditView extends View<KV_PP_EditPresenter> {
 		flexEditTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
 	}
 
+	/**
+	 * To format the row.
+	 * 
+	 * @param row int
+	 */
 	public void formatRow(int row) {
 		editTable.getCellFormatter().setWidth(row, 0, "60%");
 		editTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
 		editTable.getCellFormatter().setWidth(row, 1, "1%");
 		editTable.getCellFormatter().setWidth(row, 2, "70px");
-		editTable.getCellFormatter().setWidth(row, 3, "58%");
-		editTable.getFlexCellFormatter().setAlignment(row, 3, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_BOTTOM);
-		editTable.getFlexCellFormatter().addStyleName(row, 3, "sampleData");
+		editTable.getCellFormatter().setWidth(row, BatchClassManagementConstants.THREE, "58%");
+		editTable.getFlexCellFormatter().setAlignment(row, BatchClassManagementConstants.THREE, HasHorizontalAlignment.ALIGN_LEFT,
+				HasVerticalAlignment.ALIGN_BOTTOM);
+		editTable.getFlexCellFormatter().addStyleName(row, BatchClassManagementConstants.THREE, "sampleData");
 		editTable.getFlexCellFormatter().addStyleName(row, 0, "bold_text");
 	}
 
+	/**
+	 * To add widget.
+	 * 
+	 * @param row int
+	 * @param column int
+	 * @param widget Widget
+	 */
 	public void addWidget(int row, int column, Widget widget) {
 		editTable.setWidget(row, column, widget);
 	}
 
+	/**
+	 * To add Widget Star.
+	 * 
+	 * @param row int
+	 * @param column int
+	 */
 	public void addWidgetStar(int row, int column) {
 		Label star = new Label(AdminConstants.STAR);
 		editTable.setWidget(row, column, star);
-		star.setStyleName("font_red");
+		star.setStyleName(BatchClassManagementConstants.FONT_RED);
 	}
 
+	/**
+	 * To get save button.
+	 * 
+	 * @return Button
+	 */
 	public Button getSave() {
 		return save;
 	}
 
+	/**
+	 * To get cancel button.
+	 * 
+	 * @return Button
+	 */
 	public Button getCancel() {
 		return cancel;
 	}
 
+	/**
+	 * To add buttons.
+	 * 
+	 * @param row int
+	 */
 	public void addButtons(int row) {
 		editTable.setWidget(row, 1, save);
 		editTable.setWidget(row, 2, cancel);
 		editTable.getFlexCellFormatter().setAlignment(row, 1, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
+	/**
+	 * To add Text Box.
+	 * 
+	 * @param row int
+	 * @param value String
+	 * @param dataType DataType
+	 * @param readOnly boolean
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> addTextBox(int row, String value, DataType dataType, boolean readOnly) {
 		TextBox fieldValue = new TextBox();
 		fieldValue.setReadOnly(readOnly);
@@ -165,6 +246,15 @@ public class KV_PP_EditView extends View<KV_PP_EditPresenter> {
 		return validatableTextBox;
 	}
 
+	/**
+	 * To add Multiple Select List Box.
+	 * 
+	 * @param row int
+	 * @param sampleValueList List<String>
+	 * @param MAX_VISIBLE_ITEM_COUNT int
+	 * @param value String
+	 * @return ListBox
+	 */
 	public ListBox addMultipleSelectListBox(int row, List<String> sampleValueList, int MAX_VISIBLE_ITEM_COUNT, String value) {
 		ListBox fieldValue = new ListBox(true);
 		fieldValue.setVisibleItemCount(MAX_VISIBLE_ITEM_COUNT);
@@ -178,6 +268,14 @@ public class KV_PP_EditView extends View<KV_PP_EditPresenter> {
 		return fieldValue;
 	}
 
+	/**
+	 * To add drop down.
+	 * 
+	 * @param row int
+	 * @param sampleValueList List<String>
+	 * @param selectedValue String
+	 * @return ListBox
+	 */
 	public ListBox addDropDown(int row, List<String> sampleValueList, String selectedValue) {
 		ListBox fieldValue = new ListBox();
 		fieldValue.setVisibleItemCount(1);

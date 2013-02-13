@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,12 +36,13 @@
 package com.ephesoft.dcma.gwt.home.client.view;
 
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.CoreCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.shared.BatchPriority;
 import com.ephesoft.dcma.gwt.home.client.event.BatchListKeyDownEvent;
 import com.ephesoft.dcma.gwt.home.client.i18n.BatchListConstants;
 import com.ephesoft.dcma.gwt.home.client.presenter.LandingPresenter;
-import com.ephesoft.dcma.gwt.home.client.view.ReviewTable.ReviewValidateTable;
+import com.ephesoft.dcma.gwt.home.client.view.reviewtable.ReviewValidateTable;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -60,7 +61,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * Class that is used for the view presented to user on landing on batch list page.
  * 
  * @author Ephesoft
- *
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
  */
 public class LandingView extends View<LandingPresenter> {
 
@@ -68,92 +70,85 @@ public class LandingView extends View<LandingPresenter> {
 	 * The review table.
 	 */
 	private ReviewValidateTable reviewTable;
-	
+
 	/**
 	 * The validate table.
 	 */
 	private ReviewValidateTable validateTable;
-	
+
 	/**
 	 * Label used for batches in review state.
 	 */
 	private Label pendingForReviewLabelValue;
-	
+
 	/**
 	 * Label used for batches in validation state.
 	 */
 	private Label pendingForValidationLabelValue;
-	
+
 	/**
 	 * Label to show total batches present.
 	 */
 	private Label totalBatchValue;
-	
+
 	/**
 	 * The outer panel in the view.
 	 */
 	private DockLayoutPanel flowpanel;
-	
+
 	/**
-	 * The tab layout panel containing the review and validate tabs. 
+	 * The tab layout panel containing the review and validate tabs.
 	 */
 	private TabLayoutPanel reviewValidateTabLayoutPanel;
-	
-	/**
-	 * Style applied on batch alert text.
-	 */
-	private static final String BATCH_ALERT_TEXT_STYLE = "batchAlertText";
-	
+
 	/**
 	 * Used to set height/width at hundred percent.
 	 */
 	private static final String HUNDRED_PERCENT = "100%";
-	
 	/**
-	 * Used to set height/width at ninety nine percent.
+	 * focusPanel FocusPanel.
 	 */
-	private static final String NINETY_NINE_PERCENT = "99%";
-	
 	private FocusPanel focusPanel;
 
+	/**
+	 * To build the Landing Page.
+	 * 
+	 * @return FocusPanel
+	 */
 	public FocusPanel buildLandingPage() {
 		focusPanel = new FocusPanel();
 		flowpanel = new DockLayoutPanel(Unit.PCT);
 		flowpanel.setHeight(HUNDRED_PERCENT);
+		flowpanel.addStyleName(CoreCommonConstants.MAIN_CONTAINER_CSS);
 		HorizontalPanel horCapPanel = new HorizontalPanel();
 		VerticalPanel innerVerPanel = new VerticalPanel();
-		innerVerPanel.addStyleName("landing-header");
-		innerVerPanel.setWidth(NINETY_NINE_PERCENT);
+		innerVerPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		VerticalPanel capPanel = new VerticalPanel();
-		capPanel.setStyleName("top-box");
+		capPanel.setStyleName(CoreCommonConstants.TOP_PANEL_CSS);
 		HorizontalPanel title = new HorizontalPanel();
 		title.setBorderWidth(0);
 		title.setSize(HUNDRED_PERCENT, HUNDRED_PERCENT);
 		Label titleLabel = new Label(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_BATCH_ALERTS));
 		title.add(titleLabel);
-		titleLabel.addStyleName("blk_bold_text");
+		titleLabel.addStyleName(CoreCommonConstants.HEADER_BOLD_TEXT_CSS);
 		capPanel.add(titleLabel);
-		capPanel.setSpacing(5);
 		HorizontalPanel simPanel = new HorizontalPanel();
 
 		simPanel.setSize(HUNDRED_PERCENT, HUNDRED_PERCENT);
 
 		Label pendingForReviewLabel = new Label(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_PEND_FOR_REVIEW)
 				+ ": ");
-		pendingForReviewLabel.addStyleName(BATCH_ALERT_TEXT_STYLE);
+		pendingForReviewLabel.addStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
 		pendingForReviewLabelValue = new Label("");
-		pendingForReviewLabelValue.addStyleName(BATCH_ALERT_TEXT_STYLE);
 		Label pendingForValidationLabel = new Label(LocaleDictionary.get().getConstantValue(
 				BatchListConstants.LABEL_PEND_FOR_VALIDATION)
 				+ ": ");
-		pendingForValidationLabel.addStyleName(BATCH_ALERT_TEXT_STYLE);
+		pendingForValidationLabel.addStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
 		pendingForValidationLabelValue = new Label("");
-		pendingForValidationLabelValue.addStyleName(BATCH_ALERT_TEXT_STYLE);
 		Label totalBatchCount = new Label(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TOTAL_BATCHES) + ": ");
-		totalBatchCount.addStyleName(BATCH_ALERT_TEXT_STYLE);
-		totalBatchValue = new Label("");
-		totalBatchValue.addStyleName(BATCH_ALERT_TEXT_STYLE);
-		Label pipe = new Label("");
+		totalBatchCount.addStyleName(CoreCommonConstants.BOLD_TEXT_CSS);
+		totalBatchValue = new Label(BatchListConstants.EMPTY_STRING);
+		Label pipe = new Label(BatchListConstants.EMPTY_STRING);
 		pipe.setStyleName("pipe");
 
 		simPanel.add(totalBatchCount);
@@ -181,61 +176,94 @@ public class LandingView extends View<LandingPresenter> {
 		HorizontalPanel buttonTextPanel = new HorizontalPanel();
 		buttonTextPanel.add(dummyLabel);
 		buttonTextPanel.setCellWidth(dummyLabel, "20%");
-		buttonTextPanel.addStyleName("button-home-panel");
 		innerVerPanel.add(buttonTextPanel);
 		horCapPanel.add(innerVerPanel);
 		horCapPanel.setCellHorizontalAlignment(innerVerPanel, HasAlignment.ALIGN_LEFT);
 		horCapPanel.setWidth(HUNDRED_PERCENT);
-		flowpanel.addNorth(horCapPanel, 15);
+		flowpanel.addNorth(horCapPanel, BatchListConstants.FIFTEEN);
 		reviewTable = new ReviewValidateTable(true);
-		reviewValidateTabLayoutPanel = new TabLayoutPanel(5, Unit.PCT);
-		reviewValidateTabLayoutPanel.addStyleName("posl10");
-		reviewValidateTabLayoutPanel.setWidth(NINETY_NINE_PERCENT);
+		reviewValidateTabLayoutPanel = new TabLayoutPanel(BatchListConstants.FIVE, Unit.PCT);
+		reviewValidateTabLayoutPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		reviewValidateTabLayoutPanel.add(reviewTable.getMainPanel());
 		validateTable = new ReviewValidateTable(false);
 		reviewValidateTabLayoutPanel.add(validateTable.getMainPanel(), "");
-		reviewValidateTabLayoutPanel.addStyleName("align-center");
 		flowpanel.add(reviewValidateTabLayoutPanel);
 		focusPanel.add(flowpanel);
 		focusPanel.addKeyDownHandler(new KeyDownHandler() {
-			
+
 			@Override
 			public void onKeyDown(KeyDownEvent arg0) {
 				presenter.getController().getEventBus().fireEvent(new BatchListKeyDownEvent(arg0));
 			}
 		});
-		
+
 		return focusPanel;
 	}
 
+	/**
+	 * To get Review Table.
+	 * 
+	 * @return ReviewValidateTable
+	 */
 	public ReviewValidateTable getReviewTable() {
 		return reviewTable;
 	}
 
+	/**
+	 * To get Validate Table.
+	 * 
+	 * @return ReviewValidateTable
+	 */
 	public ReviewValidateTable getValidateTable() {
 		return validateTable;
 	}
-	
+
+	/**
+	 * To set Review Table Selected.
+	 */
 	public void setReviewTableSelected() {
 		this.reviewValidateTabLayoutPanel.selectTab(reviewTable.getMainPanel());
 	}
 
+	/**
+	 * To set Validate Table Seleted.
+	 */
 	public void setValidateTableSeleted() {
 		this.reviewValidateTabLayoutPanel.selectTab(validateTable.getMainPanel());
 	}
-	
+
+	/**
+	 * To get Review Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getReviewLabel() {
 		return pendingForReviewLabelValue;
 	}
 
+	/**
+	 * To get Validation Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getValidationLabel() {
 		return pendingForValidationLabelValue;
 	}
 
+	/**
+	 * To get Total Batch Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getTotalBatchLabel() {
 		return totalBatchValue;
 	}
 
+	/**
+	 * To get Priority List Box.
+	 * 
+	 * @return ListBox
+	 */
 	public ListBox getPriorityListBox() {
 		ListBox priorityListBox = new ListBox();
 		priorityListBox.addItem(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TABLE_ALL), "0");
@@ -250,24 +278,38 @@ public class LandingView extends View<LandingPresenter> {
 		return priorityListBox;
 	}
 
+	/**
+	 * To go to Review and Validate Page.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 */
 	public void gotoReviewAndValidatePage(final String batchInstanceIdentifier) {
 		String href = Window.Location.getHref();
 		String baseUrl = href.substring(0, href.lastIndexOf('/'));
 		StringBuffer newUrl = new StringBuffer();
-		newUrl.append(baseUrl).append("/ReviewValidate.html");
-		if (!("0".equals(batchInstanceIdentifier))) {
-			newUrl.append("?batch_id=").append(batchInstanceIdentifier);
+		newUrl.append(baseUrl).append(BatchListConstants.REVIEW_VALIDATE_HTML);
+		if (!(BatchListConstants.ZERO.equals(batchInstanceIdentifier))) {
+			newUrl.append(BatchListConstants.BATCH_ID).append(batchInstanceIdentifier);
 		}
 		Window.Location.assign(newUrl.toString());
 	}
 
+	/**
+	 * To get Outer.
+	 * 
+	 * @return Panel
+	 */
 	public Panel getOuter() {
 		return focusPanel;
 	}
 
+	/**
+	 * To get Review Validate TabLayout Panel.
+	 * 
+	 * @return TabLayoutPanel
+	 */
 	public TabLayoutPanel getReviewValidateTabLayoutPanel() {
 		return reviewValidateTabLayoutPanel;
 	}
-	
 
 }

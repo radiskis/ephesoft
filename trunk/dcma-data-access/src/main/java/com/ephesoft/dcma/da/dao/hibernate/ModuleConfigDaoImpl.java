@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,18 +52,31 @@ import com.ephesoft.dcma.da.domain.ModuleConfig;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.ModuleConfigDao
  */
 @Repository
 public class ModuleConfigDaoImpl extends HibernateDao<ModuleConfig> implements ModuleConfigDao {
 	
+	/**
+	 * IS_MANDATORY String.
+	 */
 	private static final String IS_MANDATORY = "isMandatory";
+	
+	/**
+	 * CHILD_KEY String.
+	 */
 	private static final String CHILD_KEY = "childKey";
+	
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleConfigDaoImpl.class);
+	
 	/**
 	 * API to get module by child name.
 	 * 
-	 * @param childName
-	 * @return List<ModuleConfig> list of module configs.
+	 * @param childName String
+	 * @return List<ModuleConfig>
 	 */
 	@Override
 	public List<ModuleConfig> getModuleByChildName(String childName) {
@@ -76,6 +89,13 @@ public class ModuleConfigDaoImpl extends HibernateDao<ModuleConfig> implements M
 		return this.find(criteria);
 	}
 	
+	/**
+	 * API to get the module configuration by key and mandatory.
+	 * 
+	 * @param moduleConfigKey String
+	 * @param isMandatory boolean
+	 * @return ModuleConfig
+	 */
 	@Override
 	public ModuleConfig getModuleConfigByKeyAndMandatory(String moduleConfigKey, boolean isMandatory) {
 		LOGGER.debug(moduleConfigKey);

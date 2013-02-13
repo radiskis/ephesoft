@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,8 +55,8 @@ public class PreImageLoadingPresenter implements Presenter {
 	public final ReviewValidatePresenter reviewValidatePresenter;
 
 	@Override
-	public void go(HasWidgets container) {
-
+	public void onPresenterLoad(HasWidgets container) {
+		// no need to implement anything in the go method.
 	}
 
 	public PreImageLoadingPresenter(ReviewValidateDocServiceAsync rpcService, HandlerManager eventBus,
@@ -68,7 +68,7 @@ public class PreImageLoadingPresenter implements Presenter {
 	}
 
 	private void injectEvent(HandlerManager eventBus) {
-		eventBus.addHandler(DocExpandEvent.TYPE, new DocExpandEventHandler() {
+		eventBus.addHandler(DocExpandEvent.type, new DocExpandEventHandler() {
 
 			@Override
 			public void onExpand(DocExpandEvent event) {
@@ -77,18 +77,25 @@ public class PreImageLoadingPresenter implements Presenter {
 					List<Page> pageList = nextDocument.getPages().getPage();
 					for (Page page : pageList) {
 						if (page != null) {
-							String newFileName = page.getNewFileName();
-							if (newFileName != null && !newFileName.isEmpty()) {
-								reviewValidatePresenter.getView().getDocTree().getTempImage().setUrl(
-										reviewValidatePresenter.batchDTO.getAbsoluteURLFor(page.getNewFileName()));
-							}
-							String thumbNailFile = page.getThumbnailFileName();
-							if (thumbNailFile != null && !thumbNailFile.isEmpty()) {
-								reviewValidatePresenter.getView().getDocTree().getTempImage().setUrl(
-										reviewValidatePresenter.batchDTO.getAbsoluteURLFor(page.getThumbnailFileName()));
-							}
+							setDocImageUrl(page);
 						}
 					}
+				}
+			}
+
+			/**
+			 * @param page
+			 */
+			private void setDocImageUrl(Page page) {
+				String newFileName = page.getNewFileName();
+				if (newFileName != null && !newFileName.isEmpty()) {
+					reviewValidatePresenter.getView().getDocTree().getTempImage().setUrl(
+							reviewValidatePresenter.batchDTO.getAbsoluteURLFor(page.getNewFileName()));
+				}
+				String thumbNailFile = page.getThumbnailFileName();
+				if (thumbNailFile != null && !thumbNailFile.isEmpty()) {
+					reviewValidatePresenter.getView().getDocTree().getTempImage().setUrl(
+							reviewValidatePresenter.batchDTO.getAbsoluteURLFor(page.getThumbnailFileName()));
 				}
 			}
 		});

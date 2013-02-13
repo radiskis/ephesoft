@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,15 +37,19 @@ package com.ephesoft.dcma.gwt.core.shared.exception;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-
 public class GWTException extends Exception implements IsSerializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	public GWTException() {
-		
+		super();
+
 	}
-	
+
+	public GWTException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 	public GWTException(String message) {
 		super(message);
 	}

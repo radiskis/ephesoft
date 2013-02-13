@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,51 +33,55 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
 import java.util.Collections;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.da.property.DependencyTypeProperty;
 import com.ephesoft.dcma.da.property.PluginProperty;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.ephesoft.dcma.gwt.core.shared.comparator.PluginComparator;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.ViewAndAddPluginsView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowMessages;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.ViewAndAddPluginsView;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.TextArea;
 
-public class ViewAndAddPluginsPresenter extends AbstractCustomWorkflowPresenter<ViewAndAddPluginsView> implements PaginationListner {
+public class ViewAndAddPluginsPresenter extends AbstractCustomWorkflowPresenter<ViewAndAddPluginsView> implements PaginationListner,
+		DoubleClickListner {
 
-	private static final int TABLE_ROW_COUNT = 15;
-	private int startIndex;
-	private int maxResult;
-	private Order order;
 	private final AllPluginsListPresenter allPluginsListPresenter;
 
 	public ViewAndAddPluginsPresenter(CustomWorkflowController customWorkflowController, ViewAndAddPluginsView viewAndAddPluginsView) {
 		super(customWorkflowController, viewAndAddPluginsView);
 
-		this.allPluginsListPresenter = new AllPluginsListPresenter(getController(), view.getAllPluginsListView());
-		view.getAllPluginsListView().listView.setTableRowCount(TABLE_ROW_COUNT);
+		this.allPluginsListPresenter = new AllPluginsListPresenter(controller, view.getAllPluginsListView());
+		view.getAllPluginsListView().listView.setTableRowCount(CustomWorkflowConstants.TABLE_ROW_COUNT);
 
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void bind() {
 		if (controller.getAllPluginsNameToDescriptionMap() != null) {
-			setIndexes(0, view.getAllPluginsListView().listView.getTableRowCount(), null);
-			getView().createPluginsList(controller.getAllPlugins());
+			view.createPluginsList(controller.getAllPlugins());
 		}
 	}
 
@@ -91,12 +95,6 @@ public class ViewAndAddPluginsPresenter extends AbstractCustomWorkflowPresenter<
 		controller.getCustomWorkflowManagementPresenter().showImportPluginView();
 	}
 
-	private void setIndexes(int startIndex2, int maxResult2, Order order2) {
-		this.startIndex = startIndex2;
-		this.maxResult = maxResult2;
-		this.order = order2;
-	}
-
 	/**
 	 * @return the allPluginsListPresenter
 	 */
@@ -104,24 +102,94 @@ public class ViewAndAddPluginsPresenter extends AbstractCustomWorkflowPresenter<
 		return allPluginsListPresenter;
 	}
 
+	public String createHelpContent() {
+
+		String pluginAddingStepsLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.PLUGIN_ADDING_STEPS);
+		String makeLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.MAKE);
+		String pluginTwoFilesLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.PLUGIN_HAVING_TWO_FILES);
+		String jarDescriptionLocaleMessage = LocaleDictionary.get().getMessageValue(
+				CustomWorkflowMessages.JAR_FOR_THE_PLUGIN_TO_BE_ADDED);
+		String xmlDescriptionLocaleMessage = LocaleDictionary.get().getMessageValue(
+				CustomWorkflowMessages.FILE_INFORMATION_ABOUT_THE_PLUGIN);
+		String zipContentLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.FILE_CONTAIN_TWO_FILES);
+		String fileKeywordLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.FILE_AND);
+		String sameNameLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.FILE_SAME_NAME);
+		String jarContentWarningLocaleMessage = LocaleDictionary.get().getMessageValue(
+				CustomWorkflowMessages.FILE_CANNOT_BE_VERIFIED_WARNING);
+		String jarRequiredContentLocaleMessage = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.REQUIRED_CONTENT);
+		String tomcatRestartWarning = LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.RESTART_TOMCAT_WARNING);
+
+		String keyBoardShortcuts = "<p><b>" + pluginAddingStepsLocaleMessage + "</b></p>" + "<ol>" + CustomWorkflowConstants.HTML_LI
+				+ makeLocaleMessage + CustomWorkflowConstants.BREAK_TAG_START + CustomWorkflowConstants.ZIP_FILE
+				+ CustomWorkflowConstants.BREAK_TAG_END + pluginTwoFilesLocaleMessage + CustomWorkflowConstants.HTML_LI_END + "<ol>"
+				+ " <li type=\"a\">" + CustomWorkflowConstants.BREAK_TAG_START + CustomWorkflowConstants.JAR_FILE
+				+ CustomWorkflowConstants.BREAK_TAG_END + jarDescriptionLocaleMessage + CustomWorkflowConstants.HTML_LI_END
+				+ " <li type=\"a\">" + CustomWorkflowConstants.BREAK_TAG_START + CustomWorkflowConstants.XML_FILE
+				+ CustomWorkflowConstants.BREAK_TAG_END + xmlDescriptionLocaleMessage + CustomWorkflowConstants.HTML_LI_END + "</ol>"
+				+ CustomWorkflowConstants.HTML_LI + CustomWorkflowConstants.BREAK_TAG_START + CustomWorkflowConstants.ZIP_FILE
+				+ CustomWorkflowConstants.BREAK_TAG_END + zipContentLocaleMessage + CustomWorkflowConstants.HTML_LI_END
+				+ CustomWorkflowConstants.HTML_LI + CustomWorkflowConstants.BREAK_TAG_START + CustomWorkflowConstants.ZIP_FILE
+				+ CustomWorkflowConstants.BREAK_TAG_END + fileKeywordLocaleMessage + CustomWorkflowConstants.BREAK_TAG_START
+				+ CustomWorkflowConstants.JAR_FILE + CustomWorkflowConstants.BREAK_TAG_END + sameNameLocaleMessage
+				+ CustomWorkflowConstants.HTML_LI_END + CustomWorkflowConstants.HTML_LI + CustomWorkflowConstants.BREAK_TAG_START
+				+ CustomWorkflowConstants.JAR_FILE + CustomWorkflowConstants.BREAK_TAG_END + jarContentWarningLocaleMessage
+				+ jarRequiredContentLocaleMessage + CustomWorkflowConstants.HTML_LI_END + CustomWorkflowConstants.HTML_LI
+				+ tomcatRestartWarning + CustomWorkflowConstants.HTML_LI_END + "</ol>";
+
+		return keyBoardShortcuts;
+	}
+
 	public void onAddNewPluginHelp() {
-		ConfirmationDialogUtil.showConfirmationDialog("For adding a new plugin (NEW_PLUGIN):" + "\n"
-				+ "a zip file(NEW_PLUGIN.zip) containing " + "\n" + "1. a jar(NEW_PLUGIN.jar) " + "\n" + "2. an xml(NEW_PLUGIN.xml) "
-				+ "\n" + " must be selected", "Help", true);
+
+		String helpContent = createHelpContent();
+		final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+		confirmationDialog.setMessage(helpContent);
+		confirmationDialog.setDialogTitle(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.HELP_BUTTON));
+		confirmationDialog.addDialogListener(new DialogListener() {
+
+			@Override
+			public void onCancelClick() {
+				confirmationDialog.hide();
+			}
+
+			@Override
+			public void onOkClick() {
+				confirmationDialog.hide();
+			}
+
+		});
+		confirmationDialog.setPerformCancelOnEscape(true);
+		confirmationDialog.show();
+		confirmationDialog.center();
+		confirmationDialog.okButton.setFocus(true);
+		confirmationDialog.cancelButton.setVisible(false);
+		confirmationDialog.getPanel().getElementById(CustomWorkflowConstants.TEXT_PANEL).addClassName(
+				CustomWorkflowConstants.HELP_CONTENT);
 
 	}
 
 	public void showDependenciesView() {
+		controller.getCustomWorkflowManagementPresenter().getView().showDependencyManagementView();
+		final String selectedPluginIndex = view.getAllPluginsListView().getAllPluginsListView().getSelectedRowIndex();
 
-		controller.getCustomWorkflowManagementPresenter().showDependenciesView();
+		final PluginDetailsDTO selectedPluginDto = controller.getCustomWorkflowManagementPresenter().getPluginDtoForIdentifier(
+				selectedPluginIndex);
+
+		if (selectedPluginDto != null) {
+			controller.setSelectedPlugin(selectedPluginDto.getPluginName());
+		}
+		controller.getCustomWorkflowManagementPresenter().getDependencyManagementPresenter().showDependenciesView();
 	}
 
 	@Override
 	public void onPagination(int startIndex, int maxResult, Order order) {
+		Order finalOrder;
 		if (order == null) {
-			order = new Order(PluginProperty.NAME, true);
+			finalOrder = new Order(PluginProperty.NAME, true);
+		} else {
+			finalOrder = order;
 		}
-		PluginComparator pluginComparator = new PluginComparator(order);
+		PluginComparator pluginComparator = new PluginComparator(finalOrder);
 		List<PluginDetailsDTO> allPluginsList = controller.getAllPlugins();
 
 		Collections.sort(allPluginsList, pluginComparator);
@@ -130,46 +198,113 @@ public class ViewAndAddPluginsPresenter extends AbstractCustomWorkflowPresenter<
 		view.updatePluginsList(allPluginsList, totalSize, startIndex, Math.min(totalSize, lastIndex));
 	}
 
-	/**
-	 * @return the startIndex
-	 */
-	public int getStartIndex() {
-		return startIndex;
+	public void deletePlugin() {
+		final String selectedPluginIndex = view.getAllPluginsListView().getAllPluginsListView().getSelectedRowIndex();
+
+		final PluginDetailsDTO selectedPluginDTO = controller.getCustomWorkflowManagementPresenter().getPluginDtoForIdentifier(
+				selectedPluginIndex);
+
+		if (selectedPluginDTO != null) {
+			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowConstants.DELETING_PLUGIN_MESSAGE));
+			controller.getRpcService().deletePlugin(selectedPluginDTO, new EphesoftAsyncCallback<Boolean>() {
+
+				@Override
+				public void onSuccess(Boolean isPluginDeleted) {
+					if (isPluginDeleted) {
+						updateAllPluginDependencies(controller.getAllPlugins(), selectedPluginDTO.getPluginName());
+						controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(),
+								new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
+
+									@Override
+									public void onSuccess(List<PluginDetailsDTO> allPluginDetailsDTOs) {
+										ScreenMaskUtility.unmaskScreen();
+										controller.setAllPlugins(allPluginDetailsDTOs);
+										ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
+												CustomWorkflowConstants.PLUGIN_DELETED_SUCCESSFULLY));
+										getController().getCustomWorkflowManagementPresenter().getCustomWorkflowEntryPresenter()
+												.getViewAndAddPluginsPresenter().bind();
+
+										getController().getCustomWorkflowManagementPresenter().init();
+									}
+
+									@Override
+									public void customFailure(Throwable arg0) {
+										ScreenMaskUtility.unmaskScreen();
+									}
+								});
+
+					}
+				}
+
+				@Override
+				public void customFailure(Throwable failureMessage) {
+					ScreenMaskUtility.unmaskScreen();
+					final String message = failureMessage.getLocalizedMessage();
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(message));
+				}
+			});
+		}
 	}
 
 	/**
-	 * @param startIndex the startIndex to set
+	 * This method is used to remove the pluginName string from the dependencies string.
+	 * 
+	 * @param allPlugins
+	 * @param pluginName
 	 */
-	public void setStartIndex(int startIndex) {
-		this.startIndex = startIndex;
+	private void updateAllPluginDependencies(List<PluginDetailsDTO> allPlugins, String pluginName) {
+
+		StringBuilder orRegexBuilder = new StringBuilder();
+
+		orRegexBuilder.append(CustomWorkflowConstants.BOUNDARY);
+		orRegexBuilder.append(pluginName);
+		orRegexBuilder.append(CustomWorkflowConstants.OR_REPLACE_REGEX);
+		orRegexBuilder.append(pluginName);
+		orRegexBuilder.append(CustomWorkflowConstants.BOUNDARY);
+
+		String orRegex = orRegexBuilder.toString();
+
+		StringBuilder andRegexBuilder = new StringBuilder();
+
+		andRegexBuilder.append(CustomWorkflowConstants.BOUNDARY);
+		andRegexBuilder.append(pluginName);
+		andRegexBuilder.append(CustomWorkflowConstants.AND_REPLACE_REGEX);
+		andRegexBuilder.append(pluginName);
+		andRegexBuilder.append(CustomWorkflowConstants.BOUNDARY);
+
+		String andRegex = andRegexBuilder.toString();
+
+		for (PluginDetailsDTO pluginDetailsDTO : allPlugins) {
+
+			for (DependencyDTO dependencyDTO : pluginDetailsDTO.getDependencies()) {
+				String originalDependenciesString = dependencyDTO.getDependencies();
+
+				if (dependencyDTO.getDependencyType().equals(DependencyTypeProperty.ORDER_BEFORE.getProperty())) {
+
+					if (!originalDependenciesString.equals(pluginName)) {
+						String newDependenciesString = originalDependenciesString.replaceAll(orRegex,
+								CustomWorkflowConstants.EMPTY_STRING).replaceAll(andRegex, CustomWorkflowConstants.EMPTY_STRING);
+						dependencyDTO.setDependencies(newDependenciesString);
+						if (newDependenciesString.isEmpty()) {
+							pluginDetailsDTO.setDirty(true);
+							dependencyDTO.setDeleted(true);
+						}
+						if (!originalDependenciesString.equals(newDependenciesString)) {
+							pluginDetailsDTO.setDirty(true);
+							dependencyDTO.setDirty(true);
+						}
+					} else {
+						pluginDetailsDTO.setDirty(true);
+						dependencyDTO.setDependencies(CustomWorkflowConstants.EMPTY_STRING);
+						dependencyDTO.setDeleted(true);
+					}
+				}
+			}
+		}
 	}
 
-	/**
-	 * @return the maxResult
-	 */
-	public int getMaxResult() {
-		return maxResult;
+	@Override
+	public void onDoubleClickTable() {
+		showDependenciesView();
 	}
-
-	/**
-	 * @param maxResult the maxResult to set
-	 */
-	public void setMaxResult(int maxResult) {
-		this.maxResult = maxResult;
-	}
-
-	/**
-	 * @return the order
-	 */
-	public Order getOrder() {
-		return order;
-	}
-
-	/**
-	 * @param order the order to set
-	 */
-	public void setOrder(Order order) {
-		this.order = order;
-	}
-
 }

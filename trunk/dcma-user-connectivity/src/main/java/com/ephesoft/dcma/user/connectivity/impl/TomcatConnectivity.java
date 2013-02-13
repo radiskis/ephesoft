@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -50,6 +51,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.ephesoft.dcma.batch.schema.UserInformation;
 import com.ephesoft.dcma.user.connectivity.UserConnectivity;
 import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
 
@@ -64,13 +66,22 @@ import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
 public class TomcatConnectivity implements UserConnectivity {
 
 	/**
+	 * OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY String.
+	 */
+	private static final String OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY = "Operation not supported in Tomcat connectivity.";
+
+	/**
 	 * Used for handling logs.
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(TomcatConnectivity.class);
 
+	/**
+	 * tomcatUserXmlPath String.
+	 */
 	private String tomcatUserXmlPath;
 
 	/**
+	 * To get Tomcat User Xml Path.
 	 * @return the tomcatUserXmlPath
 	 */
 	public String getTomcatUserXmlPath() {
@@ -78,7 +89,8 @@ public class TomcatConnectivity implements UserConnectivity {
 	}
 
 	/**
-	 * @param tomcatUserXmlPath the tomcatUserXmlPath to set
+	 * To set Tomcat User Xml Path.
+	 * @param tomcatUserXmlPath String
 	 */
 	public void setTomcatUserXmlPath(String tomcatUserXmlPath) {
 		this.tomcatUserXmlPath = tomcatUserXmlPath;
@@ -87,7 +99,7 @@ public class TomcatConnectivity implements UserConnectivity {
 	/**
 	 * This method returns DOM document from the XML file loaded for tomcatUserXmlPath.
 	 * 
-	 * @param batchXmlFile xml file path
+	 * @param tomcatUserXmlPath String
 	 * @return {@link Document}
 	 */
 	private Document getDocument(String tomcatUserXmlPath) {
@@ -121,13 +133,11 @@ public class TomcatConnectivity implements UserConnectivity {
 		Set<String> allGroups = new HashSet<String>();
 		Document document = getDocument(tomcatUserXmlPath);
 		NodeList roleList = document.getElementsByTagName(UserConnectivityConstant.TOMCAT_ROLE);
-		if (roleList != null & roleList.getLength() > 0) {
-			for (int index = 0; index < roleList.getLength(); index++) {
+		if (roleList != null & roleList.getLength() > UserConnectivityConstant.ZERO) {
+			for (int index = UserConnectivityConstant.ZERO; index < roleList.getLength(); index++) {
 				Element role = (Element) roleList.item(index);
 				String roleAttribute = role.getAttribute(UserConnectivityConstant.TOMCAT_ROLENAME);
-				if (roleAttribute != null && !roleAttribute.isEmpty()) {
-					allGroups.add(roleAttribute);
-				}
+				setUserGroupsSet(allGroups, roleAttribute);
 			}
 		}
 		return allGroups;
@@ -143,34 +153,35 @@ public class TomcatConnectivity implements UserConnectivity {
 		Set<String> allUsers = new HashSet<String>();
 		Document document = getDocument(tomcatUserXmlPath);
 		NodeList roleList = document.getElementsByTagName(UserConnectivityConstant.TOMCAT_USER);
-		if (roleList != null & roleList.getLength() > 0) {
-			for (int index = 0; index < roleList.getLength(); index++) {
+		if (roleList != null & roleList.getLength() > UserConnectivityConstant.ZERO) {
+			for (int index = UserConnectivityConstant.ZERO; index < roleList.getLength(); index++) {
 				Element role = (Element) roleList.item(index);
 				String userAttribute = role.getAttribute(UserConnectivityConstant.TOMCAT_USERNAME);
-				if (userAttribute != null && !userAttribute.isEmpty()) {
-					allUsers.add(userAttribute);
-				}
+				setUserGroupsSet(allUsers, userAttribute);
 			}
 		}
 		return allUsers;
 	}
 
+	/**
+	 * This method is used to connect the Tomcat Server and fetching the list of user group object from the Tomcat Server.
+	 * @param userName String
+	 * @return Set<String> if connected and user is found else return null
+	 */
 	@Override
 	public Set<String> getUserGroups(String userName) {
-		Set<String> userGroupsSet = new HashSet<String>();;
+		Set<String> userGroupsSet = new HashSet<String>();
 		Document document = getDocument(tomcatUserXmlPath);
 		NodeList roleList = document.getElementsByTagName(UserConnectivityConstant.TOMCAT_USER);
-		if (roleList != null & roleList.getLength() > 0) {
-			for (int index = 0; index < roleList.getLength(); index++) {
+		if (roleList != null & roleList.getLength() > UserConnectivityConstant.ZERO) {
+			for (int index = UserConnectivityConstant.ZERO; index < roleList.getLength(); index++) {
 				Element user = (Element) roleList.item(index);
 				String userAttribute = user.getAttribute(UserConnectivityConstant.TOMCAT_USERNAME);
-				if(userAttribute.equals(userName)) {
+				if (userAttribute.equals(userName)) {
 					String userRoles = user.getAttribute(UserConnectivityConstant.ROLES);
 					String[] userRolesArray = userRoles.split(UserConnectivityConstant.COMMA_SYMBOL);
 					for (String userRole : userRolesArray) {
-						if(userRole != null && !userRole.isEmpty()) {
-							userGroupsSet.add(userRole);
-						}
+						setUserGroupsSet(userGroupsSet, userRole);
 					}
 				}
 			}
@@ -178,4 +189,78 @@ public class TomcatConnectivity implements UserConnectivity {
 		return userGroupsSet;
 	}
 
+	private void setUserGroupsSet(Set<String> userGroupsSet, String userRole) {
+		if (userRole != null && !userRole.isEmpty()) {
+			userGroupsSet.add(userRole);
+		}
+	}
+
+	/**
+	 * To add group.
+	 * @param userInformation UserInformation
+	 */
+	@Override
+	public void addGroup(UserInformation userInformation) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To add user.
+	 * @param userInformation UserInformation
+	 */
+	@Override
+	public void addUser(UserInformation userInformation) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To check existence of user.
+	 * @param userName String
+	 * @return boolean
+	 */
+	@Override
+	public boolean checkUserExistence(String userName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To delete group.
+	 * @param groupName String
+	 */
+	@Override
+	public void deleteGroup(String groupName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To delete user.
+	 * @param userName String
+	 */
+	@Override
+	public void deleteUser(String userName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To modify user password.
+	 * @param userName String
+	 * @param newPassword String
+	 * @throws NamingException if error occurs
+	 */
+	@Override
+	public void modifyUserPassword(String userName, String newPassword) throws NamingException {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
+
+	/**
+	 * To verify and modify user password.
+	 * @param userName String
+	 * @param oldPassword String
+	 * @param newPassword String
+	 * @throws NamingException if error occurs
+	 */
+	@Override
+	public void verifyandmodifyUserPassword(String userName, String oldPassword, String newPassword) throws NamingException {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_TOMCAT_CONNECTIVITY);
+	}
 }

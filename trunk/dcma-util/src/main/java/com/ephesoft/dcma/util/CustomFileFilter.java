@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,11 +41,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * This class is for custom file filters.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.io.FilenameFilter
+ */
 public class CustomFileFilter implements FilenameFilter {
 
+	/**
+	 * Initializing subStringList.
+	 */
 	private final List<String> subStringList = new ArrayList<String>();
+	
+	/**
+	 * Initializing excluded.
+	 */
 	private final boolean excluded;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param excluded boolean 
+	 * @param subString {@link String}
+	 */
 	public CustomFileFilter(boolean excluded, String... subString) {
 		super();
 		for (int index = 0; index < subString.length; index++) {
@@ -54,15 +74,23 @@ public class CustomFileFilter implements FilenameFilter {
 		this.excluded = excluded;
 	}
 
+	/**
+	 * Accept method.
+	 * 
+	 * @param dir File
+	 * @param name {@link String}
+	 * @return boolean
+	 */
 	@Override
 	public boolean accept(File dir, String name) {
 		Boolean accepted = excluded;
 		for (String item : subStringList) {
-			boolean isContained = name.toLowerCase().endsWith(item.toLowerCase(Locale.getDefault()));
+			boolean isContained = name.toLowerCase(Locale.getDefault()).endsWith(item.toLowerCase(Locale.getDefault()));
 			if (excluded) {
 				accepted = (accepted && !isContained);
-			} else
+			} else {
 				accepted = accepted || isContained;
+			}
 		}
 		return accepted;
 	}

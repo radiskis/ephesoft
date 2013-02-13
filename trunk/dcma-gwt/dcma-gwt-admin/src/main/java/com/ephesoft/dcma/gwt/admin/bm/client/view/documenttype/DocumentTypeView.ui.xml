@@ -6,17 +6,11 @@
 		<g:north size="43">
 			<g:CaptionPanel ui:field="documentConfigurationCaptionPanel"
 				height="90%" width="97%">
-				<g:ScrollPanel height="100%" width="100%">
 					<g:VerticalPanel height="100%" width="100%">
 						<g:VerticalPanel ui:field="documentTypeVerticalPanel"
 							height="100%" width="100%">
 							<document-type:DocumentTypeDetailView
 								ui:field="documentTypeDetailView" width='100%' height="100%" />
-							<g:HorizontalPanel width="100%">
-								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
-									<g:Button ui:field="editDocumentPropertiesButton"></g:Button>
-								</g:cell>
-							</g:HorizontalPanel>
 						</g:VerticalPanel>
 						<g:VerticalPanel ui:field="documentTypeConfigVerticalPanel"
 							height="100%" visible="false" width="100%">
@@ -24,7 +18,6 @@
 								ui:field="editDocumentTypeView" width='100%' />
 						</g:VerticalPanel>
 					</g:VerticalPanel>
-				</g:ScrollPanel>
 			</g:CaptionPanel>
 		</g:north>
 		<g:center>

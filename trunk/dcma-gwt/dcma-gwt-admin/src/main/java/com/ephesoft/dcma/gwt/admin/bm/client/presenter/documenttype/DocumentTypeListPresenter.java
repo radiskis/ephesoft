@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,53 +55,107 @@ import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.ephesoft.dcma.gwt.core.shared.comparator.DocumentTypeComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the document type list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class DocumentTypeListPresenter extends AbstractBatchClassPresenter<DocumentTypeListView> implements PaginationListner,
 		DoubleClickListner {
 
-	private Collection<DocumentTypeDTO> DocumentTypeDTOList;
+	/**
+	 * documentTypeDTOList Collection<DocumentTypeDTO>.
+	 */
+	private Collection<DocumentTypeDTO> documentTypeDTOList;
 
+	/**
+	 * To get Document Type DTO List.
+	 * 
+	 * @return Collection<DocumentTypeDTO>
+	 */
 	public Collection<DocumentTypeDTO> getDocumentTypeDTOList() {
-		return DocumentTypeDTOList;
+		return documentTypeDTOList;
 	}
 
+	/**
+	 * To set Document Type DTO List.
+	 * 
+	 * @param documentTypeDTOList Collection<DocumentTypeDTO>
+	 */
 	public void setDocumentTypeDTOList(Collection<DocumentTypeDTO> documentTypeDTOList) {
-		DocumentTypeDTOList = documentTypeDTOList;
+		this.documentTypeDTOList = documentTypeDTOList;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view DocumentTypeListView
+	 */
 	public DocumentTypeListPresenter(BatchClassManagementController controller, DocumentTypeListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 
 	}
 
+	/**
+	 * To perform operations on pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param paramOrder Order
+	 */
 	@Override
-	public void onPagination(int startIndex, int maxResult, Order order) {
+	public void onPagination(int startIndex, int maxResult, Order paramOrder) {
+		Order order = paramOrder;
+		/*
+		 * if (order == null) { order = new Order(DocumentTypeProperty.ORDER, true); }
+		 */
+		List<DocumentTypeDTO> newDocumentTypeDTOList = new ArrayList<DocumentTypeDTO>(documentTypeDTOList);
 
-		DocumentTypeComparator comparator = new DocumentTypeComparator(order);
-
-		List<DocumentTypeDTO> newDocumentTypeDTOList = new ArrayList<DocumentTypeDTO>(DocumentTypeDTOList);
-
-		Collections.sort(newDocumentTypeDTOList, comparator);
-
+		if (order != null) {
+			DocumentTypeComparator comparator = new DocumentTypeComparator(order);
+			Collections.sort(newDocumentTypeDTOList, comparator);
+		}
 		List<Record> documentTypeRecordList = getController().getMainPresenter().getView().getBatchClassView().setDocumentTypeList(
 				newDocumentTypeDTOList);
-		this.getView().getDocumentTypeListView().updateRecords(documentTypeRecordList, 0);
+		int totalSize = documentTypeRecordList.size();
+		int lastIndex = startIndex + maxResult;
+		int count = Math.min(totalSize, lastIndex);
+		this.getView().getDocumentTypeListView().updateRecords(documentTypeRecordList.subList(startIndex, count), startIndex,
+				totalSize);
 
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String rowIndex = view.getDocumentTypeListView().getSelectedRowIndex();
 		int rowCount = view.getDocumentTypeListView().getTableRecordCount();

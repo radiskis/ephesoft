@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,23 +42,64 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
-
+/**
+ * This class provides functionality to show table info list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class TableInfoListView extends View<TableInfoListPresenter> {
 
+	/**
+	 * To get Table Info List View.
+	 * 
+	 * @return
+	 */
 	public ListView getTableInfoListView() {
 		return listView;
 	}
 
-	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 10);
-	public HeaderColumn startPattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.START_PATTERN), 30);
-	public HeaderColumn endPattern = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.END_PATTERN), 30);
+	/**
+	 * name HeaderColumn.
+	 */
+	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME),
+			BatchClassManagementConstants.FIFTEEN);
 
+	/**
+	 * startPattern HeaderColumn.
+	 */
+	public HeaderColumn startPattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.START_PATTERN), BatchClassManagementConstants.EIGHTEEN);
+
+	/**
+	 * endPattern HeaderColumn.
+	 */
+	public HeaderColumn endPattern = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.END_PATTERN), BatchClassManagementConstants.EIGHTEEN);
+
+	/**
+	 * tableExtractionAPI HeaderColumn.
+	 */
+	public HeaderColumn tableExtractionAPI = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get()
+			.getConstantValue(BatchClassManagementConstants.TABLE_EXTRACTION_TECHNIQUE), BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * widthOfMultiline HeaderColumn.
+	 */
+	public HeaderColumn widthOfMultiline = new HeaderColumn(BatchClassManagementConstants.FIVE, LocaleDictionary.get()
+			.getConstantValue(BatchClassManagementConstants.WIDTH_OF_MULTILINE), BatchClassManagementConstants.EIGHTEEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public TableInfoListView() {
 		super();
-		listView.addHeaderColumns(name, startPattern, endPattern);
+		listView.addHeaderColumns(name, startPattern, endPattern, tableExtractionAPI, widthOfMultiline);
 	}
 }

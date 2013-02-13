@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,16 +35,44 @@
 
 package com.ephesoft.dcma.core.common;
 
+/**
+ * This is exception class for DCMA business that throws run time exception.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * 
+ */
 public class DCMABusinessException extends RuntimeException {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor.
+	 * @param message String
+	 * @param cause Throwable
+	 */
 	public DCMABusinessException(String message, Throwable cause) {
 		super(message, cause);
 	}
 	
+	/**
+	 * Constructor.
+	 * @param message String
+	 */
 	public DCMABusinessException(String message){
 		super(message);
 		
+	}
+
+	/**
+	 * Constructor.
+	 * @param cause Throwable
+	 */
+	public DCMABusinessException(Throwable cause) {
+		super(cause);
+
 	}
 }

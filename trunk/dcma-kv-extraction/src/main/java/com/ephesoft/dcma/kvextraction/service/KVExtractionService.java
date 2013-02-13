@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -66,13 +66,24 @@ public interface KVExtractionService {
 
 	/**
 	 * This API is called from web services to perform KV extraction on the specified HOCR.
-	 * @param updtDocList
-	 * @param hocrPages
-	 * @param params
-	 * @return
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param params {@link ExtractKVParams}
+	 * @return boolean
 	 * @throws DCMAException
 	 */
 	boolean extractKVDocumentFieldsFromHOCR(List<DocField> updtDocList, HocrPages hocrPages, ExtractKVParams params)
+			throws DCMAException;
+	
+	/**
+	 * This API is called from web services to perform KV extraction on the specified HOCR.
+	 * @param updtDocList {@link List<DocField>}
+	 * @param hocrPages {@link HocrPages}
+	 * @param params {@link ExtractKVParams}
+	 * @return bolean
+	 * @throws DCMAException
+	 */
+	boolean extractKVFromHOCRForBatchClass(List<DocField> updtDocList, HocrPages hocrPages, String batchClassIdentifier, String documentType)
 			throws DCMAException;
 
 }

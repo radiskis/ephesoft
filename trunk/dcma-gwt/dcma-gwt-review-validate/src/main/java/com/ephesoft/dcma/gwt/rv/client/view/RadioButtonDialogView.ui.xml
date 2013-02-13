@@ -4,7 +4,7 @@
 
 	<g:HTMLPanel>
 		<div>
-			<g:VerticalPanel width="100%" ui:field="radioButtonDialogView">
+			<g:VerticalPanel width="100%" ui:field="radioButtonDialogViewPanel">
 				<g:VerticalPanel ui:field="radioPanel">
 				</g:VerticalPanel>
 				<g:HorizontalPanel ui:field="buttonPanel">

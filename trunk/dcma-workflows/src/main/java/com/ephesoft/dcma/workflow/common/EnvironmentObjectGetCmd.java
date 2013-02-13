@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,20 +39,44 @@ import org.jbpm.api.cmd.Command;
 import org.jbpm.api.cmd.Environment;
 
 /**
- * Get an object from the environment
+ * Get an object from the environment.
  * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.api.cmd.Environment
  */
+@SuppressWarnings("PMD")
 public class EnvironmentObjectGetCmd implements Command<Object> {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * objClass Class<?>.
+	 */
 	private final Class<?> objClass;
-	
+
+	/**
+	 * To get environment object.
+	 * 
+	 * @param <T>
+	 * @param objClazz Class<?>
+	 * @return <T>
+	 */
 	public <T> EnvironmentObjectGetCmd(Class<?> objClazz) {
 		this.objClass = objClazz;
 	}
-	
-	
+
+	/**
+	 * To execute the environment.
+	 * 
+	 * @param environment Environment
+	 * @return Object
+	 * @throws Exception in case of error
+	 */
+	@Override
 	public Object execute(Environment environment) throws Exception {
 		return environment.get(objClass);
 	}

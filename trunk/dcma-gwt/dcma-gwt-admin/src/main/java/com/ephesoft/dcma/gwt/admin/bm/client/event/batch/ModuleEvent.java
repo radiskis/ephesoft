@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,11 @@ import com.ephesoft.dcma.gwt.core.shared.ModuleDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
+ * Used for handling events on module level.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Used for handling events on module level.
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
  */
 public class ModuleEvent extends GwtEvent<ModuleHandler> {
 
@@ -64,11 +63,22 @@ public class ModuleEvent extends GwtEvent<ModuleHandler> {
 	 */
 	private ModuleDTO module;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 */
 	public ModuleEvent(final Action action) {
 		super();
 		this.action = action;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 * @param module ModuleDTO
+	 */
 	public ModuleEvent(final Action action, final ModuleDTO module) {
 		super();
 		this.action = action;
@@ -88,11 +98,21 @@ public class ModuleEvent extends GwtEvent<ModuleHandler> {
 		}
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<ModuleHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<ModuleHandler> getAssociatedType() {
 		return type;
 	}
 
+	/**
+	 * To get Module.
+	 * 
+	 * @return ModuleDTO
+	 */
 	public ModuleDTO getModule() {
 		return module;
 	}

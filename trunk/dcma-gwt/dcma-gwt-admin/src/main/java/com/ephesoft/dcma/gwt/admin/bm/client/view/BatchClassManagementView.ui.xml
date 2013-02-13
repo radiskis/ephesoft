@@ -6,14 +6,17 @@
 	xmlns:page-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.pagetype'
 	xmlns:field-type='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype'
 	xmlns:kvextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction'
-	xmlns:advancedkvextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.AdvancedKVExtraction'
+	xmlns:advancedkvextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.advancedkvextraction'
 	xmlns:table-info='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo'
 	xmlns:table-column-info='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo'
 	xmlns:regex='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.regex'
 	xmlns:breadcrumb='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view'
 	xmlns:bcf='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.batchclassfield'
 	xmlns:email='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.email'
-	xmlns:function-key='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey'>
+	xmlns:scanner='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.scanner'
+	xmlns:function-key='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey'
+	xmlns:advancedtableextraction='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.tablecolumninfo.advancedtableextraction'
+	xmlns:cmis='urn:import:com.ephesoft.dcma.gwt.admin.bm.client.view.cmisimporter'>
 
 	<g:DockLayoutPanel unit='PCT' ui:field="mainLayoutPanel">
 		<g:north size="2">
@@ -51,8 +54,8 @@
 										visible="false" />
 								</g:layer>
 								<g:layer>
-									<plugin:KV_PP_ConfigView
-										ui:field="kvPPConfigView" visible="false" />
+									<plugin:KV_PP_ConfigView ui:field="kvPPConfigView"
+										visible="false" />
 								</g:layer>
 								<g:layer>
 									<plugin:KV_PP_PropertiesView
@@ -63,12 +66,21 @@
 										visible="false" />
 								</g:layer>
 								<g:layer>
+									<plugin:BoxExporterPluginView
+										ui:field="boxExporterPluginView" visible="false" />
+								</g:layer>
+								<g:layer>
 									<doc-type:DocumentTypeView ui:field="documentTypeView"
 										visible="false" />
 								</g:layer>
 								<g:layer>
 									<email:EmailView ui:field="emailView" visible="false" />
 								</g:layer>
+								<g:layer>
+									<scanner:ScannerView ui:field="scannerView"
+										visible="false" />
+								</g:layer>
+
 								<g:layer>
 									<function-key:FunctionKeyView
 										ui:field="functionKeyView" visible="false" />
@@ -122,6 +134,13 @@
 										visible="false">
 									</g:LayoutPanel>
 								</g:layer>
+								<g:layer>
+									<advancedtableextraction:AdvancedTableExtractionView
+										ui:field="advancedTableExtractionView" visible="false" />
+								</g:layer>
+								<g:layer>
+									<cmis:CmisImporterView ui:field="cmisImporterView" visible="false" />
+								</g:layer>
 							</g:LayoutPanel>
 						</g:north>
 					</g:DockLayoutPanel>
@@ -150,7 +169,7 @@
 							<g:cell width="1%">
 								<g:Label></g:Label>
 							</g:cell>
-							
+
 							<g:cell>
 								<g:Button ui:field="validate"></g:Button>
 							</g:cell>

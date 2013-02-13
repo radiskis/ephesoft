@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,7 @@ import java.util.Properties;
 import org.springframework.core.io.ClassPathResource;
 
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
+import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.ephesoft.dcma.gwt.login.client.LoginRemoteService;
 
 public class LoginServiceImpl extends DCMARemoteServiceServlet implements LoginRemoteService {
@@ -50,11 +51,10 @@ public class LoginServiceImpl extends DCMARemoteServiceServlet implements LoginR
 	private static final long serialVersionUID = 1L;
 	private static final String APPLICATION_PROPERTY_NAME = "application";
 	private static final String META_INF = "META-INF";
-	private Properties appProperties;
 
 	@Override
-	public String getProductVersion() throws Exception {
-		appProperties = loadProperties(APPLICATION_PROPERTY_NAME);
+	public String getProductVersion() throws IOException {
+		Properties appProperties = loadProperties(APPLICATION_PROPERTY_NAME);
 		return appProperties.getProperty("ephesoft.product.version");
 	}
 
@@ -77,7 +77,7 @@ public class LoginServiceImpl extends DCMARemoteServiceServlet implements LoginR
 	 * API to get license expiry message.
 	 */
 	@Override
-	public void getLicenseExpiryMsg() throws Exception {
+	public void getLicenseExpiryMsg() throws GWTException {
 		initRemoteServiceForLicenseAlert();
 
 	}

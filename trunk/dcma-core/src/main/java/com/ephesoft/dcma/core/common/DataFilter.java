@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,25 +35,45 @@
 
 package com.ephesoft.dcma.core.common;
 
+/**
+ * This class is to filter the data.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @param <T>
+ */
 public class DataFilter<T extends DomainProperty> {
 
+	/**
+	 * nameProperty T.
+	 */
 	private T nameProperty;
+	
+	/**
+	 * valueProperty Object.
+	 */
 	private Object valueProperty;
+	
+	/**
+	 * isDataFilterLike boolean.
+	 */
 	private boolean isDataFilterLike;
 
 	/**
-	 * @param nameProperty
-	 * @param valueProperty
+	 * Constructor.
+	 * @param nameProperty T
+	 * @param valueProperty Object
 	 */
 	public DataFilter(T nameProperty, Object valueProperty) {
 		this(nameProperty, valueProperty, false);
 	}
 
 	/**
-	 * @param nameProperty
-	 * @param valueProperty
-	 * @param isLike
-	 */
+	 * Constructor.
+	 * @param nameProperty T
+	 * @param valueProperty Object
+	 * @param isDataFilterLike 
+	 */ 
 	public DataFilter(T nameProperty, Object valueProperty, boolean isDataFilterLike) {
 		super();
 		this.nameProperty = nameProperty;
@@ -62,6 +82,7 @@ public class DataFilter<T extends DomainProperty> {
 	}
 
 	/**
+	 * To get Name Property.
 	 * @return the nameProperty
 	 */
 	public T getNameProperty() {
@@ -69,6 +90,7 @@ public class DataFilter<T extends DomainProperty> {
 	}
 
 	/**
+	 * To get Value Property.
 	 * @return the valueProperty
 	 */
 	public Object getValueProperty() {
@@ -76,6 +98,7 @@ public class DataFilter<T extends DomainProperty> {
 	}
 
 	/**
+	 * Returns true or false depending on the data filter.
 	 * @return the isLike
 	 */
 	public boolean isLike() {

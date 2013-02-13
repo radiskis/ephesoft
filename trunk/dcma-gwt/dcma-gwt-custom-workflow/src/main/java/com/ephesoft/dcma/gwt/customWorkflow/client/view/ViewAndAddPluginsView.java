@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view;
+package com.ephesoft.dcma.gwt.customworkflow.client.view;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -42,11 +42,12 @@ import java.util.List;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.property.PluginProperty;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.comparator.PluginComparator;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.ViewAndAddPluginsPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.ViewAndAddPluginsPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -62,21 +63,19 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 @UiTemplate(value = "ViewAndAddPluginsView.ui.xml")
 public class ViewAndAddPluginsView extends View<ViewAndAddPluginsPresenter> {
 
-	private static int TABLE_ROW_COUNT = 15;
-
-	private AllPluginsListView allPluginsListView;
+	private final AllPluginsListView allPluginsListView;
 
 	@UiField
-	Label pluginsListingLabel;
+	protected Label pluginsListingLabel;
 
 	@UiField
-	Button addNewPluginButton;
+	protected Button addNewPluginButton;
 
 	@UiField
-	Button addNewPluginHelpButton;
+	protected Button addNewPluginHelpButton;
 
 	@UiField
-	Button dependenciesButton;
+	protected Button dependenciesButton;
 
 	@UiField
 	protected LayoutPanel allPluginsListPanel;
@@ -85,16 +84,19 @@ public class ViewAndAddPluginsView extends View<ViewAndAddPluginsPresenter> {
 	protected HorizontalPanel pluginButtonsPanel;
 
 	@UiField
-	DockLayoutPanel pluginsLayoutPanel;
+	protected DockLayoutPanel pluginsLayoutPanel;
+
+	@UiField
+	protected Button deletePluginButton;
 
 	interface Binder extends UiBinder<DockLayoutPanel, ViewAndAddPluginsView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public ViewAndAddPluginsView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		allPluginsListView = new AllPluginsListView();
 
@@ -111,39 +113,40 @@ public class ViewAndAddPluginsView extends View<ViewAndAddPluginsPresenter> {
 	}
 
 	private void addFieldText() {
-		dependenciesButton.setText(CustomWorkflowConstants.DEPENDENCIES_CONSTANT);
-		addNewPluginButton.setText(CustomWorkflowConstants.ADD_PLUGIN_STRING);
-		addNewPluginHelpButton.setText(CustomWorkflowConstants.HELP_BUTTON);
-		pluginsListingLabel.setText(CustomWorkflowConstants.PLUGIN_NAMES_STRING);
+		dependenciesButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.DEPENDENCIES_LABEL_CONSTANT));
+		addNewPluginButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.ADD_PLUGIN_STRING));
+		addNewPluginHelpButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.HELP_BUTTON));
+		deletePluginButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.DELETE_PLUGIN));
+		pluginsListingLabel.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.PLUGIN_NAMES_STRING));
 	}
 
-	public void createPluginsList(List<PluginDetailsDTO> allPluginsList) {
-		Order order = new Order(PluginProperty.NAME, true);
-		PluginComparator pluginComparator = new PluginComparator(order);
+	public void createPluginsList(final List<PluginDetailsDTO> allPluginsList) {
+		final Order order = new Order(PluginProperty.NAME, true);
+		final PluginComparator pluginComparator = new PluginComparator(order);
 		Collections.sort(allPluginsList, pluginComparator);
 
-		List<Record> recordList = setPluginsList(allPluginsList);
+		final List<Record> recordList = setPluginsList(allPluginsList);
 
 		presenter.getAllPluginsListPresenter().getView().listView.initTable(recordList.size(), presenter, recordList.subList(0,
-				TABLE_ROW_COUNT), false, false, null);
+				CustomWorkflowConstants.TABLE_ROW_COUNT), true, true, presenter, null, false);
 
 	}
 
-	public void updatePluginsList(List<PluginDetailsDTO> allPluginsList, int totalCount, int startIndex, int lastIndex) {
-		List<Record> recordList = setPluginsList(allPluginsList);
+	public void updatePluginsList(final List<PluginDetailsDTO> allPluginsList, final int totalCount, final int startIndex, final int lastIndex) {
+		final List<Record> recordList = setPluginsList(allPluginsList);
 		presenter.getAllPluginsListPresenter().getView().listView.updateRecords(recordList.subList(startIndex, lastIndex), startIndex,
 				totalCount);
 	}
 
-	public List<Record> setPluginsList(List<PluginDetailsDTO> allPluginsList) {
-		List<Record> recordList = new LinkedList<Record>();
+	public List<Record> setPluginsList(final List<PluginDetailsDTO> allPluginsList) {
+		final List<Record> recordList = new LinkedList<Record>();
 
 		if (allPluginsList != null) {
 
-			for (PluginDetailsDTO pluginEntry : allPluginsList) {
+			for (final PluginDetailsDTO pluginEntry : allPluginsList) {
 
 				{
-					Record record = new Record(pluginEntry.getIdentifier());
+					final Record record = new Record(pluginEntry.getIdentifier());
 					record.addWidget(presenter.getAllPluginsListPresenter().getView().pluginName, new Label(pluginEntry
 							.getPluginName()));
 					record.addWidget(presenter.getAllPluginsListPresenter().getView().description, new Label(pluginEntry
@@ -162,18 +165,23 @@ public class ViewAndAddPluginsView extends View<ViewAndAddPluginsPresenter> {
 	}
 
 	@UiHandler("addNewPluginButton")
-	public void onAddNewPluginClicked(ClickEvent clickEvent) {
+	public void onAddNewPluginClicked(final ClickEvent clickEvent) {
 		presenter.addNewPlugin();
 	}
 
 	@UiHandler("dependenciesButton")
-	public void onDependenciesButtonClicked(ClickEvent clickEvent) {
+	public void onDependenciesButtonClicked(final ClickEvent clickEvent) {
 		presenter.showDependenciesView();
 	}
 
 	@UiHandler("addNewPluginHelpButton")
-	public void onAddNewPluginHelpClicked(ClickEvent clickEvent) {
+	public void onAddNewPluginHelpClicked(final ClickEvent clickEvent) {
 		presenter.onAddNewPluginHelp();
+	}
+
+	@UiHandler("deletePluginButton")
+	public void onDeletePluginHelpClicked(final ClickEvent clickEvent) {
+		presenter.deletePlugin();
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,19 +37,52 @@ package com.ephesoft.dcma.nsi;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * This is properties file for Nsi Exporter.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public enum NsiExporterProperties implements PluginProperty {
 
+	/**
+	 * Initializing NSI_EXPORT_FOLDER.
+	 */
 	NSI_EXPORT_FOLDER("nsi.final_export_folder"),
+	
+	/**
+	 * Initializing NSI_SWITCH.
+	 */
 	NSI_SWITCH("nsi.switch"),
+	
+	/**
+	 * Initializing NSI_XML_NAME.
+	 */
 	NSI_XML_NAME("nsi.final_xml_name"),
+	
+	/**
+	 * Initializing NSI_PLUGIN_NAME.
+	 */
 	NSI_PLUGIN_NAME("NSI_EXPORT");
 
+	/**
+	 * Initializing key.
+	 */
 	String key;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param key {@link String}
+	 */ 
 	NsiExporterProperties(String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get property key.
+	 * @return key
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

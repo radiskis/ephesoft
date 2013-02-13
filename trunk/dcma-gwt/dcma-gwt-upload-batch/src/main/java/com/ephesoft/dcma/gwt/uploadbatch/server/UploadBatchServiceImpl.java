@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,29 +53,54 @@ import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.EphesoftUser;
 import com.ephesoft.dcma.core.common.FileType;
+import com.ephesoft.dcma.core.common.UserType;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.domain.BatchClassCloudConfig;
 import com.ephesoft.dcma.da.domain.BatchClassField;
+import com.ephesoft.dcma.da.service.BatchClassCloudConfigService;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.gwt.core.server.DCMARemoteServiceServlet;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassCloudConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatchService;
+import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchConstants;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.CustomFileFilter;
+import com.ephesoft.dcma.util.IUtilCommonConstants;
+import com.ephesoft.dcma.util.PDFUtil;
+import com.ephesoft.dcma.util.TIFFUtil;
 
 public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements UploadBatchService {
 
 	private static final long serialVersionUID = 1L;
 	private static final String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
 	private static final String BCF_SER_FILE_NAME = "BCF_ASSO";
+	
+	
+	/**
+	 * The UPLOAD_BATCH_LIMIT {@link String} is a constant for 'upload_batch_limit'
+	 * defined in application-config properties file.
+	 */
+	private static final String UPLOAD_BATCH_LIMIT = "upload_batch_limit";
+	
+	/**
+	 * The DEFAULT_FILE_SIZE_LIMIT is the default file size limit for upload
+	 * batch for Freemium User type.
+	 * 
+	 * @return default file size limit
+	 */
+	private static final long DEFAULT_FILE_SIZE_LIMIT = 1024L;
 
 	@Override
 	public int getRowsCount() {
 		List<BatchInstanceStatus> statusList = new ArrayList<BatchInstanceStatus>();
 		statusList.add(BatchInstanceStatus.READY_FOR_REVIEW);
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
-		
+
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
 		return batchInstanceService.getCount(statusList, null, getUserRoles(), getUserName(), EphesoftUser.NORMAL_USER);
 	}
@@ -83,11 +108,38 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 	@Override
 	public String finishBatch(String currentBatchUploadFolder, String batchClassID) throws GWTException {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
+		final Integer userType = getUserType();
+
+		// Path to upload batch folder in ephesoft shared folder
+		StringBuilder uploadBatchFolderPath = new StringBuilder();
+		uploadBatchFolderPath.append(batchSchemaService.getUploadBatchFolder());
+		uploadBatchFolderPath.append(File.separator);
+		uploadBatchFolderPath.append(currentBatchUploadFolder);
+		uploadBatchFolderPath.append(File.separator);
+		uploadBatchFolderPath.append(ICommonConstants.UPLOAD_BATCH_META_DATA_XML_FILE_NAME);
+
+		// Creating the xml storing the upload batch info
+		String uploadBatchFolder=uploadBatchFolderPath.toString();
+		LOG.info("Path to create the upload batch meta data xml file for uploaded batches:"+uploadBatchFolder);
+		createXmlForUploadBatchInfo(uploadBatchFolder);
+
+		String errorMessage = null;
 		try {
-			CustomFileFilter fileFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
-					.getExtensionWithDot(), FileType.SER.getExtensionWithDot(), FileType.PDF.getExtensionWithDot());
-			batchSchemaService.copyFolderWithFileFilter(batchSchemaService.getUploadBatchFolder(), currentBatchUploadFolder,
-					batchClassID, fileFilter);
+			
+			// Check for batch class limit for the current user group
+			errorMessage = checkForBatchClassLimit(userType, batchClassID, currentBatchUploadFolder, batchSchemaService.getUploadBatchFolder());
+			if (null == errorMessage || errorMessage.isEmpty()) {
+				CustomFileFilter fileFilter = new CustomFileFilter(true, FileType.TIF.getExtensionWithDot(), FileType.TIFF
+						.getExtensionWithDot(), FileType.SER.getExtensionWithDot(), FileType.PDF.getExtensionWithDot(), FileType.XML
+						.getExtensionWithDot());
+				batchSchemaService.copyFolderWithFileFilter(batchSchemaService.getUploadBatchFolder(), currentBatchUploadFolder,
+						batchClassID, fileFilter);
+				updateBatchClassCounter(userType, batchClassID);
+			} else {
+				
+				// Throw batch class limit exception
+				throw new GWTException(errorMessage);
+			}
 		} catch (Exception e) {
 			throw new GWTException(e.getMessage());
 		}
@@ -101,19 +153,57 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 		Set<String> allGroups = getUserRoles();
 		if (null != allGroups) {
 			List<BatchClass> batchClassList = batchClassService.getAllBatchClassesByUserRoles(allGroups);
+			list = getBatchClassName(batchClassList);
 			// List<BatchClass> batchClassList = batchClassService.getAllBatchClasses();
-			if (null != batchClassList) {
-				for (BatchClass batchClass : batchClassList) {
-					String identifier = batchClass.getIdentifier();
-					String description = batchClass.getDescription();
-					if (description.length() > 30) {
-						description = description.substring(0, 30);
-					}
-					list.put(identifier + " - " + description, identifier);
+		}
+		return list;
+	}
+
+	private Map<String, String> getBatchClassName(List<BatchClass> batchClassList) {
+		Map<String, String> list = new LinkedHashMap<String, String>();
+		if (null != batchClassList) {
+			for (BatchClass batchClass : batchClassList) {
+				String identifier = batchClass.getIdentifier();
+				String description = batchClass.getDescription();
+				if (description.length() > 30) {
+					description = description.substring(0, 30);
 				}
+				list.put(identifier + " - " + description, identifier);
 			}
 		}
 		return list;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatchService#getBatchClassImageLimit()
+	 */
+	@Override
+	public Map<String, BatchClassCloudConfigDTO> getBatchClassImageLimit() {
+		Map<String, BatchClassCloudConfigDTO> map = new LinkedHashMap<String, BatchClassCloudConfigDTO>();
+		BatchClassService batchClassService = this.getSingleBeanOfType(BatchClassService.class);
+		BatchClassCloudConfigService batchClassCloudService = this.getSingleBeanOfType(BatchClassCloudConfigService.class);
+		Set<String> allGroups = getUserRoles();
+		Integer userType = getUserType();
+		if (null != allGroups) {
+			List<BatchClass> batchClassList = batchClassService.getAllBatchClassesByUserRoles(allGroups);
+			
+			if (null != batchClassList) {
+				for (BatchClass batchClass : batchClassList) {
+					String identifier = batchClass.getIdentifier();
+					BatchClassCloudConfigDTO batchClassConfigDTO = null;
+					BatchClassCloudConfig batchClassCloudConfig = batchClassCloudService
+																		.getBatchClassCloudConfigByBatchClassIdentifier(identifier);
+					if (null != batchClassCloudConfig && userType.intValue() == UserType.LIMITED.getUserType()) {
+						batchClassConfigDTO = new BatchClassCloudConfigDTO();
+						batchClassConfigDTO.setBatchInstanceCounter(batchClassCloudConfig.getCurrentCounter());
+						batchClassConfigDTO.setBatchInstanceImageLimit(batchClassCloudConfig.getPageCount());
+						batchClassConfigDTO.setBatchInstanceLimit(batchClassCloudConfig.getBatchInstanceLimit());
+					}
+					map.put(identifier, batchClassConfigDTO);
+				}
+			}
+		}
+		return map;
 	}
 
 	/**
@@ -209,7 +299,7 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 			SerializationUtils.serialize(batchClassFieldList, fileOutputStream);
 		} catch (FileNotFoundException e) {
 			// Unable to read serializable file
-			log.info("Error occurred while creating the serializable file." + e, e);
+			LOG.info("Error occurred while creating the serializable file." + e, e);
 			throw new GWTException(e.getMessage());
 		} finally {
 			try {
@@ -218,8 +308,9 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 				}
 
 			} catch (Exception e) {
-				if (serializedExportFile != null)
-					log.error("Problem closing stream for file :" + serializedExportFile.getName());
+				if (serializedExportFile != null) {
+					LOG.error("Problem closing stream for file :" + serializedExportFile.getName());
+				}
 			}
 		}
 
@@ -237,7 +328,7 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 					FileUtils.deleteDirectory(currentBatchUploadFolder);
 				}
 			} catch (IOException e) {
-				log.info("Error while cleaning up last upload batch folder. Folder name:" + folderPath);
+				LOG.info("Error while cleaning up last upload batch folder. Folder name:" + folderPath);
 			}
 		}
 	}
@@ -257,7 +348,7 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 					}
 				} catch (Exception e) {
 					filesNotDeleted.add(fileName);
-					log.info("Error while deleting " + fileName + "file from the Folder:" + folderPath);
+					LOG.info("Error while deleting " + fileName + "file from the Folder:" + folderPath);
 				}
 			}
 			if (currentFile.exists()) {
@@ -270,8 +361,135 @@ public class UploadBatchServiceImpl extends DCMARemoteServiceServlet implements 
 
 	@Override
 	public String getCurrentBatchFolderName() {
-		String folderName = getUserName() + (new GregorianCalendar().getTimeInMillis());
-		return folderName;
+		return getUserName() + (new GregorianCalendar().getTimeInMillis());
 	}
+	
+	/* (non-Javadoc)
+	 * @see com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatchService#getFileSizeLimit()
+	 */
+	public Long getFileSizeLimit() {
+		Long fileSizeLimit = null;
+		try {
+			fileSizeLimit =  Long.parseLong(ApplicationConfigProperties.
+										getApplicationConfigProperties().getProperty(UPLOAD_BATCH_LIMIT));
+		} catch (NumberFormatException e) {
+			fileSizeLimit = DEFAULT_FILE_SIZE_LIMIT;
+			LOG.error("Format of property file_size_limit is wrong.");
+		} catch (IOException e) {
+			fileSizeLimit = DEFAULT_FILE_SIZE_LIMIT;
+			LOG.error("Property file_size_limit is missing from property file.");
+		}
+		return fileSizeLimit;
+	}
+	
+	/**
+	 * The <code>updateBatchClassCounter</code> method is used for updating the 
+	 * batch class instance counter.
+	 *  
+	 * @param userType {@link Integer} Ephesoft Cloud user type
+	 * @param batchClassID {@link String} current selected batch class identifier
+	 */
+	private void updateBatchClassCounter(final Integer userType, final String batchClassID) {
+		
+		// Check for FREEMIUM user type
+		if (userType.intValue() == UserType.LIMITED.getUserType()) {
+			final BatchClassCloudConfigService batchClassCloudService = this.getSingleBeanOfType(BatchClassCloudConfigService.class);
+			final BatchClassCloudConfig batchClassCloudConfig = batchClassCloudService.
+			getBatchClassCloudConfigByBatchClassIdentifier(batchClassID);
+			if (null != batchClassCloudConfig) {
+				Integer batchInstanceCount = batchClassCloudConfig.getBatchInstanceLimit();
+				Integer currentCounter = batchClassCloudConfig.getCurrentCounter();
+				
+				// Check for batch class limit and update the counter
+				if (null != currentCounter && null != batchInstanceCount && ++currentCounter <= batchInstanceCount) {
+					batchClassCloudConfig.setCurrentCounter(currentCounter);
+					batchClassCloudService.updateBatchClassCloudConfig(batchClassCloudConfig);
+				}
+			}
+		}
+	}
+
+	/**
+	 * The <code>checkForBatchClassLimit</code> method is used for checking batch 
+	 * class instance limit for a given user.
+	 * 
+	 * @param userType {@link Integer} Ephesoft Cloud user type
+	 * @param batchClassID {@link String} current selected batch class identifier
+	 * @param currentBatchUploadFolder {@link String} temporary upload folder path
+	 * @param sourcePath {@link String} batch class source path
+	 * @return {@link String} error message
+	 */
+	private String checkForBatchClassLimit(final Integer userType,
+			final String batchClassID, final String currentBatchUploadFolder, final String sourcePath) {
+		String errorMessage = null;
+		
+		// Check for FREEMIUM user type
+		if (userType.intValue() == UserType.LIMITED.getUserType()) {
+			String finalPath = sourcePath + File.separator + currentBatchUploadFolder;
+			BatchClassCloudConfigService batchClassCloudService = this.getSingleBeanOfType(BatchClassCloudConfigService.class);
+			BatchClassCloudConfig batchClassCloudConfig = batchClassCloudService.
+																getBatchClassCloudConfigByBatchClassIdentifier(batchClassID);
+			if (null != batchClassCloudConfig) {
+				Integer pageCount = batchClassCloudConfig.getPageCount();
+				Integer batchInstanceLimit = batchClassCloudConfig.getBatchInstanceLimit();
+				Integer currentCounter = batchClassCloudConfig.getCurrentCounter();
+				
+				// Check for batch class instance limit
+				boolean isBatchLimit = (null != batchInstanceLimit && null != currentCounter && ++currentCounter <= batchInstanceLimit);
+				
+				// If batch instance limit is not reached
+				if (isBatchLimit) {
+					
+					// Check for batch instance page count limit
+					boolean isPageLimit = checkForPageLimit(finalPath, pageCount);
+					if (isPageLimit) {
+						errorMessage = UploadBatchConstants.IMAGE_ERROR;
+					}
+				} else {
+					errorMessage = UploadBatchConstants.INSTANCE_ERROR;
+					com.ephesoft.dcma.util.FileUtils
+						.deleteDirectoryAndContentsRecursive(new File(finalPath), true);
+					
+				}
+			}
+		}
+		return errorMessage;
+	}
+
+	/**
+	 * The <code>checkForPageLimit</code> method is used to check the page 
+	 * count limit for a batch class instance.
+	 * 
+	 * @param currentBatchUploadFolder {@link String} current folder name of upload batch
+	 * @param pageCount {@link Integer} current page count limit
+	 * @return true/false indicating page limit crossed or not
+	 */
+	private boolean checkForPageLimit(final String currentBatchUploadFolder,
+			final Integer pageCount) {
+		boolean isPageError = false;
+		if (null != pageCount && null != currentBatchUploadFolder) {
+			File uploadDir = new File(currentBatchUploadFolder);
+			int currentCount = 0;
+			
+			// Iterate through upload files stored in temporary upload folder
+			for (File file: uploadDir.listFiles()) {
+				String fileName = file.getName();
+				String filePath = file.getAbsolutePath();
+				
+				// Get page count for multi-page tiff or pdf file.
+				int pageCountTemp = fileName.endsWith(IUtilCommonConstants.EXTENSION_PDF) ? PDFUtil.getPDFPageCount(filePath) :
+											TIFFUtil.getTIFFPageCount(filePath);
+				currentCount += pageCountTemp;
+				
+				// If page count limit is crossed 
+				if (currentCount > pageCount) {
+					isPageError = true;
+					break;
+				}
+			}
+		}
+		return isPageError;
+	}
+
 
 }

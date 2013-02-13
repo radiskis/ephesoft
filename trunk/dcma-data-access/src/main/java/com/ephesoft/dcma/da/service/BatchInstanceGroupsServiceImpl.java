@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,49 @@ import org.springframework.stereotype.Service;
 
 import com.ephesoft.dcma.da.dao.BatchInstanceGroupsDao;
 
+/**
+ * This service is used to retrieve the data from the batch instance groups table from the database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchInstanceGroupsServiceImpl
+ */
 @Service
 public class BatchInstanceGroupsServiceImpl implements BatchInstanceGroupsService {
 
+	/**
+	 * batchInstanceGroupsDao {@link BatchInstanceGroupsDao}.
+	 */
 	@Autowired
 	private BatchInstanceGroupsDao batchInstanceGroupsDao;
 
+	/**
+	 * API for getting the batch instance identifiers having the user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getBatchInstanceIdentifierForUserRoles(Set<String> userRoles) {
 		return batchInstanceGroupsDao.getBatchInstanceIdentifierForUserRoles(userRoles);
 	}
 
+	/**
+	 * API for adding user role to batch instance.
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param userRole {@link String}
+	 */
 	@Override
 	public void addUserRolesToBatchInstanceIdentifier(String batchInstanceIdentifier, String userRole) {
 		batchInstanceGroupsDao.addUserRolesToBatchInstanceIdentifier(batchInstanceIdentifier, userRole);
+	}
+	
+	/**
+	 * API for getting the batch instance identifiers except provided user roles.
+	 * 
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
+	public Set<String> getBatchInstanceIdentifiersExceptUserRoles(Set<String> userRoles) {
+		return batchInstanceGroupsDao.getBatchInstanceIdentifiersExceptUserRoles(userRoles);
 	}
 }

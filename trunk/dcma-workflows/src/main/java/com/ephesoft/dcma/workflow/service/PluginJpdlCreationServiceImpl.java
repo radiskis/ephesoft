@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,14 +45,30 @@ import org.slf4j.LoggerFactory;
 
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.common.PluginJpdlCreationInfo;
+import com.ephesoft.dcma.workflow.constant.WorkFlowConstants;
 
+/**
+ * This is service class for plugin JPDL creation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.workflow.service.PluginJpdlCreationService
+ */
 public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginJpdlCreationServiceImpl.class);
 
+	/**
+	 * workflowPath String.
+	 */
 	private String workflowPath;
 
 	/**
+	 * To get Workflow Path.
+	 * 
 	 * @return the workflowPath
 	 */
 	public String getWorkflowPath() {
@@ -60,12 +76,22 @@ public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService 
 	}
 
 	/**
-	 * @param workflowPath the workflowPath to set
+	 * To set Workflow Path.
+	 * 
+	 * @param workflowPath String
 	 */
 	public void setWorkflowPath(String workflowPath) {
 		this.workflowPath = workflowPath;
 	}
 
+	/**
+	 * To get Sub Process String.
+	 * 
+	 * @param subProcessName String
+	 * @param expression String
+	 * @param method String
+	 * @return String
+	 */
 	public String getSubProcessString(String subProcessName, String expression, String method) {
 		LOGGER.info("Inserting sub process tag for: " + subProcessName + " with method: " + method + " & expression: " + expression);
 		String subProcessJPDLString = PLUGIN_JPDL_STRING.replace(SUB_PROCESS_NAME, subProcessName).replace(EXPRESSION, expression)
@@ -98,6 +124,13 @@ public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService 
 		return PLUGIN_JPDL_NON_SCRIPTING_ARG_STRING.replace(ARGUEMENT, arguement);
 	}
 
+	/**
+	 * To get JPDL Content in String Form.
+	 * 
+	 * @param JPDLProcessName String
+	 * @param subProcessNameList List<PluginJpdlCreationInfo>
+	 * @return String
+	 */
 	public String getJPDLContentInStringForm(String JPDLProcessName, List<PluginJpdlCreationInfo> subProcessNameList) {
 		StringBuffer jpdlStringBuffer = new StringBuffer();
 		LOGGER.info("Initializing JPDL with xml tag");
@@ -159,12 +192,20 @@ public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService 
 		return jpdlStringBuffer.toString();
 	}
 
+	/**
+	 * API to create JPDL for plugin given it's process name, list of sub process names and workflow path.
+	 * 
+	 * @param workflowPath {@link String}
+	 * @param jpdlProcessName {@link String}
+	 * @param subProcessNameList {@link List}< {@link PluginJpdlCreationInfo}>
+	 * @return {@link String} relative path of the created JPDL.
+	 */
 	@Override
 	public String writeJPDL(String workflowPath, String JPDLProcessName, List<PluginJpdlCreationInfo> subProcessNameList) {
 		LOGGER.info("Creating JPDL for " + JPDLProcessName);
 		LOGGER.info("at " + workflowPath);
-		String processDefinitionPath = "";
-		String jpdlPath = "";
+		String processDefinitionPath = WorkFlowConstants.EMPTY_STRING;
+		String jpdlPath = WorkFlowConstants.EMPTY_STRING;
 		FileWriter fstream = null;
 		BufferedWriter out = null;
 		try {
@@ -181,7 +222,7 @@ public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService 
 				}
 			}
 		} catch (IOException e) {
-			LOGGER.error("Error while creating JPDL " + e.getMessage());
+			LOGGER.error("Error while creating JPDL " + e.getMessage(), e);
 		} finally {
 			try {
 				if (out != null) {
@@ -191,7 +232,7 @@ public class PluginJpdlCreationServiceImpl implements PluginJpdlCreationService 
 					fstream.close();
 				}
 			} catch (IOException e) {
-				LOGGER.error("Error while creating JPDL " + e.getMessage());
+				LOGGER.error("Error while creating JPDL " + e.getMessage(), e);
 			}
 		}
 		LOGGER.info("JPDL relative path " + jpdlPath);

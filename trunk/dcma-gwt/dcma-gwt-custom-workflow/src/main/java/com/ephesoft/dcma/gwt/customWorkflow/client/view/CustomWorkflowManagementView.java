@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,13 +33,13 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view;
+package com.ephesoft.dcma.gwt.customworkflow.client.view;
 
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.CustomWorkflowManagementPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.DependencyManagementView;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.DependencyView;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.EditDependencyView;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.CustomWorkflowManagementPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyManagementView;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyView;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.EditDependencyView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,27 +49,27 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 public class CustomWorkflowManagementView extends View<CustomWorkflowManagementPresenter> {
 
 	@UiField
-	DockLayoutPanel customWorkflowLayoutPanel;
+	protected DockLayoutPanel customWorkflowLayoutPanel;
 
 	@UiField
-	CustomWorkflowEntryView customWorkflowEntryView;
+	protected CustomWorkflowEntryView customWorkflowEntryView;
 
 	@UiField
-	DependencyManagementView dependencyManagementView;
+	protected DependencyManagementView dependencyManagementView;
 
 	@UiField
-	DependencyView dependencyView;
+	protected DependencyView dependencyView;
 
 	@UiField
-	EditDependencyView editDependencyView;
+	protected EditDependencyView editDependencyView;
 
 	@UiField
-	LayoutPanel layoutPanel;
+	protected LayoutPanel layoutPanel;
 
 	/**
 	 * @return the customWorkflowEntryView
 	 */
-	public CustomWorkflowEntryView getCustomWorkflowEntryView() {
+	public final CustomWorkflowEntryView getCustomWorkflowEntryView() {
 		return customWorkflowEntryView;
 	}
 
@@ -79,18 +79,16 @@ public class CustomWorkflowManagementView extends View<CustomWorkflowManagementP
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public CustomWorkflowManagementView() {
-
+		super();
 		initWidget(BINDER.createAndBindUi(this));
-		// workflowBreadCrumbView.addStyleName("buttonsPanelLayout");
 		init();
 	}
 
-	private void init() {
+	private final void init() {
 		showEntryView();
 	}
 
-
-	public void showEntryView() {
+	public final void showEntryView() {
 		layoutPanel.clear();
 		getCustomWorkflowEntryView().setVisible(true);
 		layoutPanel.add(getCustomWorkflowEntryView());

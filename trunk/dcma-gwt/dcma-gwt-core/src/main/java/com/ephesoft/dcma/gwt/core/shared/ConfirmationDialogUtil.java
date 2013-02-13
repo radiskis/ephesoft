@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,9 +54,9 @@ public class ConfirmationDialogUtil {
 			confirmationDialog.setDefaultListener();
 		}
 		confirmationDialog.hide();
-		confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_confirmation_ok));
+		confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_CONFIRMATION_OK));
 		confirmationDialog.cancelButton.setText(LocaleDictionary.get().getConstantValue(
-				LocaleCommonConstants.title_confirmation_cancel));
+				LocaleCommonConstants.TITLE_CONFIRMATION_CANCEL));
 		confirmationDialog.setMessage(message);
 		confirmationDialog.setDialogTitle(title);
 		if (removeCancelButton) {
@@ -84,5 +84,9 @@ public class ConfirmationDialogUtil {
 
 	public static ConfirmationDialog showConfirmationDialogError(String message, boolean createNewConfirmationDialog) {
 		return showConfirmationDialog(message, "Error", true, createNewConfirmationDialog);
+	}
+	
+	public static ConfirmationDialog getConfirmationDialog() {
+		return confirmationDialog;
 	}
 }

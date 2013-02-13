@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,27 +38,34 @@ package com.ephesoft.dcma.core.model.common;
 import java.util.Date;
 
 /** Base interface for domain objects. 
+ * 
  *  @author Ephesoft 
- **/
+ *  @version 1.0
+ *  @see com.ephesoft.dcma.core.model.common.DomainEntity
+ */
 public interface DomainObject extends DomainEntity {
 
 	/**
+	 * To check whether deleted or not.
 	 * @return whether this object is marked as deleted
 	 */
 	boolean isDeleted();
 
 	/**
-	 * @param deleted <code>true</code> if this object should be marked as deleted
+	 * To set deleted.
+	 * @param deleted boolean
 	 */
 	void setDeleted(boolean deleted);
 
 	/**
-	 * @return the date of last modification or <code>null</code>, if this object has not been persisted yet
+	 * To get Last Modified date.
+	 * @return the date of last modification 
 	 */
 	Date getLastModified();
 
 	/**
-	 * @param lastModified the last modification
+	 * To set Last Modified date.
+	 * @param lastModified Date
 	 */
 	void setLastModified(Date lastModified);
 }

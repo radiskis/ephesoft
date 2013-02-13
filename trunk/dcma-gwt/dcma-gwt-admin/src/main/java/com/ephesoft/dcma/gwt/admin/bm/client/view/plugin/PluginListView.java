@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,20 +43,53 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show plugin list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class PluginListView extends View<PluginListPresenter> {
 
-	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 20,
-			true, PluginProperty.NAME);
-	public HeaderColumn description = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.DESCRIPTION), 30, true, PluginProperty.DESCRIPTION);
+	/**
+	 * name HeaderColumn.
+	 */
+	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME),
+			BatchClassManagementConstants.TWENTY, true, PluginProperty.NAME);
 
+	/**
+	 * description HeaderColumn.
+	 */
+	public HeaderColumn description = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.DESCRIPTION), BatchClassManagementConstants.THIRTY, true, PluginProperty.DESCRIPTION);
+
+	/**
+	 * information HeaderColumn.
+	 */
+	public HeaderColumn information = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.PLUGIN_INFORMATION), BatchClassManagementConstants.FORTY_FIVE, false,
+			PluginProperty.INFORMATION);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * To get Plugin List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getPluginListView() {
 		return listView;
 	}
 
+	/**
+	 * Constructor.
+	 */
 	public PluginListView() {
-		listView.addHeaderColumns(name, description);
+		super();
+		listView.addHeaderColumns(name, description, information);
 	}
 }

@@ -9,7 +9,7 @@
 
 		<g:west size="44">
 			<core:SlidingPanel ui:field="slidingPanel">
-				<g:DockLayoutPanel unit='PCT' ui:field="reviewValidateView">
+				<g:DockLayoutPanel unit='PCT' ui:field="rVView">
 					<g:west size="45">
 						<rv:DocumentTree ui:field='docTree' />
 					</g:west>

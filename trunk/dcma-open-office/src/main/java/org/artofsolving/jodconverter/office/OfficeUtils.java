@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -66,21 +66,39 @@ import com.sun.star.uno.UnoRuntime;
  * Utility class.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.sun.star.beans.PropertyValue
  */
-public class OfficeUtils {
+public final class OfficeUtils {
 
+	/**
+	 * SERVICE_DESKTOP String.
+	 */
 	public static final String SERVICE_DESKTOP = "com.sun.star.frame.Desktop";
 
 	private OfficeUtils() {
 		throw new AssertionError("utility class must not be instantiated");
 	}
 
+	/**
+	 * To cast.
+	 * 
+	 * @param <T>
+	 * @param type Class<T>
+	 * @param object Object
+	 * @return <T> T
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T cast(Class<T> type, Object object) {
 		return (T) UnoRuntime.queryInterface(type, object);
 	}
 
+	/**
+	 * Property method.
+	 * @param name String
+	 * @param value Object
+	 * @return PropertyValue
+	 */
 	public static PropertyValue property(String name, Object value) {
 		PropertyValue propertyValue = new PropertyValue();
 		propertyValue.Name = name;
@@ -88,65 +106,91 @@ public class OfficeUtils {
 		return propertyValue;
 	}
 
+	/**
+	 * To Uno Properties.
+	 * @param properties Map<String, ?>
+	 * @return PropertyValue[]
+	 */
 	public static PropertyValue[] toUnoProperties(Map<String, ?> properties) {
 		PropertyValue[] propertyValues = new PropertyValue[properties.size()];
-		int i = 0;
+		int index = 0;
 		for (Map.Entry<String, ?> entry : properties.entrySet()) {
 			Object value = entry.getValue();
-			if (value instanceof Map) {
+			if (value instanceof Map<?, ?>) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> subProperties = (Map<String, Object>) value;
 				value = toUnoProperties(subProperties);
 			}
-			propertyValues[i++] = property((String) entry.getKey(), value);
+			propertyValues[index++] = property((String) entry.getKey(), value);
 		}
 		return propertyValues;
 	}
 
+	/**
+	 * To convert to URL.
+	 * @param file File
+	 * @return String
+	 */
 	public static String toUrl(File file) {
 		String url = "file:///" + file.getPath();
 		url = url.replace('\\', '/');
 		if (url.endsWith("/")) {
-			return url.substring(0, url.length() - 1);
-		} else {
-			return url;
+			url = url.substring(0, url.length() - 1);
 		}
+		return url;
 	}
 
+	/**
+	 * To get Default Office Home.
+	 * @return File
+	 */
 	public static File getDefaultOfficeHome() {
+		File officeHomeFile = null;
 		if (System.getProperty("office.home") != null) {
-			return new File(System.getProperty("office.home"));
-		}
-		if (PlatformUtils.isWindows()) {
-			return new File(System.getenv("ProgramFiles"), "OpenOffice.org 3");
+			officeHomeFile = new File(System.getProperty("office.home"));
+		} else if (PlatformUtils.isWindows()) {
+			officeHomeFile = new File(System.getenv("ProgramFiles"), "OpenOffice.org 3");
 		} else if (PlatformUtils.isMac()) {
-			return new File("/Applications/OpenOffice.org.app/Contents");
+			officeHomeFile = new File("/Applications/OpenOffice.org.app/Contents");
 		} else {
 			// Linux or Solaris
-			return new File("/opt/openoffice.org3");
+			officeHomeFile = new File("/opt/openoffice.org3");
 		}
+		return officeHomeFile;
 	}
 
+	/**
+	 * To get Default Profile Directory.
+	 * @return File
+	 */
 	public static File getDefaultProfileDir() {
+		File officeProfileFile = null;
 		if (System.getProperty("office.profile") != null) {
-			return new File(System.getProperty("office.profile"));
-		}
-		if (PlatformUtils.isWindows()) {
-			return new File(System.getenv("APPDATA"), "OpenOffice.org/3");
+			officeProfileFile = new File(System.getProperty("office.profile"));
+		} else if (PlatformUtils.isWindows()) {
+			officeProfileFile = new File(System.getenv("APPDATA"), "OpenOffice.org/3");
 		} else if (PlatformUtils.isMac()) {
-			return new File(System.getProperty("user.home"), "Library/Application Support/OpenOffice.org/3");
+			officeProfileFile = new File(System.getProperty("user.home"), "Library/Application Support/OpenOffice.org/3");
 		} else {
 			// Linux or Solaris
-			return new File(System.getProperty("user.home"), ".openoffice.org/3");
+			officeProfileFile = new File(System.getProperty("user.home"), ".openoffice.org/3");
 		}
+		return officeProfileFile;
 	}
 
+	/**
+	 * To get Office Executable.
+	 * @param officeHome File
+	 * @return File
+	 */
 	public static File getOfficeExecutable(File officeHome) {
+		File file = null;
 		if (PlatformUtils.isMac()) {
-			return new File(officeHome, "MacOS/soffice.bin");
+			file = new File(officeHome, "MacOS/soffice.bin");
 		} else {
-			return new File(officeHome, "program/soffice.bin");
+			file = new File(officeHome, "program/soffice.bin");
 		}
+		return file;
 	}
 
 }

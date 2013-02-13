@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -75,6 +75,9 @@ import com.ephesoft.dcma.workflow.service.PickupService;
  */
 public class WorkflowServiceImpl implements WorkflowService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
 	/**
@@ -83,33 +86,75 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
+	
+	/**
+	 * Instance of {@link ExecutionService}.
+	 */
 	@Autowired
 	private ExecutionService executionService;
+	
+	/**
+	 * Instance of {@link MailService}.
+	 */
 	@Autowired
 	private MailService mailService;
+	
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
 	@Autowired
 	private BatchInstanceService batchInstanceService;
+	
+	/**
+	 * Instance of {@link PickupService}.
+	 */
 	@Autowired
 	private PickupService pickupService;
 
+	/**
+	 * fromMail String.
+	 */
 	private String fromMail;
+	
+	/**
+	 * toMail String.
+	 */
 	private String toMail;
+	
+	/**
+	 * subject String.
+	 */
 	private String subject;
+	
+	/**
+	 * mailTemplatePath String.
+	 */
 	private String mailTemplatePath;
 
+	/**
+	 * This method is used to start workflow for given batch instance.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 */
 	@Override
 	public void startWorkflow(final BatchInstanceID batchInstanceID) {
 		startWorkflow(batchInstanceID, null);
 	}
 
+	/**
+	 * This method is used to start workflow for given batch instance on a particular module.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param moduleName {@link String}
+	 */
 	@Override
 	public void startWorkflow(final BatchInstanceID batchInstanceID, String moduleName) {
 		LOGGER.info("Start Workflow for batch instance id:" + batchInstanceID + " for module name:" + moduleName);
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceID.getID());
 		Map<String, Object> vars = new HashMap<String, Object>();
-		vars.put(JBPMVariables.BATCH_INSTANCE_ID, batchInstanceID);
-		vars.put(JBPMVariables.RESTART_WORKFLOW, moduleName);
-		vars.put(JBPMVariables.IS_MODULE_REMOTE, WorkFlowConstants.NO_STRING);
+		vars.put(WorkFlowConstants.BATCH_INSTANCE_ID, batchInstanceID);
+		vars.put(WorkFlowConstants.RESTART_WORKFLOW, moduleName);
+		vars.put(WorkFlowConstants.IS_MODULE_REMOTE, WorkFlowConstants.NO_STRING);
 		if (moduleName != null) {
 			// batchInstance.setStatus(BatchInstanceStatus.RUNNING);
 			batchInstanceService.updateBatchInstanceStatusByIdentifier(batchInstance.getIdentifier(), BatchInstanceStatus.RUNNING);
@@ -119,21 +164,41 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	}
 
+	/**
+	 * This method is used to restart workflow for given batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 */
 	@Override
 	public void restartWorkflow(BatchInstance batchInstance) {
 		throw new UnsupportedOperationException("Operation not supported.");
 	}
 
+	/**
+	 * This method is used to start workflow for given batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 */
 	@Override
 	public void stopWorkflow(BatchInstance batchInstance) {
 		throw new UnsupportedOperationException("Operation not supported.");
 	}
 
+	/**
+	 * This method is used to suspend workflow for given batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 */
 	@Override
 	public void suspendWorkflow(BatchInstance batchInstance) {
 		throw new UnsupportedOperationException("Operation not supported.");
 	}
 
+	/**
+	 * This method generates a mail in case of error.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 */
 	@Override
 	public void mailOnError(BatchInstance batchInstances) {
 		MailMetaData metaData = new MailMetaData();
@@ -149,63 +214,102 @@ public class WorkflowServiceImpl implements WorkflowService {
 		mailService.sendTextMailWithClasspathTemplate(metaData, mailTemplatePath, model);
 	}
 
+	/**
+	 * This method is used to signal workflow for given batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 */
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void signalWorkflow(BatchInstance batchInstance) {
 		LOGGER.info("Signal Workflow for batch instance id:" + batchInstance.getIdentifier());
 		String processInstanceKey = batchInstance.getProcessInstanceKey();
 		ProcessInstance processInstance = executionService.findProcessInstanceById(processInstanceKey);
-		Execution execution = processInstance.findActiveExecutionIn(((ExecutionImpl) processInstance).getActivityName());
-		Execution moduleExecution = ((ExecutionImpl) execution).getSubProcessInstance();
-		if (moduleExecution != null) {
-			execution = moduleExecution;
-			Execution pluginExecution = ((ExecutionImpl) execution).getSubProcessInstance();
-			if (pluginExecution != null) {
-				execution = pluginExecution;
+		if (processInstance != null) {
+			Execution execution = processInstance.findActiveExecutionIn(((ExecutionImpl) processInstance).getActivityName());
+			Execution moduleExecution = ((ExecutionImpl) execution).getSubProcessInstance();
+			if (moduleExecution != null) {
+				execution = moduleExecution;
+				Execution pluginExecution = ((ExecutionImpl) execution).getSubProcessInstance();
+				if (pluginExecution != null) {
+					execution = pluginExecution;
+				}
 			}
-		}
-		if (execution != null) {
-			executionService.signalExecutionById(execution.getId());
+			if (execution != null) {
+				executionService.signalExecutionById(execution.getId());
+			}
+		} else {
+			startWorkflow(batchInstance.getBatchInstanceID());
 		}
 	}
 
+	/**
+	 * This method is used to get active module for a batch instance.
+	 * 
+	 * @param batchInstance {@link BatchInstance}
+	 * @return {@link String}
+	 */
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public String getActiveModule(BatchInstance batchInstance) {
 		LOGGER.info("Get active module for batch instance id:" + batchInstance.getIdentifier());
 		String returnValue = null;
 		String processInstanceKey = batchInstance.getProcessInstanceKey();
 		ProcessInstance processInstance = executionService.findProcessInstanceById(processInstanceKey);
+		Execution moduleExecution = null;
 		if (processInstance != null) {
 			Execution execution = processInstance.findActiveExecutionIn(((ExecutionImpl) processInstance).getActivityName());
-			if (execution != null) {
-				Execution moduleExecution = ((ExecutionImpl) execution).getSubProcessInstance();
-				if (moduleExecution != null) {
-					execution = moduleExecution;
-				}
-				returnValue = execution.getId();
+			if ((execution != null)) {
+				moduleExecution = ((ExecutionImpl) execution).getSubProcessInstance();
 			}
+			if (moduleExecution != null) {
+				execution = moduleExecution;
+			}
+			returnValue = execution.getId();
 		}
 		LOGGER.info("Active module for batch instance id:" + batchInstance.getIdentifier() + " is:" + returnValue);
 		return returnValue;
 
 	}
 
+	/**
+	 * To set From Mail.
+	 * @param fromMail String
+	 */
 	public void setFromMail(String fromMail) {
 		this.fromMail = fromMail;
 	}
 
+	/**
+	 * To set To Mail.
+	 * @param toMail String
+	 */
 	public void setToMail(String toMail) {
 		this.toMail = toMail;
 	}
 
+	/**
+	 * To set Subject.
+	 * @param subject String
+	 */
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
 
+	/**
+	 * To set Mail Template Path.
+	 * @param mailTemplatePath String
+	 */
 	public void setMailTemplatePath(String mailTemplatePath) {
 		this.mailTemplatePath = mailTemplatePath;
 	}
 
+	/**
+	 * This method is used to signal workflow for a batch with the specified batchId.
+	 * 
+	 * @param batchId {@link String}
+	 * 
+	 */
 	@Override
 	public void signalWorkflow(String batchId) {
 		LOGGER.info("Signal workflow for batch instance id:" + batchId);
@@ -248,6 +352,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 	}
 
+	/**
+	 * This API is used to update Batch Instance Status For batches in Review And Validation phase.
+	 * 
+	 * @param identifier {@link BatchInstanceID}
+	 * @param status {@link BatchInstanceStatus}
+	 */
 	@Override
 	public void updateBatchInstanceStatusForReviewAndValidation(BatchInstanceID identifier, BatchInstanceStatus status) {
 		pluginPropertiesService.clearCache(identifier.getID());

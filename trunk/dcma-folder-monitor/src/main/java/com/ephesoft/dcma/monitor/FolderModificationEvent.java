@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,18 +37,36 @@ package com.ephesoft.dcma.monitor;
 
 import org.springframework.context.ApplicationEvent;
 
-
+/**
+ * This class handles the modification that has to be done to any folder.
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.monitor.service.FolderMonitorService
+ */
 public class FolderModificationEvent extends ApplicationEvent {
 
+	/**
+	 * A long serial version id.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * An instance of {@link FolderDetail}.
+	 */
 	final private FolderDetail folderDetail;
-	
+	/**
+	 * Parameterized constructor.
+	 * @param source {@link Object}
+	 * @param folderDetail {@link FolderDetail}
+	 */
 	public FolderModificationEvent(Object source, FolderDetail folderDetail ) {
 		super(source);
 		this.folderDetail = folderDetail;
 	}
-	
+	/**
+	 * Getter for folderDetail.
+	 * @return {@link FolderDetail}
+	 */
 	public FolderDetail getFolderDetail() {
 		return folderDetail;
 	}

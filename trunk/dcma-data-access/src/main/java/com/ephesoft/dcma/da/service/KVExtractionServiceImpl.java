@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,7 +44,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.core.common.LocationType;
-import com.ephesoft.dcma.core.service.DataAccessService;
 import com.ephesoft.dcma.da.dao.KVExtractionDao;
 import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.KVExtraction;
@@ -57,18 +56,21 @@ import com.ephesoft.dcma.da.domain.KVExtraction;
  * @see com.ephesoft.dcma.da.service.KVExtractionService
  */
 @Service
-public class KVExtractionServiceImpl extends DataAccessService implements KVExtractionService {
+public class KVExtractionServiceImpl implements KVExtractionService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KVExtractionServiceImpl.class);
 
+	/**
+	 * kvExtractionDao {@link KVExtractionDao}.
+	 */
 	@Autowired
 	private KVExtractionDao kvExtractionDao;
 
 	/**
-	 * An api to fetch all KV Extraction by field type.
+	 * An API to fetch all KV Extraction by field type.
 	 * 
 	 * @param fieldType FieldType
 	 * @return List<KVExtraction>
@@ -86,7 +88,7 @@ public class KVExtractionServiceImpl extends DataAccessService implements KVExtr
 	}
 
 	/**
-	 * An api to insert the kvExtraction object.
+	 * An API to insert the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -101,7 +103,7 @@ public class KVExtractionServiceImpl extends DataAccessService implements KVExtr
 	}
 
 	/**
-	 * An api to update the kvExtraction object.
+	 * An API to update the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -116,7 +118,7 @@ public class KVExtractionServiceImpl extends DataAccessService implements KVExtr
 	}
 
 	/**
-	 * An api to remove the kvExtraction object.
+	 * An API to remove the kvExtraction object.
 	 * 
 	 * @param kvExtraction KVExtraction
 	 */
@@ -131,11 +133,11 @@ public class KVExtractionServiceImpl extends DataAccessService implements KVExtr
 	}
 
 	/**
-	 * An api to check whether KVExtraction field already exists for a field type.
-	 *
-	 * @param fieldType
-	 * @param kvExtractionField
-	 * @return
+	 * An API to check whether KVExtraction field already exists for a field type.
+	 * 
+	 * @param fieldType {@link FieldType}
+	 * @param kvExtractionField {@link KVExtraction}
+	 * @return List<{@link KVExtraction}>
 	 */
 	@Override
 	public List<KVExtraction> getDuplicateKVFields(FieldType fieldType, KVExtraction kvExtractionField) {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,6 +53,8 @@ import com.ephesoft.dcma.da.domain.PageType;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer
+ * @see com.ephesoft.dcma.core.common.PluginProperty
  */
 public interface PluginPropertiesService {
 
@@ -62,7 +64,7 @@ public interface PluginPropertiesService {
 	 * @param batchIdentifier {@link String}
 	 * @return {@link BatchPluginPropertyContainer}
 	 */
-	public BatchPluginPropertyContainer getPluginProperties(String batchIdentifier);
+	BatchPluginPropertyContainer getPluginProperties(String batchIdentifier);
 
 	/**
 	 * This method returns the plug-in properties of a batch for a particular plugin.
@@ -71,7 +73,7 @@ public interface PluginPropertiesService {
 	 * @param pluginName {@link String}
 	 * @return {@link BatchPlugin}
 	 */
-	public BatchPlugin getPluginProperties(String batchIdentifier, String pluginName);
+	BatchPlugin getPluginProperties(String batchIdentifier, String pluginName);
 
 	/**
 	 * This method returns the plug-in property configuration of a batch for a particular plug-in property.
@@ -81,7 +83,7 @@ public interface PluginPropertiesService {
 	 * @param pluginProperty {@link PluginProperty}
 	 * @return {@link BatchPluginConfiguration}
 	 */
-	public BatchPluginConfiguration[] getPluginProperties(String batchIdentifier, String pluginName, PluginProperty pluginProperty);
+	BatchPluginConfiguration[] getPluginProperties(String batchIdentifier, String pluginName, PluginProperty pluginProperty);
 
 	/**
 	 * This method returns the dynamic plug-in properties of a batch for a particular plug-in.
@@ -91,7 +93,7 @@ public interface PluginPropertiesService {
 	 * @param pluginProperty {@link PluginProperty}
 	 * @return {@link BatchDynamicPluginConfiguration}
 	 */
-	public BatchDynamicPluginConfiguration[] getDynamicPluginProperties(String batchIdentifier, String pluginName,
+	BatchDynamicPluginConfiguration[] getDynamicPluginProperties(String batchIdentifier, String pluginName,
 			PluginProperty pluginProperty);
 
 	/**
@@ -102,14 +104,14 @@ public interface PluginPropertiesService {
 	 * @param pluginProperty {@link PluginProperty}
 	 * @return {@link String}
 	 */
-	public String getPropertyValue(String batchIdentifier, String pluginName, PluginProperty pluginProperty);
+	String getPropertyValue(String batchIdentifier, String pluginName, PluginProperty pluginProperty);
 
 	/**
 	 * This method clears the cache for a particular batch.
 	 * 
 	 * @param batchIdentifier {@link String}
 	 */
-	public void clearCache(String batchIdentifier);
+	void clearCache(String batchIdentifier);
 
 	/**
 	 * This method returns the document types for a particular batch.
@@ -117,7 +119,7 @@ public interface PluginPropertiesService {
 	 * @param batchIdentifier {@link String}
 	 * @return {@link DocumentType}
 	 */
-	public List<DocumentType> getDocumentTypes(String batchIdentifier);
+	List<DocumentType> getDocumentTypes(String batchIdentifier);
 
 	/**
 	 * This method returns the document types by name for a particular batch.
@@ -126,7 +128,7 @@ public interface PluginPropertiesService {
 	 * @param docTypeName {@link String}
 	 * @return {@link DocumentType}
 	 */
-	public List<DocumentType> getDocumentTypeByName(String batchIdentifier, String docTypeName);
+	List<DocumentType> getDocumentTypeByName(String batchIdentifier, String docTypeName);
 
 	/**
 	 * This method returns the page types for a particular batch.
@@ -134,7 +136,7 @@ public interface PluginPropertiesService {
 	 * @param batchIdentifier {@link String}
 	 * @return {@link PageType}
 	 */
-	public List<PageType> getPageTypes(String batchIdentifier);
+	List<PageType> getPageTypes(String batchIdentifier);
 
 	/**
 	 * This method returns the document types by page type name for a particular batch.
@@ -143,7 +145,7 @@ public interface PluginPropertiesService {
 	 * @param pageTypeName {@link String}
 	 * @return {@link DocumentType}
 	 */
-	public List<DocumentType> getDocTypeByPageTypeName(String batchIdentifier, String pageTypeName);
+	List<DocumentType> getDocTypeByPageTypeName(String batchIdentifier, String pageTypeName);
 
 	/**
 	 * This method returns the field types of a batch for a document.
@@ -152,7 +154,7 @@ public interface PluginPropertiesService {
 	 * @param docTypeName {@link String}
 	 * @return {@link FieldType}
 	 */
-	public List<FieldType> getFieldTypes(String batchIdentifier, String docTypeName);
+	List<FieldType> getFieldTypes(String batchIdentifier, String docTypeName);
 
 	/**
 	 * This method returns the field types with KVExtraction of a batch for a document.
@@ -161,7 +163,7 @@ public interface PluginPropertiesService {
 	 * @param docTypeName {@link String}
 	 * @return {@link FieldType}
 	 */
-	public List<FieldType> getFieldTypeAndKVExtractions(String batchIdentifier, String docTypeName);
+	List<FieldType> getFieldTypeAndKVExtractions(String batchIdentifier, String docTypeName);
 
 	/**
 	 * This method returns the function keys of a batch for a document.
@@ -170,6 +172,6 @@ public interface PluginPropertiesService {
 	 * @param docTypeName {@link String}
 	 * @return {@link FunctionKey}
 	 */
-	public List<FunctionKey> getFunctionKeys(String batchIdentifier, String docTypeName);
+	List<FunctionKey> getFunctionKeys(String batchIdentifier, String docTypeName);
 
 }

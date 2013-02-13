@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -70,7 +70,7 @@ public class ReviewValidateView extends RVBasePanel {
 	@UiField
 	protected DockLayoutPanel tableView;
 	@UiField
-	protected DockLayoutPanel reviewValidateView;
+	protected DockLayoutPanel rVView;
 	@UiField
 	protected SlidingPanel slidingPanel;
 	@UiField
@@ -91,8 +91,8 @@ public class ReviewValidateView extends RVBasePanel {
 		topElem.getStyle().setZIndex(2);
 		topElem.getStyle().setOverflow(Overflow.VISIBLE);
 		reviewValidateViewPanel.addStyleName("left10");
-		slidingPanel.setWidget(reviewValidateView);
-		rvView.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.msg_back));
+		slidingPanel.setWidget(rVView);
+		rvView.setText(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.MSG_BACK));
 		rvView.addStyleName("margin");
 	}
 
@@ -117,7 +117,7 @@ public class ReviewValidateView extends RVBasePanel {
 		docTree.addStyleName("doc_tree");
 
 		slidingPanel.setEventBus(eventBus);
-		
+
 		this.presenter.setBatchListScreenTab();
 	}
 
@@ -127,13 +127,13 @@ public class ReviewValidateView extends RVBasePanel {
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// no need to do anything on injection of events on this view
 	}
 
 	@UiHandler("rvView")
-	void onReviewValidateViewClicked(ClickEvent clickEvent) {
+	protected void onReviewValidateViewClicked(ClickEvent clickEvent) {
 		presenter.setTableView(Boolean.FALSE);
-		slidingPanel.setWidget(reviewValidateView);
+		slidingPanel.setWidget(rVView);
 	}
 
 	public SlidingPanel getSlidingPanel() {
@@ -143,16 +143,17 @@ public class ReviewValidateView extends RVBasePanel {
 	public DockLayoutPanel getTableView() {
 		return tableView;
 	}
-  public TopPanel getTopPanel()
-  {
-	  return topPanel;
-  }
+
+	public TopPanel getTopPanel() {
+		return topPanel;
+	}
+
 	public DockLayoutPanel getReviewValidateView() {
-		return reviewValidateView;
+		return rVView;
 	}
 
 	public void setReviewValidateView() {
-		slidingPanel.setWidget(reviewValidateView);
+		slidingPanel.setWidget(rVView);
 	}
 
 	public ReviewValidatePanel getRvPanel() {
@@ -166,8 +167,8 @@ public class ReviewValidateView extends RVBasePanel {
 	public TableExtractionView getTableExtractionView() {
 		return tableExtractionView;
 	}
+
 	public ImageOverlayPanel getImgOverlayPanel() {
 		return imgOverlayPanel;
 	}
-
 }

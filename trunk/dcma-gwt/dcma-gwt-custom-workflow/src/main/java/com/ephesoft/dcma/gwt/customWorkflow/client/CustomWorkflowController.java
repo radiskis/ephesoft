@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,20 +33,20 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client;
+package com.ephesoft.dcma.gwt.customworkflow.client;
 
 import java.util.List;
 import java.util.Map;
 
-import com.ephesoft.dcma.gwt.core.client.Controller;
+import com.ephesoft.dcma.gwt.core.client.AbstractController;
 import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.CustomWorkflowManagementPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.CustomWorkflowManagementView;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.CustomWorkflowManagementPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.CustomWorkflowManagementView;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 
-public class CustomWorkflowController extends Controller {
+public class CustomWorkflowController extends AbstractController {
 
 	private CustomWorkflowManagementPresenter customWorkflowManagementPresenter;
 	private CustomWorkflowManagementView customWorkflowManagementView;
@@ -54,9 +54,9 @@ public class CustomWorkflowController extends Controller {
 	private String selectedPlugin;
 	
 	private List<PluginDetailsDTO> allPlugins;
-	
-	Map<Integer, String> pluginIndexToNameMap;
-	
+
+	private Map<Integer, String> pluginIndexToNameMap;
+
 	private List<String> dependenciesType;
 
 	private Map<String, String> allPluginsNameToDescriptionMap;
@@ -76,12 +76,16 @@ public class CustomWorkflowController extends Controller {
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void refresh() {
-
+		/**
+		 * Handle refresh action of a view
+		 */
 	}
 
 	@Override

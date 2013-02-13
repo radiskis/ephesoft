@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,10 +51,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
-import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
+import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.imagemagick.ImageMagicProperties;
 import com.ephesoft.dcma.imagemagick.MultiPageExecutor;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
@@ -64,8 +65,31 @@ import com.ephesoft.dcma.util.OSUtil;
  * This class is used to create the pdf file using HOCR to PDF.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
+ * 
  */
 public class HOCRtoPDFCreator {
+
+	/**
+	 * Constant to store size of string array.
+	 */
+	private static final int STRING_ARRAY_SIZE_12 = 12;
+
+	/**
+	 * Constant for file save error message.
+	 */
+	private static final String FILE_SAVE_ERROR_MSG = "Problem in saving file fileNames.txt at location ";
+
+	/**
+	 * Constant for file creation error message.
+	 */
+	private static final String FILE_CREATION_ERROR_MSG = "Problem in creating file fileNames.txt at location ";
+
+	/**
+	 * Constant for pdf file generation error message.
+	 */
+	private static final String PDF_GENERATION_ERROR_MSG = "Exception while generating PDF";
 
 	/**
 	 * List of commands for multipage pdf generation.
@@ -82,19 +106,12 @@ public class HOCRtoPDFCreator {
 	 */
 	private transient String jarName;
 
-	public static final String JAVA_LIBRARY_PATH = "java.library.path";
-	public static final String JAVA_TEMP_DIR_PATH = "java.io.tmpdir";
-	public static final String JAVA_OPTION_PREFIX = "-D";
-	private static final String FALSE = "false";
-	private static final String SEMI_COLON = ";";
-	private static final String QUOTES = "\"";
-	public static final String FILE_NAME = "fileNames.txt";
-
+	
 	/**
-	 * Reference for batchSchemaService.
+	 * Instance of {@link BatchInstanceService}.
 	 */
 	@Autowired
-	private BatchSchemaService batchSchemaService;
+	private BatchInstanceService batchInstanceService;
 
 	/**
 	 * Reference for pluginPropertiesService.
@@ -107,13 +124,6 @@ public class HOCRtoPDFCreator {
 	 * Variable for logging.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(HOCRtoPDFCreator.class);
-
-	/**
-	 * @param batchSchemaService the batchSchemaService to set
-	 */
-	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
-		this.batchSchemaService = batchSchemaService;
-	}
 
 	/**
 	 * @param pdfCmds the pdfCmds to set
@@ -139,7 +149,7 @@ public class HOCRtoPDFCreator {
 	/**
 	 * API for getting PDF Command for windows/Linux.
 	 * 
-	 * @return the pdfCmds
+	 * @return {@link String}
 	 */
 	public String getPdfCmds() {
 		String command = null;
@@ -154,21 +164,21 @@ public class HOCRtoPDFCreator {
 	/**
 	 * API for creating pdf for HOCR file.
 	 * 
-	 * @param batchXML
-	 * @param batchInstanceID
-	 * @param localFolder
-	 * @param pages
-	 * @param batchInstanceThread
-	 * @param multiPageExecutors
-	 * @param documentIdInt
-	 * @return
+	 * @param batchXML {@link Batch}
+	 * @param batchInstanceID {@link String}
+	 * @param localFolder {@link String}
+	 * @param pages {@link String []}
+	 * @param batchInstanceThread {@link BatchInstanceThread}
+	 * @param multiPageExecutors {@link List<MultiPageexecutor>}
+	 * @param documentIdInt {@link String}
+	 * @return boolean
 	 * @throws DCMAApplicationException
 	 */
 	public boolean createPDFFromHOCR(Batch batchXML, String batchInstanceID, String localFolder, String[] pages,
 			BatchInstanceThread batchInstanceThread, List<MultiPageExecutor> multiPageExecutors, String documentIdInt)
 			throws DCMAApplicationException {
-		String checkColouredImage = FALSE;
-		String checkSearchableImage = FALSE;
+		String checkColouredImage = ImageMagicKConstants.FALSE;
+		String checkSearchableImage = ImageMagicKConstants.FALSE;
 		String checkColouredPDF = pluginPropertiesService.getPropertyValue(batchInstanceID,
 				ImageMagicKConstants.CREATEMULTIPAGE_FILES_PLUGIN, ImageMagicProperties.CHECK_COLOURED_PDF);
 		String checkSearchablePDF = pluginPropertiesService.getPropertyValue(batchInstanceID,
@@ -182,8 +192,8 @@ public class HOCRtoPDFCreator {
 		boolean returnValue = false;
 		if (pages != null && pages.length > 0) {
 			try {
-				String[] cmds = new String[12];
-				String[] allPdfCmds = getPdfCmds().split(SEMI_COLON);
+				String[] cmds = new String[STRING_ARRAY_SIZE_12];
+				String[] allPdfCmds = getPdfCmds().split(ImageMagicKConstants.SEMI_COLON);
 				int pdfCount = 0;
 				if (allPdfCmds != null && allPdfCmds.length > 0) {
 					for (String eachPdfCmd : allPdfCmds) {
@@ -195,21 +205,22 @@ public class HOCRtoPDFCreator {
 						}
 					}
 				}
-				String tempDirPath = System.getProperty(JAVA_TEMP_DIR_PATH);
+				String tempDirPath = System.getProperty(ImageMagicKConstants.JAVA_TEMP_DIR_PATH);
 				if (tempDirPath != null && !tempDirPath.isEmpty()) {
-					cmds[pdfCount] = JAVA_OPTION_PREFIX + JAVA_TEMP_DIR_PATH + "=" + tempDirPath;
+					cmds[pdfCount] = ImageMagicKConstants.JAVA_OPTION_PREFIX + ImageMagicKConstants.JAVA_TEMP_DIR_PATH + "=" + tempDirPath;
 				}
 				pdfCount++;
 				cmds[pdfCount] = allPdfCmds[pdfCount - 1];
 				pdfCount++;
-				cmds[pdfCount] = System.getProperty(JAVA_LIBRARY_PATH) + File.separator + jarName;
+				cmds[pdfCount] = System.getProperty(ImageMagicKConstants.JAVA_LIBRARY_PATH) + File.separator + jarName;
 				int count = pdfCount + 1;
-				String batchInstanceFolder = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+				String batchInstanceFolder = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID) + File.separator
+						+ batchInstanceID;
 				writePageNamesToFile(batchXML, pages, batchInstanceFolder, documentIdInt);
 				if (OSUtil.isWindows()) {
-					cmds[count] = QUOTES + batchInstanceFolder + QUOTES;
+					cmds[count] = ImageMagicKConstants.QUOTES + batchInstanceFolder + ImageMagicKConstants.QUOTES;
 					count++;
-					cmds[count] = QUOTES + pages[pages.length - 1] + QUOTES;
+					cmds[count] = ImageMagicKConstants.QUOTES + pages[pages.length - 1] + ImageMagicKConstants.QUOTES;
 				} else {
 					cmds[count] = batchInstanceFolder;
 					count++;
@@ -230,8 +241,8 @@ public class HOCRtoPDFCreator {
 				multiPageExecutors.add(new MultiPageExecutor(cmds, null, batchInstanceThread, pages));
 				returnValue = true;
 			} catch (Exception e) {
-				LOGGER.error("Exception while generating PDF", e);
-				throw new DCMAApplicationException("Exception while generating PDF" + e.getMessage(), e);
+				LOGGER.error(PDF_GENERATION_ERROR_MSG, e);
+				throw new DCMAApplicationException(PDF_GENERATION_ERROR_MSG + e.getMessage(), e);
 			}
 		}
 		return returnValue;
@@ -240,10 +251,10 @@ public class HOCRtoPDFCreator {
 	/**
 	 * API for creating file and writing information into it.
 	 * 
-	 * @param batchXML
-	 * @param pages
-	 * @param batchInstanceFolder
-	 * @param documentIdInt
+	 * @param batchXML {@link Batch}
+	 * @param pages  {@link String []}
+	 * @param batchInstanceFolder {@link String}
+	 * @param documentIdInt {@link String}
 	 * @throws DCMAApplicationException
 	 */
 	public void writePageNamesToFile(Batch batchXML, String[] pages, String batchInstanceFolder, String documentIdInt)
@@ -251,7 +262,7 @@ public class HOCRtoPDFCreator {
 		FileOutputStream foOutputStream = null;
 		DataOutputStream dataOutputStream = null;
 		try {
-			foOutputStream = new FileOutputStream(new File(batchInstanceFolder + File.separator + documentIdInt + FILE_NAME));
+			foOutputStream = new FileOutputStream(new File(batchInstanceFolder + File.separator + documentIdInt + ImageMagicKConstants.FILE_NAME));
 			if (foOutputStream != null) {
 				dataOutputStream = new DataOutputStream(foOutputStream);
 				if (dataOutputStream != null && pages != null && pages.length > 0) {
@@ -272,12 +283,11 @@ public class HOCRtoPDFCreator {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			LOGGER.error("Problem in creating file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
-			throw new DCMAApplicationException("Problem in creating file " + FILE_NAME + " at location :" + batchInstanceFolder
-					+ e.getMessage(), e);
+			LOGGER.error(FILE_CREATION_ERROR_MSG + batchInstanceFolder, e);
+			throw new DCMAApplicationException(FILE_CREATION_ERROR_MSG + batchInstanceFolder + e.getMessage(), e);
 		} catch (IOException e) {
-			LOGGER.error("Problem in saving file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
-			throw new DCMAApplicationException("Problem in saving file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
+			LOGGER.error(FILE_SAVE_ERROR_MSG + batchInstanceFolder, e);
+			throw new DCMAApplicationException(FILE_SAVE_ERROR_MSG + batchInstanceFolder, e);
 		} finally {
 			try {
 				if (dataOutputStream != null) {
@@ -288,7 +298,7 @@ public class HOCRtoPDFCreator {
 				}
 			} catch (IOException e) {
 				LOGGER.error(
-						"Problem in closing the streams for :" + batchInstanceFolder + File.separator + documentIdInt + FILE_NAME, e);
+						"Problem in closing the streams for :" + batchInstanceFolder + File.separator + documentIdInt + ImageMagicKConstants.FILE_NAME, e);
 			}
 		}
 	}
@@ -296,9 +306,9 @@ public class HOCRtoPDFCreator {
 	/**
 	 * API for getting HOCR file name for specified image.
 	 * 
-	 * @param batchXML
-	 * @param imageName
-	 * @return
+	 * @param batchXML {@link Batch}
+	 * @param imageName {@link String}
+	 * @return {@link String}
 	 */
 	private String getHOCRFileNameForImage(Batch batchXML, String imageName) {
 		String returnValue = null;
@@ -317,7 +327,7 @@ public class HOCRtoPDFCreator {
 	}
 
 	/**
-	 * This method generates the PDF file on the basis of color image, searchable image. This methods reads the images from input
+	 * This method generates the PDF file on the basis of color image, search able image. This methods reads the images from input
 	 * folder and generates the pdf at the output folder location.
 	 * 
 	 * @param checkColorImage {@link String}
@@ -326,7 +336,7 @@ public class HOCRtoPDFCreator {
 	 * @param imageFiles String[]
 	 * @param batchInstanceThread {@link BatchInstanceThread}
 	 * @param documentId {@link String}
-	 * @return returnValue
+	 * @return boolean
 	 * @throws DCMAApplicationException
 	 */
 	public boolean createPDFFromHOCR(String checkColorImage, String checkSearchableImage, String inputFolderLocation,
@@ -335,8 +345,8 @@ public class HOCRtoPDFCreator {
 		boolean returnValue = false;
 		if (imageFiles != null && imageFiles.length > 0) {
 			try {
-				String[] cmds = new String[12];
-				String[] allPdfCmds = getPdfCmds().split(SEMI_COLON);
+				String[] cmds = new String[STRING_ARRAY_SIZE_12];
+				String[] allPdfCmds = getPdfCmds().split(ImageMagicKConstants.SEMI_COLON);
 				int pdfCount = 0;
 				if (allPdfCmds != null && allPdfCmds.length > 0) {
 					for (String eachPdfCmd : allPdfCmds) {
@@ -348,20 +358,20 @@ public class HOCRtoPDFCreator {
 						}
 					}
 				}
-				String tempDirPath = System.getProperty(JAVA_TEMP_DIR_PATH);
+				String tempDirPath = System.getProperty(ImageMagicKConstants.JAVA_TEMP_DIR_PATH);
 				if (tempDirPath != null && !tempDirPath.isEmpty()) {
-					cmds[pdfCount] = JAVA_OPTION_PREFIX + JAVA_TEMP_DIR_PATH + "=" + tempDirPath;
+					cmds[pdfCount] = ImageMagicKConstants.JAVA_OPTION_PREFIX + ImageMagicKConstants.JAVA_TEMP_DIR_PATH + "=" + tempDirPath;
 				}
 				pdfCount++;
 				cmds[pdfCount] = allPdfCmds[pdfCount - 1];
 				pdfCount++;
-				cmds[pdfCount] = System.getProperty(JAVA_LIBRARY_PATH) + File.separator + jarName;
+				cmds[pdfCount] = System.getProperty(ImageMagicKConstants.JAVA_LIBRARY_PATH) + File.separator + jarName;
 				int count = pdfCount + 1;
 				writePageNamesToFile(imageFiles, inputFolderLocation, documentId);
 				if (OSUtil.isWindows()) {
-					cmds[count] = QUOTES + inputFolderLocation + QUOTES;
+					cmds[count] = ImageMagicKConstants.QUOTES + inputFolderLocation + ImageMagicKConstants.QUOTES;
 					count++;
-					cmds[count] = QUOTES + imageFiles[imageFiles.length - 1] + QUOTES;
+					cmds[count] = ImageMagicKConstants.QUOTES + imageFiles[imageFiles.length - 1] + ImageMagicKConstants.QUOTES;
 				} else {
 					cmds[count] = inputFolderLocation;
 					count++;
@@ -382,8 +392,8 @@ public class HOCRtoPDFCreator {
 				multiPageExecutors.add(new MultiPageExecutor(cmds, null, batchInstanceThread, imageFiles));
 				returnValue = true;
 			} catch (Exception e) {
-				LOGGER.error("Exception while generating PDF", e);
-				throw new DCMAApplicationException("Exception while generating PDF" + e.getMessage(), e);
+				LOGGER.error(PDF_GENERATION_ERROR_MSG, e);
+				throw new DCMAApplicationException(PDF_GENERATION_ERROR_MSG + e.getMessage(), e);
 			}
 		}
 		return returnValue;
@@ -394,7 +404,7 @@ public class HOCRtoPDFCreator {
 		FileOutputStream foOutputStream = null;
 		DataOutputStream dataOutputStream = null;
 		try {
-			foOutputStream = new FileOutputStream(new File(batchInstanceFolder + File.separator + documentIdInt + FILE_NAME));
+			foOutputStream = new FileOutputStream(new File(batchInstanceFolder + File.separator + documentIdInt + ImageMagicKConstants.FILE_NAME));
 			if (foOutputStream != null) {
 				dataOutputStream = new DataOutputStream(foOutputStream);
 				if (dataOutputStream != null && pages != null && pages.length > 0) {
@@ -415,12 +425,11 @@ public class HOCRtoPDFCreator {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			LOGGER.error("Problem in creating file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
-			throw new DCMAApplicationException("Problem in creating file " + FILE_NAME + " at location :" + batchInstanceFolder
-					+ e.getMessage(), e);
+			LOGGER.error(FILE_CREATION_ERROR_MSG + batchInstanceFolder, e);
+			throw new DCMAApplicationException(FILE_CREATION_ERROR_MSG + batchInstanceFolder + e.getMessage(), e);
 		} catch (IOException e) {
-			LOGGER.error("Problem in saving file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
-			throw new DCMAApplicationException("Problem in saving file " + FILE_NAME + " at location :" + batchInstanceFolder, e);
+			LOGGER.error(FILE_SAVE_ERROR_MSG + batchInstanceFolder, e);
+			throw new DCMAApplicationException(FILE_SAVE_ERROR_MSG + batchInstanceFolder, e);
 		} finally {
 			try {
 				if (dataOutputStream != null) {
@@ -430,14 +439,13 @@ public class HOCRtoPDFCreator {
 					foOutputStream.close();
 				}
 			} catch (IOException e) {
-				LOGGER.info(
-						"Problem in closing the streams for :" + batchInstanceFolder + File.separator + documentIdInt + FILE_NAME, e);
+				LOGGER.info("Problem in closing the streams for :" + batchInstanceFolder + File.separator + documentIdInt + ImageMagicKConstants.FILE_NAME,
+						e);
 			}
 		}
 	}
 
 	private String getHOCRFileNameForImage(String imageFile) {
-		String returnValue = imageFile.substring(0, imageFile.lastIndexOf(".")) + ".html";
-		return returnValue;
+		return imageFile.substring(0, imageFile.lastIndexOf('.')) + FileType.HTML.getExtensionWithDot();
 	}
 }

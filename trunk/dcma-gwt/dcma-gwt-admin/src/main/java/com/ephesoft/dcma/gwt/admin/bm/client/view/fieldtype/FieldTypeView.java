@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -69,81 +69,173 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit fieldtype.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
+	/**
+	 * TOP_PADD String.
+	 */
+	private static final String TOP_PADD = "topPadd";
+
+	/**
+	 * HEIGHT String.
+	 */
+	private static final String HEIGHT = "20px";
+
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, FieldTypeView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * kvFieldTypeListViewv KVFieldTypeListView.
+	 */
 	private final KVFieldTypeListView kvFieldTypeListView;
 
+	/**
+	 * regexListView RegexListView.
+	 */
 	private final RegexListView regexListView;
 
+	/**
+	 * kvFieldTypeListPresenter KVTypeListPresenter.
+	 */
 	private KVTypeListPresenter kvFieldTypeListPresenter;
 
+	/**
+	 * regexListPresenter RegexListPresenter.
+	 */
 	private RegexListPresenter regexListPresenter;
 
+	/**
+	 * kvFieldTypeListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel kvFieldTypeListPanel;
 
+	/**
+	 * regexListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel regexListPanel;
 
+	/**
+	 * fieldTypeDetailView FieldTypeDetailView.
+	 */
 	@UiField
 	protected FieldTypeDetailView fieldTypeDetailView;
 
+	/**
+	 * editFieldTypeView EditFieldTypeView.
+	 */
 	@UiField
 	protected EditFieldTypeView editFieldTypeView;
 
-	@UiField
-	protected Button editFieldPropertiesButton;
-
+	/**
+	 * fieldTypeVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel fieldTypeVerticalPanel;
 
+	/**
+	 * fieldTypeConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel fieldTypeConfigVerticalPanel;
 
+	/**
+	 * fieldConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel fieldConfigurationCaptionPanel;
 
+	/**
+	 * kvExtractionCompletePanel DockLayoutPanel.
+	 */
 	@UiField
-	DockLayoutPanel kvExtractionCompletePanel;
+	protected DockLayoutPanel kvExtractionCompletePanel;
 
+	/**
+	 * addKVButton Button.
+	 */
 	@UiField
 	protected Button addKVButton;
 
+	/**
+	 * testKVButton Button.
+	 */
 	@UiField
 	protected Button testKVButton;
 
+	/**
+	 * editKVButton Button.
+	 */
 	@UiField
 	protected Button editKVButton;
 
+	/**
+	 * deleteKVButton Button.
+	 */
 	@UiField
 	protected Button deleteKVButton;
 
+	/**
+	 * addRegexBtn Button.
+	 */
 	@UiField
 	protected Button addRegexBtn;
 
+	/**
+	 * editRegexBtn Button.
+	 */
 	@UiField
 	protected Button editRegexBtn;
 
+	/**
+	 * deleteRegexBtn Button.
+	 */
 	@UiField
 	protected Button deleteRegexBtn;
 
+	/**
+	 * kvButtonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel kvButtonPanel;
 
+	/**
+	 * regexButtonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel regexButtonPanel;
 
+	/**
+	 * addAdvancedKVAddButton Button.
+	 */
 	@UiField
 	protected Button addAdvancedKVAddButton;
 
+	/**
+	 * editAdvancedKVButton Button.
+	 */
 	@UiField
 	protected Button editAdvancedKVButton;
 
+	/**
+	 * Constructor.
+	 */
 	public FieldTypeView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -161,35 +253,51 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		editRegexBtn.setText(AdminConstants.EDIT_BUTTON);
 		addAdvancedKVAddButton.setText(AdminConstants.ADD_ADVANCED_KV_EXTRACTION_BUTTON);
 		editAdvancedKVButton.setText(AdminConstants.EDIT_ADVANCED_KV_EXTRACTION_BUTTON);
-		editFieldPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
-		fieldConfigurationCaptionPanel.setCaptionHTML(AdminConstants.FIELD_DETAILS_HTML);
-		addKVButton.setHeight("20px");
-		editKVButton.setHeight("20px");
-		deleteKVButton.setHeight("20px");
-		addRegexBtn.setHeight("20px");
-		editRegexBtn.setHeight("20px");
-		deleteRegexBtn.setHeight("20px");
-		testKVButton.setHeight("20px");
-		kvButtonPanel.addStyleName("topPadd");
-		regexButtonPanel.addStyleName("topPadd");
 
-		fieldTypeVerticalPanel.add(editFieldPropertiesButton);
+		fieldConfigurationCaptionPanel.setCaptionHTML(AdminConstants.FIELD_DETAILS_HTML);
+		addKVButton.setHeight(HEIGHT);
+		editKVButton.setHeight(HEIGHT);
+		deleteKVButton.setHeight(HEIGHT);
+		addAdvancedKVAddButton.setHeight(HEIGHT);
+		editAdvancedKVButton.setHeight(HEIGHT);
+		addRegexBtn.setHeight(HEIGHT);
+		editRegexBtn.setHeight(HEIGHT);
+		deleteRegexBtn.setHeight(HEIGHT);
+		testKVButton.setHeight(HEIGHT);
+		kvButtonPanel.addStyleName(TOP_PADD);
+		regexButtonPanel.addStyleName(TOP_PADD);
 
 	}
 
+	/**
+	 * To get Field Type Detail View.
+	 * 
+	 * @return FieldTypeDetailView
+	 */
 	public FieldTypeDetailView getFieldTypeDetailView() {
 		return fieldTypeDetailView;
 	}
 
+	/**
+	 * To get KV Field Type List View.
+	 * 
+	 * @return KVFieldTypeListView
+	 */
 	public KVFieldTypeListView getKVFieldTypeListView() {
 		return kvFieldTypeListView;
 	}
 
+	/**
+	 * To create KV Field List.
+	 * 
+	 * @param fields List<KVExtractionDTO>
+	 */
 	public void createKVFieldList(List<KVExtractionDTO> fields) {
 		List<Record> recordList = setFieldsList(fields);
 
 		kvFieldTypeListPresenter = new KVTypeListPresenter(presenter.getController(), kvFieldTypeListView);
-		kvFieldTypeListView.listView.initTable(recordList.size(), null, null, recordList, true, false, kvFieldTypeListPresenter);
+		kvFieldTypeListView.listView.initTable(recordList.size(), null, null, recordList, true, false, kvFieldTypeListPresenter, null,
+				true);
 	}
 
 	private List<Record> setFieldsList(List<KVExtractionDTO> fields) {
@@ -198,8 +306,10 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		for (final KVExtractionDTO kvExtractionDTO : fields) {
 			Record record = new Record(kvExtractionDTO.getIdentifier());
 			record.addWidget(kvFieldTypeListView.keyPattern, new Label(kvExtractionDTO.getKeyPattern()));
-			record.addWidget(kvFieldTypeListView.location, new Label(kvExtractionDTO.getLocationType().name()));
 			record.addWidget(kvFieldTypeListView.valuePattern, new Label(kvExtractionDTO.getValuePattern()));
+			if (kvExtractionDTO.getLocationType() != null) {
+				record.addWidget(kvFieldTypeListView.location, new Label(kvExtractionDTO.getLocationType().name()));
+			}
 			String noOfWords = String.valueOf(kvExtractionDTO.getNoOfWords());
 			if (noOfWords != null && noOfWords.length() != 0) {
 				record.addWidget(kvFieldTypeListView.noOfWords, new Label(noOfWords));
@@ -222,7 +332,7 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 			if (multiplier != null) {
 				float Rval = multiplier;
 				int Rpl = 2;
-				float pVarLocal = (float) Math.pow(10, Rpl);
+				float pVarLocal = (float) Math.pow(BatchClassManagementConstants.TEN, Rpl);
 				Rval = Rval * pVarLocal;
 				float tmp = Math.round(Rval);
 				Float fVarLocal = (float) tmp / pVarLocal;
@@ -236,10 +346,15 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		return recordList;
 	}
 
+	/**
+	 * To create Regex List.
+	 * 
+	 * @param regex List<RegexDTO>
+	 */
 	public void createRegexList(List<RegexDTO> regex) {
 		List<Record> recordList = setRegexList(regex);
 		regexListPresenter = new RegexListPresenter(presenter.getController(), regexListView);
-		regexListView.listView.initTable(recordList.size(), null, null, recordList, true, false, regexListPresenter);
+		regexListView.listView.initTable(recordList.size(), null, null, recordList, true, false, regexListPresenter, null, true);
 	}
 
 	private List<Record> setRegexList(List<RegexDTO> regexDTOs) {
@@ -252,31 +367,47 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		return records;
 	}
 
+	/**
+	 * To get Edit Field Type View.
+	 * 
+	 * @return EditFieldTypeView
+	 */
 	public EditFieldTypeView getEditFieldTypeView() {
 		return editFieldTypeView;
 	}
 
-	public Button getEditFieldPropertiesButtonButton() {
-		return editFieldPropertiesButton;
-	}
-
+	/**
+	 * To get Field Type Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getFieldTypeVerticalPanel() {
 		return fieldTypeVerticalPanel;
 	}
 
+	/**
+	 * To get Field Type Config Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getFieldTypeConfigVerticalPanel() {
 		return fieldTypeConfigVerticalPanel;
 	}
 
+	/**
+	 * To get Add KV Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getAddKVButtonButton() {
 		return addKVButton;
 	}
 
-	@UiHandler("editFieldPropertiesButton")
-	public void onEditFieldPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditFieldPropertiesButtonClicked();
-	}
-
+	/**
+	 * To perform operations on Test KV Extraction Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("testKVButton")
 	public void onTestKVExtractionButtonClick(ClickEvent clickEvent) {
 		String identifier = kvFieldTypeListView.listView.getSelectedRowIndex();
@@ -294,45 +425,74 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		presenter.onTestKVButtonClicked(identifier);
 	}
 
+	/**
+	 * To perform operations on add KV Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addKVButton")
 	public void onAddKVButtonClick(ClickEvent clickEvent) {
 		presenter.onAddKVButtonClicked();
 	}
 
+	/**
+	 * To perform operations on add advanced KV add Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addAdvancedKVAddButton")
 	public void onAddAdvancedKVAddButtonClicked(ClickEvent clickEvent) {
 		presenter.onAdvancedKVAddButton();
 	}
 
+	/**
+	 * To perform operations on edit advanced KV Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editAdvancedKVButton")
 	public void onEditAdvancedKVButtonClicked(ClickEvent clickEvent) {
 		String identifier = kvFieldTypeListView.listView.getSelectedRowIndex();
 		int rowCount = kvFieldTypeListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
 		presenter.onAdvancedEditKVButtonClicked(identifier);
 	}
 
+	/**
+	 * To perform operations on edit KV Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editKVButton")
 	public void onEditKVButtonClicked(ClickEvent clickEvent) {
 		kvFieldTypeListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on delete KV Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteKVButton")
 	public void onDeleteKVButtonClicked(ClickEvent clickEvent) {
 		final String identifier = kvFieldTypeListView.listView.getSelectedRowIndex();
 		int rowCount = kvFieldTypeListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_DELETE));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
@@ -356,15 +516,27 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
 	}
 
+	/**
+	 * To perform operations on edit regex Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editRegexBtn")
 	public void onEditRegexBtnClicked(ClickEvent clickEvent) {
 		regexListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on add regex Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addRegexBtn")
 	public void onAddRegexBtnClicked(ClickEvent clickEvent) {
-		if (((fieldTypeDetailView.getIsHidden().getValue()) || (fieldTypeDetailView.getIsMultiLine().getValue()))
-				|| ((editFieldTypeView.getIsHidden().getValue()) || (editFieldTypeView.getIsMultiLine().getValue()))) {
+		if (((fieldTypeDetailView.getIsHidden().getValue()) || (fieldTypeDetailView.getIsMultiLine().getValue()) || (fieldTypeDetailView
+				.getIsReadOnly().getValue()))
+				|| ((editFieldTypeView.getIsHidden().getValue()) || (editFieldTypeView.getIsMultiLine().getValue()) || (editFieldTypeView
+						.getIsReadonlyValue()))) {
 			final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
 					.getMessageValue(BatchClassManagementMessages.ADD_REGEX_FAILURE), LocaleDictionary.get().getConstantValue(
 					BatchClassManagementConstants.ADD_REGEX_FAILURE_TITLE), Boolean.TRUE);
@@ -387,15 +559,22 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 		}
 	}
 
+	/**
+	 * To perform operations on delete regex Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteRegexBtn")
 	public void onDeleteRegexButtonClicked(ClickEvent clickEvent) {
 		final String identifier = regexListView.listView.getSelectedRowIndex();
 		int rowCount = regexListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_DELETE));
 			} else {
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING));
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 			return;
 		}
@@ -419,6 +598,12 @@ public class FieldTypeView extends View<FieldTypeViewPresenter> {
 
 	}
 
+	/**
+	 * To get Conformation for KV Extraction View.
+	 * 
+	 * @param isAdvanced boolean
+	 * @param kvExtractionDTO KVExtractionDTO
+	 */
 	public void getConformationForKVExtractionView(final boolean isAdvanced, final KVExtractionDTO kvExtractionDTO) {
 		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
 				.getMessageValue(BatchClassManagementMessages.DATA_LOSS), LocaleDictionary.get().getConstantValue(

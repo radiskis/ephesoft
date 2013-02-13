@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -63,17 +63,46 @@ import java.util.logging.Logger;
 import com.sun.star.frame.XDesktop;
 import com.sun.star.lang.DisposedException;
 
+/**
+ * This class manage office processes.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.sun.star.frame.XDesktop
+ */
+@SuppressWarnings("PMD")
 class ManagedOfficeProcess {
 
+	/**
+	 * settings ManagedOfficeProcessSettings.
+	 */
 	private final ManagedOfficeProcessSettings settings;
 
+	/**
+	 * process OfficeProcess.
+	 */
 	private final OfficeProcess process;
+	
+	/**
+	 * connection InternalOfficeConnection.
+	 */
 	private final InternalOfficeConnection connection;
 
+	/**
+	 * executor ExecutorService.
+	 */
 	private ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("OfficeProcessThread"));
 
+	/**
+	 * LOGGER to print the logging information.
+	 */	
 	private final Logger logger = Logger.getLogger(getClass().getName());
-
+	
+	/**
+	 * Constructor.
+	 * @param settings ManagedOfficeProcessSettings
+	 * @throws OfficeException if error occurs
+	 */
 	public ManagedOfficeProcess(ManagedOfficeProcessSettings settings) throws OfficeException {
 		this.settings = settings;
 		process = new OfficeProcess(settings.getOfficeHome(), settings.getUnoUrl(), settings.getTemplateProfileDir(), settings
@@ -81,10 +110,18 @@ class ManagedOfficeProcess {
 		connection = new InternalOfficeConnection(settings.getUnoUrl());
 	}
 
+	/**
+	 * To get connection.
+	 * @return OfficeConnection
+	 */
 	public OfficeConnection getConnection() {
 		return connection;
 	}
 
+	/**
+	 * Start & wait method.
+	 * @throws OfficeException if failure occurs
+	 */
 	public void startAndWait() throws OfficeException {
 		Future<?> future = executor.submit(new Runnable() {
 
@@ -99,6 +136,10 @@ class ManagedOfficeProcess {
 		}
 	}
 
+	/**
+	 * Stop & wait method.
+	 * @throws OfficeException if failure occurs
+	 */
 	public void stopAndWait() throws OfficeException {
 		Future<?> future = executor.submit(new Runnable() {
 
@@ -113,6 +154,9 @@ class ManagedOfficeProcess {
 		}
 	}
 
+	/**
+	 * Restart & wait method.
+	 */
 	public void restartAndWait() {
 		Future<?> future = executor.submit(new Runnable() {
 
@@ -128,6 +172,9 @@ class ManagedOfficeProcess {
 		}
 	}
 
+	/**
+	 * Restart due to task time out.
+	 */
 	public void restartDueToTaskTimeout() {
 		executor.execute(new Runnable() {
 
@@ -138,6 +185,9 @@ class ManagedOfficeProcess {
 		});
 	}
 
+	/**
+	 * Restart due to connection lost.
+	 */
 	public void restartDueToLostConnection() {
 		executor.execute(new Runnable() {
 

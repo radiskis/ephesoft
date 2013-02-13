@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,86 +43,159 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class PluginView extends View<PluginViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, PluginView> {
 	}
 
+	/**
+	 * viewEditPluginPanel LayoutPanel.
+	 */
 	@UiField
-   LayoutPanel viewEditPluginPanel;
+	protected LayoutPanel viewEditPluginPanel;
 
+	/**
+	 * pluginDetailView PluginDetailView.
+	 */
 	@UiField
 	protected PluginDetailView pluginDetailView;
+
+	/**
+	 * editPluginView EditPluginView.
+	 */
 	@UiField
 	protected EditPluginView editPluginView;
+
+	/**
+	 * pluginData PluginData.
+	 */
 	@UiField
 	protected PluginData pluginData;
 
+	/**
+	 * pluginViewVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel pluginViewVerticalPanel;
 
+	/**
+	 * To get Plugin View Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getPluginViewVerticalPanel() {
 		return pluginViewVerticalPanel;
 	}
 
+	/**
+	 * To get Plugin Config Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getPluginConfigVerticalPanel() {
 		return pluginConfigVerticalPanel;
 	}
 
+	/**
+	 * pluginConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel pluginConfigVerticalPanel;
-	private final Button edit;
-	private final Label noResuleLabel;
 
+	/**
+	 * noResultLabel Label.
+	 */
+	@UiField
+	protected Label noResultLabel;
+
+	/**
+	 * pluginDetailsCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel pluginDetailsCaptionPanel;
+
+	/**
+	 * pluginConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel pluginConfigurationCaptionPanel;
 
+	/**
+	 * editButtonPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editButtonPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public PluginView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-		edit = new Button();
-		noResuleLabel = new Label();
-		noResuleLabel.setText(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_FOUND));
-		noResuleLabel.setVisible(false);
-		edit.setText("Edit");
+
+		noResultLabel.setText(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_FOUND));
+		noResultLabel.setVisible(false);
+
 		pluginConfigurationCaptionPanel.setCaptionHTML(AdminConstants.PLUGIN_CONFIGURATION_HTML);
 		pluginDetailsCaptionPanel.setCaptionHTML(AdminConstants.PLUGIN_DETAILS_HTML);
 		editButtonPanel.setStyleName(AdminConstants.PADDING_STYLE);
-		editButtonPanel.add(edit);
-		pluginViewVerticalPanel.add(noResuleLabel);
+
 	}
 
+	/**
+	 * To get Plugin Detail View.
+	 * 
+	 * @return PluginDetailView
+	 */
 	public PluginDetailView getPluginDetailView() {
 		return pluginDetailView;
 	}
 
+	/**
+	 * To get Edit Plugin View.
+	 * 
+	 * @return EditPluginView
+	 */
 	public EditPluginView getEditPluginView() {
 		return editPluginView;
 	}
 
+	/**
+	 * To get Plugin Data View.
+	 * 
+	 * @return PluginData
+	 */
 	public PluginData getPluginDataView() {
 		return pluginData;
 	}
 
-	public Button getEditButton() {
-		return edit;
-	}
-
+	/**
+	 * To get No Result Label.
+	 * 
+	 * @return Label
+	 */
 	public Label getNoResuleLabel() {
-		return noResuleLabel;
+		return noResultLabel;
 	}
 }

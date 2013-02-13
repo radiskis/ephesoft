@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,25 +47,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.DocumentTypeDao;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.DocumentType;
 
 /**
- * Implementation of a Dao representing document_type table in database
+ * Implementation of a Dao representing document_type table in database.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.DocumentTypeDao
  */
 @Repository
 public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements DocumentTypeDao {
 
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(DocumentTypeDaoImpl.class);
 
 	/**
-	 * An api to fetch all DocumentType by batch instance id.
+	 * An API to fetch all DocumentType by batch instance id.
 	 * 
-	 * @param batchInstanceID String
+	 * @param batchInstanceIdentifier String
 	 * @return List<DocumentType>
 	 */
 	@Override
@@ -73,16 +78,16 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 		LOG.info("batchInstanceID : " + batchInstanceIdentifier);
 		DetachedCriteria criteria = criteria();
 		DetachedCriteria subQuery = criteria(BatchInstance.class);
-		subQuery.add(Restrictions.eq("identifier", batchInstanceIdentifier));
-		subQuery.setProjection(Projections.property("batchClass.id"));
-		criteria.add(Subqueries.propertyIn("batchClass.id", subQuery));
+		subQuery.add(Restrictions.eq(DataAccessConstant.IDENTIFIER, batchInstanceIdentifier));
+		subQuery.setProjection(Projections.property(DataAccessConstant.BATCH_CLASS_ID));
+		criteria.add(Subqueries.propertyIn(DataAccessConstant.BATCH_CLASS_ID, subQuery));
 		return find(criteria);
 	}
 
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID String
+	 * @param batchClassIdentifier String
 	 * @param firstIndex int
 	 * @param maxResults int
 	 * @return List<DocumentType>
@@ -91,13 +96,13 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 	public List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier, final int firstIndex,
 			final int maxResults) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.createAlias(DataAccessConstant.BATCHCLASS, DataAccessConstant.BATCHCLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DataAccessConstant.BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return find(criteria, firstIndex, maxResults);
 	}
 
 	/**
-	 * An api to fetch all DocumentType by document type name.
+	 * An API to fetch all DocumentType by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @return List<DocumentType>
@@ -105,12 +110,12 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 	@Override
 	public List<DocumentType> getDocTypeByDocTypeName(String docTypeName) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("name", docTypeName));
+		criteria.add(Restrictions.eq(DataAccessConstant.NAME, docTypeName));
 		return find(criteria);
 	}
 
 	/**
-	 * An api to insert the documentType object.
+	 * An API to insert the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -120,7 +125,7 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 	}
 
 	/**
-	 * An api to update the documentType object.
+	 * An API to update the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -130,7 +135,7 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 	}
 
 	/**
-	 * An api to remove the documentType object.
+	 * An API to remove the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
@@ -139,18 +144,30 @@ public class DocumentTypeDaoImpl extends HibernateDao<DocumentType> implements D
 		remove(documentType);
 	}
 
+	/**
+	 * An API to get document type based on document type identifier.
+	 * 
+	 * @param identifier String
+	 * @return DocumentType
+	 */
 	@Override
 	public DocumentType getDocTypeByIdentifier(String identifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.add(Restrictions.eq("identifier", identifier));
+		criteria.add(Restrictions.eq(DataAccessConstant.IDENTIFIER, identifier));
 		return this.findSingle(criteria);
 	}
 	
+	/**
+	 * An API to fetch all DocumentType by batch class id.
+	 * 
+	 * @param batchClassIdentifier String
+	 * @return List<DocumentType>
+	 */
 	@Override
 	public List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassIdentifier) {
 		DetachedCriteria criteria = criteria();
-		criteria.createAlias("batchClass", "batchClass", JoinFragment.INNER_JOIN);
-		criteria.add(Restrictions.eq("batchClass.identifier", batchClassIdentifier));
+		criteria.createAlias(DataAccessConstant.BATCHCLASS, DataAccessConstant.BATCHCLASS, JoinFragment.INNER_JOIN);
+		criteria.add(Restrictions.eq(DataAccessConstant.BATCH_CLASS_IDENTIFIER, batchClassIdentifier));
 		return find(criteria);
 	}
 }

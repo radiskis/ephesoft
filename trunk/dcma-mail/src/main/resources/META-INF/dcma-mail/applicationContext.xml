@@ -11,6 +11,47 @@
          					"
 	default-autowire="byName">
 
+	<bean id="emailSenderConfig"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="placeholderPrefix" value="$mf{" />
+		<property name="placeholderSuffix" value="}" />
+		<property name="locations"
+			value="classpath:/META-INF/dcma-mail/email-details.properties">
+		</property>
+	</bean>
+	<bean id="wizardMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl" depends-on="emailSenderConfig">
+		<property name="host" value="$mf{mail.host}" />
+		<property name="username" value="$mf{mail.username}" />
+		<property name="password" value="$mf{mail.password}" />
+		<property name="port" value="$mf{mail.port}" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.socketFactory.fallback">true</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="wizardMailService" class="com.ephesoft.dcma.mail.service.WizardMailServiceImpl"
+		p:senderName="$mf{mail.senderName}" p:subject="$mf{mail.subject}"
+		p:ccList="$mf{mail.ccList}" p:templateLocation="$mf{mail.templateLocation}"
+		p:errorMailSubject="$mf{mail.errorMailSubject}"
+		p:errorMailTemplateLocation="$mf{mail.errorMailTemplateLocation}"
+		p:errorMailReceiverName="$mf{mail.errorMailReceiverName}"
+		p:errorMailReceiverId="$mf{mail.errorMailReceiverId}"
+		p:resetPasswordTemplateLocation="$mf{mail.resetPasswordTemplateLocation}"
+		p:resetPasswordSubject="$mf{mail.resetPasswordSubject}"
+		p:changePasswordTemplateLocation="$mf{mail.changePasswordTemplateLocation}"
+		p:changePasswordSubject="$mf{mail.changePasswordSubject}">
+		<property name="wizardMailSender" ref="wizardMailSender" />
+		<property name="freemarkerMailConfiguration" ref="freemarkerMailConfiguration" />
+	</bean>
+	<bean id="freemarkerMailConfiguration"
+		class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+		<property name="templateLoaderPath" value="classpath:META-INF/mail-template" />
+	</bean>
 	<context:component-scan base-package="com.ephesoft.dcma.mail.service" />
 
 </beans>

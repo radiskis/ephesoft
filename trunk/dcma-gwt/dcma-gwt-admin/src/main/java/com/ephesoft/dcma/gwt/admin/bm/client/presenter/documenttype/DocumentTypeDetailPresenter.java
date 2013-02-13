@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,13 +41,29 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.DocumentTypeDetailView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the document type details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class DocumentTypeDetailPresenter extends AbstractBatchClassPresenter<DocumentTypeDetailView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view DocumentTypeDetailView
+	 */
 	public DocumentTypeDetailPresenter(BatchClassManagementController controller, DocumentTypeDetailView view) {
 		super(controller, view);
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedDocument() != null) {
@@ -57,13 +73,17 @@ public class DocumentTypeDetailPresenter extends AbstractBatchClassPresenter<Doc
 			view.setIsHidden(controller.getSelectedDocument().isHidden());
 			if (controller.getSelectedDocument().getRspProjectFileName() == null) {
 				view.setRecostarExtraction(AdminConstants.EMPTY_STRING);
-			}
-			else {
+			} else {
 				view.setRecostarExtraction(controller.getSelectedDocument().getRspProjectFileName());
 			}
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub

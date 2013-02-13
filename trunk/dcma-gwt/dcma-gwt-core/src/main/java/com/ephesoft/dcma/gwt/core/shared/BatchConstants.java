@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -192,26 +192,15 @@ public interface BatchConstants {
 	String SAVE_BATCH_TITLE = "Save Batch";
 
 	String BATCH_CLASS_FIELD_DATATYPE = "datatype";
-	String BATCH_CLASS_FIELD_NAME = "name";
+	String NAME_CONSTANT = "name";
+	String DESCRIPTION_CONSTANT = "description";
 	String BATCH_CLASS_FIELD_ORDER_NUMBER = "fieldOrderNumber";
-	String BATCH_CLASS_FIELD_DESCRIPTION = "description";
-
-	String DOCUMENT_TYPE_NAME = "name";
-	String DOCUMENT_TYPE_DESCRIPTION = "description";
-
 	String EMAIL_USERNAME = "username";
 	String EMAIL_PASSWORD = "password";
 	String EMAIL_SERVER_NAME = "serverName";
 	String EMAIL_SERVER_TYPE = "serverType";
 	String EMAIL_FOLDER_NAME = "folderName";
 	String EMAIL_PORTNUMBER = "portNumber";
-
-	String MODULE_NAME = "name";
-	String MODULE_DESCRIPTION = "description";
-
-	String PLUGIN_NAME = "name";
-	String PLUGIN_DESCRIPTION = "description";
-
 	String ERROR_CONVERT_NUMBER = "Error converting number ";
 	String ROLES = "Roles";
 
@@ -219,16 +208,18 @@ public interface BatchConstants {
 	String MIDDLE_PAGE = "_Middle_Page";
 	String LAST_PAGE = "_Last_Page";
 	String BATCH_CLASS_DEF = "BatchClassDefinition";
-	String AND = ",";
-	String OR = "/";
+	String CONDITION_AND = ",";
+	String CONDITION_OR = "/";
 	String ZERO = "0";
 	String DEFAULT = "Default";
 	String YES = "Yes";
 	String EMAIL_ACCOUNTS = "EmailAccounts";
 	String SCRIPTS = "Scripts";
+	String OFF = "OFF";
 
 	/**
 	 * Maximum length of text that can be shown in listBox beyond which it will be trimmed.
 	 */
 	int MAX_TEXT_LENGTH = 26;
+	String FALSE = "FALSE";
 }

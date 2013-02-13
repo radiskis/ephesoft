@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,23 +40,25 @@ import java.util.List;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.CopyBatchClassView;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
+ * Presenter for copying a batch class.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Presenter for copying a batch class.
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBatchClassView> {
 
@@ -65,10 +67,18 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 	 */
 	private BatchClassDTO batchClassDTO;
 
+	/**
+	 * Constructor.
+	 * @param controller BatchClassManagementController
+	 * @param view CopyBatchClassView
+	 */
 	public CopyBatchClassPresenter(final BatchClassManagementController controller, final CopyBatchClassView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (batchClassDTO != null) {
@@ -76,9 +86,13 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 			view.setUncFolder(batchClassDTO.getUncFolder());
 			view.setPriority(batchClassDTO.getPriority());
 			view.setDescription(batchClassDTO.getDescription());
+			view.setSystemFolder(batchClassDTO.getSystemFolder());
 		}
 	}
 
+	/**
+	 * To show Batch Class Copy View.
+	 */
 	public void showBatchClassCopyView() {
 		view.getDialogBox().setWidth("100%");
 		view.getDialogBox().center();
@@ -87,23 +101,131 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 		view.getDialogBox().setText(MessageConstants.BATCH_CLASS_COPY);
 	}
 
+	/**
+	 * For handling event.
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * To get Batch Class DTO.
+	 * @return BatchClassDTO
+	 */
 	public BatchClassDTO getBatchClassDTO() {
 		return batchClassDTO;
 	}
 
+	/**
+	 * To set Batch Class DTO.
+	 * @param batchClassDTO BatchClassDTO
+	 */
 	public void setBatchClassDTO(final BatchClassDTO batchClassDTO) {
 		this.batchClassDTO = batchClassDTO;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 */
 	public void onOkClicked() {
 		String batchClassName = view.getName();
 		batchClassDTO.setName(batchClassName);
 		boolean isPriorityNumber = isNumber(view.getPriority());
+		boolean validCheck = validateFields(batchClassName, isPriorityNumber);
+		if (validCheck) {
+			ScreenMaskUtility.maskScreen();
+			controller.getRpcService().getAllBatchClasses(new EphesoftAsyncCallback<List<BatchClassDTO>>() {
+
+				@Override
+				public void customFailure(final Throwable arg0) {
+					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
+					ScreenMaskUtility.unmaskScreen();
+				}
+
+				@Override
+				public void onSuccess(final List<BatchClassDTO> batches) {
+					boolean isUNCPathUnique = true;
+					boolean isBatchClassNameUnique = true;
+					for (BatchClassDTO batchDTO : batches) {
+						// checking whether unc path is unique
+						if (batchDTO.getUncFolder().equalsIgnoreCase(view.getUncFolder())) {
+							isUNCPathUnique = false;
+						}
+						// checking whether batch class name is unique
+						if (batchDTO.getName().equalsIgnoreCase(view.getName())) {
+							isBatchClassNameUnique = false;
+						}
+					}
+					if (!isUNCPathUnique || view.getUncFolder().isEmpty()) {
+						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
+						ScreenMaskUtility.unmaskScreen();
+						return;
+					}
+					if (!isBatchClassNameUnique || view.getName().isEmpty()) {
+						ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.BATCH_CLASS_NAME_NOT_UNIQUE);
+						ScreenMaskUtility.unmaskScreen();
+						return;
+					}
+					batchClassDTO.setName(view.getName());
+					batchClassDTO.setDescription(view.getDescription());
+					batchClassDTO.setPriority(view.getPriority());
+					batchClassDTO.setUncFolder(view.getUncFolder());
+					batchClassDTO.setSystemFolder(view.getSystemFolder());
+					controller.getRpcService().createUncFolder(batchClassDTO.getUncFolder(), new EphesoftAsyncCallback<Void>() {
+
+						@Override
+						public void customFailure(final Throwable arg0) {
+							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
+							ScreenMaskUtility.unmaskScreen();
+						}
+
+						@Override
+						public void onSuccess(final Void arg0) {
+							controller.getRpcService().copyBatchClass(batchClassDTO, new EphesoftAsyncCallback<Void>() {
+
+								@Override
+								public void onSuccess(final Void arg0) {
+									ScreenMaskUtility.unmaskScreen();
+
+									ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
+											MessageConstants.BATCH_CLASS_COPY_CREATED_SUCCESSFULLY, MessageConstants.COPY_SUCCESSFUL,
+											Boolean.TRUE);
+									confirmationDialog.addDialogListener(new DialogListener() {
+
+										@Override
+										public void onOkClick() {
+											controller.getMainPresenter().init();
+											view.getDialogBox().hide(true);
+										}
+
+										@Override
+										public void onCancelClick() {
+											// do nothing.
+										}
+									});
+
+								}
+
+								@Override
+								public void customFailure(final Throwable arg0) {
+									ScreenMaskUtility.unmaskScreen();
+									ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNABLE_TO_CREATE_COPY);
+									view.getDialogBox().hide(true);
+								}
+							});
+						}
+					});
+
+				}
+
+			});
+
+		}
+
+	}
+
+	private boolean validateFields(String batchClassName, boolean isPriorityNumber) {
 		boolean validCheck = true;
 		if (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate()
 				|| !view.getValidateNameTextBox().validate()) {
@@ -119,104 +241,17 @@ public class CopyBatchClassPresenter extends AbstractBatchClassPresenter<CopyBat
 			ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.PRIORITY_SHOULD_BE_BETWEEN_1_AND_100);
 			validCheck = false;
 		}
-		if (validCheck && (batchClassName.contains(" ") || batchClassName.contains("-"))) {
+		if (validCheck && (batchClassName.contains(BatchClassManagementConstants.SPACE) || batchClassName.contains(BatchClassManagementConstants.HYPHEN))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.BATCH_CLASS_NAME_ERROR);
 			validCheck = false;
 		}
-		if (validCheck) {
-
-			controller.getRpcService().matchBaseFolder(view.getUncFolder(), new AsyncCallback<String>() {
-
-				@Override
-				public void onFailure(Throwable arg0) {
-					// TODO Auto-generated method stub
-
-				}
-
-				@Override
-				public void onSuccess(String matchBaseFolderPath) {
-					/*
-					 * boolean isUncPathStartsWithBaseFolder = Boolean.parseBoolean(matchBaseFolderPath);
-					 * 
-					 * if(!isUncPathStartsWithBaseFolder) {
-					 * ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_BEGIN_WITH_BASEFOLDER); return;
-					 * }
-					 */
-					controller.getRpcService().getAllBatchClasses(new AsyncCallback<List<BatchClassDTO>>() {
-
-						@Override
-						public void onFailure(final Throwable arg0) {
-							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
-						}
-
-						@Override
-						public void onSuccess(final List<BatchClassDTO> batches) {
-							boolean isUNCPathUnique = true;
-							for (BatchClassDTO batchDTO : batches) {
-								if (batchDTO.getUncFolder().equalsIgnoreCase(view.getUncFolder())) {
-									isUNCPathUnique = false;
-								}
-							}
-							if (!isUNCPathUnique || view.getUncFolder().isEmpty()) {
-								ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
-								return;
-							}
-							batchClassDTO.setDescription(view.getDescription());
-							batchClassDTO.setPriority(view.getPriority());
-							batchClassDTO.setUncFolder(view.getUncFolder());
-							controller.getRpcService().createUncFolder(batchClassDTO.getUncFolder(), new AsyncCallback<Void>() {
-
-								@Override
-								public void onFailure(final Throwable arg0) {
-									ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
-								}
-
-								@Override
-								public void onSuccess(final Void arg0) {
-									ScreenMaskUtility.maskScreen();
-									controller.getRpcService().copyBatchClass(batchClassDTO, new AsyncCallback<Void>() {
-
-										@Override
-										public void onSuccess(final Void arg0) {
-											ScreenMaskUtility.unmaskScreen();
-
-											ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
-													MessageConstants.BATCH_CLASS_COPY_CREATED_SUCCESSFULLY,
-													MessageConstants.COPY_SUCCESSFUL, Boolean.TRUE);
-											confirmationDialog.addDialogListener(new DialogListener() {
-
-												@Override
-												public void onOkClick() {
-													controller.getMainPresenter().init();
-													view.getDialogBox().hide(true);
-												}
-
-												@Override
-												public void onCancelClick() {
-													// do nothing.
-												}
-											});
-
-											
-										}
-
-										@Override
-										public void onFailure(final Throwable arg0) {
-											ScreenMaskUtility.unmaskScreen();
-											ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNABLE_TO_CREATE_COPY);
-											view.getDialogBox().hide(true);
-										}
-									});
-								}
-							});
-
-						}
-
-					});
-				}
-			});
+		if (validCheck && !view.getValidateSystemFolderTextBox().validate()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.INVALID_SYSTEM_FOLDER_PATH)
+					+ LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.CHANGE_AND_TRY_AGAIN));
+			validCheck = false;
 		}
-
+		return validCheck;
 	}
 
 	private boolean isNumber(final String priority) {

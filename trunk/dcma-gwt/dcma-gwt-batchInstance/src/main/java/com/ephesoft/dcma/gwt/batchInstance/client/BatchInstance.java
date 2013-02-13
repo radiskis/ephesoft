@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,52 +33,79 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client;
+package com.ephesoft.dcma.gwt.batchinstance.client;
 
 import com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.view.RootPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
+/**
+ * Class that defines the entry point for batch instances and perform operations on load.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint
+ */
 public class BatchInstance extends DCMAEntryPoint<BatchInstanceManagementServiceAsync> {
 
+	/**
+	 * To create Locale Info.
+	 * 
+	 * @param locale String
+	 * @return LocaleInfo
+	 */
 	@Override
 	public LocaleInfo createLocaleInfo(String locale) {
 		return new LocaleInfo(locale, "batchInstanceConstants", "batchInstanceMessages");
 	}
 
+	/**
+	 * To create Rpc Service.
+	 * 
+	 * @return BatchInstanceManagementServiceAsync
+	 */
 	@Override
 	public BatchInstanceManagementServiceAsync createRpcService() {
 		return GWT.create(BatchInstanceManagementService.class);
 	}
 
+	/**
+	 * To get Home Page.
+	 * 
+	 * @return String
+	 */
 	@Override
 	public String getHomePage() {
 		return "BatchInstanceManagement.html";
 	}
 
+	/**
+	 * Processing to be done on load.
+	 */
 	@Override
 	public void onLoad() {
 		LayoutPanel layoutPanel = new LayoutPanel();
 		BatchInstanceController controller = new BatchInstanceController(eventBus, rpcService);
 		layoutPanel.add(controller.createView());
 
-		final RootPanel rootPanel = new RootPanel(layoutPanel);
+		final RootPanel rootPanel = new RootPanel(layoutPanel, rpcService);
 		rootPanel.getHeader().setEventBus(eventBus);
 		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
 		rootPanel.getHeader().addNonClickableTab("Batch Instance Management", "BatchInstanceManagement.html");
-		rootPanel.getHeader().addTab("Custom Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addTab("Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addTab("Folder Management", "FolderManager.html", false);
 		rootPanel.getHeader().getTabBar().selectTab(1);
 		ScreenMaskUtility.maskScreen();
 
-		rpcService.isReportingEnabled(new AsyncCallback<Boolean>() {
+		rpcService.isReportingEnabled(new EphesoftAsyncCallback<Boolean>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				// TODO Auto-generated method stub
 
 			}
@@ -92,7 +119,7 @@ public class BatchInstance extends DCMAEntryPoint<BatchInstanceManagementService
 			}
 		});
 
-		rpcService.getUserName(new AsyncCallback<String>() {
+		rpcService.getUserName(new EphesoftAsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(String userName) {
@@ -101,7 +128,7 @@ public class BatchInstance extends DCMAEntryPoint<BatchInstanceManagementService
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 		});

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,7 +37,6 @@ package com.ephesoft.dcma.gwt.core.client.ui.table;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +44,7 @@ import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.OrderingListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.RowSelectionListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
@@ -68,6 +68,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -108,32 +109,34 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		String rowHighlighted();
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
-	public static int VISIBLE_RECORD_COUNT = 5;
+	private static final Binder BINDER = GWT.create(Binder.class);
+	public static int visibleRecodrCount = 5;
 
 	@UiField
-	FocusPanel focusPanel;
+	protected FocusPanel focusPanel;
 
 	@UiField
-	FlexTable headerTable;
+	protected FlexTable headerTable;
 
 	@UiField
-	SelectionStyle selectionStyle;
+	protected SelectionStyle selectionStyle;
 
 	@UiField
-	FlexTable navBarTable;
+	protected FlexTable navBarTable;
 
 	@UiField
-	ScrollPanel scrollPanel;
+	public ScrollPanel scrollPanel;
 
 	@UiField
-	FlexTable table;
-	
+	protected FlexTable flexTable;
+
 	private TableData tableData;
 
 	private int totalCount;
 	private NavBar navBar;
 	private boolean requireRadioButton;
+
+	private boolean orderedEntity;
 
 	private boolean fireEventForFirstRow;
 
@@ -141,24 +144,26 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 
 	private RowSelectionListner listner;
 
-	private DoubleClickListner doubleClickListner;
-
 	private Order order;
 
-	boolean mouseOn;
+	private boolean mouseOn;
 
-	private Map<Integer, RadioButtonContainer> radioButtons = new HashMap<Integer, RadioButtonContainer>();
+	private int selectedIndex;
+
+	private static final int FIRST_COLUMN_INDEX = 1;
+
+	private final Map<Integer, RadioButtonContainer> radioButtons = new HashMap<Integer, RadioButtonContainer>();
 
 	public Table(int totalCount, TableHeader header, boolean requireRadioButton, boolean fireEventForFirstRow,
 			final DoubleClickListner doubleClickListner) {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		this.totalCount = totalCount;
 		this.fireEventForFirstRow = fireEventForFirstRow;
 		tableData = new TableData();
 		tableData.setHeader(header);
 		this.requireRadioButton = requireRadioButton;
 		navBar = new NavBar(this);
-		this.doubleClickListner = doubleClickListner;
 		mouseOn = false;
 		if (doubleClickListner != null && totalCount != 0) {
 			focusPanel.addMouseOutHandler(new MouseOutHandler() {
@@ -194,20 +199,20 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 	}
 
 	public void setPaginationListner(PaginationListner paginationListner) {
-		this.navBar.setListner(paginationListner);
+		this.navBar.setPaginationListner(paginationListner);
+	}
+
+	public void setOrderingListner(OrderingListner orderingListner) {
+		this.navBar.setOrderingListner(orderingListner);
 	}
 
 	public void setRowSelectionListener(RowSelectionListner rowSelectionListner) {
 		this.listner = rowSelectionListner;
 	}
 
-	public void setDoubleClickListener(DoubleClickListner doubleClickListner) {
-		this.doubleClickListner = doubleClickListner;
-	}
-
-	@Override
-	protected void onLoad() {
-	}
+	/*
+	 * @Override protected void onLoad() { }
+	 */
 
 	public void pushData(List<Record> recordList, int startIndex) {
 		this.tableData.setRecordList(recordList);
@@ -220,18 +225,24 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		update(requireRadioButton, startIndex);
 	}
 
+	public void pushData(List<Record> recordList, int startIndex, int count, int selectedIndex) {
+		this.tableData.setRecordList(recordList);
+		this.totalCount = count;
+		update(requireRadioButton, startIndex, selectedIndex);
+	}
+
 	private void createTableHeader(boolean isRadioButton) {
 		Images images = GWT.create(Images.class);
 		final TableHeader header = tableData.getHeader();
-		final LinkedList<HeaderColumn> columns = header.getHeaderColumns(isRadioButton);
+		final List<HeaderColumn> columns = header.getHeaderColumns(isRadioButton);
 		String width = null;
-		int j = 0;
+		int counter = 0;
 		for (final HeaderColumn column : columns) {
-			width = String.valueOf(column.getWidth()) + "%";
-			headerTable.getCellFormatter().setWidth(0, j, width);
-			headerTable.getCellFormatter().addStyleName(0, j, "wordWrap");
+			width = column.getWidth() + "%";
+			headerTable.getCellFormatter().setWidth(0, counter, width);
+			headerTable.getCellFormatter().addStyleName(0, counter, "wordWrap");
 			HorizontalPanel headerPanel = new HorizontalPanel();
-			Label name = new Label(column.name);
+			Label name = new Label(column.getName());
 			headerPanel.add(name);
 			final Label sortImage = new Label();
 			sortImage.setWidth("5px");
@@ -247,10 +258,10 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 			headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 			headerPanel.add(sortImage);
 
-			if (j == 0 && isRadioButton) {
+			if (counter == 0 && isRadioButton) {
 				name.setText("");
 			}
-			headerTable.setWidget(0, j, headerPanel);
+			headerTable.setWidget(0, counter, headerPanel);
 			if (column.isSortable()) {
 				name.addStyleName("cursorHand");
 				name.addClickHandler(new ClickHandler() {
@@ -260,24 +271,28 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 						order = new Order(column.getDomainProperty(), !column.isPrimaryAsc());
 						navBar.setOrder(order);
 						column.setPrimaryAsc(!column.isPrimaryAsc());
-						navBar.getListner().onPagination(navBar.getStartIndex(), VISIBLE_RECORD_COUNT, order);
+						navBar.getListner().onPagination(navBar.getStartIndex(), visibleRecodrCount, order);
 					}
 				});
 			}
-			headerTable.getFlexCellFormatter().setVerticalAlignment(0, j, HasVerticalAlignment.ALIGN_TOP);
-			headerTable.getCellFormatter().setHorizontalAlignment(0, j, HasHorizontalAlignment.ALIGN_LEFT);
-			j++;
+			headerTable.getFlexCellFormatter().setVerticalAlignment(0, counter, HasVerticalAlignment.ALIGN_TOP);
+			headerTable.getCellFormatter().setHorizontalAlignment(0, counter, HasHorizontalAlignment.ALIGN_LEFT);
+			counter++;
 		}
 		headerTable.getRowFormatter().setStyleName(0, selectionStyle.header());
 	}
 
-	private void update(boolean isRadioButton, int startIndex) {
+	private native void scrollIntoView(Element element) /*-{
+														element.scrollIntoView(true);
+														}-*/;
+
+	private void update(boolean isRadioButton, int startIndex, int selectedIndexlocal) {
 		selectedRowId = null;
-		table.removeAllRows();
+		flexTable.removeAllRows();
 		navBarTable.removeAllRows();
 		createTableHeader(isRadioButton);
 		int count = totalCount;
-		int max = startIndex + VISIBLE_RECORD_COUNT;
+		int max = startIndex + visibleRecodrCount;
 		if (max > count) {
 			max = count;
 		}
@@ -286,31 +301,32 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		TableHeader header = tableData.getHeader();
 		HeaderColumn[] columns = header.getHeaderColumns();
 		String width = null;
-		int i = 0;
-		String radioName = null;
-		if (tableData.getRecordList() != null) {
-			if (!tableData.getRecordList().isEmpty()) {
-				for (final Record record : tableData.getRecordList()) {
-					int j = 0;
-					for (; j < columns.length; j++) {
-						width = String.valueOf(columns[j].getWidth()) + "%";
-						table.getCellFormatter().setWidth(i, j, width);
-						table.setWidget(i, j, record.getWidget(columns[j]));
-						table.getCellFormatter().setHorizontalAlignment(i, j, HasHorizontalAlignment.ALIGN_LEFT);
-						table.getCellFormatter().setWordWrap(i, j, true);
-						table.getCellFormatter().addStyleName(i, j, "wordWrap");
+		int rowCounter = 0;
+		String radioName = String.valueOf(new Date().getTime());
+		final List<Record> recordList = tableData.getRecordList();
+		if (recordList != null) {
+			if (!recordList.isEmpty()) {
+				for (final Record record : recordList) {
+					int colCounter = 0;
+					for (; colCounter < columns.length; colCounter++) {
+						width = columns[colCounter].getWidth() + "%";
+						flexTable.getCellFormatter().setWidth(rowCounter, colCounter, width);
+						flexTable.setWidget(rowCounter, colCounter, record.getWidget(columns[colCounter]));
+						flexTable.getCellFormatter().setHorizontalAlignment(rowCounter, colCounter, HasHorizontalAlignment.ALIGN_LEFT);
+						flexTable.getCellFormatter().setWordWrap(rowCounter, colCounter, true);
+						flexTable.getCellFormatter().addStyleName(rowCounter, colCounter, "wordWrap");
 					}
 					if (isRadioButton) {
-						if (i == 0) {
-							radioName = String.valueOf(new Date().getTime());
-						}
 						final RadioButton radioButton = new RadioButton(radioName);
-						if (i == 0) {
+						if (rowCounter == selectedIndexlocal) {
 							radioButton.setValue(true);
 							selectedRowId = record.getIdentifier();
+							selectedIndex = rowCounter;
 							if (null != listner && fireEventForFirstRow) {
 								listner.onRowSelected(selectedRowId);
 							}
+
+							scrollIntoView(flexTable.getWidget(selectedIndexlocal, FIRST_COLUMN_INDEX).getElement());
 						}
 						radioButton.addClickHandler(new ClickHandler() {
 
@@ -319,12 +335,13 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 								clearRadioButtons();
 								radioButton.setValue(true);
 								selectedRowId = record.getIdentifier();
+								selectedIndex = recordList.indexOf(record);
 							}
 						});
-						table.setWidget(i, 0, radioButton);
+						flexTable.setWidget(rowCounter, 0, radioButton);
 						RadioButtonContainer radioButtonContainer = new RadioButtonContainer(radioButton, record.getIdentifier());
-						radioButtons.put(new Integer(i), radioButtonContainer);
-						table.getCellFormatter().setHorizontalAlignment(i, 0, HasHorizontalAlignment.ALIGN_CENTER);
+						radioButtons.put(rowCounter, radioButtonContainer);
+						flexTable.getCellFormatter().setHorizontalAlignment(rowCounter, 0, HasHorizontalAlignment.ALIGN_CENTER);
 
 						radioButton.addFocusHandler(new FocusHandler() {
 
@@ -333,44 +350,52 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 								removeSelectedRowStyleFromTable();
 								for (Integer rowId : radioButtons.keySet()) {
 									if (radioButtons.get(rowId).getRadioButton().equals(radioButton)) {
-										table.getRowFormatter().addStyleName(rowId, selectionStyle.rowHighlighted());
+										selectedIndex = recordList.indexOf(record);
+										flexTable.getRowFormatter().addStyleName(rowId, selectionStyle.rowHighlighted());
 									}
 								}
 							}
 						});
 					} else {
 						RadioButtonContainer radioButtonContainer = new RadioButtonContainer(null, record.getIdentifier());
-						radioButtons.put(new Integer(i), radioButtonContainer);
+						radioButtons.put(rowCounter, radioButtonContainer);
 					}
-					if (i % 2 == 0) {
-						table.getRowFormatter().setStyleName(i, selectionStyle.oddRow());
+					if (rowCounter % 2 == 0) {
+						flexTable.getRowFormatter().setStyleName(rowCounter, selectionStyle.oddRow());
 					} else {
-						table.getRowFormatter().setStyleName(i, selectionStyle.evenRow());
+						flexTable.getRowFormatter().setStyleName(rowCounter, selectionStyle.evenRow());
 					}
-					i++;
-					table.getRowFormatter().addStyleName(0, selectionStyle.rowHighlighted());
+					rowCounter++;
+					flexTable.getRowFormatter().addStyleName(selectedIndexlocal, selectionStyle.rowHighlighted());
+
 				}
 			} else {
 				Label label = new Label();
 				label.setWidth("100%");
 				label.setText("No record found.");
-				table.getCellFormatter().setWidth(1, 0, "100%");
-				table.getFlexCellFormatter().setColSpan(1, 0, 3);
+				flexTable.getCellFormatter().setWidth(1, 0, "100%");
+				flexTable.getFlexCellFormatter().setColSpan(1, 0, 3);
 				// Record record = new Record("1");
 				// tableData.getRecordList().add(record);
-				table.setWidget(1, 0, label);
+				flexTable.setWidget(1, 0, label);
 			}
 
 		}
+
+	}
+
+	private void update(boolean isRadioButton, int startIndex) {
+		update(isRadioButton, startIndex, 0);
 	}
 
 	private void setNavigationBar() {
-		navBarTable.getCellFormatter().setWidth(0, 1, "40%");
-		navBarTable.getCellFormatter().setWidth(0, 2, "15%");
-		navBarTable.getCellFormatter().setWidth(0, 3, "22%");
-		navBarTable.getCellFormatter().setWidth(0, 4, "23%");
+		navBarTable.getCellFormatter().setWidth(0, 1, "30%");
+		navBarTable.getCellFormatter().setWidth(0, 2, "10%");
+		navBarTable.getCellFormatter().setWidth(0, 3, "10%");
+		navBarTable.getCellFormatter().setWidth(0, 4, "22%");
+		navBarTable.getCellFormatter().setWidth(0, 5, "23%");
 		Label displayText = new Label(navBar.getCountString());
-		Label searchPageText = new Label(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.title_go_to_page));
+		Label searchPageText = new Label(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.TITLE_GO_TO_PAGE));
 		Label totalPageCountText = new Label("  /" + navBar.getTotalPageCount());
 		HorizontalPanel searchPagePanel = new HorizontalPanel();
 		displayText.setStyleName(selectionStyle.boldText());
@@ -382,14 +407,18 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		searchPagePanel.setCellHorizontalAlignment(searchPageText, HasHorizontalAlignment.ALIGN_RIGHT);
 		searchPagePanel.setCellHorizontalAlignment(navBar.getSearchPageTextBox(), HasHorizontalAlignment.ALIGN_RIGHT);
 		searchPagePanel.setCellHorizontalAlignment(totalPageCountText, HasHorizontalAlignment.ALIGN_RIGHT);
-		if (this.navBar.getListner() != null) {
-			navBarTable.setWidget(0, 2, navBar);
+		if (this.navBar.getOrderingListner() != null) {
+			navBarTable.setWidget(0, 2, navBar.getOrderingPanel());
 			navBarTable.getCellFormatter().setHorizontalAlignment(0, 2, HasHorizontalAlignment.ALIGN_RIGHT);
-			navBarTable.setWidget(0, 3, searchPagePanel);
 		}
-		navBarTable.setWidget(0, 4, displayText);
-		navBarTable.getCellFormatter().setHorizontalAlignment(0, 3, HasHorizontalAlignment.ALIGN_RIGHT);
+		if (this.navBar.getListner() != null) {
+			navBarTable.setWidget(0, 3, navBar.getPaginationPanel());
+			navBarTable.getCellFormatter().setHorizontalAlignment(0, 3, HasHorizontalAlignment.ALIGN_RIGHT);
+			navBarTable.setWidget(0, 4, searchPagePanel);
+		}
+		navBarTable.setWidget(0, 5, displayText);
 		navBarTable.getCellFormatter().setHorizontalAlignment(0, 4, HasHorizontalAlignment.ALIGN_RIGHT);
+		navBarTable.getCellFormatter().setHorizontalAlignment(0, 5, HasHorizontalAlignment.ALIGN_RIGHT);
 	}
 
 	public String getSelectedRowId() {
@@ -400,13 +429,14 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		return order;
 	}
 
-	@UiHandler("table")
-	void onTableClicked(ClickEvent event) {
+	@UiHandler("flexTable")
+	protected void onFlexTableClicked(ClickEvent event) {
 		removeSelectedRowStyleFromTable();
-		Cell cell = table.getCellForEvent(event);
+		Cell cell = flexTable.getCellForEvent(event);
 		if (cell != null && totalCount != 0) {
 			int row = cell.getRowIndex();
-			table.getRowFormatter().addStyleName(row, selectionStyle.rowHighlighted());
+			selectedIndex = row;
+			flexTable.getRowFormatter().addStyleName(row, selectionStyle.rowHighlighted());
 			RadioButtonContainer radioButtonContainer = radioButtons.get(row);
 			if (radioButtonContainer != null && radioButtonContainer.getRadioButton() != null) {
 				clearRadioButtons();
@@ -430,15 +460,15 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 	}
 
 	private void removeSelectedRowStyleFromTable() {
-		for (int rowId = 0; rowId < table.getRowCount(); rowId++) {
-			table.getRowFormatter().removeStyleName(rowId, selectionStyle.rowHighlighted());
+		for (int rowId = 0; rowId < flexTable.getRowCount(); rowId++) {
+			flexTable.getRowFormatter().removeStyleName(rowId, selectionStyle.rowHighlighted());
 		}
 	}
 
 	private class RadioButtonContainer {
 
-		private RadioButton radioButton;
-		private String identifier;
+		private final RadioButton radioButton;
+		private final String identifier;
 
 		public RadioButtonContainer(RadioButton radioBtn, String identifier) {
 			this.radioButton = radioBtn;
@@ -458,15 +488,41 @@ public class Table extends ResizeComposite implements HasDoubleClickHandlers {
 		return tableData.getRecordList().size();
 	}
 
-
 	@Override
-	public HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
+	public final HandlerRegistration addDoubleClickHandler(DoubleClickHandler handler) {
 		return addDomHandler(handler, DoubleClickEvent.getType());
 	}
 
+	/**
+	 * @return the isOrderedEntity
+	 */
+	public boolean isOrderedEntity() {
+		return orderedEntity;
+	}
+
+	/**
+	 * @param isOrderedEntity the isOrderedEntity to set
+	 */
+	public void setOrderedEntity(boolean isOrderedEntity) {
+		this.orderedEntity = isOrderedEntity;
+	}
 
 	public int getStartIndex() {
 		return navBar.getStartIndex();
+	}
+
+	/**
+	 * @return the selectedIndex
+	 */
+	public int getSelectedIndex() {
+		return selectedIndex;
+	}
+
+	/**
+	 * @param selectedIndex the selectedIndex to set
+	 */
+	public void setSelectedIndex(int selectedIndex) {
+		this.selectedIndex = selectedIndex;
 	}
 
 }

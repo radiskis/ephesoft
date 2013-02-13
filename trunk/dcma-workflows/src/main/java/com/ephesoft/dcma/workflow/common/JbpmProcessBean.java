@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,46 +52,64 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Spring bean instance of a JBPM4 process.<br>
- * This bean automatically connects to a {@link ProcessEngine}.
- * The process is automatically deployed when the bean is initialized and it undeploys the process before it is destroyed.
+ * This bean automatically connects to a {@link ProcessEngine}. The process is automatically deployed when the bean is initialized and
+ * it undeploys the process before it is destroyed.
  * <p>
- * It provides convinience methods to JBPM4 resources like {@link ProcessEngine}, {@link ExecutionService} and {@link RepositoryService}.
+ * It provides convinience methods to JBPM4 resources like {@link ProcessEngine}, {@link ExecutionService} and
+ * {@link RepositoryService}.
  * <p>
  * It provides convinience methods to start an instances of the process. Multiple process instances can be running at the same time.
- * This bean does <b>not</b> maintain a list or state of started processes. That is the responsibility of JBPM. 
- * This bean does hold the process deployment id so it is not necessary to provide this when starting an process instance.
- * It is the responsibility of the calling code to do something with the {@link ProcessInstance} if it's necessary.
- * If needed a {@link ProcessInstance} can be looked by querying JBPM via a service.
+ * This bean does <b>not</b> maintain a list or state of started processes. That is the responsibility of JBPM. This bean does hold the
+ * process deployment id so it is not necessary to provide this when starting an process instance. It is the responsibility of the
+ * calling code to do something with the {@link ProcessInstance} if it's necessary. If needed a {@link ProcessInstance} can be looked
+ * by querying JBPM via a service.
  * 
- *
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.api.ExecutionService
  */
 
 public class JbpmProcessBean {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(JbpmProcessBean.class);
-	
-	// name of jpdl.xml file
+
+	/**
+	 * name of jpdl.xml file.
+	 */
 	private String resourceName;
-	
-	// optional key for process as defined in jpdl.xml
+
+	/**
+	 * optional key for process as defined in jpdl.xml.
+	 */
 	private String processKey;
-	
-	// deployment id of process
+
+	/**
+	 * deployment id of process.
+	 */
 	private String deploymentId;
-	
-	// id of process definition of deployed process. Has format {key}-{version}.
+
+	/**
+	 * id of process definition of deployed process. Has format {key}-{version}.
+	 */
 	private String processDefinitionId;
-	
+
+	/**
+	 * Instance of {@link RepositoryService}.
+	 */
 	@Autowired
 	private RepositoryService repositoryService;
-	
+
+	/**
+	 * Instance of {@link ExecutionService}.
+	 */
 	@Autowired
 	private ExecutionService executionService;
-	
-	
+
 	/**
 	 * Deploy process when bean is initialized.
 	 */
@@ -99,110 +117,117 @@ public class JbpmProcessBean {
 	@Transactional
 	public void initialize() {
 		// deploy process
-		LOGGER.info(String.format("Deploying process with key %s ...",processKey));
-		deploymentId = repositoryService.createDeployment()
-				.addResourceFromClasspath(resourceName).deploy();
+		LOGGER.info(String.format("Deploying process with key %s ...", processKey));
+		deploymentId = repositoryService.createDeployment().addResourceFromClasspath(resourceName).deploy();
 
 		// lookup processDefinitionId
-		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deploymentId).uniqueResult();
-		LOGGER.debug(String.format("Deployed process with ID:%s, Name:%s, Key:%s, Version:%s", processDefinition.getId(), processDefinition.getName(), processDefinition.getKey(), processDefinition.getVersion()));
+		ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().deploymentId(deploymentId)
+				.uniqueResult();
+		LOGGER.debug(String.format("Deployed process with ID:%s, Name:%s, Key:%s, Version:%s", processDefinition.getId(),
+				processDefinition.getName(), processDefinition.getKey(), processDefinition.getVersion()));
 		processDefinitionId = processDefinition.getId();
 	}
-	
+
 	/**
 	 * Unregister process when bean is destroyed.
 	 */
 	@PreDestroy
 	public void destroy() {
 		// delete deployed process
-		LOGGER.info(String.format("Deleting deployed process with key %s ...",processKey));
+		LOGGER.info(String.format("Deleting deployed process with key %s ...", processKey));
 		repositoryService.deleteDeploymentCascade(deploymentId);
 		LOGGER.info("Process undeployed.");
 	}
-	
-	/* 
+
+	/*
 	 * STARTING A PROCESS
 	 */
-	
+
 	/**
 	 * Start a new process.<br>
-	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. 
-	 * Otherwise the deployment id is used.
+	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. Otherwise the deployment id
+	 * is used.
 	 * <p>
+	 * 
 	 * @return Started {@link ProcessInstance}
 	 */
 	public ProcessInstance startProcessInstance() {
 		return startProcessInstance(null, null);
 	}
-	
+
 	/**
 	 * Start a new process instance using a business key.<br>
-	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. 
-	 * Otherwise the deployment id is used.
+	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. Otherwise the deployment id
+	 * is used.
 	 * <p>
+	 * 
 	 * @param businessKey Custom key by which this process can be tracked
 	 * @return Started {@link ProcessInstance}
 	 */
 	public ProcessInstance startProcessInstanceWithKey(String businessKey) {
 		return startProcessInstance(null, businessKey);
 	}
-	
+
 	/**
 	 * Start a new process instance using variables.<br>
-	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. 
-	 * Otherwise the deployment id is used.<br>
+	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. Otherwise the deployment id
+	 * is used.<br>
+	 * 
 	 * @see See also {@link #startProcessInstanceWithKeyAndVariables(String, Map)}
-	 * <p>
+	 *      <p>
 	 * @param variables Custom variables necessary for the process.
 	 * @return Started {@link ProcessInstance}
 	 */
-	public ProcessInstance startProcessInstanceWithVariables(Map<String,Object> variables) {
+	public ProcessInstance startProcessInstanceWithVariables(Map<String, Object> variables) {
 		return startProcessInstance(variables, null);
 	}
-	
+
 	/**
 	 * Start a new process instance using a business key and variables.<br>
-	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. 
-	 * Otherwise the deployment id is used.
+	 * If a processKey was provided in the Spring configuration, the key will be used to create a process. Otherwise the deployment id
+	 * is used.
 	 * <p>
-	 * NOTE: Because the process is running in a Spring environment, the process is able to lookup Spring managed beans.
-	 * It is therefore not necessary to pass Spring components as variables to the process. It can be done however to override
-	 * a Spring component since the variables Map is searched before the Spring environement.
+	 * NOTE: Because the process is running in a Spring environment, the process is able to lookup Spring managed beans. It is
+	 * therefore not necessary to pass Spring components as variables to the process. It can be done however to override a Spring
+	 * component since the variables Map is searched before the Spring environement.
 	 * <p>
+	 * 
 	 * @param businessKey Custom key by which this process can be tracked
 	 * @param variables Custom variables necessary for the process.
 	 * @return Started {@link ProcessInstance}
 	 */
-	public ProcessInstance startProcessInstanceWithKeyAndVariables(String businessKey, Map<String,Object> variables) {
+	public ProcessInstance startProcessInstanceWithKeyAndVariables(String businessKey, Map<String, Object> variables) {
 		return startProcessInstance(variables, businessKey);
 	}
-	
+
 	/**
 	 * Start a process instance.<br>
-	 * If a process key is provided for this bean, that process key is ALWAYS used to created a process instance.
-	 * Otherwise just the deployment id (== processDefinitionKey) is used to create an instance.
+	 * If a process key is provided for this bean, that process key is ALWAYS used to created a process instance. Otherwise just the
+	 * deployment id (== processDefinitionKey) is used to create an instance.
 	 * <p>
 	 * If variables are provided, the variables are used when creating a process instance.<br>
 	 * If a business key is provided, the business key is used when creating a process instance.<br>
 	 * <p>
-	 * @param variables
-	 * @param businessKey
-	 * @return
+	 * 
+	 * @param variables Map<String,Object>
+	 * @param businessKey String
+	 * @return Started {@link ProcessInstance}
 	 */
-	private ProcessInstance startProcessInstance(Map<String,Object> variables, String businessKey) {
-		
+	private ProcessInstance startProcessInstance(Map<String, Object> variables, String businessKey) {
+
 		boolean withVariables = variables != null;
 		boolean withBusinessKey = businessKey != null;
 		ProcessInstance processInstance = null;
-		if(processKey != null) {
+		if (processKey != null) {
 			// START WITH PROCESS KEY
-			if(withBusinessKey && withVariables) { // start with business key AND variables 
-				LOGGER.info(String.format("Starting process using process key %s and business key %s and variables ...", processKey, businessKey));
+			if (withBusinessKey && withVariables) { // start with business key AND variables
+				LOGGER.info(String.format("Starting process using process key %s and business key %s and variables ...", processKey,
+						businessKey));
 				processInstance = executionService.startProcessInstanceByKey(processKey, variables, businessKey);
-			} else if(withBusinessKey) { // start with business key AND NO variables
+			} else if (withBusinessKey) { // start with business key AND NO variables
 				LOGGER.info(String.format("Starting process using process key %s and business key %s ...", processKey, businessKey));
 				processInstance = executionService.startProcessInstanceByKey(processKey, businessKey);
-			} else if(withVariables) { // start WITHOUT business key BUT WITH variables
+			} else if (withVariables) { // start WITHOUT business key BUT WITH variables
 				LOGGER.info(String.format("Starting process using process key %s and variables ...", processKey));
 				processInstance = executionService.startProcessInstanceByKey(processKey, variables);
 			} else { // start WITHOUT business key AND WITHOUT variables
@@ -211,13 +236,15 @@ public class JbpmProcessBean {
 			}
 		} else {
 			// START WITH DEPLOYMENT ID
-			if(withBusinessKey && withVariables) { // start with business key AND variables 
-				LOGGER.info(String.format("Starting process using deployment id %s and business key %s and variables ...", processDefinitionId, businessKey));
+			if (withBusinessKey && withVariables) { // start with business key AND variables
+				LOGGER.info(String.format("Starting process using deployment id %s and business key %s and variables ...",
+						processDefinitionId, businessKey));
 				processInstance = executionService.startProcessInstanceById(processDefinitionId, variables, businessKey);
-			} else if(withBusinessKey) { // start with business key AND NO variables
-				LOGGER.info(String.format("Starting process using deployment id %s and business key %s ...", deploymentId, businessKey));
+			} else if (withBusinessKey) { // start with business key AND NO variables
+				LOGGER.info(String
+						.format("Starting process using deployment id %s and business key %s ...", deploymentId, businessKey));
 				processInstance = executionService.startProcessInstanceById(processDefinitionId, businessKey);
-			} else if(withVariables) { // start WITHOUT business key BUT WITH variables
+			} else if (withVariables) { // start WITHOUT business key BUT WITH variables
 				LOGGER.info(String.format("Starting process using deployment id %s and variables ...", deploymentId));
 				processInstance = executionService.startProcessInstanceById(processDefinitionId, variables);
 			} else { // start WITHOUT business key AND WITHOUT variables
@@ -227,11 +254,11 @@ public class JbpmProcessBean {
 		}
 		return processInstance;
 	}
-	
+
 	/*
-	 *  VARIABLES 
+	 * VARIABLES
 	 */
-	
+
 	/**
 	 * @see ExecutionService#getVariable(String, String)
 	 * 
@@ -244,52 +271,74 @@ public class JbpmProcessBean {
 		LOGGER.debug(String.format("Value of variable name '%s': %s", variableName, varValue.toString()));
 		return varValue;
 	}
-	
+
 	/**
 	 * @see ExecutionService#getVariableNames(String)
 	 * 
-	 * @param processExecutionId
-	 * @return Variable names
+	 * @param processExecutionId String
+	 * @return Set<String>
 	 */
 	public Set<String> getVariableNames(String processExecutionId) {
 		Set<String> names = executionService.getVariableNames(processExecutionId);
 		LOGGER.debug(String.format("Found %d variable names for process %s", names.size(), processExecutionId));
 		return names;
 	}
-	
+
 	/**
 	 * @see ExecutionService#getVariables(String, Set)
 	 * 
-	 * @param processExecutionId
-	 * @param variableNames
-	 * @return
+	 * @param processExecutionId String
+	 * @param variableNames Set<String>
+	 * @return Map<String,Object>
 	 */
-	public Map<String,Object> getVariables(String processExecutionId, Set<String> variableNames) {
-		Map<String,Object> vars = executionService.getVariables(processExecutionId, variableNames);
+	public Map<String, Object> getVariables(String processExecutionId, Set<String> variableNames) {
+		Map<String, Object> vars = executionService.getVariables(processExecutionId, variableNames);
 		LOGGER.debug(String.format("Found %d variables for process %s", vars.size(), processExecutionId));
 		return vars;
 	}
 
-	/* 
-	 * Spring getters/setters 
+	/**
+	 * To get Resource Name.
+	 * 
+	 * @return String
 	 */
 	public String getResourceName() {
 		return resourceName;
 	}
 
+	/**
+	 * To set Resource Name.
+	 * 
+	 * @param resourceName String
+	 */
 	@Required
 	public void setResourceName(String resourceName) {
 		this.resourceName = resourceName;
 	}
 
+	/**
+	 * To get Process Key.
+	 * 
+	 * @return String
+	 */
 	public String getProcessKey() {
 		return processKey;
 	}
 
+	/**
+	 * To set Process Key.
+	 * 
+	 * @param processKey String
+	 */
 	public void setProcessKey(String processKey) {
 		this.processKey = processKey;
 	}
 
+	/**
+	 * To get Deployment Id.
+	 * 
+	 * @return String
+	 */
 	public String getDeploymentId() {
 		return deploymentId;
 	}

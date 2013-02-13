@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,40 +36,69 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.KV_PP_AddEditView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidator;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.KVPageProcessDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows KV_PP add and edit.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_AddEditView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_AddEditView
+	 */
 	public KV_PP_AddEditPresenter(BatchClassManagementController controller, KV_PP_AddEditView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// No implementation
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		KVPageProcessDTO kvPageProcessDTO = controller.getSelectedKvPageProcessDTO();
 		if (controller.isAdd()) {
-			view.setKeyPattern("");
+			view.setKeyPattern(BatchClassManagementConstants.EMPTY_STRING);
 			view.setLocation(view.getDefaultLocation());
-			view.setValuePattern("");
-			view.setNoOfWords("0");
-			view.setPageLevelFieldName("");
+			view.setValuePattern(BatchClassManagementConstants.EMPTY_STRING);
+			view.setNoOfWords(BatchClassManagementConstants.ZERO);
+			view.setPageLevelFieldName(BatchClassManagementConstants.EMPTY_STRING);
 			view.getValidateKeyPatternTextBox().addValidator(new EmptyStringValidator(view.getKeyPatternTextBox()));
+			view.getValidateKeyPatternTextBox().addValidator(
+					new RegExValidator(view.getValidateKeyPatternTextBox(), view.getKeyPatternTextBox(), true, false, true, null,
+							controller.getRpcService()));
 			view.getValidateKeyPatternTextBox().toggleValidDateBox();
 			view.getValidateValuePatternTextBox().addValidator(new EmptyStringValidator(view.getValuePatternTextBox()));
+			view.getValidateValuePatternTextBox().addValidator(
+					new RegExValidator(view.getValidateValuePatternTextBox(), view.getValuePatternTextBox(), true, false, true, null,
+							controller.getRpcService()));
 			view.getValidateNoOfWordsTextBox().addValidator(new NumberValidator(view.getNoOfWordsTextBox()));
 			view.getValidateValuePatternTextBox().toggleValidDateBox();
 			view.getValidatePageLevelFieldNameLabelTextBox().addValidator(
@@ -82,21 +111,49 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 			view.setNoOfWords(kvPageProcessDTO.getNoOfWords().toString());
 			view.setPageLevelFieldName(kvPageProcessDTO.getPageLevelFieldName());
 			view.getValidateKeyPatternTextBox().addValidator(new EmptyStringValidator(view.getKeyPatternTextBox()));
+			view.getValidateKeyPatternTextBox().addValidator(
+					new RegExValidator(view.getValidateKeyPatternTextBox(), view.getKeyPatternTextBox(), true, false, true, null,
+							controller.getRpcService()));
 			view.getValidateKeyPatternTextBox().toggleValidDateBox();
 			view.getValidateValuePatternTextBox().addValidator(new EmptyStringValidator(view.getValuePatternTextBox()));
+			view.getValidateValuePatternTextBox().addValidator(
+					new RegExValidator(view.getValidateValuePatternTextBox(), view.getValuePatternTextBox(), true, false, true, null,
+							controller.getRpcService()));
 			view.getValidateNoOfWordsTextBox().addValidator(new NumberValidator(view.getNoOfWordsTextBox()));
 			view.getValidateValuePatternTextBox().toggleValidDateBox();
 			view.getValidatePageLevelFieldNameLabelTextBox().addValidator(
 					new EmptyStringValidator(view.getPageLevelFieldNameTextBox()));
 			view.getValidatePageLevelFieldNameLabelTextBox().toggleValidDateBox();
 		}
+		view.getKeyPatternTextBox().setFocus(true);
 	}
 
+	/**
+	 * To perform operations in case of save.
+	 */
 	public void onSave() {
 		boolean validFlag = true;
-		if (validFlag && (!view.getValidateKeyPatternTextBox().validate() || !view.getValidateValuePatternTextBox().validate())) {
-			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-					BatchClassManagementMessages.BLANK_ERROR));
+		if (validFlag && !view.getValidateKeyPatternTextBox().isValid()) {
+			if (view.getValidateKeyPatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.BLANK_ERROR));
+			} else {
+				String label = view.getKeyPatternLabel().getText();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.VALIDATE_THE_REGEX_PATTERN, label.subSequence(0, label.length() - 1)));
+			}
+			validFlag = false;
+		}
+
+		if (validFlag && !view.getValidateValuePatternTextBox().isValid()) {
+			if (view.getValidateValuePatternTextBox().getWidget().getText().isEmpty()) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.BLANK_ERROR));
+			} else {
+				String label = view.getValuePatternLabel().getText();
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.VALIDATE_THE_REGEX_PATTERN, label.subSequence(0, label.length() - 1)));
+			}
 			validFlag = false;
 		}
 
@@ -111,7 +168,8 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 		if (validFlag && !view.getValidateNoOfWordsTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.NUMBER_ERROR)
-					+ " " + view.getNoOfWordsLabel().getText().substring(0, view.getNoOfWordsLabel().getText().length()));
+					+ BatchClassManagementConstants.SPACE
+					+ view.getNoOfWordsLabel().getText().substring(0, view.getNoOfWordsLabel().getText().length()));
 			validFlag = false;
 		}
 
@@ -144,6 +202,9 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 		}
 	}
 
+	/**
+	 * To perform operations in case of cancel.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getPluginConfigDTO().removeKVPageProcessDTO(controller.getSelectedKvPageProcessDTO());
@@ -155,5 +216,19 @@ public class KV_PP_AddEditPresenter extends AbstractBatchClassPresenter<KV_PP_Ad
 		}
 		controller.getMainPresenter().getModuleViewPresenter().bind();
 		controller.getMainPresenter().showModuleView();
+	}
+
+	/**
+	 * To do validation on key pattern validate button click.
+	 */
+	public void onKeyPatternValidateButtonClicked() {
+		view.getValidateKeyPatternTextBox().validate();
+	}
+
+	/**
+	 * To do validation on value pattern validate button click.
+	 */
+	public void onValuePatternValidateButtonClicked() {
+		view.getValidateValuePatternTextBox().validate();
 	}
 }

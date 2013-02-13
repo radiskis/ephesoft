@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,7 +57,7 @@ public class ExternalAppDialogBox extends DialogBox {
 	interface Binder extends UiBinder<Widget, ExternalAppDialogBox> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	private DialogBoxListener listener;
 
@@ -70,15 +70,26 @@ public class ExternalAppDialogBox extends DialogBox {
 
 	@UiField
 	VerticalPanel verticalPanel;
-
+	
 	private Frame frame;
 
 	private Button okButton;
 
 	private Button closeButton;
-
+	
 	public ExternalAppDialogBox(String url, int xDimension, int yDimension) {
-		setWidget(binder.createAndBindUi(this));
+		this(url, xDimension, yDimension, false, false, false, true);
+	}
+	
+	
+	public ExternalAppDialogBox(String url, int xDimension, int yDimension, boolean showOkButton, boolean showCloseButton,
+			boolean center) {
+		this(url, xDimension, yDimension, showOkButton, showCloseButton, center, true);
+	}
+
+	public ExternalAppDialogBox(String url, int xDimension, int yDimension, boolean showOkButton, boolean showCloseButton,
+			boolean center, boolean isVisible) {
+		setWidget(BINDER.createAndBindUi(this));
 		addStyleName(CSS_CONFIGURABLE_DIALOG_BOX);
 		setWidth(xDimension + "px");
 		setHeight(yDimension + "px");
@@ -105,21 +116,30 @@ public class ExternalAppDialogBox extends DialogBox {
 		closeButton.setTitle("Ctrl+z");
 		okButton.getElement().setAttribute("id", "okButtonElement");
 		closeButton.getElement().setAttribute("id", "closeButtonElement");
-		okButton.setVisible(false);
-		closeButton.setVisible(false);
+		okButton.setVisible(showOkButton);
+		closeButton.setVisible(showCloseButton);
 		HorizontalPanel horizontalButtonPanel = new HorizontalPanel();
 		horizontalButtonPanel.setSpacing(5);
-		horizontalButtonPanel.add(okButton);
-		horizontalButtonPanel.add(closeButton);
-		horizontalButtonPanel.setCellHorizontalAlignment(okButton, HasHorizontalAlignment.ALIGN_CENTER);
-		horizontalButtonPanel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_CENTER);
+		if (showOkButton) {
+			horizontalButtonPanel.add(okButton);
+			horizontalButtonPanel.setCellHorizontalAlignment(okButton, HasHorizontalAlignment.ALIGN_CENTER);
+		}
+		if (showCloseButton) {
+			horizontalButtonPanel.add(closeButton);
+			horizontalButtonPanel.setCellHorizontalAlignment(closeButton, HasHorizontalAlignment.ALIGN_CENTER);
+		}
 		verticalPanel.add(frame);
 		verticalPanel.setCellHorizontalAlignment(frame, HasHorizontalAlignment.ALIGN_CENTER);
 		verticalPanel.setCellHorizontalAlignment(horizontalButtonPanel, HasHorizontalAlignment.ALIGN_CENTER);
 		verticalPanel.add(horizontalButtonPanel);
 		setModal(true);
 		setVisible(true);
-		show();
+		if (center) {
+			center();
+		}
+		if(isVisible) {
+			show();
+		}
 	}
 
 	@Override
@@ -150,5 +170,9 @@ public class ExternalAppDialogBox extends DialogBox {
 
 	public void setDialogTitle(String caption) {
 		setText(caption);
+	}
+	
+	public Frame getFrame() {
+		return frame;
 	}
 }

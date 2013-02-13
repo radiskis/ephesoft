@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,29 +44,50 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the Fuzzy DB properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class FuzzyDBPropertiesViewPresenter extends AbstractBatchClassPresenter<FuzzyDBPropertiesView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FuzzyDBPropertiesView
+	 */
 	public FuzzyDBPropertiesViewPresenter(BatchClassManagementController controller, FuzzyDBPropertiesView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		if (controller.getSelectedPlugin() != null && controller.getSelectedPlugin().getPlugin().getPluginName().equals(
-				PluginNameConstants.FUZZYDB_PLUGIN)) {
-		BatchClassPluginDTO batchPluginDTO = controller.getSelectedPlugin();
-		int row = 0;
-		for (BatchClassPluginConfigDTO pluginConfigDTO : batchPluginDTO.getBatchClassPluginConfigs()) {
-			if (!(pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE)
-					|| pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.FIELD_TYPE) || pluginConfigDTO.getName()
-					.equalsIgnoreCase(AdminConstants.ROW_TYPE))) {
-				view.setProperties(pluginConfigDTO, row);
-				row++;
+		if (controller.getSelectedPlugin() != null
+				&& controller.getSelectedPlugin().getPlugin().getPluginName().equals(PluginNameConstants.FUZZYDB_PLUGIN)) {
+			BatchClassPluginDTO batchPluginDTO = controller.getSelectedPlugin();
+			int row = 0;
+			for (BatchClassPluginConfigDTO pluginConfigDTO : batchPluginDTO.getBatchClassPluginConfigs()) {
+				if (!(pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.DOCUMENT_TYPE)
+						|| pluginConfigDTO.getName().equalsIgnoreCase(AdminConstants.FIELD_TYPE) || pluginConfigDTO.getName()
+						.equalsIgnoreCase(AdminConstants.ROW_TYPE))) {
+					view.setProperties(pluginConfigDTO, row);
+					row++;
+				}
 			}
 		}
 	}
-}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// to be used in case of event handling

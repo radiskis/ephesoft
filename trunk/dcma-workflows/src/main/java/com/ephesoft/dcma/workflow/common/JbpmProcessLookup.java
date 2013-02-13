@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,63 +43,70 @@ import org.jbpm.api.RepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Bean to lookup a ProcessDefinition by key.
- * Can be used to lookup the current (last) deployed process definition version.
+ * Bean to lookup a ProcessDefinition by key. Can be used to lookup the current (last) deployed process definition version.
  * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.api.ProcessDefinition
  */
 
 public class JbpmProcessLookup {
 
+	/**
+	 * Instance of {@link RepositoryService}.
+	 */
 	@Autowired
 	private RepositoryService repositoryService;
-	
+
+	/**
+	 * processKey String.
+	 */
 	private String processKey;
 
 	/**
 	 * Get the current (last) version of the process with current process key.
+	 * 
 	 * @return {@link ProcessDefinition}
 	 */
 	public ProcessDefinition getCurrent() {
 		ProcessDefinition processDefinition = null;
 		ProcessDefinitionQuery dfq = repositoryService.createProcessDefinitionQuery();
-		List<ProcessDefinition> result = dfq.processDefinitionKey(processKey)
-			.orderDesc(ProcessDefinitionQuery.PROPERTY_VERSION)
-			.page(0, 1)
-			.list();
-		
-		if(!result.isEmpty()) {
+		List<ProcessDefinition> result = dfq.processDefinitionKey(processKey).orderDesc(ProcessDefinitionQuery.PROPERTY_VERSION).page(
+				0, 1).list();
+
+		if (!result.isEmpty()) {
 			processDefinition = result.get(0);
-		} 
+		}
 		return processDefinition;
 	}
-	
+
 	/**
 	 * Get all versions of the process with current process key.
+	 * 
 	 * @return List of {@link ProcessDefinition}
 	 */
 	public List<ProcessDefinition> getAllVersions() {
-		
-		List<ProcessDefinition> result = repositoryService.createProcessDefinitionQuery()
-				.processDefinitionKey(processKey)
-				.list();
+
+		List<ProcessDefinition> result = repositoryService.createProcessDefinitionQuery().processDefinitionKey(processKey).list();
 		return result;
 	}
-	
+
 	/**
 	 * Get a process definition with given version.
+	 * 
 	 * @param version int Specific version
 	 * @return {@link ProcessDefinition} with current process key and given version.
 	 */
 	public ProcessDefinition getVersion(int version) {
 		String processDefId = String.format("%s-%d", processKey, version);
-		
+
 		ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
 		return processDefinitionQuery.processDefinitionId(processDefId).uniqueResult();
 	}
 
-	/* Setters / Getters for Spring injection */
-	
 	/**
+	 * To get Process Key.
+	 * 
 	 * @return the processKey
 	 */
 	public String getProcessKey() {
@@ -107,10 +114,12 @@ public class JbpmProcessLookup {
 	}
 
 	/**
-	 * @param processKey the processKey to set
+	 * To set Process Key.
+	 * 
+	 * @param processKey String
 	 */
 	public void setProcessKey(String processKey) {
 		this.processKey = processKey;
 	}
-	
+
 }

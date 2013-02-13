@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,38 +35,39 @@
 
 package com.ephesoft.dcma.gwt.core.client.validator;
 
-import com.ephesoft.dcma.gwt.core.client.validator.Validator;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.HasValue;
 
 public class DateFormatValidator implements Validator {
 
-	private HasValue<String> _value;
-	private DateTimeFormat _format;
+	private HasValue<String> value;
+	private DateTimeFormat format;
 	
 	public DateFormatValidator(HasValue<String> value) {
 		this("dd/MM/yyyy", value);
 	}
 
 	public DateFormatValidator(String pattern, HasValue<String> value) {
-		_format = DateTimeFormat.getFormat(pattern);
-		_value = value;
+		format = DateTimeFormat.getFormat(pattern);
+		this.value = value;
 	}
  
 	public void setValue(HasValue<String> value) {
-		_value = value;
+		this.value = value;
 	}
  
 	@Override
 	public boolean validate() {
+		Boolean valid = true;
 		try {
-			if (_value.getValue() == null) return false;
-			_format.parse(_value.getValue());
+			if (value.getValue() == null) {
+				valid = false;
+			}
+			format.parse(value.getValue());
 		} catch (Exception e) {
 			// the value couldn't be parsed by the pattern, return false
-			return false;
-		}
- 
-		return true;
+			valid = false;
+		} 
+		return valid;
 	}
 }

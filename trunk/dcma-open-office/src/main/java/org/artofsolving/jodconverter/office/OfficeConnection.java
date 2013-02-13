@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -69,52 +69,67 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
 /**
- * Connection details are managed here
+ * Connection details are managed here.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.sun.star.beans.XPropertySet
  */
+@SuppressWarnings("PMD")
 class OfficeConnection implements OfficeContext {
 
-//	private static AtomicInteger bridgeIndex = new AtomicInteger();
-
+	/**
+	 * unoUrl UnoUrl.
+	 */
 	private final UnoUrl unoUrl;
 
-//	private XComponent bridgeComponent;
+	/**
+	 * serviceManager XMultiComponentFactory.
+	 */
 	private XMultiComponentFactory serviceManager;
+	
+	/**
+	 * componentContext XComponentContext.
+	 */
 	private XComponentContext componentContext;
 
+	/**
+	 * connectionEventListeners List<OfficeConnectionEventListener>.
+	 */
 	private final List<OfficeConnectionEventListener> connectionEventListeners = new ArrayList<OfficeConnectionEventListener>();
 
+	/**
+	 * connected boolean.
+	 */
 	private volatile boolean connected = false;
 
-	// private XEventListener bridgeListener = new XEventListener() {
-	//
-	// public void disposing(EventObject event) {
-	// if (connected) {
-	// connected = false;
-	// logger.info(String.format("disconnected: '%s'", unoUrl));
-	// OfficeConnectionEvent connectionEvent = new OfficeConnectionEvent(OfficeConnection.this);
-	// for (OfficeConnectionEventListener listener : connectionEventListeners) {
-	// listener.disconnected(connectionEvent);
-	// }
-	// }
-	// // else we tried to connect to a server that doesn't speak URP
-	// }
-	// };
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private final Logger LOGGER = Logger.getLogger(getClass().getName());
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
-
+	/**
+	 * Office Connection.
+	 * @param unoUrl UnoUrl
+	 */
 	public OfficeConnection(UnoUrl unoUrl) {
 		this.unoUrl = unoUrl;
 	}
 
+	/**
+	 * To add Connection Event Listener.
+	 * @param connectionEventListener OfficeConnectionEventListener
+	 */
 	public void addConnectionEventListener(OfficeConnectionEventListener connectionEventListener) {
 		connectionEventListeners.add(connectionEventListener);
 	}
 
+	/**
+	 * To set up connection.
+	 * @throws ConnectException if failure occurs
+	 */
 	public void connect() throws ConnectException {
-		logger.fine(String.format("connecting with connectString '%s'", unoUrl));
+		LOGGER.fine(String.format("connecting with connectString '%s'", unoUrl));
 		try {
 
 			XComponentContext localContext = Bootstrap.createInitialComponentContext(null);
@@ -128,7 +143,7 @@ class OfficeConnection implements OfficeContext {
 			componentContext = OfficeUtils.cast(XComponentContext.class, properties.getPropertyValue("DefaultContext"));
 			serviceManager = componentContext.getServiceManager();
 			connected = true;
-			logger.info(String.format("connected: '%s'", unoUrl));
+			LOGGER.info(String.format("connected: '%s'", unoUrl));
 			OfficeConnectionEvent connectionEvent = new OfficeConnectionEvent(this);
 			for (OfficeConnectionEventListener listener : connectionEventListeners) {
 				listener.connected(connectionEvent);
@@ -140,15 +155,26 @@ class OfficeConnection implements OfficeContext {
 		}
 	}
 
+	/**
+	 * To check whether connected or not.
+	 * @return boolean
+	 */
 	public boolean isConnected() {
 		return connected;
 	}
 
+	/**
+	 * To disconnect.
+	 */
 	public synchronized void disconnect() {
-		logger.fine(String.format("disconnecting: '%s'", unoUrl));
+		LOGGER.fine(String.format("disconnecting: '%s'", unoUrl));
 		((XComponent) componentContext).dispose();
 	}
 
+	/**
+	 * To get service
+	 * @param serviceName String
+	 */
 	public Object getService(String serviceName) {
 		try {
 			return serviceManager.createInstanceWithContext(serviceName, componentContext);

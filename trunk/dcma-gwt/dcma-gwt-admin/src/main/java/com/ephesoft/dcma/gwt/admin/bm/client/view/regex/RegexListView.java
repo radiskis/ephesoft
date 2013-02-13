@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,45 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show regex list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class RegexListView extends View<RegexListPresenter> {
 
+	/**
+	 * To get Regex List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getRegexListView() {
 		return listView;
 	}
 
-	public HeaderColumn pattern = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PATTERN),15);
-	public HeaderColumn blank = new HeaderColumn(1, "",15);
+	/**
+	 * pattern HeaderColumn.
+	 */
+	public HeaderColumn pattern = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PATTERN),
+			BatchClassManagementConstants.FIFTEEN);
 
+	/**
+	 * blank HeaderColumn.
+	 */
+	public HeaderColumn blank = new HeaderColumn(1, BatchClassManagementConstants.EMPTY_STRING, BatchClassManagementConstants.FIFTEEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public RegexListView() {
 		super();
-		listView.addHeaderColumns(pattern,blank);
+		listView.addHeaderColumns(pattern, blank);
 	}
 }

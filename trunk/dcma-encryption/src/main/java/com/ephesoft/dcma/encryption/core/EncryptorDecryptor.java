@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,43 +58,57 @@ import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.encryption.constants.EncryptionConstants;
 import com.ephesoft.dcma.encryption.exception.CryptographyException;
 
-public class EncryptorDecryptor {
-	
-	private String KEY = "encryptorKey";
-	
-	private int ITERATION_COUNT = 10;
-	
-	private String ALGORITHM = "PBEWithMD5AndDES";
-	
-	private int SALT_LENGTH = 8;
-	
-	
+/**
+ * This class is used to encrypt and decrypt.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.encryption.exception.CryptographyException
+ */
+public final class EncryptorDecryptor {
 
-	private static EncryptorDecryptor encryptor;
+	/**
+	 * An instance of {@link EncryptorDecryptor}.
+	 */
+	private static EncryptorDecryptor encryptor = new EncryptorDecryptor();
 
-	private static final Logger log = LoggerFactory.getLogger(EncryptorDecryptor.class);
+	/**
+	 * An instance of Logger for logging.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(EncryptorDecryptor.class);
 
 	private EncryptorDecryptor() {
 		super();
 	}
 
-	public static synchronized EncryptorDecryptor getEncryptorDecryptor() {
-		if (encryptor == null) {
-			encryptor = new EncryptorDecryptor();
-		}
+	/**
+	 * getter for encryptorDecryptor.
+	 * @return {@link EncryptorDecryptor}
+	 */
+	public static EncryptorDecryptor getEncryptorDecryptor() {
 		return encryptor;
 	}
 
-	public synchronized byte[] startCrypting(byte[] data, byte[] salt, boolean isEncryption) throws CryptographyException{
-		KeySpec keySpec = new PBEKeySpec(KEY.toCharArray(), salt, ITERATION_COUNT);
+	/**
+	 * This method is used to start the encryption process.
+	 * 
+	 * @param data byte[]
+	 * @param salt byte[]
+	 * @param isEncryption boolean
+	 * @return byte[]
+	 * @throws CryptographyException {@link CryptographyException}
+	 */
+	public byte[] startCrypting(byte[] data, byte[] salt, boolean isEncryption) throws CryptographyException {
+		KeySpec keySpec = new PBEKeySpec(EncryptionConstants.KEY.toCharArray(), salt, EncryptionConstants.ITERATION_COUNT);
 		SecretKey key;
 		byte[] finalBytes = null;
 		try {
-			key = SecretKeyFactory.getInstance(ALGORITHM).generateSecret(keySpec);
+			key = SecretKeyFactory.getInstance(EncryptionConstants.ALGORITHM).generateSecret(keySpec);
 			Cipher ecipher = Cipher.getInstance(key.getAlgorithm());
-			AlgorithmParameterSpec paramSpec = new PBEParameterSpec(salt, ITERATION_COUNT);
+			AlgorithmParameterSpec paramSpec = new PBEParameterSpec(salt, EncryptionConstants.ITERATION_COUNT);
 			if (isEncryption) {
 				ecipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
 			} else {
@@ -102,37 +116,78 @@ public class EncryptorDecryptor {
 			}
 			finalBytes = ecipher.doFinal(data);
 		} catch (InvalidKeySpecException e) {
-			log.error("Key used is invalid",e);
-			throw new CryptographyException("Key used is invalid", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Key used is invalid", e);
+				throw new CryptographyException("Key used is invalid", e);
+			} else {
+				LOGGER.error("Decryption : Key used is invalid", e);
+				throw new CryptographyException("Key used is invalid", e);
+			}
 		} catch (NoSuchAlgorithmException e) {
-			log.error("Algorithm used does not exist",e);
-			throw new CryptographyException("Algorithm used does not exist", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Algorithm used does not exist", e);
+				throw new CryptographyException("Algorithm used does not exist", e);
+			} else {
+				LOGGER.error("Decryption : Algorithm used does not exist", e);
+				throw new CryptographyException("Algorithm used does not exist", e);
+			}
 		} catch (NoSuchPaddingException e) {
-			log.error("Padding used does not exist",e);
-			throw new CryptographyException("Padding used does not exist", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Padding used does not exist", e);
+				throw new CryptographyException("Padding used does not exist", e);
+			} else {
+				LOGGER.error("Decryption : Padding used does not exist", e);
+				throw new CryptographyException("Padding used does not exist", e);
+			}
 		} catch (InvalidKeyException e) {
-			log.error("Key generated is invalid",e);
-			throw new CryptographyException("Key generated is invalid", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Key generated is invalid", e);
+				throw new CryptographyException("Key generated is invalid", e);
+			} else {
+				LOGGER.error("Decryption : Key generated is invalid", e);
+				throw new CryptographyException("Key generated is invalid", e);
+			}
 		} catch (InvalidAlgorithmParameterException e) {
-			log.error("Algorithm parameter is invalid",e);
-			throw new CryptographyException("Algorithm parameter is invalid", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Algorithm parameter is invalid", e);
+				throw new CryptographyException("Algorithm parameter is invalid", e);
+			} else {
+				LOGGER.error("Decryption : Algorithm parameter is invalid", e);
+				throw new CryptographyException("Algorithm parameter is invalid", e);
+			}
 		} catch (IllegalBlockSizeException e) {
-			log.error("Block size is illegal",e);
-			throw new CryptographyException("Block size is illegal", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Block size is illegal", e);
+				throw new CryptographyException("Block size is illegal", e);
+			} else {
+				LOGGER.error("Decryption : Block size is illegal", e);
+				throw new CryptographyException("Block size is illegal", e);
+			}
 		} catch (BadPaddingException e) {
-			log.error("Padding done is invalid",e);
-			throw new CryptographyException("Padding done is invalid", e);
+			if (isEncryption) {
+				LOGGER.error("Encryption : Padding done is invalid", e);
+				throw new CryptographyException("Padding done is invalid", e);
+			} else {
+				LOGGER.error("Decryption : Padding done is invalid", e);
+				throw new CryptographyException("Padding done is invalid", e);
+			}
 		}
 		return finalBytes;
 	}
 
+	/**
+	 * This method encrypts the string provided.
+	 * @param decryptedString {@link String}
+	 * @return {@link String}
+	 * @throws CryptographyException {@link CryptographyException}
+	 */
 	public String encryptString(String decryptedString) throws CryptographyException {
-		byte[] salt = generateSalt(SALT_LENGTH);
+		byte[] salt = generateSalt(EncryptionConstants.SALT_LENGTH);
 		byte[] decryptedStringInBytes;
 		try {
 			decryptedStringInBytes = decryptedString.getBytes("UTF8");
 		} catch (UnsupportedEncodingException e) {
-			log.error("Could not encode string using UTF-8",e);
+			LOGGER.error("Could not encode string using UTF-8", e);
 			throw new CryptographyException("Could not encode string using UTF-8", e);
 		}
 		byte[] encryptedByte = startCrypting(decryptedStringInBytes, salt, true);
@@ -149,17 +204,23 @@ public class EncryptorDecryptor {
 		return randomBytes;
 	}
 
+	/**
+	 * This method is used to decrypt the encrypted string.
+	 * @param encryptedString {@link String}
+	 * @return {@link String}
+	 * @throws CryptographyException {@link CryptographyException}
+	 */
 	public String decryptString(String encryptedString) throws CryptographyException {
 		byte[] data;
 		try {
 			data = encryptedString.getBytes("UTF8");
 		} catch (UnsupportedEncodingException e) {
-			log.error("Could not decode string using UTF-8",e);
+			LOGGER.error("Could not decode string using UTF-8", e);
 			throw new CryptographyException("Could not decode string using UTF-8", e);
 		}
 		data = Base64.decodeBase64(data);
-		byte[] salt = ArrayUtils.subarray(data, 0, SALT_LENGTH);
-		data = ArrayUtils.subarray(data, SALT_LENGTH, data.length);
+		byte[] salt = ArrayUtils.subarray(data, 0, EncryptionConstants.SALT_LENGTH);
+		data = ArrayUtils.subarray(data, EncryptionConstants.SALT_LENGTH, data.length);
 		byte[] result = startCrypting(data, salt, false);
 		return new String(result);
 	}

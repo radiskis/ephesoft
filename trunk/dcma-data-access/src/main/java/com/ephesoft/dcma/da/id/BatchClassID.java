@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,12 +37,31 @@ package com.ephesoft.dcma.da.id;
 
 import java.io.Serializable;
 
+/**
+ * This class is used to fetch the batch class identifier.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.io.Serializable
+ */
 public class BatchClassID implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * identifier String.
+	 */
 	private final String identifier;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param identifier String
+	 * @throws IllegalArgumentException in case of error
+	 */
 	public BatchClassID(String identifier) throws IllegalArgumentException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("null identifier not allowed");
@@ -50,14 +69,26 @@ public class BatchClassID implements Serializable {
 		this.identifier = identifier;
 	}
 
+	/**
+	 * To get id.
+	 * @return String
+	 */
 	public String getID() {
 		return identifier;
 	}
 
+	/**
+	 * Convert to string.
+	 * @return String
+	 */
 	public String toString() {
 		return this.identifier;
 	}
 
+	/**
+	 * To check equality between two objects.
+	 * @return boolean
+	 */
 	public boolean equals(Object obj) {
 		boolean isEquals = false;
 		if (obj instanceof BatchClassID) {
@@ -67,6 +98,10 @@ public class BatchClassID implements Serializable {
 		return isEquals;
 	}
 
+	/**
+	 * To compute hashcode.
+	 * @return int
+	 */
 	public int hashCode() {
 		return identifier.hashCode();
 	}

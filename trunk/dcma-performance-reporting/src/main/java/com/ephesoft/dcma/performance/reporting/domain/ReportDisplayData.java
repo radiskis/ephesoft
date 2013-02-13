@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,44 +35,94 @@
 
 package com.ephesoft.dcma.performance.reporting.domain;
 
+/**
+ * This class displayes report data.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class ReportDisplayData {
 
+	/**
+	 * entityName String.
+	 */
 	private String entityName;
 
+	/**
+	 * batch double.
+	 */
 	private double batch;
 
+	/**
+	 * docs double.
+	 */
 	private double docs;
 
+	/**
+	 * pages double.
+	 */
 	private double pages;
 
+	/**
+	 * To get Entity Name.
+	 * @return String
+	 */
 	public String getEntityName() {
 		return entityName;
 	}
 
+	/**
+	 * To set Entity Name.
+	 * @param entityName String
+	 */
 	public void setEntityName(String entityName) {
 		this.entityName = entityName;
 	}
 
+	/**
+	 * To get Batch.
+	 * @return double
+	 */
 	public double getBatch() {
 		return batch;
 	}
 
+	/**
+	 * To set Batch.
+	 * @param batch double
+	 */
 	public void setBatch(double batch) {
 		this.batch = batch;
 	}
 
+	/**
+	 * To get docs.
+	 * @return double
+	 */
 	public double getDocs() {
 		return docs;
 	}
 
+	/**
+	 * To set docs.
+	 * @param docs double
+	 */
 	public void setDocs(double docs) {
 		this.docs = docs;
 	}
 
+	/**
+	 * To get pages.
+	 * @return double
+	 */
 	public double getPages() {
 		return pages;
 	}
 
+	/**
+	 * To set pages.
+	 * @param pages double
+	 */
 	public void setPages(double pages) {
 		this.pages = pages;
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,14 +53,18 @@ import com.ephesoft.dcma.da.domain.RegexValidation;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.RegexValidationDao
  */
 @Repository
 public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implements RegexValidationDao {
 
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(RegexValidationDaoImpl.class);
 
 	/**
-	 * An api to fetch all Regex Validation by field type.
+	 * An API to fetch all Regex Validation by field type.
 	 * 
 	 * @param fieldType FieldType
 	 * @return List<RegexValidation>
@@ -74,7 +78,7 @@ public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implem
 	}
 
 	/**
-	 * An api to insert the RegexValidation object.
+	 * An API to insert the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */
@@ -84,7 +88,7 @@ public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implem
 	}
 
 	/**
-	 * An api to update the RegexValidation object.
+	 * An API to update the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */
@@ -94,7 +98,7 @@ public class RegexValidationDaoImpl extends HibernateDao<RegexValidation> implem
 	}
 
 	/**
-	 * An api to remove the RegexValidation object.
+	 * An API to remove the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */

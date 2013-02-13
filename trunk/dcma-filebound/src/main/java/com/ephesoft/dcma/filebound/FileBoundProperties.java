@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,22 +41,51 @@ import com.ephesoft.dcma.core.common.PluginProperty;
  * This enum is responsible for loading property fields with data base.
  * 
  * @author Ephesoft
- * 
  * @version 1.0
  * @see com.ephesoft.dcma.cmis.FileBoundExporter
  */
 public enum FileBoundProperties implements PluginProperty {
 	
+	/**
+	 * filebound switch.
+	 */
 	FILEBOUND_SWITCH("filebound.switch"),
+	/**
+	 * filebound connection url.
+	 */
 	FILEBOUND_CONNECTION_URL("filebound.connection_url"),
+	/**
+	 * filebound user name.
+	 */
 	FILEBOUND_USERNAME("filebound.username"),
+	/**
+	 * filebound project name.
+	 */
 	FILEBOUND_PROJECT_NAME("filebound.project_name"),
+	/**
+	 * filebound password.
+	 */
 	FILEBOUND_PASSWORD("filebound.password"),
+	/**
+	 * filebound index filed.
+	 */
 	FILEBOUND_INDEX_FIELD("filebound.index_field"),
+	/**
+	 * filebound division.
+	 */
 	FILEBOUND_DIVISION("filebound.division"),
+	/**
+	 * filebound separator.
+	 */
 	FILEBOUND_SEPERATOR("filebound.separator"),
+	/**
+	 * filebound export format.
+	 */
 	FILEBOUND_EXPORT_FORMAT("filebound.exportformat");
 	
+	/**
+	 * A String type to store the key.
+	 */
 	String key;
 	
 	FileBoundProperties(final String key) {

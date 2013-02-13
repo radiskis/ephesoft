@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -62,7 +62,6 @@ import com.ephesoft.dcma.util.FileUtils;
  * particular instance.
  * 
  * @author Ephesoft
- * @see com.ephesoft.dcma.barcodeextraction.AbstratctBarcodeExtractionTests
  * 
  */
 
@@ -154,7 +153,7 @@ public class BarcodeExtractionReaderTest extends AbstractBarcodeExtractionTests 
 	public void setUp() {
 		boolean result = false;
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId("BI1A");
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		batchInstanceIdSuccess = "BI1A";
 		batchInstanceIdFailure = "BI15";

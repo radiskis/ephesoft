@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,8 +50,10 @@ public class PluginXmlDTO implements IsSerializable {
 	private Boolean isScriptPlugin;
 	private String scriptFileName;
 	private String backUpFileName;
+	private String applicationContextPath;
 	private List<PluginConfigXmlDTO> configXmlDTOs;
 	private List<PluginDependencyXmlDTO> dependencyXmlDTOs;
+	private Boolean overrideExisting;
 	
 
 	
@@ -210,4 +212,35 @@ public class PluginXmlDTO implements IsSerializable {
 		this.configXmlDTOs = configXmlDTOs;
 	}
 
+
+	
+	/**
+	 * @return the applicationContextPath
+	 */
+	public String getApplicationContextPath() {
+		return applicationContextPath;
+	}
+
+
+	
+	/**
+	 * @param applicationContextPath the applicationContextPath to set
+	 */
+	public void setApplicationContextPath(String applicationContextPath) {
+		this.applicationContextPath = applicationContextPath;
+	}
+
+	/**
+	 * @return the overrideExisting
+	 */
+	public Boolean getOverrideExisting() {
+		return overrideExisting;
+	}
+	
+	/**
+	 * @param overrideExisting the overrideExisting to set
+	 */
+	public void setOverrideExisting(Boolean overrideExisting) {
+		this.overrideExisting = overrideExisting;
+	}
 }

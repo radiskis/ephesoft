@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,10 +33,10 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.AllPluginsListView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.AllPluginsListView;
 import com.google.gwt.event.shared.HandlerManager;
 
 
@@ -50,12 +50,16 @@ public class AllPluginsListPresenter extends AbstractCustomWorkflowPresenter<All
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void bind() {
-	
+		/**
+		 * Bind your view with the values here
+		 */
 	}
 
 }

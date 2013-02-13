@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,6 +49,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.PluginListView;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
+import com.ephesoft.dcma.gwt.core.client.ui.table.Table;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -63,51 +64,104 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit module.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class ModuleView extends View<ModuleViewPresenter> {
 
-	private static final String _20PX = "20px";
+	/**
+	 * HEIGHT String.
+	 */
+	private static final String HEIGHT = "20px";
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, ModuleView> {
 	}
 
+	/**
+	 * moduleDetailView ModuleDetailView.
+	 */
 	@UiField
 	protected ModuleDetailView moduleDetailView;
 
+	/**
+	 * editModuleView EditModuleView.
+	 */
 	@UiField
 	protected EditModuleView editModuleView;
 
+	/**
+	 * pluginListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel pluginListPanel;
 
-	private PluginListView pluginListView;
+	/**
+	 * pluginListView PluginListView.
+	 */
+	private final PluginListView pluginListView;
 
+	/**
+	 * pluginListPresenter PluginListPresenter.
+	 */
 	private PluginListPresenter pluginListPresenter;
+
+	/**
+	 * moduleConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel moduleConfigurationCaptionPanel;
 
+	/**
+	 * editPlugin Button.
+	 */
 	@UiField
 	protected Button editPlugin;
 
+	/**
+	 * addPlugin Button.
+	 */
 	@UiField
 	protected Button addPlugin;
 
+	/**
+	 * buttonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel buttonPanel;
 
+	/**
+	 * moduleViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel moduleViewPanel;
 
+	/**
+	 * moduleDetailViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel moduleDetailViewPanel;
 
+	/**
+	 * editModuleViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editModuleViewPanel;
 
-	@UiField
-	protected Button editModuleButton;
-
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public ModuleView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -117,15 +171,20 @@ public class ModuleView extends View<ModuleViewPresenter> {
 		moduleConfigurationCaptionPanel.setCaptionHTML(AdminConstants.MODULE_CONFIGURATION);
 		pluginListPanel.add(pluginListView.listView);
 		editPlugin.setText(AdminConstants.EDIT_BUTTON);
-		editPlugin.setHeight(_20PX);
+		editPlugin.setHeight(HEIGHT);
 		addPlugin.setText(AdminConstants.EDIT_LIST_BUTTON);
-		addPlugin.setHeight(_20PX);
+		addPlugin.setHeight(HEIGHT);
 		buttonPanel.setStyleName("topPadd");
-		editModuleButton.setText(AdminConstants.EDIT_BUTTON);
+
 	}
 
+	/**
+	 * To create Plugin List.
+	 * 
+	 * @param plugins Collection<BatchClassPluginDTO>
+	 */
 	public void createPluginList(Collection<BatchClassPluginDTO> plugins) {
-
+		int maxResult = 0;
 		List<BatchClassPluginDTO> pluginsList = new ArrayList<BatchClassPluginDTO>(plugins);
 
 		presenter.getController().getMainPresenter().sortPluginList(pluginsList);
@@ -133,44 +192,77 @@ public class ModuleView extends View<ModuleViewPresenter> {
 
 		pluginListPresenter = new PluginListPresenter(presenter.getController(), pluginListView);
 		pluginListPresenter.setPluginDetailDTO(plugins);
-		pluginListView.listView.initTable(recordList.size(), pluginListPresenter, recordList, true, false, pluginListPresenter);
+		maxResult = Math.min(recordList.size(), Table.visibleRecodrCount);
+		pluginListView.listView.initTable(recordList.size(), pluginListPresenter, recordList.subList(0, maxResult), true, false,
+				pluginListPresenter, null, false);
 	}
 
+	/**
+	 * To set Plugin List.
+	 * 
+	 * @param plugins Collection<BatchClassPluginDTO>
+	 * @return List<Record>
+	 */
 	public List<Record> setPluginList(Collection<BatchClassPluginDTO> plugins) {
-
-		if (null == plugins) {
-			return null;
-		}
-
 		List<Record> recordList = new LinkedList<Record>();
-		for (final BatchClassPluginDTO pluginDTO : plugins) {
-			if (!pluginDTO.isDeleted()) {
-				Record record = new Record(pluginDTO.getIdentifier());
-				record.addWidget(pluginListView.name, new Label(pluginDTO.getPlugin().getPluginName()));
-				record.addWidget(pluginListView.description, new Label(pluginDTO.getPlugin().getPluginDescription()));
-				recordList.add(record);
+		if (null == plugins) {
+			recordList = null;
+		} else {
+			for (final BatchClassPluginDTO pluginDTO : plugins) {
+				if (!pluginDTO.isDeleted()) {
+					Record record = new Record(pluginDTO.getIdentifier());
+					record.addWidget(pluginListView.name, new Label(pluginDTO.getPlugin().getPluginName()));
+					record.addWidget(pluginListView.description, new Label(pluginDTO.getPlugin().getPluginDescription()));
+					record.addWidget(pluginListView.information, new Label(pluginDTO.getPlugin().getPluginInformation()));
+					recordList.add(record);
+				}
 			}
 		}
 		return recordList;
 	}
 
+	/**
+	 * To get Module Detail View.
+	 * 
+	 * @return ModuleDetailView
+	 */
 	public ModuleDetailView getModuleDetailView() {
 		return moduleDetailView;
 	}
 
+	/**
+	 * To get Module List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getModuleListView() {
 		return pluginListView.listView;
 	}
 
+	/**
+	 * To get Plugin List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getPluginListView() {
 		return pluginListView.listView;
 	}
 
+	/**
+	 * To perform operations on Edit Plugin Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editPlugin")
 	public void onEditPluginClicked(ClickEvent clickEvent) {
 		pluginListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on add Plugin Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addPlugin")
 	public void onAddPluginClicked(ClickEvent clickEvent) {
 
@@ -191,28 +283,45 @@ public class ModuleView extends View<ModuleViewPresenter> {
 		presenter.getController().getMainPresenter().showAddPluginView();
 	}
 
+	/**
+	 * To get Module View Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getModuleViewPanel() {
 		return moduleViewPanel;
 	}
 
+	/**
+	 * To get Module Detail View Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getModuleDetailViewPanel() {
 		return moduleDetailViewPanel;
 	}
 
+	/**
+	 * To get Edit Module View Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getEditModuleViewPanel() {
 		return editModuleViewPanel;
 	}
 
-	@UiHandler("editModuleButton")
-	public void onEditModuleButtonClick(ClickEvent clickEvent) {
-		presenter.onEditModuleButtonClick();
-	}
-
+	/**
+	 * To get Edit Module View.
+	 * 
+	 * @return EditModuleView
+	 */
 	public EditModuleView getEditModuleView() {
 		return editModuleView;
 	}
 
 	/**
+	 * To get Add Plugin.
+	 * 
 	 * @return the addPlugin
 	 */
 	public Button getAddPlugin() {
@@ -220,13 +329,17 @@ public class ModuleView extends View<ModuleViewPresenter> {
 	}
 
 	/**
-	 * @param addPlugin the addPlugin to set
+	 * To set Add Plugin.
+	 * 
+	 * @param addPlugin Button
 	 */
 	public void setAddPlugin(Button addPlugin) {
 		this.addPlugin = addPlugin;
 	}
 
 	/**
+	 * To get Edit Plugin.
+	 * 
 	 * @return the editPlugin
 	 */
 	public Button getEditPlugin() {

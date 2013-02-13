@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,7 +48,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -59,7 +58,12 @@ import com.ephesoft.dcma.util.ApplicationContextUtil;
 /**
  * Base test case with standard injection mechanism. Subclasses have to set the {@link ContextConfiguration} annotation to correctly
  * load a context for dependency injection.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  */
+@SuppressWarnings("PMD")
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners( {DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
 public abstract class DcmaTestBase extends TestCase implements ApplicationContextAware {
@@ -80,6 +84,8 @@ public abstract class DcmaTestBase extends TestCase implements ApplicationContex
 	}
 
 	/**
+	 * To get Single Bean with Name.
+	 * 
 	 * @param <T> the type of the bean in question
 	 * @param clazz the class
 	 * @return the bean of type {@code c} with its name in a single map entry
@@ -91,7 +97,7 @@ public abstract class DcmaTestBase extends TestCase implements ApplicationContex
 	}
 
 	/**
-	 * Compares collections
+	 * Compares collections.
 	 * 
 	 * @param expected the expected collection
 	 * @param actual the actual collection
@@ -110,30 +116,16 @@ public abstract class DcmaTestBase extends TestCase implements ApplicationContex
 		assertTrue("Contents differ", expected.containsAll(actual));
 	}
 
-	/**
-	 * @param <T> the base type
-	 * @param collection the collection
-	 * @return the only element from the collection
-	 */
 	protected <T> T getSingle(Collection<T> collection) {
 		assertNotNull(collection);
 		assertEquals(1, collection.size());
 		return collection.iterator().next();
 	}
 
-	/**
-	 * @param <T> the type of objects to return
-	 * @param resourceName the resource name
-	 * @return map of names and references to objects added
-	 */
 	protected <T> Map<String, T> initBeans(String resourceName) {
 		return ApplicationContextUtil.initializeBeans((ConfigurableApplicationContext) applicationContext, loadResource(resourceName));
 	}
 
-	/**
-	 * @param resourceName name relative to current class
-	 * @return resource for {@code resourceName}
-	 */
 	protected Resource loadResource(String resourceName) {
 		return new ClassPathResource(resourceName, getClass());
 	}

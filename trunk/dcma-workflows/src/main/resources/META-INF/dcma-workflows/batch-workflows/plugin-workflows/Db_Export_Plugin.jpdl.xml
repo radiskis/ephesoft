@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="Db_Export_Plugin" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="92,19,80,40">
+		<transition to="Db_Export_Plugin" />
+	</start>
+
+	<java continue="async" expr="#{dbExportService}" g="27,98,177,59"
+		method="dbExport" name="Db_Export_Plugin">
+		<arg>
+			<object expr="#{batchInstanceID}" />
+		</arg>
+		<arg>
+			<object expr="Db_Export_Plugin" />
+		</arg>
+		<transition to="end" />
+	</java>
+	<end g="93,190,80,40" name="end" />
+</process>

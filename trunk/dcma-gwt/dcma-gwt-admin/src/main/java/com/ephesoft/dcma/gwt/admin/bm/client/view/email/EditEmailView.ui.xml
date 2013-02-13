@@ -2,99 +2,103 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editEmailViewPanel">
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="userNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="userNameStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="userName" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="passwordLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="passwordStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="password" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="serverNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="serverNameStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="serverName" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="serverTypeLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="serverTypeStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="serverType" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="folderNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="folderNameStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="folderName" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
 				<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isSSLLabel"></g:Label>
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="userNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="userNameStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="userName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="passwordLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="passwordStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="password" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="serverNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="serverNameStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="serverName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="serverTypeLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="serverTypeStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="serverType" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="folderNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="folderNameStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="folderName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isSSLLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="isSSLStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="isSSL" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="portNumberLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="portNumberStar"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="portNumber" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+		<g:HorizontalPanel width="100%" ui:field="editEmailPanel">
+			<g:cell width="90%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
 			</g:cell>
 			<g:cell width="1%">
-				<g:Label ui:field="isSSLStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isSSL" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="portNumberLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="portNumberStar"></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="portNumber" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-
-		<g:HorizontalPanel ui:field="editEmailPanel">
-			<g:Button ui:field="saveButton" />
-			<g:cell width="7%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="cancelButton" />
+			<g:cell width="7%">
+				<g:Button ui:field="cancelButton" />
+			</g:cell>
 		</g:HorizontalPanel>
-
 	</g:VerticalPanel>
 </ui:UiBinder>

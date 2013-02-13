@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,50 +50,91 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
+import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.domain.ServerRegistry;
 import com.ephesoft.dcma.da.service.ServerRegistryService;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
+/**
+ * This class is to get the context.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.util.ApplicationContextUtil
+ */
 @Component
 public class EphesoftContext implements Context, ApplicationContextAware {
 
-	private static final Logger log = LoggerFactory.getLogger(EphesoftContext.class);
-	
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(EphesoftContext.class);
+
+	/**
+	 * Instance of ApplicationContext.
+	 */
 	private static ApplicationContext applicationContext;
-	
+
+	/**
+	 * Instance of ServerRegistryService.
+	 */
 	@Autowired
 	private ServerRegistryService registryService;
+
+	/**
+	 * identifier long.
+	 */
+	private long identifier = BatchConstants.ZERO;
 	
-	private long id = 0;
-	private int port = 0;
-	private String context = "";
-	String hostName = getHostAddress();
+	/**
+	 * port int.
+	 */
+	private int port = BatchConstants.ZERO;
 	
+	/**
+	 * context String.
+	 */
+	private String context = BatchConstants.EMPTY;
+	
+	/**
+	 * hostName String.
+	 */
+	private final String hostName = getHostAddress();
+
+	/**
+	 * To set Application Context.
+	 * @param appContext ApplicationContext
+	 * @throws BeansException if case error occurs
+	 */
 	@Override
-	public void setApplicationContext(ApplicationContext appContext) throws BeansException {
+	public void setApplicationContext(final ApplicationContext appContext) throws BeansException {
 		applicationContext = appContext;
 	}
-	
+
+	/**
+	 * Initial processing to be done.
+	 */
 	@PostConstruct
 	public void init() {
 		createRegistry();
 	}
-	
+
 	private void createRegistry() {
-		if(applicationContext instanceof WebApplicationContext) {
-			String portNumber = ((WebApplicationContext) applicationContext).getServletContext().getInitParameter("port");
-			if(portNumber != null) {
+		if (applicationContext instanceof WebApplicationContext) {
+			final String portNumber = ((WebApplicationContext) applicationContext).getServletContext().getInitParameter("port");
+			if (portNumber != null) {
 				try {
 					port = Integer.valueOf(portNumber);
-				} catch (NumberFormatException e) {
-					log.error("No port number is defined in web.xml. Assigning port number 0"); 
+				} catch (final NumberFormatException e) {
+					LOGGER.error("No port number is defined in web.xml. Assigning port number 0");
 				}
 			}
 			context = ((WebApplicationContext) applicationContext).getServletContext().getContextPath();
 		}
-		
+
 		ServerRegistry registry = registryService.getServerRegistry(this.hostName, String.valueOf(this.port), this.context);
-		if(registry == null) {
+		if (registry == null) {
 			registry = new ServerRegistry();
 			registry.setIpAddress(this.hostName);
 			registry.setPort(String.valueOf(this.port));
@@ -104,71 +145,125 @@ public class EphesoftContext implements Context, ApplicationContextAware {
 			registry.setActive(true);
 			registryService.updateServerRegistry(registry);
 		}
-		id = registry.getId();
+		identifier = registry.getId();
 	}
-	
+
+	/**
+	 * To get port.
+	 * @return int
+	 */
 	public int getPort() {
 		return port;
 	}
-	
+
+	/**
+	 * To get host name.
+	 * @return String
+	 */
 	public String getHostName() {
 		return hostName;
 	}
-	
+
+	/**
+	 * To get Web Context Path.
+	 * @return String
+	 */
 	public String getWebContextPath() {
 		return context;
 	}
-	
+
+	/**
+	 * To get context.
+	 * @return EphesoftContext
+	 */
 	@Override
 	public EphesoftContext getContext() {
 		return this;
 	}
-	
+
+	/**
+	 * To get id.
+	 * @return long
+	 */
 	public long getId() {
-		return id;
+		return identifier;
 	}
-	
+
+	/**
+	 * To get Heart beat Url.
+	 * @return String
+	 */
 	public String getHeartbeatUrl() {
-		StringBuilder url = new StringBuilder("http://");
+		final StringBuilder url = new StringBuilder("http://");
+		String returnValue;
 		try {
 			url.append(this.getHostName());
-			url.append(":");
+			url.append(ICommonConstants.COLON);
 			url.append(this.getPort());
-			if (!context.contains("/")) {
-				url.append("/");
+			if (!context.contains(ICommonConstants.FORWARD_SLASH)) {
+				url.append(ICommonConstants.FORWARD_SLASH);
 			}
 			url.append(this.getWebContextPath());
-			url.append("/");
+			url.append(ICommonConstants.FORWARD_SLASH);
 			url.append("HealthStatus.html");
-		} catch (Exception e) {
-			return "http://www.ephesoft.com/";
+			returnValue = url.toString();
+		} catch (final Exception e) {
+			returnValue = "http://www.ephesoft.com/";
 		}
-		return url.toString();
+		return returnValue;
 	}
-	
+
 	private static String getHostAddress() {
+		String returnValue;
 		try {
-			return InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			return "localhost";
+			returnValue = InetAddress.getLocalHost().getHostAddress();
+		} catch (final UnknownHostException e) {
+			returnValue = ICommonConstants.LOCALHOST;
 		}
+		return returnValue;
 	}
-	
-	public static <T> T get(Class<T> type) {
+
+	/**
+	 * To get single bean of the specified type.
+	 * @param type Class<T>
+	 * @param <T>
+	 * @return <T>
+	 */
+	public static <T> T get(final Class<T> type) {
 		if (applicationContext == null) {
-			log.error("Ephesoft application Context yet not initialized.");
+			LOGGER.error("Ephesoft application Context yet not initialized.");
 			throw new FactoryBeanNotInitializedException("Ephesoft application Context yet not initialized.");
 		}
 		return ApplicationContextUtil.getSingleBeanOfType(applicationContext, type);
 	}
-	
+
+	/**
+	 * To get current context.
+	 * @return EphesoftContext
+	 */
 	public static EphesoftContext getCurrent() {
 		return get(Context.class).getContext();
 	}
-	
-	public static ServerRegistry getHostServerRegistry () {
-		EphesoftContext context = get(Context.class).getContext();
-		ServerRegistryService registryService = get(ServerRegistryService.class);
+
+	/**
+	 * To get Host Server Registry.
+	 * @return ServerRegistry
+	 */
+	public static ServerRegistry getHostServerRegistry() {
+		final EphesoftContext context = get(Context.class).getContext();
+		final ServerRegistryService registryService = get(ServerRegistryService.class);
 		return registryService.getServerRegistry(context.getId());
+	}
+
+	/**
+	 * To get Server Registry.
+	 * @param ipAddress String
+	 * @param portNumber String
+	 * @param applicationContext String
+	 * @return ServerRegistry
+	 */
+	public static ServerRegistry getServerRegistry(String ipAddress, String portNumber, String applicationContext) {
+		ServerRegistryService registryService = get(ServerRegistryService.class);
+		return registryService.getServerRegistry(ipAddress, portNumber, applicationContext);
 	}
 }

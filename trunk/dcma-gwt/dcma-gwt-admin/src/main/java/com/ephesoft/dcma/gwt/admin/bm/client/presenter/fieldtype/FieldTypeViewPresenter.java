@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,6 +43,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.KVExtractionTestResultView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -54,21 +55,43 @@ import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
 import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
 
+/**
+ * The presenter for view that shows the field type view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTypeView> {
 
+	/**
+	 * KV_EXTRACTION_RESULT String.
+	 */
 	private static final String KV_EXTRACTION_RESULT = "KV Extraction Result";
 
+	/**
+	 * fieldTypeDetailPresenter FieldTypeDetailPresenter.
+	 */
 	private final FieldTypeDetailPresenter fieldTypeDetailPresenter;
 
+	/**
+	 * editFieldTypePresenter EditFieldTypePresenter.
+	 */
 	private final EditFieldTypePresenter editFieldTypePresenter;
 
+	/**
+	 * kvExtractionTestResultView KVExtractionTestResultView.
+	 */
 	private final KVExtractionTestResultView kvExtractionTestResultView;
 
-	// private DialogBox dialogBox = new DialogBox();
-
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FieldTypeView
+	 */
 	public FieldTypeViewPresenter(BatchClassManagementController controller, FieldTypeView view) {
 
 		super(controller, view);
@@ -77,26 +100,38 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		this.kvExtractionTestResultView = new KVExtractionTestResultView();
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		fieldTypeDetailPresenter.bind();
-		editFieldTypePresenter.bind();
 		if (controller.getSelectedDocumentLevelField() != null) {
 			view.createKVFieldList(controller.getSelectedDocumentLevelField().getKvExtractionList());
 			view.createRegexList(controller.getSelectedDocumentLevelField().getRegexList());
 		}
+		editFieldTypePresenter.bind();
 	}
 
+	/**
+	 * To show Field Type View.
+	 */
 	public void showFieldTypeView() {
 		view.getFieldTypeVerticalPanel().setVisible(Boolean.TRUE);
 		view.getFieldTypeConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show edit Field Type View.
+	 */
 	public void showEditFieldTypeView() {
 		view.getFieldTypeVerticalPanel().setVisible(Boolean.FALSE);
 		view.getFieldTypeConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To perform operations when add KV button is clicked.
+	 */
 	public void onAddKVButtonClicked() {
 		if (controller.isAdd()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -104,12 +139,17 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 			return;
 		}
 		KVExtractionDTO kvExtractionDTO = createKVExtractionDTOObject();
-		
+
 		controller.setAdd(true);
 		controller.setSelectedKVExtraction(kvExtractionDTO);
 		controller.getMainPresenter().showKVExtractionView(true);
 	}
 
+	/**
+	 * To create KV Extraction DTO Object.
+	 * 
+	 * @return KVExtractionDTO
+	 */
 	public KVExtractionDTO createKVExtractionDTOObject() {
 		KVExtractionDTO kvExtractionDTO = new KVExtractionDTO();
 		kvExtractionDTO.setNew(true);
@@ -118,16 +158,22 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		return kvExtractionDTO;
 	}
 
+	/**
+	 * To perform operations when test KV button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onTestKVButtonClicked(String identifier) {
 		ScreenMaskUtility.maskScreen();
 		controller.setSelectedKVExtraction(controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier));
 		controller.getRpcService().testKVExtraction(controller.getBatchClass(), controller.getSelectedKVExtraction(), null, false,
-				new AsyncCallback<List<OutputDataCarrierDTO>>() {
+				new EphesoftAsyncCallback<List<OutputDataCarrierDTO>>() {
 
 					@Override
-					public void onFailure(Throwable throwable) {
+					public void customFailure(Throwable throwable) {
 						ScreenMaskUtility.unmaskScreen();
-						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(), MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE);
+						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(),
+								MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE);
 						dialog.addDialogListener(new DialogListener() {
 
 							@Override
@@ -140,8 +186,7 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 								// TODO Auto-generated method stub
 							}
 						});
-						
-						
+
 					}
 
 					@Override
@@ -161,13 +206,21 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 				});
 	}
 
+	/**
+	 * To perform operations when edit field properties button is clicked.
+	 */
 	public void onEditFieldPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editFieldTypePresenter.bind();
 		showEditFieldTypeView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editFieldTypePresenter.bind();
 	}
 
+	/**
+	 * To perform operations when edit field properties button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditKVButtonClicked(String identifier) {
 		KVExtractionDTO kvExtractionDTO = controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier);
 		if (!kvExtractionDTO.isSimpleKVExtraction()) {
@@ -177,12 +230,22 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		}
 	}
 
+	/**
+	 * To show Simple KV Extraction View.
+	 * 
+	 * @param kvExtractionDTO KVExtractionDTO
+	 */
 	public void showSimpleKVExtractionView(KVExtractionDTO kvExtractionDTO) {
 		controller.setSelectedKVExtraction(kvExtractionDTO);
 		controller.setAdd(false);
-		controller.getMainPresenter().showKVExtractionView(true);
+		controller.getMainPresenter().showKVExtractionView(false);
 	}
 
+	/**
+	 * To perform operations when delete KV button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteKVButtonClicked(String identifier) {
 		controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);
@@ -190,18 +253,31 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 
 	}
 
+	/**
+	 * To perform operations when delete Regex button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteRegexBtnClicked(String identifier) {
 		controller.getSelectedDocumentLevelField().getRegexDTOByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);
 		controller.getMainPresenter().showFieldTypeView(false);
 	}
 
+	/**
+	 * To perform operations when edit Regex button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditRegexButtonClicked(String identifier) {
 		controller.setSelectedRegex(controller.getSelectedDocumentLevelField().getRegexDTOByIdentifier(identifier));
 		controller.setAdd(false);
-		controller.getMainPresenter().showRegexView(true);
+		controller.getMainPresenter().showRegexView(false);
 	}
 
+	/**
+	 * To perform operations when add Regex button is clicked.
+	 */
 	public void onAddRegexBtnClicked() {
 		if (controller.isAdd()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -214,6 +290,11 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		controller.getMainPresenter().showRegexView(true);
 	}
 
+	/**
+	 * To create Regex DTO Object.
+	 * 
+	 * @return RegexDTO
+	 */
 	public RegexDTO createRegexDTOObject() {
 		RegexDTO regexDTO = new RegexDTO();
 		regexDTO.setNew(true);
@@ -222,11 +303,19 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		return regexDTO;
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.
 	}
 
+	/**
+	 * To perform operations when advanced KV add button is clicked.
+	 */
 	public void onAdvancedKVAddButton() {
 		if (controller.isAdd()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -242,8 +331,14 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		controller.getMainPresenter().getAdvancedKVExtractionPresenter().setEditAdvancedKV(false);
 	}
 
+	/**
+	 * To perform operations when advanced KV edit button is clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onAdvancedEditKVButtonClicked(String identifier) {
 		KVExtractionDTO kvExtractionDTO = controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier);
+
 		controller.getMainPresenter().getAdvancedKVExtractionPresenter().setEditAdvancedKV(true);
 		if (kvExtractionDTO.isSimpleKVExtraction()) {
 			view.getConformationForKVExtractionView(true, kvExtractionDTO);
@@ -252,12 +347,18 @@ public class FieldTypeViewPresenter extends AbstractBatchClassPresenter<FieldTyp
 		}
 	}
 
+	/**
+	 * To show Advanced KV Extraction View.
+	 * 
+	 * @param identifier String
+	 */
 	public void showAdvancedKVExtractionView(String identifier) {
 
 		controller.setSelectedKVExtraction(controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier));
 		controller.setAdd(false);
 		controller.getBatchClass().setDirty(Boolean.TRUE);
 		controller.getMainPresenter().showAdvancedKVExtractionView();
+
 
 	}
 }

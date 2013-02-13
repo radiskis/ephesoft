@@ -56,7 +56,12 @@ var batchInstanceConstants = {
 	open_batch_button_title : "Open selected batch",
 	restart_batch_button_title : "Restart selected batch",
 	delete_all_button: "Del All",
-	delete_button_tooltip:"Delete all batch instance(s) by status and priority"
+	delete_button_tooltip:"Delete all batch instance(s) by status and priority",
+	remote : "Remote",
+	label_table_column_batchCreatedOn : "Batch Created On",
+	unlock_button_tooltip: "Unlock selected batch",
+	refresh_button_tooltip: "Refresh the status of batch instances",
+	delete_batch_tooltip: "Delete selected batch"
 };
 var batchInstanceMessages = {
 	batch_list_retrieve_failure : "Unable to retrieve batch list.",
@@ -156,8 +161,12 @@ var batchInstanceConstants_tk = {
 	open_batch_button_title : "Seçilen küme aç",
 	restart_batch_button_title : "Seçilen toplu yeniden başlatın",
 	delete_all_button: "Silmek..",
-	delete_button_tooltip:"Durumuna göre tüm toplu örnek silme"	
-
+	delete_button_tooltip:"Durumuna göre tüm toplu örnek silme",
+	remote : "Remote",
+	label_table_column_batchCreatedOn: "Toplu Oluşturulma",
+	unlock_button_tooltip: "Se�ilen toplu kilidini",
+	refresh_button_tooltip: "Toplu �rneklerinin durumunu yenile",
+	delete_batch_tooltip: "Se�ilen toplu silme"
 };
 var batchInstanceMessages_tk = {
 	batch_list_retrieve_failure : "Toplu listesi alÄ±namÄ±yor.",

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,24 +50,25 @@ import com.ephesoft.dcma.da.domain.BatchClassPlugin;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.BatchClassPluginDao
  */
-
 @Repository
 public class BatchClassPluginDaoImpl extends HibernateDao<BatchClassPlugin> implements BatchClassPluginDao {
 
-	//Empty Constructor.
-		public BatchClassPluginDaoImpl() {
-			super();
+	/** 
+	 * BATCH_CLASS_PLUGIN_PLUGIN String.
+	 */
+	private static final String BATCH_CLASS_PLUGIN_PLUGIN = "plugin.id";
+
+	/**
+	 * API to get Batch class plugin for plugin id.
+	 * @param pluginId Long
+	 * @return List<BatchClassPlugin>
+	 */
+	@Override
+	public List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq(BATCH_CLASS_PLUGIN_PLUGIN, pluginId.longValue()));
+		return find(criteria);
 	}
-
-		private static final String BATCH_CLASS_PLUGIN_PLUGIN = "plugin.id";
-		
-		@Override
-		public List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId) {
-			DetachedCriteria criteria = criteria();
-			criteria.add(Restrictions.eq(BATCH_CLASS_PLUGIN_PLUGIN, pluginId.longValue()));
-			return find(criteria);
-		}
-
 }
-	

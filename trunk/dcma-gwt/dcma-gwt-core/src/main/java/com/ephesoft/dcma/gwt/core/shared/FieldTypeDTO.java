@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,9 +58,9 @@ public class FieldTypeDTO implements IsSerializable {
 
 	private String pattern;
 
-	private boolean isDeleted;
+	private boolean deleted;
 
-	private boolean isNew;
+	private boolean newField;
 
 	private String fieldOrderNumber;
 
@@ -72,13 +72,17 @@ public class FieldTypeDTO implements IsSerializable {
 
 	private List<String> regexPatternList;
 
-	private boolean isMultiLine;
+	private boolean multiLine;
 
 	private List<KVExtractionDTO> kvExtractionList = new ArrayList<KVExtractionDTO>();
 
 	private List<RegexDTO> regexList = new ArrayList<RegexDTO>();
 	
-	private boolean isHidden;
+	private boolean hidden;
+	/**
+	 * Field is set to true if document level field is readonly.
+	 */
+	private boolean isReadOnly;
 
 	public DocumentTypeDTO getDocTypeDTO() {
 		return docTypeDTO;
@@ -141,9 +145,13 @@ public class FieldTypeDTO implements IsSerializable {
 	}
 
 	public List<KVExtractionDTO> getKvExtractionList(boolean includeDeleted) {
-		if (includeDeleted)
-			return kvExtractionList;
-		return getKvExtractionList();
+		List<KVExtractionDTO> kvExtractionDTOs;
+		if (includeDeleted){
+			kvExtractionDTOs = kvExtractionList;
+		}else{
+			kvExtractionDTOs = getKvExtractionList();
+		}
+		return kvExtractionDTOs;
 	}
 
 	public List<KVExtractionDTO> getKvExtractionList() {
@@ -157,9 +165,13 @@ public class FieldTypeDTO implements IsSerializable {
 	}
 
 	public List<RegexDTO> getRegexList(boolean includeDeleted) {
-		if (includeDeleted)
-			return regexList;
-		return getRegexList();
+		List<RegexDTO> regexDTOs;
+		if (includeDeleted){
+			regexDTOs = regexList;
+		}else{
+			regexDTOs = getRegexList();
+		}
+		return regexDTOs;
 	}
 
 	public List<RegexDTO> getRegexList() {
@@ -172,20 +184,20 @@ public class FieldTypeDTO implements IsSerializable {
 		return regexDTOs;
 	}
 
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return newField;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newField) {
+		this.newField = newField;
 	}
 
 	public String getIdentifier() {
@@ -213,38 +225,45 @@ public class FieldTypeDTO implements IsSerializable {
 	}
 
 	public KVExtractionDTO getKVExtractionByKeyAndDataTypeAndLocation(String keyPattern, String valuePattern, LocationType locationType) {
+		KVExtractionDTO kvExtractionDTO = null;
 		Collection<KVExtractionDTO> dtos = kvExtractionList;
-		for (KVExtractionDTO kvExtractionDTO : dtos) {
-			if (kvExtractionDTO.getKeyPattern() != null && kvExtractionDTO.getKeyPattern().equals(keyPattern)) {
-				if (kvExtractionDTO.getValuePattern() != null && kvExtractionDTO.getValuePattern().equals(valuePattern))
-					if (kvExtractionDTO.getLocationType() != null
-							&& kvExtractionDTO.getLocationType().name().equals(locationType.name()))
-						return kvExtractionDTO;
+		for (KVExtractionDTO dto : dtos) {
+			if (dto.getKeyPattern() != null && dto.getKeyPattern().equals(keyPattern)
+					&& (dto.getValuePattern() != null && dto.getValuePattern().equals(valuePattern))
+					&& (dto.getLocationType() != null && dto.getLocationType().name().equals(locationType.name()))) {
+
+				kvExtractionDTO = dto;
 			}
 		}
-		return null;
+		return kvExtractionDTO;
 	}
 
 	public boolean checkKVExtractionDetails(String keyPattern, String valuePattern, LocationType locationType) {
-		if (getKVExtractionByKeyAndDataTypeAndLocation(keyPattern, valuePattern, locationType) != null)
-			return true;
-		return false;
+		boolean valid = false;
+		if (getKVExtractionByKeyAndDataTypeAndLocation(keyPattern, valuePattern, locationType) != null){
+			valid = true;
+		}
+		return valid;
 	}
 
 	public KVExtractionDTO getKVExtractionDTOByIdentifier(String identifier) {
+		KVExtractionDTO kvExtractionDTO = null;
 		for (KVExtractionDTO extractionDTO : kvExtractionList) {
-			if (extractionDTO.getIdentifier().equals(identifier))
-				return extractionDTO;
+			if (extractionDTO.getIdentifier().equals(identifier)){
+				kvExtractionDTO= extractionDTO;
+			}
 		}
-		return null;
+		return kvExtractionDTO;
 	}
 
 	public boolean checkRegex(String pattern) {
+		boolean valid = false;
 		for (RegexDTO dto : regexList) {
-			if (dto.getPattern().equals(pattern))
-				return true;
+			if (dto.getPattern().equals(pattern)){
+				valid = true;
+			}
 		}
-		return false;
+		return valid;
 	}
 
 	public void addRegex(RegexDTO regexDTO) {
@@ -252,19 +271,23 @@ public class FieldTypeDTO implements IsSerializable {
 	}
 
 	public RegexDTO getRegexDTOByIdentifier(String identifier) {
+		RegexDTO regexDTO = null;
 		for (RegexDTO dto : regexList) {
-			if (dto.getIdentifier().equals(identifier))
-				return dto;
+			if (dto.getIdentifier().equals(identifier)){
+				regexDTO = dto;
+			}
 		}
-		return null;
+		return regexDTO;
 	}
 
 	public RegexDTO getRegexDTOByPattern(String pattern) {
+		RegexDTO regexDTO = null;
 		for (RegexDTO dto : regexList) {
-			if (dto.getPattern().equals(pattern))
-				return dto;
+			if (dto.getPattern().equals(pattern)){
+				regexDTO = dto;
+			}
 		}
-		return null;
+		return regexDTO;
 	}
 
 	public String getBarcodeType() {
@@ -285,21 +308,38 @@ public class FieldTypeDTO implements IsSerializable {
 
 	
 	public boolean isHidden() {
-		return isHidden;
+		return hidden;
 	}
 
 	
-	public void setHidden(boolean isHidden) {
-		this.isHidden = isHidden;
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
 	}
 
-	public void setMultiLine(boolean isMultiLine) {
-		this.isMultiLine = isMultiLine;
+	public void setMultiLine(boolean multiLine) {
+		this.multiLine = multiLine;
 	}
 
 	public boolean isMultiLine() {
-		return isMultiLine;
+		return multiLine;
 	}
 
-	
+	/**
+	 * API to set the 'isReadOnly' field
+	 * 
+	 * @param isReadOnly the isReadOnly to set
+	 */
+	public void setReadOnly(boolean isReadOnly) {
+		this.isReadOnly = isReadOnly;
+	}
+
+	/**
+	 * API to get the 'isReadOnly' field
+	 * 
+	 * @return the isReadOnly
+	 */
+	public boolean getIsReadOnly() {
+		return isReadOnly;
+	}
+
 }

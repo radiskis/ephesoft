@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,13 +38,14 @@ package com.ephesoft.dcma.gwt.login.client.i18n;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 
 public interface LoginConstants extends LocaleCommonConstants {
-	
-	String login_title = "login_title";
-	String login_username = "login_username";
-	String login_password = "login_password";
-	/*String login_remember_me = "login_remember_me";
-	String login_forgot_pwd = "login_forgot_pwd";*/
-	String login_button_text = "login_button_text";
-	String version_text = "version_text";
-	String UNABLE_TO_RETRIVE_VERSION_INFO="unable_to_retrive_version_info";
+
+	/*
+	 * String login_remember_me = "login_remember_me"; String login_forgot_pwd = "login_forgot_pwd";
+	 */
+	String LOGIN_BUTTON_TEXT = "login_button_text";
+	String UNABLE_TO_RETRIVE_VERSION_INFO = "unable_to_retrive_version_info";
+	String LOGIN_TITLE = "login_title";
+	String LOGIN_USERNAME = "login_username";
+	String LOGIN_PASSWORD = "login_password";
+	String VERSION_TEXT = "version_text";
 }

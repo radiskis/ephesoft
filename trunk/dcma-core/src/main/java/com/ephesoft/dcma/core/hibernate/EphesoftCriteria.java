@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,40 +43,107 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.impl.CriteriaImpl;
 import org.springframework.util.StringUtils;
 
+import com.ephesoft.dcma.core.constant.CoreConstants;
+
+/**
+ * Ephesoft criteria class to create alias.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.hibernate.criterion.DetachedCriteria
+ */
 public class EphesoftCriteria extends DetachedCriteria {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * aliasEntityMap BidiMap.
+	 */
 	private final BidiMap aliasEntityMap = new TreeBidiMap();
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param impl CriteriaImpl
+	 * @param criteria Criteria
+	 */
 	public EphesoftCriteria(CriteriaImpl impl, Criteria criteria) {
 		super(impl, criteria);
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param entityName String
+	 * @param alias String
+	 */
 	public EphesoftCriteria(String entityName, String alias) {
 		super(entityName, alias);
 	}
 
+	/**
+	 * 
+	 * Constructor.
+	 * 
+	 * @param entityName String
+	 */
 	public EphesoftCriteria(String entityName) {
 		super(entityName);
 	}
 
+	/**
+	 * Creating alias for entity name.
+	 * 
+	 * @param entityName String
+	 * @return EphesoftCriteria
+	 */
 	public static EphesoftCriteria forEntityName(String entityName) {
 		return new EphesoftCriteria(entityName);
 	}
 
+	/**
+	 * Creating alias for entity name.
+	 * 
+	 * @param entityName String
+	 * @param alias String
+	 * @return EphesoftCriteria
+	 */
 	public static EphesoftCriteria forEntityName(String entityName, String alias) {
 		return new EphesoftCriteria(entityName, alias);
 	}
 
+	/**
+	 * Creating alias for class.
+	 * 
+	 * @param clazz Class<?> 
+	 * @return EphesoftCriteria
+	 */
 	public static EphesoftCriteria forClass(Class<?> clazz) {
 		return new EphesoftCriteria(clazz.getName());
 	}
 
+	/**
+	 * Creating alias for class.
+	 * 
+	 * @param clazz Class<?> 
+	 * @param alias String
+	 * @return EphesoftCriteria
+	 */
 	public static EphesoftCriteria forClass(Class<?> clazz, String alias) {
 		return new EphesoftCriteria(clazz.getName(), alias);
 	}
 
+	/**
+	 * To create alias.
+	 * 
+	 * @param associationPath String
+	 * @param alias String
+	 * @return DetachedCriteria
+	 * @throws HibernateException in case of error
+	 */
 	public DetachedCriteria createAlias(String associationPath, String alias) throws HibernateException {
 		super.createAlias(associationPath, alias);
 		String[] involvedEntitiyVars = split(associationPath);
@@ -84,6 +151,15 @@ public class EphesoftCriteria extends DetachedCriteria {
 		return this;
 	}
 
+	/**
+	 * To create alias.
+	 * 
+	 * @param associationPath String
+	 * @param alias Stringfz
+	 * @param joinType int
+	 * @return DetachedCriteria
+	 * @throws HibernateException in case of error
+	 */
 	public DetachedCriteria createAlias(String associationPath, String alias, int joinType) throws HibernateException {
 		super.createAlias(associationPath, alias, joinType);
 		String[] involvedEntitiyVars = split(associationPath);
@@ -91,6 +167,14 @@ public class EphesoftCriteria extends DetachedCriteria {
 		return this;
 	}
 
+	/**
+	 * To create alias.
+	 * 
+	 * @param associationPath String
+	 * @param containsProperty boolean
+	 * @return DetachedCriteria
+	 * @throws HibernateException in case of error
+	 */
 	public DetachedCriteria createAlias(String associationPath, boolean containsProperty) throws HibernateException {
 		String[] associations = split(associationPath);
 
@@ -106,10 +190,24 @@ public class EphesoftCriteria extends DetachedCriteria {
 		return this;
 	}
 
+	/**
+	 * To create alias.
+	 * 
+	 * @param associationPath String
+	 * @return DetachedCriteria
+	 * @throws HibernateException in case of error
+	 */
 	public DetachedCriteria createAlias(String associationPath) throws HibernateException {
 		return createAlias(associationPath, false);
 	}
 
+	/**
+	 * To get alias.
+	 * 
+	 * @param associationPath String
+	 * @param containsProperty boolean
+	 * @return String
+	 */ 
 	public String getAlias(String associationPath, boolean containsProperty) {
 		String path = null;
 		String[] involvedEntitiyVars = split(associationPath);
@@ -125,18 +223,24 @@ public class EphesoftCriteria extends DetachedCriteria {
 			String alias = (String) this.aliasEntityMap.getKey(involvedEntitiyVars[involvedEntitiyVars.length
 					- (containsProperty ? 2 : 1)]);
 			if (alias != null && containsProperty) {
-				path = alias + '.' + involvedEntitiyVars[involvedEntitiyVars.length - 1];
+				path = alias + CoreConstants.DOT + involvedEntitiyVars[involvedEntitiyVars.length - 1];
 			}
 		}
 		return path;
 	}
 
+	/**
+	 * To get alias.
+	 * 
+	 * @param associationPath String
+	 * @return String
+	 */ 
 	public String getAlias(String associationPath) {
 		return getAlias(associationPath, false);
 	}
 
 	private String[] split(String associationPath) {
-		String[] involvedEntitiyVars = StringUtils.split(associationPath, ".");
+		String[] involvedEntitiyVars = StringUtils.split(associationPath, CoreConstants.DOT);
 		if (involvedEntitiyVars == null) {
 			involvedEntitiyVars = new String[1];
 			involvedEntitiyVars[0] = associationPath;

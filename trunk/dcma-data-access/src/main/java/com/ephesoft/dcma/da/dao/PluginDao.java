@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,17 +40,26 @@ import java.util.List;
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.Plugin;
 
+/**
+ * Dao representing plugin table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.PluginDaoImpl
+ */
 public interface PluginDao extends CacheableDao<Plugin> {
 
 	/**
 	 * API to get the plugin properties by plugin Id.
 	 * 
-	 * @param pluginId
+	 * @param pluginId Long
 	 * @return Plugin
 	 */
 	Plugin getPluginPropertiesForPluginId(Long pluginId);
 
 	/**
+	 * API to get plugins.
+	 * 
 	 * @param moduleId Long
 	 * @param startResult int
 	 * @param maxResult int
@@ -61,8 +70,16 @@ public interface PluginDao extends CacheableDao<Plugin> {
 	/**
 	 * API to get Plugin by Name.
 	 * 
-	 * @param pluginName
-	 * @return
+	 * @param pluginName String
+	 * @return Plugin
 	 */
 	Plugin getPluginByName(String pluginName);
+	
+	/**
+	 * API to retrieve names of all the plugins.
+	 * 
+	 * @return {@link List}< {@link String}>
+	 */
+	List<String> getAllPluginsNames();
+	
 }

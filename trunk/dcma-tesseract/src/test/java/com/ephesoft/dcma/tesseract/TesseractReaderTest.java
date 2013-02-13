@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -61,7 +61,6 @@ import com.ephesoft.dcma.util.FileUtils;
  * @author Ephesoft
  * @version 1.0
  * @see com.ephesoft.dcma.tesseract.AbstractTesseractTests
- * 
  */
 public class TesseractReaderTest extends AbstractTesseractTests {
 
@@ -152,7 +151,7 @@ public class TesseractReaderTest extends AbstractTesseractTests {
 		} catch (IOException e) {
 			assertTrue(e.getMessage(), result);
 		}
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdSuccess);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		actualOutputFolder = (testFolderLocation + File.separator + prop.getProperty(ACTUAL_OUTPUT_FOLDER));
 		expectedOutputFolder = (testFolderLocation + File.separator + prop.getProperty(EXPECTED_OUTPUT_FOLDER));
@@ -162,7 +161,7 @@ public class TesseractReaderTest extends AbstractTesseractTests {
 
 	/**
 	 * This method tests the functionality of Tesseract service, compares xml formed and checks for HOCR file, where batch is of
-	 * Tessract.
+	 * Tesseract.
 	 */
 	@Test
 	public void testTesseractReaderSuccess() {
@@ -210,7 +209,7 @@ public class TesseractReaderTest extends AbstractTesseractTests {
 
 	/**
 	 * This method tests the functionality of Tesseract service, compares xml formed and checks for HOCR file,where batch is not of
-	 * Tessract.
+	 * Tesseract.
 	 */
 	@Test
 	public void testTesseractReaderFailure() {

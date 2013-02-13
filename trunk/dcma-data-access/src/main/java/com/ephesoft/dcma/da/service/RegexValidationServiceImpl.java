@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
 import com.ephesoft.dcma.da.dao.RegexValidationDao;
 import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.RegexValidation;
@@ -56,20 +55,23 @@ import com.ephesoft.dcma.da.domain.RegexValidation;
  * @see com.ephesoft.dcma.da.service.RegexValidationService
  */
 @Service
-public class RegexValidationServiceImpl extends DataAccessService implements RegexValidationService {
+public class RegexValidationServiceImpl implements RegexValidationService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegexValidationServiceImpl.class);
 
+	/**
+	 * regexValidationDao {@link RegexValidationDao}.
+	 */
 	@Autowired
 	private RegexValidationDao regexValidationDao;
 
 	/**
-	 * An api to fetch all KV Extraction by field type.
+	 * An API to fetch all KV Extraction by field type.
 	 * 
-	 * @param fieldType FieldType
+	 * @param fieldType {@link FieldType}
 	 * @return List<RegexValidation>
 	 */
 	@Transactional(readOnly = true)
@@ -85,9 +87,9 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 	}
 
 	/**
-	 * An api to insert the RegexValidation object.
+	 * An API to insert the RegexValidation object.
 	 * 
-	 * @param RegexValidation RegexValidation
+	 * @param RegexValidation {@link RegexValidation}
 	 */
 	@Transactional
 	@Override
@@ -100,9 +102,9 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 	}
 
 	/**
-	 * An api to update the RegexValidation object.
+	 * An API to update the RegexValidation object.
 	 * 
-	 * @param RegexValidation RegexValidation
+	 * @param RegexValidation {@link RegexValidation}
 	 */
 	@Transactional
 	@Override
@@ -115,9 +117,9 @@ public class RegexValidationServiceImpl extends DataAccessService implements Reg
 	}
 
 	/**
-	 * An api to remove the RegexValidation object.
+	 * An API to remove the RegexValidation object.
 	 * 
-	 * @param RegexValidation RegexValidation
+	 * @param RegexValidation {@link RegexValidation}
 	 */
 	@Transactional
 	@Override

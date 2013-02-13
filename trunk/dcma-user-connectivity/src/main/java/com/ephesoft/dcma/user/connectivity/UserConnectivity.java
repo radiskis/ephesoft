@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,13 +37,15 @@ package com.ephesoft.dcma.user.connectivity;
 
 import java.util.Set;
 
+import javax.naming.NamingException;
+import com.ephesoft.dcma.batch.schema.UserInformation;
+
 /**
- * This class connect to the user authentication based server and fetching the Set of groups or User
- * from that server.
+ * This class connect to the user authentication based server and fetching the Set of groups or User from that server.
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.batch.schema.UserInformation
  */
 
 public interface UserConnectivity {
@@ -65,9 +67,68 @@ public interface UserConnectivity {
 	/**
 	 * This method is used to return set of string of all superAdmin groups.
 	 * 
+	 * @param userName String
 	 * @return Set<String> if result is found else return null
 	 */
-	
+
 	Set<String> getUserGroups(String userName);
 
+	/**
+	 * This method is used to return set of string of all superAdmin groups.
+	 * 
+	 * @param userInformation UserInformation
+	 * @return Set<String> if result is found else return null
+	 * @throws NamingException
+	 */
+
+	void addUser(UserInformation userInformation) throws NamingException;
+
+	/**
+	 * This method is used to return add groups for user.
+	 *
+	 * @param userInformation UserInformation
+	 * @return Set<String> if result is found else return null
+	 * @throws NamingException
+	 */
+
+	void addGroup(UserInformation userInformation) throws NamingException;
+
+	/**
+	 * API check the user exist in the LDAP.
+	 * 
+	 * @param userName {@link String}
+	 * @return boolean
+	 */
+	boolean checkUserExistence(String userName);
+
+	/**
+	 * API delete the group name in the LDAP.
+	 * 
+	 * @param groupName {@link String}
+	 */
+	void deleteGroup(String groupName);
+
+	/**
+	 * API delete the user name in the LDAP.
+	 * 
+	 * @param userName {@link String}
+	 */
+	void deleteUser(String userName);
+
+	/**
+	 * API for verifying the user authentication and updates the user with new password.
+	 * 
+	 * @param userName {@link String}
+	 * @param oldPassword {@link String}
+	 * @param newPassword {@link String}
+	 */
+	void verifyandmodifyUserPassword(String userName, String oldPassword, String newPassword) throws NamingException;
+
+	/**
+	 * API for updates the user password.
+	 * 
+	 * @param userName {@link String}
+	 * @param newPassword {@link String}
+	 */
+	void modifyUserPassword(String userName, String newPassword) throws NamingException;
 }

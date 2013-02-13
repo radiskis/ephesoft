@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,25 +41,62 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class validates the date format.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.text.SimpleDateFormat
+ */
 public class DateFormatValidator implements Validator {
 
+	/**
+	 * value String.
+	 */
 	private String value;
+	
+	/**
+	 * format SimpleDateFormat.
+	 */
 	private SimpleDateFormat format;
+	
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DateFormatValidator.class);
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param value String
+	 */
 	public DateFormatValidator(String value) {
 		this("dd/MM/yyyy", value);
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param value String
+	 * @param pattern String
+	 */
 	public DateFormatValidator(String pattern, String value) {
 		this.format = new SimpleDateFormat(pattern, Locale.ENGLISH);
 		this.value = value;
 	}
 
+	/**
+	 * To set values.
+	 * @param value String
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * Validate method.
+	 * @return boolean
+	 */
 	@Override
 	public boolean validate() {
 		boolean isValidated = false;

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -122,6 +122,16 @@ public interface UserConnectivityConstant {
 	 * Variable for ldap filter.
 	 */
 	String LDAP_FILTER = "(objectClass=*)";
+	
+	/**
+	 * Variable for ldap user filter.
+	 */
+	String LDAP_USER_FILTER = "(objectClass=Person)";
+	
+	/**
+	 * Variable for ldap group filter.
+	 */
+	String LDAP_GROUP_FILTER = "(|((objectClass=organizationalRole)(objectClass=groupOfNames)(objectClass=groupOfUniqueNames)))";
 
 	/**
 	 * Variable for ms active directory start filter.
@@ -129,9 +139,9 @@ public interface UserConnectivityConstant {
 	String MSACTIVEDIRECTORY_START_FILTER = "(";
 	
 	/**
-	 * Variable for ms active directory object class name.
+	 * Variable for object class name.
 	 */
-	String MSACTIVEDIRECTORY_OBJECT_CLASS = "objectClass";
+	String OBJECT_CLASS = "objectClass";
 	
 	/**
 	 * Variable for ms active directory equal symbol.
@@ -157,4 +167,74 @@ public interface UserConnectivityConstant {
 	 * Variable for tomcat roles.
 	 */
 	String ROLES = "roles";
+	
+	/**
+	 * Variable for mail.
+	 */
+	String MAIL = "mail";
+	
+	/**
+	 * Variable for user id.
+	 */
+	String UID = "uid";
+	
+	/**
+	 * Variable for user password.
+	 */
+	String USER_PASSWORD = "userpassword";
+	
+	/**
+	 * Variable for inetOrgPerson.
+	 */
+	String INET_ORG_PERSON = "inetOrgPerson";
+	
+	/**
+	 * Variable for description.
+	 */
+	String DESCRIPTION = "description";
+	
+	/**
+	 * Variable for uniqueMember.
+	 */
+	String UNIQUE_MEMBER = "uniqueMember";
+	
+	/**
+	 * Variable for groupOfUniqueNames.
+	 */
+	String GROUP_OF_UNIQUE_NAMES = "groupOfUniqueNames";
+	
+	/**
+	 * Variable for givenName.
+	 */
+	String GIVEN_NAME = "givenName";
+	
+	/**
+	 * Variable for sn.
+	 */
+	String SUR_NAME = "sn";
+
+	/**
+	 * Constant for 'Person' LDAP object class name.
+	 */
+	String OBJECT_CLASS_PERSON = "Person";
+	
+	/**
+	 * Constant for empty.
+	 */
+	String EMPTY = "";
+	
+	/**
+	 * Constant for zero.
+	 */
+	int ZERO = 0;
+	
+	/**
+	 * Constant for one.
+	 */
+	int ONE = 1;
+	
+	/**
+	 * Constant for two.
+	 */
+	int TWO = 2;
 }

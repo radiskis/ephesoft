@@ -3,7 +3,7 @@
 
 	<g:HorizontalPanel width="100%" ui:field="breadCrumbPanel">
 		<g:cell width="80%">
-			<g:Label ui:field="breadCrumbs" />
+			<g:HorizontalPanel ui:field="clickablebreadCrumbPanel"></g:HorizontalPanel>
 		</g:cell>
 		<g:cell width="15%" horizontalAlignment='ALIGN_RIGHT'>
 			<g:Button ui:field="previousButton" />

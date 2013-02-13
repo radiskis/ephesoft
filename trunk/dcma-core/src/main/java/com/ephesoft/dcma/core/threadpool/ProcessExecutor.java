@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,9 +43,29 @@ import java.io.InputStreamReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.core.constant.CoreConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
+
+/**
+ * Class to execute process.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.io.InputStreamReader
+ */
 public class ProcessExecutor extends AbstractRunnable {
+
+	/**
+	 * Logger instance for logging using slf4j for logging information.
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(ProcessExecutor.class);
+
+	/**
+	 * Default number of retries by executor in case of failure(non-zero exit value)
+	 */
+	private static final int DEFAULT_NO_OF_RETRIES = 0;
 
 	/**
 	 * List of commands to be executed.
@@ -58,40 +78,49 @@ public class ProcessExecutor extends AbstractRunnable {
 	private File environment;
 
 	/**
-	 * Constructor
+	 * The number of retries we want in case the executor exits with a non-zero exit value
+	 */
+	private int numberOfRetries;
+
+	/**
+	 * A variable to decide whether we want to retry in case the executor exits with a non-zero exit value
+	 */
+	private boolean retry;
+
+	/**
+	 * Constructor.
 	 * 
 	 * @param cmds the command that is to be executed.
 	 */
 	public ProcessExecutor(String[] cmds) {
-		super();
-		if (cmds != null) {
-			this.cmds = new String[cmds.length];
-			System.arraycopy(cmds, 0, this.cmds, 0, cmds.length);
-		} else {
-			this.cmds = null;
-		}
+		this(cmds, null);
 	}
 
 	/**
-	 * Logger instance for logging using slf4j for logging information.
+	 * Constructor.
+	 * 
+	 * @param cmds the command that is to be executed.
+	 * @param environment the environment in which it needs to be executed.
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ProcessExecutor.class);
+	public ProcessExecutor(String[] cmds, File environment) {
+		this(cmds, environment, false);
+	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param cmds the command that is to be executed.
 	 * @param environment the environment in which it needs to be executed.
+	 * @param retry whether the command needs to be re-executed on non-zero exit command value
 	 */
-	public ProcessExecutor(String[] cmds, File environment) {
+	public ProcessExecutor(String[] cmds, File environment, boolean retry) {
 		super();
 		if (cmds != null) {
 			this.cmds = new String[cmds.length];
 			System.arraycopy(cmds, 0, this.cmds, 0, cmds.length);
-		} else {
-			this.cmds = null;
 		}
 		this.environment = environment;
+		this.retry = retry;
 	}
 
 	/**
@@ -107,15 +136,15 @@ public class ProcessExecutor extends AbstractRunnable {
 			LOG.info("Starting execution of ");
 			for (int ind = 0; ind < cmds.length; ind++) {
 				if (cmds[ind] == null) {
-					cmds[ind] = "";
+					cmds[ind] = CoreConstants.EMPTY;
 				}
 				LOG.info(cmds[ind]);
 				commandStr.append(cmds[ind]);
-				commandStr.append(' ');
+				commandStr.append(CoreConstants.SPACE);
 			}
 			LOG.info("in environment " + environment);
 			process = Runtime.getRuntime().exec(cmds, null, environment);
-			// process = Runtime.getRuntime().exec(commandStr.toString(), null, environment);
+
 			inputStreamReader = new InputStreamReader(process.getInputStream());
 			input = new BufferedReader(inputStreamReader);
 			String line = null;
@@ -130,16 +159,20 @@ public class ProcessExecutor extends AbstractRunnable {
 			}
 			LOG.info("exited with error code no " + exitValue);
 			if (exitValue != 0) {
-				LOG.error("Non-zero(" + exitValue + ") exit value for command found. So exiting the application");
-				setDcmaApplicationException(new DCMAApplicationException(
-						"Non-zero exit value for command found. So exiting the application"));
+				if (retry) {
+					checkAndRetryExecution();
+				} else {
+					setNonZeroExitValueError();
+				}
 			}
 		} catch (IOException e) {
-			LOG.error("Problem in completing processing", e);
-			setDcmaApplicationException(new DCMAApplicationException("Problem in completing processing", e));
+			String errorMsg = "Problem in completing processing";
+			LOG.error(errorMsg, e);
+			setDcmaApplicationException(new DCMAApplicationException(errorMsg, e));
 		} catch (Exception e) {
-			LOG.error("Processing could not be completed", e);
-			setDcmaApplicationException(new DCMAApplicationException("Processing could not be completed", e));
+			String errorMsg = "Processing could not be completed";
+			LOG.error(errorMsg, e);
+			setDcmaApplicationException(new DCMAApplicationException(errorMsg, e));
 		} finally {
 			try {
 				if (input != null) {
@@ -152,5 +185,36 @@ public class ProcessExecutor extends AbstractRunnable {
 				LOG.error("Problem in closing buffer reader. " + e.getMessage(), e);
 			}
 		}
+	}
+
+	/**
+	 * A method to check whether we need to retry the execution of the failed command. If we do, we perform the operations that failed
+	 * again, else we set an exception for non zero exit value.
+	 */
+	private void checkAndRetryExecution() {
+		int maximumNumberOfRetries = DEFAULT_NO_OF_RETRIES;
+		try {
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			String property = applicationConfigProperties.getProperty(CoreConstants.MAXIMUM_NUMBER_OF_RETRIES);
+			maximumNumberOfRetries = Integer.parseInt(property);
+		} catch (Exception e) {
+			LOG.info("Could not fetch maximum number of retries from the property file. Hence it has the value: "
+					+ maximumNumberOfRetries);
+			// deliberately ignoring the exception so that the default number of retries can still work for an inappropriate value in
+			// the property file
+		}
+		if (numberOfRetries++ < maximumNumberOfRetries) {
+			LOG.info("Retrying executing the command.");
+			run();
+		} else {
+			setNonZeroExitValueError();
+		}
+	}
+
+	/**
+	 * A method to set the non zero exit value being obtained in the command execution
+	 */
+	private void setNonZeroExitValueError() {
+		setDcmaApplicationException(new DCMAApplicationException("Non-zero exit value for command found. So exiting the application"));
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -142,7 +142,7 @@ public class FolderImporterTest extends AbstractFolderImporterTest {
 	/**
 	 * Variable for property file.
 	 */
-	private Properties prop = new Properties();
+	private final Properties prop = new Properties();
 
 	/**
 	 * This method prepares and initializes all the resources that would be required by the plugin.
@@ -150,7 +150,7 @@ public class FolderImporterTest extends AbstractFolderImporterTest {
 	@Before
 	public void setUp() {
 		boolean result = false;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceId);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 
 		try {

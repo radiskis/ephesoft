@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,79 +59,102 @@ import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 
+/**
+ * This class is used to copy the batch folder files to export folder and update batch.xml.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.export.service.ExportServiceImpl
+ */
 @Component
 public class FolderExporter implements ICommonConstants {
-
+	/**
+	 * Copy batch xml plug in name.
+	 */
 	private static final String COPY_BATCH_XML_PLUGIN = "COPY_BATCH_XML";
-
+	/**
+	 * An instance of Logger for proper logging using slf4j.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(FolderExporter.class);
-
+	/**
+	 * String to store invalid characters.
+	 */
 	private String invalidChars;
-
+	/**
+	 * String to store the characters to be replaced for invalid characters.
+	 */
 	private String replaceChar;
-
+	/**
+	 * Instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 */
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
 
 	/**
-	 * @return the batchSchemaService
+	 * @return {@link BatchSchemaService} the batchSchemaService.
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * @param batchSchemaService {@link BatchSchemaService} the batchSchemaService to set.
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return {@link PluginPropertiesService} the pluginPropertiesService.
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService {@link PluginPropertiesService} the pluginPropertiesService to set.
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
-	 * @return the invalid characters list.
+	 * @return {@link String} the invalid characters list.
 	 */
 	public String getInvalidChars() {
 		return invalidChars;
 	}
 
 	/**
-	 * @param invalidChars invalid characters list to set.
+	 * @param invalidChars {@link String} invalid characters list to set.
 	 */
 	public void setInvalidChars(String invalidChars) {
 		this.invalidChars = invalidChars;
 	}
 
 	/**
-	 * @return the replace character for invalid chars.
+	 * @return {@link String} the replace character for invalid chars.
 	 */
 	public String getReplaceChar() {
 		return replaceChar;
 	}
 
 	/**
-	 * @param replaceChar replcae character to be set.
+	 * @param replaceChar {@link String} replace character to be set.
 	 */
 	public void setReplaceChar(String replaceChar) {
 		this.replaceChar = replaceChar;
@@ -141,12 +164,11 @@ public class FolderExporter implements ICommonConstants {
 	 * This method simply reads the batch.xml file in the sFolderToBeExported. It finds the names of multipage tif and pdf files from
 	 * the batch.xml. Then it moves these files to the export to folder.
 	 * 
-	 * @param batchInstanceID
-	 * @throws JAXBException
-	 * @throws DCMAApplicationException
+	 * @param batchInstanceID {@link String}
+	 * @throws JAXBException root exception class for all JAXB exceptions
+	 * @throws DCMAApplicationException if any exception occurs.
 	 */
 	public void exportFiles(String batchInstanceID) throws JAXBException, DCMAApplicationException {
-
 		String exportToFolderSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID, COPY_BATCH_XML_PLUGIN,
 				ExportProperties.EXPORT_TO_FOLDER_SWITCH);
 		LOGGER.info("Export to folder switch: " + exportToFolderSwitch);
@@ -155,7 +177,8 @@ public class FolderExporter implements ICommonConstants {
 		if (IExportCommonConstants.ON_SWITCH.equalsIgnoreCase(exportToFolderSwitch)) {
 			// Initialize properties
 			LOGGER.info("Initializing properties...");
-			String sFolderToBeExported = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+			String sFolderToBeExported = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID) + File.separator
+					+ batchInstanceID;
 			String exportToFolder = pluginPropertiesService.getPropertyValue(batchInstanceID, COPY_BATCH_XML_PLUGIN,
 					ExportProperties.EXPORT_FOLDER);
 			String folderName = pluginPropertiesService.getPropertyValue(batchInstanceID, COPY_BATCH_XML_PLUGIN,
@@ -228,55 +251,25 @@ public class FolderExporter implements ICommonConstants {
 			Documents documents = batch.getDocuments();
 			if (documents != null && documents.getDocument() != null) {
 				List<Document> listOfDocuments = documents.getDocument();
-				InputStream in = null;
-
 				// Export batch XML file to exportToBatchFolder.
 				File destinationXmlFile = new File(exportToBatchFolder.getPath() + File.separator + xmlFileName);
-				try {
-					exportBatchXML(batchInstanceID, isZipSwitchOn, sFolderToBeExported, xmlFileName, xmlFile, xmlZipFile, in,
-							destinationXmlFile);
-					exportMultiPagePdfAndTiffFiles(batchInstanceID, folderName, fileName, fFolderToBeExported, exportToFolder,
-							listOfDocuments, invalidChars);
-					updateExportedBatchXml(batch, destinationXmlFile);
-				} catch (Exception excep) {
-					throw new DCMAApplicationException("Error ocurred while exporting files.", excep);
-				}
+				exportBatchXML(batchInstanceID, isZipSwitchOn, sFolderToBeExported, xmlFileName, xmlFile, xmlZipFile,
+						destinationXmlFile);
+				exportMultiPagePdfAndTiffFiles(batchInstanceID, folderName, fileName, fFolderToBeExported, exportToFolder,
+						listOfDocuments, invalidChars);
+				updateExportedBatchXml(batch, destinationXmlFile);
 			}
 		}
 	}
 
-	/**
-	 * This method updates the exported batch xml.
-	 * 
-	 * @param batch {@link Batch}
-	 * @param destinationXmlFile {@link File}
-	 * @throws Exception
-	 */
-	private void updateExportedBatchXml(Batch batch, File destinationXmlFile) throws Exception {
+	private void updateExportedBatchXml(Batch batch, File destinationXmlFile) {
 		LOGGER.info("Entering updateExportedBatchXml method");
-		try {
-			LOGGER.info("Updating batch XML: " + destinationXmlFile.getAbsolutePath());
-			batchSchemaService.update(batch, destinationXmlFile.getAbsolutePath());
-			LOGGER.info("Batch XML updated successfully: " + destinationXmlFile.getAbsolutePath());
-		} catch (Exception exception) {
-			LOGGER.error("Batch XML could not be updated: " + destinationXmlFile.getAbsolutePath(), exception);
-			throw exception;
-		}
+		LOGGER.info("Updating batch XML: " + destinationXmlFile.getAbsolutePath());
+		batchSchemaService.update(batch, destinationXmlFile.getAbsolutePath());
+		LOGGER.info("Batch XML updated successfully: " + destinationXmlFile.getAbsolutePath());
 		LOGGER.info("Exiting updateExportedBatchXml method");
 	}
 
-	/**
-	 * This method updates the document files based on the format and parameters specified by admin and exports them to the export
-	 * batch folder.
-	 * 
-	 * @param batchInstanceID
-	 * @param fileNameFormat
-	 * @param fileNameArr
-	 * @param fFolderToBeExported
-	 * @param exportToFolder
-	 * @param listOfDocuments
-	 * @param invalidChars
-	 */
 	private void exportMultiPagePdfAndTiffFiles(final String batchInstanceID, final String fileNameFormat, final String fileNameArr,
 			final File fFolderToBeExported, final String exportToFolder, final List<Document> listOfDocuments,
 			final String[] invalidChars) {
@@ -293,7 +286,10 @@ public class FolderExporter implements ICommonConstants {
 		File exportToBatchFolder = null;
 		for (Document document : listOfDocuments) {
 			LOGGER.info("Exporiting files for document: " + document.getType());
-			List<DocField> docFieldList = document.getDocumentLevelFields().getDocumentLevelField();
+			List<DocField> docFieldList = null;
+			if (document.getDocumentLevelFields() != null) {
+				docFieldList = document.getDocumentLevelFields().getDocumentLevelField();
+			}
 			String sMultiPagePdf = document.getMultiPagePdfFile();
 			String sMultiPageTif = document.getMultiPageTiffFile();
 			String finalMultiPagePdf = sMultiPagePdf;
@@ -341,13 +337,6 @@ public class FolderExporter implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * Method to replace invalid characters from file name {fileName} by the replace character specified by admin.
-	 * 
-	 * @param fileName name of the file from which invalid characters are to be replaced.
-	 * @param invalidChars array of invalid characters which are to be replaced.
-	 * @return
-	 */
 	private String replaceInvalidFileChars(final String fileName, final String[] invalidChars) {
 		LOGGER.info("Entering removeInvalidFileChars method");
 		String updatedFileName = fileName;
@@ -369,15 +358,6 @@ public class FolderExporter implements ICommonConstants {
 		return updatedFileName;
 	}
 
-	/**
-	 * This method gets the updated filename according to the file format specified by admin.
-	 * 
-	 * @param batchInstanceID
-	 * @param documentIdentifier
-	 * @param fileNameFormat
-	 * @param docFieldList
-	 * @return
-	 */
 	private String getUpdatedFileName(final String batchInstanceID, final String documentIdentifier, final String[] fileNameFormat,
 			final List<DocField> docFieldList) {
 		LOGGER.info("Entering getUpdatedFileName method.");
@@ -395,7 +375,7 @@ public class FolderExporter implements ICommonConstants {
 				} else if (fileFormat.equalsIgnoreCase(IExportCommonConstants.EPHESOFT_DOCUMENT_ID)) {
 					isValidParamForFileName = true;
 					updatedFileName.append(documentIdentifier);
-				} else {
+				} else if (docFieldList != null && !docFieldList.isEmpty()) {
 					dlfValue = getDlfValue(docFieldList, fileFormat);
 					if (dlfValue != null && !dlfValue.isEmpty()) {
 						isValidParamForFileName = true;
@@ -412,13 +392,6 @@ public class FolderExporter implements ICommonConstants {
 		return updatedFileName.toString();
 	}
 
-	/**
-	 * This method gets the document level field value for the passed document level field.
-	 * 
-	 * @param docFieldList {link @List<DocField>}
-	 * @param dlfName {@link String}
-	 * @return
-	 */
 	private String getDlfValue(final List<DocField> docFieldList, final String dlfName) {
 		LOGGER.info("Entering getDlfValue method.");
 		String dlfValue = null;
@@ -440,15 +413,6 @@ public class FolderExporter implements ICommonConstants {
 		return dlfValue;
 	}
 
-	/**
-	 * This method exports the multipage pdf file from fFolderToBeExported to the exportToBatchFolder.
-	 * 
-	 * @param fFolderToBeExported {@link File} Source folder.
-	 * @param exportToBatchFolder {@link File} Destination folder.
-	 * @param sMultiPageTif {@link String} File name of file to be exported.
-	 * @param dMultiPageTif {@link String} Final file name for the exported file.
-	 * @return
-	 */
 	private String exportTiffFile(final File fFolderToBeExported, final File exportToBatchFolder, final String sMultiPageTif,
 			final String dMultiPageTif) {
 		File fDestinationTifFile = null;
@@ -468,15 +432,6 @@ public class FolderExporter implements ICommonConstants {
 		return fDestinationTifFile.getAbsolutePath();
 	}
 
-	/**
-	 * This method exports the multipage tiff file from fFolderToBeExported to the exportToBatchFolder.
-	 * 
-	 * @param fFolderToBeExported {@link File} Source folder.
-	 * @param exportToBatchFolder {@link File} Destination folder.
-	 * @param sMultiPagePdf {@link String} File name of file to be exported.
-	 * @param dMultiPagePdf {@link String} Final file name for the exported file.
-	 * @return
-	 */
 	private String exportPdfFile(final File fFolderToBeExported, final File exportToBatchFolder, final String sMultiPagePdf,
 			final String dMultiPagePdf) {
 		File fDestinationPdfFile = null;
@@ -495,16 +450,16 @@ public class FolderExporter implements ICommonConstants {
 		}
 		return fDestinationPdfFile.getAbsolutePath();
 	}
-
 	private void exportBatchXML(final String batchInstanceID, final boolean isZipSwitchOn, final String sFolderToBeExported,
-			final String xmlFileName, final File xmlFile, final File xmlZipFile, InputStream in, final File destinationXmlFile)
+			final String xmlFileName, final File xmlFile, final File xmlZipFile, final File destinationXmlFile)
 			throws DCMAApplicationException {
+		InputStream inpStream = null;
 		try {
 			if (isZipSwitchOn) {
 				if (xmlZipFile != null && xmlZipFile.exists()) {
-					in = com.ephesoft.dcma.util.FileUtils.getInputStreamFromZip(sFolderToBeExported + File.separator + xmlFileName,
-							xmlFileName);
-					FileUtils.copyInputStreamToFile(in, destinationXmlFile);
+					inpStream = com.ephesoft.dcma.util.FileUtils.getInputStreamFromZip(sFolderToBeExported + File.separator
+							+ xmlFileName, xmlFileName);
+					FileUtils.copyInputStreamToFile(inpStream, destinationXmlFile);
 				} else {
 					FileUtils.copyFile(xmlFile, destinationXmlFile, false);
 				}
@@ -512,9 +467,9 @@ public class FolderExporter implements ICommonConstants {
 				if (xmlFile != null && xmlFile.exists()) {
 					FileUtils.copyFile(xmlFile, destinationXmlFile, false);
 				} else {
-					in = com.ephesoft.dcma.util.FileUtils.getInputStreamFromZip(sFolderToBeExported + File.separator + xmlFileName,
-							xmlFileName);
-					FileUtils.copyInputStreamToFile(in, destinationXmlFile);
+					inpStream = com.ephesoft.dcma.util.FileUtils.getInputStreamFromZip(sFolderToBeExported + File.separator
+							+ xmlFileName, xmlFileName);
+					FileUtils.copyInputStreamToFile(inpStream, destinationXmlFile);
 				}
 			}
 			LOGGER.info("Successfully export file for batch Instance identifier : " + batchInstanceID);
@@ -526,8 +481,8 @@ public class FolderExporter implements ICommonConstants {
 			throw new DCMAApplicationException("Problem copying XML file : " + xmlFileName, e);
 		} finally {
 			try {
-				if (in != null) {
-					in.close();
+				if (inpStream != null) {
+					inpStream.close();
 				}
 			} catch (IOException ioe) {
 				LOGGER.info("IOException in closing file input stream in Folder Exporter.");

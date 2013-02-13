@@ -5,7 +5,7 @@
 		<g:north size="25">
 			<g:CaptionPanel ui:field="pluginDetailsCaptionPanel"
 				width="97%">
-				<g:ScrollPanel width="90%" height="100%">
+				<g:ScrollPanel width="100%" height="100%">
 					<g:VerticalPanel width="100%" height="100%">
 						<plugin:PluginData ui:field="pluginData" width='100%' />
 					</g:VerticalPanel>
@@ -25,7 +25,7 @@
 										height="80%" width="100%">
 										<plugin:KV_PP_DetailView ui:field="kvPPDetailView"
 											width="100%" height="100%" />
-										<g:HorizontalPanel ui:field="kvppEditButtonPanel">
+										<g:HorizontalPanel ui:field="kvppEditButtonPanel" width="0%">
 										</g:HorizontalPanel>
 									</g:VerticalPanel>
 									<g:VerticalPanel ui:field="kvppPluginConfigVerticalPanel"

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,19 +46,53 @@ import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
 import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.util.OSUtil;
 
+/**
+ * This class is used for optimizing pdf's.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public class PdfOptimizer {
 
+	/**
+	 * String to store batch instance folder name.
+	 */
 	private final String batchInstanceFolder;
+	/**
+	 * String to store input pdf name.
+	 */
 	private final String inputPdfName;
+	/**
+	 * Batch instance thread.
+	 */
 	private final BatchInstanceThread thread;
+	/**
+	 * String to store output pdf name.
+	 */
 	private final String outputPdfName;
+	/**
+	 * PDF optimizing parameters.
+	 */
 	private final String pdfOptimizerParam;
+	/**
+	 * String to store ghost script command.
+	 */
 	private final String gsCommand;
 	/**
 	 * Logger instance for logging using slf4j for logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PdfOptimizer.class);
-
+	/**
+	 * Parameterized constructor.
+	 * @param batchInstanceFolder {@link String}
+	 * @param inputPdfName {@link String}
+	 * @param thread {@link BatchInstanceThread}
+	 * @param outputPdfName {@link String}
+	 * @param pdfOptimizerParam {@link String}
+	 * @param gsCommand {@link String}
+	 * @throws DCMAApplicationException
+	 */
 	public PdfOptimizer(String batchInstanceFolder, String inputPdfName, BatchInstanceThread thread, String outputPdfName,
 			String pdfOptimizerParam, String gsCommand) throws DCMAApplicationException {
 		this.batchInstanceFolder = batchInstanceFolder;
@@ -69,8 +103,11 @@ public class PdfOptimizer {
 		this.gsCommand = gsCommand;
 		run();
 	}
-
-	public void run() throws DCMAApplicationException {
+	/**
+	 * This method is used to create the command for pdf optimization.
+	 * @throws DCMAApplicationException if any exception occurs.
+	 */
+	public final void run() throws DCMAApplicationException {
 		try {
 			LOGGER.info("Creating command for pdf optimization .....");
 			String pdfOptimizerParams[] = pdfOptimizerParam.split(" ");

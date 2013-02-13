@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,8 +46,9 @@ public class PluginDetailsDTO implements IsSerializable {
 	private String pluginDescription;
 	private String pluginWorkflowName;
 	private String scriptName;
+	private String pluginInformation;
 	private List<DependencyDTO> dependencies;
-	private boolean isDirty;
+	private boolean dirty;
 	
 	/**
 	 * @return the dependencies
@@ -118,6 +119,21 @@ public class PluginDetailsDTO implements IsSerializable {
 	public void setScriptName(String scriptName) {
 		this.scriptName = scriptName;
 	}
+	
+	/**
+	 * @return the pluginInformation
+	 */
+	public String getPluginInformation() {
+		return pluginInformation;
+	}
+
+
+	/**
+	 * @param pluginDetailedDecription the pluginInformation to set
+	 */
+	public void setPluginInformation(String pluginInformation) {
+		this.pluginInformation = pluginInformation;
+	}
 
 	public DependencyDTO getDependencyDTOByIdentifier(PluginDetailsDTO pluginDetailsDTO, String identifier)
 	{
@@ -137,15 +153,15 @@ public class PluginDetailsDTO implements IsSerializable {
 	 * @return the isDirty
 	 */
 	public boolean isDirty() {
-		return isDirty;
+		return dirty;
 	}
 
 
 	
 	/**
-	 * @param isDirty the isDirty to set
+	 * @param dirty the isDirty to set
 	 */
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 }

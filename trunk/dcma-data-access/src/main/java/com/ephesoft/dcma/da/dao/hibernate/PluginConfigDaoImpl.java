@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,9 +45,22 @@ import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.PluginConfigDao;
 import com.ephesoft.dcma.da.domain.PluginConfig;
 
+/**
+ * Dao representing plugin_config table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.PageTypeDao
+ */
 @Repository
 public class PluginConfigDaoImpl extends HibernateDao<PluginConfig> implements PluginConfigDao {
 
+	/**
+	 * API to fetch Plugin Config by name.
+	 * 
+	 * @param configName String
+	 * @return PluginConfig
+	 */
 	@Override
 	public PluginConfig getPluginConfigByName(String configName) {
 		DetachedCriteria criteria = criteria();
@@ -55,6 +68,12 @@ public class PluginConfigDaoImpl extends HibernateDao<PluginConfig> implements P
 		return this.findSingle(criteria);
 	}
 
+	/**
+	 * API to fetch Plugin Config for Plugin Id.
+	 * 
+	 * @param pluginId Long
+	 * @return List<PluginConfig>
+	 */
 	@Override
 	public List<PluginConfig> getPluginConfigForPluginId(Long pluginId) {
 		DetachedCriteria criteria = criteria();

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -69,6 +69,7 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.kvfinder.data.InputDataCarrier;
 import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
 import com.ephesoft.dcma.kvfinder.service.KVFinderService;
+import com.ephesoft.dcma.regexpp.constant.RegexPPConstant;
 
 /**
  * This class reads the key value on each image file fetched from batch.xml, processes images with existing key value pattern
@@ -83,8 +84,19 @@ import com.ephesoft.dcma.kvfinder.service.KVFinderService;
 @Component
 public class RegexReader implements ICommonConstants {
 
+	/**
+	 * MAX_VAL_CONST int.
+	 */
+	private static final int MAX_VAL_CONST = 10;
+
+	/**
+	 * KV_PAGE_PROCESS_PLUGIN String.
+	 */
 	private static final String KV_PAGE_PROCESS_PLUGIN = "KV_PAGE_PROCESS";
 
+	/**
+	 * ON_SWTICH String.
+	 */
 	private static final String ON_SWTICH = "ON";
 
 	/**
@@ -100,6 +112,9 @@ public class RegexReader implements ICommonConstants {
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
+	/**
+	 * kvFinderService KVFinderService.
+	 */
 	@Autowired
 	private KVFinderService kvFinderService;
 
@@ -109,6 +124,7 @@ public class RegexReader implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegexReader.class);
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -116,6 +132,7 @@ public class RegexReader implements ICommonConstants {
 	}
 
 	/**
+	 * To get Plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -124,8 +141,8 @@ public class RegexReader implements ICommonConstants {
 
 	/**
 	 * This method is used to update the page value If the page successfully update then it return true otherwise return false. If
-	 * pagelevelfield is not exist in the batch.xml then it will create the new PageLevelField and enters the alternative value and
-	 * values for that pagelevelfield and update it in page object.
+	 * page level field is not exist in the batch.xml then it will create the new PageLevelField and enters the alternative value and
+	 * values for that page level field and update it in page object.
 	 * 
 	 * @param page
 	 * @param outputDataCarriers {@link OutputDataCarrier}
@@ -195,7 +212,7 @@ public class RegexReader implements ICommonConstants {
 			isSuccessful = true;
 		} else {
 			docFieldType.setName(pluginName);
-			docFieldType.setValue("");
+			docFieldType.setValue(RegexPPConstant.EMPTY);
 			isSuccessful = true;
 		}
 		docFieldType.setAlternateValues(alternateValues);
@@ -206,7 +223,7 @@ public class RegexReader implements ICommonConstants {
 	}
 
 	/**
-	 * This method is taking input outputdatacarrier list and used to return the outputdatacarrier object having the maximum confidence
+	 * This method is taking input output data carrier list and used to return the output data carrier object having the maximum confidence
 	 * value. If two object having the maximum confidence value then this method return the first object having the maximum confidence
 	 * value.
 	 * 
@@ -215,7 +232,7 @@ public class RegexReader implements ICommonConstants {
 	 */
 	private OutputDataCarrier getMaxOutputDataCarrier(List<OutputDataCarrier> outputDataCarriers) {
 
-		OutputDataCarrier maxOutputDataCarrier = outputDataCarriers.get(0);
+		OutputDataCarrier maxOutputDataCarrier = outputDataCarriers.get(RegexPPConstant.ZERO);
 
 		for (OutputDataCarrier outputDataCarrier : outputDataCarriers) {
 			if (outputDataCarrier.getConfidence() > maxOutputDataCarrier.getConfidence()) {
@@ -227,13 +244,13 @@ public class RegexReader implements ICommonConstants {
 
 	/**
 	 * This method taking batchInstanceID as input and fetching out the batchClassPluginConfigList with the use of batchInstanceID,
-	 * plugin, RegexPattern. On iterating over the batchClassPluginConfigList inputdatacarries list is created and each input data
+	 * plugin, RegexPattern. On iterating over the batchClassPluginConfigList input data carries list is created and each input data
 	 * carrier list is stored in the map in accordance of the page level field name.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param mapCarrier Map<String, List<InputDataCarrier>>
 	 * @return inputDataCarriers list of {@link InputDataCarrier}
-	 * @throws DCMAApplicationException if any error occur in retriving list
+	 * @throws DCMAApplicationException if any error occur in retrieving list
 	 */
 	private void retrieveInputCarrierList(final BatchInstanceID batchInstanceID, final Map<String, List<InputDataCarrier>> mapCarrier)
 			throws DCMAApplicationException {
@@ -263,11 +280,11 @@ public class RegexReader implements ICommonConstants {
 	}
 
 	/**
-	 * This method is used to update the batch.xml file where the
+	 * This method is used to update the batch.xml file.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @throws DCMAApplicationException if any error occur in updating batch.xml
-	 * @throws DCMAException if any error occur in retriving data from batchSchemaService
+	 * @throws DCMAException if any error occur in retrieving data from batchSchemaService
 	 */
 	public void readRegex(final BatchInstanceID batchInstanceID) throws DCMAApplicationException, DCMAException {
 		String regexSwitch = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
@@ -276,11 +293,10 @@ public class RegexReader implements ICommonConstants {
 			String errMsg = null;
 			String batchInstanceIdentifier = batchInstanceID.getID();
 			LOGGER.info("Initializing......");
-			// String pluginName = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
-			// RegexProperties.KEY_VALUE_PATTERNS);
+		
 			String maxValue = pluginPropertiesService.getPropertyValue(batchInstanceID.getID(), KV_PAGE_PROCESS_PLUGIN,
 					RegexProperties.KVPAGEPROCESS_MAX_RESULT_COUNT);
-			int maxVal = 10;
+			int maxVal = MAX_VAL_CONST;
 			try {
 				maxVal = Integer.parseInt(maxValue);
 			} catch (NumberFormatException e) {
@@ -340,11 +356,11 @@ public class RegexReader implements ICommonConstants {
 						LOGGER.error(errMsg);
 						throw new DCMAApplicationException(errMsg);
 					}
-					HocrPage hocrPage = hocrPageList.get(0);
+					HocrPage hocrPage = hocrPageList.get(RegexPPConstant.ZERO);
 
 					for (String string : mapCarrier.keySet()) {
 						List<InputDataCarrier> inputDataCarriersForDesc = mapCarrier.get(string);
-						outputDataCarriers = kvFinderService.findKeyValue(inputDataCarriersForDesc, hocrPage, maxVal);
+						outputDataCarriers = kvFinderService.findKeyValue(inputDataCarriersForDesc, hocrPage, null, null, maxVal);
 						Boolean isSuccessful = updateBatchXML(page, outputDataCarriers, batchInstanceID, string);
 						if (!isSuccessful) {
 							errMsg = ("Error in upadting the page in batch.xml" + page);

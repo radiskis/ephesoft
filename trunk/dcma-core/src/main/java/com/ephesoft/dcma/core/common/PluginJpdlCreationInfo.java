@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,6 @@
 
 package com.ephesoft.dcma.core.common;
 
-
 /**
  * Enumerating all possible batch instance status.
  * 
@@ -43,38 +42,79 @@ package com.ephesoft.dcma.core.common;
  * @version 1.0
  */
 public class PluginJpdlCreationInfo {
+	
+	/**
+	 * subProcessName String.
+	 */
 	private String subProcessName;
-	private boolean isScriptingPlugin;
+	
+	/**
+	 * scriptingPlugin boolean.
+	 */
+	private boolean scriptingPlugin;
+	
+	/**
+	 * serviceName String.
+	 */
 	private String serviceName;
+	
+	/**
+	 * methodName String.
+	 */ 
 	private String methodName;
 
+	/**
+	 * Constructor.
+	 * @param subProcessName  
+	 */
 	public PluginJpdlCreationInfo(String subProcessName) {
 		this(subProcessName, false,"","");
 	}
 	
+	/**
+	 * Constructor.
+	 * @param subProcessName String 
+	 * @param isScriptingPlugin boolean
+	 * @param serviceName String 
+	 * @param methodName String
+	 */
 	public PluginJpdlCreationInfo(String subProcessName, boolean isScriptingPlugin, String serviceName, String methodName) {
 		this.subProcessName = subProcessName;
-		this.isScriptingPlugin = isScriptingPlugin;
+		this.scriptingPlugin = isScriptingPlugin;
 		this.serviceName = serviceName;
 		this.methodName = methodName;
 	}
 	
-	
+	/**
+	 * To get Service Name.
+	 * @return String
+	 */
 	public String getServiceName() {
 		return serviceName;
 	}
 	
-	
+	/**
+	 * To get Method Name.
+	 * @return String
+	 */
 	public String getMethodName() {
 		return methodName;
 	}
 	
+	/**
+	 * To get Sub Process Name.
+	 * @return String
+	 */
 	public String getSubProcessName() {
 		return subProcessName;
 	}
 	
+	/**
+	 * To check whether Scripting Plugin or not.
+	 * @return boolean
+	 */
 	public boolean isScriptingPlugin() {
-		return isScriptingPlugin;
+		return scriptingPlugin;
 	}
 	
 }

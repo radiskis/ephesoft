@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,18 +36,19 @@
 package com.ephesoft.dcma.gwt.core.client.ui.table;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import com.ephesoft.dcma.core.common.DomainProperty;
 
 public class TableHeader {
 
-	private LinkedList<HeaderColumn> headerColumns = new LinkedList<HeaderColumn>();
+	private final List<HeaderColumn> headerColumns = new LinkedList<HeaderColumn>();
 
 	public void addHeaderColumn(HeaderColumn column) {
 		headerColumns.add(column);
 	}
 
-	public LinkedList<HeaderColumn> getHeaderColumns(boolean isRadioButton) {
+	public List<HeaderColumn> getHeaderColumns(boolean isRadioButton) {
 		boolean columnToAdd = true;
 		if (isRadioButton) {
 			for(HeaderColumn column : headerColumns) {
@@ -59,7 +60,6 @@ public class TableHeader {
 			HeaderColumn radioButton = new HeaderColumn(0, "radio", 5);
 			headerColumns.add(0, radioButton);
 			}
-			return headerColumns;
 		}
 		return headerColumns;
 	}
@@ -70,28 +70,28 @@ public class TableHeader {
 
 	public static class HeaderColumn {
 
-		int index;
-		String name;
-		int width;
-		boolean isSortable;
-		boolean isPrimaryAsc = true;
-		DomainProperty domainProperty;
+		private final int index;
+		private String name;
+		private final int width;
+		private boolean sortable;
+		private boolean primaryAsc = true;
+		private final DomainProperty domainProperty;
 
 		public HeaderColumn(int index, String name, int width) {
 			this(index, name, width, false, null);
 		}
 
-		public HeaderColumn(int index, String name, int width, boolean isSortable, DomainProperty domainProperty) {
+		public HeaderColumn(int index, String name, int width, boolean sortable, DomainProperty domainProperty) {
 			this.index = index;
 			this.name = name;
 			this.width = width;
-			this.isSortable = isSortable;
+			this.sortable = sortable;
 			this.domainProperty = domainProperty;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + index;
 			return result;
@@ -99,21 +99,28 @@ public class TableHeader {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
+			boolean isEqual = true;
+			if (this == obj){
+				isEqual = true;
+			}				
+			if (obj == null){
+				isEqual = false;
+			}				
+			if (getClass() != obj.getClass()){
+				isEqual = false;
+			}				
 			HeaderColumn other = (HeaderColumn) obj;
-			if (index != other.index)
-				return false;
+			if (index != other.index){
+				isEqual = false;
+			}				
 			if (name == null) {
-				if (other.name != null)
-					return false;
-			} else if (!name.equals(other.name))
-				return false;
-			return true;
+				if (other.name != null){
+					isEqual = false;
+				}					
+			} else if (!name.equals(other.name)){
+				isEqual = false;
+			}				
+			return isEqual;
 		}
 
 		public int getIndex() {
@@ -133,23 +140,23 @@ public class TableHeader {
 		}
 
 		public boolean isPrimaryAsc() {
-			return isPrimaryAsc;
+			return primaryAsc;
 		}
 
-		public void setPrimaryAsc(boolean isPrimaryAsc) {
-			this.isPrimaryAsc = isPrimaryAsc;
+		public void setPrimaryAsc(boolean primaryAsc) {
+			this.primaryAsc = primaryAsc;
 		}
 		
 		public void setName(String name) {
 			this.name = name;
 		}
 
-		public void setSortable(boolean isSortable) {
-			this.isSortable = isSortable;
+		public void setSortable(boolean sortable) {
+			this.sortable = sortable;
 		}
 
 		public boolean isSortable() {
-			return isSortable;
+			return sortable;
 		}
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,24 +33,47 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client;
+package com.ephesoft.dcma.gwt.batchinstance.client;
 
-import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstancePresenter;
-import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceView;
-import com.ephesoft.dcma.gwt.core.client.Controller;
+import com.ephesoft.dcma.gwt.batchinstance.client.presenter.BatchInstancePresenter;
+import com.ephesoft.dcma.gwt.batchinstance.client.view.BatchInstanceView;
+import com.ephesoft.dcma.gwt.core.client.AbstractController;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 
-public class BatchInstanceController extends Controller {
+/**
+ * This class provides functionality to control batch instance view, save, update etc.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.AbstractController
+ */
+public class BatchInstanceController extends AbstractController {
 
+	/**
+	 * batchInstancePresenter BatchInstancePresenter.
+	 */
 	private BatchInstancePresenter batchInstancePresenter;
+
+	/**
+	 * batchInstanceView BatchInstanceView.
+	 */
 	private BatchInstanceView batchInstanceView;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param eventBus HandlerManager
+	 * @param rpcService DCMARemoteServiceAsync
+	 */
 	public BatchInstanceController(HandlerManager eventBus, DCMARemoteServiceAsync rpcService) {
 		super(eventBus, rpcService);
 	}
 
+	/**
+	 * To create View.
+	 */
 	@Override
 	public Composite createView() {
 		this.batchInstanceView = new BatchInstanceView();
@@ -58,27 +81,50 @@ public class BatchInstanceController extends Controller {
 		return this.batchInstanceView;
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void refresh() {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * To get Rpc Service.
+	 * 
+	 * @return BatchInstanceManagementServiceAsync
+	 */
 	@Override
 	public BatchInstanceManagementServiceAsync getRpcService() {
 		return (BatchInstanceManagementServiceAsync) super.getRpcService();
 	}
 
+	/**
+	 * To get Batch Instance Presenter.
+	 * 
+	 * @return BatchInstancePresenter
+	 */
 	public BatchInstancePresenter getBatchInstancePresenter() {
 		return batchInstancePresenter;
 	}
 
+	/**
+	 * To get Batch Instance View.
+	 * 
+	 * @return BatchInstanceView
+	 */
 	public BatchInstanceView getBatchInstanceView() {
 		return batchInstanceView;
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,31 +48,52 @@ import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
+/**
+ * This class is used to create and destroy the session.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchClassService
+ * @see com.ephesoft.dcma.da.service.BatchInstanceService
+ */
 public class SessionListener implements HttpSessionListener {
 
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * LOG to print the logging information.
+	 */
+	protected final static Logger LOG = LoggerFactory.getLogger(SessionListener.class);
 
+	/**
+	 * To create session.
+	 * 
+	 * @param sessionEvent HttpSessionEvent
+	 */
 	@Override
 	public void sessionCreated(HttpSessionEvent sessionEvent) {
-		log.info("Session created successfully.");
+		LOG.info("Session created successfully.");
 	}
 
+	/**
+	 * To destroy the session.
+	 * 
+	 * @param sessionEvent HttpSessionEvent
+	 */
 	@Override
 	public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-		log.info("Session is getting destroyed.");
+		LOG.info("Session is getting destroyed.");
 		HttpSession session = sessionEvent.getSession();
 		String userName = (String) session.getAttribute("userName");
 		WebApplicationContext ctx = WebApplicationContextUtils.getRequiredWebApplicationContext(session.getServletContext());
 
 		BatchInstanceService batchInstanceService = ApplicationContextUtil.getSingleBeanOfType(ctx, BatchInstanceService.class);
-		log.info("Unlocking all batch instances for current user:" + userName);
+		LOG.info("Unlocking all batch instances for current user:" + userName);
 		batchInstanceService.unlockAllBatchInstancesForCurrentUser(userName);
 
 		BatchClassService batchClassService = ApplicationContextUtil.getSingleBeanOfType(ctx, BatchClassService.class);
-		log.info("Unlocking all batch classes for current user:" + userName);
+		LOG.info("Unlocking all batch classes for current user:" + userName);
 		batchClassService.unlockAllBatchClassesForCurrentUser(userName);
 
-		log.info("Session destruction is complete.");
+		LOG.info("Session destruction is complete.");
 	}
 
 }

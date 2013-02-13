@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,30 +46,46 @@ import com.ephesoft.dcma.da.domain.BatchClass;
  * 
  */
 public interface DeploymentService {
-	
+
 	/**
 	 * This method is used to deploy given batch class.
+	 * 
 	 * @param batchClass {@link BatchClass}
 	 */
 	void deploy(BatchClass batchClass);
 
 	/**
-	 * This method is used to un-deploy given batch class.
+	 * This method is used to undeploy given batch class.
+	 * 
 	 * @param batchClass {@link BatchClass}
 	 */
 	void undeploy(BatchClass batchClass);
-	
+
 	/**
 	 * This method is used to deploy all batch classes.
 	 */
 	void deployAll();
 
 	/**
-	 * API to check if a worklow is deployed.
+	 * API to check if a workflow is deployed.
 	 * 
 	 * @param activityName
 	 * @return
 	 */
 	boolean isDeployed(String activityName);
+
+	/**
+	 * API to deploy a JPDL existing on the given process definition path.
+	 * 
+	 * @param processDefinition {@link String}
+	 */
+	void deploy(String processDefinition);
+
+	/**
+	 * API to create and deploy workflow for a batch class.
+	 * 
+	 * @param batchClass {@link BatchClass}
+	 */
+	void createAndDeployBatchClassJpdl(BatchClass batchClass);
 
 }

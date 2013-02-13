@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,29 +44,56 @@ import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the table info list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class TableInfoListPresenter extends AbstractBatchClassPresenter<TableInfoListView> implements DoubleClickListner {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view TableInfoListView
+	 */
 	public TableInfoListPresenter(BatchClassManagementController controller, TableInfoListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getTableInfoListView().getSelectedRowIndex();
 		int rowCount = view.getTableInfoListView().getTableRecordCount();

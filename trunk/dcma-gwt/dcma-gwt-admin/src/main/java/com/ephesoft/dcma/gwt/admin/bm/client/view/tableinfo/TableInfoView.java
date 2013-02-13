@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -65,50 +65,111 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit table info view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class TableInfoView extends View<TableInfoViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, TableInfoView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * tableColumnInfoListView TableColumnInfoListView.
+	 */
 	private final TableColumnInfoListView tableColumnInfoListView;
-	
+
+	/**
+	 * tableColumnInfoListPresenter TableColumnInfoListPresenter.
+	 */
 	private TableColumnInfoListPresenter tableColumnInfoListPresenter;
 
+	/**
+	 * tableColumnInfoListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel tableColumnInfoListPanel;
 
+	/**
+	 * tableInfoDetailView TableInfoDetailView.
+	 */
 	@UiField
 	protected TableInfoDetailView tableInfoDetailView;
 
+	/**
+	 * editTableInfoView EditTableInfoView.
+	 */
 	@UiField
 	protected EditTableInfoView editTableInfoView;
 
-	@UiField
-	protected Button editTableInfoPropertiesButton;
-
+	/**
+	 * tableInfoVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel tableInfoVerticalPanel;
 
+	/**
+	 * tableInfoConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel tableInfoConfigVerticalPanel;
 
+	/**
+	 * tableInfoCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel tableInfoCaptionPanel;
 
+	/**
+	 * addTCButton Button.
+	 */
 	@UiField
 	protected Button addTCButton;
 
+	/**
+	 * editTCButton Button.
+	 */
 	@UiField
 	protected Button editTCButton;
 
+	/**
+	 * advEditButton Button.
+	 */
+	@UiField
+	protected Button advEditButton;
+
+	/**
+	 * deleteTCButton Button.
+	 */
 	@UiField
 	protected Button deleteTCButton;
 
+	/**
+	 * testTableButton Button.
+	 */
+	@UiField
+	protected Button testTableButton;
+
+	/**
+	 * tableColumnInfoButtonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel tableColumnInfoButtonPanel;
 
+	/**
+	 * Constructor.
+	 */
 	public TableInfoView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -119,34 +180,61 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 		addTCButton.setText(AdminConstants.ADD_BUTTON);
 		editTCButton.setText(AdminConstants.EDIT_BUTTON);
 		deleteTCButton.setText(AdminConstants.DELETE_BUTTON);
-
-		editTableInfoPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
+		advEditButton.setText(AdminConstants.ADV_EDIT);
 
 		tableInfoCaptionPanel.setCaptionHTML(AdminConstants.TABLE_INFO_DETAILS_HTML);
 
-		addTCButton.setHeight("20px");
-		editTCButton.setHeight("20px");
-		deleteTCButton.setHeight("20px");
+		addTCButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		editTCButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		deleteTCButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		advEditButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+
+		testTableButton.setText(AdminConstants.TEST_TABLE_BUTTON);
+		testTableButton.setHeight("20px");
+		testTableButton.addStyleName("margin");
 
 		tableColumnInfoButtonPanel.addStyleName("topPadd");
 
-		tableInfoVerticalPanel.add(editTableInfoPropertiesButton);
-
 	}
 
+	/**
+	 * To perform operations on Test Table Button Clicked.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("testTableButton")
+	public void onTestTableButtonClicked(ClickEvent clickEvent) {
+		presenter.onTestTableButtonClicked();
+	}
+
+	/**
+	 * To get Table Info Detail View.
+	 * 
+	 * @return TableInfoDetailView
+	 */
 	public TableInfoDetailView getTableInfoDetailView() {
 		return tableInfoDetailView;
 	}
 
+	/**
+	 * To get Table Column Info List View.
+	 * 
+	 * @return TableColumnInfoListView
+	 */
 	public TableColumnInfoListView getTableColumnInfoListView() {
 		return tableColumnInfoListView;
 	}
 
+	/**
+	 * To create Table Column Info List.
+	 * 
+	 * @param fields List<TableColumnInfoDTO>
+	 */
 	public void createTableColumnInfoList(List<TableColumnInfoDTO> fields) {
 		List<Record> recordList = setFieldsList(fields);
 		tableColumnInfoListPresenter = new TableColumnInfoListPresenter(presenter.getController(), tableColumnInfoListView);
 		tableColumnInfoListView.listView.initTable(recordList.size(), null, null, recordList, true, false,
-				tableColumnInfoListPresenter);
+				tableColumnInfoListPresenter, null, true);
 	}
 
 	private List<Record> setFieldsList(List<TableColumnInfoDTO> fields) {
@@ -155,55 +243,97 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 		for (final TableColumnInfoDTO tcInfoDTO : fields) {
 			Record record = new Record(tcInfoDTO.getIdentifier());
 			CheckBox isRequired = new CheckBox();
+			CheckBox isMandatory = new CheckBox();
 			isRequired.setValue(tcInfoDTO.isRequired());
 			isRequired.setEnabled(false);
+			isMandatory.setValue(tcInfoDTO.isMandatory());
+			isMandatory.setEnabled(false);
 			record.addWidget(tableColumnInfoListView.betweenLeft, new Label(tcInfoDTO.getBetweenLeft()));
 			record.addWidget(tableColumnInfoListView.betweenRight, new Label(tcInfoDTO.getBetweenRight()));
 			record.addWidget(tableColumnInfoListView.columnName, new Label(tcInfoDTO.getColumnName()));
 			record.addWidget(tableColumnInfoListView.columnHeaderPattern, new Label(tcInfoDTO.getColumnHeaderPattern()));
+			record.addWidget(tableColumnInfoListView.columnStartCoord, new Label(tcInfoDTO.getColumnStartCoordinate()));
+			record.addWidget(tableColumnInfoListView.columnEndCoord, new Label(tcInfoDTO.getColumnEndCoordinate()));
 			record.addWidget(tableColumnInfoListView.columnPattern, new Label(tcInfoDTO.getColumnPattern()));
 			record.addWidget(tableColumnInfoListView.isRequired, isRequired);
+			record.addWidget(tableColumnInfoListView.isMandatory, isMandatory);
 			recordList.add(record);
 		}
 
 		return recordList;
 	}
 
+	/**
+	 * To get Edit Table Info View.
+	 * 
+	 * @return EditTableInfoView
+	 */
 	public EditTableInfoView getEditTableInfoView() {
 		return editTableInfoView;
 	}
 
-	public Button getEditTableInfoPropertiesButton() {
-		return editTableInfoPropertiesButton;
-	}
-
+	/**
+	 * To get Table Info Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getTableInfoVerticalPanel() {
 		return tableInfoVerticalPanel;
 	}
 
+	/**
+	 * To get Table Info Configuration Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getTableInfoConfigVerticalPanel() {
 		return tableInfoConfigVerticalPanel;
 	}
 
+	/**
+	 * To get Add TC Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getAddTCButton() {
 		return addTCButton;
 	}
 
-	@UiHandler("editTableInfoPropertiesButton")
-	public void onEditTableInfoPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditTableInfoPropertiesButtonClicked();
-	}
-
+	/**
+	 * To perform operations on Add TC Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addTCButton")
 	public void onAddTCButtonClick(ClickEvent clickEvent) {
 		presenter.onAddTCButtonClicked();
 	}
 
+	/**
+	 * To perform operations on edit TC Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editTCButton")
 	public void onEditTCButtonClicked(ClickEvent clickEvent) {
 		tableColumnInfoListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on advanced edit Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("advEditButton")
+	public void onAdvEditButtonClicked(ClickEvent clickEvent) {
+		tableColumnInfoListPresenter.onAdvEditButtonClicked();
+	}
+
+	/**
+	 * To delete the selected records.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteTCButton")
 	public void onDeleteTCButtonClicked(ClickEvent clickEvent) {
 		final String identifier = tableColumnInfoListView.listView.getSelectedRowIndex();
@@ -235,7 +365,7 @@ public class TableInfoView extends View<TableInfoViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		
+
 	}
 
 }

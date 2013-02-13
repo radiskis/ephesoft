@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client;
+package com.ephesoft.dcma.gwt.customworkflow.client;
 
 import java.util.List;
 
@@ -48,4 +48,6 @@ public interface CustomWorkflowServiceAsync extends DCMARemoteServiceAsync {
 	void getAllPluginDetailDTOs(AsyncCallback<List<PluginDetailsDTO>> callback);
 
 	void updateAllPluginDetailsDTOs(List<PluginDetailsDTO> allPluginDetailsDTO, AsyncCallback<List<PluginDetailsDTO>> callback);
+	
+	void deletePlugin(PluginDetailsDTO pluginDetailsDTO, AsyncCallback<Boolean> callback);
 }

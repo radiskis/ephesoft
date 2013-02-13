@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -78,22 +78,46 @@ import com.sun.star.util.XCloseable;
 import com.sun.star.util.XRefreshable;
 
 /**
+ * This is class for abstract conversion.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see org.artofsolving.jodconverter.office.OfficeTask
  */
+@SuppressWarnings("PMD")
 public abstract class AbstractConversionTask implements OfficeTask {
 
+	/**
+	 * inputFile File.
+	 */
 	private final File inputFile;
+	
+	/**
+	 * outputFile File.
+	 */
 	private final File outputFile;
+	
+	/**
+	 * inputFileURL String.
+	 */
 	private final String inputFileURL;
 
+	/**
+	 * Constructor.
+	 * @param inputFile File
+	 * @param outputFile File
+	 */
 	public AbstractConversionTask(File inputFile, File outputFile) {
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
 		this.inputFileURL = null;
 	}
 
+	/**
+	 * Constructor.
+	 * @param inputFileURL String
+	 * @param outputFile File
+	 */
 	public AbstractConversionTask(String inputFileURL, File outputFile) {
 		this.inputFile = null;
 		this.outputFile = outputFile;
@@ -104,6 +128,11 @@ public abstract class AbstractConversionTask implements OfficeTask {
 
 	protected abstract Map<String, ?> getStoreProperties(File outputFile, XComponent document);
 
+	/**
+	 * Execute method. 
+	 * @param context OfficeContext
+	 * @throws OfficeException in case of conversion failure
+	 */
 	public void execute(OfficeContext context) throws OfficeException {
 		XComponent document = null;
 		try {

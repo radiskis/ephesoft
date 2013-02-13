@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,14 +54,18 @@ import com.ephesoft.dcma.da.domain.TableInfo;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see @see com.ephesoft.dcma.da.dao.TableInfoDao
  */
 @Repository
 public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableInfoDao {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableInfoDaoImpl.class);
 
 	/**
-	 * An api to fetch all TableInfo by document type name.
+	 * An API to fetch all TableInfo by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @param batchClassIdentifier String
@@ -82,7 +86,7 @@ public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableIn
 	}
 
 	/**
-	 * An api to fetch all TableInfo by document type.
+	 * An API to fetch all TableInfo by document type.
 	 * 
 	 * @param documentType DocumentType
 	 * @return List<TableInfo>
@@ -95,7 +99,7 @@ public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableIn
 	}
 
 	/**
-	 * An api to insert the TableInfo object.
+	 * An API to insert the TableInfo object.
 	 * 
 	 * @param TableInfo TableInfo
 	 */
@@ -104,7 +108,7 @@ public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableIn
 	}
 
 	/**
-	 * An api to update the TableInfo object.
+	 * An API to update the TableInfo object.
 	 * 
 	 * @param TableInfo TableInfo
 	 */
@@ -113,7 +117,7 @@ public class TableInfoDaoImpl extends HibernateDao<TableInfo> implements TableIn
 	}
 
 	/**
-	 * An api to remove the TableInfo object.
+	 * An API to remove the TableInfo object.
 	 * 
 	 * @param TableInfo TableInfo
 	 */

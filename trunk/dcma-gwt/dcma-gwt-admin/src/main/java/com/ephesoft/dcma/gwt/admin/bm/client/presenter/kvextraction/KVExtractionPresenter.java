@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,44 +40,79 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVExtractionView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the KV extraction view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KVExtractionPresenter extends AbstractBatchClassPresenter<KVExtractionView> {
 
+	/**
+	 * kvExtractionDetailPresenter KVExtractionDetailPresenter.
+	 */
 	private final KVExtractionDetailPresenter kvExtractionDetailPresenter;
 
+	/**
+	 * editKVExtractionPresenter EditKVExtractionPresenter.
+	 */
 	private final EditKVExtractionPresenter editKVExtractionPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KVExtractionView
+	 */
 	public KVExtractionPresenter(BatchClassManagementController controller, KVExtractionView view) {
-
 		super(controller, view);
 		this.kvExtractionDetailPresenter = new KVExtractionDetailPresenter(controller, view.getKvextractionDetailView());
 		this.editKVExtractionPresenter = new EditKVExtractionPresenter(controller, view.getEditKVExtractionView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		kvExtractionDetailPresenter.bind();
 		editKVExtractionPresenter.bind();
 	}
 
+	/**
+	 * To show KV Extraction View.
+	 */
 	public void showKVExtractionView() {
 		view.getKvExtractionTypeVerticalPanel().setVisible(Boolean.TRUE);
 		view.getKvTypeConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show Edit KV Extraction View.
+	 */
 	public void showEditKVExtractionView() {
 		view.getKvExtractionTypeVerticalPanel().setVisible(Boolean.FALSE);
 		view.getKvTypeConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To perform operations on Edit KV Properties button click.
+	 */
 	public void onEditKVPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editKVExtractionPresenter.bind();
 		showEditKVExtractionView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editKVExtractionPresenter.bind();
 	}
-	
+
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 }

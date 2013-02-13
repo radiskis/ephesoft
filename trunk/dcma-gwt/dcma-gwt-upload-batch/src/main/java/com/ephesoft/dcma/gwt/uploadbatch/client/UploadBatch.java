@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.uploadbatch.client;
 
 import com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
@@ -43,7 +44,6 @@ import com.ephesoft.dcma.gwt.core.client.view.RootPanel;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchConstants;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchMessages;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
@@ -73,20 +73,23 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 		layoutPanel.add(controller.createView());
 		
 		controller.getMainPresenter().bind();
-		final RootPanel rootPanel = new RootPanel(layoutPanel);
+		final RootPanel rootPanel = new RootPanel(layoutPanel, rpcService);
 
 		rootPanel.getHeader().setEventBus(eventBus);
 		
 		rootPanel.getHeader().setDialogMessage(LocaleDictionary.get().getMessageValue(UploadBatchMessages.BACK_WITHOUT_FINISH_UPLOAD));
-		rootPanel.getHeader().setButtonText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.OK), LocaleDictionary.get().getConstantValue(UploadBatchConstants.CANCEL));
+		rootPanel.getHeader().setButtonText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.BUTTON_TEXT_OK), LocaleDictionary.get().getConstantValue(UploadBatchConstants.CANCEL));
 		rootPanel.getHeader().setShowDialogBoxOnTabClick(true);
 		
 		rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_HOME), "BatchList.html",false);
 		ScreenMaskUtility.maskScreen();
 
-		rpcService.getRowsCount(new AsyncCallback<Integer>() {
+		rpcService.getRowsCount(new EphesoftAsyncCallback<Integer>() {
 
-			public void onFailure(Throwable caught) {
+			public void customFailure(Throwable caught) {
+				/*
+				 * On failure
+				 */
 			}
 
 			public void onSuccess(Integer result) {
@@ -102,12 +105,13 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 				rootPanel.getHeader().addTab(LocaleDictionary.get().getConstantValue(UploadBatchConstants.TAB_LABEL_WEB_SCANNER),
 						"WebScanner.html",false);
 				
-				rpcService.isUploadBatchEnabled(new AsyncCallback<Boolean>() {
+				rpcService.isUploadBatchEnabled(new EphesoftAsyncCallback<Boolean>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
-						// TODO Auto-generated method stub
-						
+					public void customFailure(Throwable arg0) {
+						/*
+						 * On failure
+						 */
 					}
 
 					@Override
@@ -121,7 +125,7 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 			}
 		});
 
-		rpcService.getUserName(new AsyncCallback<String>() {
+		rpcService.getUserName(new EphesoftAsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(String userName) {
@@ -130,7 +134,7 @@ public class UploadBatch extends DCMAEntryPoint<UploadBatchServiceAsync> {
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 		});

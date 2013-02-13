@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,9 +42,7 @@ import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.property.PluginProperty;
-import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
-import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
@@ -54,41 +52,81 @@ import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.ephesoft.dcma.gwt.core.shared.comparator.BatchClassPluginComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the plugin details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListView> implements PaginationListner, DoubleClickListner {
 
+	/**
+	 * pluginDetailDTOList Collection<BatchClassPluginDTO>.
+	 */
 	private Collection<BatchClassPluginDTO> pluginDetailDTOList;
 
+	/**
+	 * To get plugin detail DTO.
+	 * 
+	 * @return Collection<BatchClassPluginDTO>
+	 */
 	public Collection<BatchClassPluginDTO> getPluginDetailDTO() {
 		return pluginDetailDTOList;
 	}
 
+	/**
+	 * To set Plugin Detail DTO.
+	 * 
+	 * @param pluginDetailDTOList Collection<BatchClassPluginDTO>
+	 */
 	public void setPluginDetailDTO(Collection<BatchClassPluginDTO> pluginDetailDTOList) {
 		this.pluginDetailDTOList = pluginDetailDTOList;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view PluginListView
+	 */
 	public PluginListPresenter(BatchClassManagementController controller, PluginListView view) {
 		super(controller, view);
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-
+		// NO implementation
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// NO implementation
 	}
 
+	/**
+	 * To perform operations on pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param paramOrder Order
+	 */
 	@Override
-	public void onPagination(int startIndex, int maxResult, Order order) {
+	public void onPagination(int startIndex, int maxResult, Order paramOrder) {
+		Order order = paramOrder;
 		if (order == null) {
 			order = new Order(PluginProperty.ORDER, true);
 		}
@@ -103,11 +141,17 @@ public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListV
 				pluginDetailsRecordList.subList(startIndex, count), startIndex, totalSize);
 	}
 
+	/**
+	 * In case of double click on Table, open the edit view.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getPluginListView().getSelectedRowIndex();
 		if (identifier == null || identifier.isEmpty()) {
@@ -115,15 +159,15 @@ public class PluginListPresenter extends AbstractBatchClassPresenter<PluginListV
 					BatchClassManagementMessages.NONE_SELECTED_WARNING));
 
 		} else {
-			if (getController().getMainPresenter().getModuleViewPresenter().getView().getEditPlugin().isEnabled()) {
-				BatchClassPluginDTO pluginDTO = controller.getSelectedModule().getPluginByIdentifier(identifier);
-				if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.FUZZYDB_PLUGIN)) {
-					controller.getMainPresenter().showFuzzyDBPluginView(pluginDTO);
-				} else if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.KV_PAGE_PROCESS_PLUGIN)) {
-					controller.getMainPresenter().showKVppPluginView(pluginDTO);
-				} else {
-					controller.getMainPresenter().showPluginView(pluginDTO);
-				}
+			BatchClassPluginDTO pluginDTO = controller.getSelectedModule().getPluginByIdentifier(identifier);
+			if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.FUZZYDB_PLUGIN)) {
+				controller.getMainPresenter().showFuzzyDBPluginView(pluginDTO);
+			} else if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.KV_PAGE_PROCESS_PLUGIN)) {
+				controller.getMainPresenter().showKVppPluginView(pluginDTO);
+			} else if (pluginDTO.getPlugin().getPluginName().equalsIgnoreCase(PluginNameConstants.EXPORT_BOX_PLUGIN)) {
+				controller.getMainPresenter().showBoxPluginView(pluginDTO);
+			} else {
+				controller.getMainPresenter().showPluginView(pluginDTO);
 			}
 		}
 	}

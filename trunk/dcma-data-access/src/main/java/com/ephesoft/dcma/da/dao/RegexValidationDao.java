@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,12 +46,12 @@ import com.ephesoft.dcma.da.domain.RegexValidation;
  * 
  * @author Ephesoft
  * @version 1.0
- * 
+ * @see com.ephesoft.dcma.da.dao.hibernate.RegexValidationDaoImpl
  */
 public interface RegexValidationDao extends CacheableDao<RegexValidation> {
 
 	/**
-	 * An api to fetch all Regex Validation by field type.
+	 * An API to fetch all Regex Validation by field type.
 	 * 
 	 * @param fieldType FieldType
 	 * @return List<RegexValidation>
@@ -59,21 +59,21 @@ public interface RegexValidationDao extends CacheableDao<RegexValidation> {
 	List<RegexValidation> getRegexValidationByFieldType(FieldType fieldType);
 
 	/**
-	 * An api to insert the RegexValidation object.
+	 * An API to insert the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */
 	void insertRegexValidation(RegexValidation RegexValidation);
 
 	/**
-	 * An api to update the RegexValidation object.
+	 * An API to update the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */
 	void updateRegexValidation(RegexValidation RegexValidation);
 
 	/**
-	 * An api to remove the RegexValidation object.
+	 * An API to remove the RegexValidation object.
 	 * 
 	 * @param RegexValidation RegexValidation
 	 */

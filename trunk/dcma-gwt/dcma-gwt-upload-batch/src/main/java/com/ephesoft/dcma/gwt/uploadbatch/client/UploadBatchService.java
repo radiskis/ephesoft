@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassCloudConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -115,4 +116,20 @@ public interface UploadBatchService extends DCMARemoteService {
 	 * @return {@link String}
 	 */
 	String getCurrentBatchFolderName();
+
+	/**
+	 * The <code>getBatchClassImageLimit</code> method is used to get batch class
+	 * instance image limit.
+	 * 
+	 * @return Map<{@link String},{@link BatchClassCloudConfigDTO}>.
+	 */
+	Map<String, BatchClassCloudConfigDTO> getBatchClassImageLimit();
+	
+	/**
+	 * The <code>getFileSizeLimit</code> method is used for getting upload
+	 * file limit.
+	 * 
+	 * @return {@link Long} file upload size in kb
+	 */
+	Long getFileSizeLimit();
 }

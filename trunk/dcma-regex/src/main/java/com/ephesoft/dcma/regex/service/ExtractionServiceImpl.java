@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,41 +35,110 @@
 
 package com.ephesoft.dcma.regex.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import com.ephesoft.dcma.batch.schema.DocField;
+import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.regex.Extraction;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This service is used to extract the data from scanned pages using regular expression and insert the received data to the batch.xml
+ * file. Data will be added to the document level fields. If the more than one data is found then values are added to the alternate
+ * value of document level fields.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.regex.service.ExtractionService
+ */
 public class ExtractionServiceImpl implements ExtractionService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtractionServiceImpl.class);
 
+	/**
+	 * Instance of {@link Extraction}.
+	 */
 	@Autowired
 	private Extraction extraction;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+	
+    /**
+     * To perform pre-processing functions.
+     * 
+     * @param batchInstanceID {@link BatchInstanceID}
+     * @param pluginWorkflow {@link String}
+     */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+     * To perform post-processing functions.
+     * 
+     * @param batchInstanceID {@link BatchInstanceID}
+     * @param pluginWorkflow {@link String}
+     */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * This method is used to extract the data from scanned pages using regular expression and insert the received data to the
+	 * batch.xml file.
+	 * 
+	 * @param batchInstanceIdentifier {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException If not able to extract document fields
+	 */
 	@Override
 	public void extractDocumentFields(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		try {
 			extraction.extractFields(batchInstanceID.getID());
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new DCMAException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * @param batchClassID {@link String}
+	 * @param docTypeName {@link String}
+	 * @param hocrPages {@link HocrPages}
+	 * @return
+	 * @throws DCMAException If not able to extract document fields
+	 */
+	@Override
+	public List<DocField> extractDocumentFieldsFromHOCR(final String batchClassID, final String docTypeName, final HocrPages hocrPages)
+			throws DCMAException {
+		try {
+			LOGGER.info("Extracting document level fields...");
+			return extraction.extractFieldsAPI(batchClassID, docTypeName, hocrPages);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);

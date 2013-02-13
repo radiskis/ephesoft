@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,51 +45,80 @@ import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.tabbed.TabbedPdfExporter;
 import com.ephesoft.dcma.util.BackUpFileService;
 
 /**
- * This service is used to transform the batch xml into the tabbed pdf format.
- * 
+ * This service is used to transform the batch xml into tabbed pdf format.
+ *
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.nsi.service.NsiExportService
+ * @see com.ephesoft.dcma.tabbed.pdf.service.TabbedPdfService
  */
 public class TabbedPdfServiceImpl implements TabbedPdfService, ICommonConstants {
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(TabbedPdfServiceImpl.class);
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	protected final static Logger LOGGER = LoggerFactory.getLogger(TabbedPdfServiceImpl.class);
 
+	/**
+	 * tabbedPdfExport {@link TabbedPdfExporter}.
+	 */
 	@Autowired
 	private TabbedPdfExporter tabbedPdfExport;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * Pre-processing method.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * Post-processing method.
+	 * 
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
 	/**
 	 * This method create tabbed (bookmarked) pdf in configured export folder.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
-	 * @param pluginWorkflow(@link String}
+	 * @param pluginWorkflow{@link String}
 	 * @throws DCMAException if any error or exception occurs
 	 */
 	@Override
-	public void tabbedPdfExporter(final BatchInstanceID batchInstanceID,final String pluginWorkflow) throws DCMAException {
-		LOGGER.info("Start of execution of tabbedPdfExporter method for batchInstanceID:"+batchInstanceID);
+	public void tabbedPdfExporter(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
+		LOGGER.info("Start of execution of tabbedPdfExporter method for batchInstanceID:" + batchInstanceID);
 		try {
 			tabbedPdfExport.createTabbedPDF(batchInstanceID.getID());
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new DCMAException(e.getMessage(), e);
 		}
-		LOGGER.info("End of execution of tabbedPdfExporter method for batchInstanceID:"+batchInstanceID);
+		LOGGER.info("End of execution of tabbedPdfExporter method for batchInstanceID:" + batchInstanceID);
 	}
 }

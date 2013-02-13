@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,12 +46,13 @@ import java.util.Map.Entry;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.property.DependencyProperty;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.comparator.DependencyComparator;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.DependencyManagementPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.CustomWorkflowBreadCrumbView;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.DependencyManagementPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.CustomWorkflowBreadCrumbView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -67,37 +68,37 @@ import com.google.gwt.user.client.ui.ListBox;
 public class DependencyManagementView extends View<DependencyManagementPresenter> {
 
 	@UiField
-	CustomWorkflowBreadCrumbView workflowBreadCrumbView;
+	protected CustomWorkflowBreadCrumbView workflowBreadCrumbView;
 
 	@UiField
-	DependencyView dependencyView;
+	protected DependencyView dependencyView;
 
 	@UiField
-	EditDependencyView editDependencyView;
+	protected EditDependencyView editDependencyView;
 
 	@UiField
-	LayoutPanel layoutPanel;
+	protected LayoutPanel layoutPanel;
 
 	@UiField
-	HorizontalPanel dependencyBottomButtonsPanel;
+	protected HorizontalPanel dependencyBottomButtonsPanel;
 
 	@UiField
-	Button saveButton;
+	protected Button saveButton;
 
 	@UiField
-	Button applyButton;
+	protected Button applyButton;
 
 	@UiField
-	Button cancelButton;
+	protected Button cancelButton;
 
 	interface Binder extends UiBinder<DockLayoutPanel, DependencyManagementView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public DependencyManagementView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		addUIComponentsText();
 
@@ -108,9 +109,9 @@ public class DependencyManagementView extends View<DependencyManagementPresenter
 	 * 
 	 */
 	private void addUIComponentsText() {
-		saveButton.setText(CustomWorkflowConstants.SAVE_BUTTON);
-		applyButton.setText(CustomWorkflowConstants.APPLY_BUTTON);
-		cancelButton.setText(CustomWorkflowConstants.CANCEL_BUTTON);
+		saveButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.SAVE_BUTTON));
+		applyButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.APPLY_BUTTON));
+		cancelButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.CANCEL_BUTTON));
 
 	}
 
@@ -129,9 +130,10 @@ public class DependencyManagementView extends View<DependencyManagementPresenter
 		Collections.sort(new ArrayList<DependencyDTO>(dependencyDTOs), dependencyComparator);
 		List<Record> recordList = setDependeciesList(dependencyDTOs);
 		int recordListSize = recordList.size();
-		int visibleRowCount = Math.min(recordListSize, DependencyView.TABLE_ROW_COUNT);
+		int visibleRowCount = Math.min(recordListSize, CustomWorkflowConstants.TABLE_ROW_COUNT);
 		presenter.getDependencyPresenter().getDependencyListPresenter().getView().listView.initTable(recordListSize, presenter
-				.getDependencyPresenter(), recordList.subList(0, visibleRowCount), true, false, presenter.getDependencyPresenter().getDependencyListPresenter());
+				.getDependencyPresenter(), recordList.subList(0, visibleRowCount), true, false, presenter.getDependencyPresenter()
+				.getDependencyListPresenter(), null, false);
 
 	}
 
@@ -142,7 +144,7 @@ public class DependencyManagementView extends View<DependencyManagementPresenter
 				startIndex, lastIndex), startIndex, totalCount);
 	}
 
-	List<Record> setDependeciesList(Collection<DependencyDTO> dependencyDTOs) {
+	private List<Record> setDependeciesList(Collection<DependencyDTO> dependencyDTOs) {
 		List<Record> recordList = new LinkedList<Record>();
 
 		if (dependencyDTOs != null) {
@@ -154,8 +156,9 @@ public class DependencyManagementView extends View<DependencyManagementPresenter
 							dependencyDTO.getPluginDTO().getPluginName()));
 					record.addWidget(presenter.getDependencyPresenter().getDependencyListPresenter().getView().dependencyType,
 							new Label(dependencyDTO.getDependencyType()));
+					String dependencies = dependencyDTO.getDependencies();
 					record.addWidget(presenter.getDependencyPresenter().getDependencyListPresenter().getView().dependencies,
-							new Label((dependencyDTO.getDependencies())));
+							new Label(dependencies));
 					recordList.add(record);
 				}
 			}
@@ -164,17 +167,17 @@ public class DependencyManagementView extends View<DependencyManagementPresenter
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	protected void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSaveClicked();
 	}
 
 	@UiHandler("applyButton")
-	void onApplyClicked(ClickEvent clickEvent) {
+	protected void onApplyClicked(ClickEvent clickEvent) {
 		presenter.onApplyClicked();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	protected void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancelClicked();
 	}
 

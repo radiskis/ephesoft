@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,21 +42,35 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
 
 import com.ephesoft.dcma.core.dao.Dao;
 import com.ephesoft.dcma.util.ClassUtil;
 
 /**
+ * This is JPA dao class.
  * 
  * @author Ephesoft
- *
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.dao.Dao
  * @param <T>
  */
-public abstract class JpaDao<T> implements Dao<T> {
+public class JpaDao<T> implements Dao<T> {
 
+	/**
+	 * OPERATION_NOT_SUPPORTED String.
+	 */ 
+	private static final String OPERATION_NOT_SUPPORTED = "Operation not supported.";
+	
+	/**
+	 * entityManager EntityManager.
+	 */
 	@PersistenceContext
 	private EntityManager entityManager;
 
+	/**
+	 * entityClass Class<? extends T>.
+	 */
 	private Class<? extends T> entityClass;
 
 	protected Class<? extends T> getEntityClass() {
@@ -66,21 +80,93 @@ public abstract class JpaDao<T> implements Dao<T> {
 		return this.entityClass;
 	}
 
+	/**
+	 * To get objects.
+	 * @param objectId Serializable
+	 */
 	public T get(Serializable objectId) {
 		return (T) entityManager.find(getEntityClass(), objectId);
 	}
 
+	/**
+	 * To save objects.
+	 * @param object T
+	 */
 	public void save(T object) {
 		((Session) entityManager.getDelegate()).saveOrUpdate(object);
 	}
-	
+
+	/**
+	 * To remove objects.
+	 * @param object T
+	 */
 	public void remove(T object) {
 		entityManager.remove(object);
 	}
 
+	/**
+	 * To get all the names.
+	 * @return List<T>
+	 */
 	@SuppressWarnings("unchecked")
 	public List<T> getAll() {
 		return entityManager.createQuery("select obj from " + getEntityClass().getName() + " obj").getResultList();
 	}
+
+	/**
+	 * To count.
+	 * @param criteria DetachedCriteria
+	 * @return int
+	 * @throws UnsupportedOperationException in case of error
+	 */
+	@Override
+	public int count(DetachedCriteria criteria) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To count.
+	 * @return int
+	 * @throws UnsupportedOperationException in case of error
+	 */
+	@Override
+	public int countAll() {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To create new object.
+	 * @param object T
+	 */
+	@Override
+	public void create(T object) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To evict an object.
+	 * @param object object
+	 */
+	@Override
+	public void evict(Object object) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To merge objects.
+	 * @param object T
+	 */
+	@Override
+	public T merge(T object) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
+
+	/**
+	 * To save or update an object.
+	 * @param object T
+	 */
+	@Override
+	public void saveOrUpdate(T object) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED);
+	}
 }
- 

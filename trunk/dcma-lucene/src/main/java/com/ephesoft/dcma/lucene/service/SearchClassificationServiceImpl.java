@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,27 +52,50 @@ import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.id.BatchClassID;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.lucene.LuceneEngine;
 import com.ephesoft.dcma.lucene.LuceneProperties;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This class is used for generating the confidence score for the learning done.
+ * 
+ * @author Ephesoft
+ *
+ */
 public class SearchClassificationServiceImpl implements SearchClassificationService {
 
+	/**
+	 * An instance of Logger for proper logging in this class using slf4j. 
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchClassificationServiceImpl.class);
 
+	/**
+	 * An instance of {@link LuceneEngine}.
+	 */
 	@Autowired
 	private transient LuceneEngine luceneEngine;
+
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
 
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) throws DCMAApplicationException {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
 	@Override
@@ -86,7 +109,8 @@ public class SearchClassificationServiceImpl implements SearchClassificationServ
 	}
 
 	@Override
-	public void generateConfidenceScoreAPI(final List<Document> xmlDocuments, final HocrPages hocrPages, final String workingDir, final Map<LuceneProperties, String> propertyMap, final String batchClassIdentifier) throws DCMAException {
+	public void generateConfidenceScoreAPI(final List<Document> xmlDocuments, final HocrPages hocrPages, final String workingDir,
+			final Map<LuceneProperties, String> propertyMap, final String batchClassIdentifier) throws DCMAException {
 		try {
 			luceneEngine.generateConfidenceAPI(xmlDocuments, hocrPages, workingDir, propertyMap, batchClassIdentifier);
 		} catch (Exception e) {

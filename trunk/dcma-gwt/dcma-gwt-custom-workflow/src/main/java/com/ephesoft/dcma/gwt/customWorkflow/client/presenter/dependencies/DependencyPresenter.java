@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,24 +42,18 @@ import java.util.Map;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.da.property.DependencyProperty;
-import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
-import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.comparator.DependencyComparator;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.AbstractCustomWorkflowPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies.DependencyView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.AbstractCustomWorkflowPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies.DependencyView;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class DependencyPresenter extends AbstractCustomWorkflowPresenter<DependencyView> implements PaginationListner{
+public class DependencyPresenter extends AbstractCustomWorkflowPresenter<DependencyView> implements PaginationListner {
 
-	DependencyListPresenter dependencyListPresenter;
+	private DependencyListPresenter dependencyListPresenter;
 
 	public DependencyPresenter(CustomWorkflowController controller, DependencyView view) {
 		super(controller, view);
@@ -68,7 +62,9 @@ public class DependencyPresenter extends AbstractCustomWorkflowPresenter<Depende
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
@@ -116,58 +112,6 @@ public class DependencyPresenter extends AbstractCustomWorkflowPresenter<Depende
 		getDependenciesList();
 	}
 
-	public void onSaveClicked() {
-		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new AsyncCallback<List<PluginDetailsDTO>>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-
-			}
-
-			@Override
-			public void onSuccess(List<PluginDetailsDTO> pluginDetailsDTOs) {
-				controller.setAllPlugins(pluginDetailsDTOs);
-				ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
-						CustomWorkflowMessages.PLUGINS_UPDATED_SUCCESSFULLY));
-				Window.Location.reload();
-			}
-		});
-	}
-
-	public void onApplyClicked() {
-		controller.getRpcService().updateAllPluginDetailsDTOs(controller.getAllPlugins(), new AsyncCallback<List<PluginDetailsDTO>>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-
-			}
-
-			@Override
-			public void onSuccess(List<PluginDetailsDTO> pluginDetailsDTOs) {
-				controller.setAllPlugins(pluginDetailsDTOs);
-				ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
-						CustomWorkflowMessages.PLUGINS_UPDATED_SUCCESSFULLY));
-			}
-		});
-	}
-
-	public void onCancelClicked() {
-		controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-				ScreenMaskUtility.unmaskScreen();
-			}
-
-			@Override
-			public void onSuccess(List<PluginDetailsDTO> pluginDetailsDTOs) {
-				controller.setAllPlugins(pluginDetailsDTOs);
-				Window.Location.reload();
-			}
-
-		});
-	}
-
 	/**
 	 * @return the dependencyListPresenter
 	 */
@@ -188,11 +132,11 @@ public class DependencyPresenter extends AbstractCustomWorkflowPresenter<Depende
 
 	@Override
 	public void onPagination(int startIndex, int maxResult, Order order) {
-
+		Order finalOrder = order;
 		if (order == null) {
-			order = new Order(DependencyProperty.DEPENDENCY_NAME, true);
+			finalOrder = new Order(DependencyProperty.DEPENDENCY_NAME, true);
 		}
-		DependencyComparator dependencyComparator = new DependencyComparator(order);
+		DependencyComparator dependencyComparator = new DependencyComparator(finalOrder);
 		int selectedIndex = Integer.parseInt(view.getPluginNames().getValue(view.getPluginNames().getSelectedIndex()));
 		List<DependencyDTO> dependenciesList = controller.getAllPlugins().get(selectedIndex).getDependencies();
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,14 +35,42 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
 import com.ephesoft.dcma.da.dao.PluginConfigSampleValueDao;
 import com.ephesoft.dcma.da.domain.PluginConfigSampleValue;
 
+/**
+ * Dao representing plugin_config_sample_value table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.PluginConfigSampleValueDao
+ */
 @Repository
 public class PluginConfigSampleValueDaoImpl extends HibernateDao<PluginConfigSampleValue> implements PluginConfigSampleValueDao {
 
+	/**
+	 * PLUGIN_CONFIG_ID String.
+	 */
+	private static final String PLUGIN_CONFIG_ID = "pluginConfig.id";
+
+	/**
+	 * API to get all plugin config sample values for the given plugin config id.
+	 * 
+	 * @param pluginConfigId {@link Long}
+	 * @return {@link List}< {@link PluginConfigSampleValue}>
+	 */
+	@Override
+	public List<PluginConfigSampleValue> getAllPluginConfigSampleValuesForPluginConfigId(Long pluginConfigId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq(PLUGIN_CONFIG_ID, pluginConfigId));
+		return find(criteria);
+	}
 
 }

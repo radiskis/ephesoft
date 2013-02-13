@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,6 +40,7 @@ import java.util.List;
 import org.hibernate.exception.LockAcquisitionException;
 import org.jbpm.api.job.Job;
 
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchInstance;
 
 /**
@@ -54,28 +55,60 @@ public interface JbpmService {
 
 	/**
 	 * API to find Jobs For the given Lock Owner.
+	 * 
 	 * @param lockOwner {@link String}
 	 * @return List<{@link Job}>
 	 */
 	List<Job> findJobsForLockOwner(String lockOwner);
-	
+
 	/**
 	 * API to To Resume the Job locked and given by jobId.
+	 * 
 	 * @param jobId {@link Long}
 	 * @throws LockAcquisitionException
 	 */
 	void lockJobToResume(long jobId) throws LockAcquisitionException;
-	
+
 	/**
 	 * API to get BatchInstance By JobId.
+	 * 
 	 * @param jobId {@link Long}
 	 * @return {@link BatchInstance}
 	 */
 	BatchInstance getBatchInstanceByJobId(long jobId);
-	
+
 	/**
 	 * API to delete Process Instance given the processKey.
+	 * 
 	 * @param processKey {@link String}
 	 */
 	void deleteProcessInstance(String processKey);
+
+	/**
+	 * API to find All Jobs.
+	 * 
+	 * @return List<{@link Job}>
+	 */
+	List<Job> findAllJobs();
+
+	/**
+	 * API to restart batch instance using batch instance identifier and moduleName.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 * @param moduleName String
+	 * @param throwException
+	 * @throws DCMAApplicationException
+	 * @return Boolean
+	 */
+	Boolean restartBatchInstance(String batchInstanceIdentifier, String moduleName, boolean throwException)
+			throws DCMAApplicationException;
+
+	/**
+	 * API to delete batch instance using batch instance identifier.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 * @throws DCMAApplicationException
+	 * @return Boolean
+	 */
+	Boolean deleteBatchInstance(String batchInstanceIdentifier) throws DCMAApplicationException;
 }

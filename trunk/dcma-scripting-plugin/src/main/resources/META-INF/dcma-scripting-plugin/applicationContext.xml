@@ -27,7 +27,8 @@
 
 	<bean id="scriptExecutor" class="com.ephesoft.dcma.script.ScriptExecutor"
 		p:parserType="$script{script.parser_type}"
-		p:updateBatchInstFromBatch="$script{script.update_batch_inst_from_batch}">
+		p:updateBatchInstFromBatch="$script{script.update_batch_inst_from_batch}"
+		p:scriptSwitch="$script{script.scriptSwitch}">
 	</bean>
 
 	<context:component-scan base-package="com.ephesoft.dcma.script" />

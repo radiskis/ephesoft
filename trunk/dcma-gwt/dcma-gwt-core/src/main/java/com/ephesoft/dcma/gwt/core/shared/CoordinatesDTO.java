@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,40 +41,40 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class CoordinatesDTO implements IsSerializable {
 
-	private BigInteger x0;
-	private BigInteger x1;
-	private BigInteger y0;
-	private BigInteger y1;
+	private BigInteger xZero;
+	private BigInteger xOne;
+	private BigInteger yZero;
+	private BigInteger yOne;
 
 	public BigInteger getX0() {
-		return x0;
+		return xZero;
 	}
 
-	public void setX0(BigInteger x0) {
-		this.x0 = x0;
+	public void setX0(BigInteger xZero) {
+		this.xZero = xZero;
 	}
 
 	public BigInteger getX1() {
-		return x1;
+		return xOne;
 	}
 
-	public void setX1(BigInteger x1) {
-		this.x1 = x1;
+	public void setX1(BigInteger xOne) {
+		this.xOne = xOne;
 	}
 
 	public BigInteger getY0() {
-		return y0;
+		return yZero;
 	}
 
-	public void setY0(BigInteger y0) {
-		this.y0 = y0;
+	public void setY0(BigInteger yZero) {
+		this.yZero = yZero;
 	}
 
 	public BigInteger getY1() {
-		return y1;
+		return yOne;
 	}
 
-	public void setY1(BigInteger y1) {
-		this.y1 = y1;
+	public void setY1(BigInteger yOne) {
+		this.yOne = yOne;
 	}
 }

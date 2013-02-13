@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,36 +35,75 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeListView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.table.Record;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.OrderingListner;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.FieldTypeDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTypeListView> implements DoubleClickListner {
+/**
+ * The presenter for view that shows the field type list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
+public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTypeListView> implements DoubleClickListner,
+		OrderingListner {
 
+	/**
+	 * fieldTypeDTOList List<FieldTypeDTO>.
+	 */
+	private List<FieldTypeDTO> fieldTypeDTOList;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FieldTypeListView
+	 */
 	public FieldTypeListPresenter(BatchClassManagementController controller, FieldTypeListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		//Processing to be done on load of this presenter.
+		// Processing to be done on load of this presenter.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getFieldsListView().getSelectedRowIndex();
 		int rowCount = view.getFieldsListView().getTableRecordCount();
@@ -80,5 +119,80 @@ public class FieldTypeListPresenter extends AbstractBatchClassPresenter<FieldTyp
 		} else {
 			controller.getMainPresenter().getDocumentTypeViewPresenter().onEditFieldButtonClicked(identifier);
 		}
+	}
+
+	/**
+	 * To perform operations on ordering.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param selectedRowId String
+	 * @param swapIndex int
+	 * @param selectedRecordIndex int
+	 */
+	@Override
+	public void onOrdering(final int startIndex, final int maxResult, final String selectedRowId, final int swapIndex,
+			final int selectedRecordIndex) {
+		final int selectedIndex = getSelectedFieldTypeDTOList(selectedRowId);
+		final int swappedIndex = selectedIndex + swapIndex;
+		int selRecordIndexLocal = selectedRecordIndex + swapIndex;
+		if ((selectedIndex > 0 && selectedIndex < fieldTypeDTOList.size() - 1)
+				|| (swappedIndex > 0 && swappedIndex < fieldTypeDTOList.size() - 1)) {
+			selRecordIndexLocal = selRecordIndexLocal < 0 ? maxResult - 1 : selRecordIndexLocal > maxResult - 1 ? 0
+					: selRecordIndexLocal;
+			swapFieldTypes(selectedIndex, swappedIndex);
+			updateFieldTypeList(startIndex, maxResult, selRecordIndexLocal);
+		}
+	}
+
+	private void updateFieldTypeList(final int startIndex, final int maxResult, final int selRecordIndex) {
+		final List<Record> fieldRecordList = getController().getMainPresenter().getView().getDocumentTypeView().setFieldsList(
+				fieldTypeDTOList);
+		final int totalSize = fieldRecordList.size();
+		final int lastIndex = startIndex + maxResult;
+		final int count = Math.min(totalSize, lastIndex);
+		this.getView().getFieldsListView().updateRecords(fieldRecordList.subList(startIndex, count), startIndex, totalSize,
+				selRecordIndex);
+	}
+
+	/**
+	 * Method to swap the two fields in the list.
+	 * 
+	 * @param selectedIndex index of the field to be swapped
+	 * @param swappedIndex index of the field to be swapped
+	 */
+	private void swapFieldTypes(final int selectedIndex, final int swappedIndex) {
+		final FieldTypeDTO selectedFieldTypeDTO = this.fieldTypeDTOList.get(selectedIndex);
+		final FieldTypeDTO swappedFieldTypeDTO = this.fieldTypeDTOList.get(swappedIndex);
+		// Swap order number of two fields.
+		final String selFieldOrderNumber = selectedFieldTypeDTO.getFieldOrderNumber();
+		final String swappedFieldOrderNumber = swappedFieldTypeDTO.getFieldOrderNumber();
+		swappedFieldTypeDTO.setFieldOrderNumber(selFieldOrderNumber);
+		selectedFieldTypeDTO.setFieldOrderNumber(swappedFieldOrderNumber);
+		// Swap the positions of two fields in the list to be displayed on UI.
+		Collections.swap(this.fieldTypeDTOList, selectedIndex, swappedIndex);
+		controller.getBatchClass().setDirty(true);
+	}
+
+	private int getSelectedFieldTypeDTOList(String selectedRowId) {
+		int index = -1;
+		if (this.fieldTypeDTOList != null) {
+			for (FieldTypeDTO fieldTypeDTO : this.fieldTypeDTOList) {
+				if (fieldTypeDTO.getIdentifier().equals(selectedRowId)) {
+					index = this.fieldTypeDTOList.indexOf(fieldTypeDTO);
+					break;
+				}
+			}
+		}
+		return index;
+	}
+
+	/**
+	 * To set Field Type DTO List.
+	 * 
+	 * @param fieldTypeDTOList List<FieldTypeDTO>
+	 */
+	public void setFieldTypeDTOList(final List<FieldTypeDTO> fieldTypeDTOList) {
+		this.fieldTypeDTOList = fieldTypeDTOList;
 	}
 }

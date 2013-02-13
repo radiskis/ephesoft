@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,20 +52,45 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * The presenter for view that shows KV_PP edit details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditView> {
 
+	/**
+	 * docFieldWidgets List<EditableWidgetStorage>.
+	 */
 	private List<EditableWidgetStorage> docFieldWidgets;
 
+	/**
+	 * MAX_VISIBLE_ITEM_COUNT int.
+	 */
 	public static final int MAX_VISIBLE_ITEM_COUNT = 4;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_EditView
+	 */
 	public KV_PP_EditPresenter(BatchClassManagementController controller, KV_PP_EditView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * To perform operations in case of cancel.
+	 */
 	public void onCancel() {
 		controller.getMainPresenter().getKvPPPropertiesPresenter().bind();
 	}
 
+	/**
+	 * To perform operations in case of save.
+	 */
 	public void onSave() {
 		boolean fieldsValid = false;
 		Collection<BatchClassPluginConfigDTO> values = controller.getSelectedPlugin().getBatchClassPluginConfigs();
@@ -92,7 +117,7 @@ public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditV
 			for (BatchClassPluginConfigDTO batchClassPluginConfigDTO : values) {
 				if (!batchClassPluginConfigDTO.getPluginConfig().getFieldName().equals(
 						BatchClassManagementConstants.KV_PAGE_PROCESS_CONFIG_NAME)) {
-					if (docFieldWidgets.get(index).isListBox) {
+					if (docFieldWidgets.get(index).listBox) {
 						if (docFieldWidgets.get(index).getListBoxwidget().isMultipleSelect()) {
 							StringBuffer selectedItem = new StringBuffer();
 							Integer numberOfItemSelected = docFieldWidgets.get(index).getListBoxwidget().getItemCount();
@@ -120,6 +145,9 @@ public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditV
 		controller.getMainPresenter().getKvPPPropertiesPresenter().bind();
 	}
 
+	/**
+	 * To set properties.
+	 */
 	public void setProperties() {
 		docFieldWidgets = new ArrayList<EditableWidgetStorage>();
 		int row = 0;
@@ -129,7 +157,7 @@ public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditV
 				if (!batchClassPluginConfig.getPluginConfig().getFieldName().equals(
 						BatchClassManagementConstants.KV_PAGE_PROCESS_CONFIG_NAME)) {
 					view.formatRow(row);
-					view.addWidget(row, 0, new Label(batchClassPluginConfig.getDescription() + ":"));
+					view.addWidget(row, 0, new Label(batchClassPluginConfig.getDescription() + BatchClassManagementConstants.COLON));
 					view.addWidgetStar(row, 1);
 					if (batchClassPluginConfig.getSampleValue() != null && !batchClassPluginConfig.getSampleValue().isEmpty()) {
 						if (batchClassPluginConfig.getSampleValue().size() > 1) {
@@ -179,57 +207,146 @@ public class KV_PP_EditPresenter extends AbstractBatchClassPresenter<KV_PP_EditV
 		}
 	}
 
+	/**
+	 * Class for editable widget storage.
+	 * 
+	 * @author Ephesoft
+	 */
 	private static class EditableWidgetStorage {
 
-		private ValidatableWidget<TextBox> widget;
-		private boolean isListBox;
-		private ListBox listBoxwidget;
-		private boolean isValidatable;
+		/**
+		 * widget ValidatableWidget<TextBox>.
+		 */
+		private final ValidatableWidget<TextBox> widget;
 
+		/**
+		 * listBox boolean.
+		 */
+		private final boolean listBox;
+
+		/**
+		 * listBoxwidget ListBox.
+		 */
+		private final ListBox listBoxwidget;
+
+		/**
+		 * validatable boolean.
+		 */
+		private boolean validatable;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param widget ValidatableWidget<TextBox>
+		 */
 		public EditableWidgetStorage(ValidatableWidget<TextBox> widget) {
-			this.widget = widget;
-			this.isListBox = false;
-			this.isValidatable = true;
+			this(widget, false, null, true);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param listBoxwidget ListBox
+		 */
 		public EditableWidgetStorage(ListBox listBoxwidget) {
-			this.listBoxwidget = listBoxwidget;
-			this.isListBox = true;
-			this.isValidatable = true;
+			this(null, true, listBoxwidget, true);
 		}
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param widget ValidatableWidget<TextBox>
+		 * @param listBox boolean
+		 * @param listBoxwidget ListBox
+		 * @param validatable boolean
+		 */
+		public EditableWidgetStorage(ValidatableWidget<TextBox> widget, boolean listBox, ListBox listBoxwidget, boolean validatable) {
+			super();
+			this.widget = widget;
+			this.listBox = listBox;
+			this.listBoxwidget = listBoxwidget;
+			this.validatable = validatable;
+		}
+
+		/**
+		 * To get Text Box Widget.
+		 * 
+		 * @return ValidatableWidget<TextBox>
+		 */
 		public ValidatableWidget<TextBox> getTextBoxWidget() {
 			return widget;
 		}
 
+		/**
+		 * To get List Box widget.
+		 * 
+		 * @return ListBox
+		 */
 		public ListBox getListBoxwidget() {
 			return listBoxwidget;
 		}
 
+		/**
+		 * To check whether list box.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isListBox() {
-			return isListBox;
+			return listBox;
 		}
 
+		/**
+		 * To check whether validatable.
+		 * 
+		 * @return boolean
+		 */
 		public boolean isValidatable() {
-			return isValidatable;
+			return validatable;
 		}
 
+		/**
+		 * To set validatable.
+		 * 
+		 * @param isValidatable boolean
+		 */
 		public void setValidatable(boolean isValidatable) {
-			this.isValidatable = isValidatable;
+			this.validatable = isValidatable;
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {
 			view.setView();
 			setProperties();
+			int index = 0;
+			if ((docFieldWidgets != null) && (docFieldWidgets.size() != 0)) {
+				while ((index < docFieldWidgets.size() && !docFieldWidgets.get(index).listBox)
+						&& docFieldWidgets.get(index).widget.getWidget().isReadOnly()) {
+					index++;
+				}
+				if (index < docFieldWidgets.size()) {
+					if (docFieldWidgets.get(index).listBox) {
+						docFieldWidgets.get(index).listBoxwidget.setFocus(true);
+					} else {
+						docFieldWidgets.get(index).widget.getWidget().setFocus(true);
+					}
+				}
+			}
 		}
 	}
 }

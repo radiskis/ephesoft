@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,44 +43,87 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for module_plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "module_plugin")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class ModulePlugin extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -8801340830295935352L;
 
+	/**
+	 * module Module.
+	 */
 	@OneToOne
 	@JoinColumn(name = "module_id", nullable = false)
 	private Module module;
 
+	/**
+	 * plugin Plugin.
+	 */
 	@OneToOne
 	@JoinColumn(name = "plugin_id", nullable = false)
 	private Plugin plugin;
 
+	/**
+	 * orderNumber int.
+	 */
 	@Column(name = "order_number")
 	private int orderNumber;
 
+	/**
+	 * To get Module.
+	 * @return Module
+	 */
 	public Module getModule() {
 		return module;
 	}
 
+	/**
+	 * To set Module.
+	 * @param module Module
+	 */
 	public void setModule(Module module) {
 		this.module = module;
 	}
 
+	/**
+	 * To get plugin.
+	 * @return Plugin
+	 */
 	public Plugin getPlugin() {
 		return plugin;
 	}
 
+	/**
+	 * To set plugin.
+	 * @param plugin Plugin
+	 */
 	public void setPlugin(Plugin plugin) {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * To get Order Number.
+	 * @return int
+	 */
 	public int getOrderNumber() {
 		return orderNumber;
 	}
 
+	/**
+	 * To set Order Number. 
+	 * @param orderNumber int
+	 */
 	public void setOrderNumber(int orderNumber) {
 		this.orderNumber = orderNumber;
 	}

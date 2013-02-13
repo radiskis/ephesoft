@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,44 +40,80 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.regex.RegexView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the regex details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class RegexPresenter extends AbstractBatchClassPresenter<RegexView> {
 
+	/**
+	 * regexDetailPresenter RegexDetailPresenter.
+	 */
 	private final RegexDetailPresenter regexDetailPresenter;
-	
+
+	/**
+	 * editRegexPresenter EditRegexPresenter.
+	 */
 	private final EditRegexPresenter editRegexPresenter;
-	
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view RegexView
+	 */
 	public RegexPresenter(BatchClassManagementController controller, RegexView view) {
 
 		super(controller, view);
 		this.regexDetailPresenter = new RegexDetailPresenter(controller, view.getRegexDetailView());
 		this.editRegexPresenter = new EditRegexPresenter(controller, view.getEditRegexView());
 	}
-	
+
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		regexDetailPresenter.bind();
 		editRegexPresenter.bind();
 	}
 
+	/**
+	 * To show Regex Detail View.
+	 */
 	public void showRegexDetailView() {
 		view.getRegexVerticalPanel().setVisible(Boolean.TRUE);
 		view.getRegexConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show Edit Regex View.
+	 */
 	public void showEditRegexView() {
 		view.getRegexVerticalPanel().setVisible(Boolean.FALSE);
 		view.getRegexConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
-	
+
+	/**
+	 * To perform operations on Edit Function Key Properties button click.
+	 */
 	public void onEditRegexPropertiesBtnClicked() {
 		controller.setAdd(false);
-		editRegexPresenter.bind();
 		showEditRegexView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editRegexPresenter.bind();
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//event handling code goes here.
+		// event handling code goes here.
 	}
 }

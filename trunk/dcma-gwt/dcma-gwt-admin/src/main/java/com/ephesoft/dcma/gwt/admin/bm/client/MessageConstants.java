@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -62,7 +62,7 @@ public interface MessageConstants {
 	String INVALID_DB_CONNECTION = "Invalid Database connection settings.";
 	String ROWID_SET_INCORRECTLY = "RowId should be mapped to a Primary Key field";
 
-	String BATCH_CLASS_NAME_NOT_UNIQUE = "Batch Class name is either not unique or is empty";
+	String BATCH_CLASS_NAME_NOT_UNIQUE = "Batch Class name is not unique.";
 	String UNC_PATH_NOT_UNIQUE = "UNC Path is either not unique or is empty.";
 	String UNC_PATH_NOT_VERIFIED = "Unable to verify UNC Path.";
 	String BATCH_CLASS_COPY_CREATED_SUCCESSFULLY = "Copy of Batch Class created successfully.";
@@ -76,6 +76,7 @@ public interface MessageConstants {
 	String PRIORITY_SHOULD_BE_BETWEEN_1_AND_100 = "Priority should be between 1 to 100.";
 	String COPY_SUCCESSFUL = "Copy Successfull";
 	String BATCH_CLASS_NAME_ERROR = "Batch class name must not contain a space or a hyphen";
+	String ADD_NEW_MODULE = "Add New Module";
 
 	String TITLE_TEST_SUCCESS = "Test Successful";
 	String TITLE_TEST_FAILURE = "Test Failed";
@@ -121,4 +122,7 @@ public interface MessageConstants {
 	String LOADING_PLUGINS = "Loading Plugins";
 	String WARNING = "Warning";
 	String HIGHLIGHT_DEPENDENCY_ADD_MESSAGE = "Selected Plug-in has dependencies on the highlighted plugins. Would you like to add them as well ? ";
+	
+	String NON_UNIQUE_PROFILE_ERROR_MSG = "Please enter unique name for profile.";
+	String SPECIAL_CHARACTER_NOT_ALLOWED = "Name should not contain special characters. Only Alpha-Numeric characters are allowed(A-z,a-z,0-9).";
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,48 +41,111 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.DocumentType
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show individual document type detail.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class DocumentTypeDetailView extends View<DocumentTypeDetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, DocumentTypeDetailView> {
 	}
 
+	/**
+	 * name Label.
+	 */
 	@UiField
 	protected Label name;
 
+	/**
+	 * description Label.
+	 */
 	@UiField
 	protected Label description;
 
+	/**
+	 * minConfidenceThreshold Label.
+	 */
 	@UiField
 	protected Label minConfidenceThreshold;
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
 
+	/**
+	 * descriptionLabel Label.
+	 */
 	@UiField
 	protected Label descriptionLabel;
 
+	/**
+	 * minConfidenceThresholdLabel Label.
+	 */
 	@UiField
 	protected Label minConfidenceThresholdLabel;
 
+	/**
+	 * recostarExtractionLabel Label.
+	 */
 	@UiField
 	protected Label recostarExtractionLabel;
 
+	/**
+	 * recostarExtraction Label.
+	 */
 	@UiField
 	protected Label recostarExtraction;
 
+	/**
+	 * isHiddenLabel Label.
+	 */
 	@UiField
 	protected Label isHiddenLabel;
+
+	/**
+	 * isHidden CheckBox.
+	 */
 	@UiField
 	protected CheckBox isHidden;
 
+	/**
+	 * editDocumentPropertiesButton Button.
+	 */
+	@UiField
+	protected Button editDocumentPropertiesButton;
+
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
+	@UiField
+	protected ScrollPanel scrollPanel;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public DocumentTypeDetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -101,25 +164,65 @@ public class DocumentTypeDetailView extends View<DocumentTypeDetailPresenter> {
 		recostarExtractionLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHiddenLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		isHidden.setEnabled(false);
+
+		editDocumentPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
+		editDocumentPropertiesButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		scrollPanel.setStyleName(AdminConstants.SCROLL_PANEL_HEIGHT);
 	}
 
+	/**
+	 * To set Name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setText(name);
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setText(description);
 	}
 
+	/**
+	 * To set Minimum Confidence Threshold.
+	 * 
+	 * @param minConfidenceThreshold String
+	 */
 	public void setMinConfidenceThreshold(String minConfidenceThreshold) {
 		this.minConfidenceThreshold.setText(minConfidenceThreshold);
 	}
 
+	/**
+	 * To set Recostar Extraction.
+	 * 
+	 * @param recostarExtraction String
+	 */
 	public void setRecostarExtraction(String recostarExtraction) {
 		this.recostarExtraction.setText(recostarExtraction);
 	}
 
+	/**
+	 * To set is hidden field.
+	 * 
+	 * @param isHidden boolean
+	 */
 	public void setIsHidden(boolean isHidden) {
 		this.isHidden.setValue(isHidden);
+	}
+
+	/**
+	 * To perform operations on edit Document Properties Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("editDocumentPropertiesButton")
+	public void onEditDocumentPropertiesButtonClick(ClickEvent clickEvent) {
+		presenter.getController().getBatchClassManagementPresenter().getDocumentTypeViewPresenter()
+				.onEditDocumentPropertiesButtonClicked();
 	}
 }

@@ -144,13 +144,18 @@ function getViewPortHeightForIE() {
 	return viewportheight;
 }
 
+function getViewPortWidthForIE() {
+	viewportwidth = document.documentElement.clientWidth;
+	return viewportwidth;
+}
+
 function loginSubmit() {
 	document.getElementById("loginForm").submit();
 }
 
 function getViewPortWidth() {
-	viewportwidth = document.getElementsByTagName('body')[0].clientWidth;
-	return viewportwidth;
+	return window.innerWidth || document.documentElement.clientWidth
+			|| document.body.clientWidth;
 }
 window.onbeforeunload = function() {
 	onCloseWindow();
@@ -174,4 +179,17 @@ if (typeof window.addEventListener != 'undefined') {
 	window.addEventListener('message', onmessage, false);
 } else if (typeof window.attachEvent != 'undefined') {
 	window.attachEvent('onmessage', onmessage);
+}
+
+function performScannerAction(action) {
+	window.document.webScannerApplet.init(action);
+}
+
+function setScannerProperties(keys, values, delimiter) {
+	window.document.webScannerApplet.setScannerProperties(keys, values,
+			delimiter);
+}
+
+function setImageDeleted() {
+	window.document.webScannerApplet.onImageDelete();
 }

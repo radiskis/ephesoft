@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.webapp;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -43,26 +44,66 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ephesoft.dcma.constant.WebAppConstants;
+
+/**
+ * This class is to execute a chain of filters.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see javax.servlet.FilterChain
+ */
 public class HTTPHeaderFilter implements Filter {
 
+	/**
+	 * Destroy method.
+	 */
 	@Override
 	public void destroy() {
-
+		// No implementation
 	}
 
+	/**
+	 * To make the application compatible with IE-8 and to prevent caching in the browser.
+	 * 
+	 * @param request ServletRequest
+	 * @param response ServletResponse
+	 * @param chain FilterChain
+	 * @throws IOException in case of error
+	 * @throws ServletException in case of error
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		if (response instanceof HttpServletResponse) {
-			((HttpServletResponse) response).setHeader("X-UA-Compatible", "IE=8");
+			((HttpServletResponse) response).setHeader(WebAppConstants.X_UA_COMPATIBLE, WebAppConstants.IE_8);
+		}
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		String requestURI = httpRequest.getRequestURI();
+
+		if (requestURI.contains(WebAppConstants.NOCACHE) || requestURI.contains(WebAppConstants.CSS_EXTENSION)) {
+
+			Date now = new Date();
+			HttpServletResponse httpResponse = (HttpServletResponse) response;
+			httpResponse.setDateHeader(WebAppConstants.DATE, now.getTime());
+			httpResponse.setDateHeader(WebAppConstants.EXPIRES, now.getTime() - WebAppConstants.TIME_CONST);
+			httpResponse.setHeader(WebAppConstants.PRAGMA, WebAppConstants.NO_CACHE);
+			httpResponse.setHeader(WebAppConstants.CACHE_CONTROL, WebAppConstants.NO_CACHE_NO_STORE_MUST_REVALIDATE);
 		}
 		chain.doFilter(request, response);
 	}
 
+	/**
+	 * Init method.
+	 * 
+	 * @param arg0 FilterConfig
+	 * @throws ServletException in case of error
+	 */
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
-
+		// No implementation
 	}
 
 }

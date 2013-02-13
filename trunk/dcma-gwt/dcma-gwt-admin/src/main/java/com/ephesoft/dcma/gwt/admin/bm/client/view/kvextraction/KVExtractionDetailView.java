@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,42 +42,91 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.kvextraction.KVExtraction
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show KV extraction detail.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KVExtractionDetailView extends View<KVExtractionDetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, KVExtractionDetailView> {
 	}
 
+	/**
+	 * keyPatternLabel Label.
+	 */
 	@UiField
 	protected Label keyPatternLabel;
 
+	/**
+	 * keyPattern Label.
+	 */
 	@UiField
 	protected Label keyPattern;
 
+	/**
+	 * valuePatternLabel Label.
+	 */
 	@UiField
 	protected Label valuePatternLabel;
 
+	/**
+	 * valuePattern Label.
+	 */
 	@UiField
 	protected Label valuePattern;
 
+	/**
+	 * locationLabel Label.
+	 */
 	@UiField
 	protected Label locationLabel;
 
+	/**
+	 * location Label.
+	 */
 	@UiField
 	protected Label location;
 
+	/**
+	 * noOfWordsLabel Label.
+	 */
 	@UiField
 	protected Label noOfWordsLabel;
 
+	/**
+	 * noOfWords Label.
+	 */
 	@UiField
 	protected Label noOfWords;
 
+	/**
+	 * editKVPropertiesButton Button.
+	 */
+	@UiField
+	protected Button editKVPropertiesButton;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public KVExtractionDetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -93,20 +142,41 @@ public class KVExtractionDetailView extends View<KVExtractionDetailPresenter> {
 		valuePatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		locationLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		noOfWordsLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		editKVPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
 	}
 
+	/**
+	 * To set Key Pattern.
+	 * 
+	 * @param keyPattern String
+	 */
 	public void setKeyPattern(String keyPattern) {
 		this.keyPattern.setText(keyPattern);
 	}
 
+	/**
+	 * To set Value Pattern.
+	 * 
+	 * @param valuePattern String
+	 */
 	public void setValuePattern(String valuePattern) {
 		this.valuePattern.setText(valuePattern);
 	}
 
+	/**
+	 * To set location.
+	 * 
+	 * @param location String
+	 */
 	public void setlocation(String location) {
 		this.location.setText(location);
 	}
 
+	/**
+	 * To set location.
+	 * 
+	 * @param location LocationType
+	 */
 	public void setlocation(LocationType location) {
 		if (location != null) {
 			this.location.setText(location.name());
@@ -115,8 +185,32 @@ public class KVExtractionDetailView extends View<KVExtractionDetailPresenter> {
 		}
 	}
 
+	/**
+	 * To set No Of Words.
+	 * 
+	 * @param noOfWords String
+	 */
 	public void setNoOfWords(String noOfWords) {
 		this.noOfWords.setText(noOfWords);
+	}
+
+	/**
+	 * To get Edit KV Properties Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getEditKVPropertiesButtonButton() {
+		return editKVPropertiesButton;
+	}
+
+	/**
+	 * To perform operations on Edit KV Properties Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("editKVPropertiesButton")
+	public void onEditKVPropertiesButtonClick(ClickEvent clickEvent) {
+		presenter.getController().getBatchClassManagementPresenter().getKvExtractionPresenter().onEditKVPropertiesButtonClicked();
 	}
 
 }

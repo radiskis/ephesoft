@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,17 +40,25 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class DocExpandEvent extends GwtEvent<DocExpandEventHandler> {
 
-	public static Type<DocExpandEventHandler> TYPE = new Type<DocExpandEventHandler>();
+	public static Type<DocExpandEventHandler> type = new Type<DocExpandEventHandler>();
 
 	private Document document;
 
+	private boolean fireReviewPanelDefaultEvent;
+
 	public DocExpandEvent(Document document) {
+		this(document, true);
+	}
+
+	public DocExpandEvent(Document document, boolean fireReviewPanelDefaultEvent) {
+		super();
+		this.fireReviewPanelDefaultEvent = fireReviewPanelDefaultEvent;
 		this.document = document;
 	}
 
 	@Override
 	public Type<DocExpandEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	@Override
@@ -60,5 +68,13 @@ public class DocExpandEvent extends GwtEvent<DocExpandEventHandler> {
 
 	public Document getDocument() {
 		return document;
+	}
+
+	public void setFireReviewPanelDefaultEvent(boolean fireReviewPanelDefaultEvent) {
+		this.fireReviewPanelDefaultEvent = fireReviewPanelDefaultEvent;
+	}
+
+	public boolean isFireReviewPanelDefaultEvent() {
+		return fireReviewPanelDefaultEvent;
 	}
 }

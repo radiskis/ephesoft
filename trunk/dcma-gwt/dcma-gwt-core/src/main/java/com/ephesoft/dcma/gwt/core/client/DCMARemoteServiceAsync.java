@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,6 +45,7 @@ public interface DCMARemoteServiceAsync {
 
 	/**
 	 * API to acquire Lock on a batch class given it's identifier asynchronously.
+	 * 
 	 * @param batchIdentifier
 	 * @param callback
 	 */
@@ -52,66 +53,79 @@ public interface DCMARemoteServiceAsync {
 
 	/**
 	 * API to initiate Remote Services on the application asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void initRemoteService(AsyncCallback<Void> callback);
 
 	/**
 	 * API to setup remote services on the application asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void setup(AsyncCallback<Void> callback);
 
 	/**
 	 * API to clean up asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void cleanup(AsyncCallback<Void> callback);
 
 	/**
 	 * API to clean up the current user for the current batch
+	 * 
 	 * @param batchIdentifier
 	 * @param callback
 	 */
-	void cleanUpCurrentBatch(String batchIdentifier,AsyncCallback<Void> callback);
+	void cleanUpCurrentBatch(String batchIdentifier, AsyncCallback<Void> callback);
+
 	/**
 	 * API to get User Name using the remote services on the application asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getUserName(AsyncCallback<String> callback);
 
 	/**
 	 * API to logout from remote services on the application asynchronously.
+	 * 
 	 * @param callback
+	 * @param url
 	 */
-	void logout(AsyncCallback<Void> callback);
+	void logout(String url, AsyncCallback<Void> callback);
 
 	/**
 	 * API to get locale of the user using the remote services on the application asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getLocale(AsyncCallback<String> callback);
 
 	/**
 	 * API to get roles of the user using the remote services on the application asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getUserRoles(AsyncCallback<Set<String>> callback);
 
 	/**
 	 * API to check if reporting is enabled asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void isReportingEnabled(AsyncCallback<Boolean> callback);
 
 	/**
 	 * API to get all user's asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getAllUser(AsyncCallback<Set<String>> callback);
 
 	/**
 	 * API to get all user groups asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getAllGroups(AsyncCallback<Set<String>> callback);
@@ -119,12 +133,14 @@ public interface DCMARemoteServiceAsync {
 	/**
 	 * 
 	 * API to get All BatchClass By User Roles asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getAllBatchClassByUserRoles(AsyncCallback<Set<String>> callback);
 
 	/**
 	 * API to check if Upload Batch is Enabled asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void isUploadBatchEnabled(AsyncCallback<Boolean> callback);
@@ -138,58 +154,128 @@ public interface DCMARemoteServiceAsync {
 
 	/**
 	 * API to set BatchList Priority Filter asynchronously.
+	 * 
 	 * @param reviewBatchListPriority
 	 * @param validateBatchListPriority
 	 * @param callback
 	 */
 	void setBatchListPriorityFilter(Integer reviewBatchListPriority, Integer validateBatchListPriority, AsyncCallback<Void> callback);
-	
+
 	/**
 	 * API to check if Restart All Batch is Enabled asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void isRestartAllBatchEnabled(AsyncCallback<Boolean> callback);
-	
+
 	/**
 	 * API to get the Batch List table row count asynchronously.
+	 * 
 	 * @param callback
 	 */
 	void getBatchListTableRowCount(AsyncCallback<Integer> callback);
-	
+
 	/**
 	 * API to get the batch list screen tab asynchronously.
+	 * 
 	 * @param callback
 	 */
-	void getBatchListScreenTab(String userName , AsyncCallback<BatchInstanceStatus> callback);
-	
+	void getBatchListScreenTab(String userName, AsyncCallback<BatchInstanceStatus> callback);
+
 	/**
 	 * API to set the batch list screen tab asynchronously.
+	 * 
 	 * @param userName
 	 * @param batchDTOStatus
 	 * @param callback
 	 */
-	void setBatchListScreenTab(String userName , BatchInstanceStatus batchDTOStatus, AsyncCallback<Void> callback);
-	
+	void setBatchListScreenTab(String userName, BatchInstanceStatus batchDTOStatus, AsyncCallback<Void> callback);
+
 	/**
 	 * API to disable the restart all button for current session.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	void disableRestartAllButton(AsyncCallback<Void> callback);
+
 	/**
 	 * API to get current user of a batch.
+	 * 
 	 * @param batchInstanceIdentifier
 	 * @param callback
 	 */
-	void getCurrentUser(String batchInstanceIdentifier,AsyncCallback<String> callback);
-	
+	void getCurrentUser(String batchInstanceIdentifier, AsyncCallback<String> callback);
+
 	/**
 	 * API to show License expiry message on login.
 	 * 
 	 */
 	void setUpForLicenseExpiryAlert(AsyncCallback<Void> callback);
-	
+
 	/**
 	 * API to show License expiry message on login.
 	 */
 	void initRemoteServiceForLicenseAlert(AsyncCallback<Void> callback);
+
+	/**
+	 * API to validate a regex expression.
+	 * 
+	 * @param regex
+	 * @param callback
+	 */
+	void validateRegEx(String regex, AsyncCallback<Boolean> callback);
+
+	/**
+	 * API to validate a value with the regular expression pattern.
+	 * 
+	 * @param value {@link String} - input value to be matched with regular expression pattern.
+	 * @param regex {@link String} - regular expression pattern for matching.
+	 * @param callback
+	 */
+	void validateValueWithRegEx(final String input, final String regex, AsyncCallback<Boolean> callback);
+
+	/**
+	 * API to get the help url from properties file.
+	 * 
+	 * @return
+	 */
+	void getHelpUrl(AsyncCallback<String> callback);
+
+	/**
+	 * API to get selected batch class from session.
+	 * 
+	 * @param asyncCallback
+	 */
+	void getBatchClassInfoFromSession(AsyncCallback<String> asyncCallback);
+
+	/**
+	 * API to set the selected batch class info into session.
+	 * 
+	 * @param batchClassInfo
+	 * @param callback
+	 */
+	void setBatchClassInfoFromSession(String batchClassInfo, AsyncCallback<Void> callback);
+
+	/**
+	 * API to get the text and link values for the UI footer.
+	 * 
+	 * @return {@link Map}< {@link String}, {@link String}>
+	 */
+	void getFooterProperties(AsyncCallback<Map<String, String>> asyncCallback);
+
+	/**
+	 * The <code>getUserType</code> method is used to get the Ephesoft Cloud user type.
+	 * 
+	 * @param callback {@link AsyncCallback < {@link Integer} .
+	 */
+	void getUserType(AsyncCallback<Integer> callback);
+
+	/**
+	 * API to create the xml file for upload batch info
+	 * 
+	 * @param uploadBatchFolderPath{@link String} path to xml file to create and store upload batch info.
+	 * @param callback.
+	 */
+
+	void createXmlForUploadBatchInfo(String uploadBatchFolderPath, AsyncCallback<Void> callback);
 }

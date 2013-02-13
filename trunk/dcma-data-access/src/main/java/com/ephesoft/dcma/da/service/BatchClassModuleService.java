@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -93,6 +93,7 @@ public interface BatchClassModuleService {
 	void evict(BatchClassModule batchClassModule);
 	
 	/**
+	 * API to fetch BatchClassModule by workflow name.
 	 * 
 	 * @param batchClassIdentifier {@link String}
 	 * @param workflowName {@link String}
@@ -105,7 +106,7 @@ public interface BatchClassModuleService {
 	 * @param batchClassIdentifier {@link String}
 	 * @return {@link List}< {@link BatchClassModule}>
 	 */
-	List<BatchClassModule> getAllBatchClassModulesByIdentifier (String batchClassIdentifier);
+	List<BatchClassModule> getAllBatchClassModulesByIdentifier(String batchClassIdentifier);
 	
 	/**
 	 * API to get all the batch class modules available.
@@ -115,7 +116,7 @@ public interface BatchClassModuleService {
 	
 	/**
 	 * API to get the list of all batch class modules in ascending or descending workflow name order.
-	 * @param ascending boolean
+	 * @param order Order
 	 * @return {@link List}< {@link BatchClassModule}>
 	 */
 	List<BatchClassModule> getAllBatchClassModules(Order order);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -64,31 +64,62 @@ import org.artofsolving.jodconverter.document.DocumentFormat;
 import com.sun.star.lang.XComponent;
 
 /**
- * 
+ * This is standard conversion class.
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see org.artofsolving.jodconverter.document.DocumentFamily
  */
 public class StandardConversionTask extends AbstractConversionTask {
 
+	/**
+	 * outputFormat DocumentFormat.
+	 */
 	private final DocumentFormat outputFormat;
 
+	/**
+	 * defaultLoadProperties Map<String, ?>.
+	 */
 	private Map<String, ?> defaultLoadProperties;
+	
+	/**
+	 * inputFormat DocumentFormat.
+	 */
 	private DocumentFormat inputFormat;
 
+	/**
+	 * Constructor.
+	 * @param inputFile File
+	 * @param outputFile File
+	 * @param outputFormat DocumentFormat
+	 */ 
 	public StandardConversionTask(File inputFile, File outputFile, DocumentFormat outputFormat) {
 		super(inputFile, outputFile);
 		this.outputFormat = outputFormat;
 	}
 
+	/**
+	 * Constructor.
+	 * @param inputFileURL String 
+	 * @param outputFile File
+	 * @param outputFormat DocumentFormat
+	 */
 	public StandardConversionTask(String inputFileURL, File outputFile, DocumentFormat outputFormat) {
 		super(inputFileURL, outputFile);
 		this.outputFormat = outputFormat;
 	}
 
+	/**
+	 * To set Default Load Properties.
+	 * @param defaultLoadProperties Map<String, ?>
+	 */
 	public void setDefaultLoadProperties(Map<String, ?> defaultLoadProperties) {
 		this.defaultLoadProperties = defaultLoadProperties;
 	}
 
+	/**
+	 * To set input format.
+	 * @param inputFormat DocumentFormat
+	 */
 	public void setInputFormat(DocumentFormat inputFormat) {
 		this.inputFormat = inputFormat;
 	}

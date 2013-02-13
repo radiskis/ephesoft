@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,11 +36,11 @@
 package com.ephesoft.dcma.gwt.reporting.client;
 
 import com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.client.view.RootPanel;
 import com.ephesoft.dcma.gwt.reporting.client.presenter.ReportingPresenter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
@@ -55,7 +55,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class ReportingEntryPoint extends DCMAEntryPoint<ReportingModelServiceAsync> {
 
-	ReportingController controller = null;
+	private ReportingController controller = null;
 
 	@Override
 	public ReportingModelServiceAsync createRpcService() {
@@ -71,16 +71,18 @@ public class ReportingEntryPoint extends DCMAEntryPoint<ReportingModelServiceAsy
 		ReportingPresenter reportingPresenter = controller.getPresenter();
 		reportingPresenter.bind();
 
-		final RootPanel rootPanel = new RootPanel(layoutPanel);
-		
+		final RootPanel rootPanel = new RootPanel(layoutPanel, rpcService);
+
 		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
 		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
+		rootPanel.getHeader().addTab("Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addTab("Folder Management", "FolderManager.html", false);
 		rootPanel.getHeader().addNonClickableTab("Reports", "Reporting.html");
-		rootPanel.getHeader().getTabBar().selectTab(2);
+		rootPanel.getHeader().getTabBar().selectTab(4);
 		rootPanel.addStyleName("set_position");
 		rootPanel.getHeader().setEventBus(eventBus);
 
-		rpcService.getUserName(new AsyncCallback<String>() {
+		rpcService.getUserName(new EphesoftAsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(final String userName) {
@@ -88,7 +90,7 @@ public class ReportingEntryPoint extends DCMAEntryPoint<ReportingModelServiceAsy
 			}
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				// Username cannot be set if the call failed.
 			}
 		});

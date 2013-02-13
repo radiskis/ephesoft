@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -68,10 +68,9 @@ public class ExtractDocField {
 	 * 
 	 * @param batchInstanceId String
 	 * @param updtDocList List<List<DocFieldType>>
-	 * @param baseFolLoc String
-	 * @param packageBatch String
-	 * @param batchXml String
-	 * @param isValidDataList List<Boolean>
+	 * @param batch Batch
+	 * @param batchSchemaService BatchSchemaService
+     * @param isValidDataList List<Boolean>
 	 * @throws DCMAApplicationException Check for input parameters and update the file having file name batch.xml.
 	 */
 	public void updateBatchXML(final String batchInstanceId, final List<List<DocField>> updtDocList, Batch batch,
@@ -101,7 +100,7 @@ public class ExtractDocField {
 
 		boolean isWrite = false;
 		if (null != xmlDocuments && xmlDocuments.size() == updtDocList.size()) {
-			for (int i = 0; i < xmlDocuments.size(); i++) {
+			for (int i = RegexConstants.ZERO; i < xmlDocuments.size(); i++) {
 				List<DocField> docFdTyLt = updtDocList.get(i);
 				// Boolean isValidateData = isValidateDataList.get(i);
 				if (null == docFdTyLt || docFdTyLt.isEmpty()) {
@@ -119,7 +118,7 @@ public class ExtractDocField {
 				if (documentLevelField.isEmpty()) {
 					documentLevelField.addAll(docFdTyLt);
 				} else {
-					for (int orgIndex = 0; orgIndex < documentLevelField.size(); orgIndex++) {
+					for (int orgIndex = RegexConstants.ZERO; orgIndex < documentLevelField.size(); orgIndex++) {
 						DocField orgFieldType = documentLevelField.get(orgIndex);
 						String orgName = orgFieldType.getName();
 						for (DocField actFieldType : docFdTyLt) {

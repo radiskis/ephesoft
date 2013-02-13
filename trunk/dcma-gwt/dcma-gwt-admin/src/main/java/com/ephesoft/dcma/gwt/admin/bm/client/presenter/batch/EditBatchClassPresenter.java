@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,38 +42,58 @@ import java.util.Set;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.EditBatchClassView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
+ * Presenter for editing details of a batch class.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Presenter for editing details of a batch class.
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBatchClassView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditBatchClassView
+	 */
 	public EditBatchClassPresenter(final BatchClassManagementController controller, final EditBatchClassView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * On cancel click.
+	 */
 	public void onCancel() {
 		controller.getMainPresenter().getBatchClassViewPresenter().showBatchClassDetailView();
 	}
 
+	/**
+	 * On save click.
+	 */
 	public void onSave() {
 
 		if (!view.getValidateTextBox().validate() || !view.getValidateDescTextBox().validate()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.MANDATORY_FIELDS_BLANK));
+		} else if (!view.getValidateSystemFolderTextBox().validate()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.INVALID_SYSTEM_FOLDER_PATH)
+					+ LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.CHANGE_AND_TRY_AGAIN));
 		} else {
 			boolean validCheck = true;
 			boolean isPriorityNumber = isNumber(view.getPriority());
@@ -88,49 +108,117 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 				validCheck = false;
 			}
 
-			if (validCheck && view.getRole().isEmpty()) {
-				ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.NOTHING_SELECTED);
-				validCheck = false;
-			}
-
-			if (validCheck && !controller.IsSuperAdmin()) {
+			if (validCheck && !controller.isSuperAdmin()) {
 				String roleName = checkForValidRoleToUnmap();
-				if(roleName!=null){
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.CANT_DELETE_OWN_ROLE,roleName));
-				validCheck = false;
+				if (roleName != null) {
+					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+							BatchClassManagementMessages.CANT_DELETE_OWN_ROLE, roleName));
+					validCheck = false;
 				}
 			}
 
 			if (validCheck) {
-				controller.getBatchClass().setDescription(view.getDescription());
-				controller.getBatchClass().setPriority(view.getPriority());
-				controller.getBatchClass().setUncFolder(view.getUncFolder());
-				controller.getBatchClass().setVersion(view.getVersion());
-				controller.getBatchClass().setAssignedRole(view.getRoleList());
+				checkSystemFolderAndProceed();
 
-				controller.getMainPresenter().getBatchClassViewPresenter().bind();
-				controller.getMainPresenter().getBatchClassViewPresenter().showBatchClassDetailView();
 			}
 		}
 	}
 
+	private void checkSystemFolderAndProceed() {
+		final BatchClassDTO batchClass = controller.getBatchClass();
+		final String newSystemFolder = view.getSystemFolder();
+		final String existingSystemFolder = batchClass.getSystemFolder();
+		if (existingSystemFolder == null || !existingSystemFolder.equals(newSystemFolder)) {
+			controller.getRpcService().getAllUnFinishedBatchInstancesCount(batchClass.getIdentifier(), new AsyncCallback<Integer>() {
+
+				@Override
+				public void onSuccess(Integer unfinishedBatchCount) {
+					if (unfinishedBatchCount > 0) {
+						ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+						confirmationDialog.okButton.setText(BatchClassManagementConstants.YES);
+						confirmationDialog.cancelButton.setText(BatchClassManagementConstants.NO);
+						confirmationDialog
+								.setMessage("This batch class has "
+										+ unfinishedBatchCount
+										+ " batches under processing. Changing the system folder now will make them loose the restart functionality. Do you still want to continue ?");
+
+						confirmationDialog.addDialogListener(new DialogListener() {
+
+							@Override
+							public void onOkClick() {
+								batchClass.setSystemFolder(newSystemFolder);
+								updateBatchClassDto(batchClass);
+								showBatchClassView();
+							}
+
+							@Override
+							public void onCancelClick() {
+								updateBatchClassDto(batchClass);
+								showBatchClassView();
+							}
+						});
+						confirmationDialog.okButton.setFocus(true);
+						confirmationDialog.show();
+
+					} else {
+						batchClass.setSystemFolder(newSystemFolder);
+						updateBatchClassDto(batchClass);
+						showBatchClassView();
+					}
+				}
+
+				@Override
+				public void onFailure(Throwable arg0) {
+					ConfirmationDialogUtil.showConfirmationDialogError("Cannot update the system folder.");
+				}
+			});
+		} else {
+			updateBatchClassDto(batchClass);
+			showBatchClassView();
+		}
+	}
+
+	private void showBatchClassView() {
+		controller.getMainPresenter().getBatchClassViewPresenter().bind();
+		controller.getMainPresenter().getBatchClassViewPresenter().showBatchClassDetailView();
+	}
+
+	private void updateBatchClassDto(final BatchClassDTO batchClass) {
+		batchClass.setDescription(view.getDescription());
+		batchClass.setPriority(view.getPriority());
+		batchClass.setUncFolder(view.getUncFolder());
+		batchClass.setVersion(view.getVersion());
+		batchClass.setAssignedRole(view.getRoleList());
+	}
+
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		if (controller.getBatchClass() != null) {
-			view.setName(controller.getBatchClass().getName());
-			view.setDescription(controller.getBatchClass().getDescription());
-			view.setPriority(controller.getBatchClass().getPriority());
-			view.setUncFolder(controller.getBatchClass().getUncFolder());
-			view.setVersion(controller.getBatchClass().getVersion());
+		final BatchClassDTO batchClass = controller.getBatchClass();
+		if (batchClass != null) {
+			view.setName(batchClass.getName());
+			view.setDescription(batchClass.getDescription());
+			view.setPriority(batchClass.getPriority());
+			view.setUncFolder(batchClass.getUncFolder());
+			view.setVersion(batchClass.getVersion());
 			view.getValidateTextBox().addValidator(new EmptyStringValidator(view.getPriorityTextBox()));
 			view.getValidateTextBox().toggleValidDateBox();
 			view.getValidateDescTextBox().addValidator(new EmptyStringValidator(view.getDescriptionTextBox()));
 			view.getValidateDescTextBox().toggleValidDateBox();
-			view.setRole(controller.getBatchClass().getAssignedRole(), controller.getAllRoles());
+			view.setRole(batchClass.getAssignedRole(), controller.getAllRoles());
+			view.getDescriptionTextBox().setFocus(true);
+			view.getValidateSystemFolderTextBox().toggleValidDateBox();
+			view.setSystemFolder(batchClass.getSystemFolder());
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// event handling to be done here.
@@ -146,6 +234,11 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 		return returnValue;
 	}
 
+	/**
+	 * To check for valid role to unmap.
+	 * 
+	 * @return String
+	 */
 	public String checkForValidRoleToUnmap() {
 		String roleName = null;
 		List<RoleDTO> assignedRoles = controller.getBatchClass().getAssignedRole();
@@ -170,7 +263,7 @@ public class EditBatchClassPresenter extends AbstractBatchClassPresenter<EditBat
 			if (userRoles.contains(roleDTO.getName())) {
 				assignedUserRoles.add(roleDTO);
 			}
-        }
+		}
 		return assignedUserRoles;
 	}
 }

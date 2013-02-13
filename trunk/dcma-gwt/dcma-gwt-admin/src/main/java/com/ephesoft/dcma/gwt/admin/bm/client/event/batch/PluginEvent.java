@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,11 @@ import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
+ * Used for event handling on plugin level.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Used for event handling on plugin level.
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
  */
 public class PluginEvent extends GwtEvent<PluginHandler> {
 
@@ -64,6 +63,12 @@ public class PluginEvent extends GwtEvent<PluginHandler> {
 	 */
 	private final PluginDetailsDTO plugin;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 * @param plugin PluginDetailsDTO
+	 */
 	public PluginEvent(final Action action, final PluginDetailsDTO plugin) {
 		super();
 		this.action = action;
@@ -83,11 +88,21 @@ public class PluginEvent extends GwtEvent<PluginHandler> {
 		}
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<PluginHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<PluginHandler> getAssociatedType() {
 		return type;
 	}
 
+	/**
+	 * To get plugin.
+	 * 
+	 * @return PluginDetailsDTO
+	 */
 	public PluginDetailsDTO getPlugin() {
 		return plugin;
 	}

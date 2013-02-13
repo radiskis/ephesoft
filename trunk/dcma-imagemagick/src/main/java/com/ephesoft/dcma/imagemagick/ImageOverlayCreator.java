@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.imagemagick;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,29 +61,38 @@ import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
+import com.ephesoft.dcma.util.FileFormatException;
 import com.ephesoft.dcma.util.FileNameFormatter;
 
+/**
+ * This class is used to create an overlay on the image according to the coordinates.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public class ImageOverlayCreator implements ICommonConstants {
-
-	private static final String COMMA = ",";
-	private static final String SPACE = " ";
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * An instance of Logger for proper logging in this class using slf4j.
+	 */
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ImageOverlayCreator.class);
 
 	/**
 	 * Simple constructor checks weather IMAGEMAGICK_ENV_VARIABLE is set.
 	 */
 	public ImageOverlayCreator() {
 		String envVariable = System.getenv(IImageMagickCommonConstants.IMAGEMAGICK_ENV_VARIABLE);
-		logger.debug("checking if the Image Magick Enviornment variable IM4JAVA_TOOLPATH is set");
+		LOGGER.debug("checking if the Image Magick Enviornment variable IM4JAVA_TOOLPATH is set");
 		if (envVariable == null || envVariable.isEmpty()) {
-			logger.error("Enviornment Variable IM4JAVA_TOOLPATH not set");
+			LOGGER.error("Enviornment Variable IM4JAVA_TOOLPATH not set");
 			throw new DCMABusinessException("Enviornment Variable IM4JAVA_TOOLPATH not set.");
 		}
-		logger.debug("Enviornment variable IM4JAVA_TOOLPATH is set value=" + envVariable);
+		LOGGER.debug("Enviornment variable IM4JAVA_TOOLPATH is set value=" + envVariable);
 	}
 
 	/**
-	 * This method takes bath folder path, batch id as Input and generates overlayed images
+	 * This method takes bath folder path, batch id as Input and generates overlayed images.
 	 * 
 	 * @param sBatchFolder
 	 * @param batchInstanceIdentifier
@@ -99,10 +109,10 @@ public class ImageOverlayCreator implements ICommonConstants {
 		if (!fBatchFolder.exists() || !fBatchFolder.isDirectory()) {
 			throw new DCMABusinessException("Improper Folder Specified folder name->" + sBatchFolder);
 		}
-		logger.info("Finding xml file for Overlyed Images generation in the folder--> " + fBatchFolder);
+		LOGGER.info("Finding xml file for Overlyed Images generation in the folder--> " + fBatchFolder);
 
-		logger.info("xml file parsed sucsessfully");
-		List<OverlayDetails> listOfOverlayDetails = getListOfOverlayedFiles(fBatchFolder, sBatchFolder, batch, batchInstanceIdentifier);
+		LOGGER.info("xml file parsed sucsessfully");
+		List<OverlayDetails> listOfOverlayDetails = getListOfOverlayedFiles(sBatchFolder, batch, batchInstanceIdentifier);
 		StringBuffer sbParameter = new StringBuffer();
 
 		for (int index = 0; index < listOfOverlayDetails.size(); index++) {
@@ -123,13 +133,13 @@ public class ImageOverlayCreator implements ICommonConstants {
 					String overlayFilePath = overlayDetails.getOverlayedFilePath();
 					Object[] listOfFiles = {ocrFilePath, overlayFilePath};
 					sbParameter.append("rectangle");
-					sbParameter.append(SPACE);
+					sbParameter.append(ImageMagicKConstants.SPACE);
 					sbParameter.append(coordinates.getX0());
-					sbParameter.append(COMMA);
+					sbParameter.append(ImageMagicKConstants.COMMA);
 					sbParameter.append(coordinates.getY0());
-					sbParameter.append(COMMA);
+					sbParameter.append(ImageMagicKConstants.COMMA);
 					sbParameter.append(coordinates.getX1());
-					sbParameter.append(COMMA);
+					sbParameter.append(ImageMagicKConstants.COMMA);
 					sbParameter.append(coordinates.getY1());
 					ConvertCmd convertcmd = new ConvertCmd();
 					IMOperation operation = new IMOperation();
@@ -137,7 +147,7 @@ public class ImageOverlayCreator implements ICommonConstants {
 					operation.fill("#0AFA");
 					String paramerter = sbParameter.toString();
 					sbParameter.delete(0, sbParameter.length());
-					logger.info("Overlaying image " + ocrFilePath + " Overlay coordinates=" + paramerter + "Overlayed Image="
+					LOGGER.info("Overlaying image " + ocrFilePath + " Overlay coordinates=" + paramerter + "Overlayed Image="
 							+ overlayFilePath);
 					operation.draw(paramerter);
 					operation.addImage();
@@ -145,7 +155,7 @@ public class ImageOverlayCreator implements ICommonConstants {
 					addFileToBatchSchema(batch, overlayDetails);
 				}
 			} catch (Exception ex) {
-				logger.error("Problem generating Overlayed Image ");
+				LOGGER.error("Problem generating Overlayed Image ");
 				// parsedXmlFile.setBatchStatus(BatchStatusType.ERROR);
 				// xmlReader.writeXML(BATCH_XSD_SCHEMA_PACKAGE, parsedXmlFile,
 				// xmlFile);
@@ -153,7 +163,7 @@ public class ImageOverlayCreator implements ICommonConstants {
 			}
 
 		}
-		logger.info("Overlayed Image generation complete for batch folder" + sBatchFolder + " persisitng info to xml file");
+		LOGGER.info("Overlayed Image generation complete for batch folder" + sBatchFolder + " persisitng info to xml file");
 
 		batchSchemaService.updateBatch(batch);
 
@@ -167,7 +177,7 @@ public class ImageOverlayCreator implements ICommonConstants {
 	 * @param overlayDetails
 	 */
 	private void addFileToBatchSchema(Batch parsedXmlFile, OverlayDetails overlayDetails) {
-		logger.debug("Adding newly generated overlayed image to  parsed batch.xml file overlayed file name="
+		LOGGER.debug("Adding newly generated overlayed image to  parsed batch.xml file overlayed file name="
 				+ overlayDetails.getOverlayedFileName());
 		int documentIndex = overlayDetails.getDocumentIndex();
 		int fieldIndex = overlayDetails.getFieldIndex();
@@ -196,7 +206,7 @@ public class ImageOverlayCreator implements ICommonConstants {
 	 * @return
 	 * @throws DCMAApplicationException
 	 */
-	private List<OverlayDetails> getListOfOverlayedFiles(File fBatchFolder, String sBatchFolder, Batch parsedXmlFile,
+	private List<OverlayDetails> getListOfOverlayedFiles(String sBatchFolder, Batch parsedXmlFile,
 			String batchInstanceIdentifier) throws DCMAApplicationException {
 		List<OverlayDetails> listOfOverlayDetails = new LinkedList<OverlayDetails>();
 		List<Document> listOfDocuments = parsedXmlFile.getDocuments().getDocument();
@@ -264,10 +274,11 @@ public class ImageOverlayCreator implements ICommonConstants {
 	 * @param parsedXmlFile
 	 * @param sBatchFolder
 	 * @param batchInstanceIdentifier
-	 * @throws Exception
+	 * @throws IOException
+	 * @throws FileFormatException
 	 */
 	private void updateFileNames(List<OverlayDetails> listOfOverlayDetails, Batch parsedXmlFile, String sBatchFolder,
-			String batchInstanceIdentifier) throws Exception {
+			String batchInstanceIdentifier) throws IOException, FileFormatException {
 		FileNameFormatter formater = new FileNameFormatter();
 		for (int index = 0; index < listOfOverlayDetails.size(); index++) {
 			OverlayDetails overlayDetails = listOfOverlayDetails.get(index);

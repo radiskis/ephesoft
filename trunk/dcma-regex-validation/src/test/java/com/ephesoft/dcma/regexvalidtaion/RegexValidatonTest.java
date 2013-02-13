@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,6 +59,7 @@ import com.ephesoft.dcma.util.FileUtils;
  * validates the document as regex patterns are correctly specified for the document type, second one does not validate the document.
  * 
  * @author Ephesoft
+ * @version 1.0
  * @see com.ephesoft.dcma.regexvalidtaion.AbstractRegexValidationTest
  * 
  */
@@ -137,7 +138,7 @@ public class RegexValidatonTest extends AbstractRegexValidationTest {
 	private transient String batchClassIdFailure;
 
 	/**
-	 * Initalizes the unit tests.
+	 * Initializes the unit tests.
 	 * 
 	 * @throws IOException
 	 */
@@ -146,13 +147,13 @@ public class RegexValidatonTest extends AbstractRegexValidationTest {
 		boolean result = false;
 		Properties prop = new Properties();
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
-		testFolderLocation = batchSchemaService.getTestFolderLocation();
+		
 		batchInstanceIdSuccess = "BI7D";
 		batchClassIdSuccess = "BC1";
 		batchInstanceIdFailure = "BI7F";
 		batchClassIdFailure = "BC1";
-
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassIdSuccess);
+		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		try {
 			prop.load(RegexValidatonTest.class.getClassLoader().getResourceAsStream(PROP_FILE_REG_VAL_TEST));
 		} catch (IOException e) {
@@ -254,7 +255,7 @@ public class RegexValidatonTest extends AbstractRegexValidationTest {
 	}
 
 	/**
-	 * This methos does the clean-up operation : deleting the newly modified xml in inputOutput folder and replacing them with
+	 * This method does the clean-up operation : deleting the newly modified xml in inputOutput folder and replacing them with
 	 * corresponding xml in samples folder.
 	 */
 	@After

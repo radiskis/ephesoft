@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,51 +42,109 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.KV_PP_AddEditDetai
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show KV PP add and edit details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, KV_PP_AddEditDetailView> {
 	}
 
+	/**
+	 * keyPatternLabel Label.
+	 */
 	@UiField
 	protected Label keyPatternLabel;
 
+	/**
+	 * keyPattern Label.
+	 */
 	@UiField
 	protected Label keyPattern;
 
+	/**
+	 * valuePatternLabel Label.
+	 */
 	@UiField
 	protected Label valuePatternLabel;
 
+	/**
+	 * valuePattern Label.
+	 */
 	@UiField
 	protected Label valuePattern;
 
+	/**
+	 * locationLabel Label.
+	 */
 	@UiField
 	protected Label locationLabel;
 
+	/**
+	 * location Label.
+	 */
 	@UiField
 	protected Label location;
 
+	/**
+	 * noOfWordsLabel Label.
+	 */
 	@UiField
 	protected Label noOfWordsLabel;
 
+	/**
+	 * noOfWords Label.
+	 */
 	@UiField
 	protected Label noOfWords;
 
+	/**
+	 * pageLevelFieldNameLabel Label.
+	 */
 	@UiField
 	protected Label pageLevelFieldNameLabel;
 
+	/**
+	 * pageLevelFieldName Label.
+	 */
 	@UiField
 	protected Label pageLevelFieldName;
 
+	/**
+	 * kvPPDetailVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel kvPPDetailVerticalPanel;
 
+	/**
+	 * editKVPPPropertiesButton Button.
+	 */
+	@UiField
+	protected Button editKVPPPropertiesButton;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public KV_PP_AddEditDetailView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -101,30 +159,56 @@ public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> 
 				.getConstantValue(BatchClassManagementConstants.KV_PAGE_LEVEL_FIELD_NAME)
 				+ AdminConstants.COLON);
 
-		kvPPDetailVerticalPanel.setSpacing(5);
+		kvPPDetailVerticalPanel.setSpacing(BatchClassManagementConstants.FIVE);
 		keyPatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		valuePatternLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		locationLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		noOfWordsLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		pageLevelFieldNameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		editKVPPPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
 	}
 
+	/**
+	 * To set Key Pattern.
+	 * 
+	 * @param keyPattern String
+	 */
 	public void setKeyPattern(String keyPattern) {
 		this.keyPattern.setText(keyPattern);
 	}
 
+	/**
+	 * To set Value Pattern.
+	 * 
+	 * @param valuePattern String
+	 */
 	public void setValuePattern(String valuePattern) {
 		this.valuePattern.setText(valuePattern);
 	}
 
+	/**
+	 * To set No. of Words.
+	 * 
+	 * @param noOfWords String
+	 */
 	public void setNoOfWords(String noOfWords) {
 		this.noOfWords.setText(noOfWords);
 	}
 
+	/**
+	 * To set location.
+	 * 
+	 * @param location String
+	 */
 	public void setlocation(String location) {
 		this.location.setText(location);
 	}
 
+	/**
+	 * To set location.
+	 * 
+	 * @param location LocationType
+	 */
 	public void setlocation(LocationType location) {
 		if (location != null) {
 			this.location.setText(location.name());
@@ -133,7 +217,32 @@ public class KV_PP_AddEditDetailView extends View<KV_PP_AddEditDetailPresenter> 
 		}
 	}
 
+	/**
+	 * To set Page Level Field Name.
+	 * 
+	 * @param pageLevelFieldName String
+	 */
 	public void setPageLevelFieldNameeldName(String pageLevelFieldName) {
 		this.pageLevelFieldName.setText(pageLevelFieldName);
 	}
+
+	/**
+	 * To get Edit KV PP Properties Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getEditKVPPPropertiesButton() {
+		return editKVPPPropertiesButton;
+	}
+
+	/**
+	 * To get controller on edit KV Properties Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+	@UiHandler("editKVPPPropertiesButton")
+	public void onEditKVPropertiesButtonClick(ClickEvent clickEvent) {
+		presenter.getController().getBatchClassManagementPresenter().getKvPPAddEditListPresenter().onEditKVPPPropertiesButtonClicked();
+	}
+
 }

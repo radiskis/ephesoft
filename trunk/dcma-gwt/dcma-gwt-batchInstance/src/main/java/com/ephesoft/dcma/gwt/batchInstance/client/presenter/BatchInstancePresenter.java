@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client.presenter;
+package com.ephesoft.dcma.gwt.batchinstance.client.presenter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,16 +42,18 @@ import java.util.Map;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
-import com.ephesoft.dcma.gwt.batchInstance.client.BatchInstanceController;
-import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceConstants;
-import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceMessages;
-import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceListView;
-import com.ephesoft.dcma.gwt.batchInstance.client.view.BatchInstanceView;
+import com.ephesoft.dcma.gwt.batchinstance.client.BatchInstanceController;
+import com.ephesoft.dcma.gwt.batchinstance.client.i18n.BatchInstanceConstants;
+import com.ephesoft.dcma.gwt.batchinstance.client.i18n.BatchInstanceMessages;
+import com.ephesoft.dcma.gwt.batchinstance.client.view.BatchInstanceListView;
+import com.ephesoft.dcma.gwt.batchinstance.client.view.BatchInstanceView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.RowSelectionListner;
 import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
+import com.ephesoft.dcma.gwt.core.shared.BatchPriority;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.DataFilter;
@@ -60,72 +62,170 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * The presenter for view that shows the batch instance details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.batchinstance.client.presenter.AbstractBatchInstancePresenter
+ */
 public class BatchInstancePresenter extends AbstractBatchInstancePresenter<BatchInstanceView> implements PaginationListner,
 		RowSelectionListner {
 
-	private List<DataFilter> filters = new ArrayList<DataFilter>();
+	/**
+	 * filters List<DataFilter>.
+	 */
+	private final List<DataFilter> filters = new ArrayList<DataFilter>();
 
-	private static int TABLE_ROW_COUNT = 15;
+	/**
+	 * TABLE_ROW_COUNT int.
+	 */
+	private static final int TABLE_ROW_COUNT = 15;
+
+	/**
+	 * REVIEW_VALIDATE_HTML String.
+	 */
 	private static final String REVIEW_VALIDATE_HTML = "/ReviewValidate.html";
+
+	/**
+	 * BATCH_ID_URL String.
+	 */
 	private static final String BATCH_ID_URL = "?batch_id=";
+
+	/**
+	 * startIndex int.
+	 */
 	private int startIndex;
+
+	/**
+	 * maxResult int.
+	 */
 	private int maxResult;
+
+	/**
+	 * order Order.
+	 */
 	private Order order;
 
+	/**
+	 * Enum that handles the action status the batch is in.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public enum ActionableStatus {
 
-		ERROR(4), READY_FOR_REVIEW(9), READY_FOR_VALIDATION(10), RUNNING(8);
+		/**
+		 * ERROR.
+		 */
+		ERROR(4),
+		/**
+		 * READY_FOR_REVIEW.
+		 */
+		READY_FOR_REVIEW(9),
+		/**
+		 * READY_FOR_VALIDATION.
+		 */
+		READY_FOR_VALIDATION(10),
+		/**
+		 * RUNNING.
+		 */
+		RUNNING(8);
 
-		private Integer id;
+		/**
+		 * identifier Integer.
+		 */
+		private Integer identifier;
 
-		private ActionableStatus(int statusId) {
-			id = statusId;
+		private ActionableStatus(final int statusId) {
+			identifier = statusId;
 		}
 
+		/**
+		 * To get values as List.
+		 * 
+		 * @return List<ActionableStatus>
+		 */
 		public static List<ActionableStatus> valuesAsList() {
 			return Arrays.asList(values());
 		}
 
+		/**
+		 * To get id.
+		 * 
+		 * @return Integer
+		 */
 		public Integer getId() {
-			return id;
+			return identifier;
 		}
 
+		/**
+		 * To get values as strings.
+		 * 
+		 * @return List<String>
+		 */
 		public static List<String> valuesAsString() {
-			List<String> valuesAsString = new ArrayList<String>();
-			for (ActionableStatus actionableStatus : ActionableStatus.valuesAsList()) {
+			final List<String> valuesAsString = new ArrayList<String>();
+			for (final ActionableStatus actionableStatus : ActionableStatus.valuesAsList()) {
 				valuesAsString.add(actionableStatus.name());
 			}
 			return valuesAsString;
 		}
 	}
 
+	/**
+	 * Enum for result.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public enum Results {
-		SUCCESSFUL, FAILURE;
+
+		/**
+		 * SUCCESSFUL.
+		 */
+		SUCCESSFUL,
+		/**
+		 * FAILURE.
+		 */
+		FAILURE;
 	}
 
-	public BatchInstancePresenter(BatchInstanceController controller, BatchInstanceView view) {
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchInstanceController
+	 * @param view BatchInstanceView
+	 */
+	public BatchInstancePresenter(final BatchInstanceController controller, final BatchInstanceView view) {
 		super(controller, view);
 		view.getBatchInstanceListView().listView.setTableRowCount(TABLE_ROW_COUNT);
 		bind();
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
-	public void bind() {
+	public final void bind() {
 		setIndexes(0, view.getBatchInstanceListView().listView.getTableRowCount(), null);
-		getRowCount(filters, true, startIndex, maxResult, order);
+		getRowCount(filters, true, startIndex, maxResult, order, null);
 		enableRestartAll();
 	}
 
-	public void enableRestartAll() {
-		controller.getRpcService().isRestartAllBatchEnabled(new AsyncCallback<Boolean>() {
+	/**
+	 * To enable all the batches to restart.
+	 */
+	public final void enableRestartAll() {
+		controller.getRpcService().isRestartAllBatchEnabled(new EphesoftAsyncCallback<Boolean>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-
+			public void customFailure(final Throwable arg0) {
+				// Empty method.
 			}
 
 			@Override
-			public void onSuccess(Boolean arg0) {
+			public void onSuccess(final Boolean arg0) {
 				if (arg0) {
 					view.getRestartAllButton().setEnabled(true);
 				}
@@ -133,140 +233,167 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 		});
 	}
 
-	private void getRowCount(List<DataFilter> dataFilters, final int start, final int maxResults, Order order) {
-		getRowCount(dataFilters, false, start, maxResults, order);
+	private void getRowCount(final List<DataFilter> dataFilters, final int start, final int maxResults, final Order order) {
+		getRowCount(dataFilters, false, start, maxResults, order, view.getSearchTextEntered());
 	}
 
 	private void getRowCount(final List<DataFilter> filters, final boolean initialize, final int start, final int maxResults,
-			final Order order) {
-		controller.getRpcService().getRowCount(filters, new AsyncCallback<Integer>() {
+			final Order order, final String searchString) {
+		controller.getRpcService().getRowCount(filters, searchString, new EphesoftAsyncCallback<Integer>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
 			}
 
 			@Override
-			public void onSuccess(Integer arg0) {
+			public void onSuccess(final Integer arg0) {
 				getBatchInstanceRows(start, maxResults, filters, order, !initialize, arg0);
 			}
 		});
 	}
 
-	private void getBatchInstanceRows(final int start, final int maxResult, List<DataFilter> filters, Order order,
+	private void getBatchInstanceRows(final int start, final int maxResult, final List<DataFilter> filters, final Order order,
 			final boolean update, final int count) {
 		ScreenMaskUtility.maskScreen();
-		controller.getRpcService().getBatchInstanceDTOs(start, maxResult, filters, order, new AsyncCallback<List<BatchInstanceDTO>>() {
-
-			@Override
-			public void onFailure(Throwable arg0) {
-				ScreenMaskUtility.unmaskScreen();
-				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-						BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
-			}
-
-			@Override
-			public void onSuccess(final List<BatchInstanceDTO> arg0) {
-				controller.getRpcService().getIndividualRowCount(new AsyncCallback<Integer[]>() {
+		controller.getRpcService().getBatchInstanceDTOs(start, maxResult, filters, order, view.getSearchTextEntered(),
+				new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
 					@Override
-					public void onFailure(Throwable paramThrowable) {
+					public void customFailure(final Throwable arg0) {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
 					}
 
 					@Override
-					public void onSuccess(Integer[] countlist) {
-						ScreenMaskUtility.unmaskScreen();
-						view.updateBatchAlertsPanel(countlist);
-						if (update) {
-							view.updateBatchInstanceList(arg0, start, count);
-						} else {
-							view.createBatchInstanceList(arg0, count);
-						}
+					public void onSuccess(final List<BatchInstanceDTO> arg0) {
+						controller.getRpcService().getIndividualRowCount(new EphesoftAsyncCallback<Integer[]>() {
+
+							@Override
+							public void customFailure(final Throwable paramThrowable) {
+								ScreenMaskUtility.unmaskScreen();
+								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+										BatchInstanceMessages.MSG_BATCH_LIST_RETRIEVE_FAILURE), Boolean.TRUE);
+							}
+
+							@Override
+							public void onSuccess(final Integer[] countlist) {
+								ScreenMaskUtility.unmaskScreen();
+								view.updateBatchAlertsPanel(countlist);
+								if (update) {
+									view.updateBatchInstanceList(arg0, start, count);
+								} else {
+									view.createBatchInstanceList(arg0, count);
+								}
+							}
+						});
 					}
 				});
-			}
-		});
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
-	public void injectEvents(HandlerManager eventBus) {
-
+	public void injectEvents(final HandlerManager eventBus) {
+		// Empty method.
 	}
 
-	public void updateTable(int startIndex, int maxResult, Order order) {
-		List<String> priorities = view.getPrioritySelected();
-		List<String> batchInstances = view.getBatchInstanceSelected();
+	/**
+	 * To update the table.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param order Order
+	 */
+	public void updateTable(final int startIndex, final int maxResult, final Order order) {
+		final List<String> priorities = view.getPrioritySelected();
+		final List<String> batchInstances = view.getBatchInstanceSelected();
 		filters.clear();
-		for (String priority : priorities) {
+		for (final String priority : priorities) {
 			filters.add(new DataFilter(BatchInstanceConstants.PRIORITY, priority));
 		}
-		for (String batchInstance : batchInstances) {
+		for (final String batchInstance : batchInstances) {
 			filters.add(new DataFilter(BatchInstanceConstants.STATUS, batchInstance));
 		}
 		setIndexes(startIndex, maxResult, order);
 		getRowCount(filters, this.startIndex, this.maxResult, this.order);
 	}
 
+	/**
+	 * To update the table.
+	 */
 	public void updateTable() {
-		List<String> priorities = view.getPrioritySelected();
-		List<String> batchInstances = view.getBatchInstanceSelected();
+		final List<String> priorities = view.getPrioritySelected();
+		final List<String> batchInstances = view.getBatchInstanceSelected();
 		if (priorities.isEmpty() && batchInstances.isEmpty()) {
 			view.setDefaultFilters();
 		}
 		filters.clear();
-		for (String priority : priorities) {
-			filters.add(new DataFilter("priority", priority));
+		for (final String priority : priorities) {
+			filters.add(new DataFilter(BatchInstanceConstants.PRIORITY, priority));
 		}
-		for (String batchInstance : batchInstances) {
-			filters.add(new DataFilter("status", batchInstance));
+		for (final String batchInstance : batchInstances) {
+			filters.add(new DataFilter(BatchInstanceConstants.STATUS, batchInstance));
 		}
 		getRowCount(filters, this.startIndex, this.maxResult, this.order);
 	}
 
-	private void setIndexes(int startIndex2, int maxResult2, Order order2) {
+	private void setIndexes(final int startIndex2, final int maxResult2, final Order order2) {
 		this.startIndex = startIndex2;
 		this.maxResult = maxResult2;
 		this.order = order2;
 	}
 
+	/**
+	 * To set index on pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param order Order
+	 */
 	@Override
-	public void onPagination(int startIndex, int maxResult, Order order) {
+	public void onPagination(final int startIndex, final int maxResult, final Order order) {
 		setIndexes(startIndex, maxResult, order);
 		getRowCount(filters, startIndex, maxResult, order);
-
 	}
 
+	/**
+	 * To perform operations on delete batch button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteBatchButtonClicked(final String identifier) {
 		// ScreenMaskUtility.maskScreen();
 
-		controller.getRpcService().deleteBatchInstance(identifier, new AsyncCallback<Results>() {
+		controller.getRpcService().deleteBatchInstance(identifier, new EphesoftAsyncCallback<Results>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				// ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_DELETE_FAILURE), Boolean.TRUE);
 			}
 
 			@Override
-			public void onSuccess(Results arg0) {
+			public void onSuccess(final Results arg0) {
 				if (arg0.name().equals(Results.SUCCESSFUL.name())) {
 					showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_SUCCESSFUL,
 							identifier), startIndex, maxResult, order);
-					controller.getRpcService().deleteBatchFolders(identifier, new AsyncCallback<Results>() {
+					controller.getRpcService().deleteBatchFolders(identifier, new EphesoftAsyncCallback<Results>() {
 
 						@Override
-						public void onFailure(Throwable arg0) {
+						public void customFailure(final Throwable arg0) {
 							// ScreenMaskUtility.unmaskScreen();
 						}
 
 						@Override
-						public void onSuccess(Results arg0) {
-
+						public void onSuccess(final Results arg0) {
+							// Empty method.
 						}
 					});
 				} else {
@@ -277,31 +404,33 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 		});
 	}
 
+	/**
+	 * To perform operations on unlock batch button clicked.
+	 * 
+	 * @param identifier String
+	 */
 	public void onUnlockButtonClicked(final String identifier) {
-		ScreenMaskUtility.maskScreen();
 		controller.getRpcService().clearCurrentUser(identifier, new AsyncCallback<Void>() {
 
 			@Override
 			public void onFailure(Throwable arg0) {
-				ScreenMaskUtility.unmaskScreen();
+
 			}
 
 			@Override
 			public void onSuccess(Void arg0) {
-				ScreenMaskUtility.unmaskScreen();
-				controller.getRpcService().clearCurrentUser(identifier, new AsyncCallback<Void>() {
+				ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get()
+						.getMessageValue(BatchInstanceMessages.MSG_CLEAR_CURRENT_USER));
+				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
-						ScreenMaskUtility.unmaskScreen();
+					public void onOkClick() {
+						updateTable();
 					}
 
 					@Override
-					public void onSuccess(Void arg0) {
-						ScreenMaskUtility.unmaskScreen();
-						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
-								BatchInstanceMessages.MSG_CLEAR_CURRENT_USER));
-						updateTable();
+					public void onCancelClick() {
+
 					}
 				});
 			}
@@ -328,30 +457,36 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 	}
 
+	/**
+	 * To perform operations on restart batch button clicked.
+	 * 
+	 * @param identifier String
+	 * @param module String
+	 */
 	public void onRestartBatchButtonClicked(final String identifier, final String module) {
 		controller.getRpcService().updateBatchInstanceStatus(identifier, BatchInstanceStatus.RESTART_IN_PROGRESS,
-				new AsyncCallback<Results>() {
+				new EphesoftAsyncCallback<Results>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(final Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_RESTART_FAILURE, identifier), Boolean.TRUE);
 					}
 
 					@Override
-					public void onSuccess(Results arg0) {
+					public void onSuccess(final Results arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
 								BatchInstanceMessages.MSG_RESTART_SUCCESSFUL, identifier), Boolean.TRUE);
 
-						controller.getRpcService().restartBatchInstance(identifier, module, new AsyncCallback<Results>() {
+						controller.getRpcService().restartBatchInstance(identifier, module, new EphesoftAsyncCallback<Results>() {
 
 							@Override
-							public void onFailure(Throwable arg0) {
-
+							public void customFailure(final Throwable arg0) {
+								// Empty method.
 							}
 
 							@Override
-							public void onSuccess(Results arg0) {
+							public void onSuccess(final Results arg0) {
 								updateTable(startIndex, maxResult, order);
 
 							}
@@ -362,8 +497,13 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 	}
 
+	/**
+	 * To perform operations on rows selected.
+	 * 
+	 * @param identifer String
+	 */
 	@Override
-	public void onRowSelected(String identifer) {
+	public void onRowSelected(final String identifer) {
 		view.restartOptions.setSelectedIndex(0);
 		view.performRestartOptionsPopulate();
 		if (!view.checkRowSelectedIsValid(identifer) || view.checkRemotelyExecutingBatch(identifer)) {
@@ -375,26 +515,38 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 		}
 	}
 
-	public void onSearchButtonClicked(String identifier) {
+	/**
+	 * To perform operations on search button clicked.
+	 * 
+	 * @param identifier String
+	 */
+	public void onSearchButtonClicked(final String identifier) {
 		ScreenMaskUtility.maskScreen();
 
-		controller.getRpcService().getBatchInstanceDTOs(identifier, new AsyncCallback<List<BatchInstanceDTO>>() {
+		controller.getRpcService().getBatchInstanceDTOs(identifier, new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
 			@Override
-			public void onSuccess(List<BatchInstanceDTO> batchInstanceDTOs) {
+			public void onSuccess(final List<BatchInstanceDTO> batchInstanceDTOs) {
 				view.clearFilters();
-				for (BatchInstanceDTO batchInstanceDTO : batchInstanceDTOs) {
+				filters.clear();
+				for (final BatchInstanceDTO batchInstanceDTO : batchInstanceDTOs) {
 					if (null != batchInstanceDTO) {
 						view.setPriorityListBox(batchInstanceDTO.getPriority());
 						view.setBatchInstanceListBox(batchInstanceDTO.getStatus());
+
+						// Adds default selection in filters
+						addPriorityAndStatusInFilters(batchInstanceDTO);
 					}
 				}
 				ScreenMaskUtility.unmaskScreen();
-				view.updateBatchInstanceList(batchInstanceDTOs, 0, batchInstanceDTOs.size());
+
+				final int listSize = batchInstanceDTOs.size();
+				final int viewRecordsSize = Math.min(listSize, maxResult);
+				view.updateBatchInstanceList(batchInstanceDTOs.subList(0, viewRecordsSize), 0, listSize);
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_SEARCH_FAILURE));
 				ScreenMaskUtility.unmaskScreen();
@@ -404,28 +556,36 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 
 	}
 
+	/**
+	 * To get restart options.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 */
 	public void getRestartOptions(final String batchInstanceIdentifier) {
-		controller.getRpcService().getRestartOptions(batchInstanceIdentifier, new AsyncCallback<Map<String, String>>() {
+		controller.getRpcService().getRestartOptions(batchInstanceIdentifier, new EphesoftAsyncCallback<Map<String, String>>() {
 
 			@Override
-			public void onFailure(Throwable paramThrowable) {
+			public void customFailure(final Throwable paramThrowable) {
 				view.showErrorRetrievingRestartOptions(batchInstanceIdentifier);
 			}
 
 			@Override
-			public void onSuccess(Map<String, String> restartOptionsList) {
+			public void onSuccess(final Map<String, String> restartOptionsList) {
 				view.setRestartOptions(restartOptionsList);
 			}
 		});
 	}
 
+	/**
+	 * To perform operations on restart all button clicked.
+	 */
 	public void onRestartAllButtonClicked() {
 		ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_RESTART_ALL_TEXT));
 		view.disableRestartAllButton();
-		controller.getRpcService().restartAllBatchInstances(new AsyncCallback<Void>() {
+		controller.getRpcService().restartAllBatchInstances(new EphesoftAsyncCallback<Void>() {
 
 			@Override
-			public void onFailure(Throwable paramThrowable) {
+			public void customFailure(final Throwable paramThrowable) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_RESTART_ALL_FAILURE), Boolean.TRUE);
 				ScreenMaskUtility.unmaskScreen();
@@ -433,16 +593,16 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			}
 
 			@Override
-			public void onSuccess(Void arg0) {
-				controller.getRpcService().disableRestartAllButton(new AsyncCallback<Void>() {
+			public void onSuccess(final Void arg0) {
+				controller.getRpcService().disableRestartAllButton(new EphesoftAsyncCallback<Void>() {
 
 					@Override
-					public void onFailure(Throwable paramThrowable) {
+					public void customFailure(final Throwable paramThrowable) {
 						ScreenMaskUtility.unmaskScreen();
 					}
 
 					@Override
-					public void onSuccess(Void arg0) {
+					public void onSuccess(final Void arg0) {
 						updateTable();
 						ScreenMaskUtility.unmaskScreen();
 					}
@@ -451,11 +611,17 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 		});
 	}
 
+	/**
+	 * To get Batch Instance DTO.
+	 * 
+	 * @param isDelete boolean
+	 * @param batchIdentifier String
+	 */
 	public void getBatchInstanceDTO(final boolean isDelete, final String batchIdentifier) {
-		controller.getRpcService().getBatchInstanceDTO(batchIdentifier, new AsyncCallback<BatchInstanceDTO>() {
+		controller.getRpcService().getBatchInstanceDTO(batchIdentifier, new EphesoftAsyncCallback<BatchInstanceDTO>() {
 
 			@Override
-			public void onFailure(Throwable paramThrowable) {
+			public void customFailure(final Throwable paramThrowable) {
 				if (isDelete) {
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 							BatchInstanceMessages.MSG_DELETE_FAILURE));
@@ -466,7 +632,7 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			}
 
 			@Override
-			public void onSuccess(BatchInstanceDTO batchInstanceDTO) {
+			public void onSuccess(final BatchInstanceDTO batchInstanceDTO) {
 				view.isBatchInstanceLocked(isDelete, batchInstanceDTO);
 			}
 		});
@@ -475,46 +641,52 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	/**
 	 * API for redirecting user to batch detail page for selected batch.
 	 * 
-	 * @param batchInstanceIdentifier
+	 * @param batchInstanceIdentifier String
 	 */
-	public void redirectToBatchDetailPage(String batchInstanceIdentifier) {
+	public void redirectToBatchDetailPage(final String batchInstanceIdentifier) {
 		if (batchInstanceIdentifier != null && !batchInstanceIdentifier.isEmpty()) {
-			String href = Window.Location.getHref();
-			String baseUrl = href.substring(0, href.lastIndexOf('/'));
-			StringBuffer newUrl = new StringBuffer();
+			final String href = Window.Location.getHref();
+			final String baseUrl = href.substring(0, href.lastIndexOf('/'));
+			final StringBuffer newUrl = new StringBuffer();
 			newUrl.append(baseUrl).append(REVIEW_VALIDATE_HTML);
 			newUrl.append(BATCH_ID_URL).append(batchInstanceIdentifier);
-		    Window.open(newUrl.toString(),"_blank","");
+			Window.open(newUrl.toString(), "_blank", "");
 		}
 	}
 
-	public void onDeleteAllBatchButtonClick(List<DataFilter> statusFilters) {
+	/**
+	 * To perform operations on Delete all Batch Button Clicked.
+	 * 
+	 * @param statusFilters List<DataFilter>
+	 */
+	public void onDeleteAllBatchButtonClick(final List<DataFilter> statusFilters) {
 		ScreenMaskUtility.maskScreen();
-		controller.getRpcService().deleteAllBatchInstancesByStatus(statusFilters, new AsyncCallback<List<String>>() {
+		controller.getRpcService().deleteAllBatchInstancesByStatus(statusFilters, new EphesoftAsyncCallback<List<String>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_DELETE_ALL_FAILURE));
 			}
 
 			@Override
-			public void onSuccess(List<String> batchInstanceId) {
+			public void onSuccess(final List<String> batchInstanceId) {
 				view.clearSearchBatchBox();
 				if (!batchInstanceId.isEmpty()) {
 					showSuccessConfirmation(LocaleDictionary.get().getMessageValue(BatchInstanceMessages.MSG_DELETE_ALL_SUCCESS),
 							startIndex, maxResult, order);
 					ScreenMaskUtility.unmaskScreen();
-					controller.getRpcService().deleteAllBatchInstancesFolders(batchInstanceId, new AsyncCallback<Void>() {
+					controller.getRpcService().deleteAllBatchInstancesFolders(batchInstanceId, new EphesoftAsyncCallback<Void>() {
 
 						@Override
-						public void onFailure(Throwable arg0) {
+						public void customFailure(final Throwable arg0) {
+							// Empty method.
 						}
 
 						@Override
-						public void onSuccess(Void arg0) {
-
+						public void onSuccess(final Void arg0) {
+							// Empty method.
 						}
 					});
 				} else {
@@ -527,17 +699,22 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 		});
 	}
 
-	public void clearUser(String batchInstanceIdentifier) {
-		controller.getRpcService().clearCurrentUser(batchInstanceIdentifier, new AsyncCallback<Void>() {
+	/**
+	 * To clear user.
+	 * 
+	 * @param batchInstanceIdentifier String
+	 */
+	public void clearUser(final String batchInstanceIdentifier) {
+		controller.getRpcService().clearCurrentUser(batchInstanceIdentifier, new EphesoftAsyncCallback<Void>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-
+			public void customFailure(final Throwable arg0) {
+				// Empty method.
 			}
 
 			@Override
-			public void onSuccess(Void arg0) {
-
+			public void onSuccess(final Void arg0) {
+				// Empty method.
 			}
 		});
 
@@ -546,8 +723,8 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	/**
 	 * This API is for showing confirmation dialog box for opening batch.
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param batchInstanceDTO
+	 * @param batchInstanceIdentifier String
+	 * @param batchInstanceDTO BatchInstanceDTO
 	 */
 	private void openingBatchConfirmationDialog(final String batchInstanceIdentifier, final BatchInstanceDTO batchInstanceDTO) {
 
@@ -574,16 +751,16 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 	/**
 	 * This API is for getting batch instance DTO and lock the selected batch.
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param batchInstanceDTOMap
-	 * @param batchInstanceListView
+	 * @param batchInstanceIdentifier String
+	 * @param batchInstanceDTOMap Map<String, BatchInstanceDTO>
+	 * @param batchInstanceListView BatchInstanceListView
 	 */
 	public void getBatchDtoAndAcquireLock(final String batchInstanceIdentifier,
 			final Map<String, BatchInstanceDTO> batchInstanceDTOMap, final BatchInstanceListView batchInstanceListView) {
-		controller.getRpcService().getBatchInstanceDTO(batchInstanceIdentifier, new AsyncCallback<BatchInstanceDTO>() {
+		controller.getRpcService().getBatchInstanceDTO(batchInstanceIdentifier, new EphesoftAsyncCallback<BatchInstanceDTO>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchInstanceMessages.MSG_UNABLE_TO_RETRIEVE_BATCH));
 			}
@@ -595,17 +772,17 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 							BatchInstanceMessages.MSG_LOCKED_BATCH));
 				} else {
-					controller.getRpcService().acquireLock(batchInstanceIdentifier, new AsyncCallback<Void>() {
+					controller.getRpcService().acquireLock(batchInstanceIdentifier, new EphesoftAsyncCallback<Void>() {
 
 						@Override
-						public void onFailure(Throwable arg0) {
+						public void customFailure(final Throwable arg0) {
 
 							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 									BatchInstanceMessages.MSG_UNABLE_TO_GET_LOCK));
 						}
 
 						@Override
-						public void onSuccess(Void arg0) {
+						public void onSuccess(final Void arg0) {
 							openingBatchConfirmationDialog(batchInstanceListView.listView.getSelectedRowIndex(), batchInstanceDTO);
 						}
 					});
@@ -613,4 +790,35 @@ public class BatchInstancePresenter extends AbstractBatchInstancePresenter<Batch
 			}
 		});
 	}
+
+	/**
+	 * This method adds priority and status default selection in filters.
+	 * 
+	 * @param batchInstanceDTO - instance of BatchInstanceDTO
+	 */
+	private void addPriorityAndStatusInFilters(final BatchInstanceDTO batchInstanceDTO) {
+		Integer priority = null;
+		String status = null;
+		if (BatchPriority.URGENT.getLowerLimit() <= batchInstanceDTO.getPriority()
+				&& batchInstanceDTO.getPriority() <= BatchPriority.URGENT.getUpperLimit()) {
+			priority = BatchPriority.URGENT.getLowerLimit();
+		} else if (BatchPriority.HIGH.getLowerLimit() <= batchInstanceDTO.getPriority()
+				&& batchInstanceDTO.getPriority() <= BatchPriority.HIGH.getUpperLimit()) {
+			priority = BatchPriority.HIGH.getLowerLimit();
+		} else if (BatchPriority.MEDIUM.getLowerLimit() <= batchInstanceDTO.getPriority()
+				&& batchInstanceDTO.getPriority() <= BatchPriority.MEDIUM.getUpperLimit()) {
+			priority = BatchPriority.MEDIUM.getLowerLimit();
+		} else if (BatchPriority.LOW.getLowerLimit() <= batchInstanceDTO.getPriority()
+				&& batchInstanceDTO.getPriority() <= BatchPriority.LOW.getUpperLimit()) {
+			priority = BatchPriority.LOW.getLowerLimit();
+		}
+		status = BatchInstanceStatus.valueOf(batchInstanceDTO.getStatus()).getId().toString();
+		if (null != priority) {
+			filters.add(new DataFilter(BatchInstanceConstants.PRIORITY, priority.toString()));
+		}
+		if (null != status) {
+			filters.add(new DataFilter(BatchInstanceConstants.STATUS, status));
+		}
+	}
+
 }

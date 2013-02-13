@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -71,14 +71,14 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 	
 	private Collection<KVPageProcessDTO> kvPageProcessDTOs;
 	
-	private boolean isMultivalue;
+	private boolean multivalue;
 	
-	private boolean isMandatory;
+	private boolean mandatory;
 	
 	
 	private DataType dataType;
     private Integer orderNumber;
-	public BatchClassPluginConfigDTO getChildById(String identifier) {
+	public BatchClassPluginConfigDTO getChildById(final String identifier) {
 		return batchClassPluginConfigsMap.get(identifier);
 	}
 
@@ -86,7 +86,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return batchClassPlugin;
 	}
 
-	public void setBatchClassPlugin(BatchClassPluginDTO batchClassPlugin) {
+	public void setBatchClassPlugin(final BatchClassPluginDTO batchClassPlugin) {
 		this.batchClassPlugin = batchClassPlugin;
 	}
 
@@ -94,7 +94,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return pluginConfig;
 	}
 
-	public void setPluginConfig(PluginConfigurationDTO pluginConfig) {
+	public void setPluginConfig(final PluginConfigurationDTO pluginConfig) {
 		this.pluginConfig = pluginConfig;
 	}
 
@@ -102,7 +102,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -110,7 +110,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(final String value) {
 		this.value = value;
 		pluginConfig.setDirty(true);
 	}
@@ -119,7 +119,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 
@@ -127,7 +127,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return sampleValue;
 	}
 
-	public void setSampleValue(List<String> sampleValue) {
+	public void setSampleValue(final List<String> sampleValue) {
 		this.sampleValue = sampleValue;
 	}
 
@@ -135,7 +135,7 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return identifier;
 	}
 
-	public void setIdentifier(String identifier) {
+	public void setIdentifier(final String identifier) {
 		this.identifier = identifier;
 	}
 
@@ -143,90 +143,100 @@ public class BatchClassPluginConfigDTO implements IsSerializable {
 		return qualifier;
 	}
 
-	public void setQualifier(String qualifier) {
+	public void setQualifier(final String qualifier) {
 		this.qualifier = qualifier;
 	}
 
 	public boolean isMultivalue() {
-		return isMultivalue;
+		return multivalue;
 	}
-	public void setMultivalue(boolean isMultivalue) {
-		this.isMultivalue = isMultivalue;
+	public void setMultivalue(final boolean multivalue) {
+		this.multivalue = multivalue;
 	}
 	
 	
 	public boolean isMandatory() {
-		return isMandatory;
+		return mandatory;
 	}
 
 	
-	public void setMandatory(boolean isMandatory) {
-		this.isMandatory = isMandatory;
+	public void setMandatory(final boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 
 	public DataType getDataType() {
 		return dataType;
 	}
 	
-	public void setDataType(DataType dataType) {
+	public void setDataType(final DataType dataType) {
 		this.dataType = dataType;
 	}
 	
-	public Collection<KVPageProcessDTO> getKvPageProcessDTOs(boolean includeDeleted) {
-		if (includeDeleted)
-			return kvPageProcessDTOs;
-		return getKvPageProcessDTOs();
+	public Collection<KVPageProcessDTO> getKvPageProcessDTOs(final boolean includeDeleted) {
+		Collection<KVPageProcessDTO> kVPageProcessDTO;
+		if (includeDeleted){
+			kVPageProcessDTO = kvPageProcessDTOs;
+		}else{
+			kVPageProcessDTO = getKvPageProcessDTOs();
+		}
+		return kVPageProcessDTO;
 	}
 	
 	public Collection<KVPageProcessDTO> getKvPageProcessDTOs() {
-		List<KVPageProcessDTO> kvPageProcessDTOList = new ArrayList<KVPageProcessDTO>();
-		if(kvPageProcessDTOs != null)
-		for (KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOs) {
-			if (!(kvPageProcessDTO.getIsDeleted())) {
-				kvPageProcessDTOList.add(kvPageProcessDTO);
+		final List<KVPageProcessDTO> kvPageProcessDTOList = new ArrayList<KVPageProcessDTO>();
+		if (kvPageProcessDTOs != null) {
+			for (final KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOs) {
+				if (!(kvPageProcessDTO.getIsDeleted())) {
+					kvPageProcessDTOList.add(kvPageProcessDTO);
+				}
 			}
 		}
 		return kvPageProcessDTOList;
 	}
 	
-	public void setKvPageProcessDTOs(List<KVPageProcessDTO> kvPageProcessDTOs) {
+	public void setKvPageProcessDTOs(final List<KVPageProcessDTO> kvPageProcessDTOs) {
 		this.kvPageProcessDTOs = kvPageProcessDTOs;
 	}
-	public void addKVPageProcessDTO(KVPageProcessDTO kvPageProcessDTO) {
+	public void addKVPageProcessDTO(final KVPageProcessDTO kvPageProcessDTO) {
 		if(kvPageProcessDTOs == null) {
 			kvPageProcessDTOs = new ArrayList<KVPageProcessDTO>();
 		}
 		kvPageProcessDTOs.add(kvPageProcessDTO);
 	}
 	
-	public void removeKVPageProcessDTO(KVPageProcessDTO kvPageProcessDTO) {
+	public void removeKVPageProcessDTO(final KVPageProcessDTO kvPageProcessDTO) {
 		if(kvPageProcessDTOs == null) {
 			kvPageProcessDTOs = new ArrayList<KVPageProcessDTO>();
 		}
 		kvPageProcessDTOs.remove(kvPageProcessDTO);
 	}
 	
-	public KVPageProcessDTO getKVPageProcessByKeyAndDataTypeAndLocation(String keyPattern, String valuePattern, LocationType locationType) {
-		Collection<KVPageProcessDTO> kvPageProcessDTOList = kvPageProcessDTOs;
-		if(kvPageProcessDTOList != null && !kvPageProcessDTOList.isEmpty())
-		for (KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOList) {
-			if (kvPageProcessDTO.getKeyPattern() != null && kvPageProcessDTO.getKeyPattern().equals(keyPattern)) {
-				if (kvPageProcessDTO.getValuePattern() != null && kvPageProcessDTO.getValuePattern().equals(valuePattern))
-					if (kvPageProcessDTO.getLocationType() != null
-							&& kvPageProcessDTO.getLocationType().name().equals(locationType.name()))
-						return kvPageProcessDTO;
+	public KVPageProcessDTO getKVPageProcessByKeyAndDataTypeAndLocation(final String keyPattern, final String valuePattern,
+			final LocationType locationType) {
+		final Collection<KVPageProcessDTO> kvPageProcessDTOList = kvPageProcessDTOs;
+		KVPageProcessDTO pageProcessDTO = null;
+		if (kvPageProcessDTOList != null && !kvPageProcessDTOList.isEmpty()) {
+			for (final KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOList) {
+				if (kvPageProcessDTO.getKeyPattern() != null && kvPageProcessDTO.getKeyPattern().equals(keyPattern)
+						&& kvPageProcessDTO.getValuePattern() != null && kvPageProcessDTO.getValuePattern().equals(valuePattern)
+						&& kvPageProcessDTO.getLocationType() != null
+						&& kvPageProcessDTO.getLocationType().name().equals(locationType.name())) {
+					pageProcessDTO = kvPageProcessDTO;
+				}
 			}
 		}
-		return null;
+		return pageProcessDTO;
 	}
 
-	public boolean checkKVPageProcessDetails(String keyPattern, String valuePattern, LocationType locationType) {
-		if (getKVPageProcessByKeyAndDataTypeAndLocation(keyPattern, valuePattern, locationType) != null)
-			return true;
-		return false;
+	public boolean checkKVPageProcessDetails(final String keyPattern, final String valuePattern, final LocationType locationType) {
+		boolean validDetails = false;
+		if (getKVPageProcessByKeyAndDataTypeAndLocation(keyPattern, valuePattern, locationType) != null){
+			validDetails = true;
+		}
+		return validDetails;
 	}
 
-	public void setOrderNumber(Integer orderNumber) {
+	public void setOrderNumber(final Integer orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,13 +33,15 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view.dependencies;
+package com.ephesoft.dcma.gwt.customworkflow.client.view.dependencies;
 
 import com.ephesoft.dcma.da.property.DependencyProperty;
 import com.ephesoft.dcma.gwt.core.client.View;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.DependencyListPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.DependencyListPresenter;
 
 public class DependencyListView extends View<DependencyListPresenter> {
 
@@ -47,12 +49,16 @@ public class DependencyListView extends View<DependencyListPresenter> {
 		return listView;
 	}
 
-	public HeaderColumn pluginName = new HeaderColumn(1, "Plugin Name", 20, true, DependencyProperty.DEPENDENCY_NAME);
-	public HeaderColumn dependencyType = new HeaderColumn(2, "Dependency Type", 20, true, DependencyProperty.DEPENDENCY_TYPE);
-	public HeaderColumn dependencies = new HeaderColumn(3, "Dependencies", 20);
+	public HeaderColumn pluginName = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
+			CustomWorkflowConstants.PLUGIN_NAME_LABEL), 20, true, DependencyProperty.DEPENDENCY_NAME);
+	public HeaderColumn dependencyType = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			CustomWorkflowConstants.DEPENDENCY_TYPE), 20, true, DependencyProperty.DEPENDENCY_TYPE);
+	public HeaderColumn dependencies = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
+			CustomWorkflowConstants.DEPENDENCIES), 20);
 	public ListView listView = new ListView();
 
 	public DependencyListView() {
+		super();
 		listView.addHeaderColumns(pluginName, dependencyType, dependencies);
 	}
 }

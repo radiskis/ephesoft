@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.kvfinder.data;
 
+import com.ephesoft.dcma.batch.schema.Coordinates;
 import com.ephesoft.dcma.core.common.KVFetchValue;
 import com.ephesoft.dcma.core.common.LocationType;
 
@@ -82,31 +83,49 @@ public class InputDataCarrier {
 	 * fetchValue.
 	 */
 	private KVFetchValue fetchValue;
-	
+
 	/**
 	 * length.
 	 */
 	private Integer length;
-	
+
 	/**
 	 * width.
 	 */
 	private Integer width;
-	
+
 	/**
 	 * x-offset.
 	 */
 	private Integer xoffset;
-	
+
 	/**
 	 * y-offset.
 	 */
 	private Integer yoffset;
 
 	/**
-	 * @param locationType
-	 * @param keyPattern
-	 * @param valuePattern
+	 * use existing key.
+	 */
+	private boolean useExistingField;
+
+	/**
+	 * Coordinates of key rectangle drawn by user at UI.
+	 */
+	private Coordinates keyRectangleCoordinates;
+
+	/**
+	 * Coordinates of value rectangle drawn by user at UI.
+	 */
+	private Coordinates valueRectangleCoordinates;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param locationType {@link LocationType}
+	 * @param keyPattern String
+	 * @param valuePattern String
+	 * @param noOfWords Integer
 	 */
 	public InputDataCarrier(LocationType locationType, String keyPattern, String valuePattern, Integer noOfWords) {
 		super();
@@ -116,8 +135,26 @@ public class InputDataCarrier {
 		this.noOfWords = noOfWords;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param locationType {@link LocationType}
+	 * @param keyPattern String
+	 * @param valuePattern String 
+	 * @param noOfWords Integer
+	 * @param multiplier Float
+	 * @param fetchValue {@link KVFetchValue}
+	 * @param length Integer
+	 * @param width Integer
+	 * @param xoffset Integer
+	 * @param yoffset Integer
+	 * @param useExistingField boolean
+	 * @param keyRectangleCoordinates Coordinates
+	 * @param valueRectangleCoordinates Coordinates
+	 */
 	public InputDataCarrier(LocationType locationType, String keyPattern, String valuePattern, Integer noOfWords, Float multiplier,
-			KVFetchValue fetchValue, Integer length, Integer width, Integer xoffset, Integer yoffset) {
+			KVFetchValue fetchValue, Integer length, Integer width, Integer xoffset, Integer yoffset, boolean useExistingField,
+			Coordinates keyRectangleCoordinates, Coordinates valueRectangleCoordinates) {
 		super();
 		this.locationType = locationType;
 		this.keyPattern = keyPattern;
@@ -130,9 +167,15 @@ public class InputDataCarrier {
 		this.width = width;
 		this.xoffset = xoffset;
 		this.yoffset = yoffset;
+		this.useExistingField = useExistingField;
+
+		this.keyRectangleCoordinates = keyRectangleCoordinates;
+		this.valueRectangleCoordinates = valueRectangleCoordinates;
+
 	}
 
 	/**
+	 * To get location type.
 	 * @return the locationType
 	 */
 	public LocationType getLocationType() {
@@ -140,13 +183,15 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param locationType the locationType to set
+	 * To set location type.
+	 * @param locationType {@link LocationType}
 	 */
 	public void setLocationType(LocationType locationType) {
 		this.locationType = locationType;
 	}
 
 	/**
+	 * To get Key Pattern.
 	 * @return the keyPattern
 	 */
 	public String getKeyPattern() {
@@ -154,13 +199,15 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param keyPattern the keyPattern to set
+	 *  To set Key Pattern.
+	 * @param keyPattern String
 	 */
 	public void setKeyPattern(String keyPattern) {
 		this.keyPattern = keyPattern;
 	}
 
 	/**
+	 * To get Value Pattern.
 	 * @return the valuePattern
 	 */
 	public String getValuePattern() {
@@ -168,13 +215,15 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param valuePattern the valuePattern to set
+	 * To set Value Pattern.
+	 * @param valuePattern String
 	 */
 	public void setValuePattern(String valuePattern) {
 		this.valuePattern = valuePattern;
 	}
 
 	/**
+	 * To get no. of words.
 	 * @return the noOfWords
 	 */
 	public Integer getNoOfWords() {
@@ -182,13 +231,15 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param noOfWords the noOfWords to set
+	 * To set no. of words.
+	 * @param noOfWords Integer
 	 */
-	public void setNoOfWords(Integer noOfWords) {
+	public void setNoOfWords(final Integer noOfWords) {
 		this.noOfWords = noOfWords;
 	}
 
 	/**
+	 * To get Distance.
 	 * @return the distance
 	 */
 	public String getDistance() {
@@ -196,13 +247,15 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param distance the distance to set
+	 * To set Distance.
+	 * @param distance String
 	 */
-	public void setDistance(String distance) {
+	public void setDistance(final String distance) {
 		this.distance = distance;
 	}
 
 	/**
+	 * To get Multiplier.
 	 * @return the multiplier
 	 */
 	public Float getMultiplier() {
@@ -210,49 +263,139 @@ public class InputDataCarrier {
 	}
 
 	/**
-	 * @param multiplier the multiplier to set
+	 * To set Multiplier.
+	 * @param multiplier Float
 	 */
-	public void setMultiplier(Float multiplier) {
+	public void setMultiplier(final Float multiplier) {
 		this.multiplier = multiplier;
 	}
 
+	/**
+	 * To get Fetch Value.
+	 * @return KVFetchValue
+	 */
 	public KVFetchValue getFetchValue() {
 		return fetchValue;
 	}
 
-	public void setFetchValue(KVFetchValue fetchValue) {
+	/**
+	 * To set Fetch Value.
+	 * @param fetchValue KVFetchValue
+	 */
+	public void setFetchValue(final KVFetchValue fetchValue) {
 		this.fetchValue = fetchValue;
 	}
 
+	/**
+	 * To get width.
+	 * @return Integer
+	 */
 	public Integer getWidth() {
 		return width;
 	}
 
-	public void setWidth(Integer width) {
+	/**
+	 * To set width.
+	 * @param width Integer
+	 */
+	public void setWidth(final Integer width) {
 		this.width = width;
 	}
 
+	/**
+	 * To get Length.
+	 * @return Integer
+	 */
 	public Integer getLength() {
 		return length;
 	}
 
-	public void setLength(Integer length) {
+	/**
+	 * To set Length.
+	 * @param length Integer
+	 */
+	public void setLength(final Integer length) {
 		this.length = length;
 	}
 
+	/**
+	 * To get Xoffset.
+	 * @return Integer
+	 */
 	public Integer getXoffset() {
 		return xoffset;
 	}
 
-	public void setXoffset(Integer xoffset) {
+	/**
+	 * To set Xoffset.
+	 * @param xoffset Integer
+	 */
+	public void setXoffset(final Integer xoffset) {
 		this.xoffset = xoffset;
 	}
 
+	/**
+	 * To get Yoffset.
+	 * @return Integer
+	 */
 	public Integer getYoffset() {
 		return yoffset;
 	}
 
-	public void setYoffset(Integer yoffset) {
+	/**
+	 * To set Yoffset.
+	 * @param yoffset Integer
+	 */
+	public void setYoffset(final Integer yoffset) {
 		this.yoffset = yoffset;
 	}
+
+	/**
+	 * To check whether use field exists or not.
+	 * @return boolean
+	 */
+	public boolean isUseExistingField() {
+		return useExistingField;
+	}
+
+	/**
+	 * To set use existing field.
+	 * @param useExistingField boolean
+	 */
+	public void setUseExistingField(final boolean useExistingField) {
+		this.useExistingField = useExistingField;
+	}
+
+	/**
+	 * To get Key Rectangle Coordinates.
+	 * @return Coordinates
+	 */
+	public Coordinates getKeyRectangleCoordinates() {
+		return keyRectangleCoordinates;
+	}
+
+	/**
+	 * To set Key Rectangle Coordinates.
+	 * @param keyRectangleCoordinates Coordinates
+	 */
+	public void setKeyRectangleCoordinates(final Coordinates keyRectangleCoordinates) {
+		this.keyRectangleCoordinates = keyRectangleCoordinates;
+	}
+
+	/**
+	 * To get Value Rectangle Coordinates.
+	 * @return Coordinates
+	 */
+	public Coordinates getValueRectangleCoordinates() {
+		return valueRectangleCoordinates;
+	}
+
+	/**
+	 * To set Value Rectangle Coordinates.
+	 * @param valueRectangleCoordinates Coordinates
+	 */
+	public void setValueRectangleCoordinates(final Coordinates valueRectangleCoordinates) {
+		this.valueRectangleCoordinates = valueRectangleCoordinates;
+	}
+
 }

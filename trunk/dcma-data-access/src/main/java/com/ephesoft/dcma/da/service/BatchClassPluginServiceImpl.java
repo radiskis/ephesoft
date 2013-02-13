@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,27 +41,53 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ephesoft.dcma.da.dao.BatchClassPluginDao;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 
+/**
+ * This is a database service to read data required by Batch Class plugin configuration Service.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchClassPluginServiceImpl
+ */
 @Service
 public class BatchClassPluginServiceImpl implements BatchClassPluginService {
-
-	private static final String BATCH_CLASS_PLUGIN_ID = "Batch class Plugin id : ";
 
 	/**
 	 * LOGGER to print the Logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassModuleServiceImpl.class);
 
+	/**
+	 * batchClassPluginDao {@link BatchClassPluginDao}.
+	 */
 	@Autowired
-	BatchClassPluginDao batchClassPluginDao;
+	private BatchClassPluginDao batchClassPluginDao;
 
+	/**
+	 * API to get the list of batch class plugins for the given plugin id.
+	 * @param pluginId {@link Long}
+	 * @return {@link List}< {@link BatchClassPlugin}>
+	 */
 	@Override
 	public List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId) {
 		LOGGER.info("Getting list of batch class plugins for plugin id: " + pluginId);
 		return batchClassPluginDao.getBatchClassPluginForPluginId(pluginId);
+	}
+
+	/**
+	 * API to update batch class plugin.
+	 *  
+	 * @param batchClassPlugin {@link BatchClassPlugin}
+	 */
+	@Override
+	@Transactional
+	public void updateBatchClassPlugin(BatchClassPlugin batchClassPlugin) {
+		LOGGER.info("Updating batch class plugin with id: " + batchClassPlugin.getId() + " with plugin name: " + batchClassPlugin.getPlugin().getPluginName());
+		batchClassPluginDao.merge(batchClassPlugin);
 	}
 
 }

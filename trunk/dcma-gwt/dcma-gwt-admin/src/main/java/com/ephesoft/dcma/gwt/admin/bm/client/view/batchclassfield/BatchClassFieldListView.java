@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,33 +43,74 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show batch class field list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class BatchClassFieldListView extends View<BatchClassFieldListPresenter> {
 
+	/**
+	 * To get Batch Class Field List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getBatchClassFieldListView() {
 		return listView;
 	}
 
+	/**
+	 * name HeaderColumn.
+	 */
 	public HeaderColumn name = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_NAME), 20, true, BatchClassFieldProperty.NAME);
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_NAME), BatchClassManagementConstants.TWENTY, true,
+			BatchClassFieldProperty.NAME);
+
+	/**
+	 * description HeaderColumn.
+	 */
 	public HeaderColumn description = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_DESCRIPTION), 20, true, BatchClassFieldProperty.DESCRIPTION);
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_DESCRIPTION), BatchClassManagementConstants.TWENTY, true,
+			BatchClassFieldProperty.DESCRIPTION);
+
+	/**
+	 * type HeaderColumn.
+	 */
 	public HeaderColumn type = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_TYPE), 15, true, BatchClassFieldProperty.TYPE);
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_TYPE), BatchClassManagementConstants.FIFTEEN, true,
+			BatchClassFieldProperty.TYPE);
 
-	public HeaderColumn fdOrder = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_ORDER), 10, true, BatchClassFieldProperty.FIELDORDERNUMBER);
+	/**
+	 * fdOrder HeaderColumn.
+	 */
+	public HeaderColumn fdOrder = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_ORDER), BatchClassManagementConstants.TEN, true,
+			BatchClassFieldProperty.FIELDORDERNUMBER);
 
-	public HeaderColumn sampleValue = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_SAMPLE), 15);
-	public HeaderColumn validationPattern = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BATCH_CLASS_FIELD_PATTERN), 15);
+	/**
+	 * sampleValue HeaderColumn.
+	 */
+	public HeaderColumn sampleValue = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.BATCH_CLASS_FIELD_SAMPLE), BatchClassManagementConstants.FIFTEEN);
 
+	/**
+	 * validationPattern HeaderColumn.
+	 */
+	public HeaderColumn validationPattern = new HeaderColumn(BatchClassManagementConstants.FIVE, LocaleDictionary.get()
+			.getConstantValue(BatchClassManagementConstants.BATCH_CLASS_FIELD_PATTERN), BatchClassManagementConstants.FIFTEEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public BatchClassFieldListView() {
-
 		super();
-
 		listView.addHeaderColumns(name, description, type, fdOrder, sampleValue, validationPattern);
 
 	}

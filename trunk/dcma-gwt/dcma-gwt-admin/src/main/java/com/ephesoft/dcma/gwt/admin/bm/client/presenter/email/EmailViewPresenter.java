@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,30 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.email.EmailView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the email view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EmailViewPresenter extends AbstractBatchClassPresenter<EmailView> {
 
+	/**
+	 * emailDetailPresenter EmailDetailPresenter.
+	 */
 	private final EmailDetailPresenter emailDetailPresenter;
 
+	/**
+	 * editEmailPresenter EditEmailPresenter.
+	 */
 	private final EditEmailPresenter editEmailPresenter;
 
+	/**
+	 * Constructor.
+	 * @param controller BatchClassManagementController
+	 * @param view EmailView
+	 */
 	public EmailViewPresenter(BatchClassManagementController controller, EmailView view) {
 
 		super(controller, view);
@@ -53,37 +71,61 @@ public class EmailViewPresenter extends AbstractBatchClassPresenter<EmailView> {
 		this.editEmailPresenter = new EditEmailPresenter(controller, view.getEditEmailView());
 	}
 
+	/**
+	 * To show Email View.
+	 */
 	public void showEmailView() {
 		view.getEmailVerticalPanel().setVisible(Boolean.TRUE);
 		view.getEmailConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show edit Email View.
+	 */
 	public void showEditEmailView() {
 		view.getEmailVerticalPanel().setVisible(Boolean.FALSE);
 		view.getEmailConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * In case of Detail View Clicked.
+	 */
 	public void onDetailViewClicked() {
 		emailDetailPresenter.bind();
 	}
 
+	/**
+	 * To get Email Detail Presenter.
+	 * @return EmailDetailPresenter
+	 */
 	public EmailDetailPresenter getEmailDetailPresenter() {
 		return emailDetailPresenter;
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		this.editEmailPresenter.bind();
 		this.emailDetailPresenter.bind();
 	}
 
+	/**
+	 * To perform operations in case of edit email Properties button clicked.
+	 */
 	public void onEditEmailPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editEmailPresenter.bind();
-		showEditEmailView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		showEditEmailView();
+		editEmailPresenter.bind();
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling to be done here.

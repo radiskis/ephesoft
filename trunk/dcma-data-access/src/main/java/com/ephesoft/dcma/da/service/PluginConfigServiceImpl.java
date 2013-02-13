@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,6 +46,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ephesoft.dcma.da.dao.PluginConfigDao;
 import com.ephesoft.dcma.da.domain.PluginConfig;
 
+/**
+ * This is a database service to get the plugin config details for a pluginConfig.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.PluginConfigServiceImpl
+ */
 @Service
 public class PluginConfigServiceImpl implements PluginConfigService {
 
@@ -54,15 +61,29 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginConfigServiceImpl.class);
 
+	/**
+	 * pluginConfigDao {@link PluginConfigDao}.
+	 */
 	@Autowired
 	private PluginConfigDao pluginConfigDao;
 
+	/**
+	 * API to get the plugin config by name.
+	 * 
+	 * @param configName {@link String}
+	 * @return {@link PluginConfig}
+	 */
 	@Override
 	public PluginConfig getPluginConfigByName(String configName) {
 		LOGGER.info("Getting plugin config object for plugin config name: " + configName);
 		return pluginConfigDao.getPluginConfigByName(configName);
 	}
 
+	/**
+	 * API to create new plugin config.
+	 * 
+	 * @param pluginConfig {@link PluginConfig}
+	 */
 	@Override
 	@Transactional(readOnly = false)
 	public void createNewPluginConfig(PluginConfig pluginConfig) {
@@ -70,6 +91,12 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 		pluginConfigDao.create(pluginConfig);
 	}
 
+	/**
+	 * API to get list of plugin configs corresponding to the given plugin id.
+	 * 
+	 * @param pluginId {@link String}
+	 * @return {@link List}< {@link PluginConfig}>
+	 */
 	@Override
 	public List<PluginConfig> getPluginConfigForPluginId(String pluginId) {
 		LOGGER.info("Getting plugin configs for pluginid: " + pluginId);
@@ -82,5 +109,29 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 			LOGGER.error("Error in getting plugin config for plugin id: " + pluginId + ". " + e.getMessage());
 		}
 		return pluginConfigs;
+	}
+
+	/**
+	 * API to remove the given plugin config.
+	 * 
+	 * @param pluginConfig {@link PluginConfig}
+	 */
+	@Override
+	@Transactional
+	public void removePluginConfig(PluginConfig pluginConfig) {
+		LOGGER.info("Removing Plugin Config: " + pluginConfig.getName());
+		pluginConfigDao.remove(pluginConfig);
+	}
+
+	/**
+	 * API to update the given plugin config.
+	 * 
+	 * @param pluginConfig {@link PluginConfig}
+	 */
+	@Override
+	@Transactional
+	public void updatePluginConfig(PluginConfig pluginConfig) {
+		LOGGER.info("Updating Plugin Config: " + pluginConfig.getName());
+		pluginConfigDao.saveOrUpdate(pluginConfig);
 	}
 }

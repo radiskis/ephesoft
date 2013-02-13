@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,9 +33,10 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.home.client.view.ReviewTable;
+package com.ephesoft.dcma.gwt.home.client.view.reviewtable;
 
 import com.ephesoft.dcma.da.property.BatchInstanceProperty;
+import com.ephesoft.dcma.gwt.core.client.i18n.CoreCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
@@ -49,6 +50,7 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -61,17 +63,18 @@ import com.google.gwt.user.client.ui.TextBox;
  * The table that is used to show all the batches in review state and in validation state. A common table is used for both views.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.google.gwt.user.client.ui.ResizeComposite
  */
 public class ReviewValidateTable extends ResizeComposite {
 
 	/**
-	 * List view of the table
+	 * List view of the table.
 	 */
 	private ListView listView;
 
 	/**
-	 * List box used for sorting on basis of batch priority
+	 * List box used for sorting on basis of batch priority.
 	 */
 	private ListBox priorityListBox;
 
@@ -81,18 +84,38 @@ public class ReviewValidateTable extends ResizeComposite {
 	private Button refreshButton;
 
 	/**
-	 * The main panel of the view
+	 * The main panel of the view.
 	 */
 	private DockLayoutPanel mainPanel;
 
+	/**
+	 * filterAndSearchPanel HorizontalPanel.
+	 */
 	private HorizontalPanel filterAndSearchPanel;
 
+	/**
+	 * searchPanel HorizontalPanel.
+	 */
 	private HorizontalPanel searchPanel;
 
+	/**
+	 * searchAndFilterContanier FlowPanel.
+	 */
+	private FlowPanel searchAndFilterContanier;
+
+	/**
+	 * searchBatchButton Button.
+	 */
 	private Button searchBatchButton;
 
+	/**
+	 * searchBatchLabel Label.
+	 */
 	private Label searchBatchLabel;
 
+	/**
+	 * searchBatchTextBox TextBox.
+	 */
 	private TextBox searchBatchTextBox;
 
 	/**
@@ -104,44 +127,55 @@ public class ReviewValidateTable extends ResizeComposite {
 	 * Header column for priority.
 	 */
 	public HeaderColumn priority = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
-			BatchListConstants.LABEL_TABLE_COLUMN_PRIORITY), 10);
+			BatchListConstants.LABEL_TABLE_COLUMN_PRIORITY), BatchListConstants.TEN);
 
 	/**
 	 * Header column for batchId.
 	 */
 	public HeaderColumn batchId = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
-			BatchListConstants.LABEL_TABLE_COLUMN_BATCHID), 10, true, BatchInstanceProperty.ID);
+			BatchListConstants.LABEL_TABLE_COLUMN_BATCHID), BatchListConstants.TEN, true, BatchInstanceProperty.ID);
 
 	/**
 	 * Header column for batch class name.
 	 */
 	public HeaderColumn batchClassName = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchListConstants.LABEL_TABLE_COLUMN_BATCHCLASSNAME), 20);
+			BatchListConstants.LABEL_TABLE_COLUMN_BATCHCLASSNAME), BatchListConstants.TWENTY, true,
+			BatchInstanceProperty.BATCHCLASSNAME);
 
 	/**
 	 * Header column for batch name.
 	 */
-	public HeaderColumn batchName = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchListConstants.LABEL_TABLE_COLUMN_BATCHNAME), 30, true, BatchInstanceProperty.BATCHNAME);
+	public HeaderColumn batchName = new HeaderColumn(BatchListConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchListConstants.LABEL_TABLE_COLUMN_BATCHNAME), BatchListConstants.FIFTEEN, true, BatchInstanceProperty.BATCHNAME);
 
 	/**
 	 * Header column for batch update date.
 	 */
-	public HeaderColumn batchUpdatedOn = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
-			BatchListConstants.LABEL_TABLE_COLUMN_BATCHUPDATEDON), 25);
+	public HeaderColumn batchUpdatedOn = new HeaderColumn(BatchListConstants.FIVE, LocaleDictionary.get().getConstantValue(
+			BatchListConstants.LABEL_TABLE_COLUMN_BATCHUPDATEDON), BatchListConstants.EIGHTEEN, true,
+			BatchInstanceProperty.LASTMODIFIED);
 
+	/**
+	 * Header column for batch creation date.
+	 */
+	public HeaderColumn batchCreatedOn = new HeaderColumn(BatchListConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchListConstants.LABEL_TABLE_COLUMN_BATCHCREATEDON), BatchListConstants.EIGHTEEN, true,
+			BatchInstanceProperty.CREATIONDATE);
+
+	/**
+	 * Constructor.
+	 */
 	public ReviewValidateTable() {
 		super();
 		mainPanel = new DockLayoutPanel(Unit.PCT);
-		mainPanel.setHeight("95%");
+		searchAndFilterContanier = new FlowPanel();
 		filterAndSearchPanel = new HorizontalPanel();
-		filterAndSearchPanel.addStyleName("batchListCompositePanelLayout");
-		filterAndSearchPanel.setSpacing(5);
-		filterAndSearchPanel.setWidth("490px");
+		searchAndFilterContanier.addStyleName(CoreCommonConstants.OPTIONS_PANEL);
+		filterAndSearchPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 		priorityListBox = createPriorityListBox();
 		searchPanel = new HorizontalPanel();
 		listView = new ListView();
-		listView.setTableRowCount(15);
+		listView.setTableRowCount(BatchListConstants.FIFTEEN);
 		addHeaders();
 		HorizontalPanel listBoxPanel;
 		listBoxPanel = new HorizontalPanel();
@@ -156,30 +190,31 @@ public class ReviewValidateTable extends ResizeComposite {
 		searchPanel.setCellVerticalAlignment(searchBatchLabel, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
 		searchPanel.setCellVerticalAlignment(searchBatchButton, HasVerticalAlignment.ALIGN_MIDDLE);
-		searchPanel.setSpacing(6);
 
-		searchPanel.addStyleName("batchListGroupPanelLayout");
+		searchPanel.addStyleName(CoreCommonConstants.LAST_GRP_PANEL_NORMAL_CSS);
 		searchBatchLabel.setText(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_SEARCH_BATCH)
 				+ BatchListConstants.COLON);
 		searchBatchButton.setText(LocaleDictionary.get().getConstantValue(BatchListConstants.BUTTON_SEARCH_BATCH));
 
-		listBoxPanel.addStyleName("batchListGroupPanelLayout");
-		mainPanel.addNorth(filterAndSearchPanel, 15);
-		mainPanel.addStyleName("pad0");
+		listBoxPanel.addStyleName(CoreCommonConstants.GRP_PANEL_NORMAL_CSS);
+		searchAndFilterContanier.add(filterAndSearchPanel);
+		mainPanel.addNorth(searchAndFilterContanier, BatchListConstants.FIFTEEN);
+		mainPanel.addStyleName("padding0");
 		mainPanel.add(listView);
 		Label priorityLabel = new Label(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_PRIORITY_LISTBOX));
 		refreshButton = new Button(LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_REFRESH_BUTTON));
 
-		listBoxPanel.setSpacing(6);
 		listBoxPanel.add(priorityLabel);
 		listBoxPanel.add(priorityListBox);
 		listBoxPanel.add(refreshButton);
 		listBoxPanel.setCellHorizontalAlignment(priorityLabel, HasHorizontalAlignment.ALIGN_RIGHT);
 		listBoxPanel.setCellHorizontalAlignment(refreshButton, HasHorizontalAlignment.ALIGN_LEFT);
+		listBoxPanel.setWidth(CoreCommonConstants._100_PERCENTAGE);
 
 		filterAndSearchPanel.add(listBoxPanel);
 		filterAndSearchPanel.add(searchPanel);
 		filterAndSearchPanel.setCellHorizontalAlignment(listBoxPanel, HasHorizontalAlignment.ALIGN_LEFT);
+		filterAndSearchPanel.setCellWidth(listBoxPanel, CoreCommonConstants._20_PERCENTAGE);
 		filterAndSearchPanel.setCellHorizontalAlignment(searchPanel, HasHorizontalAlignment.ALIGN_LEFT);
 		searchBatchTextBox.addKeyPressHandler(new KeyPressHandler() {
 
@@ -194,28 +229,53 @@ public class ReviewValidateTable extends ResizeComposite {
 
 			@Override
 			public void onClick(ClickEvent arg0) {
-				searchBatchTextBox.setText("");
+				searchBatchTextBox.setText(BatchListConstants.EMPTY_STRING);
 			}
 		});
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param review boolean
+	 */
 	public ReviewValidateTable(boolean review) {
 		this();
 		this.review = review;
 	}
 
+	/**
+	 * To get Search Batch Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getSearchBatchButton() {
 		return searchBatchButton;
 	}
 
+	/**
+	 * To set Search Batch Button.
+	 * 
+	 * @param searchBatchButton Button
+	 */
 	public void setSearchBatchButton(Button searchBatchButton) {
 		this.searchBatchButton = searchBatchButton;
 	}
 
+	/**
+	 * To get Search Batch Text Box.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getSearchBatchTextBox() {
 		return searchBatchTextBox;
 	}
 
+	/**
+	 * To set Search Batch Text Box.
+	 * 
+	 * @param searchBatchTextBox TextBox
+	 */
 	public void setSearchBatchTextBox(TextBox searchBatchTextBox) {
 		this.searchBatchTextBox = searchBatchTextBox;
 	}
@@ -235,29 +295,59 @@ public class ReviewValidateTable extends ResizeComposite {
 	}
 
 	private void addHeaders() {
-		listView.addHeaderColumns(priority, batchId, batchClassName, batchName, batchUpdatedOn);
+		listView.addHeaderColumns(priority, batchId, batchClassName, batchName, batchCreatedOn, batchUpdatedOn);
 	}
 
+	/**
+	 * To get List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getListView() {
 		return listView;
 	}
 
+	/**
+	 * To get Priority List Box.
+	 * 
+	 * @return ListBox
+	 */
 	public ListBox getPriorityListBox() {
 		return priorityListBox;
 	}
 
+	/**
+	 * To get Main Panel.
+	 * 
+	 * @return DockLayoutPanel
+	 */
 	public DockLayoutPanel getMainPanel() {
 		return mainPanel;
 	}
 
+	/**
+	 * To get value of field is review.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isReview() {
 		return review;
 	}
 
+	/**
+	 * To set Review.
+	 * 
+	 * @param review boolean
+	 */
 	public void setReview(boolean review) {
 		this.review = review;
 	}
 
+	/**
+	 * To get Refresh Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getRefreshButton() {
 		return refreshButton;
 	}

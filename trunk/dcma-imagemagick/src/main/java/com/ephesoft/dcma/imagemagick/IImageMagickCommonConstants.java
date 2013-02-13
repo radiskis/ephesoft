@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,33 +35,117 @@
 
 package com.ephesoft.dcma.imagemagick;
 
+/**
+ * This interface stores all the common constants used for ImageMagick conversions and processing.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public interface IImageMagickCommonConstants {
 
+	/**
+	 * Thumbnail length.
+	 */
 	int THUMBNAIL_LENGTH = 200;
+	/**
+	 * Thumbnail breadth.
+	 */
 	int THUMBNAIL_BREDTH = 150;
+	/**
+	 * Constant for thumbnail.
+	 */
 	String THUMBNAIL = "thumbnail";
+	/**
+	 * Constant for thumbs.
+	 */
 	String THUMBS = "thumbs";
+	/**
+	 * Constant fot png type.
+	 */
 	String PNG = "png";
+	/**
+	 * Constant for tif type.
+	 */
 	String TIF = "tif";
+	/**
+	 * Constant for png extension.
+	 */
 	String EXT_PNG = ".png";
+	/**
+	 * Constant for tif extension.
+	 */
 	String EXT_TIF = ".tif";
+	/**
+	 * Suffix sample for thumbnail of png type.
+	 */
 	String SUFFIX_THUMBNAIL_SAMPLE_PNG = "_thumb.png";
+	/**
+	 * Suffix sample for thumbnail of tif type.
+	 */
 	String SUFFIX_THUMBNAIL_SAMPLE_TIF = "_thumb.tif";
+	/**
+	 * Imagemagick environment variable.
+	 */
 	String IMAGEMAGICK_ENV_VARIABLE = "IM4JAVA_TOOLPATH";
+	/**
+	 * Image magick compare classification.
+	 */
 	String IMAGE_COMPARE_CLASSIFICATION = "Image_Compare_Classification";
+	/**
+	 * Default IM compare metric.
+	 */
 	String DEFAULT_IM_COMP_METRIC = "RMSE";
+	/**
+	 * Default IM compare fuzz.
+	 */
 	String DEFAULT_IM_COMP_FUZZ = "10";
+	/**
+	 * Thumbnail type display.
+	 */
 	String THUMB_TYPE_DISP = "displayThumbnail";
+	/**
+	 * compare thumbnail type.
+	 */
 	String THUMB_TYPE_COMP = "compareThumbnail";
+	/**
+	 * OCR input file type.
+	 */
 	String OCR_INPUT_FILE = "ocrInputFile";
+	/**
+	 * Constant to store display image.
+	 */
 	String DISPLAY_IMAGE = "displayImage";
+	/**
+	 * Repair files utility through ghostscript.
+	 */
 	String REPAIR_FILES_THROUGH_GHOSTSCIPT_ENV_VARIABLE = "REPAIR_FILES_UTILITY_PATH";
+	/**
+	 * Ghostscript home environment variable.
+	 */
 	String GHOSTSCRIPT_ENV_VARIABLE = "GHOSTSCRIPT_HOME";
+	/**
+	 * Imagemagick repair files utility.
+	 */
 	String REPAIR_IMAGE_MAGICK_FILES_ENV_VARIABLE = "REPAIR_IMAGE_MAGICK_UTILITY_PATH";
-	String EMPTY_STRING = "";
+	/**
+	 * Constant for double quotes.
+	 */
 	String QUOTES = "\"";
+	/**
+	 * Constant for space.
+	 */
 	String SPACE = " ";
+	/**
+	 * Constant for ghostscript executor.
+	 */
 	String GHOSTSCRIPT_EXECUTOR = "EphesoftExecutor.exe";
+	/**
+	 * Constant for imagemagick executor.
+	 */
 	String IMAGEMAGICK_EXECUTOR = "EphesoftImageMagickExecutor.exe";
+	/**
+	 * Constant for imagemagick environment variable home.
+	 */
 	String IM4JAVA_TOOLPATH = "IM4JAVA_TOOLPATH";
 }

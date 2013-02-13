@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,44 +45,81 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import com.ephesoft.dcma.constant.UtilConstants;
+
 /**
  * This file is used to maintain the back up file at every plugin level.
- *
+ * 
  * @author Ephesoft
  * @version 1.0
+ * @see org.springframework.core.io.ClassPathResource
  */
 public class BackUpFileService {
 
 	/**
-	 *
+	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BackUpFileService.class);
 
+	/**
+	 * Initializing BACKUP_PROPERTY_FILE.
+	 */
 	private static final String BACKUP_PROPERTY_FILE = "META-INF" + File.separator + "dcma-util" + File.separator
 			+ "dcma-backup-service.properties";
 
+	/**
+	 * Initializing APPLICATION_PROPERTY_FILE.
+	 */
 	private static final String APPLICATION_PROPERTY_FILE = "META-INF" + File.separator + "application.properties";
 
+	/**
+	 * Initializing PRE_BATCH_XML.
+	 */
 	private static final String PRE_BATCH_XML = "PRE_STATE_";
 
-	private static final String BASE_FOL_LOC = "backup.local_folder";
-
+	/**
+	 * Initializing INPUT_BATCH_XML.
+	 */
 	private static final String INPUT_BATCH_XML = "backup.input_batch_xml";
 
+	/**
+	 * Initializing INPUT_BATCH_XML_ZIP.
+	 */
 	private static final String INPUT_BATCH_XML_ZIP = "backup.input_batch_xml_zip";
 
+	/**
+	 * Initializing REPORT_BASE_FOL_LOC.
+	 */
 	private static final String REPORT_BASE_FOL_LOC = "backup.report_folder";
 
+	/**
+	 * Initializing ENABLE_REPORTING.
+	 */
 	private static final String ENABLE_REPORTING = "enable.reporting";
 
+	/**
+	 * Initializing OUTPUT_BATCH_XML.
+	 */
 	private static final String OUTPUT_BATCH_XML = "backup.output_batch_xml";
 
+	/**
+	 * Initializing OUTPUT_BATCH_XML_ZIP.
+	 */
 	private static final String OUTPUT_BATCH_XML_ZIP = "backup.output_batch_xml_zip";
 
+	/**
+	 * Initializing ZIP_SWITCH.
+	 */
 	private static final String ZIP_SWITCH = "zip_switch";
 
+	/**
+	 * Initializing backUpFileConfig.
+	 */
 	private static Properties backUpFileConfig = new Properties();
 
+	/**
+	 * Initializing applicationConfig.
+	 */
 	private static Properties applicationConfig = new Properties();
 
 	static {
@@ -92,7 +129,7 @@ public class BackUpFileService {
 
 	/**
 	 * Open application.properties containing backup configuration parameters, and populate a corresponding Properties object.
-	 **/
+	 */
 	private static void fetchApplicationConfig() {
 
 		ClassPathResource classPathResource = new ClassPathResource(APPLICATION_PROPERTY_FILE);
@@ -117,7 +154,7 @@ public class BackUpFileService {
 
 	/**
 	 * Open backUpService.properties containing backup configuration parameters, and populate a corresponding Properties object.
-	 **/
+	 */
 	private static void fetchConfig() {
 
 		ClassPathResource classPathResource = new ClassPathResource(BACKUP_PROPERTY_FILE);
@@ -128,7 +165,7 @@ public class BackUpFileService {
 			backUpFileConfig.load(input);
 		} catch (IOException ex) {
 			LOGGER.error("Cannot open and load backUpService properties file.", ex);
-			// System.exit(1);
+	
 		} finally {
 			try {
 				if (input != null) {
@@ -142,17 +179,18 @@ public class BackUpFileService {
 
 	/**
 	 * This method will called before service method call to generate the back up file.
-	 *
-	 * @param batchInstanceIdentifier
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param localFolder {@link String}
 	 */
-	public static void backUpBatch(final String batchInstanceIdentifier) {
+	public static void backUpBatch(final String batchInstanceIdentifier, final String localFolder) {
 		LOGGER.info("Entering backUpBatch method.");
 		boolean preserveFileDate = false;
 
 		boolean isZipSwitchOn = Boolean.parseBoolean(applicationConfig.getProperty(ZIP_SWITCH));
 		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
 
-		String baseFolLoc = com.ephesoft.dcma.util.FileUtils.getAbsoluteFilePath(backUpFileConfig.getProperty(BASE_FOL_LOC));
+		String baseFolLoc = localFolder;
 
 		String inputBatchXml = backUpFileConfig.getProperty(INPUT_BATCH_XML);
 
@@ -170,22 +208,22 @@ public class BackUpFileService {
 
 		boolean isZip = false;
 		if (isZipSwitchOn) {
-			
-			if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
-				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
+
+			if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+				LOGGER.info("zip file exists for the xml file whose File path is : " + srcFilePath);
 				isZip = true;
 			}
 		} else {
-			if(new File(srcFilePath).exists()) {
+			if (new File(srcFilePath).exists()) {
 				LOGGER.info("xml file exists. File path is: " + srcFilePath);
 				isZip = false;
-			} else if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
-				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
+			} else if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+				LOGGER.info("zip file exists for the xml file whose File path is : " + srcFilePath);
 				isZip = true;
 
 			}
 		}
-		
+
 		LOGGER.info("isZip in back service is : " + isZip);
 		try {
 
@@ -213,17 +251,18 @@ public class BackUpFileService {
 
 	/**
 	 * This method will called with resume service method to generate the back up file.
-	 *
-	 * @param batchInstanceIdentifier
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param localFolder {@link String}
 	 */
-	public static void restoreBatch(final String batchInstanceIdentifier) {
+	public static void restoreBatch(final String batchInstanceIdentifier, final String localFolder) {
 		LOGGER.info("Entering restore batch method.");
 		boolean preserveFileDate = false;
 
 		boolean isZipSwitchOn = Boolean.parseBoolean(applicationConfig.getProperty(ZIP_SWITCH));
 		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
 
-		String baseFolLoc = backUpFileConfig.getProperty(BASE_FOL_LOC);
+		String baseFolLoc = localFolder;
 
 		String inputBatchXml = backUpFileConfig.getProperty(INPUT_BATCH_XML);
 
@@ -242,15 +281,15 @@ public class BackUpFileService {
 		boolean isZip = false;
 
 		if (isZipSwitchOn) {
-			if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
-				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
+			if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+				LOGGER.info("zip file exists for the xml file whose File path is : " + srcFilePath);
 				isZip = true;
 			}
 		} else {
-			if(new File(srcFilePath).exists()) {
+			if (new File(srcFilePath).exists()) {
 				LOGGER.info("zip file exists. File path is: " + srcFilePath);
 				isZip = false;
-			} else if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+			} else if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
 				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
 				isZip = true;
 
@@ -282,18 +321,19 @@ public class BackUpFileService {
 
 	/**
 	 * This method will called after service method call to generate the back up file.
-	 *
-	 * @param batchInstanceIdentifier
-	 * @param pluginName
+	 * 
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pluginName {@link String}
+	 * @param localFolder {@link String}
 	 */
-	public static void backUpBatch(final String batchInstanceIdentifier, final String pluginName) {
+	public static void backUpBatch(final String batchInstanceIdentifier, final String pluginName, final String localFolder) {
 		LOGGER.info("Entering backUpBatch method.");
 		boolean preserveFileDate = false;
 
 		boolean isZipSwitchOn = Boolean.parseBoolean(applicationConfig.getProperty(ZIP_SWITCH));
 		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
 
-		String baseFolLoc = backUpFileConfig.getProperty(BASE_FOL_LOC);
+		String baseFolLoc = localFolder;
 
 		String inputBatchXml = backUpFileConfig.getProperty(INPUT_BATCH_XML);
 
@@ -306,7 +346,7 @@ public class BackUpFileService {
 
 		String inputFileName = batchInstanceIdentifier + inputBatchXml;
 
-		String outputFileName = batchInstanceIdentifier + "_" + pluginName + outputBatchXml;
+		String outputFileName = batchInstanceIdentifier + UtilConstants.UNDERSCORE + pluginName + outputBatchXml;
 
 		String xmlOutputFileName = outputFileName;
 
@@ -315,33 +355,30 @@ public class BackUpFileService {
 
 		String srcFilePath = baseFolPath + inputFileName;
 		String destFilePath = baseFolPath + outputFileName;
- 
 		boolean isZip = false;
 
 		if (isZipSwitchOn) {
-			if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+			if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
 				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
 				isZip = true;
 			}
 		} else {
-			if(new File(srcFilePath).exists()) {
+			if (new File(srcFilePath).exists()) {
 				LOGGER.info("xml file exists. File path is: " + srcFilePath);
 				isZip = false;
-			} else if(com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
+			} else if (com.ephesoft.dcma.util.FileUtils.isZipFileExists(srcFilePath)) {
 				LOGGER.info("zip file exists for the xml file whose File path is: " + srcFilePath);
 				isZip = true;
-
 			}
 		}
 		if (isZip) {
 			inputBatchXml = backUpFileConfig.getProperty(INPUT_BATCH_XML_ZIP);
 			outputBatchXml = backUpFileConfig.getProperty(OUTPUT_BATCH_XML_ZIP);
 			inputFileName = batchInstanceIdentifier + inputBatchXml;
-			outputFileName = batchInstanceIdentifier + "_" + pluginName + outputBatchXml;
+			outputFileName = batchInstanceIdentifier + UtilConstants.UNDERSCORE + pluginName + outputBatchXml;
 			srcFilePath = baseFolPath + inputFileName;
 			destFilePath = baseFolPath + outputFileName;
 		}
-
 		LOGGER.info("Source File in copying the back up is:" + srcFilePath);
 		LOGGER.info("Destination File in copying the back up is:" + destFilePath);
 
@@ -353,28 +390,29 @@ public class BackUpFileService {
 			File destFile = new File(destFilePath);
 
 			try {
-				FileUtils.copyFile(srcFile, destFile, preserveFileDate);
-				LOGGER.info("Successfully copy of the file for the plugin : " + pluginName + " and batch Instance Id : "
+				//com.ephesoft.dcma.util.FileUtils.copyFile(srcFile, destFile, preserveFileDate);
+				FileUtils.copyFile(srcFile, destFile,preserveFileDate);
+				LOGGER.info("Successfully copy of the file for the plugin : " + pluginName + " and batch Instance Id: "
 						+ batchInstanceIdentifier);
 			} catch (IOException e) {
-				LOGGER.error("Unable to copy the file for the plugin : " + pluginName + " and batch Instance Id : "
+				LOGGER.error("Unable to copy the file for the plugin : " + pluginName + " and batch Instance Id: "
 						+ batchInstanceIdentifier);
-				LOGGER.error(e.getMessage());
+				LOGGER.error(e.getMessage(),e);
 			}
 			if (Boolean.parseBoolean(applicationConfig.getProperty(ENABLE_REPORTING))) {
 				destFile = new File(reportBaseFolPath + outputFileName);
 				File xmlFile = new File(reportBaseFolPath + xmlOutputFileName);
 				File zipXmlFile = new File(reportBaseFolPath + outputFileName);
 
-				if(xmlOutputFileName != null && xmlFile.exists()) {
+				if (xmlOutputFileName != null && xmlFile.exists()) {
 					FileUtils.deleteQuietly(xmlFile);
 				}
-				if(zipXmlFile != null && zipXmlFile.exists()) {
+				if (zipXmlFile != null && zipXmlFile.exists()) {
 					FileUtils.deleteQuietly(xmlFile);
 				}
 				try {
-
-					FileUtils.copyFile(srcFile, destFile, preserveFileDate);
+					//com.ephesoft.dcma.util.FileUtils.copyFile(srcFile, destFile, preserveFileDate);
+					FileUtils.copyFile(srcFile, destFile,preserveFileDate);
 					LOGGER.info("Report : Successfully copy of the file for the plugin : " + pluginName + " and batch Instance Id : "
 							+ batchInstanceIdentifier);
 				} catch (IOException e) {

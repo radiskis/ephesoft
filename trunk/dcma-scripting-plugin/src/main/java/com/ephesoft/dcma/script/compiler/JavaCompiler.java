@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ephesoft.dcma.script.constant.ScriptConstants;
+
 /**
  * This class will compile the scripts at run time and execute it. A wrapper to ease the use of com.sun.tools.javac.Main.
  * 
@@ -50,20 +52,47 @@ import java.util.List;
  */
 public final class JavaCompiler {
 
+	/**
+	 * To store the classpath.
+	 */
 	private String classpath;
 
+	/**
+	 * To store the output directory.
+	 */
 	private String outputdir;
 
+	/**
+	 * To store the source path of class file.
+	 */
 	private String sourcepath;
 
+	/**
+	 * To store the bootable class path.
+	 */
 	private String bootclasspath;
 
+	/**
+	 * The external directories.
+	 */
 	private String extdirs;
 
+	/**
+	 * To store the encoding.
+	 */
 	private String encoding;
 
+	/**
+	 * To store the target location.
+	 */
 	private String target;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param classpath String
+	 * @param outputdir String
+	 */
 	public JavaCompiler(final String classpath, final String outputdir) {
 		this.classpath = classpath;
 		this.outputdir = outputdir;
@@ -72,10 +101,9 @@ public final class JavaCompiler {
 	/**
 	 * Compile the given source files.
 	 * 
-	 * @param srcFiles
+	 * @param srcFiles String
 	 * @return null if success; or compilation errors
 	 */
-	@SuppressWarnings("restriction")
 	public String compile(final String srcFiles[]) {
 		String errorStr = null;
 		final StringWriter err = new StringWriter();
@@ -85,13 +113,19 @@ public final class JavaCompiler {
 		final int resultCode = com.sun.tools.javac.Main.compile(args, errPrinter);
 
 		errPrinter.close();
-		
-		if(resultCode != 0) {
+
+		if (resultCode != 0) {
 			errorStr = err.toString();
 		}
 		return errorStr;
 	}
 
+	/**
+	 * Compile the given source files.
+	 * 
+	 * @param srcFiles File
+	 * @return null if success; or compilation errors
+	 */
 	public String compile(final File srcFiles[]) {
 		String paths[] = new String[srcFiles.length];
 		for (int i = 0; i < paths.length; i++) {
@@ -104,31 +138,31 @@ public final class JavaCompiler {
 		final List<String> args = new ArrayList<String>();
 
 		if (classpath != null) {
-			args.add("-classpath");
+			args.add(ScriptConstants.HYPHEN_CLASSPATH);
 			args.add(classpath);
 		}
 		if (outputdir != null) {
-			args.add("-d");
+			args.add(ScriptConstants.HYPHEN_D);
 			args.add(outputdir);
 		}
 		if (sourcepath != null) {
-			args.add("-sourcepath");
+			args.add(ScriptConstants.HYPHEN_SOURCEPATH);
 			args.add(sourcepath);
 		}
 		if (bootclasspath != null) {
-			args.add("-bootclasspath");
+			args.add(ScriptConstants.HYPHEN_BOOTCLASSPATH);
 			args.add(bootclasspath);
 		}
 		if (extdirs != null) {
-			args.add("-extdirs");
+			args.add(ScriptConstants.HYPHEN_EXTDIRS);
 			args.add(extdirs);
 		}
 		if (encoding != null) {
-			args.add("-encoding");
+			args.add(ScriptConstants.HYPHEN_ENCODING);
 			args.add(encoding);
 		}
 		if (target != null) {
-			args.add("-target");
+			args.add(ScriptConstants.HYPHEN_TARGET);
 			args.add(target);
 		}
 
@@ -139,58 +173,128 @@ public final class JavaCompiler {
 		return (String[]) args.toArray(new String[args.size()]);
 	}
 
+	/**
+	 * To get Boot classpath.
+	 * 
+	 * @return String
+	 */
 	public String getBootclasspath() {
 		return bootclasspath;
 	}
 
+	/**
+	 * To set Boot classpath.
+	 * 
+	 * @param bootclasspath String
+	 */
 	public void setBootclasspath(final String bootclasspath) {
 		this.bootclasspath = bootclasspath;
 	}
 
+	/**
+	 * To get Classpath.
+	 * 
+	 * @return String
+	 */
 	public String getClasspath() {
 		return classpath;
 	}
 
+	/**
+	 * To set Classpath.
+	 * 
+	 * @param classpath String
+	 */
 	public void setClasspath(final String classpath) {
 		this.classpath = classpath;
 	}
 
+	/**
+	 * To get Encoding.
+	 * 
+	 * @return String
+	 */
 	public String getEncoding() {
 		return encoding;
 	}
 
+	/**
+	 * To set Encoding.
+	 * 
+	 * @param encoding String
+	 */
 	public void setEncoding(final String encoding) {
 		this.encoding = encoding;
 	}
 
+	/**
+	 * To get Extdirs.
+	 * 
+	 * @return String
+	 */
 	public String getExtdirs() {
 		return extdirs;
 	}
 
+	/**
+	 * To set Extdirs.
+	 * 
+	 * @param extdirs String
+	 */
 	public void setExtdirs(final String extdirs) {
 		this.extdirs = extdirs;
 	}
 
+	/**
+	 * To get Outputdir.
+	 * 
+	 * @return String
+	 */
 	public String getOutputdir() {
 		return outputdir;
 	}
 
+	/**
+	 * To set Outputdir.
+	 * 
+	 * @param outputdir String
+	 */
 	public void setOutputdir(final String outputdir) {
 		this.outputdir = outputdir;
 	}
 
+	/**
+	 * To get Source path.
+	 * 
+	 * @return String
+	 */
 	public String getSourcepath() {
 		return sourcepath;
 	}
 
+	/**
+	 * To set Source path.
+	 * 
+	 * @param sourcepath String
+	 */
 	public void setSourcepath(final String sourcepath) {
 		this.sourcepath = sourcepath;
 	}
 
+	/**
+	 * To get Target.
+	 * 
+	 * @return String
+	 */
 	public String getTarget() {
 		return target;
 	}
 
+	/**
+	 * To set Target.
+	 * 
+	 * @param target String
+	 */
 	public void setTarget(final String target) {
 		this.target = target;
 	}

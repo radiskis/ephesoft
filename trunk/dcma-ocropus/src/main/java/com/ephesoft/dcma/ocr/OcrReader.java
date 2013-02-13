@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,6 +58,8 @@ import com.ephesoft.dcma.batch.service.PluginPropertiesService;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
+import com.ephesoft.dcma.ocr.constants.OcropusConstants;
 import com.ephesoft.dcma.util.FileNameFormatter;
 
 /**
@@ -72,6 +74,9 @@ import com.ephesoft.dcma.util.FileNameFormatter;
 @Component
 public class OcrReader implements ICommonConstants {
 
+	/**
+	 * OCROPUS_PLUGIN, constant String.
+	 */
 	private static final String OCROPUS_PLUGIN = "OCROPUS";
 
 	/**
@@ -85,7 +90,7 @@ public class OcrReader implements ICommonConstants {
 	private static final int CMD_ARRAY_SIZE = 3;
 
 	/**
-	 * Referance of batchSchemaService.
+	 * Reference of batchSchemaService.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
@@ -98,15 +103,26 @@ public class OcrReader implements ICommonConstants {
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * List of all ocropus commands seperated by ";".
+	 * List of all ocropus commands separated by ";".
 	 */
 	private String mandatorycmds;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To set Mandatorycmds.
+	 * @param mandatorycmds String
+	 */
 	public void setMandatorycmds(final String mandatorycmds) {
 		this.mandatorycmds = mandatorycmds;
 	}
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public BatchSchemaService getBatchSchemaService() {
@@ -114,13 +130,15 @@ public class OcrReader implements ICommonConstants {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService {@link BatchSchemaService}
 	 */
 	public void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get Plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -128,7 +146,8 @@ public class OcrReader implements ICommonConstants {
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set Plugin Properties Service.
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
 	 */
 	public void setPluginPropertiesService(final PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -139,7 +158,7 @@ public class OcrReader implements ICommonConstants {
 	 */
 	public List<String> populateCommandsList() {
 		List<String> cmdList = new ArrayList<String>();
-		StringTokenizer token = new StringTokenizer(mandatorycmds, ";");
+		StringTokenizer token = new StringTokenizer(mandatorycmds, OcropusConstants.SEMI_COLON);
 		while (token.hasMoreTokens()) {
 			String eachCmd = token.nextToken();
 			cmdList.add(eachCmd);
@@ -151,27 +170,30 @@ public class OcrReader implements ICommonConstants {
 	 * This method calls the Ocropus plugin using java.lang.Runtime(). If command exits with a status of "0", then the execution was
 	 * successful.A status less than 0 means that image cannot be read using this plugin.
 	 * 
-	 * @param batch Batch
+	 * @param batch {@link Batch}
 	 * @param fileName String
-	 * @throws DCMAApplicationException
+	 * @param batchInstanceId String
+	 * @param cmdList List<String>
+	 * @param actualFolderLocation String
+	 * @throws DCMAApplicationException if exception occurs while generating HOCR for image
 	 */
 	public String process(final String fileName, final Batch batch, final String batchInstanceId, final List<String> cmdList,
 			final String actualFolderLocation) throws DCMAApplicationException {
-		if (fileName.contains(" ")) {
+		if (fileName.contains(OcropusConstants.SPACE)) {
 			LOGGER.error(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
 			throw new DCMAApplicationException(" Space found in the name of image:" + fileName + ".So it acnnot be processed");
 		}
 		// process each image file to generate HOCR files
 		String targetDirectoryName = fileName.substring(0, fileName.indexOf(".tif"));
-		String targetHOCR = "";
-		String oldFileName = "";
-		String ocrInputFileName = "";
-		String pageId = "";
+		String targetHOCR = OcropusConstants.EMPTY;
+		String oldFileName = OcropusConstants.EMPTY;
+		String ocrInputFileName = OcropusConstants.EMPTY;
+		String pageId = OcropusConstants.EMPTY;
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
-		for (int i = 0; i < xmlDocuments.size(); i++) {
+		for (int i = OcropusConstants.ZERO; i < xmlDocuments.size(); i++) {
 			Document document = (Document) xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
-			for (int j = 0; j < listOfPages.size(); j++) {
+			for (int j = OcropusConstants.ZERO; j < listOfPages.size(); j++) {
 				Page page = listOfPages.get(j);
 				String sImageFile = page.getNewFileName();
 				if (fileName.equalsIgnoreCase(sImageFile)) {
@@ -197,26 +219,26 @@ public class OcrReader implements ICommonConstants {
 		LOGGER.info("Target PNG name is: " + targetPNG);
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			for (int i = 0; i < cmdList.size(); i++) {
+			for (int i = OcropusConstants.ZERO; i < cmdList.size(); i++) {
 				String[] cmds = new String[CMD_ARRAY_SIZE];
-				cmds[0] = "sh";
-				cmds[1] = "-c";
+				cmds[OcropusConstants.ZERO] = "sh";
+				cmds[OcropusConstants.ONE] = "-c";
 				if (cmdList.get(i).contains("convert")) {
 					LOGGER.debug("inside convert");
-					cmds[2] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + fileName + "\" \""
+					cmds[OcropusConstants.TWO] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + fileName + "\" \""
 							+ actualFolderLocation + File.separator + targetPNG + "\"";
 				} else if (cmdList.get(i).contains("export")) {
 					LOGGER.debug("inside export");
-					cmds[2] = cmdList.get(i);
+					cmds[OcropusConstants.TWO] = cmdList.get(i);
 				} else if (cmdList.get(i).contains("ocroscript")) {
 					LOGGER.debug("inside ocroscript");
-					cmds[2] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + targetPNG + "\" > \""
+					cmds[OcropusConstants.TWO] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + targetPNG + "\" > \""
 							+ actualFolderLocation + File.separator + targetHOCR + "\"";
 				} else if (cmdList.get(i).contains("rm")) {
 					LOGGER.debug("inside rm");
-					cmds[2] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + targetPNG + "\"";
+					cmds[OcropusConstants.TWO] = cmdList.get(i) + " \"" + actualFolderLocation + File.separator + targetPNG + "\"";
 				}
-				LOGGER.info("command formed is :" + cmds[2]);
+				LOGGER.info("command formed is :" + cmds[OcropusConstants.TWO]);
 				Process process = runtime.exec(cmds);
 
 				InputStreamReader inputStreamReader = null;
@@ -249,7 +271,6 @@ public class OcrReader implements ICommonConstants {
 				}
 				LOGGER.info("Command " + i + " exited with error code no " + process.exitValue());
 			}
-
 		} catch (Exception e) {
 			LOGGER.error("Exception while generating HOCRfor image" + fileName + e.getMessage());
 			throw new DCMAApplicationException("Exception while generating HOCR for image" + fileName + e.getMessage(), e);
@@ -260,10 +281,10 @@ public class OcrReader implements ICommonConstants {
 	/**
 	 * This method generates HOCR files for each image file and updates the batch xml with each HOCR file name.
 	 * 
-	 * @param batchInstanceID
-	 * @return
-	 * @throws DCMAApplicationException
-	 * @throws DCMABusinessException
+	 * @param batchInstanceID String
+	 * @return boolean
+	 * @throws DCMAApplicationException if exception occurs while reading from XML
+	 * @throws DCMABusinessException if file has invalid extension
 	 */
 	public boolean readOCR(final String batchInstanceID) throws DCMAApplicationException {
 		LOGGER.info("Started Processing image at " + new Date());
@@ -272,8 +293,10 @@ public class OcrReader implements ICommonConstants {
 		String validExt = pluginPropertiesService.getPropertyValue(batchInstanceID, OCROPUS_PLUGIN, OCRProperties.OCROPUS_VALID_EXTNS);
 		LOGGER.info("Properties Initialized Successfully");
 
-		String[] validExtensions = validExt.split(";");
-		String actualFolderLocation = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceID;
+		String[] validExtensions = validExt.split(OcropusConstants.SEMI_COLON);
+
+		String actualFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceID) + File.separator
+				+ batchInstanceID;
 		List<String> cmdList = populateCommandsList();
 
 		Batch batch = batchSchemaService.getBatch(batchInstanceID);
@@ -287,12 +310,12 @@ public class OcrReader implements ICommonConstants {
 		}
 
 		if (!allPages.isEmpty()) {
-			for (int i = 0; i < allPages.size(); i++) {
+			for (int i = OcropusConstants.ZERO; i < allPages.size(); i++) {
 				String eachPage = allPages.get(i);
 				eachPage = eachPage.trim();
 				boolean isFileValid = false;
-				if (validExtensions != null && validExtensions.length > 0) {
-					for (int l = 0; l < validExtensions.length; l++) {
+				if (validExtensions != null && validExtensions.length > OcropusConstants.ZERO) {
+					for (int l = OcropusConstants.ZERO; l < validExtensions.length; l++) {
 						if (eachPage.endsWith(validExtensions[l])) {
 							isFileValid = true;
 							break;
@@ -334,19 +357,19 @@ public class OcrReader implements ICommonConstants {
 	 * 
 	 * @param batch Batch
 	 * @return List<String>
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException if error occurs
 	 */
 	public List<String> findAllPagesFromXML(final Batch batch) throws DCMAApplicationException {
 		List<String> allPages = new ArrayList<String>();
 
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
-		for (int i = 0; i < xmlDocuments.size(); i++) {
+		for (int i = OcropusConstants.ZERO; i < xmlDocuments.size(); i++) {
 			Document document = (Document) xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
-			for (int j = 0; j < listOfPages.size(); j++) {
+			for (int j = OcropusConstants.ZERO; j < listOfPages.size(); j++) {
 				Page page = listOfPages.get(j);
 				String sImageFile = page.getNewFileName();
-				if (sImageFile != null && sImageFile.length() > 0) {
+				if (sImageFile != null && sImageFile.length() > OcropusConstants.ZERO) {
 					allPages.add(sImageFile);
 				}
 			}
@@ -357,18 +380,18 @@ public class OcrReader implements ICommonConstants {
 	/**
 	 * This method updates the batch.xml for each iamge file processed using ocropus plugin.
 	 * 
-	 * @param fileName
-	 * @param targetHOCR
+	 * @param fileName String
+	 * @param targetHOCR String 
 	 * @param batch Batch
-	 * @throws DCMAApplicationException
+	 * @throws DCMAApplicationException if error occurs
 	 */
 	public void updateBatchXML(final String fileName, final String targetHOCR, final Batch batch) throws DCMAApplicationException {
 
 		List<Document> xmlDocuments = batch.getDocuments().getDocument();
-		for (int i = 0; i < xmlDocuments.size(); i++) {
+		for (int i = OcropusConstants.ZERO; i < xmlDocuments.size(); i++) {
 			Document document = (Document) xmlDocuments.get(i);
 			List<Page> listOfPages = document.getPages().getPage();
-			for (int j = 0; j < listOfPages.size(); j++) {
+			for (int j = OcropusConstants.ZERO; j < listOfPages.size(); j++) {
 				Page page = listOfPages.get(j);
 				String sImageFile = page.getNewFileName();
 				if (fileName.equalsIgnoreCase(sImageFile)) {

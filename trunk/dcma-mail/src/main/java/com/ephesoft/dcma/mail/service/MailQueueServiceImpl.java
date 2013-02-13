@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,15 +51,27 @@ import com.ephesoft.dcma.mail.domain.EmailData;
  */
 public class MailQueueServiceImpl implements MailQueueService {
 
+	/**
+	 * Logger instance for proper logging.
+	 */
 	private final static Logger LOG = LoggerFactory.getLogger(MailQueueServiceImpl.class);
 
+	/**
+	 * An instance of {@link MailService}.
+	 */
 	@Autowired
 	private MailService mailService;
 
+	/**
+	 * An instance of {@link EmailQueueDao}.
+	 */
 	@Autowired
 	private EmailQueueDao emailQueueDao;
 
-	private int fetchMaxCount = 20; // parameter
+	/**
+	 * Maximum fetch count parameter.
+	 */
+	private int fetchMaxCount = 20;
 
 	@Override
 	public void processPendingMails() {

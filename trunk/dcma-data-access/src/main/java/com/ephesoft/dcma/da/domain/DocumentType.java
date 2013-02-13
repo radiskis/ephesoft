@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,157 +52,305 @@ import org.hibernate.annotations.CascadeType;
 import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for plugin_dependency.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "document_type")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class DocumentType extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * DOCUMENT_TYPE_ID String.
+	 */
+	private static final String DOCUMENT_TYPE_ID = "document_type_id";
 
+	/**
+	 * batchClass BatchClass.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "batch_class_id")
 	private BatchClass batchClass;
 
+	/**
+	 * identifier String.
+	 */
 	@Column(name = "identifier")
 	private String identifier;
 
+	/**
+	 * priority int.
+	 */
 	@Column
 	private int priority;
 
+	/**
+	 * minConfidenceThreshold float.
+	 */
 	@Column(name = "min_confidence_threshold")
 	private float minConfidenceThreshold;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "document_type_name")
 	private String name;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "document_type_description")
 	private String description;
 
+	/**
+	 * rspProjectFileName String.
+	 */
 	@Column(name = "rsp_project_file_name")
 	private String rspProjectFileName;
 
+	/**
+	 * hidden boolean.
+	 */
 	@Column(name = "is_hidden", columnDefinition = "bit default 0")
-	private boolean isHidden;
+	private boolean hidden;
 
+	/**
+	 * pages List<PageType>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "document_type_id")
+	@JoinColumn(name = DOCUMENT_TYPE_ID)
 	private List<PageType> pages = new ArrayList<PageType>();
 
+	/**
+	 * fieldTypes List<FieldType>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "document_type_id")
+	@JoinColumn(name = DOCUMENT_TYPE_ID)
+	@javax.persistence.OrderBy("fieldOrderNumber")
 	private List<FieldType> fieldTypes = new ArrayList<FieldType>();
 
+	/**
+	 * tableInfos List<TableInfo>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "document_type_id")
+	@JoinColumn(name = DOCUMENT_TYPE_ID)
 	private List<TableInfo> tableInfos = new ArrayList<TableInfo>();
 
+	/**
+	 * functionKeys List<FunctionKey>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
-	@JoinColumn(name = "document_type_id")
+	@JoinColumn(name = DOCUMENT_TYPE_ID)
 	private List<FunctionKey> functionKeys = new ArrayList<FunctionKey>();
 
-	public DocumentType() {
-	}
-
+	/**
+	 * To get Priority.
+	 * @return int
+	 */
 	public int getPriority() {
 		return priority;
 	}
 
+	/**
+	 * To set Priority.
+	 * @param priority int 
+	 */
 	public void setPriority(int priority) {
 		this.priority = priority;
 	}
 
+	/**
+	 * To get Min Confidence Threshold.
+	 * @return float
+	 */
 	public float getMinConfidenceThreshold() {
 		return minConfidenceThreshold;
 	}
 
+	/**
+	 * To set Min Confidence Threshold.
+	 * @param minConfidenceThreshold float
+	 */
 	public void setMinConfidenceThreshold(float minConfidenceThreshold) {
 		this.minConfidenceThreshold = minConfidenceThreshold;
 	}
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Batch Class.
+	 * @return BatchClass
+	 */
 	public BatchClass getBatchClass() {
 		return batchClass;
 	}
 
+	/**
+	 * To set Batch Class.
+	 * @param batchClass BatchClass
+	 */
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
 
+	/**
+	 * To get pages.
+	 * @return List<PageType>
+	 */
 	public List<PageType> getPages() {
 		return pages;
 	}
 
+	/**
+	 * To set pages.
+	 * @param pages List<PageType>
+	 */
 	public void setPages(List<PageType> pages) {
 		this.pages = pages;
 	}
 
+	/**
+	 * To get Field Types.
+	 * @return List<FieldType>
+	 */
 	public List<FieldType> getFieldTypes() {
 		return fieldTypes;
 	}
 
+	/**
+	 * To set Field Types.
+	 * @param fieldTypes List<FieldType>
+	 */
 	public void setFieldTypes(List<FieldType> fieldTypes) {
 		this.fieldTypes = fieldTypes;
 	}
 
+	/**
+	 * To set Table Infos.
+	 * @param tableInfos List<TableInfo>
+	 */
 	public void setTableInfos(List<TableInfo> tableInfos) {
 		this.tableInfos = tableInfos;
 	}
 
+	/**
+	 * To get Table Infos.
+	 * @return List<TableInfo>
+	 */
 	public List<TableInfo> getTableInfos() {
 		return tableInfos;
 	}
 
+	/**
+	 * To get Function Keys.
+	 * @return List<FunctionKey>
+	 */
 	public List<FunctionKey> getFunctionKeys() {
 		return functionKeys;
 	}
 
+	/**
+	 * To set Function Keys.
+	 * @param functionKeyList List<FunctionKey>
+	 */
 	public void setFunctionKeys(List<FunctionKey> functionKeyList) {
 		functionKeys = functionKeyList;
 	}
 
+	/**
+	 * To get Identifier.
+	 * @return String
+	 */
 	public String getIdentifier() {
 		return identifier;
 	}
 
+	/**
+	 * To set Identifier. 
+	 * @param identifier String
+	 */
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
+	/**
+	 * To get Rsp Project File Name.
+	 * @return String
+	 */
 	public String getRspProjectFileName() {
 		return rspProjectFileName;
 	}
 
+	/**
+	 * To set Rsp Project File Name.
+	 * @param rspProjectFileName String
+	 */
 	public void setRspProjectFileName(String rspProjectFileName) {
 		this.rspProjectFileName = rspProjectFileName;
 	}
 
+	/**
+	 * To check whether hidden or not.
+	 * @return boolean
+	 */
 	public boolean isHidden() {
-		return isHidden;
+		return hidden;
 	}
 
+	/**
+	 * To set hidden.
+	 * @param isHidden boolean
+	 */
 	public void setHidden(boolean isHidden) {
-		this.isHidden = isHidden;
+		this.hidden = isHidden;
 	}
 
+	/**
+	 * To add variables other than in pojo.
+	 */
 	public void postPersist() {
 		super.postPersist();
 		this.identifier = EphesoftProperty.DOCUMENT_TYPE.getProperty() + Long.toHexString(this.getId()).toUpperCase();
@@ -275,7 +423,7 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * Returns page type based on identifier
+	 * Returns page type based on identifier.
 	 * 
 	 * @param identifier the identifier corresponding to which page type is required
 	 * @return page type if found. null otherwise
@@ -292,7 +440,7 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * Adds a field type to this document type
+	 * Adds a field type to this document type.
 	 * 
 	 * @param fieldType the field type to be added
 	 */
@@ -301,7 +449,7 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * Adds a page type to this document
+	 * Adds a page type to this document.
 	 * 
 	 * @param pageType the page type to be added
 	 */
@@ -310,7 +458,7 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * Removes a table info from the document based on identifier. Used to delete the table info
+	 * Removes a table info from the document based on identifier. Used to delete the table info.
 	 * 
 	 * @param identifier the identifier of the table info that is to be removed
 	 * @return true if table info was found and removed. false otherwise.
@@ -327,9 +475,9 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * Adds a table Info to this document type
+	 * Adds a table Info to this document type.
 	 * 
-	 * @param tableInfo the table ifno to be added
+	 * @param tableInfo the table info to be added
 	 */
 	public void addTableInfo(TableInfo tableInfo) {
 		this.tableInfos.add(tableInfo);
@@ -352,10 +500,19 @@ public class DocumentType extends AbstractChangeableEntity implements Serializab
 		return null;
 	}
 
+	/**
+	 * To add Function Key.
+	 * @param functionKey FunctionKey
+	 */
 	public void addFunctionKey(FunctionKey functionKey) {
 		this.functionKeys.add(functionKey);
 	}
 
+	/**
+	 * To remove Function Key of the specified Identifier.
+	 * @param identifier String
+	 * @return boolean
+	 */
 	public boolean removeFunctionKeyByIdentifier(String identifier) {
 		List<FunctionKey> functionKeyList = new ArrayList<FunctionKey>();
 		functionKeyList.addAll(this.functionKeys);

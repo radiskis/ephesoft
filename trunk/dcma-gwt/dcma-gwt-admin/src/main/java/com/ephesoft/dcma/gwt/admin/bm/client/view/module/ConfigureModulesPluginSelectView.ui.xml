@@ -6,6 +6,7 @@
 		<g:south size="80">
 			<g:HorizontalPanel ui:field="buttonsHorizontalPanel">
 				<g:Button ui:field="okButton"></g:Button>
+				<g:Button ui:field="resetButton"></g:Button>
 				<g:Button ui:field="cancelButton"></g:Button>
 			</g:HorizontalPanel>
 		</g:south>

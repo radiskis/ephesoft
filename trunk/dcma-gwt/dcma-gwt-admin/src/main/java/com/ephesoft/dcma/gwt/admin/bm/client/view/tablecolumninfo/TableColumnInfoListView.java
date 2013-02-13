@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,28 +42,88 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show table column info list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class TableColumnInfoListView extends View<TableColumnInfoListPresenter> {
 
+	/**
+	 * To get Table Column Info List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getTableColumnInfoListView() {
 		return listView;
 	}
 
+	/**
+	 * betweenLeft HeaderColumn.
+	 */
 	public HeaderColumn betweenLeft = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BETWEEN_LEFT), 10);
-	public HeaderColumn betweenRight = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.BETWEEN_RIGHT), 20);
-	public HeaderColumn columnName = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.COLUMN_NAME), 15);
-	public HeaderColumn columnHeaderPattern = new HeaderColumn(2, "Column Header Pattern", 20);
-	public HeaderColumn columnPattern = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.COLUMN_PATTERN), 15);
-	public HeaderColumn isRequired = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.IS_REQUIRED), 15);
+			BatchClassManagementConstants.BETWEEN_LEFT), BatchClassManagementConstants.TEN);
 
+	/**
+	 * betweenRight HeaderColumn.
+	 */
+	public HeaderColumn betweenRight = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.BETWEEN_RIGHT), BatchClassManagementConstants.ELEVEN);
+
+	/**
+	 * columnName HeaderColumn.
+	 */
+	public HeaderColumn columnName = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.COLUMN_NAME), BatchClassManagementConstants.ELEVEN);
+
+	/**
+	 * columnHeaderPattern HeaderColumn.
+	 */
+	public HeaderColumn columnHeaderPattern = new HeaderColumn(BatchClassManagementConstants.THREE, LocaleDictionary.get()
+			.getConstantValue(BatchClassManagementConstants.COLUMN_HEADER_PATTERN), BatchClassManagementConstants.ELEVEN);
+
+	/**
+	 * columnPattern HeaderColumn.
+	 */
+	public HeaderColumn columnPattern = new HeaderColumn(BatchClassManagementConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.COLUMN_PATTERN), BatchClassManagementConstants.TWELVE);
+	/**
+	 * columnStartCoord HeaderColumn.
+	 */
+	public HeaderColumn columnStartCoord = new HeaderColumn(BatchClassManagementConstants.FIVE, LocaleDictionary.get()
+			.getConstantValue(BatchClassManagementConstants.COLUMN_START_COORDINATE_LABEL), BatchClassManagementConstants.TWELVE);
+
+	/**
+	 * columnEndCoord HeaderColumn.
+	 */
+	public HeaderColumn columnEndCoord = new HeaderColumn(BatchClassManagementConstants.SIX, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.COLUMN_END_COORDINATE_LABEL), BatchClassManagementConstants.ELEVEN);
+
+	/**
+	 * isRequired HeaderColumn.
+	 */
+	public HeaderColumn isRequired = new HeaderColumn(BatchClassManagementConstants.SEVEN, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.IS_REQUIRED), BatchClassManagementConstants.SEVEN);
+
+	/**
+	 * isMandatory HeaderColumn.
+	 */
+	public HeaderColumn isMandatory = new HeaderColumn(BatchClassManagementConstants.EIGHT, LocaleDictionary.get().getConstantValue(
+			BatchClassManagementConstants.IS_MANDATORY), BatchClassManagementConstants.SEVEN);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public TableColumnInfoListView() {
 		super();
-		listView.addHeaderColumns(betweenLeft, betweenRight, columnName, columnHeaderPattern, columnPattern, isRequired);
+		listView.addHeaderColumns(betweenLeft, betweenRight, columnName, columnPattern, columnHeaderPattern, columnStartCoord,
+				columnEndCoord, isRequired, isMandatory);
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,11 +51,25 @@ import com.ephesoft.dcma.docassembler.classification.searchablepdf.SearchablePdf
  * @see com.ephesoft.dcma.docassembler.classification.DocumentClassification
  */
 public enum DocumentClassificationFactory {
-
+	/**
+	 * Creating instance of BARCODE.
+	 */
 	BARCODE(new BarcodeClassification(), "BarcodeClassification"), 
+	/**
+	 * Creating instance of SEARCHCLASSIFICATION.
+	 */
 	SEARCHCLASSIFICATION(new SearchClassification(), "SearchClassification"), 
-	IMAGE(new ImageClassification(), "ImageClassification"),
+	/**
+	 * Creating instance of IMAGE.
+	 */
+	IMAGE(new ImageClassification(), "ImageClassification"), 
+	/**
+	 * Creating instance of SEARCHABLEPDF.
+	 */
 	SEARCHABLEPDF(new SearchablePdfClassification(), "SearchablePdfClassification"),
+	/**
+	 * Creating instance of AUTOMATIC.
+	 */
 	AUTOMATIC(new AutomaticClassification(), "AutomaticClassification");
 
 	/**
@@ -69,6 +83,7 @@ public enum DocumentClassificationFactory {
 	private String nameClassification;
 
 	/**
+	 * Constructor.
 	 * @param documentClassification DocumentClassification
 	 * @param nameClassification String
 	 */
@@ -78,6 +93,7 @@ public enum DocumentClassificationFactory {
 	}
 
 	/**
+	 * To get Document Classification.
 	 * @return the documentClassification
 	 */
 	public DocumentClassification getDocumentClassification() {
@@ -85,6 +101,7 @@ public enum DocumentClassificationFactory {
 	}
 
 	/**
+	 * To get name Classification.
 	 * @return the nameClassification
 	 */
 	public String getNameClassification() {
@@ -94,7 +111,7 @@ public enum DocumentClassificationFactory {
 	/**
 	 * On the basis of nameClassification this method will return the DocumentClassification object reference.
 	 * 
-	 * @param nameClassification String
+	 * @param nameClassification {@link String}
 	 * @return DocumentClassification
 	 */
 	public static DocumentClassification getDocumentClassification(final String nameClassification) {

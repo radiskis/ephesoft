@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,8 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
 import com.ephesoft.dcma.da.dao.TableColumnsInfoDao;
+import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 
@@ -56,20 +56,23 @@ import com.ephesoft.dcma.da.domain.TableInfo;
  * @see com.ephesoft.dcma.da.service.TableColumnsInfoService
  */
 @Service
-public class TableColumnsInfoServiceImpl extends DataAccessService implements TableColumnsInfoService {
+public class TableColumnsInfoServiceImpl implements TableColumnsInfoService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableColumnsInfoServiceImpl.class);
 
+	/**
+	 * tableColumnsInfoDao {@link TableColumnsInfoDao}.
+	 */
 	@Autowired
 	private TableColumnsInfoDao tableColumnsInfoDao;
 
 	/**
-	 * An api to fetch all TableColumnsInfo by document type.
+	 * An API to fetch all TableColumnsInfo by document type.
 	 * 
-	 * @param tableInfo TableInfo
+	 * @param tableInfo {@link TableInfo}
 	 * @return List<TableColumnsInfo>
 	 */
 	@Transactional(readOnly = true)
@@ -85,11 +88,11 @@ public class TableColumnsInfoServiceImpl extends DataAccessService implements Ta
 	}
 
 	/**
-	 * An api to fetch all TableColumnsInfo by document type name and table name.
+	 * An API to fetch all TableColumnsInfo by document type name and table name.
 	 * 
-	 * @param docTypeName
-	 * @param tableName
-	 * @return List<TableInfo>
+	 * @param docTypeName {@link DocumentType}
+	 * @param tableName {@link String}
+	 * @return List<{@link TableColumnsInfo}>
 	 */
 	@Transactional(readOnly = true)
 	@Override
@@ -104,9 +107,9 @@ public class TableColumnsInfoServiceImpl extends DataAccessService implements Ta
 	}
 
 	/**
-	 * An api to insert the TableColumnsInfo object.
+	 * An API to insert the TableColumnsInfo object.
 	 * 
-	 * @param tableColumnsInfo TableColumnsInfo
+	 * @param tableColumnsInfo {@link TableColumnsInfo}
 	 */
 	@Transactional
 	@Override
@@ -119,9 +122,9 @@ public class TableColumnsInfoServiceImpl extends DataAccessService implements Ta
 	}
 
 	/**
-	 * An api to update the TableColumnsInfo object.
+	 * An API to update the TableColumnsInfo object.
 	 * 
-	 * @param tableColumnsInfo TableColumnsInfo
+	 * @param tableColumnsInfo {@link TableColumnsInfo}
 	 */
 	@Transactional
 	@Override
@@ -134,9 +137,9 @@ public class TableColumnsInfoServiceImpl extends DataAccessService implements Ta
 	}
 
 	/**
-	 * An api to remove the TableColumnsInfo object.
+	 * An API to remove the TableColumnsInfo object.
 	 * 
-	 * @param tableColumnsInfo TableColumnsInfo
+	 * @param tableColumnsInfo {@link TableColumnsInfo}
 	 */
 	@Transactional
 	@Override

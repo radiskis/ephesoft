@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,10 +36,12 @@
 package com.ephesoft.dcma.kvfinder.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.kvfinder.data.InputDataCarrier;
+import com.ephesoft.dcma.kvfinder.data.KeyValueFieldCarrier;
 import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
 
 /**
@@ -57,19 +59,22 @@ public interface KVFinderService {
 	 * 
 	 * @return {@link String}
 	 */
-	public String getWidthOfLine();
+	String getWidthOfLine();
 
 	/**
 	 * This api will search all the input key, value and location pattern for the input hocr page and return the output values which
 	 * will satisfied for all the above patterns.
 	 * 
-	 * @param inputDataCarrier List<{@link InputDataCarrier}>
+	 * @param inputDataCarrier {@link List<{@link InputDataCarrier}>}
 	 * @param hocrPage {@link HocrPage}
+	 * @param fieldTypeKVMap {@link Map<{@link String}, {@link KeyValueFieldCarrier}>}
+	 * @param keyValueFieldCarrier {@link KeyValueFieldCarrier}
 	 * @param maxResults int
 	 * @return List<{@link OutputDataCarrier}>
-	 * @throws DCMAException if any of the input is not valid.
+	 * @throws DCMAException
 	 */
-	List<OutputDataCarrier> findKeyValue(final List<InputDataCarrier> inputDataCarrier, final HocrPage hocrPage, final int maxResults)
-			throws DCMAException;
+	List<OutputDataCarrier> findKeyValue(final List<InputDataCarrier> inputDataCarrier, final HocrPage hocrPage,
+			final Map<String, KeyValueFieldCarrier> fieldTypeKVMap, final KeyValueFieldCarrier keyValueFieldCarrier,
+			final int maxResults) throws DCMAException;
 
 }

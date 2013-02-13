@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,6 +49,7 @@ import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.kvfieldcreation.KVFieldCreator;
 import com.ephesoft.dcma.util.BackUpFileService;
 
@@ -61,25 +62,49 @@ import com.ephesoft.dcma.util.BackUpFileService;
  */
 public class KVFieldCreatorServiceImpl implements KVFieldCreatorService, ICommonConstants {
 
+	/**
+	 * An instance of Logger for proper logging in the class.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KVFieldCreatorServiceImpl.class);
 
+	/**
+	 * An instance of {@link KVFieldCreator}.
+	 */
 	@Autowired
 	private KVFieldCreator kvFieldCreator;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+	/**
+	 * To get the xml file before processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
-
+	/**
+	 * To get the xml file after processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
 	/**
-	 * This method creates KV field for each document level field for every document.
+	 * This method create kv fields for each document level field of each document.
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param pluginWorkflow {@link String}
@@ -95,11 +120,19 @@ public class KVFieldCreatorServiceImpl implements KVFieldCreatorService, ICommon
 			throw new DCMAException(e.getMessage(), e);
 		}
 	}
-	
+
+	/**
+	 * Method to give the list of possible KV Field patterns from the given HOCR and the Value.
+	 * 
+	 * @param value {@link String}
+	 * @param hocrPage {@link com.ephesoft.dcma.batch.schema.HocrPages.HocrPage}
+	 * @return {@link List<KVExtraction>}
+	 * @throws DCMAException
+	 */
 	@Override
 	public List<KVExtraction> createKeyValueFieldAPI(String value, HocrPage hocrPage) throws DCMAException {
 		try {
-			LOGGER.info("Start execution of key value learning for value:"+value);
+			LOGGER.info("Start execution of key value learning for value:" + value);
 			return kvFieldCreator.createKeyValueFieldsAPI(value, hocrPage);
 		} catch (Exception e) {
 			throw new DCMAException(e.getMessage(), e);

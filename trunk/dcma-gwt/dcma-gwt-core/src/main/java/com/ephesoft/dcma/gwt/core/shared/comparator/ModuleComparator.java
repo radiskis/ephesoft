@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,8 +48,8 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassModuleDTO;
 public class ModuleComparator implements Comparator<Object> {
 
 	private final Order order;
-	String MODULE_NAME = "name";
-	String MODULE_DESCRIPTION = "description";
+	/*String MODULE_NAME = "name";
+	String MODULE_DESCRIPTION = "description";*/
 
 	public ModuleComparator(final Order order) {
 
@@ -68,8 +68,44 @@ public class ModuleComparator implements Comparator<Object> {
 		final BatchClassModuleDTO batchClassModuleDTOOne = (BatchClassModuleDTO) moduleOne;
 		final BatchClassModuleDTO batchClassModuleDTOTwo = (BatchClassModuleDTO) moduleTwo;
 		final Boolean isAsc = order.isAscending();
+		if (!order.getSortProperty().getProperty().equals(ModuleProperty.ORDER.getProperty())) {
+			isEqualOrGreater = compareStringValue(batchClassModuleDTOOne, batchClassModuleDTOTwo, isAsc);
+		} else {
+			isEqualOrGreater = compareIntValue(batchClassModuleDTOOne, batchClassModuleDTOTwo, isAsc);
+		}
+		return isEqualOrGreater;
+	}
+
+	/**
+	 * @param batchClassModuleDTOOne
+	 * @param batchClassModuleDTOTwo
+	 * @param isAsc
+	 * @return
+	 */
+	private int compareStringValue(final BatchClassModuleDTO batchClassModuleDTOOne, final BatchClassModuleDTO batchClassModuleDTOTwo,
+			final Boolean isAsc) {
+		int isEqualOrGreater;
 		final String modulePropertyOne = getProperty(order.getSortProperty(), batchClassModuleDTOOne);
 		final String modulePropertyTwo = getProperty(order.getSortProperty(), batchClassModuleDTOTwo);
+		if (isAsc) {
+			isEqualOrGreater = modulePropertyOne.compareTo(modulePropertyTwo);
+		} else {
+			isEqualOrGreater = modulePropertyTwo.compareTo(modulePropertyOne);
+		}
+		return isEqualOrGreater;
+	}
+
+	/**
+	 * @param batchClassModuleDTOOne
+	 * @param batchClassModuleDTOTwo
+	 * @param isAsc
+	 * @return
+	 */
+	private int compareIntValue(final BatchClassModuleDTO batchClassModuleDTOOne, final BatchClassModuleDTO batchClassModuleDTOTwo,
+			final Boolean isAsc) {
+		int isEqualOrGreater;
+		final Integer modulePropertyOne = batchClassModuleDTOOne.getOrderNumber();
+		final Integer modulePropertyTwo = batchClassModuleDTOTwo.getOrderNumber();
 		if (isAsc) {
 			isEqualOrGreater = modulePropertyOne.compareTo(modulePropertyTwo);
 		} else {

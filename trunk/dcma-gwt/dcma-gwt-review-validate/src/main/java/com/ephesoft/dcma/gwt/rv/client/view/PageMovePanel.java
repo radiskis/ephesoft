@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -66,25 +66,26 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PageMovePanel extends VerticalPanel {
 
-	Button movePageButton;
-	Button cancelButton;
-	ListBox listBox1;
-	ListBox listBox2;
-	HorizontalPanel horizontalPanel;
+	protected Button movePageButton;
+	protected Button cancelButton;
+	protected ListBox listBox1;
+	protected ListBox listBox2;
+	protected HorizontalPanel horizontalPanel;
 	private BatchDTO batchDTO;
-	private List<String> listOfDocumentId;
+	private final List<String> listOfDocumentId;
 	private List<Page> listOfPages;
-	private DialogBox confirmationDialog;
-	RadioButton rb0;
-	RadioButton rb1;
-	private String selectedPageId;
-	private String selectedDocumentId;
+	private final DialogBox confirmationDialog;
+	protected RadioButton rb0;
+	protected RadioButton rb1;
+	private final String selectedPageId;
+	private final String selectedDocumentId;
 	private String moveToDocumentId;
-	private ReviewValidateDocServiceAsync rpcService = GWT.create(ReviewValidateDocService.class);
+	private final ReviewValidateDocServiceAsync rpcService = GWT.create(ReviewValidateDocService.class);
 	private DialogListener listener;
 
 	public PageMovePanel(String selectedPageId, String selectedDocumentId, final List<String> listOfDocumentId, BatchDTO batchDTO,
 			DialogBox confirmationDialog, final ReviewValidatePresenter reviewValidatePresenter) {
+		super();
 		this.selectedPageId = selectedPageId;
 		this.selectedDocumentId = selectedDocumentId;
 		this.confirmationDialog = confirmationDialog;
@@ -115,7 +116,7 @@ public class PageMovePanel extends VerticalPanel {
 					if (currPage.getIdentifier().equals(PageMovePanel.this.selectedPageId)) {
 						continue;
 					}
-					listBox2.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_page) + " "
+					listBox2.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_PAGE) + " "
 							+ currPage.getIdentifier());
 				}
 
@@ -133,7 +134,7 @@ public class PageMovePanel extends VerticalPanel {
 			if (currPage.getIdentifier().equals(PageMovePanel.this.selectedPageId)) {
 				continue;
 			}
-			listBox2.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_page) + " "
+			listBox2.addItem(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_PAGE) + " "
 					+ currPage.getIdentifier());
 		}
 
@@ -155,10 +156,10 @@ public class PageMovePanel extends VerticalPanel {
 		//				
 		// }});
 		rb0 = new RadioButton("myRadioGroup", LocaleDictionary.get().getConstantValue(
-				ReviewValidateConstants.title_movePanel_move_before));
+				ReviewValidateConstants.TITLE_MOVEPANEL_MOVE_BEFORE));
 		rb1 = new RadioButton("myRadioGroup", LocaleDictionary.get().getConstantValue(
-				ReviewValidateConstants.title_movePanel_move_after));
-		movePageButton = new Button(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_move_page));
+				ReviewValidateConstants.TITLE_MOVEPANEL_MOVE_AFTER));
+		movePageButton = new Button(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_MOVE_PAGE));
 		movePageButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -179,9 +180,10 @@ public class PageMovePanel extends VerticalPanel {
 							@Override
 							public void onFailure(Throwable arg0) {
 								ScreenMaskUtility.unmaskScreen();
-								if(!reviewValidatePresenter.displayErrorMessage(arg0)){
-								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(ReviewValidateMessages.msg_movePanel_move_error,
-										PageMovePanel.this.selectedPageId, moveToDocumentId1, arg0.getMessage()));
+								if (!reviewValidatePresenter.displayErrorMessage(arg0)) {
+									ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+											ReviewValidateMessages.MSG_MOVEPANEL_MOVE_ERROR, PageMovePanel.this.selectedPageId,
+											moveToDocumentId1, arg0.getMessage()));
 								}
 							}
 
@@ -198,7 +200,7 @@ public class PageMovePanel extends VerticalPanel {
 			}
 
 		});
-		cancelButton = new Button(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_cancel_button));
+		cancelButton = new Button(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_CANCEL_BUTTON));
 		cancelButton.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -211,11 +213,11 @@ public class PageMovePanel extends VerticalPanel {
 		});
 		rb1.setChecked(true);
 		horizontalPanel = new HorizontalPanel();
-		Label labelDocument = new Label(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_document)
+		Label labelDocument = new Label(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_DOCUMENT)
 				+ ":");
 		this.add(labelDocument);
 		this.add(listBox1);
-		Label labelPage = new Label(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.title_movePanel_page) + ":");
+		Label labelPage = new Label(LocaleDictionary.get().getConstantValue(ReviewValidateConstants.TITLE_MOVEPANEL_PAGE) + ":");
 		this.add(labelPage);
 		this.add(listBox2);
 		this.add(rb0);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -61,26 +61,57 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality for table test result view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class TableTestResultView extends View<TableTestResultViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, TableTestResultView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private FlexTable resultTable;
+	/**
+	 * resultTable FlexTable.
+	 */
+	private final FlexTable resultTable;
 
+	/**
+	 * tableListPanel FlowPanel.
+	 */
 	@UiField
 	protected FlowPanel tableListPanel;
 
+	/**
+	 * backButton Button.
+	 */
 	@UiField
 	protected Button backButton;
 
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
 	@UiField
-	ScrollPanel scrollPanel;
+	protected ScrollPanel scrollPanel;
 
+	/**
+	 * Constructor.
+	 */
 	public TableTestResultView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -95,11 +126,21 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 		tableListPanel.add(resultTable);
 	}
 
+	/**
+	 * To perform operations on back button clicked.
+	 * 
+	 * @param event ClickEvent
+	 */
 	@UiHandler("backButton")
-	public void onBackButtonClicked(ClickEvent e) {
+	public void onBackButtonClicked(ClickEvent event) {
 		dialogBox.hide();
 	}
 
+	/**
+	 * To create Test Table List.
+	 * 
+	 * @param outputDtos List<TestTableResultDTO>
+	 */
 	public void createTestTableList(List<TestTableResultDTO> outputDtos) {
 		resultTable.removeAllRows();
 		setResultList(outputDtos);
@@ -126,17 +167,16 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 							colIndex++;
 						}
 					}
-					index = rows;
-					// index = index + rows ;
+					index = index + rows;
 				} else {
-					resultTable.getFlexCellFormatter().setColSpan(index + 1, 1, 4);
+					resultTable.getFlexCellFormatter().setColSpan(index + 1, 1, BatchClassManagementConstants.FOUR);
 					resultTable.setWidget(index + 1, 0, new Label(resultDTO.getInputFileName()));
 					resultTable.setWidget(index + 1, 1, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 					index++;
 				}
 			}
 		} else {
-			resultTable.getFlexCellFormatter().setColSpan(index + 1, 0, 4);
+			resultTable.getFlexCellFormatter().setColSpan(index + 1, 0, BatchClassManagementConstants.FOUR);
 			resultTable.setWidget(index + 1, 0, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 		}
 
@@ -156,14 +196,29 @@ public class TableTestResultView extends View<TableTestResultViewPresenter> {
 		return true;
 	}
 
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
+	/**
+	 * To get Back Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getBackButton() {
 		return backButton;
 	}

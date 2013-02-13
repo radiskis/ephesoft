@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,20 +33,21 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view;
+package com.ephesoft.dcma.gwt.customworkflow.client.view;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.ViewType;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.CustomWorkflowBreadCrumbPresenter;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.customworkflow.client.ViewType;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.CustomWorkflowBreadCrumbPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -58,7 +59,7 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 	}
 
 	@UiField
-	protected Label breadCrumbs;
+	protected HorizontalPanel clickablebreadCrumbPanel;
 
 	@UiField
 	protected Button previousButton;
@@ -68,7 +69,7 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 
 	protected HorizontalPanel buttonsHorizontalPanel;
 
-	private LinkedList<BreadCrumbView> breadCrumbViews = new LinkedList<BreadCrumbView>();
+	private List<BreadCrumbView> breadCrumbViews = new LinkedList<BreadCrumbView>();
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
@@ -76,13 +77,13 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
-		previousButton.setText(CustomWorkflowConstants.BACK_CONSTANT);
+		previousButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.BACK_CONSTANT));
 		previousButton.setEnabled(false);
 
 		breadCrumbPanel.setSpacing(10);
 
 		buttonsHorizontalPanel = new HorizontalPanel();
-		buttonsHorizontalPanel.setSpacing(5);
+		buttonsHorizontalPanel.setSpacing(CustomWorkflowConstants.SPACING_5);
 		buttonsHorizontalPanel.add(previousButton);
 		breadCrumbPanel.add(buttonsHorizontalPanel);
 
@@ -95,24 +96,9 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 				if (breadCrumbViews.size() == 0) {
 					presenter.initializeBreadCrumb();
 				}
-				breadCrumbViews.removeLast();
-				BreadCrumbView breadCrumbView = breadCrumbViews.getLast();
-				switch (breadCrumbView.viewType) {
-
-					case ENTRY_VIEW:
-						Window.Location.reload();
-						break;
-					case DEPENDENCIES_VIEW:
-						presenter.getController().getCustomWorkflowManagementPresenter().getDependencyManagementPresenter()
-								.showDependenciesView();
-						presenter.setbackButtonVisibility(true);
-						break;
-
-					default:
-						break;
-				}
-
-				createBreadCrumbString();
+				((LinkedList<BreadCrumbView>) breadCrumbViews).removeLast();
+				BreadCrumbView breadCrumbView = ((LinkedList<BreadCrumbView>) breadCrumbViews).getLast();
+				createGivenBreadCrumbView(breadCrumbView.viewType);
 			}
 
 		});
@@ -123,18 +109,28 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 	 * @param breadCrumbView
 	 */
 	public void createBreadCrumbString() {
-		StringBuilder breadCrumbString = new StringBuilder();
+		clickablebreadCrumbPanel.clear();
 		boolean isFirst = false;
-		for (BreadCrumbView breadCrumbView2 : breadCrumbViews) {
+		for (final BreadCrumbView breadCrumbView2 : breadCrumbViews) {
 			if (isFirst) {
-				breadCrumbString.append(CustomWorkflowConstants.DOUBLE_ARROW);
+				Label arrowLabel = new Label(CustomWorkflowConstants.DOUBLE_ARROW);
+				clickablebreadCrumbPanel.add(arrowLabel);
 			} else {
 				isFirst = true;
 			}
-			breadCrumbString.append(breadCrumbView2.breadCrumbName);
+			Label breadCrumbs = new Label();
+			breadCrumbs.setText(breadCrumbView2.breadCrumbName);
+			clickablebreadCrumbPanel.add(breadCrumbs);
+			breadCrumbs.addStyleName(CustomWorkflowConstants.BOLD_TEXT_STYLE);
+			breadCrumbs.addStyleName(CustomWorkflowConstants.CURSOR_POINTER);
+			breadCrumbs.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent arg0) {
+					createGivenBreadCrumbView(breadCrumbView2.viewType);
+				}
+			});
 		}
-		breadCrumbs.setText(breadCrumbString.toString());
-		breadCrumbs.setStyleName(CustomWorkflowConstants.BOLD_TEXT_STYLE);
 	}
 
 	/**
@@ -151,24 +147,22 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 		this.previousButton = previousButton;
 	}
 
-
 	public void create(BreadCrumbView... breadCrumbArray) {
 		breadCrumbViews = new LinkedList<BreadCrumbView>();
 		for (BreadCrumbView breadCrumbView : breadCrumbArray) {
 			breadCrumbViews.add(breadCrumbView);
 		}
-		// createBreadCrumbView();
 	}
 
 	public BreadCrumbView getCurrentView() {
-		return breadCrumbViews.getLast();
+		return ((LinkedList<BreadCrumbView>) breadCrumbViews).getLast();
 	}
 
 	public static class BreadCrumbView {
 
-		private ViewType viewType;
-		private String breadCrumbName;
-		String identifier;
+		private final ViewType viewType;
+		private final String breadCrumbName;
+		private final String identifier;
 
 		public BreadCrumbView(ViewType viewType, String breadCrumbName, String identifier) {
 			this.viewType = viewType;
@@ -178,7 +172,7 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((viewType == null) ? 0 : viewType.hashCode());
 			return result;
@@ -209,6 +203,28 @@ public class CustomWorkflowBreadCrumbView extends View<CustomWorkflowBreadCrumbP
 
 	public HorizontalPanel getBreadCrumbPanel() {
 		return breadCrumbPanel;
+	}
+
+	/**
+	 * @param breadCrumbView
+	 */
+	private void createGivenBreadCrumbView(ViewType viewType) {
+		switch (viewType) {
+
+			case ENTRY_VIEW:
+				presenter.checkForDirtyPlugin();
+				break;
+			case DEPENDENCIES_VIEW:
+				presenter.getController().getCustomWorkflowManagementPresenter().getDependencyManagementPresenter()
+						.showDependenciesView();
+				presenter.setBackButtonVisibility(true);
+				break;
+
+			default:
+				break;
+		}
+
+		createBreadCrumbString();
 	}
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,31 +41,77 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVFieldTypeListView;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
+import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the KV type list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KVTypeListPresenter extends AbstractBatchClassPresenter<KVFieldTypeListView> implements DoubleClickListner {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KVFieldTypeListView
+	 */
 	public KVTypeListPresenter(BatchClassManagementController controller, KVFieldTypeListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// Processing to be done when initializing this presenter.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
-		onEditButtonClicked();
+		String identifier = view.getKVFieldsListView().getSelectedRowIndex();
+		int rowCount = view.getKVFieldsListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_RECORD_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
 
+		} else {
+			KVExtractionDTO kvExtractionDTO = controller.getSelectedDocumentLevelField().getKVExtractionDTOByIdentifier(identifier);
+			boolean isSimpleKVExtraction = kvExtractionDTO.isSimpleKVExtraction();
+			if (!isSimpleKVExtraction) {
+				controller.getMainPresenter().getFieldTypeViewPresenter().onAdvancedEditKVButtonClicked(identifier);
+			} else {
+				controller.getMainPresenter().getFieldTypeViewPresenter().onEditKVButtonClicked(identifier);
+			}
+		}
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String identifier = view.getKVFieldsListView().getSelectedRowIndex();
 		int rowCount = view.getKVFieldsListView().getTableRecordCount();

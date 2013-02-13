@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,23 +36,27 @@
 package com.ephesoft.dcma.gwt.uploadbatch.client.view;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.swfupload.client.File;
 import org.swfupload.client.SWFUpload;
 import org.swfupload.client.UploadBuilder;
 import org.swfupload.client.SWFUpload.ButtonAction;
 import org.swfupload.client.SWFUpload.ButtonCursor;
+import org.swfupload.client.event.FileQueuedHandler;
 import org.swfupload.client.event.UploadCompleteHandler;
 import org.swfupload.client.event.UploadErrorHandler;
 import org.swfupload.client.event.UploadProgressHandler;
 import org.swfupload.client.event.UploadStartHandler;
 
+import com.ephesoft.dcma.core.common.UserType;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchConstants;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchMessages;
@@ -60,6 +64,9 @@ import com.ephesoft.dcma.gwt.uploadbatch.client.presenter.UploadBatchPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -76,6 +83,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -83,8 +91,19 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class UploadBatchView extends View<UploadBatchPresenter> {
 
+	private static final String MARGIN_LOCAL = "marginLocal";
+
+	private static final String BOLD_TEXT = "bold_text";
+
+	private static final String PANEL_BG = "panel_bg";
+	
+	/**
+	 * The SIZE_MULTIPLIER {@link Long} 
+	 */
+	private static final Long SIZE_MULTIPLIER = 1024L;
+
 	@UiField
-	ListBox batchClassNameListBox;
+	protected ListBox batchClassNameListBox;
 
 	@UiField
 	protected VerticalPanel uploadBatchViewPanel;
@@ -143,27 +162,38 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 	@UiField
 	protected DockLayoutPanel mainDockPanel;
 
-	private UploadBuilder uploadBuilder = new UploadBuilder();
+	private final UploadBuilder uploadBuilder = new UploadBuilder();
 
-	private FlexTable editTable;
+	private final FlexTable editTable;
 	private CheckBox deleteAllBox;
-	private List<CheckBox> allFilesBox;
+	private final List<CheckBox> allFilesBox;
 
 	private Map<String, String> batchClassMapping;
-	private AssociateBCFView associateBCFView;
-	private List<String> allFileList;
-	private List<String> deleteSelectedFileList;
+	private final AssociateBCFView associateBCFView;
+	private final List<String> allFileList;
+	private final List<String> deleteSelectedFileList;
 	private SWFUpload swfUpload;
+	
+	
+	private int oldIndexListBox = 0;
+	
+	private int oversizedFileCount = 0;
+
+	/**
+	 * The fileIndexList {@link List} is a list containing file indexes used for 
+	 * cancel upload if limit is exceeded.
+	 */
+	private List<Integer> fileIndexList;
 
 	interface Binder extends UiBinder<VerticalPanel, UploadBatchView> {
 	}
 
 	private static final String UPLOAD_FORM_ACTION = "dcma-gwt-upload-batch/uploadBatch?";
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public UploadBatchView() {
 		super();
-		initWidget(binder.createAndBindUi(this));
+		initWidget(BINDER.createAndBindUi(this));
 
 		buttonPanel1.addStyleName("paddingTop");
 		uploadBatchViewPanel.addStyleName("padding");
@@ -171,25 +201,25 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 
 		batchClassPanel.addStyleName("paddingTop");
 
-		fileUploadCaptionPanel.setCaptionText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.UPLOAD_BUTTON));
-		fileUploadCaptionPanel.addStyleName("panel_bg");
-		fileUploadCaptionPanel.addStyleName("bold_text");
-		fileUploadCaptionPanel.addStyleName("marginLocal");
+		fileUploadCaptionPanel.setCaptionHTML(LocaleDictionary.get().getConstantValue(UploadBatchConstants.UPLOAD_LABEL));
+		fileUploadCaptionPanel.addStyleName(PANEL_BG);
+		fileUploadCaptionPanel.addStyleName(BOLD_TEXT);
+		fileUploadCaptionPanel.addStyleName(MARGIN_LOCAL);
 
-		batchClassCaptionPanel.setCaptionText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.BATCH_DETAIL));
-		batchClassCaptionPanel.addStyleName("panel_bg");
-		batchClassCaptionPanel.addStyleName("bold_text");
-		batchClassCaptionPanel.addStyleName("marginLocal");
+		batchClassCaptionPanel.setCaptionHTML(LocaleDictionary.get().getConstantValue(UploadBatchConstants.BATCH_DETAIL));
+		batchClassCaptionPanel.addStyleName(PANEL_BG);
+		batchClassCaptionPanel.addStyleName(BOLD_TEXT);
+		batchClassCaptionPanel.addStyleName(MARGIN_LOCAL);
 
-		actionCaptionPanel.setCaptionText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.ACTION));
-		actionCaptionPanel.addStyleName("panel_bg");
-		actionCaptionPanel.addStyleName("bold_text");
-		actionCaptionPanel.addStyleName("marginLocal");
+		actionCaptionPanel.setCaptionHTML(LocaleDictionary.get().getConstantValue(UploadBatchConstants.ACTION));
+		actionCaptionPanel.addStyleName(PANEL_BG);
+		actionCaptionPanel.addStyleName(BOLD_TEXT);
+		actionCaptionPanel.addStyleName(MARGIN_LOCAL);
 
-		deleteCaptionPanel.setCaptionText(LocaleDictionary.get().getConstantValue(UploadBatchConstants.FILE_LIST));
-		deleteCaptionPanel.addStyleName("panel_bg");
-		deleteCaptionPanel.addStyleName("bold_text");
-		deleteCaptionPanel.addStyleName("marginLocal");
+		deleteCaptionPanel.setCaptionHTML(LocaleDictionary.get().getConstantValue(UploadBatchConstants.FILE_LIST));
+		deleteCaptionPanel.addStyleName(PANEL_BG);
+		deleteCaptionPanel.addStyleName(BOLD_TEXT);
+		deleteCaptionPanel.addStyleName(MARGIN_LOCAL);
 
 		editTable = new FlexTable();
 		editTable.setWidth("100%");
@@ -237,6 +267,8 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 		uploadBuilder.setFileTypes("*.tif;*.tiff;*.pdf");
 		uploadBuilder.setFileTypesDescription(LocaleDictionary.get().getConstantValue(
 				UploadBatchConstants.FILE_TYPES));
+		
+		fileIndexList = new ArrayList<Integer>();
 
 		/*uploadBuilder.setFileDialogCompleteHandler(new FileDialogCompleteHandler() {
 
@@ -247,13 +279,23 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 			}
 		});
 		 */
+		
+		// To maintain index of file queued for upload.
+		uploadBuilder.setFileQueuedHandler(new FileQueuedHandler() {
+
+			@Override
+			public void onFileQueued(FileQueuedEvent event) {
+				File file = event.getFile();
+				fileIndexList.add(file.getIndex());
+			}
+		});
 
 		uploadBuilder.setUploadProgressHandler(new UploadProgressHandler() {
 
 			@Override
-			public void onUploadProgress(UploadProgressHandler.UploadProgressEvent e) {
-				String fileName = e.getFile().getName();
-				double percent = Math.ceil(((e.getBytesComplete() * 1000.0 / e.getBytesTotal()) * 100.0) / 1000.0);
+			public void onUploadProgress(UploadProgressHandler.UploadProgressEvent event) {
+				String fileName = event.getFile().getName();
+				double percent = Math.ceil(((event.getBytesComplete() * 1000.0 / event.getBytesTotal()) * 100.0) / 1000.0);
 				int indexInList = allFileList.indexOf(fileName);
 				if (indexInList != -1) {
 					String innerHTML = LocaleDictionary.get().getConstantValue(
@@ -271,7 +313,6 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						UploadBatchMessages.UPLOAD_UNSUCCESSFUL)
 						+ event.getFile());
-				return;
 			}
 		});
 		uploadBuilder.setUploadStartHandler(new UploadStartHandler() {
@@ -312,11 +353,25 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 						deleteButton.setEnabled(Boolean.TRUE);
 						deleteCaptionPanel.setVisible(Boolean.TRUE);
 						fileListPanel.addStyleName("deleteTable");
+						
+						// If user browser is IE
+						if (ScreenMaskUtility.getUserAgent().contains(UploadBatchConstants.IE_BROWSER)) {
+							fileListPanel.setWidth(UploadBatchConstants.WIDTH_26_EM);
+						}
 
 					}
-					ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
+					if (oversizedFileCount > 0) {
+						String fileSizeMessage = oversizedFileCount + LocaleDictionary.get().getMessageValue(
+								UploadBatchMessages.FILE_SIZE_EXCEED_MESSAGE) + UploadBatchConstants.SPACE + 
+								(presenter.getFileSizeLimit()/SIZE_MULTIPLIER) + UploadBatchConstants.SPACE +
+								UploadBatchConstants.MEGA_BYTE;
+						String title  = LocaleDictionary.get().getMessageValue(
+								UploadBatchMessages.LIMIT_REACHED);
+						ConfirmationDialogUtil.showConfirmationDialog(fileSizeMessage, title, true);
+					} else {
+						ConfirmationDialogUtil.showConfirmationDialogSuccess(LocaleDictionary.get().getMessageValue(
 							UploadBatchMessages.FILE_UPLOAD_COMPLETE_ALERT));
-
+					}
 				}
 			}
 		});
@@ -330,10 +385,10 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 		editTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_MIDDLE);
 		editTable.getCellFormatter().setWidth(row, 1, "48%");
 		editTable.getCellFormatter().setWidth(row, 2, "30%");
-		editTable.getFlexCellFormatter().addStyleName(0, 0, "bold_text");
-		editTable.getFlexCellFormatter().addStyleName(0, 1, "bold_text");
-		editTable.getFlexCellFormatter().addStyleName(1, 0, "bold_text");
-		editTable.getFlexCellFormatter().addStyleName(1, 1, "bold_text");
+		editTable.getFlexCellFormatter().addStyleName(0, 0, BOLD_TEXT);
+		editTable.getFlexCellFormatter().addStyleName(0, 1, BOLD_TEXT);
+		editTable.getFlexCellFormatter().addStyleName(1, 0, BOLD_TEXT);
+		editTable.getFlexCellFormatter().addStyleName(1, 1, BOLD_TEXT);
 	}
 
 	public void addWidget(int row, int column, Widget widget) {
@@ -354,8 +409,8 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 
 		String identifier = getSelectedBatchClassNameListBoxValue();
 		if (identifier == null || identifier.isEmpty()) {
-			ConfirmationDialogUtil.showConfirmationDialogError((LocaleDictionary.get()
-					.getMessageValue(UploadBatchMessages.NONE_SELECTED_WARNING)));
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+					.getMessageValue(UploadBatchMessages.NONE_SELECTED_WARNING));
 		} else {
 			final DialogBox dialogBox = new DialogBox();
 			associateBCFView.setDialogBox(dialogBox);
@@ -369,16 +424,82 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 		presenter.onResetButtonClick();
 	}
 
+	/**
+	 * The <code>onUploadClick</code> is a method for handling on click
+	 * event of Upload Image Button.
+	 * 
+	 * @param clickEvent {@link ClickEvent}
+	 */
 	@UiHandler("uploadButton")
 	public void onUploadClick(ClickEvent clickEvent) {
-		int fileLength = swfUpload.getStats().getFilesQueued();
-		if (fileLength == 0) {
-			ConfirmationDialogUtil.showConfirmationDialogError((LocaleDictionary.get()
-					.getMessageValue(UploadBatchMessages.UPLOAD_FILE_INVALID_TYPE)));
-			return;
+		
+		// Check for batch class limit error
+		if (presenter.checkForBatchClassLimit(getSelectedBatchClassNameListBoxValue())) {
+			String message = LocaleDictionary.get().getMessageValue(
+					UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_ERROR);
+			String title  = LocaleDictionary.get().getMessageValue(
+					UploadBatchMessages.LIMIT_REACHED);
+			ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+			clearTempUploadOnError();
+		} else { // Check for page count error
+			int fileLength = swfUpload.getStats().getFilesQueued();
+			
+			// Image limit for a particular batch class
+			Integer imageLimit = presenter.
+					getBatchClassImageLimit(batchClassNameListBox.getValue(batchClassNameListBox.getSelectedIndex()));
+			if (fileLength == 0) {
+				
+				//Disable the "Browse" button.
+				swfUpload.setButtonDisabled(true);
+				ConfirmationDialog confirmationDialog= ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get()
+						.getMessageValue(UploadBatchMessages.UPLOAD_FILE_INVALID_TYPE));
+				
+				//Adding close handler to ConfirmationDialog to handle closing of dialog panel through "escape" button.
+				confirmationDialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+					
+					@Override
+					public void onClose(CloseEvent<PopupPanel> closeEvent) {
+						
+						//Enable the "Browse: button.
+						swfUpload.setButtonDisabled(false);
+						
+					}
+				});
+				confirmationDialog.okButton.addClickHandler(new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent clickEvent) {
+						
+						//Enable the "Browse: button.
+						swfUpload.setButtonDisabled(false);
+					}
+				});
+			} else if (null != imageLimit && imageLimit > 0 && (fileLength + allFileList.size()) > imageLimit) {
+				 String message = LocaleDictionary.get().getMessageValue(
+							UploadBatchMessages.UPLOAD_IMAGE_LIMIT_ERROR) + imageLimit + UploadBatchConstants.SPACE 
+							+ LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_APPENDED_MESSAGE);
+					String title  = LocaleDictionary.get().getMessageValue(
+							UploadBatchMessages.LIMIT_REACHED);
+					ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+				clearTempUploadOnError();
+			} else {
+				oversizedFileCount = checkForFileSize();
+				if (fileLength == oversizedFileCount) {
+					String fileSizeMessage = oversizedFileCount + LocaleDictionary.get().getMessageValue(
+							UploadBatchMessages.FILE_SIZE_EXCEED_MESSAGE) + UploadBatchConstants.SPACE + 
+							(presenter.getFileSizeLimit()/SIZE_MULTIPLIER) + UploadBatchConstants.SPACE +
+							UploadBatchConstants.MEGA_BYTE;
+					String title  = LocaleDictionary.get().getMessageValue(
+							UploadBatchMessages.LIMIT_REACHED);
+					ConfirmationDialogUtil.showConfirmationDialog(fileSizeMessage, title, true);
+				} else {
+					fileIndexList.clear();
+					ScreenMaskUtility.maskScreen();
+					presenter.onSubmit(UPLOAD_FORM_ACTION);
+				}
+			}
 		}
-		ScreenMaskUtility.maskScreen();
-		presenter.onSubmit(UPLOAD_FORM_ACTION);
 	}
 
 	@UiHandler("deleteButton")
@@ -390,12 +511,21 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 		return batchClassNameListBox;
 	}
 
-	public void setBatchClassNameListBoxValues(Collection<String> batchListValues) {
-		if (!batchListValues.isEmpty()) {
+	public void setBatchClassNameListBoxValues(Map<String, String> batchClassInfoMap, String selectedBatchClassInfo) {
+		if (!batchClassInfoMap.isEmpty()) {
 			this.batchClassNameListBox.setEnabled(true);
 			this.batchClassNameListBox.setVisibleItemCount(1);
-			for (String value : batchListValues) {
-				this.batchClassNameListBox.addItem(value);
+			int indexCount = 0;
+			boolean isSelectedIndexSet = false;
+			for (String key : batchClassInfoMap.keySet()) {
+				this.batchClassNameListBox.addItem(key, batchClassInfoMap.get(key));
+				if (!isSelectedIndexSet && null != selectedBatchClassInfo  
+						&& batchClassInfoMap.get(key).trim().equals(selectedBatchClassInfo.trim())) {
+					this.batchClassNameListBox.setItemSelected(indexCount, true);
+					oldIndexListBox = indexCount;
+					isSelectedIndexSet = true;
+				}
+				indexCount++;
 			}
 		} else {
 			this.batchClassNameListBox.setEnabled(false);
@@ -404,12 +534,37 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 	}
 
 	@UiHandler("batchClassNameListBox")
-	void onChange(ChangeEvent event) {
-		presenter.getAssociateBCFPresenter().setBatchClassFieldDTOs(getSelectedBatchClassNameListBoxValue(), true);
+	protected void onChange(ChangeEvent event) {
+		String newValue  = getSelectedBatchClassNameListBoxValue();
+		Integer imageLimit = presenter.getBatchClassImageLimit(newValue);
+		int newIndex = batchClassNameListBox.getSelectedIndex();
+		
+		// Check for batch class instance limit error
+		if (presenter.checkForBatchClassLimit(newValue)) {
+			batchClassNameListBox.setSelectedIndex(oldIndexListBox);
+			String message = LocaleDictionary.get().getMessageValue(
+					UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_ERROR);
+			String title  = LocaleDictionary.get().getMessageValue(
+					UploadBatchMessages.LIMIT_REACHED);
+			ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+		} else if (null != imageLimit && allFileList.size() > imageLimit) { // Check for page count limit error
+			batchClassNameListBox.setSelectedIndex(oldIndexListBox);
+			 String message = LocaleDictionary.get().getMessageValue(
+						UploadBatchMessages.UPLOAD_IMAGE_LIMIT_ERROR) + imageLimit + UploadBatchConstants.SPACE
+						+ LocaleDictionary.get().getMessageValue(
+								UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_APPENDED_MESSAGE);
+				String title  = LocaleDictionary.get().getMessageValue(
+						UploadBatchMessages.LIMIT_REACHED);
+				ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+		} else {
+			presenter.getAssociateBCFPresenter().setBatchClassFieldDTOs(newValue, true);
+			presenter.setSelectedBatchClassInfoToSession(batchClassNameListBox.getValue(newIndex));
+			oldIndexListBox = newIndex;
+		}
 	}
 
 	@UiHandler("finishButton")
-	void onFinish(ClickEvent event) {
+	protected void onFinish(ClickEvent event) {
 		String currentBatchUploadFolder = presenter.getController().getCurrentBatchUploadFolder();
 		if (currentBatchUploadFolder != null && !currentBatchUploadFolder.isEmpty()) {
 			boolean flag = presenter.getAssociateBCFPresenter().validateBatchClassField();
@@ -437,12 +592,11 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 	}
 
 	public String getSelectedBatchClassNameListBoxValue() {
+		String selectedValue = null;
 		if (this.batchClassNameListBox != null && this.batchClassNameListBox.getSelectedIndex() >= 0) {
-			String selectedValue = this.batchClassNameListBox.getItemText(this.batchClassNameListBox.getSelectedIndex());
-			return batchClassMapping.get(selectedValue);
-		} else {
-			return null;
+			selectedValue = this.batchClassNameListBox.getValue(this.batchClassNameListBox.getSelectedIndex());			
 		}
+		return selectedValue;
 	}
 
 	public Map<String, String> getBatchClassMapping() {
@@ -509,12 +663,60 @@ public class UploadBatchView extends View<UploadBatchPresenter> {
 		return selectAllCell;
 	}
 
-	public void setSwfUpload(SWFUpload swfUpload) {
+	public final void setSwfUpload(SWFUpload swfUpload) {
 		this.swfUpload = swfUpload;
 	}
 
 	public SWFUpload getSwfUpload() {
 		return swfUpload;
+	}
+	
+	/**
+	 * The <code>clearTempUploadOnError</code> method is used for clearing upload
+	 * for error files.
+	 */
+	private void clearTempUploadOnError() {
+		Iterator<Integer> fileIndexIterator = fileIndexList.listIterator();
+		
+		// Cancel all current upload
+		while (fileIndexIterator.hasNext()) {
+			int index = fileIndexIterator.next();
+			File file = swfUpload.getFile(index);
+			swfUpload.cancelUpload(file.getId(), false);
+		}
+		fileIndexList.clear();
+	}
+	
+	/**
+	 * The <code>checkForFileSize</code> method is used for checking files crossing
+	 * file size limit.
+	 * 
+	 * @return over-sized file count
+	 */
+	private int checkForFileSize() {
+		int overSizeFileCount = 0;
+		Integer userType = presenter.getUserType();
+		if (null != userType && userType.intValue() == UserType.LIMITED.getUserType()) {
+			Iterator<Integer> fileIndexIterator = fileIndexList.listIterator();
+			
+			List<Integer> removedFileIndexList = new ArrayList<Integer>(fileIndexList.size());
+			
+			// Cancel all over-sized current upload
+			while (fileIndexIterator.hasNext()) {
+				int index = fileIndexIterator.next();
+				File file = swfUpload.getFile(index);
+				if (file.getSize() > (presenter.getFileSizeLimit() * SIZE_MULTIPLIER)) {
+					swfUpload.cancelUpload(file.getId(), false);
+					overSizeFileCount++;
+					removedFileIndexList.add(index);
+				}
+				
+			}
+			if (overSizeFileCount > 0) {
+				fileIndexList.removeAll(removedFileIndexList);
+			}
+		}
+		return overSizeFileCount;
 	}
 }
 

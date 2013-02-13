@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,59 +37,73 @@ package com.ephesoft.dcma.gwt.core.client.i18n;
 
 public interface LocaleCommonConstants {
 
-	String header_label_hi = "header_label_hi";
+	String HEADER_LABEL_HI = "header_label_hi";
 
-	String header_label_signOut = "header_label_signOut";
+	String HEADER_LABEL_SIGN_OUT = "header_label_signOut";
 
-	String msg_mask_wait = "msg_mask_wait";
+	String MSG_MASK_WAIT = "msg_mask_wait";
 
-	String exc_consumerAmountIsNotPositive = "exc_consumerAmountIsNotPositive";
+	String EXC_CONSUMER_AMOUNT_IS_NOT_POSITIVE = "exc_consumerAmountIsNotPositive";
 
-	String exc_consumerTypeIsNull = "exc_consumerTypeIsNull";
+	String EXC_CONSUMER_TYPE_IS_NULL = "exc_consumerTypeIsNull";
 
-	String exc_licenseHasExpired = "exc_licenseHasExpired";
+	String EXC_LICENSE_HAS_EXPIRED = "exc_licenseHasExpired";
 
-	String exc_licenseIsNotYetValid = "exc_licenseIsNotYetValid";
+	String EXC_LICENSE_IS_NOT_YET_VALID = "exc_licenseIsNotYetValid";
 
-	String exc_issuedIsNull = "exc_issuedIsNull";
+	String EXC_ISSUED_IS_NULL = "exc_issuedIsNull";
 
-	String exc_issuerIsNull = "exc_issuerIsNull";
+	String EXC_ISSUER_IS_NULL = "exc_issuerIsNull";
 
-	String exc_holderIsNull = "exc_holderIsNull";
+	String EXC_HOLDER_IS_NULL = "exc_holderIsNull";
 
-	String exc_invalidSubject = "exc_invalidSubject";
+	String EXC_INVALID_SUBJECT = "exc_invalidSubject";
 
-	String exc_cpu_count_voilation = "exc_cpu_count_voilation";
+	String EXC_CPU_COUNT_VOILATION = "exc_cpu_count_voilation";
 
-	String exc_system_date_voilation = "exc_system_date_voilation";
+	String EXC_SYSTEM_DATE_VOILATION = "exc_system_date_voilation";
 
-	String exc_system_mac_address_voilation = "exc_system_mac_address_voilation";
+	String EXC_SYSTEM_MAC_ADDRESS_VOILATION = "exc_system_mac_address_voilation";
 
-	String title_confirmation_ok = "title_confirmation_ok";
+	String TITLE_CONFIRMATION_OK = "title_confirmation_ok";
 	
-	String title_confirmation_close = "title_confirmation_close";
+	String TITLE_CONFIRMATION_CLOSE = "title_confirmation_close";
 
-	String title_confirmation_cancel = "title_confirmation_cancel";
+	String TITLE_CONFIRMATION_CANCEL = "title_confirmation_cancel";
 
-	String dialog_box_title = "dialog_box_title";
+	String DIALOG_BOX_TITLE = "dialog_box_title";
 
-	String exc_ephesoft_license_cpu_limit_exhausted = "exc_ephesoft_license_cpu_limit_exhausted";
+	String EXC_EPHESOFT_LICENSE_CPU_LIMIT_EXHAUSTED = "exc_ephesoft_license_cpu_limit_exhausted";
 
-	String exc_ephesoft_license_server_error = "exc_ephesoft_license_server_error";
+	String EXC_EPHESOFT_LICENSE_SERVER_ERROR = "exc_ephesoft_license_server_error";
 
-	String title_confirmation_save = "title_confirmation_save";
+	String TITLE_CONFIRMATION_SAVE = "title_confirmation_save";
 
-	String title_confirmation_discard = "title_confirmation_discard";
+	String TITLE_CONFIRMATION_DISCARD = "title_confirmation_discard";
 
-	String footer_information = "Powered by Ephesoft";
+	String FOOTER_INFORMATION = "Powered by Ephesoft";
 
-	String ephesoft_url = "http://www.ephesoft.com";
+	String EPHESOFT_URL = "http://www.ephesoft.com";
 	
-	String title_go_to_page = "title_go_to_page";
+	String TITLE_GO_TO_PAGE = "title_go_to_page";
 	
-	String title_next = "title_next";
+	String TITLE_NEXT = "title_next";
 	
-	String title_previous = "title_previous";
+	String TITLE_PREVIOUS = "title_previous";
 	
-	String title_displaying = "title_displaying";
+	String TITLE_DISPLAYING = "title_displaying";
+
+	String HEADER_LABEL_HELP = "header_label_help";
+	
+	String ERROR_TITLE = "error_title";
+
+	String HELP_URK_ERROR_MESSAGE = "error_in_getting_help_url";
+	
+	String UP_RECORD = "up_record";
+	
+	String 	DOWN_RECORD = "down_record";
+
+	String FOOTER_WARNING_MESSAGE = "footer_warning_message";
+
+	String SERVER_DISCONNECTED = "server_disconnected";
 }

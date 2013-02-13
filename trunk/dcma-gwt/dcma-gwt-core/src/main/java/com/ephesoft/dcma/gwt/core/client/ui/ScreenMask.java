@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,12 +45,14 @@ import com.google.gwt.user.client.ui.Widget;
 public class ScreenMask extends DialogBox {
 
   interface Binder extends UiBinder<Widget, ScreenMask> { }
-  private static final Binder binder = GWT.create(Binder.class);
+  private static final Binder BINDER = GWT.create(Binder.class);
 
-  @UiField Label message;
+  @UiField 
+  protected Label message;
 
   public ScreenMask() {
-    setWidget(binder.createAndBindUi(this));
+	  super();
+    setWidget(BINDER.createAndBindUi(this));
     setAnimationEnabled(true);
     setGlassEnabled(true);
     setWidth("100%");

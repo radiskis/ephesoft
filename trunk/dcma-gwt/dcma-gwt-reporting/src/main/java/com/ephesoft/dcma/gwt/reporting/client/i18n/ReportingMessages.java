@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,34 +38,35 @@ package com.ephesoft.dcma.gwt.reporting.client.i18n;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonMessages;
 
 /**
- * The interface is used to define all the messages used in the reporting module and support internationalization.
+ * The class is used to define all the messages used in the reporting module and support internationalization.
  * 
  * @author Ephesoft
  * 
  */
 public interface ReportingMessages extends LocaleCommonMessages {
 
-	static String UNABLE_TO_GET_SYSTEM_STATISTICS = "unable_to_get_system_statistics";
+	String UNABLE_TO_GET_SYSTEM_STATISTICS = "unable_to_get_system_statistics";
 
-	static String UNABLE_TO_FETCH_USERS = "unable_to_fetch_users";
+	String UNABLE_TO_FETCH_USERS = "unable_to_fetch_users";
 
-	static String UNABLE_TO_GET_TOTAL_ROW_COUNT = " unable_to_get_total_row_count";
+	String UNABLE_TO_GET_TOTAL_ROW_COUNT = " unable_to_get_total_row_count";
 
-	static String UNABLE_TO_GET_REPORT_DATA = "unable_to_get_report_data";
+	String UNABLE_TO_GET_REPORT_DATA = "unable_to_get_report_data";
 
-	static String START_DATE_CANNOT_BE_GREATER_THAN_END_DATE = "start_date_cannot_be_greater_than_end_date";
+	String START_DATE_CANNOT_BE_GREATER_THAN_END_DATE = "start_date_cannot_be_greater_than_end_date";
 
-	static String START_DATE_OR_END_DATE_NOT_VALID = "start_date_or_end_date_not_valid";
+	String START_DATE_OR_END_DATE_NOT_VALID = "start_date_or_end_date_not_valid";
 
-	static String UNABLE_TO_SYNC_DATABASE = "unable_to_sync_database";
+	String UNABLE_TO_SYNC_DATABASE = "unable_to_sync_database";
 
-	static String DIALOG_TITLE_ERROR = "dialog_title_error";
+	String DIALOG_TITLE_ERROR = "dialog_title_error";
 
-	static String UNABLE_TO_GET_BATCH_CLASSES = "unable_to_fetch_batch_classes";
+	String UNABLE_TO_GET_BATCH_CLASSES = "unable_to_fetch_batch_classes";
 
-	static String ANOTHER_USER_ALREADY_CONNECTED = "another_user_already_connected";
+	String ANOTHER_USER_ALREADY_CONNECTED = "another_user_already_connected";
 
-	static String UNABLE_TO_GET_FLAG_FOR_MULTIUSER = "unable_to_get_flag_for_multiuser";
+	String UNABLE_TO_GET_FLAG_FOR_MULTIUSER = "unable_to_get_flag_for_multiuser";
 
-	static String UNABLE_TO_GET_CUSTOM_REPORTS_BUTTON_POP_UP_CONFIGS = "unable_to_get_custom_report_button_configs"; 
+	String UNABLE_TO_GET_CUSTOM_REPORTS_BUTTON_POP_UP_CONFIGS = "unable_to_get_custom_report_button_configs";
+	String UNABLE_TO_FETCH_USER_ROLES_FOR_LOGGED_IN_USER = "unable_to_fetch_user_roles_for_logged_in_user"; 
 }

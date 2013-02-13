@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,11 +38,11 @@ package com.ephesoft.dcma.gwt.core.client;
 
 public class RandomIdGenerator {
 	
-	private static long id = -1000L;
+	private static long randomId = -1000L;
 
 	public static long getIdentifier() {
-		id = id - 1;
-		return id;
+		randomId = randomId - 1;
+		return randomId;
 	}
 
 }

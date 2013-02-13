@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,21 +33,39 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-/**
- * @author Ephesoft
- */
 package com.ephesoft.dcma.workflow.jbpm.pvm.internal.id;
 
 import org.jbpm.api.Execution;
 import org.jbpm.api.ProcessDefinition;
-import org.jbpm.internal.log.Log;
 import org.jbpm.pvm.internal.id.IdComposer;
 import org.jbpm.pvm.internal.model.ExecutionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.workflow.constant.WorkFlowConstants;
+
+/**
+ * This classis to compose database Id.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.pvm.internal.id.IdComposer
+ */
 public class EphesoftDatabaseIdComposer extends IdComposer {
 
-	private static Log log = Log.getLog(EphesoftDatabaseIdComposer.class.getName());
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(EphesoftDatabaseIdComposer.class);
 
+	/**
+	 * To create Id.
+	 * 
+	 * @param processDefinition ProcessDefinition
+	 * @param parent Execution
+	 * @param execution ExecutionImpl
+	 * @return String
+	 */
 	public String createId(ProcessDefinition processDefinition, Execution parent, ExecutionImpl execution) {
 
 		String base = null;
@@ -67,33 +85,44 @@ public class EphesoftDatabaseIdComposer extends IdComposer {
 			executionPart = execution.getName();
 
 		} else if (execution.getSuperProcessExecution() != null) {
+			StringBuilder executionPartStringBuilder = new StringBuilder();
 			executionPart = execution.getSuperProcessExecution().getKey();
 			if (executionPart != null) {
-				executionPart += "." + execution.getDbid() + "-m";
+				executionPartStringBuilder.append(executionPart);
+				executionPartStringBuilder.append(WorkFlowConstants.PERIOD);
+				executionPartStringBuilder.append(execution.getDbid());
+				executionPartStringBuilder.append(WorkFlowConstants.MINUS_M_KEYWORD);
+				executionPart = executionPartStringBuilder.toString();
 			} else {
-				executionPart = extractKeyFromId(execution.getSuperProcessExecution().getId())+ "." + execution.getDbid() + "-p";
+				final String key = extractKeyFromId(execution.getSuperProcessExecution().getId());
+				executionPartStringBuilder.append(key);
+				executionPartStringBuilder.append(WorkFlowConstants.PERIOD);
+				executionPartStringBuilder.append(execution.getDbid());
+				executionPartStringBuilder.append(WorkFlowConstants.MINUS_P_KEYWORD);
+				executionPart = executionPartStringBuilder.toString();
 			}
 		} else {
 
 			executionPart = Long.toString(execution.getDbid());
 		}
 
-		String executionId = base + "." + executionPart;
+		String executionId = base + WorkFlowConstants.PERIOD + executionPart;
 
-		if (log.isDebugEnabled())
-			log.debug("generated execution id " + executionId);
-
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("generated execution id " + executionId);
+		}
 		return executionId;
 	}
 
-	private String extractKeyFromId(String id) {
+	private String extractKeyFromId(String keyId) {
 		String key = null;
-		int index = id.indexOf(".");
-		int index2 = id.lastIndexOf(".");
-		if (index2 > -1)
-			key = id.substring(index + 1, index2);
-		else
-			key = id.substring(index + 1);
+		int index = keyId.indexOf(WorkFlowConstants.PERIOD);
+		int lastIndex = keyId.lastIndexOf(WorkFlowConstants.PERIOD);
+		if (lastIndex > -1) {
+			key = keyId.substring(index + 1, lastIndex);
+		} else {
+			key = keyId.substring(index + 1);
+		}
 		return key;
 	}
 }

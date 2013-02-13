@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,103 +41,181 @@ import com.ephesoft.dcma.gwt.core.client.View;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit fuzzy DB plugin key.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FuzzyDBPluginView extends View<FuzzyDBPluginPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, FuzzyDBPluginView> {
 	}
 
+	/**
+	 * fuzzyDBPropertiesView FuzzyDBPropertiesView.
+	 */
 	@UiField
 	protected FuzzyDBPropertiesView fuzzyDBPropertiesView;
 
+	/**
+	 * editFuzzyDBPropertiesView EditFuzzyDBPropertiesView.
+	 */
 	@UiField
 	protected EditFuzzyDBPropertiesView editFuzzyDBPropertiesView;
 
+	/**
+	 * propertyDetailsPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel propertyDetailsPanel;
 
+	/**
+	 * propertyDetailsViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel propertyDetailsViewPanel;
 
+	/**
+	 * editPropertyDetailPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editPropertyDetailPanel;
 
+	/**
+	 * editButtonPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editButtonPanel;
 
+	/**
+	 * pluginData PluginData.
+	 */
 	@UiField
 	protected PluginData pluginData;
 
-	private Button edit;
-
+	/**
+	 * pluginDetailsPanel CaptionPanel.
+	 */
 	@UiField
-	Button mappingButton;
+	protected CaptionPanel pluginDetailsPanel;
 
-	@UiField
-	CaptionPanel pluginDetailsPanel;
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public FuzzyDBPluginView() {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		propertyDetailsPanel.setCaptionHTML(AdminConstants.PLUGIN_CONFIGURATION_HTML);
 		pluginDetailsPanel.setCaptionHTML(AdminConstants.PLUGIN_DETAILS_HTML);
 
-		edit = new Button();
-		edit.setText(AdminConstants.EDIT_BUTTON);
 		editButtonPanel.setStyleName(AdminConstants.PADDING_STYLE);
-		editButtonPanel.add(edit);
-		mappingButton.setText(AdminConstants.MAPPING_BUTTON);
+
 	}
 
+	/**
+	 * To get Fuzzy DB Properties View.
+	 * 
+	 * @return FuzzyDBPropertiesView
+	 */
 	public FuzzyDBPropertiesView getFuzzyDBPropertiesView() {
 		return fuzzyDBPropertiesView;
 	}
 
+	/**
+	 * To get Edit Fuzzy DB Properties View.
+	 * 
+	 * @return EditFuzzyDBPropertiesView
+	 */
 	public EditFuzzyDBPropertiesView getEditFuzzyDBPropertiesView() {
 		return editFuzzyDBPropertiesView;
 	}
 
+	/**
+	 * To get Property Details View Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getPropertyDetailsViewPanel() {
 		return propertyDetailsViewPanel;
 	}
 
+	/**
+	 * To get Edit Property Detail Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getEditPropertyDetailPanel() {
 		return editPropertyDetailPanel;
 	}
 
+	/**
+	 * To get Edit Button Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getEditButtonPanel() {
 		return editButtonPanel;
 	}
 
-	public Button getEditButton() {
-		return edit;
-	}
-
+	/**
+	 * To show Fuzzy DB Detail View.
+	 */
 	public void showFuzzyDBDetailView() {
 		propertyDetailsViewPanel.setVisible(true);
 		editPropertyDetailPanel.setVisible(false);
 	}
 
+	/**
+	 * Class to get identifier.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public static class Id {
 
-		private static long id = -1000L;
+		/**
+		 * ID_CONST long.
+		 */
+		private static final long ID_CONST = 1000L;
 
+		/**
+		 * identifier long.
+		 */
+		private static long identifier = -ID_CONST;
+
+		/**
+		 * To get Identifier.
+		 * 
+		 * @return long
+		 */
 		public static long getIdentifier() {
-			id = id - 1;
-			return id;
+			identifier = identifier - 1;
+			return identifier;
 		}
 	}
 
-	public Button getMappingButton() {
-		return mappingButton;
-	}
-
+	/**
+	 * To get Plugin Data View.
+	 * 
+	 * @return PluginData
+	 */
 	public PluginData getPluginDataView() {
 		return pluginData;
 	}

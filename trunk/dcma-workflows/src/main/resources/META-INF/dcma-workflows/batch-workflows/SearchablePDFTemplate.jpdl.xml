@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="SearchablePDFTemplate" xmlns="http://jbpm.org/4.3/jpdl">
+
+	<start g="91,16,55,42">
+		<transition to="Resume_Option" />
+	</start>
+
+	<decision g="206,803,80,40" name="Resume_Option">
+		<handler class="com.ephesoft.dcma.workflow.decisionhandler.ResumeEvaluation" />
+		<transition g="-26,-22" name="Workflow_Status_Running" to="Workflow_Status_Running" />
+		<transition g="-21,-22" name="Folder_Import_Module" to="Folder_Import_Module" />
+		<transition g="-21,-22" name="Page_Process_Module_BC3" to="Page_Process_Module_BC3" />
+		<transition g="-21,-22" name="Document_Assembler_Module"
+			to="Document_Assembler_Module" />
+		<transition g="-21,-22" name="Export_Module_BC3" to="Export_Module_BC3" />
+	</decision>
+	<sub-process continue="async" g="30,90,176,68" name="Workflow_Status_Running"
+		sub-process-key="Workflow_Status_Running">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="Folder_Import_Module" />
+	</sub-process>
+
+	<sub-process continue="async" g="30,190,176,68" name="Folder_Import_Module"
+		sub-process-key="Folder_Import_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Page_Process_Module_BC3" />
+	</sub-process>
+
+	<sub-process continue="async" g="16,290,204,60" name="Page_Process_Module_BC3"
+		sub-process-key="Page_Process_Module_BC3">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Document_Assembler_Module" />
+	</sub-process>
+
+	<sub-process continue="async" g="27,382,183,55" name="Document_Assembler_Module"
+		sub-process-key="Document_Assembler_Module">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Export_Module_BC3" />
+	</sub-process>
+
+	<sub-process continue="async" g="47,555,142,54" name="Export_Module_BC3"
+		sub-process-key="Export_Module_BC3">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<on event="start">
+			<event-listener
+				class="com.ephesoft.dcma.workflow.listener.ModuleExecutionStartListener" />
+		</on>
+		<transition to="Workflow_Status_Finished" />
+	</sub-process>
+
+	<sub-process continue="async" g="19,641,199,54" name="Workflow_Status_Finished"
+		sub-process-key="Workflow_Status_Finished">
+		<parameter-in subvar="batchInstanceID" var="batchInstanceID" />
+		<transition to="end" />
+	</sub-process>
+
+	<end g="78,727,80,40" name="end" />
+
+</process>

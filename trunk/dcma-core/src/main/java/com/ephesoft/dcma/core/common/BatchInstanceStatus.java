@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,21 +44,96 @@ import java.util.List;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see java.util.Arrays
  */
 public enum BatchInstanceStatus {
-	NEW(0), LOCKED(1), SUSPEND(2), READY(3), ERROR(4), FINISHED(5), ASSIGNED(6), OPEN(7), RUNNING(8), READY_FOR_REVIEW(9),
-	READY_FOR_VALIDATION(10), RESTARTED(11), DELETED(12), TRANSFERRED(13), RESTART_IN_PROGRESS(14);
+	/**
+	 * NEW.
+	 */
+	NEW(0), 
+	/**
+	 * LOCKED.
+	 */
+	LOCKED(1), 
+	/**
+	 * SUSPEND.
+	 */
+	SUSPEND(2), 
+	/**
+	 * READY.
+	 */
+	READY(3),
+	/**
+	 * ERROR.
+	 */
+	ERROR(4), 
+	/**
+	 * FINISHED.
+	 */
+	FINISHED(5), 
+	/**
+	 * ASSIGNED.
+	 */
+	ASSIGNED(6), 
+	/**
+	 * OPEN.
+	 */
+	OPEN(7),
+	/**
+	 * RUNNING.
+	 */
+	RUNNING(8),
+	/**
+	 * READY_FOR_REVIEW.
+	 */
+	READY_FOR_REVIEW(9),
+	/**
+	 * READY_FOR_VALIDATION.
+	 */
+	READY_FOR_VALIDATION(10),
+    /**
+     * RESTARTED.
+     */
+	RESTARTED(11),
+	/**
+	 * DELETED.
+	 */
+	DELETED(12),
+	/**
+	 * TRANSFERRED.
+	 */
+	TRANSFERRED(13), 
+	/**
+	 * RESTART_IN_PROGRESS.
+	 */
+	RESTART_IN_PROGRESS(14),
+	/**
+	 * REMOTE.
+	 */
+	REMOTE(15);
 
+	
+	/** 
+	 * statusId {@link Integer}.
+	 */
 	private Integer statusId;
 
 	private BatchInstanceStatus(int statusId) {
 		this.statusId = statusId;
 	}
 
+	/**
+	 * To get values.
+	 * @return List<BatchInstanceStatus>
+	 */
 	public static List<BatchInstanceStatus> valuesAsList() {
 		return Arrays.asList(values());
 	}
 	
+	/**
+	 * To get values.
+	 * @return List<String>
+	 */
 	public static List<String> valuesAsStringList() {
 		List<String> values = new ArrayList<String>();
 		for (BatchInstanceStatus status : BatchInstanceStatus.values()) {
@@ -67,6 +142,10 @@ public enum BatchInstanceStatus {
 		return values;
 	}
 	
+	/**
+	 * To get id.
+	 * @return Integer
+	 */
 	public Integer getId() {
 		return statusId;
 	}

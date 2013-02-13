@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,10 +33,10 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.CustomWorkflowEntryView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.CustomWorkflowEntryView;
 import com.google.gwt.event.shared.HandlerManager;
 
 public class CustomWorkflowEntryPresenter extends AbstractCustomWorkflowPresenter<CustomWorkflowEntryView> {
@@ -47,18 +47,21 @@ public class CustomWorkflowEntryPresenter extends AbstractCustomWorkflowPresente
 			CustomWorkflowEntryView customWorkflowEntryView) {
 		super(customWorkflowController, customWorkflowEntryView);
 		this.viewAndAddPluginsPresenter = new ViewAndAddPluginsPresenter(controller, view.getViewAndAddPluginsView());
-		//populateAllPlugins();
 
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here.
+		 */
 	}
 
 	@Override
 	public void bind() {
-
+		/**
+		 * Bind your view with the values here.
+		 */
 	}
 
 	public void showEntryView() {
@@ -67,18 +70,6 @@ public class CustomWorkflowEntryPresenter extends AbstractCustomWorkflowPresente
 
 	}
 
-	/**
-	 * Gets the index of selected template
-	 * 
-	 * @return int
-	 */
-	public int getSelectedTemplate() {
-		return 0;
-	}
-
-	public String getSelectedValue() {
-		return "";
-	}
 
 	public void addNewPlugin() {
 		controller.getCustomWorkflowManagementPresenter().showImportPluginView();
@@ -90,11 +81,6 @@ public class CustomWorkflowEntryPresenter extends AbstractCustomWorkflowPresente
 	 */
 	public ViewAndAddPluginsPresenter getViewAndAddPluginsPresenter() {
 		return viewAndAddPluginsPresenter;
-	}
-
-	public void showDependenciesView() {
-
-		controller.getCustomWorkflowManagementPresenter().showDependenciesView();
 	}
 
 }

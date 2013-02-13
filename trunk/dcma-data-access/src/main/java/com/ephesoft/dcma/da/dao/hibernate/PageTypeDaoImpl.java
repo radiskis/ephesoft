@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,33 +55,89 @@ import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.PageType;
 
 /**
- * Implementation of a Dao representing page_type table in database
+ * Implementation of a Dao representing page_type table in database.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.PageTypeDao
  */
 @Repository
 public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeDao {
 
+	/**
+	 * DOC_TYPE_IDENTIFIER String.
+	 */
 	private static final String DOC_TYPE_IDENTIFIER = "docType.identifier";
+	
+	/**
+	 * NAME String.
+	 */
 	private static final String NAME = "name";
+
+    /**
+     * DOC_TYPE_NAME String.
+     */
 	private static final String DOC_TYPE_NAME = "docType.name";
+	
+	/**
+	 * BATCH_CLASS_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS_IDENTIFIER = "batchClass.identifier";
+	
+	/**
+	 * BATCH_CLASS1_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS1_IDENTIFIER = "batchClass1.identifier";
+	
+	/**
+	 * BATCH_CLASS2_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS2_IDENTIFIER = "batchClass2.identifier";
+	
+	/**
+	 * BATCH_CLASS2 String.
+	 */
 	private static final String BATCH_CLASS2 = "batchClass2";
+	
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+	
+	/**
+	 * IDENTIFIER String.
+	 */
 	private static final String IDENTIFIER = "identifier";
+	
+	/**
+	 * BATCH_CLASS1 String.
+	 */
 	private static final String BATCH_CLASS1 = "batchClass1";
+	
+	/**
+	 * DOC_TYPE_BATCH_CLASS String.
+	 */
 	private static final String DOC_TYPE_BATCH_CLASS = "docType.batchClass";
+	
+	/**
+	 * DOC_TYPE String.
+	 */
 	private static final String DOC_TYPE = "docType";
+	
+	/**
+	 * DOCUMENT_TYPE String.
+	 */
 	private static final String DOCUMENT_TYPE = "documentType : ";
+	
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PageTypeDaoImpl.class);
 
 	/**
-	 * An api to fetch all page types by document type
+	 * An API to fetch all page types by document type.
 	 * 
-	 * @param documentType
+	 * @param documentType DocumentType
 	 * @return List<PageType>
 	 */
 	@Override
@@ -93,9 +149,9 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to fetch all Page types by batchInstanceID.
+	 * An API to fetch all Page types by batchInstanceID.
 	 * 
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<PageType>
 	 */
 	@Override
@@ -114,9 +170,9 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 	
 	/**
-	 * An api to fetch all Page types by batchClassID.
+	 * An API to fetch all Page types by batchClassID.
 	 * 
-	 * @param batchClassID Long
+	 * @param batchClassID String
 	 * @return List<PageType>
 	 */
 	@Override
@@ -132,9 +188,9 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to fetch all batch class id, document type names and Page type names corresponding to each other.
+	 * An API to fetch all batch class id, document type names and Page type names corresponding to each other.
 	 * 
-	 * @param batchClassIDList List<Long>
+	 * @param batchClassIdentifierList List<String>
 	 * @return List<Object[]>
 	 */
 	@Override
@@ -151,10 +207,10 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to fetch page type by page type name.
+	 * An API to fetch page type by page type name.
 	 * 
 	 * @param name String
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<PageType>
 	 */
 	@Override
@@ -174,7 +230,7 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to fetch all Page types by document type name.
+	 * An API to fetch all Page types by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @return List<PageType>
@@ -188,9 +244,9 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to fetch all the page types for input document type ID.
+	 * An API to fetch all the page types for input document type ID.
 	 * 
-	 * @param documentTypeID Long
+	 * @param documentTypeIdentifier String
 	 * @param startResult int
 	 * @param maxResult int
 	 * @return List<PageType>
@@ -204,7 +260,7 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to insert the page type object.
+	 * An API to insert the page type object.
 	 * 
 	 * @param pageType PageType
 	 */
@@ -214,7 +270,7 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to update the pageType object.
+	 * An API to update the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */
@@ -224,7 +280,7 @@ public class PageTypeDaoImpl extends HibernateDao<PageType> implements PageTypeD
 	}
 
 	/**
-	 * An api to remove the pageType object.
+	 * An API to remove the pageType object.
 	 * 
 	 * @param pageType PageType
 	 */

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,14 +39,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.script.ScriptException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,15 +78,17 @@ import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
+import com.ephesoft.dcma.common.HocrUtil;
+import com.ephesoft.dcma.common.LineDataCarrier;
+import com.ephesoft.dcma.core.common.ExpressionEvaluator;
+import com.ephesoft.dcma.core.common.TableExtractionTechnique;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.service.TableInfoService;
 import com.ephesoft.dcma.kvfinder.KVFinderConstants;
-import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
 import com.ephesoft.dcma.tableextraction.constant.TableExtractionConstants;
 import com.ephesoft.dcma.tableextraction.util.DataCarrier;
-import com.ephesoft.dcma.tableextraction.util.LineDataCarrier;
 import com.ephesoft.dcma.tablefinder.service.TableFinderService;
 
 /**
@@ -103,6 +109,9 @@ public class TableExtraction {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableExtraction.class);
 
+	/**
+	 * TABLE_EXTRACTION_PLUGIN String.
+	 */
 	private static final String TABLE_EXTRACTION_PLUGIN = "TABLE_EXTRACTION";
 
 	/**
@@ -123,8 +132,11 @@ public class TableExtraction {
 	@Autowired
 	private TableFinderService tableFinderService;
 
+	/**
+	 * Reference of PluginPropertiesService.
+	 */
 	@Autowired
-	@Qualifier("batchInstancePluginPropertiesService")
+	@Qualifier("batchClassPluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
@@ -133,6 +145,13 @@ public class TableExtraction {
 	private String confidenceScore;
 
 	/**
+	 * defaultLocale Locale.
+	 */
+	private final Locale defaultLocale = Locale.getDefault();
+
+	/**
+	 * To get confidence score.
+	 * 
 	 * @return the confidenceScore
 	 */
 	public final String getConfidenceScore() {
@@ -140,6 +159,8 @@ public class TableExtraction {
 	}
 
 	/**
+	 * To set confidence score.
+	 * 
 	 * @param confidenceScore the confidenceScore to set
 	 */
 	public final void setConfidenceScore(final String confidenceScore) {
@@ -152,6 +173,8 @@ public class TableExtraction {
 	private String widthOfLine;
 
 	/**
+	 * To get width of line.
+	 * 
 	 * @return the widthOfLine
 	 */
 	public String getWidthOfLine() {
@@ -159,9 +182,11 @@ public class TableExtraction {
 	}
 
 	/**
-	 * @param widthOfLine the widthOfLine to set
+	 * To set width of line.
+	 * 
+	 * @param widthOfLine
 	 */
-	public void setWidthOfLine(String widthOfLine) {
+	public void setWidthOfLine(final String widthOfLine) {
 		this.widthOfLine = widthOfLine;
 	}
 
@@ -174,9 +199,10 @@ public class TableExtraction {
 	 * @throws DCMAApplicationException Check for all the input parameters.
 	 */
 	public final boolean extractFields(final String batchInstanceIdentifier) throws DCMAApplicationException {
-		String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABLE_EXTRACTION_PLUGIN,
+		final String switchValue = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, TABLE_EXTRACTION_PLUGIN,
 				TableExtractionProperties.TABLE_EXTRACTION_SWITCH);
-		if (("ON").equals(switchValue)) {
+		boolean isSuccessful = true;
+		if ("ON".equalsIgnoreCase(switchValue)) {
 			String errMsg = null;
 			if (tableFinderService == null) {
 				errMsg = "No instance of TableFinderServiceImpl.";
@@ -185,6 +211,7 @@ public class TableExtraction {
 			}
 			setWidthOfLine(tableFinderService.getWidthOfLine());
 			setConfidenceScore(tableFinderService.getConfidenceScore());
+			final int gapBetweenColumnWords = tableFinderService.getGapBetweenColumnWords();
 
 			if (null == batchInstanceIdentifier) {
 				errMsg = "Invalid batchInstanceId.";
@@ -196,30 +223,28 @@ public class TableExtraction {
 
 			final Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 
-			boolean isSuccessful = false;
 			try {
 				final List<Document> docTypeList = batch.getDocuments().getDocument();
 
 				if (null == docTypeList) {
 					LOGGER.info("In valid batch documents.");
 				} else {
-					isSuccessful = processDocPage(docTypeList, batchInstanceIdentifier, batch);
+					processDocPage(docTypeList, batchInstanceIdentifier, batch, gapBetweenColumnWords);
 				}
-			} catch (DCMAApplicationException e) {
+			} catch (final DCMAApplicationException e) {
+				isSuccessful = false;
 				LOGGER.error(e.getMessage());
 				throw new DCMAApplicationException(e.getMessage(), e);
-			} catch (Exception e) {
+			} catch (final Exception e) {
+				isSuccessful = false;
 				LOGGER.error(e.getMessage());
 				throw new DCMAApplicationException(e.getMessage(), e);
 			}
-
 			batchSchemaService.updateBatch(batch);
-
-			return isSuccessful;
 		} else {
 			LOGGER.info("Skipping Table extraction. Switch set as off.");
-			return true;
 		}
+		return isSuccessful;
 	}
 
 	/**
@@ -228,24 +253,22 @@ public class TableExtraction {
 	 * @param xmlDocuments List<DocumentType>
 	 * @param batchInstanceIdentifier String
 	 * @param batch Batch
+	 * @param gapBetweenColumnWords
 	 * @return isSuccessful
 	 * @throws DCMAApplicationException Check for all the input parameters.
 	 */
-	private boolean processDocPage(final List<Document> xmlDocuments, final String batchInstanceIdentifier, final Batch batch)
-			throws DCMAApplicationException {
+	private boolean processDocPage(final List<Document> xmlDocuments, final String batchInstanceIdentifier, final Batch batch,
+			final int gapBetweenColumnWords) throws DCMAApplicationException {
 
 		boolean isSuccessful = false;
 		if (null == xmlDocuments || xmlDocuments.isEmpty()) {
 			throw new DCMAApplicationException("In valid parameters.");
 		}
 
-		DataCarrier startDataCarrier = null;
-		List<LineDataCarrier> lineDataCarrierList = null;
-		for (Document document : xmlDocuments) {
+		for (final Document document : xmlDocuments) {
 			// Create doc level fields for document.
 			createDocLevelFields(document, batchInstanceIdentifier);
 
-			startDataCarrier = null;
 			if (null == document) {
 				continue;
 			}
@@ -260,13 +283,13 @@ public class TableExtraction {
 				continue;
 			}
 
-			String batchClassIdentifier = batch.getBatchClassIdentifier();
+			final String batchClassIdentifier = batch.getBatchClassIdentifier();
 
 			if (null == batchClassIdentifier || batchClassIdentifier.isEmpty()) {
 				throw new DCMAApplicationException("Batch class identifier is null or empty...");
 			}
 
-			List<TableInfo> tableInfoList = tableInfoService.getTableInfoByDocTypeName(docTypeNameBatch, batchClassIdentifier);
+			final List<TableInfo> tableInfoList = tableInfoService.getTableInfoByDocTypeName(docTypeNameBatch, batchClassIdentifier);
 
 			if (null == tableInfoList || tableInfoList.isEmpty()) {
 				LOGGER.info("Table info list is null or empty.");
@@ -279,34 +302,22 @@ public class TableExtraction {
 				document.setDataTables(dataTables);
 			}
 
-			List<DataTable> dataTableList = dataTables.getDataTable();
+			final List<DataTable> dataTableList = dataTables.getDataTable();
 
-			startDataCarrier = readAllDataTables(tableInfoList, startDataCarrier, lineDataCarrierList, dataTableList, pageList,
-					batchInstanceIdentifier);
+			isSuccessful = readAllDataTables(tableInfoList, dataTableList, pageList, batchInstanceIdentifier, gapBetweenColumnWords);
 
 		}
 
 		return isSuccessful;
 	}
 
-	/**
-	 * This method reads all table info and extracts table accordingly.
-	 * 
-	 * @param tableInfoList
-	 * @param startDataCarrier
-	 * @param lineDataCarrierList
-	 * @param dataTableList
-	 * @param pageList
-	 * @return
-	 * @throws DCMAApplicationException
-	 */
-	private DataCarrier readAllDataTables(final List<TableInfo> tableInfoList, DataCarrier startDataCarrier,
-			List<LineDataCarrier> lineDataCarrierList, final List<DataTable> dataTableList, final List<Page> pageList,
-			final String batchInstanceIdentifier) throws DCMAApplicationException {
-
+	private boolean readAllDataTables(final List<TableInfo> tableInfoList, final List<DataTable> dataTableList,
+			final List<Page> pageList, final String batchInstanceIdentifier, final int gapBetweenColumnWords)
+			throws DCMAApplicationException {
 		// Map to store the column header info against column name.
-		Map<String, DataCarrier> colHeaderInfoMap = new HashMap<String, DataCarrier>();
-		for (TableInfo tableInfo : tableInfoList) {
+		final Map<Integer, DataCarrier> colHeaderInfoMap = new HashMap<Integer, DataCarrier>();
+		List<LineDataCarrier> lineDataCarrierList = null;
+		for (final TableInfo tableInfo : tableInfoList) {
 			if (null == tableInfo) {
 				LOGGER.info("Table info is null.");
 				continue;
@@ -317,6 +328,25 @@ public class TableExtraction {
 			final String tableName = tableInfo.getName();
 			final String startPattern = tableInfo.getStartPattern();
 			final String endPattern = tableInfo.getEndPattern();
+			String tableExtractionAPI = tableInfo.getTableExtractionAPI();
+
+			boolean regexValidationRequired = false;
+			boolean colHeaderValidationRequired = false;
+			boolean colCoordValidationRequired = false;
+			if (tableExtractionAPI != null && !tableExtractionAPI.isEmpty()) {
+				regexValidationRequired = tableExtractionAPI.toUpperCase(defaultLocale).contains(
+						TableExtractionTechnique.REGEX_VALIDATION.name());
+				colHeaderValidationRequired = tableExtractionAPI.toUpperCase(defaultLocale).contains(
+						TableExtractionTechnique.COLUMN_HEADER_VALIDATION.name());
+				colCoordValidationRequired = tableExtractionAPI.toUpperCase(defaultLocale).contains(
+						TableExtractionTechnique.COLUMN_COORDINATES_VALIDATION.name());
+			}
+			if (!regexValidationRequired && !colHeaderValidationRequired && !colCoordValidationRequired) {
+				// default case
+				tableExtractionAPI = TableExtractionTechnique.REGEX_VALIDATION.name();
+				LOGGER.info("No validation method specified by admin. Using regex validation for table extraction.");
+				regexValidationRequired = true;
+			}
 
 			if (null == tableName || tableName.isEmpty()) {
 				throw new DCMAApplicationException("Table name is null or empty.");
@@ -330,7 +360,7 @@ public class TableExtraction {
 				throw new DCMAApplicationException("Table end pattern is null or empty.");
 			}
 
-			DataTable dataTable = new DataTable();
+			final DataTable dataTable = new DataTable();
 			dataTable.setName(tableName);
 			dataTableList.add(dataTable);
 
@@ -344,9 +374,9 @@ public class TableExtraction {
 				columnsHeader = new HeaderRow.Columns();
 				headerRow.setColumns(columnsHeader);
 			}
-			List<Column> columnHeaderList = columnsHeader.getColumn();
+			final List<Column> columnHeaderList = columnsHeader.getColumn();
 
-			List<TableColumnsInfo> tableColumnsInfoList = tableInfo.getTableColumnsInfo();
+			final List<TableColumnsInfo> tableColumnsInfoList = tableInfo.getTableColumnsInfo();
 
 			if (null == tableColumnsInfoList || tableColumnsInfoList.isEmpty()) {
 				LOGGER.error("TableColumnsInfo list is null or empty.");
@@ -359,49 +389,64 @@ public class TableExtraction {
 				dataTable.setRows(rows);
 			}
 
-			List<Row> rowList = rows.getRow();
-
-			for (TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
+			final List<Row> rowList = rows.getRow();
+			boolean isMandatoryUsed = false;
+			for (final TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
 				// Create the table header first and then all the columns for the header.
-				Column column = new Column();
-				String nameOfColumn = tableColumnsInfo.getColumnName();
-				String colHeaderRegex = tableColumnsInfo.getColumnHeaderPattern();
+				final Column column = new Column();
+				final String nameOfColumn = tableColumnsInfo.getColumnName();
+				final String colHeaderRegex = tableColumnsInfo.getColumnHeaderPattern();
 				column.setName(nameOfColumn);
 				columnHeaderList.add(column);
-				colHeaderInfoMap.put(nameOfColumn, new DataCarrier(null, 0, colHeaderRegex));
+				colHeaderInfoMap.put(tableColumnsInfoList.indexOf(tableColumnsInfo), new DataCarrier(null,
+						TableExtractionConstants.ZERO, colHeaderRegex));
+				if (!isMandatoryUsed) {
+					isMandatoryUsed |= tableColumnsInfo.isMandatory();
+				}
 			}
 
-			startDataCarrier = searchAllRowOfTables(pageList, lineDataCarrierList, startDataCarrier, startPattern, endPattern,
-					batchInstanceIdentifier);
+			int defaultWidthOfMultipleLines = TableExtractionConstants.ZERO;
+			try {
+				if (tableInfo.getWidthOfMultiline() != null) {
+					defaultWidthOfMultipleLines = tableInfo.getWidthOfMultiline();
+				}
+			} catch (final NumberFormatException e) {
+				LOGGER.error("Width of multiline is either invalid or not specified.");
+			}
+
+			searchAllRowOfTables(pageList, lineDataCarrierList, startPattern, endPattern, batchInstanceIdentifier, isMandatoryUsed,
+					defaultWidthOfMultipleLines);
 			// call method to populate the columnHeaderInfoMap.
-			setColumnHeaderInfo(lineDataCarrierList, colHeaderInfoMap, tableColumnsInfoList);
-			startDataCarrier = addDataTablesValues(lineDataCarrierList, tableColumnsInfoList, rowList, startDataCarrier,
-					colHeaderInfoMap);
+			if (colHeaderValidationRequired) {
+				setColumnHeaderInfo(lineDataCarrierList, colHeaderInfoMap, tableColumnsInfoList);
+			}
+			addDataTablesValues(lineDataCarrierList, tableColumnsInfoList, rowList, colHeaderInfoMap, tableExtractionAPI,
+					regexValidationRequired, colHeaderValidationRequired, colCoordValidationRequired, gapBetweenColumnWords);
 			colHeaderInfoMap.clear();
 		}
-
-		return startDataCarrier;
+		return true;
 	}
 
 	/**
 	 * This method extracts and stores the column header information in map.
 	 * 
-	 * @param lineDataCarrierList
-	 * @param colHeaderInfoMap
-	 * @param tableColumnsInfoList
-	 * @throws DCMAApplicationException
+	 * @param lineDataCarrierList List<LineDataCarrier>
+	 * @param colHeaderInfoMap Map<Integer, DataCarrier>
+	 * @param tableColumnsInfoList List<TableColumnsInfo>
+	 * @throws DCMAApplicationException in case of errors
 	 */
-	private void setColumnHeaderInfo(final List<LineDataCarrier> lineDataCarrierList, final Map<String, DataCarrier> colHeaderInfoMap,
-			final List<TableColumnsInfo> tableColumnsInfoList) throws DCMAApplicationException {
-		for (TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
-			DataCarrier colHeaderInfo = colHeaderInfoMap.get(tableColumnsInfo.getColumnName());
+	private void setColumnHeaderInfo(final List<LineDataCarrier> lineDataCarrierList,
+			final Map<Integer, DataCarrier> colHeaderInfoMap, final List<TableColumnsInfo> tableColumnsInfoList)
+			throws DCMAApplicationException {
+		for (final TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
+			final DataCarrier colHeaderInfo = colHeaderInfoMap.get(tableColumnsInfoList.indexOf(tableColumnsInfo));
 			if (null != colHeaderInfo && null != colHeaderInfo.getValue()) {
-				for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
+				for (final LineDataCarrier lineDataCarrier : lineDataCarrierList) {
 					String rowData = null;
 					if (null != lineDataCarrier) {
 						rowData = lineDataCarrier.getLineRowData();
 						LOGGER.info("Line Row Data = " + rowData);
-						setColumnHeaderSpan(rowData, colHeaderInfo, lineDataCarrier.getSpanList());
+						setColumnHeaderSpan(rowData, colHeaderInfo, lineDataCarrier.getSpanList(), lineDataCarrier);
 						if (null != colHeaderInfo.getSpan()) {
 							LOGGER.info("Header span found for column : " + tableColumnsInfo.getColumnName() + "; Span : "
 									+ colHeaderInfo.getValue());
@@ -413,219 +458,513 @@ public class TableExtraction {
 		}
 	}
 
-	/**
-	 * This method extracts the table data.
-	 * 
-	 * @param lineDataCarrierList
-	 * @param tableColumnsInfoList
-	 * @param rowList
-	 * @param startDataCarrier
-	 * @param colHeaderInfoMap
-	 * @return
-	 * @throws DCMAApplicationException
-	 */
-	private DataCarrier addDataTablesValues(final List<LineDataCarrier> lineDataCarrierList,
-			final List<TableColumnsInfo> tableColumnsInfoList, final List<Row> rowList, DataCarrier startDataCarrier,
-			final Map<String, DataCarrier> colHeaderInfoMap) throws DCMAApplicationException {
+	private void addDataTablesValues(final List<LineDataCarrier> lineDataCarrierList,
+			final List<TableColumnsInfo> tableColumnsInfoList, final List<Row> rowList,
+			final Map<Integer, DataCarrier> colHeaderInfoMap, final String tableExtractionAPI, final boolean regexValidationRequired,
+			final boolean colHeaderValidationRequired, final boolean colCoordValidationRequired, final int gapBetweenColumnWords)
+			throws DCMAApplicationException {
 		boolean isRowAvaliable = false;
+		boolean isRowValidForAllRequiredColumns = true;
 		boolean isRowValidForAllMandatoryColumns = true;
-
-		for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
-			String pageID = lineDataCarrier.getPageID();
-			String rowData = lineDataCarrier.getLineRowData();
-			List<Span> spanList = lineDataCarrier.getSpanList();
+		final ExpressionEvaluator<Boolean> expressionEvaluator = new ExpressionEvaluator<Boolean>(tableExtractionAPI
+				.toUpperCase(defaultLocale));
+		Row previousRow = new Row();
+		for (final LineDataCarrier lineDataCarrier : lineDataCarrierList) {
+			final String pageID = lineDataCarrier.getPageID();
+			final String rowData = lineDataCarrier.getLineRowData();
+			final List<Span> spanList = lineDataCarrier.getSpanList();
 			LOGGER.info("Row Data : " + rowData);
+			isRowValidForAllRequiredColumns = true;
 			isRowValidForAllMandatoryColumns = true;
-			Row row = new Row();
+			final Row row = new Row();
 			Row.Columns columnsRow = row.getColumns();
-
 			if (null == columnsRow) {
 				columnsRow = new Row.Columns();
 				row.setColumns(columnsRow);
 			}
-
 			row.setRowCoordinates(lineDataCarrier.getRowCoordinates());
-
-			List<Column> columnRowList = columnsRow.getColumn();
+			final List<Column> columnRowList = columnsRow.getColumn();
 			isRowAvaliable = false;
-
-			for (TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
-				// Search for all the table row data one by one.
+			for (final TableColumnsInfo tableColumnsInfo : tableColumnsInfoList) {
 				LOGGER.info("Extracting column data for column = " + tableColumnsInfo.getColumnName());
-				String patternOfColumnData = tableColumnsInfo.getColumnPattern();
-				String betweenLeft = tableColumnsInfo.getBetweenLeft();
-				String betweenRight = tableColumnsInfo.getBetweenRight();
-				boolean isRequired = tableColumnsInfo.isRequired();
+				// Search for all the table row data one by one.
+				final boolean isRequired = tableColumnsInfo.isRequired();
+				final Integer columnCoordX0 = tableColumnsInfo.getColumnStartCoordinate();
+				final Integer columnCoordX1 = tableColumnsInfo.getColumnEndCoordinate();
+				final boolean isMandatory = tableColumnsInfo.isMandatory();
 
-				List<OutputDataCarrier> dataCarrierList = findPattern(rowData, patternOfColumnData, spanList);
-				Column column = new Column();
-
-				if (null == dataCarrierList || dataCarrierList.isEmpty()) {
-					LOGGER.info("No data found for table column = " + tableColumnsInfo.getColumnName());
-					createNewColumn(pageID, column, null, 0);
-					columnRowList.add(column);
-				} else {
-					createNewColumn(pageID, column, TableExtractionConstants.EMPTY, 100);
-					columnRowList.add(column);
-					isRowAvaliable = true;
-					boolean isFound = false;
-
-					for (final OutputDataCarrier outputDataCarrier : dataCarrierList) {
-						if (outputDataCarrier == null || null == outputDataCarrier.getValue() || null == outputDataCarrier.getSpan()) {
-							continue;
-						}
-						boolean isSpanValidWithColumnHeader = true;
-						String outputValue = outputDataCarrier.getValue();
-						String[] foundValArr = outputValue.split(KVFinderConstants.SPACE);
-						Span outputSpan = outputDataCarrier.getSpan();
-						final int spanIndex = lineDataCarrier.getIndexOfSpan(outputSpan);
-						List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
-						coordinatesList.add(outputSpan.getCoordinates());
-						int localSpanIndex = spanIndex;
-						if (null != foundValArr && foundValArr.length > 1) {
-							for (int index = 0; index < foundValArr.length; index++, localSpanIndex++) {
-								Span rightSpan = lineDataCarrier.getRightSpan(localSpanIndex);
-								if (null != rightSpan) {
-									coordinatesList.add(rightSpan.getCoordinates());
-								}
-							}
-						}
-						LOGGER.info("Getting rectangle coordinates for the value: " + outputValue);
-						Coordinates valueCoordinates = getValueCoordinates(coordinatesList);
-						if (!isFound && null != colHeaderInfoMap && !colHeaderInfoMap.isEmpty()) {
-							DataCarrier dataCarrier = colHeaderInfoMap.get(tableColumnsInfo.getColumnName());
-							// If no column header is specified by admin, do not apply column header verification.
-							if (null != dataCarrier && null != dataCarrier.getValue()) {
-								LOGGER.info("Checking if the value: " + outputSpan.getValue()
-										+ " is valid with respect to column header: " + dataCarrier);
-								isSpanValidWithColumnHeader = isValidCoordinatesWithColumnHeader(valueCoordinates, dataCarrier
-										.getSpan());
-								LOGGER.info(outputSpan.getValue() + " valid with column header : " + isSpanValidWithColumnHeader);
-							}
-						}
-						if (!isFound && isSpanValidWithColumnHeader) {
-							column.setValue(outputValue);
-							setColumnCoordinates(coordinatesList, column);
-							// Validate the field with left right pattern specified by admin.
-							if (betweenLeft != null && !betweenLeft.isEmpty()) {
-								if (betweenRight != null && !betweenRight.isEmpty()) {
-									Span leftSpan = lineDataCarrier.getLeftSpan(spanIndex);
-									if (null == leftSpan) {
-										LOGGER.info("Left Span is null. betweenLeft = " + betweenLeft);
-										continue;
-									}
-									Span rightSpan = lineDataCarrier.getRightSpan(spanIndex);
-									if (null == rightSpan) {
-										LOGGER.info("Right Span is null. betweenRight = " + betweenRight);
-										continue;
-									}
-									DataCarrier leftDataCarrier = findPattern(leftSpan, betweenLeft);
-									DataCarrier rightDataCarrier = findPattern(rightSpan, betweenRight);
-									if (null != leftDataCarrier && null != rightDataCarrier) {
-										LOGGER.info("Between left found = " + leftDataCarrier.getValue());
-										LOGGER.info("Between left found = " + rightDataCarrier.getValue());
-										column.setValid(true);
-										isFound = true;
-										continue;
-									}
-								} else {
-									Span leftSpan = lineDataCarrier.getLeftSpan(spanIndex);
-									if (null == leftSpan) {
-										LOGGER.info("Left Span is null. betweenLeft = " + betweenLeft);
-										continue;
-									}
-									DataCarrier leftDataCarrier = findPattern(leftSpan, betweenLeft);
-									if (null != leftDataCarrier) {
-										LOGGER.info("Between left found = " + leftDataCarrier.getValue());
-										column.setValid(true);
-										isFound = true;
-										continue;
-									}
-								}
-							} else {
-								if (betweenRight != null && !betweenRight.isEmpty()) {
-									Span rightSpan = lineDataCarrier.getRightSpan(spanIndex);
-									if (null == rightSpan) {
-										LOGGER.info("Right Span is null. betweenRight = " + betweenRight);
-										continue;
-									}
-									DataCarrier rightDataCarrier = findPattern(rightSpan, betweenRight);
-									if (null != rightDataCarrier) {
-										LOGGER.info("Between left found = " + rightDataCarrier.getValue());
-										column.setValid(true);
-										isFound = true;
-										continue;
-									}
-								} else {
-									column.setValid(true);
-								}
-							}
-						}
-						addAlternateValues(column, pageID, outputSpan);
+				final Column column = new Column();
+				setColumnProperties(pageID, column, null, TableExtractionConstants.ZERO);
+				columnRowList.add(column);
+				DataCarrier colHeaderDataCarrier = null;
+				final Integer indexOfTableColumn = tableColumnsInfoList.indexOf(tableColumnsInfo);
+				if (null != colHeaderInfoMap && !colHeaderInfoMap.isEmpty()) {
+					colHeaderDataCarrier = colHeaderInfoMap.get(indexOfTableColumn);
+				}
+				boolean isRegexValidationPassed = false;
+				boolean isColHeaderValidationPassed = false;
+				boolean isColCoordValidationPassed = false;
+				boolean furtherValidationRequired = true;
+				Coordinates valueCoordinates = null;
+				if (colHeaderValidationRequired) {
+					isColHeaderValidationPassed = applyColumnHeaderValidation(gapBetweenColumnWords, lineDataCarrier, spanList,
+							column, colHeaderDataCarrier, isColHeaderValidationPassed);
+					valueCoordinates = HocrUtil.getRectangleCoordinates(column.getCoordinatesList().getCoordinates());
+				}
+				if (isDataValid(expressionEvaluator, false, isColHeaderValidationPassed, false)
+						|| !isDataValid(expressionEvaluator, true, isColHeaderValidationPassed, true)) {
+					LOGGER.info("No further validation required.....");
+					furtherValidationRequired = false;
+				}
+				if (furtherValidationRequired && colCoordValidationRequired) {
+					LOGGER.info("Applying Column Coordinates Validation for table extraction....");
+					if (isDataValid(expressionEvaluator, false, false, true)) {
+						isColCoordValidationPassed = getColumnDataByColCoordValidation(columnCoordX0, columnCoordX1, column, spanList);
+					} else if (isColHeaderValidationPassed
+							&& valueCoordinates != null
+							&& isColumnValidWithColCoord(valueCoordinates.getX0().intValue(), valueCoordinates.getX1().intValue(),
+									columnCoordX0, columnCoordX1)) {
+						isColCoordValidationPassed = true;
+					} else {
+						isColCoordValidationPassed = getColumnDataByColCoordValidation(columnCoordX0, columnCoordX1, column, spanList);
+					}
+					LOGGER.info("Getting rectangle coordinates for the value. ");
+					valueCoordinates = HocrUtil.getRectangleCoordinates(column.getCoordinatesList().getCoordinates());
+					if ((isDataValid(expressionEvaluator, false, isColHeaderValidationPassed, isColCoordValidationPassed) || !isDataValid(
+							expressionEvaluator, true, isColHeaderValidationPassed, isColCoordValidationPassed))) {
+						LOGGER.info("No further validation required....");
+						furtherValidationRequired = false;
+					}
+					if (isColCoordValidationPassed) {
+						column.setValid(Boolean.TRUE);
 					}
 				}
-				// Checking if row contains valid data for every mandatory column
-				LOGGER.info("Checking if row contains valid data for every mandatory column");
+				if (furtherValidationRequired && regexValidationRequired) {
+					isRegexValidationPassed = applyRegexForTableExtraction(expressionEvaluator, lineDataCarrier, pageID, rowData,
+							spanList, tableColumnsInfo, column, valueCoordinates);
+				}
+				if (isDataValid(expressionEvaluator, isRegexValidationPassed, isColHeaderValidationPassed, isColCoordValidationPassed)) {
+					isRowAvaliable = true;
+					LOGGER.info("Data valid with respect to all te validadtions..");
+				} else {
+					setColumnProperties(pageID, column, TableExtractionConstants.EMPTY, TableExtractionConstants.ZERO);
+				}
+				LOGGER.info("Checking if row contains valid data for required columns...");
 				if (isRequired && !column.isValid()) {
+					LOGGER.info("Data not valid for required column: " + column.getName());
+					isRowValidForAllRequiredColumns = false;
+					break;
+				}
+				LOGGER.info("Checking if row contains valid data for mandatory columns...");
+				if (isRowValidForAllMandatoryColumns && isMandatory && (column.getValue() == null || column.getValue().isEmpty())) {
 					isRowValidForAllMandatoryColumns = false;
-					LOGGER.info("Data Not valid for required column: " + column.getName());
 				}
 			}
-			if (isRowAvaliable && isRowValidForAllMandatoryColumns) {
-				LOGGER.info("Adding row to the row list.");
-				rowList.add(row);
-				startDataCarrier = null;
+			if (isRowAvaliable && isRowValidForAllRequiredColumns) {
+				LOGGER.info("Merging rows of multiline data...");
+				if (!isRowValidForAllMandatoryColumns && previousRow.getColumns() != null) {
+					mergeMultilineRows(previousRow, columnRowList);
+					setMergedRowCoordinates(previousRow, row);
+				} else {
+					LOGGER.info("Adding row to the row list...");
+					rowList.add(row);
+					previousRow = row;
+				}
 			}
-
 		}
-		return startDataCarrier;
 	}
 
 	/**
-	 * This method gets the rectangle coordinates for the value.
+	 * This method merges the value and coordinates of the multiline rows.
 	 * 
-	 * @param coordinatesList
-	 * @return Coordinates
+	 * @param previousRow {@link Row}
+	 * @param currentRowColumnsList {@link List<{@link Column}>}
 	 */
-	private Coordinates getValueCoordinates(final List<Coordinates> coordinatesList) {
-		long minX0 = 0;
-		long minY0 = 0;
-		long maxX1 = 0;
-		long maxY1 = 0;
-		Coordinates recCoord = new Coordinates();
-		boolean isFirstCoord = true;
-		for (Coordinates coordinate : coordinatesList) {
-			if (isFirstCoord) {
-				recCoord = coordinate;
-				isFirstCoord = false;
-			} else {
-				minX0 = recCoord.getX0().longValue();
-				minY0 = recCoord.getY0().longValue();
-				maxX1 = recCoord.getX1().longValue();
-				maxY1 = recCoord.getY1().longValue();
-				long coordX0 = coordinate.getX0().longValue();
-				long coordY0 = coordinate.getY0().longValue();
-				long coordX1 = coordinate.getX1().longValue();
-				long coordY1 = coordinate.getY1().longValue();
-				if (coordX0 < minX0) {
-					recCoord.setX0(coordinate.getX0());
+	private void mergeMultilineRows(Row previousRow, final List<Column> currentRowColumnsList) {
+		List<Column> previousRowColumnsList = previousRow.getColumns().getColumn();
+		Iterator<Column> previousRowColumnsListIterator = previousRowColumnsList.iterator();
+		Iterator<Column> currentRowColumnsListIterator = currentRowColumnsList.iterator();
+
+		while (previousRowColumnsListIterator.hasNext() && currentRowColumnsListIterator.hasNext()) {
+			Column previousRowColumn = previousRowColumnsListIterator.next();
+			Column currentRowColumn = currentRowColumnsListIterator.next();
+			if (validateColumnForMerging(currentRowColumn)) {
+				StringBuilder newColumnValue = new StringBuilder();
+				if (previousRowColumn != null && previousRowColumn.getValue() != null && !previousRowColumn.getValue().isEmpty()) {
+					newColumnValue.append(previousRowColumn.getValue());
+					newColumnValue.append(TableExtractionConstants.SPACE);
 				}
-				if (coordY0 < minY0) {
-					recCoord.setY0(coordinate.getY0());
+				newColumnValue.append(currentRowColumn.getValue());
+				previousRowColumn.setValue(newColumnValue.toString());
+				if (previousRowColumn.getCoordinatesList() == null) {
+					previousRowColumn.setCoordinatesList(new CoordinatesList());
 				}
-				if (coordX1 > maxX1) {
-					recCoord.setX1(coordinate.getX1());
-				}
-				if (coordY1 > maxY1) {
-					recCoord.setY1(coordinate.getY1());
+				for (Coordinates coordinates : currentRowColumn.getCoordinatesList().getCoordinates()) {
+					previousRowColumn.getCoordinatesList().getCoordinates().add(coordinates);
 				}
 			}
 		}
-		return recCoord;
 	}
 
-	private void createNewColumn(final String pageID, final Column column, final String value, final float confidence) {
-		Column.AlternateValues alternateValues = new Column.AlternateValues();
+	/**
+	 * This column validates a column for merging.
+	 * 
+	 * @param column {@link Column}
+	 * @return boolean {@link boolean}
+	 */
+	private boolean validateColumnForMerging(final Column column) {
+		if (column != null && column.getValue() != null && !column.getValue().isEmpty() && column.getCoordinatesList() != null
+				&& !column.getCoordinatesList().getCoordinates().isEmpty()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * This method gets the rectangle coordinates for the new merged row value.
+	 * 
+	 * @param coordinatesList {@link Row}
+	 * @param currentRow {@link Row}
+	 */
+	private void setMergedRowCoordinates(Row previousRow, final Row currentRow) {
+		final Coordinates coordinates = new Coordinates();
+		BigInteger minX0 = BigInteger.ZERO;
+		BigInteger minY0 = BigInteger.ZERO;
+		BigInteger maxX1 = BigInteger.ZERO;
+		BigInteger maxY1 = BigInteger.ZERO;
+
+		final Coordinates previousRowCoordinates = previousRow.getRowCoordinates();
+		if (previousRowCoordinates == null) {
+			return;
+		}
+		final BigInteger previousRowX0 = previousRowCoordinates.getX0();
+		final BigInteger previousRowY0 = previousRowCoordinates.getY0();
+		final BigInteger previousRowX1 = previousRowCoordinates.getX1();
+		final BigInteger previousRowY1 = previousRowCoordinates.getY1();
+
+		final Coordinates currentRowCoordinates = currentRow.getRowCoordinates();
+		if (currentRowCoordinates == null) {
+			return;
+		}
+		final BigInteger currentRowX0 = currentRowCoordinates.getX0();
+		final BigInteger currentRowY0 = currentRowCoordinates.getY0();
+		final BigInteger currentRowX1 = currentRowCoordinates.getX1();
+		final BigInteger currentRowY1 = currentRowCoordinates.getY1();
+
+		if (previousRowX0.compareTo(currentRowX0) < TableExtractionConstants.ZERO) {
+			minX0 = previousRowX0;
+		} else {
+			minX0 = currentRowX0;
+		}
+		if (previousRowY0.compareTo(currentRowY0) < TableExtractionConstants.ZERO) {
+			minY0 = previousRowY0;
+		} else {
+			minY0 = currentRowY0;
+		}
+		if (previousRowX1.compareTo(currentRowX1) > TableExtractionConstants.ZERO) {
+			maxX1 = previousRowX1;
+		} else {
+			maxX1 = currentRowX1;
+		}
+		if (previousRowY1.compareTo(currentRowY1) > TableExtractionConstants.ZERO) {
+			maxY1 = previousRowY1;
+		} else {
+			maxY1 = currentRowY1;
+		}
+
+		coordinates.setX0(minX0);
+		coordinates.setX1(maxX1);
+		coordinates.setY0(minY0);
+		coordinates.setY1(maxY1);
+		previousRow.setRowCoordinates(coordinates);
+	}
+
+	private boolean applyColumnHeaderValidation(final int gapBetweenColumnWords, final LineDataCarrier lineDataCarrier,
+			final List<Span> spanList, final Column column, DataCarrier colHeaderDataCarrier, boolean isColHeaderValidationPassed) {
+		boolean tempColHeaderValidation = isColHeaderValidationPassed;
+		LOGGER.info("Applying Column Header Validation for table extraction....");
+		if (null != colHeaderDataCarrier && null != colHeaderDataCarrier.getValue()) {
+			tempColHeaderValidation = getColumnDataByHeaderValidation(colHeaderDataCarrier, column, spanList, lineDataCarrier,
+					gapBetweenColumnWords);
+		}
+		LOGGER.info("Getting rectangle coordinates for the value. ");
+		return tempColHeaderValidation;
+	}
+
+	private boolean applyRegexForTableExtraction(final ExpressionEvaluator<Boolean> expressionEvaluator,
+			final LineDataCarrier lineDataCarrier, final String pageID, final String rowData, final List<Span> spanList,
+			final TableColumnsInfo tableColumnsInfo, final Column column, Coordinates valueCoordinates)
+			throws DCMAApplicationException {
+		boolean isRegexValidationPassed;
+		LOGGER.info("Applying Regex Validation for table extraction ..... ");
+		if (isDataValid(expressionEvaluator, true, false, false)) {
+			isRegexValidationPassed = applyRegexValidation(lineDataCarrier, tableColumnsInfo, column, null, spanList, rowData, pageID);
+		} else {
+			isRegexValidationPassed = applyRegexValidation(lineDataCarrier, tableColumnsInfo, column, valueCoordinates, spanList,
+					rowData, pageID);
+		}
+		return isRegexValidationPassed;
+	}
+
+	private boolean applyRegexValidation(final LineDataCarrier lineDataCarrier, final TableColumnsInfo tableColumnsInfo,
+			final Column column, final Coordinates columnCoordinates, final List<Span> spanList, final String rowData,
+			final String pageID) throws DCMAApplicationException {
+		LOGGER.info("Applying Regex Validation for table extraction ..... ");
+		boolean isRegexValidationPassed = false;
+		LOGGER.info("Extracting column data for column = " + tableColumnsInfo.getColumnName());
+		final String patternOfColumnData = tableColumnsInfo.getColumnPattern();
+		final String betweenLeft = tableColumnsInfo.getBetweenLeft();
+		final String betweenRight = tableColumnsInfo.getBetweenRight();
+		LOGGER.info("Column Pattern : " + patternOfColumnData);
+		LOGGER.info("Between Left Pattern : " + betweenLeft);
+		LOGGER.info("Between Right Pattern : " + betweenRight);
+		if (patternOfColumnData != null && !patternOfColumnData.isEmpty()) {
+			final List<DataCarrier> dataCarrierList = findPattern(rowData, patternOfColumnData, spanList);
+			if (null == dataCarrierList || dataCarrierList.isEmpty()) {
+				LOGGER.info("No data found for table column = " + tableColumnsInfo.getColumnName());
+			} else {
+				isRegexValidationPassed = applyValidations(lineDataCarrier, column, columnCoordinates, pageID,
+						isRegexValidationPassed, betweenLeft, betweenRight, dataCarrierList);
+			}
+		}
+		return isRegexValidationPassed;
+	}
+
+	private boolean applyValidations(final LineDataCarrier lineDataCarrier, final Column column, final Coordinates columnCoordinates,
+			final String pageID, boolean isRegexValidationPassed, final String betweenLeft, final String betweenRight,
+			final List<DataCarrier> dataCarrierList) throws DCMAApplicationException {
+		boolean isValidationPassed = isRegexValidationPassed;
+		column.setValue(TableExtractionConstants.EMPTY);
+		column.setConfidence(TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE);
+		boolean isFound = false;
+		for (final DataCarrier outputDataCarrier : dataCarrierList) {
+			if (outputDataCarrier == null || null == outputDataCarrier.getValue() || null == outputDataCarrier.getSpan()) {
+				continue;
+			}
+			final String outputValue = outputDataCarrier.getValue();
+			final String[] foundValArr = outputValue.split(KVFinderConstants.SPACE);
+			final Span outputSpan = outputDataCarrier.getSpan();
+			final Integer spanIndex = lineDataCarrier.getIndexOfSpan(outputSpan);
+			final List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
+			coordinatesList.add(outputSpan.getCoordinates());
+			boolean isValid = true;
+			if (spanIndex != null) {
+				if (null != foundValArr && foundValArr.length > 1) {
+					addCoordinateSpan(lineDataCarrier, foundValArr, spanIndex, coordinatesList);
+				}
+				final Coordinates valCoordinates = HocrUtil.getRectangleCoordinates(coordinatesList);
+				if (valCoordinates != null
+						&& columnCoordinates != null
+						&& !isColumnValidWithColCoord(valCoordinates.getX0().intValue(), valCoordinates.getX1().intValue(),
+								columnCoordinates.getX0().intValue(), columnCoordinates.getX1().intValue())) {
+					isValid = false;
+				}
+				if (isValid) {
+					if (!isFound) {
+						column.setValid(true);
+						isValidationPassed = true;
+						column.setValue(outputValue);
+						setColumnCoordinates(coordinatesList, column);
+						// Validate the field with left right pattern specified by admin.
+						if (betweenLeft != null && !betweenLeft.isEmpty()) {
+							if (betweenRight != null && !betweenRight.isEmpty()) {
+								final Span leftSpan = lineDataCarrier.getLeftSpan(spanIndex);
+								if (null == leftSpan) {
+									LOGGER.info("Left Span is null. betweenLeft = " + betweenLeft);
+									continue;
+								}
+								final Span rightSpan = lineDataCarrier.getRightSpan(spanIndex);
+								if (null == rightSpan) {
+									LOGGER.info("Right Span is null. betweenRight = " + betweenRight);
+									continue;
+								}
+								final DataCarrier leftDataCarrier = findPattern(leftSpan, betweenLeft);
+								final DataCarrier rightDataCarrier = findPattern(rightSpan, betweenRight);
+								if (null != leftDataCarrier && null != rightDataCarrier) {
+									LOGGER.info("Between left found = " + leftDataCarrier.getValue());
+									LOGGER.info("Between right found = " + rightDataCarrier.getValue());
+									column.setValid(true);
+									isFound = true;
+									continue;
+								}
+							} else {
+								final Span leftSpan = lineDataCarrier.getLeftSpan(spanIndex);
+								if (null == leftSpan) {
+									LOGGER.info("Left Span is null. betweenLeft = " + betweenLeft);
+									continue;
+								}
+								final DataCarrier leftDataCarrier = findPattern(leftSpan, betweenLeft);
+								if (null != leftDataCarrier) {
+									LOGGER.info("Between left found = " + leftDataCarrier.getValue());
+									column.setValid(true);
+									isFound = true;
+									continue;
+								}
+							}
+						} else {
+							if (betweenRight != null && !betweenRight.isEmpty()) {
+								final Span rightSpan = lineDataCarrier.getRightSpan(spanIndex);
+								if (null == rightSpan) {
+									LOGGER.info("Right Span is null. betweenRight = " + betweenRight);
+									continue;
+								}
+								final DataCarrier rightDataCarrier = findPattern(rightSpan, betweenRight);
+								if (null != rightDataCarrier) {
+									LOGGER.info("Between left found = " + rightDataCarrier.getValue());
+									column.setValid(true);
+									isFound = true;
+									continue;
+								}
+							} else {
+								column.setValid(true);
+								isFound = true;
+							}
+						}
+					}
+					addAlternateValues(column, pageID, outputSpan);
+				}
+			}
+		}
+		return isValidationPassed;
+	}
+
+	private void addCoordinateSpan(final LineDataCarrier lineDataCarrier, final String[] foundValArr, final Integer spanIndex,
+			final List<Coordinates> coordinatesList) {
+		for (int localSpanIndex = spanIndex, count = 0; count < foundValArr.length - 1; localSpanIndex++, count++) {
+			final Span rightSpan = lineDataCarrier.getRightSpan(localSpanIndex);
+			if (null != rightSpan) {
+				coordinatesList.add(rightSpan.getCoordinates());
+			}
+		}
+	}
+
+	private boolean isDataValid(final ExpressionEvaluator<Boolean> expressionEvaluator, final boolean isRegexValidationPassed,
+			final boolean isColumnHeaderValidationPassed, final boolean isColumnCoordValidationPassed) {
+		boolean isDataValid = false;
+		try {
+			expressionEvaluator.putValue(TableExtractionTechnique.REGEX_VALIDATION.name(), Boolean.valueOf(isRegexValidationPassed));
+			expressionEvaluator.putValue(TableExtractionTechnique.COLUMN_HEADER_VALIDATION.name(), Boolean
+					.valueOf(isColumnHeaderValidationPassed));
+			expressionEvaluator.putValue(TableExtractionTechnique.COLUMN_COORDINATES_VALIDATION.name(), Boolean
+					.valueOf(isColumnCoordValidationPassed));
+			isDataValid = expressionEvaluator.eval();
+		} catch (final ScriptException se) {
+			LOGGER.error("Exception occurred while ", se);
+		}
+		return isDataValid;
+	}
+
+	/**
+	 * This method extracts the column data based on the column coordinates.
+	 * 
+	 * @param columnCoordX0 {@link Integer}
+	 * @param columnCoordX1 {@link Integer}
+	 * @param column {@link Column}
+	 * @param spanList {@link List<{@link Span}>}
+	 * @return boolean
+	 */
+	private boolean getColumnDataByColCoordValidation(final Integer columnCoordX0, final Integer columnCoordX1, final Column column,
+			final List<Span> spanList) {
+		LOGGER.info("Applying Column Coordinates Validation for table extraction ..... ");
+		final StringBuffer outputValue = new StringBuffer();
+		final CoordinatesList coordinatesList = new CoordinatesList();
+		boolean isColCoordValidationPassed = false;
+		for (final Span span : spanList) {
+			if (span != null && span.getValue() != null && !span.getValue().isEmpty() && span.getCoordinates() != null) {
+				final Coordinates coordinates = span.getCoordinates();
+				LOGGER.info("Checking if the value: " + span.getValue() + " is valid with respect to column coordinates: X0="
+						+ columnCoordX0 + " ,X1=" + columnCoordX1);
+				if (isColumnValidWithColCoord(coordinates.getX0().intValue(), coordinates.getX1().intValue(), columnCoordX0,
+						columnCoordX1)) {
+					LOGGER.info(span.getValue() + " valid with column coordinates .");
+					appendToColumnData(outputValue, coordinatesList, span);
+				}
+			}
+		}
+		if (outputValue.length() > 0 && coordinatesList != null) {
+			LOGGER.info("Column value = " + outputValue);
+			column.setValue(outputValue.toString());
+			column.setCoordinatesList(coordinatesList);
+			isColCoordValidationPassed = true;
+		}
+		LOGGER.info("Column coordinate validation passed = " + isColCoordValidationPassed);
+		return isColCoordValidationPassed;
+	}
+
+	/**
+	 * This method will extract the column data by applying column header validation and column coordinates validation, if needed.
+	 * Column coordinates validation will be applied based on the value of colCoordalidationRequired.
+	 * 
+	 * @param colHeaderDataCarrier {@link DataCarrier}
+	 * @param column {@link Column}
+	 * @param spanList {@link List<{@link Span}>}
+	 * @param lineDataCarrier {@link LineDataCarrier}
+	 * @param gapBetweenColumnWords int
+	 * @return boolean
+	 */
+	private boolean getColumnDataByHeaderValidation(final DataCarrier colHeaderDataCarrier, final Column column,
+			final List<Span> spanList, final LineDataCarrier lineDataCarrier, final int gapBetweenColumnWords) {
+		LOGGER.info("Applying Column Header Validation for table extraction ..... ");
+		final StringBuffer outputValue = new StringBuffer();
+		final CoordinatesList coordinatesList = new CoordinatesList();
+		boolean isColHeaderValidationPassed = false;
+		List<Span> leftSpanList = null;
+		List<Span> rightSpanList = null;
+		boolean isFirst = true;
+		Span lastSpan = null;
+		for (final Span span : spanList) {
+			if (span != null && span.getValue() != null && !span.getValue().isEmpty() && span.getCoordinates() != null) {
+				final Coordinates coordinates = span.getCoordinates();
+				LOGGER.info("Checking if the value: " + span.getValue() + " is valid with respect to column header: "
+						+ colHeaderDataCarrier.getValue());
+				if (isValidCoordinatesWithColumnHeader(coordinates, colHeaderDataCarrier.getSpan())) {
+					LOGGER.info(span.getValue() + " valid with column header.");
+					lastSpan = span;
+					if (isFirst) {
+						isFirst = false;
+						appendToColumnData(outputValue, coordinatesList, span);
+						leftSpanList = lineDataCarrier.appendSpansLeft(span, gapBetweenColumnWords);
+						if (leftSpanList != null && !leftSpanList.isEmpty()) {
+							for (final Span leftSpan : leftSpanList) {
+								if (leftSpan.getValue() != null) {
+									appendToColumnData(outputValue, coordinatesList, leftSpan);
+								}
+							}
+						}
+					} else {
+						appendToColumnData(outputValue, coordinatesList, span);
+					}
+				}
+			}
+		}
+		if (!outputValue.toString().isEmpty() && coordinatesList != null) {
+			rightSpanList = lineDataCarrier.appendSpansRight(lastSpan, gapBetweenColumnWords);
+			if (rightSpanList != null && !rightSpanList.isEmpty()) {
+				for (final Span rightSpan : rightSpanList) {
+					if (rightSpan.getValue() != null) {
+						appendToColumnData(outputValue, coordinatesList, rightSpan);
+					}
+				}
+			}
+			LOGGER.info(outputValue + " added to column value.");
+			column.setValue(outputValue.toString());
+			column.setValid(Boolean.TRUE);
+			column.setCoordinatesList(coordinatesList);
+			isColHeaderValidationPassed = true;
+		}
+		LOGGER.info("Column header validation passed = " + isColHeaderValidationPassed);
+		return isColHeaderValidationPassed;
+	}
+
+	private void appendToColumnData(final StringBuffer outputValue, final CoordinatesList coordinatesList, final Span span) {
+		outputValue.append(span.getValue());
+		outputValue.append(TableExtractionConstants.SPACE);
+		coordinatesList.getCoordinates().add(span.getCoordinates());
+	}
+
+	private void setColumnProperties(final String pageID, final Column column, final String value, final float confidence) {
+		final Column.AlternateValues alternateValues = new Column.AlternateValues();
 		column.setName(null);
 		column.setConfidence(confidence);
 		column.setPage(pageID);
@@ -635,24 +974,17 @@ public class TableExtraction {
 		column.setValue(value);
 	}
 
-	/**
-	 * This method adds alternate value to the column.
-	 * 
-	 * @param column
-	 * @param pageID
-	 * @param outputSpan
-	 */
 	private void addAlternateValues(final Column column, final String pageID, final Span outputSpan) {
-		Coordinates hocrCoordinates = outputSpan.getCoordinates();
+		final Coordinates hocrCoordinates = outputSpan.getCoordinates();
 		if (null != outputSpan && null != outputSpan.getValue() && null != hocrCoordinates) {
-			Field alternateValue = new Field();
+			final Field alternateValue = new Field();
 			alternateValue.setValue(outputSpan.getValue());
 			alternateValue.setName(null);
-			alternateValue.setConfidence(100);
+			alternateValue.setConfidence(TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE);
 			alternateValue.setPage(pageID);
-			CoordinatesList coordinatesList = new CoordinatesList();
+			final CoordinatesList coordinatesList = new CoordinatesList();
 			alternateValue.setCoordinatesList(coordinatesList);
-			Coordinates coordinates = new Coordinates();
+			final Coordinates coordinates = new Coordinates();
 			coordinates.setX0(hocrCoordinates.getX0());
 			coordinates.setX1(hocrCoordinates.getX1());
 			coordinates.setY0(hocrCoordinates.getY0());
@@ -663,164 +995,185 @@ public class TableExtraction {
 		}
 	}
 
-	/**
-	 * This method checks if span is valid with respect to the column header specified by admin and if is valid, then adds the
-	 * coordinates of current span to the coordinates list of a column.
-	 * 
-	 * @param coordinatesList
-	 * @param column
-	 * @param colHeaderInfoMap
-	 */
 	private void setColumnCoordinates(final List<Coordinates> coordinatesList, final Column column) {
 		if (null != column && null != coordinatesList && !coordinatesList.isEmpty()) {
 			column.getCoordinatesList().getCoordinates().clear();
-			for (Coordinates coordinates : coordinatesList) {
+			for (final Coordinates coordinates : coordinatesList) {
 				column.getCoordinatesList().getCoordinates().add(coordinates);
 			}
 		}
 	}
 
-	/**
-	 * Method to check if span is valid with respect to the column header specified by admin.
-	 * 
-	 * @param valueCorodinates
-	 * @param headerSpan
-	 * @return
-	 */
-	private boolean isValidCoordinatesWithColumnHeader(final Coordinates valueCorodinates, final Span headerSpan) {
+	private boolean isValidCoordinatesWithColumnHeader(final Coordinates valueCoordinates, final Span headerSpan) {
+		LOGGER.info("Entering method isValidCoordinatesWithColumnHeader.");
 		Coordinates headerSpanHocrCoordinates = null;
 		boolean isValid = false;
-		if (null != headerSpan && null != valueCorodinates && null != headerSpan.getCoordinates()) {
+		if (null != headerSpan && null != valueCoordinates && null != headerSpan.getCoordinates()) {
 			headerSpanHocrCoordinates = headerSpan.getCoordinates();
-			BigInteger outputSpanX0 = valueCorodinates.getX0();
-			BigInteger outputSpanX1 = valueCorodinates.getX1();
-			BigInteger headerSpanX0 = headerSpanHocrCoordinates.getX0();
-			BigInteger headerSpanX1 = headerSpanHocrCoordinates.getX1();
-			LOGGER.info("Header Column Coordinates: X0=" + outputSpanX0.intValue() + " ,X1=" + outputSpanX1.intValue());
-			if ((outputSpanX0.compareTo(headerSpanX0) == 1 && outputSpanX0.compareTo(headerSpanX1) == -1)
-					|| (outputSpanX1.compareTo(headerSpanX0) == 1 && outputSpanX1.compareTo(headerSpanX1) == -1)
-					|| (outputSpanX0.compareTo(headerSpanX0) == -1 && outputSpanX1.compareTo(headerSpanX1) == 1)
-					|| outputSpanX0.compareTo(headerSpanX0) == 0 || outputSpanX1.compareTo(headerSpanX1) == 0) {
+			final BigInteger outputSpanX0 = valueCoordinates.getX0();
+			final BigInteger outputSpanX1 = valueCoordinates.getX1();
+			final BigInteger outputSpanY0 = valueCoordinates.getY0();
+			final BigInteger headerSpanX0 = headerSpanHocrCoordinates.getX0();
+			final BigInteger headerSpanX1 = headerSpanHocrCoordinates.getX1();
+			final BigInteger headerSpanY1 = headerSpanHocrCoordinates.getY1();
+			LOGGER.info("Value Coordinates: X0=" + outputSpanX0 + ", X1=" + outputSpanX1 + ", Y0=" + outputSpanY0);
+			LOGGER.info("Column Header Coordinates: X0=" + headerSpanX0 + ", X1=" + headerSpanX1 + ", Y1=" + headerSpanY1);
+			if (outputSpanX0 != null
+					&& outputSpanX0 != null
+					&& outputSpanY0 != null
+					&& headerSpanX0 != null
+					&& headerSpanX1 != null
+					&& headerSpanY1 != null
+					&& (outputSpanY0.compareTo(headerSpanY1) == 1 && ((outputSpanX0.compareTo(headerSpanX0) == 1 && outputSpanX0
+							.compareTo(headerSpanX1) == -1)
+							|| (outputSpanX1.compareTo(headerSpanX0) == 1 && outputSpanX1.compareTo(headerSpanX1) == -1)
+							|| (outputSpanX0.compareTo(headerSpanX0) == -1 && outputSpanX1.compareTo(headerSpanX1) == 1)
+							|| outputSpanX0.compareTo(headerSpanX0) == 0 || outputSpanX1.compareTo(headerSpanX1) == 0))) {
 				isValid = true;
 			}
+			LOGGER.info("Is span valid with column header : " + isValid);
 		}
+		LOGGER.info("Exiting method isValidCoordinatesWithColumnHeader.");
 		return isValid;
 	}
 
-	/**
-	 * This method extracts all the rows, i.e, all rows between start and end pattern.
-	 * 
-	 * @param pageList
-	 * @param lineDataCarrierList
-	 * @param startDataCarrier
-	 * @param startPattern
-	 * @param endPattern
-	 * @return
-	 * @throws DCMAApplicationException
-	 */
-	private DataCarrier searchAllRowOfTables(final List<Page> pageList, final List<LineDataCarrier> lineDataCarrierList,
-			DataCarrier startDataCarrier, final String startPattern, final String endPattern, final String batchInstanceIdentifier)
-			throws DCMAApplicationException {
+	private boolean isColumnValidWithColCoord(final Integer valueX0, final Integer valueX1, final Integer columnX0,
+			final Integer columnX1) {
+		LOGGER.info("Entering method isColumnValidWithColCoord.....");
+		boolean isValid = false;
+		LOGGER.info("Column Coordinates: X0=" + valueX0 + " ,X1=" + valueX1);
+		LOGGER.info("Value Coordinates: X0=" + columnX0 + " ,X1=" + columnX1);
+		if (valueX0 != null
+				&& valueX1 != null
+				&& columnX0 != null
+				&& columnX0 != null
+				&& (columnX0 != 0 || columnX1 != 0)
+				&& ((valueX0.compareTo(columnX0) == 1 && valueX0.compareTo(columnX1) == -1)
+						|| (valueX1.compareTo(columnX0) == 1 && valueX1.compareTo(columnX1) == -1)
+						|| (valueX0.compareTo(columnX0) == -1 && valueX1.compareTo(columnX1) == 1)
+						|| valueX0.compareTo(columnX0) == TableExtractionConstants.ZERO || valueX1.compareTo(columnX1) == TableExtractionConstants.ZERO)) {
+			isValid = true;
+		}
+		LOGGER.info("Is value coordinates valid with column coordinates : " + isValid);
+		LOGGER.info("Exiting method isColumnValidWithColCoord.....");
+		return isValid;
+	}
 
+	private void searchAllRowOfTables(final List<Page> pageList, final List<LineDataCarrier> lineDataCarrierList,
+			final String startPattern, final String endPattern, final String batchInstanceIdentifier, final boolean isMandatoryUsed,
+			final int defaultWidthOfMultline) throws DCMAApplicationException {
+		List<DataCarrier> startDataCarrier = null;
 		String errMsg = null;
 		boolean endDataCarrierFound = false;
-		for (Page pageType : pageList) {
-
+		for (final Page pageType : pageList) {
 			final String pageID = pageType.getIdentifier();
-
 			final HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageID);
-
 			if (null == hocrPages) {
 				throw new DCMAApplicationException("No Hocr files found for page id : " + pageID);
 			}
-
 			final List<HocrPage> hocrPageList = hocrPages.getHocrPage();
-
-			HocrPage hocrPage = hocrPageList.get(0);
-
+			final HocrPage hocrPage = hocrPageList.get(0);
+			int defaultValue = TableExtractionConstants.DEFAULT_VAL;
+			try {
+				defaultValue = Integer.parseInt(getWidthOfLine());
+			} catch (final NumberFormatException nfe) {
+				LOGGER.error(nfe.getMessage(), nfe);
+			}
 			if (pageType.getIdentifier().equals(pageID)) {
-
 				LOGGER.info("HocrPage page ID : " + pageID);
 				final Spans spans = hocrPage.getSpans();
-
 				LineDataCarrier lineDataCarrier = new LineDataCarrier(pageID);
-				lineDataCarrierList.add(lineDataCarrier);
-
 				if (null != spans) {
-
-					List<Span> linkedList = getSortedSpanList(spans);
+					final List<Span> linkedList = getSortedSpanList(spans);
 					if (null == linkedList || linkedList.isEmpty()) {
 						LOGGER.info("Return linked list is null for the page id = " + pageID);
 						continue;
 					}
-					ListIterator<Span> listItr = linkedList.listIterator();
+					final ListIterator<Span> listItr = linkedList.listIterator();
 					if (null == listItr) {
 						LOGGER.info("Return list iterator is null for the page id = " + pageID);
 						continue;
 					}
 					if (startDataCarrier == null) {
+						LOGGER.info("Find start pattern.");
+						// iterating the sorted sorted span list for searching the start pattern
 						while (listItr.hasNext()) {
 							final Span span = listItr.next();
 							try {
-								startDataCarrier = findPattern(span, startPattern);
+								List<Span> spanList = lineDataCarrier.getSpanList();
+								if (spanList.isEmpty()) {
+									spanList.add(span);
+								} else {
+									final Span lastSpan = spanList.get(spanList.size() - 1);
+									final int compare = lastSpan.getCoordinates().getY1().intValue()
+											- span.getCoordinates().getY1().intValue();
+									if (compare >= -defaultValue && compare <= defaultValue) {
+										spanList.add(span);
+									} else {
+										lineDataCarrier = new LineDataCarrier(pageID);
+										spanList = lineDataCarrier.getSpanList();
+										spanList.add(span);
+									}
+								}
+								startDataCarrier = findPattern(lineDataCarrier.getLineRowData(), startPattern, spanList);
 								if (null != startDataCarrier) {
 									LOGGER.info("Start pattern found for table where start pattern : " + startPattern);
+									lineDataCarrierList.add(lineDataCarrier);
 									break;
-								} else {
-									LOGGER.info("No start pattern found for table where start pattern : " + startPattern);
-
 								}
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								errMsg = e.getMessage();
 								LOGGER.error(errMsg, e);
 							}
 						}
 					}
 					if (startDataCarrier != null) {
+						LOGGER.info("Find end pattern.");
 						while (listItr.hasNext()) {
 							final Span span = listItr.next();
-							DataCarrier endDataCarrier = findPattern(span, endPattern);
-							if (null != endDataCarrier) {
+							List<Span> spanList = lineDataCarrier.getSpanList();
+							if (spanList.isEmpty()) {
+								spanList.add(span);
+							} else {
+								final Span lastSpan = spanList.get(spanList.size() - 1);
+								final int compare = lastSpan.getCoordinates().getY1().intValue()
+										- span.getCoordinates().getY1().intValue();
+								if (compare >= -defaultValue && compare <= defaultValue) {
+									spanList.add(span);
+								} else if (!isMandatoryUsed && defaultWidthOfMultline != TableExtractionConstants.ZERO
+										&& compare >= -defaultWidthOfMultline && compare <= defaultWidthOfMultline) {
+									spanList.add(span);
+								} else {
+									lineDataCarrier = addToSpanList(lineDataCarrierList, pageID, span);
+								}
+							}
+							final List<DataCarrier> endDataCarrier = findPattern(lineDataCarrier.getLineRowData(), endPattern,
+									lineDataCarrier.getSpanList());
+							if (null != endDataCarrier && !endDataCarrier.isEmpty()) {
 								LOGGER.info("End pattern found for table where end pattern : " + endPattern);
 								endDataCarrierFound = true;
 								break;
-							} else {
-								// get the line array as word by word fetch from db all the columns and patterns.
-								// validate using left and right pattern.
-								List<Span> spanList = lineDataCarrier.getSpanList();
-								if (spanList.isEmpty()) {
-									spanList.add(span);
-								} else {
-									Span lastSpan = spanList.get(spanList.size() - 1);
-									int compare = lastSpan.getCoordinates().getY1().intValue()
-											- span.getCoordinates().getY1().intValue();
-									int defaultValue = 20;
-									try {
-										defaultValue = Integer.parseInt(getWidthOfLine());
-									} catch (NumberFormatException nfe) {
-										LOGGER.error(nfe.getMessage(), nfe);
-										defaultValue = 20;
-									}
-									if (compare >= -defaultValue && compare <= defaultValue) {
-										spanList.add(span);
-									} else {
-										lineDataCarrier = new LineDataCarrier(pageID);
-										lineDataCarrierList.add(lineDataCarrier);
-										spanList = lineDataCarrier.getSpanList();
-										spanList.add(span);
-									}
-								}
 							}
 						}
 						if (endDataCarrierFound) {
 							break;
 						}
+					} else {
+						LOGGER.info("No start pattern found for table where start pattern : " + startPattern);
 					}
 				}
 			}
 		}
+	}
 
-		return startDataCarrier;
+	private LineDataCarrier addToSpanList(final List<LineDataCarrier> lineDataCarrierList, final String pageID, final Span span) {
+		LineDataCarrier lineDataCarrier;
+		List<Span> spanList;
+		lineDataCarrier = new LineDataCarrier(pageID);
+		lineDataCarrierList.add(lineDataCarrier);
+		spanList = lineDataCarrier.getSpanList();
+		spanList.add(span);
+		return lineDataCarrier;
 	}
 
 	/**
@@ -837,17 +1190,13 @@ public class TableExtraction {
 		DataCarrier dataCarrier = null;
 		final CharSequence inputStr = span.getValue();
 		if (null == inputStr || TableExtractionConstants.EMPTY.equals(inputStr)) {
-
 			errMsg = "Invalid input character sequence.";
 			LOGGER.info(errMsg);
-
 		} else {
-
 			if (null == patternStr || TableExtractionConstants.EMPTY.equals(patternStr)) {
 				errMsg = "Invalid input pattern sequence.";
 				throw new DCMAApplicationException(errMsg);
 			}
-
 			// Compile and use regular expression
 			final Pattern pattern = Pattern.compile(patternStr);
 			final Matcher matcher = pattern.matcher(inputStr);
@@ -859,7 +1208,7 @@ public class TableExtraction {
 						int confidenceInt = TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE;
 						try {
 							confidenceInt = Integer.parseInt(getConfidenceScore());
-						} catch (NumberFormatException nfe) {
+						} catch (final NumberFormatException nfe) {
 							LOGGER.error(nfe.getMessage(), nfe);
 						}
 						final float confidence = (groupStr.length() * confidenceInt) / inputStr.length();
@@ -869,49 +1218,53 @@ public class TableExtraction {
 				}
 			}
 		}
-
 		return dataCarrier;
 	}
 
 	/**
 	 * Method is responsible for finding the patterns and returned the found data List.
 	 * 
-	 * @param value
-	 * @param patternStr
-	 * @param spanList
-	 * @return
+	 * @param value {@link String}
+	 * @param patternStr {@link String}
+	 * @param spanList {@link List}
+	 * @return {@link List<{@link DataCarrier}>}
 	 * @throws DCMAApplicationException Check for all the input parameters and find the pattern.
 	 */
-	private final List<OutputDataCarrier> findPattern(final String value, final String patternStr, final List<Span> spanList)
+	private final List<DataCarrier> findPattern(final String value, final String patternStr, final List<Span> spanList)
 			throws DCMAApplicationException {
 
 		String errMsg = null;
 		final CharSequence inputStr = value;
-		List<OutputDataCarrier> dataCarrierList = new ArrayList<OutputDataCarrier>();
+		List<DataCarrier> dataCarrierList = null;
 		if (null == inputStr || TableExtractionConstants.EMPTY.equals(inputStr)) {
 			errMsg = "Invalid input character sequence.";
 			LOGGER.info(errMsg);
 		} else {
 			if (null == patternStr || TableExtractionConstants.EMPTY.equals(patternStr)) {
 				errMsg = "Invalid input pattern sequence.";
-				throw new DCMAApplicationException(errMsg);
-			}
-			// Compile and use regular expression
-			final Pattern pattern = Pattern.compile(patternStr);
-			final Matcher matcher = pattern.matcher(inputStr);
-			while (matcher.find()) {
-				// Get all groups for this match
-				for (int i = 0; i <= matcher.groupCount(); i++) {
-					String groupStr = matcher.group(i);
-					final int startIndex = matcher.start();
-					Span matchedSpan = null;
-					if (groupStr != null) {
-						final float confidence = (groupStr.length() * TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE)
-								/ inputStr.length();
-						matchedSpan = getMatchedSpan(spanList, startIndex);
-						OutputDataCarrier dataCarrier = new OutputDataCarrier(matchedSpan, confidence, groupStr);
-						dataCarrierList.add(dataCarrier);
-						LOGGER.info(groupStr);
+				LOGGER.info(errMsg);
+				// throw new DCMAApplicationException(errMsg);
+			} else {
+				// Compile and use regular expression
+				final Pattern pattern = Pattern.compile(patternStr);
+				final Matcher matcher = pattern.matcher(inputStr);
+				while (matcher.find()) {
+					// Get all groups for this match
+					for (int i = 0; i <= matcher.groupCount(); i++) {
+						final String groupStr = matcher.group(i);
+						final int startIndex = matcher.start();
+						Span matchedSpan = null;
+						if (groupStr != null) {
+							final float confidence = (groupStr.length() * TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE)
+									/ inputStr.length();
+							matchedSpan = getMatchedSpan(spanList, startIndex);
+							final DataCarrier dataCarrier = new DataCarrier(matchedSpan, confidence, groupStr);
+							if (dataCarrierList == null) {
+								dataCarrierList = new ArrayList<DataCarrier>();
+							}
+							dataCarrierList.add(dataCarrier);
+							LOGGER.info(groupStr);
+						}
 					}
 				}
 			}
@@ -922,69 +1275,25 @@ public class TableExtraction {
 
 	private List<Span> getSortedSpanList(final Spans spans) {
 		final List<Span> spanList = spans.getSpan();
-		int width = 20;
+
+		int defaultValue = TableExtractionConstants.DEFAULT_VAL;
 		try {
-			width = Integer.parseInt(getWidthOfLine());
+			defaultValue = Integer.parseInt(getWidthOfLine());
 		} catch (NumberFormatException nfe) {
 			LOGGER.error(nfe.getMessage(), nfe);
-			width = 20;
+			defaultValue = TableExtractionConstants.DEFAULT_VAL;
 		}
-		LOGGER.info("width of line : " + width);
-		final int defaultValue = width;
-		final Set<Span> setQ = new TreeSet<Span>(new Comparator<Span>() {
-
-			public int compare(final Span firstSpan, final Span secSpan) {
-				BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
-				BigInteger s2Y1 = secSpan.getCoordinates().getY1();
-				int returnValue = s1Y1.intValue() - s2Y1.intValue();
-				if (returnValue == 0) {
-					returnValue = -1;
-				}
-				return returnValue;
-			}
-		});
-		setQ.addAll(spanList);
-		Set<Span> set = getSortedTreeSet(defaultValue);
-		final List<Span> linkedList = new LinkedList<Span>();
-		List<Span> sortedSpanList = new ArrayList<Span>();
-		boolean isFirst = true;
-		int y1Coord = 0;
-		for (Span span : setQ) {
-			int spanY1Coord = span.getCoordinates().getY1().intValue();
-			if (isFirst) {
-				y1Coord = spanY1Coord;
-				isFirst = false;
-			}
-			if (spanY1Coord - y1Coord >= -defaultValue && spanY1Coord - y1Coord <= defaultValue) {
-				sortedSpanList.add(span);
-			} else {
-				set.addAll(sortedSpanList);
-				LOGGER.info("Sorted Row : " + sortedSpanList);
-				linkedList.addAll(set);
-				sortedSpanList = new ArrayList<Span>();
-				sortedSpanList.add(span);
-				set.clear();
-				y1Coord = spanY1Coord;
-			}
-		}
-		set.addAll(sortedSpanList);
-		linkedList.addAll(set);
-		LOGGER.info("Span List sorted");
-		return linkedList;
-	}
-
-	private Set<Span> getSortedTreeSet(final int defaultValue) {
-
+		final int lineWidth = defaultValue;
 		final Set<Span> set = new TreeSet<Span>(new Comparator<Span>() {
 
 			public int compare(final Span firstSpan, final Span secSpan) {
-				BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
-				BigInteger s2Y1 = secSpan.getCoordinates().getY1();
+				final BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
+				final BigInteger s2Y1 = secSpan.getCoordinates().getY1();
 				int returnValue = 0;
-				int compare = s1Y1.intValue() - s2Y1.intValue();
-				if (compare >= -defaultValue && compare <= defaultValue) {
-					BigInteger s1X1 = firstSpan.getCoordinates().getX1();
-					BigInteger s2X1 = secSpan.getCoordinates().getX1();
+				final int compare = s1Y1.intValue() - s2Y1.intValue();
+				if (compare >= -lineWidth && compare <= lineWidth) {
+					final BigInteger s1X1 = firstSpan.getCoordinates().getX1();
+					final BigInteger s2X1 = secSpan.getCoordinates().getX1();
 					returnValue = s1X1.compareTo(s2X1);
 				} else {
 					returnValue = s1Y1.compareTo(s2Y1);
@@ -992,37 +1301,46 @@ public class TableExtraction {
 				return returnValue;
 			}
 		});
-		return set;
+
+		set.addAll(spanList);
+
+		final List<Span> linkedList = new LinkedList<Span>();
+		linkedList.addAll(set);
+
+		// TODO add the clear method to remove all elements of set since it not required after adding it to linked list.
+		// set.clear();
+
+		return linkedList;
+
 	}
 
 	/**
 	 * This method creates new document level fields for document if they haven't been created by previous plugins.
 	 * 
-	 * @param eachDocType
-	 * @param batchInstanceIdentifier
+	 * @param eachDocType Document
+	 * @param batchInstanceIdentifier String
 	 */
-	private void createDocLevelFields(Document eachDocType, String batchInstanceIdentifier) {
+	private void createDocLevelFields(final Document eachDocType, final String batchInstanceIdentifier) {
 		DocumentLevelFields documentLevelFields = eachDocType.getDocumentLevelFields();
 		if (documentLevelFields == null) {
 			documentLevelFields = new DocumentLevelFields();
 			eachDocType.setDocumentLevelFields(documentLevelFields);
 		}
-		List<DocField> docLevelFields = documentLevelFields.getDocumentLevelField();
+		final List<DocField> docLevelFields = documentLevelFields.getDocumentLevelField();
 		if (docLevelFields == null || docLevelFields.isEmpty()) {
 			LOGGER.info("Getting document level fields for document type : " + eachDocType.getType());
-			List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier,
-					eachDocType.getType());
+			final List<com.ephesoft.dcma.da.domain.FieldType> allFdTypes = pluginPropertiesService.getFieldTypes(
+					batchInstanceIdentifier, eachDocType.getType());
 			if (allFdTypes != null) {
-				for (com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
+				for (final com.ephesoft.dcma.da.domain.FieldType fdType : allFdTypes) {
 					// Create new document level field
 					LOGGER.info("Creating new document level field");
-					DocField docLevelField = new DocField();
+					final DocField docLevelField = new DocField();
 					docLevelField.setName(fdType.getName());
 					docLevelField.setFieldOrderNumber(fdType.getFieldOrderNumber());
 					docLevelField.setType(fdType.getDataType().name());
 					// Object newValue = getValueForDocField(fdType.getName(), allColumnNames, extractedData);
 					// docLevelField.setValue(newValue.toString());
-
 					// Add new document level field to document.
 					docLevelFields.add(docLevelField);
 					LOGGER.info("New doc level field added : " + docLevelField.getName());
@@ -1033,12 +1351,13 @@ public class TableExtraction {
 		}
 	}
 
-	private final void setColumnHeaderSpan(final String inputData, final DataCarrier colHeaderInfo, final List<Span> spanList)
-			throws DCMAApplicationException {
+	private final void setColumnHeaderSpan(final String inputData, final DataCarrier colHeaderInfo, final List<Span> spanList,
+			final LineDataCarrier lineDataCarrier) throws DCMAApplicationException {
 		String errMsg = null;
-		int confidenceInt = TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE;
+		final int confidenceInt = TableExtractionConstants.DEFAULT_CONFIDENCE_VALUE;
 		float previousConfidence = 0;
 		final CharSequence inputStr = inputData;
+		final List<Coordinates> coordinatesList = new ArrayList<Coordinates>();
 		if (null == inputStr || KVFinderConstants.EMPTY.equals(inputStr)) {
 			errMsg = "Invalid input character sequence.";
 			LOGGER.info(errMsg);
@@ -1056,12 +1375,27 @@ public class TableExtraction {
 						final int startIndex = matcher.start();
 						Span matchedSpan = null;
 						if (groupStr != null) {
+							final String[] foundValArr = groupStr.split(KVFinderConstants.SPACE);
 							final float confidence = (groupStr.length() * confidenceInt) / inputStr.length();
 							if (confidence > previousConfidence) {
+								coordinatesList.clear();
+								final Span span = new Span();
+								colHeaderInfo.setSpan(span);
 								matchedSpan = getMatchedSpan(spanList, startIndex);
-								colHeaderInfo.setSpan(matchedSpan);
+								coordinatesList.add(matchedSpan.getCoordinates());
+								span.setValue(matchedSpan.getValue());
 								colHeaderInfo.setConfidence(confidence);
 								previousConfidence = confidence;
+								final int spanIndex = lineDataCarrier.getIndexOfSpan(matchedSpan);
+								if (null != foundValArr && foundValArr.length > 1) {
+									for (int localSpanIndex = spanIndex, count = 0; count < foundValArr.length - 1; localSpanIndex++, count++) {
+										final Span rightSpan = lineDataCarrier.getRightSpan(localSpanIndex);
+										if (null != rightSpan) {
+											coordinatesList.add(rightSpan.getCoordinates());
+										}
+									}
+								}
+								span.setCoordinates(HocrUtil.getRectangleCoordinates(coordinatesList));
 							}
 							LOGGER.info(groupStr);
 						}
@@ -1075,7 +1409,7 @@ public class TableExtraction {
 		int spanIndex = 0;
 		boolean isFirstSpan = Boolean.TRUE;
 		Span matchedSpan = null;
-		for (Span span : spanList) {
+		for (final Span span : spanList) {
 			if (null != span && null != span.getValue()) {
 				spanIndex = spanIndex + span.getValue().length();
 				if (!isFirstSpan) {

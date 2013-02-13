@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,41 +38,123 @@ package com.ephesoft.dcma.imagemagick;
 import com.ephesoft.dcma.core.common.PluginProperty;
 
 
+/**
+ * This enum stores all the properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
+ */
 public enum ImageMagicProperties implements PluginProperty {
 	
+	/**
+	 * Ghost script image parameters name in properties file.
+	 */
 	GS_IMAGE_PARAMETERS("ghostscript.image_parameters"),
+	/**
+	 * Imagemagick input convert image parameters name in properties file.
+	 */
 	IM_CONVERT_INPUT_IMAGE_PARAMETERS("imagemagick.open_input_image_parameters"),
+	/**
+	 * Imagemagick output parameters for convert command name in properties file.
+	 */
 	IM_CONVERT_OUTPUT_IMAGE_PARAMETERS("imagemagick.save_output_image_parameters"),
-	
+	/**
+	 * Classification switch name in properties file.
+	 */
 	CLASSIFY_IMAGES_SWITCH("classifyImage.switch"),
+	/**
+	 * Classify image comparison metric property name.
+	 */
 	CLASSIFY_IMAGES_COMP_METRIC("classifyImages.comparison_metric"),
+	/**
+	 * Imagemagick classify image fuzz percentage property name.
+	 */
 	CLASSIFY_IMAGES_FUZZ_PERCNT("classifyImages.fuzz_percentage"),
+	/**
+	 * Classify image max results property name.
+	 */
 	CLASSIFY_IMAGES_MAX_RESULTS("classifyImages.max_results"),
-	
+	/**
+	 * Switch for creating thumbnail in properties file.
+	 */
 	CREATE_THUMBNAILS_SWITCH("createThumbnails.switch"),
+	/**
+	 * Property name for thumbnails display image height.
+	 */
 	CREATE_THUMBNAILS_DISP_THUMB_HEIGHT("createThumbnails.display_image_height"),
+	/**
+	 * Property name for thumbnails display image width.
+	 */
 	CREATE_THUMBNAILS_DISP_THUMB_WIDTH("createThumbnails.display_image_width"),
+	/**
+	 * Property name for thumbnails compare image width.
+	 */
 	CREATE_THUMBNAILS_COMP_THUMB_WIDTH("createThumbnails.compare_image_width"),
+	/**
+	 * Property name for thumbnails compare image height.
+	 */
 	CREATE_THUMBNAILS_COMP_THUMB_HEIGHT("createThumbnails.compare_image_height"),
+	/**
+	 * Property name for display thumbnail type.
+	 */
 	CREATE_THUMBNAILS_DISP_THUMB_TYPE("createThumbnails.display_thumbnail_type"),
+	/**
+	 * Property name for compare thumbnail type.
+	 */
 	CREATE_THUMBNAILS_COMP_THUMB_TYPE("createThumbnails.compare_thumbnail_type"),
+	/**
+	 * Property name for output image parameters.
+	 */
 	CREATE_THUMBNAILS_OUTPUT_IMAGE_PARAMETERS("createThumbnails.output_image_parameters"),
-	
+	/**
+	 * Property name for ocr create input display thumbnail.
+	 */
 	CREATE_OCR_INPUT_DISP_THUMB_TYPE("createocr.display_thumbnail_type"),
+	/**
+	 * Property name for compare thumbnail type ocring.
+	 */
 	CREATE_OCR_INPUT_COMP_THUMB_TYPE("createocr.compare_thumbnail_type"),
-	
+	/**
+	 * Property name for creating display image of thumbnail type.
+	 */
 	CREATE_DISPLAY_IMAGE_DISP_THUMB_TYPE("createDisplay.display_thumbnail_type"),
+	/**
+	 * Property name for creating compare image of thumbnail type.
+	 */
 	CREATE_DISPLAY_IMAGE_COMP_THUMB_TYPE("createDisplay.compare_thumbnail_type"),
-	
+	/**
+	 * Property name for create multipage tiff switch.
+	 */
 	CREATE_MULTIPAGE_TIFF_SWITCH("createMultipageTif.switch"),
+	/**
+	 * Check pdf export process.
+	 */
 	CHECK_PDF_EXPORT_PROCESS("createMultipageTif.export_process"),
+	/**
+	 * Create multipage coloured pdf.
+	 */
 	CHECK_COLOURED_PDF("createMultipageTif.coloured_pdf"),
+	/**
+	 * Create multipage tiff to searchable pdf.
+	 */
 	CHECK_SEARCHABLE_PDF("createMultipageTif.searchable_pdf"),
+	/**
+	 * Ghostscript pdf creation parameters.
+	 */
 	GHOSTSCRIPT_COMMAND_PDF_PARAMETERS("createMultipageTif.ghostscript_pdf_parameters"),
+	/**
+	 * PDF optimization parameters.
+	 */
 	PDF_OPTIMIZATION_PARAMETERS("createMultipageTif.optimization_parameters"),
+	/**
+	 * PDF optimization switch.
+	 */
 	PDF_OPTIMIZATION_SWITCH("createMultipageTif.pdf_optimization_switch");
 	
-	
+	/**
+	 * This key is used to fetch the values of the properties.
+	 */
 	String key;
 
 	ImageMagicProperties(String key) {

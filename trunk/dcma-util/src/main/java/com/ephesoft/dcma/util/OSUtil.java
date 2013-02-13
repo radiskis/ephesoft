@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,17 +35,47 @@
 
 package com.ephesoft.dcma.util;
 
+/**
+ * This is util class for OS.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class OSUtil {
 
+	/**
+	 * SPACE String.
+	 */
 	private static final String SPACE = " ";
+	
+	/**
+	 * EMPTY_STRING String.
+	 */
 	private static final String EMPTY_STRING = "";
+	
+	/**
+	 * NUX_OS String.
+	 */
 	private static final String NUX_OS = "nux";
+	
+	/**
+	 * NIX_OS String.
+	 */
 	private static final String NIX_OS = "nix";
+	
+	/**
+	 * WIN_OS String.
+	 */
 	private static final String WIN_OS = "win";
+	
+	/**
+	 * OS_NAME String.
+	 */
 	private static final String OS_NAME = "os.name";
 	
 	/**
-	 * @return whether the underlying database is windows
+	 * Checks whether the underlying database is windows.
+	 * @return boolean
 	 */
 	public static boolean isWindows() {
 		String osName = System.getProperty(OS_NAME).toLowerCase();
@@ -54,7 +84,8 @@ public class OSUtil {
 	}
 
 	/**
-	 * @return whether the underlying database is unix/linux
+	 * Checks whether the underlying database is unix/linux.
+	 * @return boolean
 	 */
 	public static boolean isUnix() {
 		String osName = System.getProperty(OS_NAME).toLowerCase();
@@ -63,8 +94,9 @@ public class OSUtil {
 	}
 
 	/**
-	 * @param unescapedStr
-	 * @return
+	 * To escape Spaces for Unix Linux.
+	 * @param unescapedStr {@link String}
+	 * @return {@link String}
 	 */
 	public static String escapeSpacesForUnixLinux(String unescapedStr) {
 		String escapedStr = EMPTY_STRING;

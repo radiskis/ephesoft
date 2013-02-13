@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,11 +53,11 @@ public class BatchDTO implements IsSerializable {
 
 	private String baseHTTPUrl;
 
-	private String isValidationScriptEnabled = "OFF";
-	private String fieldValueChangeScriptSwitchState = "OFF";
+	private String isValidationScriptEnabled = BatchConstants.OFF;
+	private String fieldValueChangeScriptSwitchState = BatchConstants.OFF;
 	private String fuzzySearchSwitchState = "ON";
-	private String suggestionBoxSwitchState = "OFF";
-	private String externalApplicationSwitchState = "OFF";
+	private String suggestionBoxSwitchState = BatchConstants.OFF;
+	private String externalApplicationSwitchState = BatchConstants.OFF;
 	private Map<String, String> urlAndShortcutMap = null;
 	private Map<String, String> dimensionsForPopUp = null;
 	private Map<String, String> urlAndTitleMap = null;
@@ -65,13 +65,14 @@ public class BatchDTO implements IsSerializable {
 	private String fuzzySearchPopUpYDimension = "350";
 	private Integer realUpdateInterval = 5;
 	private Integer preloadedImageCount = 3;
-	//value '1' signifies document to be displayed in tree view
-	private int docDisplayName=1;
-	
+	// value '1' signifies document to be displayed in tree view
+	private int docDisplayName = 1;
+	private boolean defaultReviewPanelStateOpen = true;
 
 	private static final String PIXELS = "px";
 
 	public BatchDTO() {
+		//Empty constructor
 	}
 
 	public BatchDTO(Batch batch, String baseHTTPUrl) {
@@ -83,7 +84,8 @@ public class BatchDTO implements IsSerializable {
 			String isFuzzySearchEnabled, String suggestionBoxSwitchState, String externalApplicationSwitchState,
 			Map<String, String> urlAndShortcutMap, Map<String, String> dimensionsForPopUp, Map<String, String> urlAndTitleMap,
 			String fuzzySearchPopUpXDimension, String fuzzySearchPopUpYDimension, String updateIntervalInStringForm,
-			String preloadedImageCountString, BatchInstanceStatus batchInstanceStatus,int docDisplayName) {
+			String preloadedImageCountString, BatchInstanceStatus batchInstanceStatus, int docDisplayName,
+			String defaultReviewPanelState) {
 		this.batch = batch;
 		this.baseHTTPUrl = baseHTTPUrl;
 		this.setDocDisplayName(docDisplayName);
@@ -104,39 +106,26 @@ public class BatchDTO implements IsSerializable {
 		if (null != externalApplicationSwitchState) {
 			setExternalApplicationSwitchState(externalApplicationSwitchState);
 		}
-		if (null != fuzzySearchPopUpXDimension) {
-			try {
-				if (Integer.parseInt(fuzzySearchPopUpXDimension) > 0) {
-					setFuzzySearchPopUpXDimension(fuzzySearchPopUpXDimension + PIXELS);
-				}
-			} catch (Exception e) {
-			}
+		if (null != fuzzySearchPopUpXDimension && Integer.parseInt(fuzzySearchPopUpXDimension) > 0) {
+			setFuzzySearchPopUpXDimension(fuzzySearchPopUpXDimension + PIXELS);
 		}
-		if (null != fuzzySearchPopUpYDimension) {
-			try {
-				if (Integer.parseInt(fuzzySearchPopUpYDimension) > 0) {
-					setFuzzySearchPopUpYDimension(fuzzySearchPopUpYDimension + PIXELS);
-				}
-			} catch (Exception e) {
-			}
+		if (null != fuzzySearchPopUpYDimension && Integer.parseInt(fuzzySearchPopUpYDimension) > 0) {
+			setFuzzySearchPopUpYDimension(fuzzySearchPopUpYDimension + PIXELS);
 		}
 		if (null != updateIntervalInStringForm) {
-			try {
-				int updateInterval = Integer.parseInt(updateIntervalInStringForm);
-				if (updateInterval > 0) {
-					setRealUpdateInterval(updateInterval);
-				}
-			} catch (Exception e) {
+			int updateInterval = Integer.parseInt(updateIntervalInStringForm);
+			if (updateInterval > 0) {
+				setRealUpdateInterval(updateInterval);
 			}
 		}
 		if (null != preloadedImageCountString) {
-			try {
-				int preloadedImageCount = Integer.parseInt(preloadedImageCountString);
-				if (preloadedImageCount > 0) {
-					setPreloadedImageCount(preloadedImageCount);
-				}
-			} catch (Exception e) {
+			int preloadedImageCount = Integer.parseInt(preloadedImageCountString);
+			if (preloadedImageCount > 0) {
+				setPreloadedImageCount(preloadedImageCount);
 			}
+		}
+		if (null != defaultReviewPanelState && defaultReviewPanelState.equalsIgnoreCase(BatchConstants.FALSE)) {
+			defaultReviewPanelStateOpen = false;
 		}
 		setUrlAndShortcutMap(urlAndShortcutMap);
 		setDimensionsForPopUp(dimensionsForPopUp);
@@ -147,7 +136,7 @@ public class BatchDTO implements IsSerializable {
 		return urlAndTitleMap;
 	}
 
-	public void setUrlAndTitleMap(Map<String, String> urlAndTitleMap) {
+	public final void setUrlAndTitleMap(Map<String, String> urlAndTitleMap) {
 		this.urlAndTitleMap = urlAndTitleMap;
 	}
 
@@ -163,47 +152,54 @@ public class BatchDTO implements IsSerializable {
 		return this.baseHTTPUrl + "/" + direction + "/" + fileName;
 	}
 
-	public String getDocDisplayNameByDocId(String id) {
-		Document document = getDocumentById(id);
+	public String getDocDisplayNameByDocId(String docId) {
+		Document document = getDocumentById(docId);
 		return document.getType();
 	}
 
-	public Document getDocumentById(String id) {
+	public Document getDocumentById(String documentId) {
 		List<Document> docs = batch.getDocuments().getDocument();
-		for (Document document : docs) {
-			if (document.getIdentifier().equals(id)) {
-				return document;
+		Document document = null;
+		for (Document doc : docs) {
+			if (doc.getIdentifier().equals(documentId)) {
+				document = doc;
+				break;
 			}
 		}
-		return null;
+		return document;
 	}
 
 	public Page getUpdatedPageInDocument(Document document, Page page) {
+		Page newPage = null;
 		List<Page> pagesInDoc = document.getPages().getPage();
 		for (Page pageType : pagesInDoc) {
 			if (pageType.getIdentifier().equals(page.getIdentifier())) {
-				return pageType;
+				newPage = pageType;
+				break;
 			}
 		}
-		return null;
+		return newPage;
 	}
 
 	public Document getDocumentForPage(Page page) {
+		Document document = null;
 		Batch batch = this.getBatch();
 		List<Document> documents = batch.getDocuments().getDocument();
 		List<Page> pageTypes = null;
-		for (Document document : documents) {
-			pageTypes = document.getPages().getPage();
+		for (Document doc : documents) {
+			pageTypes = doc.getPages().getPage();
 			for (Page pageType : pageTypes) {
 				if (pageType.getIdentifier().equals(page.getIdentifier())) {
-					return document;
+					document = doc;
+					break;
 				}
 			}
 		}
-		return null;
+		return document;
 	}
 
 	public Document getNextDocumentTo(Document document, boolean isError) {
+		Document doc = null;
 		List<Document> documents = batch.getDocuments().getDocument();
 		if (documents != null && !documents.isEmpty()) {
 			Boolean reachedToInput = Boolean.FALSE;
@@ -213,28 +209,37 @@ public class BatchDTO implements IsSerializable {
 					continue;
 				}
 				if (reachedToInput && (!isError || isErrorContained(documentType))) {
-					return documentType;
+					doc = documentType;
+					break;
 				}
 			}
-			for (Document documentType : documents) {
-				if (isErrorContained(documentType)) {
-					return documentType;
-				}
+			if (doc == null) {
+				doc = getDocumentType(doc, documents);
 			}
-
-			return document;
+			if (doc == null) {
+				doc = document;
+			}
 		}
-		return null;
+		return doc;
+	}
+
+	private Document getDocumentType(Document doc, List<Document> documents) {
+		Document docTemp = doc;
+		for (Document documentType : documents) {
+			if (isErrorContained(documentType)) {
+				docTemp = documentType;
+				break;
+			}
+		}
+		return docTemp;
 	}
 
 	public Document getPreviousDocumentTo(Document document, boolean isError) {
 		List<Document> documents = batch.getDocuments().getDocument();
-
+		Document doc = null;
 		Boolean reachedToInput = Boolean.FALSE;
 		ReverseIterable<Document> iter = new ReverseIterable<Document>(documents);
-		int count = 0;
 		for (Document documentType : iter) {
-			count++;
 			if (documentType.getIdentifier().equals(document.getIdentifier())) {
 				reachedToInput = Boolean.TRUE;
 				if (iter.iterator().hasNext()) {
@@ -243,33 +248,42 @@ public class BatchDTO implements IsSerializable {
 			}
 			if (reachedToInput && (!isError || isErrorContained(documentType))
 					&& !documentType.getIdentifier().equalsIgnoreCase(document.getIdentifier())) {
-				return documentType;
+				doc = documentType;
+				break;
 			}
 		}
-		iter = new ReverseIterable<Document>(documents);
-		for (Document documentType : iter) {
-			if (reachedToInput && (!isError || isErrorContained(documentType))) {
-				return documentType;
+		if (doc == null) {
+			iter = new ReverseIterable<Document>(documents);
+			for (Document documentType : iter) {
+				if (reachedToInput && (!isError || isErrorContained(documentType))) {
+					doc = documentType;
+					break;
+				}
 			}
 		}
-		return null;
+		return doc;
 	}
 
 	public boolean isErrorContained(Document document) {
+		boolean error = true;
 		switch (batchInstanceStatus) {
 			case READY_FOR_REVIEW:
-				return !document.isReviewed();
+				error = !document.isReviewed();
+				break;
 			case READY_FOR_VALIDATION:
-				return !document.isReviewed() || !document.isValid();
+				error = !document.isReviewed() || !document.isValid();
+				break;
+			default:
+				error = true;
 		}
-		return true;
+		return error;
 	}
 
 	public String getIsValidationScriptEnabled() {
 		return isValidationScriptEnabled;
 	}
 
-	public void setIsValidationScriptEnabled(String isValidationScriptEnabled) {
+	public final void setIsValidationScriptEnabled(String isValidationScriptEnabled) {
 		this.isValidationScriptEnabled = isValidationScriptEnabled;
 	}
 
@@ -302,7 +316,7 @@ public class BatchDTO implements IsSerializable {
 		this.batchInstanceStatus = batchInstanceStatus;
 	}
 
-	public void setFuzzySearchSwitchState(String fuzzySearchSwitchState) {
+	public final void setFuzzySearchSwitchState(String fuzzySearchSwitchState) {
 		this.fuzzySearchSwitchState = fuzzySearchSwitchState;
 	}
 
@@ -310,7 +324,7 @@ public class BatchDTO implements IsSerializable {
 		return fuzzySearchSwitchState;
 	}
 
-	public void setFieldValueChangeScriptSwitchState(String fieldValueChangeScriptSwitchState) {
+	public final void setFieldValueChangeScriptSwitchState(String fieldValueChangeScriptSwitchState) {
 		this.fieldValueChangeScriptSwitchState = fieldValueChangeScriptSwitchState;
 	}
 
@@ -322,11 +336,11 @@ public class BatchDTO implements IsSerializable {
 		return this.suggestionBoxSwitchState;
 	}
 
-	public void setSuggestionBoxSwitchState(String suggestionBoxSwitchState) {
+	public final void setSuggestionBoxSwitchState(String suggestionBoxSwitchState) {
 		this.suggestionBoxSwitchState = suggestionBoxSwitchState;
 	}
 
-	public void setExternalApplicationSwitchState(String externalApplicationSwitchState) {
+	public final void setExternalApplicationSwitchState(String externalApplicationSwitchState) {
 		this.externalApplicationSwitchState = externalApplicationSwitchState;
 	}
 
@@ -334,7 +348,7 @@ public class BatchDTO implements IsSerializable {
 		return externalApplicationSwitchState;
 	}
 
-	public void setUrlAndShortcutMap(Map<String, String> urlAndShortcutMap) {
+	public final void setUrlAndShortcutMap(Map<String, String> urlAndShortcutMap) {
 		this.urlAndShortcutMap = urlAndShortcutMap;
 	}
 
@@ -342,7 +356,7 @@ public class BatchDTO implements IsSerializable {
 		return urlAndShortcutMap;
 	}
 
-	public void setDimensionsForPopUp(Map<String, String> dimensionsForPopUp) {
+	public final void setDimensionsForPopUp(Map<String, String> dimensionsForPopUp) {
 		this.dimensionsForPopUp = dimensionsForPopUp;
 	}
 
@@ -354,7 +368,7 @@ public class BatchDTO implements IsSerializable {
 		return fuzzySearchPopUpXDimension;
 	}
 
-	public void setFuzzySearchPopUpXDimension(String fuzzySearchPopUpXDimension) {
+	public final void setFuzzySearchPopUpXDimension(String fuzzySearchPopUpXDimension) {
 		this.fuzzySearchPopUpXDimension = fuzzySearchPopUpXDimension;
 	}
 
@@ -362,11 +376,11 @@ public class BatchDTO implements IsSerializable {
 		return fuzzySearchPopUpYDimension;
 	}
 
-	public void setFuzzySearchPopUpYDimension(String fuzzySearchPopUpYDimension) {
+	public final void setFuzzySearchPopUpYDimension(String fuzzySearchPopUpYDimension) {
 		this.fuzzySearchPopUpYDimension = fuzzySearchPopUpYDimension;
 	}
 
-	public void setRealUpdateInterval(Integer realUpdateInterval) {
+	public final void setRealUpdateInterval(Integer realUpdateInterval) {
 		this.realUpdateInterval = realUpdateInterval;
 	}
 
@@ -378,15 +392,24 @@ public class BatchDTO implements IsSerializable {
 		return preloadedImageCount;
 	}
 
-	public void setPreloadedImageCount(Integer preloadedImageCount) {
+	public final void setPreloadedImageCount(Integer preloadedImageCount) {
 		this.preloadedImageCount = preloadedImageCount;
 	}
 
-	public void setDocDisplayName(int docDisplayName) {
+	public final void setDocDisplayName(int docDisplayName) {
 		this.docDisplayName = docDisplayName;
 	}
 
 	public int getDocDisplayName() {
 		return docDisplayName;
 	}
+
+	public boolean isDefaultReviewPanelStateOpen() {
+		return defaultReviewPanelStateOpen;
+	}
+
+	public void setDefaultReviewPanelStateOpen(boolean defaultReviewPanelStateOpen) {
+		this.defaultReviewPanelStateOpen = defaultReviewPanelStateOpen;
+	}
+
 }

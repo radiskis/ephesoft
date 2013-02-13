@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,13 @@ import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.BatchClass;
 
+/**
+ * This Dao deals with Batch Class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.BatchClassDaoImpl
+ */
 public interface BatchClassDao extends CacheableDao<BatchClass> {
 
 	/**
@@ -56,17 +63,17 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	 * An api to fetch BatchClass by batch Class name.
 	 * 
 	 * @param batchClassName String
-	 * @return List<BatchClass>
+	 * @return BatchClass
 	 */
-	List<BatchClass> getBatchClassbyName(String batchClassName);
+	BatchClass getBatchClassbyName(String batchClassName);
 
 	/**
 	 * An api to fetch BatchClass by batch Class processName.
 	 * 
 	 * @param processName String
-	 * @return List<BatchClass>
+	 * @return BatchClass
 	 */
-	List<BatchClass> getBatchClassbyProcessName(String processName);
+	BatchClass getBatchClassbyProcessName(String processName);
 
 	/**
 	 * This API will fetch all the batch classes.
@@ -85,7 +92,7 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	/**
 	 * API to fetch a batch class by Identifier.
 	 * 
-	 * @param batchClassId
+	 * @param batchClassIdentifier {@link String}
 	 * @return BatchClass
 	 */
 	BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
@@ -100,7 +107,7 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	/**
 	 * API to fetch BatchClass for the current user.
 	 * 
-	 * @param currentUser
+	 * @param currentUser {@link String}
 	 * @return List<BatchClass>
 	 */
 	List<BatchClass> getAllBatchClassesForCurrentUser(String currentUser);
@@ -115,16 +122,18 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	/**
 	 * API to get the list of Batch Classes specifying startindex, no of results and sorting if any.
 	 * 
-	 * @param firstResult
-	 * @param maxResults
-	 * @param order
+	 * @param startIndex int
+	 * @param maxResults int 
+	 * @param order List<Order>
+	 * @param userRoles Set<String>
 	 * @return List of batch class.
 	 */
-	List<BatchClass> getBatchClassList(int startIndex, int maxResults, List<Order> order);
+	List<BatchClass> getBatchClassList(int startIndex, int maxResults, List<Order> order, Set<String> userRoles);
 
 	/**
 	 * This API will fetch all the batch classes of current user role.
 	 * 
+	 * @param userRoles Set<String>
 	 * @return List<BatchClass>
 	 */
 	List<BatchClass> getAllBatchClassesByUserRoles(Set<String> userRoles);
@@ -132,52 +141,89 @@ public interface BatchClassDao extends CacheableDao<BatchClass> {
 	/**
 	 * This API will fetch the size of batchclass.
 	 * 
+	 * @param userRoles Set<String>
 	 * @return batchClass size
 	 */
 	int getAllBatchClassCountExcludeDeleted(Set<String> userRoles);
 
 	/**
-	 * This API will fetch the batch class list excluding the deleted batch class
+	 * This API will fetch the batch class list excluding the deleted batch class.
 	 * 
 	 * @return List<BatchClass>
 	 */
 	List<BatchClass> getAllBatchClassExcludeDeleted();
 
 	/**
-	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class
+	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class.
 	 * 
 	 * @return List<BatchClass>
 	 */
 	List<BatchClass> getAllLoadedBatchClassExcludeDeleted();
 
-
-	/** API to fetch the UNC folders for a batch class name
+	/**
+	 * API to fetch the UNC folders for a batch class by name.
 	 * 
-	 * @param batchClassName
-	 * @return
+	 * @param batchClassName {@link String}
+	 * @return List<String>
 	 */
 	List<String> getAllAssociatedUNCFolders(String batchClassName);
 
 	/**
+	 * API to get Batch Class by name including deleted.
+	 * 
 	 * @param batchClassName {@link String}
-	 * @return
+	 * @return {@link BatchClass}
 	 */
 	BatchClass getBatchClassByNameIncludingDeleted(String batchClassName);
 
 	/**
 	 * API to get batch class identifier by UNC folder.
 	 * 
-	 * @param uncFolder
-	 * @return
+	 * @param uncFolder {@link String}
+	 * @return {@link String}
 	 */
 	String getBatchClassIdentifierByUNCfolder(String uncFolder);
-	
+
 	/**
 	 * API to get all batch class identifiers.
 	 * 
-	 * @return
+	 * @return {@link List<String>}
 	 */
 	List<String> getAllBatchClassIdentifiers();
-	
 
+	/**
+	 * API to get all batch classes on the basis of excluding the deleted batch class and on the basis of ascending or desending order
+	 * of specified property.
+	 * 
+	 * @param isExcludeDeleted boolean
+	 * @param isAsc boolean
+	 * @param propertyName {@link String}
+	 * @return List<{@link BatchClass}>
+	 */
+	List<BatchClass> getAllBatchClasses(boolean isExcludeDeleted, boolean isAsc, String propertyName);
+	
+	/**
+	 * API to get all the UNC folders on the basis of excluding the deleted batch class.
+	 * 
+	 * @param isExcludeDeleted {@link Boolean}
+	 * @return {@link List}<{@link String}>
+	 */
+	List<String> getAllUNCList(boolean isExcludeDeleted);
+	
+	/**
+	 * API to fetch the system folder for the given batch class identifier.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link String} the system folder path.
+	 */
+	String getSystemFolderForBatchClassIdentifier(String batchClassIdentifier);
+	
+	/**
+	 * API to the batch class with respect to the given batch class id and the roles provided.
+	 * 
+	 * @param userRoles {@link Set<{@link String}>}
+	 * @param batchClassID {@link String}
+	 * @return {@link BatchClass}
+	 */
+	BatchClass getBatchClassByUserRoles(Set<String> userRoles, String batchClassID);
 }

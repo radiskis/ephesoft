@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,14 +35,89 @@
 
 package com.ephesoft.dcma.imp;
 
+import com.ephesoft.dcma.core.common.FileType;
+
+/**
+ * An interface keeping the string and numeric constants.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public interface IFolderImporterConstants {
 
+	/**
+	 * The value "100".
+	 */
 	int HUNDERED = 100;
+	/**
+	 * The value "1024".
+	 */
 	int KBYTE = 1024;
+	/**
+	 * The value "0".
+	 */
 	int ZERO = 0;
+	/**
+	 * The value "1".
+	 */
 	int ONE = 1;
-	
+	/**
+	 * The value "true".
+	 */
 	String TRUE = "true";
+	/**
+	 * The value "YES".
+	 */
 	String YES = "YES";
+
+	/**
+	 * Message format for showing the expected tiff files count.
+	 */
+    String EXPECTED_TIF_FILES_COUNT = ", expectedTifFilesCount = ";
+
+	/**
+	 * A constant to store period delimiter.
+	 */
+	String DOT_DELIMITER = ".";
+
+	/**
+	 * A constant to store semicolon delimiter.
+	 */
+	String SEMICOLON_DELIMITER = ";";
+
+	/**
+	 * A constant to store underscore.
+	 */
+	String UNDERSCORE = "_";
 	
+	/**
+	 * A constant to store empty.
+	 */
+	String EMPTY = "";
+
+	/**
+	 * A constant to store serialized file extension .
+	 */
+	String SER_EXTENSION = SEMICOLON_DELIMITER + FileType.SER.getExtension();
+
+	/**
+	 * Import multipage files plugin name.
+	 */
+	String IMPORT_MULTIPAGE_FILES_PLUGIN = "IMPORT_MULTIPAGE_FILES";
+
+	/**
+	 * Import batch folder plugin name.
+	 */
+	String IMPORT_BATCH_FOLDER_PLUGIN = "IMPORT_BATCH_FOLDER";
+
+	/**
+	 * A constant to store extension of serialized files with dot.
+	 */
+	String SERIALIZATION_EXT = FileType.SER.getExtensionWithDot();
+	
+	/**
+	 * Constant to store the serialized file name.
+	 */
+	String BCF_SER_FILE_NAME = "BCF_ASSO";
+
 }

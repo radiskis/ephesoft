@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.script.service.ScriptService;
 import com.ephesoft.dcma.util.FileUtils;
 
@@ -55,9 +56,9 @@ import com.ephesoft.dcma.util.FileUtils;
  * This is Junit test for ScriptService. It contains positive test case for executing script.
  * 
  * @author Ephesoft
+ * @version 1.0
  * @see com.ephesoft.dcma.script.AbstractScriptTest
  */
-
 public class ScriptTest extends AbstractScriptTest {
 
 	/**
@@ -82,11 +83,13 @@ public class ScriptTest extends AbstractScriptTest {
 	 */
 	@Autowired
 	private transient BatchSchemaService batchSchemaService;
+
 	/**
 	 * Instance of ScriptService.
 	 */
 	@Autowired
 	private transient ScriptService scriptService;
+
 	/**
 	 * Batch instance for test scenario.
 	 */
@@ -96,10 +99,17 @@ public class ScriptTest extends AbstractScriptTest {
 	 * The folder containing expected output batch xml.
 	 */
 	private transient String expectedOutputFolder;
+
 	/**
 	 * Variable stores initial local folder location.
 	 */
 	private String localFolderLocation;
+
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
 
 	/**
 	 * Method to initialize resources.
@@ -110,7 +120,7 @@ public class ScriptTest extends AbstractScriptTest {
 		String actualOutputFolder;
 		batchInstanceId1 = "BI7C";
 		String testFolderLocation;
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceId1);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		Properties prop = new Properties();
 		try {
@@ -151,7 +161,6 @@ public class ScriptTest extends AbstractScriptTest {
 	@After
 	public void tearDown() {
 		batchSchemaService.setLocalFolderLocation(localFolderLocation);
-
 	}
 
 }

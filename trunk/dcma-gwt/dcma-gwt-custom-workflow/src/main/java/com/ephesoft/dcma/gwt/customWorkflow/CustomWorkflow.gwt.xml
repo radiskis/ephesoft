@@ -4,6 +4,6 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
 
-	<entry-point	class='com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowEntryPoint' />
+	<entry-point	class='com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowEntryPoint' />
 	<source path="client"></source>
 </module>

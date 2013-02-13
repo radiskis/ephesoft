@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,18 +42,18 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class ValidatableTextBox extends TextBox implements Validatable, HasValidators {
  
-	private Set<Validator> _validators = new HashSet<Validator>();
+	private final Set<Validator> validators = new HashSet<Validator>();
  
 	@Override
 	public void addValidator(Validator validator) {
-		_validators.add(validator);
+		validators.add(validator);
 	}
  
 	@Override
 	public boolean validate() {
 		boolean valid = true;
  
-		for(Validator validator : _validators) {
+		for(Validator validator : validators) {
 			if(! validator.validate()) {
 				valid = false;
 			}
@@ -62,8 +62,12 @@ public class ValidatableTextBox extends TextBox implements Validatable, HasValid
 	}
 	
 	public void toggleValidDateBox() {
-		if(validate()) this.removeStyleName("dateBoxFormatError");
-		else this.setStyleName("dateBoxFormatError");
+		if(validate()) {
+			this.removeStyleName("dateBoxFormatError");
+		}
+		else {
+			this.setStyleName("dateBoxFormatError");
+		}
 	}
 }
 

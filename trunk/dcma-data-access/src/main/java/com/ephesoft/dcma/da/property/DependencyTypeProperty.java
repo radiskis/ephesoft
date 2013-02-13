@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,33 +40,70 @@ import java.util.List;
 
 import com.ephesoft.dcma.core.common.DomainProperty;
 
+/**
+ * Enum to specify dependency type property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DomainProperty
+ */
 public enum DependencyTypeProperty implements DomainProperty {
-	ORDER_BEFORE("Order Before"), UNIQUE("Unique");
 
+	/**
+	 * ORDER_BEFORE.
+	 */
+	ORDER_BEFORE("Order Before"),
+	/**
+	 * UNIQUE.
+	 */
+	UNIQUE("Unique");
+
+	/**
+	 * dependencyType String.
+	 */
 	private String dependencyType;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param dependencyType String
+	 */
 	private DependencyTypeProperty(String dependencyType) {
 		this.dependencyType = dependencyType;
 	}
 
 	/**
+	 * To get dependency type.
+	 * 
 	 * @return the dependencyType
 	 */
 	public String getDependencyType() {
 		return dependencyType;
 	}
 
+	/**
+	 * To get values as list.
+	 * 
+	 * @return List<DependencyTypeProperty>
+	 */
 	public static List<DependencyTypeProperty> valuesAsList() {
 		return Arrays.asList(values());
 	}
 
 	/**
-	 * @param dependencyType the dependencyType to set
+	 * To set dependency type.
+	 * 
+	 * @param dependencyType String
 	 */
 	public void setDependencyType(String dependencyType) {
 		this.dependencyType = dependencyType;
 	}
 
+	/**
+	 * To get property.
+	 * 
+	 * @return the property
+	 */
 	@Override
 	public String getProperty() {
 		// TODO Auto-generated method stub

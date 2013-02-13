@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.server;
+package com.ephesoft.dcma.gwt.customworkflow.server;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,15 +58,22 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.core.io.ClassPathResource;
 
-import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.gwt.core.server.DCMAHttpServlet;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.util.ApplicationConfigProperties;
 import com.ephesoft.dcma.util.FileUtils;
 
 public class ImportPluginUploadServlet extends DCMAHttpServlet {
+
+	private static final char RESULT_SEPERATOR = '|';
+
+	private static final String IMPORT_FILE = "importFile";
+
+	private static final String EMPTY_STRING = "";
+
+	private static final String LAST_ATTACHED_ZIP_SOURCE_PATH = "lastAttachedZipSourcePath";
 
 	private static final String CAUSE = "cause:";
 
@@ -75,7 +82,7 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String META_INF_APPLICATION_PROPERTIES = "META-INF\\application.properties";
+	private static final String META_INF_APPLICATION_PROPERTIES = "application";
 	private static final String PLUGIN_UPLOAD_PROPERTY_NAME = "plugin_upload_folder_path";
 
 	private static final String JAR_EXT = FileType.JAR.getExtensionWithDot();
@@ -84,7 +91,8 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 
 	private boolean validZipContent = false;
 
-	String tempOutputUnZipDir = "", jarFilePath = "", xmlFilePath = "", zipFileName = "", zipPathname = "";
+	private String tempOutputUnZipDir = EMPTY_STRING, jarFilePath = EMPTY_STRING, xmlFilePath = EMPTY_STRING,
+			zipFileName = EMPTY_STRING, zipPathname = EMPTY_STRING;
 
 	@Override
 	public final void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -94,121 +102,41 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
-		String lastAttachedZipSourcePath = req.getParameter("lastAttachedZipSourcePath");
-		if (lastAttachedZipSourcePath != null && !lastAttachedZipSourcePath.isEmpty()) {
-			if (new File(lastAttachedZipSourcePath).exists()) {
-				FileUtils.deleteDirectoryAndContentsRecursive(new File(lastAttachedZipSourcePath));
-			}
+		String lastAttachedZipSourcePath = req.getParameter(LAST_ATTACHED_ZIP_SOURCE_PATH);
+		if ((lastAttachedZipSourcePath != null && !lastAttachedZipSourcePath.isEmpty())
+				&& (new File(lastAttachedZipSourcePath).exists())) {
+			FileUtils.deleteDirectoryAndContentsRecursive(new File(lastAttachedZipSourcePath));
 		}
-		attachFile(req, resp, batchSchemaService);
+		attachFile(req, resp);
 	}
 
-	private void attachFile(HttpServletRequest req, HttpServletResponse resp, BatchSchemaService batchSchemaService)
-			throws IOException {
-		String errorMessageString = "";
-		PrintWriter printWriter = resp.getWriter();
+	private void attachFile(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String errorMessageString = EMPTY_STRING;
+		PrintWriter printWriter = null;
+		printWriter = resp.getWriter();
 		File tempZipFile = null;
-		InputStream instream = null;
-		OutputStream out = null;
-		ZipInputStream zipInputStream = null;
-
-		List<ZipEntry> zipEntries = null;
 		if (ServletFileUpload.isMultipartContent(req)) {
-			FileItemFactory factory = new DiskFileItemFactory();
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			String exportSerailizationFolderPath = fetchPropertyFromPropertiesFile(PLUGIN_UPLOAD_PROPERTY_NAME,
-					META_INF_APPLICATION_PROPERTIES);
+
+			String exportSerailizationFolderPath = EMPTY_STRING;
+
+			try {
+				Properties allProperties = ApplicationConfigProperties.getApplicationConfigProperties().getAllProperties(
+						META_INF_APPLICATION_PROPERTIES);
+				exportSerailizationFolderPath = allProperties.getProperty(PLUGIN_UPLOAD_PROPERTY_NAME);
+			} catch (IOException e) {
+				LOG.error("Error retreiving plugin upload path ", e);
+			}
 			File exportSerailizationFolder = new File(exportSerailizationFolderPath);
 			if (!exportSerailizationFolder.exists()) {
 				exportSerailizationFolder.mkdir();
 			}
 
-			List<FileItem> items;
-			try {
-				items = upload.parseRequest(req);
-				for (FileItem item : items) {
+			tempZipFile = readAndParseAttachedFile(req, exportSerailizationFolderPath,printWriter);
 
-					if (!item.isFormField() && "importFile".equals(item.getFieldName())) {
-						zipFileName = item.getName();
-						if (zipFileName != null) {
-							zipFileName = zipFileName.substring(zipFileName.lastIndexOf(File.separator) + 1);
-						}
-						zipPathname = exportSerailizationFolderPath + File.separator + zipFileName;
-
-						// get only the file name not whole path
-						zipPathname = zipFileName;
-						if (zipFileName != null) {
-							zipFileName = FilenameUtils.getName(zipFileName);
-						}
-						try {
-							instream = item.getInputStream();
-							tempZipFile = new File(zipPathname);
-
-							if (tempZipFile.exists()) {
-								tempZipFile.delete();
-							}
-							out = new FileOutputStream(tempZipFile);
-							byte buf[] = new byte[1024];
-							int len;
-							while ((len = instream.read(buf)) > 0) {
-								out.write(buf, 0, len);
-							}
-						} catch (FileNotFoundException e) {
-							log.error("Unable to create the export folder." + e, e);
-							printWriter.write("Unable to create the export folder.Please try again.");
-
-						} catch (IOException e) {
-							log.error("Unable to read the file." + e, e);
-							printWriter.write("Unable to read the file.Please try again.");
-						} finally {
-							if (out != null) {
-								try {
-									out.close();
-								} catch (IOException ioe) {
-									log.info("Could not close stream for file." + tempZipFile);
-								}
-							}
-							if (instream != null) {
-								try {
-									instream.close();
-								} catch (IOException ioe) {
-									log.info("Could not close stream for file." + zipFileName);
-								}
-							}
-						}
-					}
-				}
-			} catch (FileUploadException e) {
-				log.error("Unable to read the form contents." + e, e);
-				printWriter.write("Unable to read the form contents.Please try again.");
-			}
-
-			tempOutputUnZipDir = exportSerailizationFolderPath + File.separator + zipFileName;
-			File tempOutputUnZipDirFile = new File(tempOutputUnZipDir);
-			try {
-				FileUtils.copyFile(tempZipFile, tempOutputUnZipDirFile);
-
-				// FileUtils.unzip(tempZipFile, tempOutputUnZipDir);
-			} catch (Exception e) {
-				log.error("Unable to copy the file." + e, e);
-				printWriter.write("Unable to copy the file.Please try again.");
-				tempZipFile.delete();
-			}
-
-			zipInputStream = new ZipInputStream(new FileInputStream(tempOutputUnZipDir));
-			// new ZipInputStream(new FileInputStream(tempOutputUnZipDir)).getNextEntry();
-
-			zipEntries = new ArrayList<ZipEntry>();
-			ZipEntry nextEntry = zipInputStream.getNextEntry();
-			while (nextEntry != null) {
-				zipEntries.add(nextEntry);
-				nextEntry = zipInputStream.getNextEntry();
-			}
-			errorMessageString = processZipFileContents(zipEntries, zipPathname);
+			errorMessageString = processZipFileEntries(tempZipFile, exportSerailizationFolderPath,printWriter);
 
 		} else {
-			log.error("Request contents type is not supported.");
+			LOG.error("Request contents type is not supported.");
 			printWriter.write("Request contents type is not supported.");
 		}
 		if (tempZipFile != null) {
@@ -217,11 +145,11 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 		if (validZipContent) {
 			String zipFileNameWithoutExtension = tempOutputUnZipDir.substring(0, tempOutputUnZipDir.lastIndexOf('.'));
 			printWriter.write(CustomWorkflowConstants.PLUGIN_NAME + zipFileNameWithoutExtension);
-			printWriter.append("|");
+			printWriter.append(RESULT_SEPERATOR);
 			printWriter.append(CustomWorkflowConstants.JAR_FILE_PATH).append(jarFilePath);
-			printWriter.append("|");
+			printWriter.append(RESULT_SEPERATOR);
 			printWriter.append(CustomWorkflowConstants.XML_FILE_PATH).append(xmlFilePath);
-			printWriter.append("|");
+			printWriter.append(RESULT_SEPERATOR);
 			printWriter.flush();
 		} else {
 			printWriter.write("Error while importing.Please try again." + CAUSE + errorMessageString);
@@ -229,9 +157,124 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 
 	}
 
-	private String processZipFileContents(List<ZipEntry> zipEntries, String zipPathname) {
+	/**
+	 * @param tempZipFile
+	 * @param exportSerailizationFolderPath
+	 * @param printWriter 
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private String processZipFileEntries(File tempZipFile, String exportSerailizationFolderPath, PrintWriter printWriter) throws FileNotFoundException,
+			IOException {
+		String errorMessageString;
+		ZipInputStream zipInputStream;
+		List<ZipEntry> zipEntries;
+		tempOutputUnZipDir = exportSerailizationFolderPath + File.separator + zipFileName;
+		File tempOutputUnZipDirFile = new File(tempOutputUnZipDir);
+		try {
+			FileUtils.copyFile(tempZipFile, tempOutputUnZipDirFile);
 
-		String errorMessageString = "";
+			// FileUtils.unzip(tempZipFile, tempOutputUnZipDir);
+		} catch (Exception e) {
+			LOG.error("Unable to copy the file." + e, e);
+			printWriter.write("Unable to copy the file.Please try again.");
+			tempZipFile.delete();
+		}
+
+		zipInputStream = new ZipInputStream(new FileInputStream(tempOutputUnZipDir));
+		// new ZipInputStream(new FileInputStream(tempOutputUnZipDir)).getNextEntry();
+
+		zipEntries = new ArrayList<ZipEntry>();
+		ZipEntry nextEntry = zipInputStream.getNextEntry();
+		while (nextEntry != null) {
+			zipEntries.add(nextEntry);
+			nextEntry = zipInputStream.getNextEntry();
+		}
+		errorMessageString = processZipFileContents(zipEntries);
+		return errorMessageString;
+	}
+
+	/**
+	 * @param req
+	 * @param tempZipFile
+	 * @param exportSerailizationFolderPath
+	 * @param printWriter 
+	 * @return
+	 */
+	private File readAndParseAttachedFile(HttpServletRequest req, String exportSerailizationFolderPath, PrintWriter printWriter) {
+		List<FileItem> items;
+		File tempZipFile = null;
+		try {
+			FileItemFactory factory = new DiskFileItemFactory();
+			ServletFileUpload upload = new ServletFileUpload(factory);
+			InputStream instream = null;
+			OutputStream out = null;
+
+			items = upload.parseRequest(req);
+			for (FileItem item : items) {
+
+				if (!item.isFormField() && IMPORT_FILE.equals(item.getFieldName())) {
+					zipFileName = item.getName();
+					if (zipFileName != null) {
+						zipFileName = zipFileName.substring(zipFileName.lastIndexOf(File.separator) + 1);
+					}
+					zipPathname = exportSerailizationFolderPath + File.separator + zipFileName;
+
+					// get only the file name not whole path
+					zipPathname = zipFileName;
+					if (zipFileName != null) {
+						zipFileName = FilenameUtils.getName(zipFileName);
+					}
+					try {
+						instream = item.getInputStream();
+						tempZipFile = new File(zipPathname);
+
+						if (tempZipFile.exists()) {
+							tempZipFile.delete();
+						}
+						out = new FileOutputStream(tempZipFile);
+						byte buf[] = new byte[1024];
+						int len = instream.read(buf);
+						while (len > 0) {
+							out.write(buf, 0, len);
+							len = instream.read(buf);
+						}
+					} catch (FileNotFoundException e) {
+						LOG.error("Unable to create the export folder." + e, e);
+						printWriter.write("Unable to create the export folder.Please try again.");
+
+					} catch (IOException e) {
+						LOG.error("Unable to read the file." + e, e);
+						printWriter.write("Unable to read the file.Please try again.");
+					} finally {
+						if (out != null) {
+							try {
+								out.close();
+							} catch (IOException ioe) {
+								LOG.info("Could not close stream for file." + tempZipFile);
+							}
+						}
+						if (instream != null) {
+							try {
+								instream.close();
+							} catch (IOException ioe) {
+								LOG.info("Could not close stream for file." + zipFileName);
+							}
+						}
+					}
+				}
+			}
+		} catch (FileUploadException e) {
+			LOG.error("Unable to read the form contents." + e, e);
+			printWriter.write("Unable to read the form contents.Please try again.");
+		}
+		return tempZipFile;
+	}
+
+	private String processZipFileContents(List<ZipEntry> zipEntries) {
+
+		String errorMessageString = EMPTY_STRING;
 		boolean numberOfFilesValid = false;
 		boolean jarFileExists = false;
 		boolean xmlFileExists = false;
@@ -257,16 +300,16 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 			}
 		}
 
-		String zipFileNameWithoutExt = zipFileName.substring(0, zipFileName.lastIndexOf('.'));
-		String jarFileNameWithoutExt = jarFilePath.substring(0, jarFilePath.lastIndexOf('.'));
-		if (zipFileNameWithoutExt.equals(jarFileNameWithoutExt)) {
-			validName = true;
-		}else
-		{
-			validName = false;
-		}
-		if (numberOfFilesValid && jarFileExists && xmlFileExists && validName) {
-			validZipContent = true;
+		if (numberOfFilesValid && jarFileExists && xmlFileExists) {
+
+			String zipFileNameWithoutExt = zipFileName.substring(0, zipFileName.lastIndexOf('.'));
+			String jarFileNameWithoutExt = jarFilePath.substring(0, jarFilePath.lastIndexOf('.'));
+			if (zipFileNameWithoutExt.equals(jarFileNameWithoutExt)) {
+				validName = true;
+				validZipContent = true;
+			} else {
+				validName = false;
+			}
 
 		} else {
 			validZipContent = false;
@@ -282,46 +325,11 @@ public class ImportPluginUploadServlet extends DCMAHttpServlet {
 				errorMessageString = "Error: Invalid Zip file content";
 			}
 		}
+		if (!validName) {
+			errorMessageString = "Error: Selected zip file and jar file must have same name";
+		}
 
 		return errorMessageString;
 	}
 
-	boolean isFileExists(String fileName, File parentFolder) {
-		boolean isFileExists = false;
-
-		for (String currentFileName : parentFolder.list()) {
-			if (currentFileName.equals(fileName)) {
-				isFileExists = true;
-				break;
-			}
-		}
-		return isFileExists;
-	}
-
-	/**
-	 * API to fetch the specified property from the given property file
-	 * 
-	 * @param propertyName: {@link String}
-	 * @param propertyFileName: {@link String}
-	 * @return property {@link String}
-	 */
-	private String fetchPropertyFromPropertiesFile(String propertyName, String propertyFileName) {
-		ClassPathResource classPathResource = new ClassPathResource(propertyFileName);
-
-		FileInputStream fileInputStream = null;
-		File propertyFile = null;
-		String property = null;
-		try {
-			propertyFile = classPathResource.getFile();
-			Properties properties = new Properties();
-			fileInputStream = new FileInputStream(propertyFile);
-			properties.load(fileInputStream);
-			property = properties.getProperty(propertyName);
-		} catch (IOException e) {
-			log.error("An Exception occurred while executing the patch." + e.getMessage(), e);
-		}
-
-		return property;
-
-	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,28 +58,60 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show KV extraction test result fieldtype.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KVExtractionTestResultView extends View<KVExtractionTestResultViewPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, KVExtractionTestResultView> {
 	}
 
-	private static final Binder binder = GWT.create(Binder.class);
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private FlexTable resultTable;
+	/**
+	 * resultTable FlexTable.
+	 */
+	private final FlexTable resultTable;
 
+	/**
+	 * kvExtractionListPanel FlowPanel.
+	 */
 	@UiField
-	FlowPanel kvExtractionListPanel;
+	protected FlowPanel kvExtractionListPanel;
 
+	/**
+	 * backButton Button.
+	 */
 	@UiField
 	protected Button backButton;
 
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
 	@UiField
-	ScrollPanel scrollPanel;
+	protected ScrollPanel scrollPanel;
 
+	/**
+	 * Constructor.
+	 */
 	public KVExtractionTestResultView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 
 		scrollPanel.setSize("500px", "300px");
 
@@ -91,11 +123,21 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 		kvExtractionListPanel.add(resultTable);
 	}
 
+	/**
+	 * To perform operations on Back Button Click.
+	 * 
+	 * @param event ClickEvent
+	 */
 	@UiHandler("backButton")
-	public void onBackButtonClicked(ClickEvent e) {
+	public void onBackButtonClicked(ClickEvent event) {
 		dialogBox.hide();
 	}
 
+	/**
+	 * To create KV Field List.
+	 * 
+	 * @param outputDtos List<OutputDataCarrierDTO>
+	 */
 	public void createKVFieldList(List<OutputDataCarrierDTO> outputDtos) {
 		resultTable.removeAllRows();
 		createHeaderColumns();
@@ -111,11 +153,12 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 					if (value != null && !value.isEmpty()) {
 						resultTable.setWidget(index, 0, new Label(outputDataCarrierDTO.getInputFileName()));
 						resultTable.setWidget(index, 1, new Label(value));
-						resultTable.setWidget(index, 2, new Label(outputDataCarrierDTO.getConfidence() + ""));
-						resultTable.setWidget(index, 3, new Label(generateCoordinates(outputDataCarrierDTO.getCoordinates())));
+						resultTable.setWidget(index, 2, new Label(String.valueOf(outputDataCarrierDTO.getConfidence())));
+						resultTable.setWidget(index, BatchClassManagementConstants.THREE, new Label(
+								generateCoordinates(outputDataCarrierDTO.getCoordinates())));
 						index++;
 					} else {
-						resultTable.getFlexCellFormatter().setColSpan(index, 1, 4);
+						resultTable.getFlexCellFormatter().setColSpan(index, 1, BatchClassManagementConstants.FOUR);
 						resultTable.setWidget(index, 0, new Label(outputDataCarrierDTO.getInputFileName()));
 						resultTable.setWidget(index, 1, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 						index++;
@@ -123,14 +166,13 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 				}
 			}
 		} else {
-			resultTable.getFlexCellFormatter().setColSpan(1, 0, 4);
+			resultTable.getFlexCellFormatter().setColSpan(1, 0, BatchClassManagementConstants.FOUR);
 			resultTable.setWidget(index, 0, new Label(MessageConstants.MSG_NO_RESULTS_FOUND));
 		}
 	}
 
 	private String generateCoordinates(CoordinatesDTO dto) {
-		String coordinates = "{" + dto.getX0() + "," + dto.getY0() + "} , {" + dto.getX1() + "," + dto.getY1() + "}";
-		return coordinates;
+		return "{" + dto.getX0() + "," + dto.getY0() + "} , {" + dto.getX1() + "," + dto.getY1() + "}";
 	}
 
 	private void createHeaderColumns() {
@@ -143,21 +185,37 @@ public class KVExtractionTestResultView extends View<KVExtractionTestResultViewP
 		resultTable.getCellFormatter().setWidth(0, 2, "20%");
 		resultTable.setWidget(0, 2, new Label(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.CONFIDENCE)));
 
-		resultTable.getCellFormatter().setWidth(0, 3, "35%");
-		resultTable.setWidget(0, 3, new Label(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.COORDINATES)));
+		resultTable.getCellFormatter().setWidth(0, BatchClassManagementConstants.THREE, "35%");
+		resultTable.setWidget(0, BatchClassManagementConstants.THREE, new Label(LocaleDictionary.get().getConstantValue(
+				BatchClassManagementConstants.COORDINATES)));
 
 		resultTable.getRowFormatter().setStylePrimaryName(0, "header");
 
 	}
 
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
+	/**
+	 * To get Back Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getBackButton() {
 		return backButton;
 	}

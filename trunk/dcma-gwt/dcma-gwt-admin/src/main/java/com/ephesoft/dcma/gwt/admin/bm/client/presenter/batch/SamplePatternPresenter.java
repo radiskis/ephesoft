@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,38 +43,57 @@ import com.ephesoft.dcma.gwt.core.shared.SamplePatternDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
+ * Presenter for displaying the sample pattern list table.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Presenter for displaying the sample pattern list table
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class SamplePatternPresenter extends AbstractBatchClassPresenter<SamplePatternView> {
-    
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view SamplePatternView
+	 */
 	public SamplePatternPresenter(final BatchClassManagementController controller, final SamplePatternView view) {
 		super(controller, view);
 	}
 
-	@Override
-	public void bind() {
-
-	}
-
+	/**
+	 * To show Sample Pattern View.
+	 * 
+	 * @param samplePatternList SamplePatternDTO
+	 */
 	public void showSamplePatternView(SamplePatternDTO samplePatternList) {
-		view.getDialogBox().setWidth("800px !important");
+		view.getDialogBox().addStyleName(AdminConstants.SAMPLE_PATTERN_DIALOG_BOX_STYLE);
 		view.getDialogBox().add(view);
 		view.getDialogBox().setText(AdminConstants.SAMPLE_REGEX_PATTERN_TITLE);
 		view.getDialogBox().setTitle(AdminConstants.SAMPLE_REGEX_PATTERN_TITLE);
 		view.getDialogBox().show();
 		view.getDialogBox().center();
 		view.getBackButton().setFocus(true);
-		
+
 	}
 
+	/**
+	 * For event handling.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.
+	}
+
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
+	@Override
+	public void bind() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

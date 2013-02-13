@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,7 +38,6 @@ package com.ephesoft.dcma.export.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.Assert;
 
 import com.ephesoft.dcma.core.DCMAException;
@@ -46,29 +45,65 @@ import com.ephesoft.dcma.core.annotation.PostProcess;
 import com.ephesoft.dcma.core.annotation.PreProcess;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.export.FolderExporter;
-import com.ephesoft.dcma.util.ApplicationContextUtil;
 import com.ephesoft.dcma.util.BackUpFileService;
 
+/**
+ * This service implementation provides API to copy batch files to be exported.
+ * @author Ephesoft
+ * @version 1.0
+ *	@see com.ephesoft.dcma.export.service.ExportService
+ */
 public class ExportServiceImpl implements ExportService, ICommonConstants {
-
+	/**
+	 * An instance of Logger for proper logging using slf4j.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExportServiceImpl.class);
-
+	/**
+	 * An instance of {@link FolderExporter}. 
+	 */
 	@Autowired
 	private FolderExporter folderExporter;
 
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * To get the xml before start of processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PreProcess
 	public void preProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID());
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * To get the xml after finish of processing.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 */
 	@PostProcess
 	public void postProcess(final BatchInstanceID batchInstanceID, String pluginWorkflow) {
 		Assert.notNull(batchInstanceID);
-		BackUpFileService.backUpBatch(batchInstanceID.getID(), pluginWorkflow);
+		final String batchInstanceIdentifier = batchInstanceID.getID();
+		BackUpFileService.backUpBatch(batchInstanceIdentifier, pluginWorkflow, batchInstanceService
+				.getSystemFolderForBatchInstanceId(batchInstanceIdentifier));
 	}
 
+	/**
+	 * API to copy batch files.
+	 * @param batchInstanceID {@link BatchInstanceID}
+	 * @param pluginWorkflow {@link String}
+	 * @throws DCMAException
+	 */
 	@Override
 	public void copyBatchFiles(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException {
 		LOGGER.info("batchInstanceID : " + batchInstanceID);
@@ -77,13 +112,5 @@ public class ExportServiceImpl implements ExportService, ICommonConstants {
 		} catch (Exception e) {
 			throw new DCMAException(e.getMessage(), e);
 		}
-	}
-
-	public static void main(String[] args) throws DCMAException {
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-				"classpath:/META-INF/applicationContext-export.xml");
-		context.start();
-		ExportService docushareExportService = ApplicationContextUtil.getSingleBeanOfType(context, ExportService.class);
-		docushareExportService.copyBatchFiles(new BatchInstanceID("BI1"), "aaa");
 	}
 }

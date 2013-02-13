@@ -20,27 +20,20 @@
 				<g:LayoutPanel ui:field="viewEditPluginPanel" height="100%"
 					width="100%">
 					<g:layer>
-						<g:ScrollPanel height="100%" width="100%">
-							<g:HorizontalPanel height="100%" width="100%">
+							<g:HorizontalPanel height="100%" width="100%" horizontalAlignment="ALIGN_CENTER">
 								<g:VerticalPanel ui:field="propertyDetailsViewPanel"
-									height="100%" width="80%">
+									height="100%" width="100%">
 									<plugin:FuzzyDBPropertiesView
 										ui:field="fuzzyDBPropertiesView" width='100%' height="100%" />
 									<g:VerticalPanel ui:field="editButtonPanel">
 									</g:VerticalPanel>
 								</g:VerticalPanel>
 								<g:VerticalPanel ui:field="editPropertyDetailPanel"
-									width='80%' height="100%" visible="false">
+									width='100%' height="100%" visible="false">
 									<plugin:EditFuzzyDBPropertiesView
 										ui:field="editFuzzyDBPropertiesView" width='100%' height="100%" />
 								</g:VerticalPanel>
-								<g:VerticalPanel width="40%">
-									<g:cell width="40%" verticalAlignment="ALIGN_BOTTOM">
-										<g:Button ui:field="mappingButton"></g:Button>
-									</g:cell>
-								</g:VerticalPanel>
 							</g:HorizontalPanel>
-						</g:ScrollPanel>
 					</g:layer>
 				</g:LayoutPanel>
 			</g:CaptionPanel>

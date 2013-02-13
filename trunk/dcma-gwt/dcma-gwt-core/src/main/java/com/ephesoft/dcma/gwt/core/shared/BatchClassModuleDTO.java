@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,9 +57,9 @@ public class BatchClassModuleDTO implements IsSerializable {
 
 	private String workflowName;
 
-	private boolean isDeleted;
+	private boolean deleted;
 
-	private boolean isNew;
+	private boolean newPlugin;
 
 	private Map<String, BatchClassPluginDTO> batchClassPluginsMap = new LinkedHashMap<String, BatchClassPluginDTO>();
 
@@ -122,19 +122,23 @@ public class BatchClassModuleDTO implements IsSerializable {
 	}
 
 	public BatchClassPluginDTO getPluginByIdentifier(String identifier) {
-		for (BatchClassPluginDTO batchClassPluginDTO : batchClassPluginsMap.values()) {
-			if (batchClassPluginDTO.getIdentifier().equals(identifier))
-				return batchClassPluginDTO;
+		BatchClassPluginDTO batchClassPluginDTO = null;
+		for (BatchClassPluginDTO dto : batchClassPluginsMap.values()) {
+			if (dto.getIdentifier().equals(identifier)){
+				batchClassPluginDTO = dto;
+			}
 		}
-		return null;
+		return batchClassPluginDTO;
 	}
 
 	public BatchClassPluginDTO getPluginByName(String name) {
-		for (BatchClassPluginDTO batchClassPluginDTO : batchClassPluginsMap.values()) {
-			if (batchClassPluginDTO.getPlugin().getPluginName().equals(name))
-				return batchClassPluginDTO;
+		BatchClassPluginDTO batchClassPluginDTO = null;
+		for (BatchClassPluginDTO dto : batchClassPluginsMap.values()) {
+			if (dto.getPlugin().getPluginName().equals(name)){
+				batchClassPluginDTO = dto;
+			}
 		}
-		return null;
+		return batchClassPluginDTO;
 	}
 
 	public String getRemoteBatchClassIdentifier() {
@@ -185,27 +189,27 @@ public class BatchClassModuleDTO implements IsSerializable {
 	 * @return the isDeleted
 	 */
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	/**
-	 * @param isDeleted the isDeleted to set
+	 * @param deleted the isDeleted to set
 	 */
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 	/**
 	 * @return the isNew
 	 */
 	public boolean isNew() {
-		return isNew;
+		return newPlugin;
 	}
 
 	/**
-	 * @param isNew the isNew to set
+	 * @param newPlugin the isNew to set
 	 */
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setNew(boolean newPlugin) {
+		this.newPlugin = newPlugin;
 	}
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,7 +46,7 @@ public class PluginConfigurationDTO implements IsSerializable {
 	private List<String> sampleValue;
 	private String pluginId;
 	private String fieldValue;
-	private boolean isDirty;
+	private boolean dirty;
 
 	public String getIdentifier() {
 		return identifier;
@@ -81,11 +81,11 @@ public class PluginConfigurationDTO implements IsSerializable {
 	}
 
 	public boolean isDirty() {
-		return isDirty;
+		return dirty;
 	}
 
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 	
 	public void setFieldValue(String fieldValue) {

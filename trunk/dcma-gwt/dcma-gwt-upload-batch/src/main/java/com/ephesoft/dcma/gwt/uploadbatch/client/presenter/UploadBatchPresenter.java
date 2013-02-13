@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,12 +35,16 @@
 
 package com.ephesoft.dcma.gwt.uploadbatch.client.presenter;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.ephesoft.dcma.core.common.UserType;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassCloudConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatchController;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchConstants;
@@ -50,7 +54,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -58,18 +61,41 @@ import com.google.gwt.user.client.ui.Label;
 public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBatchView> {
 
 	private AssociateBCFPresenter associateBCFPresenter;
+	
+	/**
+	 * The batchClassLimitMap {@link Map} is used for storing page count and instance 
+	 * limit per batch class.
+	 */
+	private Map<String, BatchClassCloudConfigDTO> batchClassLimitMap = new HashMap<String, BatchClassCloudConfigDTO>();
+	
+	/**
+	 * The userType {@link Integer} is used for storing user type.
+	 */
+	private Integer userType;
+	
+	/**
+	 * The fileSizeLimit {@link Long} is used for storing batch class limit allowed
+	 * for each file uploaded.
+	 */
+	private Long fileSizeLimit = 0L;
 
 	public UploadBatchPresenter(UploadBatchController controller, UploadBatchView view) {
 		super(controller, view);
 	}
 
 	public void bind() {
+		setUserType();
+		setFileSizeLimit();
 		getBatchClassName();
 		getCurrentBatchUploadFolder();
+		setBatchClassLimitMap();
 	}
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
+		/*
+		 * 
+		 */
 	}
 
 	public AssociateBCFPresenter getAssociateBCFPresenter() {
@@ -81,20 +107,31 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 	}
 
 	public void getBatchClassName() {
-		controller.getRpcService().getBatchClassName(new AsyncCallback<Map<String, String>>() {
+		controller.getRpcService().getBatchClassName(new EphesoftAsyncCallback<Map<String, String>>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						UploadBatchMessages.ERROR_GETTING_BATCH_CLASS_LIST));
 			}
 
 			@Override
-			public void onSuccess(Map<String, String> arg0) {
+			public void onSuccess(final Map<String, String> arg0) {
 				view.setBatchClassMapping(arg0);
-				if (view.getBatchClassNameListBox().getItemCount() <= 0) {
-					view.setBatchClassNameListBoxValues(arg0.keySet());
-				}
+				controller.getRpcService().getBatchClassInfoFromSession(new EphesoftAsyncCallback<String>() {
+
+					@Override
+					public void customFailure(Throwable throwable) {
+						populateBatchClassListBox(arg0,	null);
+					}
+
+					@Override
+					public void onSuccess(String selectedBatchClassIdentifier) {
+						populateBatchClassListBox(arg0,
+								selectedBatchClassIdentifier);
+						
+					}
+				});
 				associateBCFPresenter = new AssociateBCFPresenter(controller, view.getAssociateBCFView());
 			}
 		});
@@ -102,31 +139,61 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 
 	public void resetCurrentBatchUploadFolderOnServer() {
 		associateBCFPresenter.clearBatchClassFieldValues();
-		controller.getRpcService().resetCurrentBatchUploadFolder(controller.getCurrentBatchUploadFolder(), new AsyncCallback<Void>() {
+		controller.getRpcService().resetCurrentBatchUploadFolder(controller.getCurrentBatchUploadFolder(), new EphesoftAsyncCallback<Void>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
-
+			public void customFailure(Throwable arg0) {
+				/*
+				 * 
+				 */
 			}
 
 			@Override
 			public void onSuccess(Void arg0) {
-
+				/*
+				 * 
+				 */
 			}
 		});
 	}
 
 	public void onFinishButtonClicked() {
 		ScreenMaskUtility.maskScreen();
-		controller.getRpcService().finishBatch(controller.getCurrentBatchUploadFolder(), view.getSelectedBatchClassNameListBoxValue(),
-				new AsyncCallback<String>() {
+		final String identifier = view.getSelectedBatchClassNameListBoxValue();
+		controller.getRpcService().finishBatch(controller.getCurrentBatchUploadFolder(), identifier,
+				new EphesoftAsyncCallback<String>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
-						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-								UploadBatchMessages.BATCH_PROCESS_FAIL)
-								+ " " + arg0.getMessage());
-						ScreenMaskUtility.unmaskScreen();
+					public void customFailure(Throwable throwable) {
+						final String errorMessage = throwable.getMessage();
+						
+						// For batch class instance page count error
+						if (UploadBatchConstants.IMAGE_ERROR.equals(errorMessage)) {
+							 final String message = LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.UPLOAD_IMAGE_LIMIT_ERROR) + getBatchClassImageLimit(identifier)
+									+ UploadBatchConstants.SPACE + LocaleDictionary.get().getMessageValue(
+											UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_APPENDED_MESSAGE);
+							final String title  = LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.LIMIT_REACHED);
+							ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+							ScreenMaskUtility.unmaskScreen();
+						} else if (UploadBatchConstants.INSTANCE_ERROR.equals(errorMessage)) {// For batch class instance limit error
+							final String message = LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.UPLOAD_INSTANCE_LIMIT_ERROR);
+							final String title  = LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.LIMIT_REACHED);
+							ConfirmationDialogUtil.showConfirmationDialog(message, title, true);
+							ScreenMaskUtility.unmaskScreen();
+							onLimitError();
+							batchClassLimitMap.clear();
+							setBatchClassLimitMap();
+						} else {
+							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.BATCH_PROCESS_FAIL)
+									+ " " + errorMessage);
+							ScreenMaskUtility.unmaskScreen();
+						}
+						
 					}
 
 					@Override
@@ -137,6 +204,8 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 						ScreenMaskUtility.unmaskScreen();
 						associateBCFPresenter.clearBatchClassFieldValues();
 						onResetButtonClick();
+						batchClassLimitMap.clear();
+						setBatchClassLimitMap();
 					}
 				});
 	}
@@ -256,10 +325,10 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 		}
 		ScreenMaskUtility.maskScreen();
 		controller.getRpcService().deleteFilesByName(controller.getCurrentBatchUploadFolder(), view.getDeleteSelectedFileList(),
-				new AsyncCallback<List<String>>() {
+				new EphesoftAsyncCallback<List<String>>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.ERROR_DELETING_FILES));
 						ScreenMaskUtility.unmaskScreen();
@@ -297,7 +366,7 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 		String currentBatchUploadFolder = controller.getCurrentBatchUploadFolder();
 		if (currentBatchUploadFolder == null || currentBatchUploadFolder.isEmpty()) {
 			// rpc call for fetching the folder name
-			controller.getRpcService().getCurrentBatchFolderName(new AsyncCallback<String>() {
+			controller.getRpcService().getCurrentBatchFolderName(new EphesoftAsyncCallback<String>() {
 
 				@Override
 				public void onSuccess(String currentBatchUploadFolder) {
@@ -306,7 +375,10 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 				}
 
 				@Override
-				public void onFailure(Throwable arg0) {
+				public void customFailure(Throwable arg0) {
+					/*
+					 * 
+					 */
 				}
 			});
 		} else {
@@ -323,7 +395,7 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 
 	private void getCurrentBatchUploadFolder() {
 		// rpc call for fetching the folder name
-		controller.getRpcService().getCurrentBatchFolderName(new AsyncCallback<String>() {
+		controller.getRpcService().getCurrentBatchFolderName(new EphesoftAsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(String currentBatchUploadFolder) {
@@ -331,10 +403,197 @@ public class UploadBatchPresenter extends AbstractUploadBatchPresenter<UploadBat
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
+				/*
+				 * 
+				 */
 
 			}
 		});
+	}
+	
+	private void populateBatchClassListBox(final Map<String, String> arg0,
+			String selectedBatchClassIdentifier) {
+		if (view.getBatchClassNameListBox().getItemCount() <= 0) {
+			view.setBatchClassNameListBoxValues(arg0, selectedBatchClassIdentifier);
+		}
+	}
+	
+	public void setSelectedBatchClassInfoToSession(String selectedBatchClassInfo) {
+		controller.getRpcService().setBatchClassInfoFromSession(selectedBatchClassInfo, new EphesoftAsyncCallback<Void>() {
+
+			@Override
+			public void customFailure(Throwable arg0) {
+				/*
+				 * 
+				 */
+			}
+
+			@Override
+			public void onSuccess(Void arg0) {
+				//Empty method
+			}
+		});
+	}
+	
+	/**
+	 * The <code>getBatchClassImageLimit</code> is a method for retrieving instance limit
+	 * for a given batch class.
+	 * 
+	 * @param identifier {@link String} batch class identifier.
+	 * @return {@link Integer} instance limit
+	 */
+	public Integer getBatchClassImageLimit(String identifier) {
+		Integer imageLimit = null;
+		if (null != batchClassLimitMap && !batchClassLimitMap.isEmpty() && batchClassLimitMap.containsKey(identifier)) {
+			BatchClassCloudConfigDTO batchClassCloudConfigDTO = batchClassLimitMap.get(identifier);
+			if (null != batchClassCloudConfigDTO) {
+				Integer batchInstanceImageLimit = batchClassCloudConfigDTO.getBatchInstanceImageLimit();
+				if (null != batchInstanceImageLimit && null != userType && userType.intValue() == UserType.LIMITED.getUserType()) {
+					imageLimit = batchInstanceImageLimit;
+				}
+			}
+		}
+		return imageLimit;
+	}
+	
+	
+	
+	/**
+	 * The <code>setBatchClassLimitMap</code> is a method for setting batch class instance limit
+	 * map for validating number of images allowed to upload.
+	 */
+	private void setBatchClassLimitMap() {
+		controller.getRpcService().getBatchClassImageLimit(new EphesoftAsyncCallback<Map<String,BatchClassCloudConfigDTO>>() {
+
+			@Override
+			public void customFailure(Throwable arg0) {
+				//Do Nothing
+			}
+
+			@Override
+			public void onSuccess(Map<String, BatchClassCloudConfigDTO> batchClassImageLimitMap) {
+				if (null != batchClassImageLimitMap && !batchClassImageLimitMap.isEmpty()) {
+					batchClassLimitMap.putAll(batchClassImageLimitMap);
+				}
+			}
+
+		});		
+	}
+	
+	/**
+	 * The <code>setUserType</code> method is used for setting current 
+	 * user type.
+	 */
+	private void setUserType() {
+		controller.getRpcService().getUserType(new EphesoftAsyncCallback<Integer>() {
+
+			@Override
+			public void customFailure(Throwable arg0) {
+				// Do nothing
+			}
+
+			@Override
+			public void onSuccess(Integer userType) {
+				if (null != userType) {
+					setUserType(userType);
+				}
+			}
+		});
+	}
+	
+	/**
+	 * The <code>setFileSizeLimit</code> method is used for setting current 
+	 * file size limit.
+	 */
+	private void setFileSizeLimit() {
+		controller.getRpcService().getFileSizeLimit(new EphesoftAsyncCallback<Long>() {
+
+			@Override
+			public void customFailure(Throwable arg0) {
+				// Do Nothing
+			}
+
+			@Override
+			public void onSuccess(Long fileSize) {
+				if (null != fileSizeLimit) {
+					fileSizeLimit = fileSize;
+				}
+			}
+		});
+	}
+	
+	
+	
+	/**
+	 * The <code>checkForBatchClassLimit</code> method is used for checking batch class limit
+	 * of batch class id passed.
+	 * 
+	 * @param identifier {@link String} batch class identifier
+	 * @return true/false 
+	 */
+	public boolean checkForBatchClassLimit(String identifier) {
+		boolean isUploadLimit = false;
+		if (null != identifier && null != batchClassLimitMap && !batchClassLimitMap.isEmpty() && batchClassLimitMap.containsKey(identifier)) {
+			BatchClassCloudConfigDTO batchClassCloudConfigDTO = batchClassLimitMap.get(identifier);
+			if (null != batchClassCloudConfigDTO) {
+				Integer batchInstanceLimit = batchClassCloudConfigDTO.getBatchInstanceLimit();
+				Integer batchInstanceCounter = batchClassCloudConfigDTO.getBatchInstanceCounter();
+				isUploadLimit = (null != batchInstanceLimit && null != batchInstanceCounter 
+											&& null != userType && userType.intValue() == UserType.LIMITED.getUserType()) ? 
+													batchInstanceCounter.intValue() >= batchInstanceLimit.intValue() : false;
+			}
+		}
+		return isUploadLimit;
+	}
+	
+	/**
+	 * The <code>onLimitError</code> method is used for repainting file view
+	 * if batch class limit error.
+	 */
+	private void onLimitError() {
+		view.getAllFileList().clear();
+		view.getDeleteSelectedFileList().clear();
+
+		// disable finish button
+		view.getFinishButton().setEnabled(Boolean.FALSE);
+		
+		// disable Field(s) button
+		view.getAddBCFButton().setEnabled(Boolean.FALSE);
+		
+		// disable delete button
+		view.getDeleteButton().setEnabled(Boolean.FALSE);
+		view.getDeleteButton().setVisible(Boolean.FALSE);
+		view.getDeleteCaptionPanel().setVisible(Boolean.FALSE);
+		
+		repaintFileList();
+	}
+	
+	/**
+	 * Getter for user type.
+	 * 
+	 * @return {@link Integer} user type
+	 */
+	public Integer getUserType() {
+		return userType;
+	}
+
+	/**
+	 * Setter for user type.
+	 * 
+	 * @param userType {@link Integer} user type
+	 */
+	public void setUserType(Integer userType) {
+		this.userType = userType;
+	}
+	
+	/**
+	 * Getter for file size limit.
+	 * 
+	 * @return {@link Long} file size limit
+	 */
+	public Long getFileSizeLimit() {
+		return fileSizeLimit;
 	}
 
 }

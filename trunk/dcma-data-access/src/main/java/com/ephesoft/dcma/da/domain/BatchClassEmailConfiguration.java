@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,35 +45,69 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_email_configuration.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_email_configuration")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class BatchClassEmailConfiguration extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * batchClass BatchClass.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "batch_class_id")
 	private BatchClass batchClass;
 
+	/**
+	 * serverType String.
+	 */
 	@Column(name = "server_type")
 	private String serverType;
 
+	/**
+	 * serverName String.
+	 */
 	@Column(name = "server_name")
 	private String serverName;
 
+	/**
+	 * userName String.
+	 */
 	@Column(name = "username")
 	private String userName;
 
+	/**
+	 * password String.
+	 */ 
 	@Column(name = "password")
 	private String password;
 
+	/**
+	 * folderName String.
+	 */
 	@Column(name = "folder_name")
 	private String folderName;
 
+	/**
+	 * ssl Boolean.
+	 */
 	@Column(name = "isSSL")
-	private Boolean isSSL;
+	private Boolean ssl;
 
+	/**
+	 * portNumber Integer.
+	 */
 	@Column(name = "portNumber")
 	private Integer portNumber;
 
@@ -81,62 +115,122 @@ public class BatchClassEmailConfiguration extends AbstractChangeableEntity imple
 		return serverType;
 	}
 
+	/**
+	 * To set Server Type.
+	 * @param serverType String
+	 */
 	public void setServerType(String serverType) {
 		this.serverType = serverType;
 	}
 
+	/**
+	 * To get Server Type.
+	 * @return String
+	 */
 	public String getServerName() {
 		return serverName;
 	}
 
+	/**
+	 * To set Server Name.
+	 * @param serverName String
+	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
 	}
 
+	/**
+	 * To get User Name.
+	 * @return String
+	 */
 	public String getUserName() {
 		return userName;
 	}
 
+	/**
+	 * To set User Name.
+	 * @param userName String
+	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
+	/**
+	 * To get Password.
+	 * @return String
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * To set Password.
+	 * @param password String
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * To get Folder Name.
+	 * @return String
+	 */
 	public String getFolderName() {
 		return folderName;
 	}
 
+	/**
+	 * To set Folder Name.
+	 * @param folderName String
+	 */
 	public void setFolderName(String folderName) {
 		this.folderName = folderName;
 	}
 
+	/**
+	 * To get Batch Class.
+	 * @return BatchClass
+	 */
 	public BatchClass getBatchClass() {
 		return batchClass;
 	}
 
+	/**
+	 * To set Batch Class.
+	 * @param batchClass BatchClass
+	 */
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
 
+	/**
+	 * To set is SSL.
+	 * @param isSSL Boolean
+	 */
 	public void setIsSSL(Boolean isSSL) {
-		this.isSSL = isSSL;
+		this.ssl = isSSL;
 	}
 
+	/**
+	 * To check whether is SSL.
+	 * @return Boolean
+	 */
 	public Boolean isSSL() {
-		return isSSL;
+		return ssl;
 	}
 
+	/**
+	 * To get Port Number.
+	 * @return Integer
+	 */
 	public Integer getPortNumber() {
 		return portNumber;
 	}
 
+	/**
+	 * To set Port Number.
+	 * @param portNumber Integer
+	 */
 	public void setPortNumber(Integer portNumber) {
 		this.portNumber = portNumber;
 	}

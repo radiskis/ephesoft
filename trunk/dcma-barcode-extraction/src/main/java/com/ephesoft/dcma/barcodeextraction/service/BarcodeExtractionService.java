@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.barcodeextraction.service;
 
+import java.util.List;
+import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
@@ -46,7 +48,7 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
  * 
  * @author Ephesoft
  * @version 1.0
- * @see com.ephesoft.dcma.barcode.service.BarcodeExtractionServiceImpl
+ * @see com.ephesoft.dcma.barcodeextraction.service.BarcodeExtractionServiceImpl
  * 
  */
 public interface BarcodeExtractionService {
@@ -57,7 +59,20 @@ public interface BarcodeExtractionService {
 	 * 
 	 * @param batchInstanceID {@link BatchInstanceID}
 	 * @param pluginWorkflow {@link String}
-	 * @throws DCMAException
+	 * @throws DCMAException if any exception is occurred during readBarcode method.
 	 */
 	void extractPageBarCode(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
+	
+	/**
+	 * This method extracts the Barcode values and confidence for each image file.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @param folderLocation {@link String}
+	 * @param imageName {@link String}
+	 * @param docType {@link String}
+	 * @return List<DocField>
+	 * @throws DCMAException if any exception is occurred during readBarcode method.
+	 * @returns list of document level fields
+	 */
+	List<DocField> extractPageBarCodeAPI(final String batchClassIdentifier, final String folderLocation, final String imageName, final String docType) throws DCMAException;
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.da.property.EmailProperty;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
@@ -55,48 +56,103 @@ import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.comparator.EmailComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the email list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EmailListPresenter extends AbstractBatchClassPresenter<EmailListView> implements PaginationListner, DoubleClickListner {
 
+	/**
+	 * emailConfigurationDTOList Collection<EmailConfigurationDTO>.
+	 */
 	private Collection<EmailConfigurationDTO> emailConfigurationDTOList;
 
+	/**
+	 * To get Email Configuration DTO List.
+	 * 
+	 * @return Collection<EmailConfigurationDTO>
+	 */
 	public Collection<EmailConfigurationDTO> getEmailConfigurationDTOList() {
 		return emailConfigurationDTOList;
 	}
 
+	/**
+	 * To set Email Configuration DTO List.
+	 * 
+	 * @param emailConfigurationDTOList Collection<EmailConfigurationDTO>
+	 */
 	public void setEmailConfigurationDTOList(Collection<EmailConfigurationDTO> emailConfigurationDTOList) {
 		this.emailConfigurationDTOList = emailConfigurationDTOList;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EmailListView
+	 */
 	public EmailListPresenter(BatchClassManagementController controller, EmailListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 
 	}
 
+	/**
+	 * To perform operations on pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param paramOrder Order
+	 */
 	@Override
-	public void onPagination(int startIndex, int maxResult, Order order) {
+	public void onPagination(int startIndex, int maxResult, Order paramOrder) {
+		Order order = paramOrder;
+		if (null == order) {
+			order = new Order(EmailProperty.ORDER, true);
+		}
 		EmailComparator comparator = new EmailComparator(order);
 		List<EmailConfigurationDTO> newEmailConfigurationDTOList = new ArrayList<EmailConfigurationDTO>(emailConfigurationDTOList);
 		Collections.sort(newEmailConfigurationDTOList, comparator);
 		List<Record> emailConfigurationRecordList = getController().getMainPresenter().getView().getBatchClassView().setEmailList(
 				newEmailConfigurationDTOList);
-		this.getView().getEmailListView().updateRecords(emailConfigurationRecordList, 0);
+		int totalSize = emailConfigurationRecordList.size();
+		int lastIndex = startIndex + maxResult;
+		int count = Math.min(totalSize, lastIndex);
+		this.getView().getEmailListView()
+				.updateRecords(emailConfigurationRecordList.subList(startIndex, count), startIndex, totalSize);
 
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String rowIndex = view.getEmailListView().getSelectedRowIndex();
 		int rowCount = view.getEmailListView().getTableRecordCount();

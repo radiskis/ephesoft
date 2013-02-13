@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,15 +51,22 @@ public class BatchClassDTO implements IsSerializable {
 	private String description;
 	private String uncFolder;
 	private String version;
-	private boolean isDirty;
-	private boolean isDeleted;
-	private boolean isDeployed;
+	private boolean dirty;
+	private boolean deleted;
+	private boolean deployed;
+	private String systemFolder;
+
+	private Map<String, WebScannerConfigurationDTO> scannerMap = new LinkedHashMap<String, WebScannerConfigurationDTO>();;
 
 	private Map<String, BatchClassModuleDTO> moduleMap = new LinkedHashMap<String, BatchClassModuleDTO>();
 
 	private Map<String, DocumentTypeDTO> documentsMap = new LinkedHashMap<String, DocumentTypeDTO>();
 
+	private Map<String, ScannerMasterDTO> scannerMasterMap = new LinkedHashMap<String, ScannerMasterDTO>();
+
 	private Map<String, EmailConfigurationDTO> emailMap = new LinkedHashMap<String, EmailConfigurationDTO>();
+
+	private Map<String, CmisConfigurationDTO> cmisMap = new LinkedHashMap<String, CmisConfigurationDTO>();
 
 	private Map<String, BatchClassFieldDTO> batchClassFieldMap = new LinkedHashMap<String, BatchClassFieldDTO>();
 
@@ -69,7 +76,7 @@ public class BatchClassDTO implements IsSerializable {
 		return identifier;
 	}
 
-	public void setIdentifier(String identifier) {
+	public void setIdentifier(final String identifier) {
 		this.identifier = identifier;
 	}
 
@@ -77,7 +84,7 @@ public class BatchClassDTO implements IsSerializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -85,7 +92,7 @@ public class BatchClassDTO implements IsSerializable {
 		return priority;
 	}
 
-	public void setPriority(String priority) {
+	public void setPriority(final String priority) {
 		this.priority = priority;
 		setDirty(true);
 	}
@@ -94,7 +101,7 @@ public class BatchClassDTO implements IsSerializable {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 		setDirty(true);
 	}
@@ -103,7 +110,7 @@ public class BatchClassDTO implements IsSerializable {
 		return uncFolder;
 	}
 
-	public void setUncFolder(String uncFolder) {
+	public void setUncFolder(final String uncFolder) {
 		this.uncFolder = uncFolder;
 	}
 
@@ -111,7 +118,7 @@ public class BatchClassDTO implements IsSerializable {
 		return version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(final String version) {
 		this.version = version;
 	}
 
@@ -119,12 +126,12 @@ public class BatchClassDTO implements IsSerializable {
 		return getModules(false);
 	}
 
-	public Collection<BatchClassModuleDTO> getModules(boolean includeDeleted) {
+	public Collection<BatchClassModuleDTO> getModules(final boolean includeDeleted) {
 		Collection<BatchClassModuleDTO> values = moduleMap.values();
 		if (!includeDeleted) {
-			Map<String, BatchClassModuleDTO> batchClassModulesMap = new LinkedHashMap<String, BatchClassModuleDTO>();
+			final Map<String, BatchClassModuleDTO> batchClassModulesMap = new LinkedHashMap<String, BatchClassModuleDTO>();
 
-			for (BatchClassModuleDTO batchClassModuleDTO : values) {
+			for (final BatchClassModuleDTO batchClassModuleDTO : values) {
 				if (!(batchClassModuleDTO.isDeleted())) {
 					batchClassModulesMap.put(batchClassModuleDTO.getIdentifier(), batchClassModuleDTO);
 				}
@@ -135,11 +142,11 @@ public class BatchClassDTO implements IsSerializable {
 
 	}
 
-	public void addModule(BatchClassModuleDTO batchClassModuleDTO) {
+	public void addModule(final BatchClassModuleDTO batchClassModuleDTO) {
 		this.moduleMap.put(batchClassModuleDTO.getIdentifier(), batchClassModuleDTO);
 	}
 
-	public void removeModule(BatchClassModuleDTO batchClassModuleDTO) {
+	public void removeModule(final BatchClassModuleDTO batchClassModuleDTO) {
 		this.moduleMap.remove(batchClassModuleDTO.getIdentifier());
 	}
 
@@ -148,10 +155,13 @@ public class BatchClassDTO implements IsSerializable {
 	 * @return a collection of the documents that are present in the batchClass and have not been soft deleted.
 	 */
 	public Collection<DocumentTypeDTO> getDocuments() {
-		Map<String, DocumentTypeDTO> dMap = new LinkedHashMap<String, DocumentTypeDTO>();
-		for (DocumentTypeDTO documentTypeDTO : documentsMap.values())
-			if (!(documentTypeDTO.isDeleted()))
+		final Map<String, DocumentTypeDTO> dMap = new LinkedHashMap<String, DocumentTypeDTO>();
+		for (final DocumentTypeDTO documentTypeDTO : documentsMap.values()){
+			if (!(documentTypeDTO.isDeleted())){
+		
 				dMap.put(documentTypeDTO.getIdentifier(), documentTypeDTO);
+			}
+		}
 		return dMap.values();
 	}
 
@@ -160,10 +170,15 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param includeDeleted : includes the soft deleted documents if set true
 	 * @return a collection of documents present in the batch class
 	 */
-	public Collection<DocumentTypeDTO> getDocuments(boolean includeDeleted) {
-		if (includeDeleted)
-			return documentsMap.values();
-		return getDocuments();
+	public Collection<DocumentTypeDTO> getDocuments(final boolean includeDeleted) {
+		Collection<DocumentTypeDTO> documents;
+		if (includeDeleted){
+			documents = documentsMap.values();
+		}
+		else{
+			documents = getDocuments();
+		}		
+		return documents;
 	}
 
 	/**
@@ -171,7 +186,7 @@ public class BatchClassDTO implements IsSerializable {
 	 * 
 	 * @param documentTypeDTO the documentTypeDTO to be added to this batch class.
 	 */
-	public void addDocumentType(DocumentTypeDTO documentTypeDTO) {
+	public void addDocumentType(final DocumentTypeDTO documentTypeDTO) {
 		documentsMap.put(documentTypeDTO.getIdentifier(), documentTypeDTO);
 	}
 
@@ -180,16 +195,16 @@ public class BatchClassDTO implements IsSerializable {
 	 * 
 	 * @param documentTypeDTO the documentTypeDTO to be removed
 	 */
-	public void removeDocumentType(DocumentTypeDTO documentTypeDTO) {
+	public void removeDocumentType(final DocumentTypeDTO documentTypeDTO) {
 		documentsMap.remove(documentTypeDTO.getIdentifier());
 	}
 
 	public boolean isDirty() {
-		return isDirty;
+		return dirty;
 	}
 
-	public void setDirty(boolean isDirty) {
-		this.isDirty = isDirty;
+	public void setDirty(final boolean isDirty) {
+		this.dirty = isDirty;
 	}
 
 	/**
@@ -198,15 +213,18 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param name the name of the document
 	 * @return document type DTO based on provided name
 	 */
-	public DocumentTypeDTO getDocTypeByName(String name) {
-		Collection<DocumentTypeDTO> dtos = documentsMap.values();
-		if (dtos != null)
-			for (DocumentTypeDTO documentTypeDTO : dtos) {
-				if (documentTypeDTO.getName().equals(name)) {
-					return documentTypeDTO;
+	public DocumentTypeDTO getDocTypeByName(final String name) {
+		final Collection<DocumentTypeDTO> dtos = documentsMap.values();
+		DocumentTypeDTO documentTypeDTO = null;
+		if (dtos != null){
+			for (final DocumentTypeDTO dto : dtos) {
+		
+				if (dto.getName().equals(name)) {
+					documentTypeDTO = dto;
 				}
 			}
-		return null;
+		}
+		return documentTypeDTO;
 	}
 
 	/**
@@ -215,10 +233,12 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param name the name to check
 	 * @return true if a document by the name exists. False otherwise
 	 */
-	public boolean checkDocumentTypeName(String name) {
-		if (getDocTypeByName(name) != null)
-			return true;
-		return false;
+	public boolean checkDocumentTypeName(final String name) {
+		boolean valid = false;
+		if (getDocTypeByName(name) != null){
+			valid = true;
+		}
+		return valid;
 	}
 
 	/**
@@ -227,40 +247,46 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param identifier the identifier of the module required
 	 * @return BathcClassModuleDTO based on identifier
 	 */
-	public BatchClassModuleDTO getModuleByIdentifier(String identifier) {
-		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
-			for (BatchClassModuleDTO batchClassModuleDTO : this.moduleMap.values()) {
-				if (batchClassModuleDTO.getIdentifier().equals(identifier))
-					return batchClassModuleDTO;
-			}
-		}
-		return null;
-	}
-
-	public DocumentTypeDTO getDocTypeByIdentifier(String identifier) {
-		if (this.documentsMap != null && !this.documentsMap.isEmpty()) {
-			for (DocumentTypeDTO documentTypeDTO : this.documentsMap.values()) {
-				if (documentTypeDTO.getIdentifier().equals(identifier))
-					return documentTypeDTO;
-			}
-		}
-		return null;
-	}
-
-	public BatchClassModuleDTO getModuleByName(String name) {
-		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
-			for (BatchClassModuleDTO batchClassModuleDTO : this.moduleMap.values()) {
-				if (batchClassModuleDTO.getModule().getName().equals(name))
-					return batchClassModuleDTO;
-			}
-		}
-		return null;
-	}
-
-	public BatchClassModuleDTO getModuleByWorkflowName(String name) {
+	public BatchClassModuleDTO getModuleByIdentifier(final String identifier) {
 		BatchClassModuleDTO batchClassModuleDTO = null;
 		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
-			for (BatchClassModuleDTO batchClassModuleDTOObject : this.moduleMap.values()) {
+			for (final BatchClassModuleDTO moduleDTO : this.moduleMap.values()) {
+				if (moduleDTO.getIdentifier().equals(identifier)){
+					batchClassModuleDTO = moduleDTO;
+				}
+			}
+		}
+		return batchClassModuleDTO;
+	}
+
+	public DocumentTypeDTO getDocTypeByIdentifier(final String identifier) {
+		DocumentTypeDTO documentTypeDTO = null;
+		if (this.documentsMap != null && !this.documentsMap.isEmpty()) {
+			for (final DocumentTypeDTO dto : this.documentsMap.values()) {
+				if (dto.getIdentifier().equals(identifier)){
+					documentTypeDTO = dto;
+				}
+			}
+		}
+		return documentTypeDTO;
+	}
+
+	public BatchClassModuleDTO getModuleByName(final String name) {
+		BatchClassModuleDTO batchClassModuleDTO = null;
+		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
+			for (final BatchClassModuleDTO moduleDTO : this.moduleMap.values()) {
+				if (moduleDTO.getModule().getName().equals(name)){
+					batchClassModuleDTO = moduleDTO;
+				}
+			}
+		}
+		return batchClassModuleDTO;
+	}
+
+	public BatchClassModuleDTO getModuleByWorkflowName(final String name) {
+		BatchClassModuleDTO batchClassModuleDTO = null;
+		if (this.moduleMap != null && !this.moduleMap.isEmpty()) {
+			for (final BatchClassModuleDTO batchClassModuleDTOObject : this.moduleMap.values()) {
 				if (batchClassModuleDTOObject.getWorkflowName().equals(name)) {
 					batchClassModuleDTO = batchClassModuleDTOObject;
 					break;
@@ -270,22 +296,81 @@ public class BatchClassDTO implements IsSerializable {
 		return batchClassModuleDTO;
 	}
 
-	public void addEmailConfiguration(EmailConfigurationDTO emailConfigurationDTO) {
+	public void addEmailConfiguration(final EmailConfigurationDTO emailConfigurationDTO) {
 		this.emailMap.put(emailConfigurationDTO.getIdentifier(), emailConfigurationDTO);
 	}
 
-	public EmailConfigurationDTO getEmailConfigurationDTOByIdentifier(String identifier) {
-		if (this.emailMap != null && !this.emailMap.isEmpty()) {
-			for (EmailConfigurationDTO emailConfigurationDTO : this.emailMap.values()) {
-				if (emailConfigurationDTO.getIdentifier().equals(identifier))
-					return emailConfigurationDTO;
-			}
-		}
-		return null;
+	public void addCmisConfiguration(final CmisConfigurationDTO cmisConfigurationDTO) {
+		this.cmisMap.put(cmisConfigurationDTO.getIdentifier(), cmisConfigurationDTO);
 	}
 
-	public void removeEmailConfiguration(EmailConfigurationDTO emailConfigurationDTO) {
+	public WebScannerConfigurationDTO getWebScannerConfigurationById(final String identifier) {
+		WebScannerConfigurationDTO webScannerConfigurationDTO = null;
+		if (this.scannerMap != null && !this.scannerMap.isEmpty()) {
+			for (final WebScannerConfigurationDTO scannerConfigurationDTO : this.scannerMap.values()) {
+				if (scannerConfigurationDTO.getIdentifier().equals(identifier)){
+					webScannerConfigurationDTO = scannerConfigurationDTO;
+				}
+			}
+		}
+		return webScannerConfigurationDTO;
+	}
+
+	public WebScannerConfigurationDTO getScannerConfigurationByIdentifier(final String identifier) {
+		WebScannerConfigurationDTO webScannerConfigurationDTO = null;
+		if (this.scannerMap != null && !this.scannerMap.isEmpty()) {
+			for (final WebScannerConfigurationDTO scannerConfigurationDTO : this.scannerMap.values()) {
+				if (scannerConfigurationDTO.getIdentifier().equals(identifier)){
+					webScannerConfigurationDTO = scannerConfigurationDTO;
+				}
+			}
+		}
+		return webScannerConfigurationDTO;
+	}
+
+	public WebScannerConfigurationDTO getScannerConfigurationByProfileName(final String profileName) {
+		WebScannerConfigurationDTO webScannerConfigurationDTO = null;
+		final Collection<WebScannerConfigurationDTO> dtos = scannerMap.values();
+		if (dtos != null){
+			for (final WebScannerConfigurationDTO scannerConfigurationDTO : dtos) {
+				if (scannerConfigurationDTO.getValue().equals(profileName)) {
+					webScannerConfigurationDTO = scannerConfigurationDTO;
+				}
+			}
+		}
+		return webScannerConfigurationDTO;
+	}
+
+	public EmailConfigurationDTO getEmailConfigurationDTOByIdentifier(final String identifier) {
+		EmailConfigurationDTO emailConfigurationDTO = null;
+		if (this.emailMap != null && !this.emailMap.isEmpty()) {
+			for (final EmailConfigurationDTO configurationDTO : this.emailMap.values()) {
+				if (configurationDTO.getIdentifier().equals(identifier)){
+					emailConfigurationDTO = configurationDTO;
+				}
+			}
+		}
+		return emailConfigurationDTO;
+	}
+
+	public void removeEmailConfiguration(final EmailConfigurationDTO emailConfigurationDTO) {
 		this.emailMap.remove(emailConfigurationDTO.getIdentifier());
+	}
+
+	public CmisConfigurationDTO getCmisConfigurationDTOByIdentifier(final String identifier) {
+		CmisConfigurationDTO cmisConfigurationDTO = null;
+		if (this.cmisMap != null && !this.cmisMap.isEmpty()) {
+			for (final CmisConfigurationDTO configurationDTO : this.cmisMap.values()) {
+				if (configurationDTO.getIdentifier().equals(identifier)){
+					cmisConfigurationDTO = configurationDTO;
+				}
+			}
+		}
+		return cmisConfigurationDTO;
+	}
+
+	public void removeCmisConfiguration(final CmisConfigurationDTO cmisConfigurationDTO) {
+		this.cmisMap.remove(cmisConfigurationDTO.getIdentifier());
 	}
 
 	/**
@@ -293,11 +378,51 @@ public class BatchClassDTO implements IsSerializable {
 	 * @return a collection of the documents that are present in the batchClass and have not been soft deleted.
 	 */
 	public Collection<EmailConfigurationDTO> getEmailConfiguration() {
-		Map<String, EmailConfigurationDTO> eMap = new LinkedHashMap<String, EmailConfigurationDTO>();
-		for (EmailConfigurationDTO emailConfigurationDTO : emailMap.values())
-			if (!(emailConfigurationDTO.isDeleted()))
+		final Map<String, EmailConfigurationDTO> eMap = new LinkedHashMap<String, EmailConfigurationDTO>();
+		for (final EmailConfigurationDTO emailConfigurationDTO : emailMap.values()){
+			if (!(emailConfigurationDTO.isDeleted())){
 				eMap.put(emailConfigurationDTO.getIdentifier(), emailConfigurationDTO);
+			}
+		}
 		return eMap.values();
+	}
+
+	/**
+	 * 
+	 * @return a collection of the documents that are present in the batchClass and have not been soft deleted.
+	 */
+	public Collection<CmisConfigurationDTO> getCmisConfiguration() {
+		final Map<String, CmisConfigurationDTO> eMap = new LinkedHashMap<String, CmisConfigurationDTO>();
+		for (final CmisConfigurationDTO cmisConfigurationDTO : cmisMap.values()){
+			if (!(cmisConfigurationDTO.isDeleted())){
+				eMap.put(cmisConfigurationDTO.getIdentifier(), cmisConfigurationDTO);
+			}
+		}
+		return eMap.values();
+	}
+
+	/**
+	 * 
+	 * @return a collection of the documents that are present in the batchClass and have not been soft deleted.
+	 */
+	public Collection<WebScannerConfigurationDTO> getScannerConfiguration() {
+		final Map<String, WebScannerConfigurationDTO> sMap = new LinkedHashMap<String, WebScannerConfigurationDTO>();
+		for (final WebScannerConfigurationDTO dto : scannerMap.values()){
+			if (!(dto.isDeleted())){
+				sMap.put(dto.getIdentifier(), dto);
+			}
+		}
+		return sMap.values();
+	}
+
+	public Collection<WebScannerConfigurationDTO> getScannerConfiguration(final boolean includeDeleted) {
+		Collection<WebScannerConfigurationDTO> scannerConfigurationDTO;
+		if (includeDeleted) {
+			scannerConfigurationDTO = scannerMap.values();
+		}else{
+			scannerConfigurationDTO = getScannerConfiguration();
+		}
+		return scannerConfigurationDTO;
 	}
 
 	/**
@@ -305,29 +430,69 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param includeDeleted : includes the soft deleted documents if set true
 	 * @return a collection of documents present in the batch class
 	 */
-	public Collection<EmailConfigurationDTO> getEmailConfiguration(boolean includeDeleted) {
+	public Collection<CmisConfigurationDTO> getCmisConfiguration(final boolean includeDeleted) {
+		Collection<CmisConfigurationDTO> cmisConfigurationDTO;
 		if (includeDeleted) {
-			return emailMap.values();
+			cmisConfigurationDTO = cmisMap.values();
+		}else{
+			cmisConfigurationDTO = getCmisConfiguration();
 		}
-		return getEmailConfiguration();
+		return cmisConfigurationDTO;
 	}
 
-	public EmailConfigurationDTO getEmailConfigurationByFields(String userName, String password, String serverName, String serverType,
-			String folderName) {
-		Collection<EmailConfigurationDTO> dtos = emailMap.values();
-		if (dtos != null)
-			for (EmailConfigurationDTO emailConfigurationDTO : dtos) {
+	public CmisConfigurationDTO getCmisConfigurationByFields(final String serverURL, final String userName, final String password, final String repositoryID,
+			final String fileExtension, final String folderName, final String cmisProperty, final String value, final String valueToUpdate) {
+		final Collection<CmisConfigurationDTO> dtos = cmisMap.values();
+		CmisConfigurationDTO configurationDTO = null;
+		if (dtos != null){
+			for (final CmisConfigurationDTO cmisConfigurationDTO : dtos) {
+				if (cmisConfigurationDTO.getUserName().equals(userName) && cmisConfigurationDTO.getPassword().equals(password)
+						&& cmisConfigurationDTO.getServerURL().equals(serverURL)
+						&& cmisConfigurationDTO.getRepositoryID().equals(repositoryID)
+						&& cmisConfigurationDTO.getFolderName().equals(folderName)
+						&& cmisConfigurationDTO.getFileExtension().equals(fileExtension)
+						&& cmisConfigurationDTO.getValue().equals(value)
+						&& cmisConfigurationDTO.getValueToUpdate().equals(valueToUpdate)) {
+					configurationDTO = cmisConfigurationDTO;
+				}
+			}
+		}
+		return configurationDTO;
+	}
+
+	/**
+	 * 
+	 * @param includeDeleted : includes the soft deleted documents if set true
+	 * @return a collection of documents present in the batch class
+	 */
+	public Collection<EmailConfigurationDTO> getEmailConfiguration(final boolean includeDeleted) {
+		Collection<EmailConfigurationDTO> emailConfigurationDTOs;
+		if (includeDeleted) {
+			emailConfigurationDTOs = emailMap.values();
+		}else{
+			emailConfigurationDTOs = getEmailConfiguration();
+		}
+		return emailConfigurationDTOs;
+	}
+
+	public EmailConfigurationDTO getEmailConfigurationByFields(final String userName, final String password, final String serverName, final String serverType,
+			final String folderName) {
+		final Collection<EmailConfigurationDTO> dtos = emailMap.values();
+		EmailConfigurationDTO configurationDTO = null;
+		if (dtos != null){
+			for (final EmailConfigurationDTO emailConfigurationDTO : dtos) {
 				if (emailConfigurationDTO.getUserName().equals(userName) && emailConfigurationDTO.getPassword().equals(password)
 						&& emailConfigurationDTO.getServerName().equals(serverName)
 						&& emailConfigurationDTO.getServerType().equals(serverType)
 						&& emailConfigurationDTO.getFolderName().equals(folderName)) {
-					return emailConfigurationDTO;
+					configurationDTO = emailConfigurationDTO;
 				}
 			}
-		return null;
+		}
+		return configurationDTO;
 	}
 
-	public boolean checkEmailConfiguration(String username, String password, String serverName, String serverType, String folderName) {
+	public boolean checkEmailConfiguration(final String username, final String password, final String serverName, final String serverType, final String folderName) {
 		boolean returnValue = false;
 		if (getEmailConfigurationByFields(username, password, serverName, serverType, folderName) != null) {
 			returnValue = true;
@@ -335,11 +500,25 @@ public class BatchClassDTO implements IsSerializable {
 		return returnValue;
 	}
 
-	public void addBatchClassField(BatchClassFieldDTO batchClassFieldDTO) {
+	public boolean checkCmisConfiguration(final String serverURL, final String userName, final String password, final String repositoryID,
+			final String fileExtension, final String folderName, final String cmisProperty, final String value, final String valueToUpdate) {
+		boolean returnValue = false;
+		if (getCmisConfigurationByFields(serverURL, userName, password, repositoryID, fileExtension, folderName, cmisProperty, value,
+				valueToUpdate) != null) {
+			returnValue = true;
+		}
+		return returnValue;
+	}
+
+	public void addScannerConfiguration(final WebScannerConfigurationDTO dto) {
+		this.scannerMap.put(dto.getIdentifier(), dto);
+	}
+
+	public void addBatchClassField(final BatchClassFieldDTO batchClassFieldDTO) {
 		this.batchClassFieldMap.put(batchClassFieldDTO.getIdentifier(), batchClassFieldDTO);
 	}
 
-	public BatchClassFieldDTO getBatchClassFieldDTOByIdentifier(String identifier) {
+	public BatchClassFieldDTO getBatchClassFieldDTOByIdentifier(final String identifier) {
 		BatchClassFieldDTO batchClassFieldDTO = null;
 		if (this.batchClassFieldMap != null && !this.batchClassFieldMap.isEmpty()) {
 			batchClassFieldDTO = batchClassFieldMap.get(identifier);
@@ -347,7 +526,7 @@ public class BatchClassDTO implements IsSerializable {
 		return batchClassFieldDTO;
 	}
 
-	public void removeBatchClassField(BatchClassFieldDTO batchClassFieldDTO) {
+	public void removeBatchClassField(final BatchClassFieldDTO batchClassFieldDTO) {
 		this.batchClassFieldMap.remove(batchClassFieldDTO.getIdentifier());
 	}
 
@@ -356,31 +535,75 @@ public class BatchClassDTO implements IsSerializable {
 	 * @return a collection of the batch class field that are present in the batch class and have not been soft deleted.
 	 */
 	public Collection<BatchClassFieldDTO> getBatchClassField() {
-		Map<String, BatchClassFieldDTO> bCFMap = new LinkedHashMap<String, BatchClassFieldDTO>();
-		for (BatchClassFieldDTO batchClassFieldDTO : batchClassFieldMap.values()) {
-			if (!(batchClassFieldDTO.isDeleted()))
+		final Map<String, BatchClassFieldDTO> bCFMap = new LinkedHashMap<String, BatchClassFieldDTO>();
+		for (final BatchClassFieldDTO batchClassFieldDTO : batchClassFieldMap.values()) {
+			if (!(batchClassFieldDTO.isDeleted())){
 				bCFMap.put(batchClassFieldDTO.getIdentifier(), batchClassFieldDTO);
+			}
 		}
 
 		return bCFMap.values();
 
 	}
 
-	public boolean checkFieldTypeName(String name) {
-		if (getBatchClassFieldByName(name) != null)
-			return true;
-		return false;
-	}
-
-	public BatchClassFieldDTO getBatchClassFieldByName(String name) {
-		Collection<BatchClassFieldDTO> bcfDtos = batchClassFieldMap.values();
-		if (bcfDtos != null)
-			for (BatchClassFieldDTO batchClassFieldDTO : bcfDtos) {
-				if (batchClassFieldDTO.getName().equals(name)) {
-					return batchClassFieldDTO;
+	/**
+	 * Returns the batch class field based on name excluding the given batchClassFieldId
+	 * 
+	 * @param name the name of the document
+	 * @return batch class field DTO based on provided name
+	 */
+	public BatchClassFieldDTO getBatchClassFieldByName(final String name, final String batchClassFieldId) {
+		final Collection<BatchClassFieldDTO> batchClassFields = batchClassFieldMap.values();
+		BatchClassFieldDTO batchClassFieldDto = null;
+		if (batchClassFields != null &&!batchClassFields.isEmpty()&&batchClassFieldId != null) {
+			for (final BatchClassFieldDTO batchClassFieldDTO : batchClassFields) {
+				if (!batchClassFieldDTO.getIdentifier().equals(batchClassFieldId) && batchClassFieldDTO.getName().equalsIgnoreCase(name)) {
+					batchClassFieldDto = batchClassFieldDTO;
+					break;
 				}
 			}
-		return null;
+		}
+		return batchClassFieldDto;
+	}
+
+	/**
+	 * Returns the batch class field based on name
+	 * 
+	 * @param name the name of the document
+	 * @return batch class field DTO based on provided name
+	 */
+	public BatchClassFieldDTO getBatchClassFieldByName(final String name) {
+		final Collection<BatchClassFieldDTO> batchClassFields = batchClassFieldMap.values();
+		BatchClassFieldDTO batchClassFieldDto = null;
+		if (batchClassFields != null) {
+			for (final BatchClassFieldDTO batchClassFieldDTO : batchClassFields) {
+				if (batchClassFieldDTO.getName().equalsIgnoreCase(name)) {
+					batchClassFieldDto = batchClassFieldDTO;
+					break;
+				}
+			}
+		}
+		return batchClassFieldDto;
+	}
+
+	/**
+	 * Api to check if the batch class field with given name exists excluding the given batchClassFieldId
+	 * 
+	 * @param name the name to check
+	 * @return true if a batch class field by the name exists. False otherwise
+	 */
+	public boolean checkBatchClassFieldName(final String name, final String batchClassFieldId) {
+		BatchClassFieldDTO batchClassFieldDTO = null;
+		boolean isExists = false;
+		if (batchClassFieldId == null) {
+			batchClassFieldDTO = getBatchClassFieldByName(name);
+		} else {
+			batchClassFieldDTO = getBatchClassFieldByName(name, batchClassFieldId);
+		}
+		if (batchClassFieldDTO != null) {
+			isExists = true;
+		}
+		return isExists;
 	}
 
 	/**
@@ -388,22 +611,25 @@ public class BatchClassDTO implements IsSerializable {
 	 * @param includeDeleted : includes the soft deleted batch class field if set true
 	 * @return a collection of batch class field present in the batch class
 	 */
-	public Collection<BatchClassFieldDTO> getBatchClassField(boolean includeDeleted) {
+	public Collection<BatchClassFieldDTO> getBatchClassField(final boolean includeDeleted) {
+		Collection<BatchClassFieldDTO> batchClassFieldDTO;
 		if (includeDeleted) {
-			return batchClassFieldMap.values();
+			batchClassFieldDTO = batchClassFieldMap.values();
+		}else{
+			batchClassFieldDTO = getBatchClassField();
 		}
-		return getBatchClassField();
+		return batchClassFieldDTO;
 	}
 
 	public List<RoleDTO> getAssignedRole() {
 		return assignedRole;
 	}
 
-	public void addAssignedRole(RoleDTO roleDTO) {
+	public void addAssignedRole(final RoleDTO roleDTO) {
 		this.assignedRole.add(roleDTO);
 	}
 
-	public void setAssignedRole(List<RoleDTO> assignedRole) {
+	public void setAssignedRole(final List<RoleDTO> assignedRole) {
 		this.assignedRole = assignedRole;
 	}
 
@@ -411,28 +637,55 @@ public class BatchClassDTO implements IsSerializable {
 	 * @return the isDeleted
 	 */
 	public boolean isDeleted() {
-		return isDeleted;
+		return deleted;
 	}
 
 	/**
 	 * @param isDeleted the isDeleted to set
 	 */
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setDeleted(final boolean isDeleted) {
+		this.deleted = isDeleted;
 	}
 
 	/**
 	 * @return the isDeployed
 	 */
 	public boolean isDeployed() {
-		return isDeployed;
+		return deployed;
 	}
 
 	/**
 	 * @param isDeployed the isDeployed to set
 	 */
-	public void setDeployed(boolean isDeployed) {
-		this.isDeployed = isDeployed;
+	public void setDeployed(final boolean isDeployed) {
+		this.deployed = isDeployed;
 	}
 
+	public void addScannerMaster(final ScannerMasterDTO dto) {
+		scannerMasterMap.put(dto.getName(), dto);
+	}
+
+	public Map<String, ScannerMasterDTO> getScannerMasterMap() {
+		return scannerMasterMap;
+	}
+
+	
+	/**
+	 * Setter for system folder.
+	 * 
+	 * @return the systemFolder {@link String}
+	 */
+	public String getSystemFolder() {
+		return systemFolder;
+	}
+
+	/**
+	 * Getter for the system folder.
+	 * 
+	 * @param {@link String} systemFolder the systemFolder to set
+	 */
+	public void setSystemFolder(final String systemFolder) {
+		this.systemFolder = systemFolder;
+	}
+	
 }

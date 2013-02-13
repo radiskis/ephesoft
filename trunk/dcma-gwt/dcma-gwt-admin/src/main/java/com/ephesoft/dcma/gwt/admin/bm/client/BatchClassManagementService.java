@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,19 +35,23 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client;
 
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteService;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
+import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassSuperConfig;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassUserOptionDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
+import com.ephesoft.dcma.gwt.core.shared.ModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.OutputDataCarrierDTO;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
@@ -57,6 +61,13 @@ import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
 import com.ephesoft.dcma.gwt.core.shared.exception.GWTException;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+/**
+ * This interface lists the service methods.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.DCMARemoteService
+ */
 @RemoteServiceRelativePath("bmService")
 public interface BatchClassManagementService extends DCMARemoteService {
 
@@ -73,7 +84,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param batchClassDTO {@link BatchClassDTO}
 	 * @return {@link BatchClassDTO}
 	 */
-	BatchClassDTO updateBatchClass(BatchClassDTO batchClassDTO);
+	BatchClassDTO updateBatchClass(BatchClassDTO batchClassDTO) throws GWTException;
 
 	/**
 	 * API to get Batch Class given batchClassIdentifier.
@@ -89,7 +100,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param batchClassID {@link String}
 	 * @throws Exception
 	 */
-	void learnFileForBatchClass(String batchClassID) throws Exception;
+	void learnFileForBatchClass(String batchClassID) throws GWTException;
 
 	/**
 	 * API for sample Generation given the batch Class ID's List.
@@ -108,7 +119,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @return Map<{@link String}, List<{@link String}>>
 	 * @throws Exception
 	 */
-	Map<String, List<String>> getAllTables(String driverName, String url, String userName, String password) throws Exception;
+	Map<String, List<String>> getAllTables(String driverName, String url, String userName, String password) throws GWTException;
 
 	/**
 	 * API to get All columns of a Table given the DB configuration.
@@ -119,10 +130,10 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param password {@link String}
 	 * @param tableName {@link String}
 	 * @return Map<{@link String}, {@link String}>
-	 * @throws Exception
+	 * @throws GWTException
 	 */
 	Map<String, String> getAllColumnsForTable(String driverName, String url, String userName, String password, String tableName)
-			throws Exception;
+			throws GWTException;
 
 	/**
 	 * API to get Document Level Fields given the document Name and batch Class Id.
@@ -140,7 +151,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param createIndex boolean
 	 * @throws Exception
 	 */
-	void learnDataBase(final String batchClassId, final boolean createIndex) throws Exception;
+	void learnDataBase(final String batchClassId, final boolean createIndex) throws GWTException;
 
 	/**
 	 * API to copy Batch Class given a BatchClassDTO.
@@ -148,7 +159,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param batchClassDTO {@link BatchClassDTO}
 	 * @throws Exception
 	 */
-	void copyBatchClass(BatchClassDTO batchClassDTO) throws Exception;
+	void copyBatchClass(BatchClassDTO batchClassDTO) throws GWTException;
 
 	/**
 	 * API to get Batch Folder List.
@@ -175,7 +186,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	int countAllBatchClassesExcludeDeleted();
 
 	/**
-	 * API to create Unc Folder given the path
+	 * API to create Unc Folder given the path.
 	 * 
 	 * @param path {@link String}
 	 * @throws GWTException
@@ -193,7 +204,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	List<String> getProjectFilesForDocumentType(String batchClassIdentifier, String documentTypeName) throws GWTException;
 
 	/**
-	 * API to test Key Value Extraction. Based on the flag either KV or Advanced Kay Value is invoked.
+	 * API to test Key Value Extraction. Based on the flag either KV or Advanced Key Value is invoked.
 	 * 
 	 * @param batchClassDTO {@link BatchClassDTO}
 	 * @param kvExtractionDTO {@link KVExtractionDTO}
@@ -242,7 +253,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param documentTypeDTO {@link DocumentTypeDTO}
 	 * @throws Exception
 	 */
-	void copyDocument(DocumentTypeDTO documentTypeDTO) throws Exception;
+	DocumentTypeDTO copyDocument(DocumentTypeDTO documentTypeDTO) throws GWTException;
 
 	/**
 	 * API to get Advanced Key Value Image Upload Path given the image name for a particular batch class id.
@@ -252,9 +263,9 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param dlfName {link String}
 	 * @param kvIdentifier {link String}
 	 * @param imageName {link String}
-	 * @return
+	 * @return String
 	 */
-	String getAdvancedKVImageUploadPath(String batchClassId, String docName, String testImagePath);
+	String getAdvancedKVImageUploadPath(String batchClassId, String docName, String testImageName);
 
 	/**
 	 * API to test Table Pattern given the BatchClassDTO and TableInfoDTO.
@@ -264,7 +275,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @return List<{@link TestTableResultDTO}>
 	 * @throws GWTException
 	 */
-	public List<TestTableResultDTO> testTablePattern(BatchClassDTO batchClassDTO, TableInfoDTO tableInfoDTO) throws GWTException;
+	List<TestTableResultDTO> testTablePattern(BatchClassDTO batchClassDTO, TableInfoDTO tableInfoDTO) throws GWTException;
 
 	/**
 	 * API to get import BatchClass UI Configuration given the workflow Name and zip Source Path.
@@ -304,7 +315,7 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @throws Exception
 	 */
 	List<String> getAllPrimaryKeysForTable(String driverName, String url, String userName, String password, String table,
-			String tableType) throws Exception;
+			String tableType) throws GWTException;
 
 	/**
 	 * API to delete Attached Folders given zip File Name.
@@ -320,19 +331,21 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @throws GWTException
 	 */
 	String getBatchClassRowCount() throws GWTException;
-	
+
 	/**
 	 * API to get super admin.
+	 * 
 	 * @return {@link Boolean}
 	 */
 	Boolean isUserSuperAdmin();
-	
+
 	/**
-	 * API to get all roles of a user
+	 * API to get all roles of a user.
+	 * 
 	 * @return HashSet<{@link String}>
 	 */
-	HashSet<String> getAllRolesOfUser();
-	
+	Set<String> getAllRolesOfUser();
+
 	/**
 	 * API to get list of all plug-ins.
 	 * 
@@ -346,42 +359,25 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @param workflowName {@link String}
 	 * @param batchClassDTO {@link BatchClassDTO}
 	 */
-	BatchClassDTO createAndDeployWorkflowJPDL(String workflowName, BatchClassDTO batchClassDTO);
+	BatchClassDTO createAndDeployWorkflowJPDL(String workflowName, BatchClassDTO batchClassDTO) throws GWTException;
 
 	/**
-	 * API to get the workflow names of all the batch class modules available in order.
+	 * API to match the work flow content for equality with same module(s) and their sequence and also same plugin(s) and sequence.
 	 * 
-	 * @return {@link List}< {@link String}>
-	 * @throws Exception
-	 */
-	List<String> getAllBatchClassModulesWorkflowName() throws Exception;
-
-	/**
-	 * API to update the list of batch class module DTO's for the given batch class DTO.
-	 * 
-	 * @param batchClassDTO {@link BatchClassDTO}
-	 * @param moduleNames {@link List}< {@link String}>
-	 * @return {@link BatchClassDTO}
-	 * @throws Exception
-	 */
-	BatchClassDTO setBatchClassDTOModulesList(BatchClassDTO batchClassDTO, List<String> moduleNames) throws Exception;
-	
-	/**
-	 * API to match the workflow content for equality with same module(s) and their sequence and also same plugin(s) and sequence.
-	 * 
-	 * @param userOptions
-	 * @param userInputWorkflowName
-	 * @return
+	 * @param userOptions ImportBatchClassUserOptionDTO
+	 * @param userInputWorkflowName String
+	 * @return Map<String, Boolean>
 	 */
 	Map<String, Boolean> isWorkflowContentEqual(ImportBatchClassUserOptionDTO userOptions, String userInputWorkflowName);
 
 	/**
 	 * API to get the test the advanced kv extraction results.
 	 * 
-	 * @param batchClassDTO
-	 * @param kvExtractionDTO
-	 * @param imageName
-	 * @return
+	 * @param batchClassDTO {@link BatchClassDTO}
+	 * @param kvExtractionDTO {@link KVExtractionDTO}
+	 * @param docName {@link String}
+	 * @param imageName {@link String}
+	 * @return List<OutputDataCarrierDTO>
 	 * @throws GWTException
 	 */
 	List<OutputDataCarrierDTO> testAdvancedKVExtraction(BatchClassDTO batchClassDTO, KVExtractionDTO kvExtractionDTO, String docName,
@@ -390,10 +386,10 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	/**
 	 * This API gets the updated file name in test-advanced-extraction folder.
 	 * 
-	 * @param batchClassIdentifier
-	 * @param docName
-	 * @param fileName
-	 * @return
+	 * @param batchClassIdentifier {@link String}
+	 * @param docName {@link String}
+	 * @param fileName {@link String}
+	 * @return {@link String}
 	 */
 	String getUpdatedTestFileName(final String batchClassIdentifier, final String docName, final String fileName);
 
@@ -404,4 +400,126 @@ public interface BatchClassManagementService extends DCMARemoteService {
 	 * @throws GWTException
 	 */
 	SamplePatternDTO getSamplePatterns() throws GWTException;
+
+	/**
+	 * API to get the span list for the provided .
+	 * 
+	 * @param batchClassId {@link String}
+	 * @param docName {@link String}
+	 * @param hocrFileName {@link String}
+	 * @return {@link List} <{@link Span}>
+	 * @throws GWTException if any exception or error occur
+	 */
+	List<Span> getSpanList(String batchClassId, String docName, String hocrFileName);
+
+	/**
+	 * API to get Advanced test table upload path given the image name for a particular batch class id.
+	 * 
+	 * @param batchClassId {@link String}
+	 * @param docName {@link String}
+	 * @param dlfName {@link String}
+	 * @param kvIdentifier {@link String}
+	 * @param imageName {@link String}
+	 * @return {@link String}
+	 */
+	String getAdvancedTEImageUploadPath(String batchClassId, String docName, String testImageName);
+
+	/**
+	 * API to get the names of available modules.
+	 * 
+	 * @return {@link List}< {@link String}>
+	 */
+	List<ModuleDTO> getAllModules();
+
+	/**
+	 * API to create a new module.
+	 * 
+	 * @param moduleDTO {@link ModuleDTO}
+	 * @throws GWTException
+	 */
+	ModuleDTO createNewModule(ModuleDTO moduleDTO) throws GWTException;
+
+	/**
+	 * API to retrieve names of all the plugins.
+	 * 
+	 * @return {@link List}< {@link String}>
+	 */
+	List<String> getAllPluginsNames();
+
+	/**
+	 * API to validate email configuration.
+	 * 
+	 * @param emailConfigDTO {@link EmailConfigurationDTO} Email Configuration to be verified.
+	 * @return {@link Boolean} returns true if valid email configuration otherwise false.
+	 * @throws {@link GWTException}
+	 */
+	Boolean validateEmailConfig(EmailConfigurationDTO emailConfigDTO) throws GWTException;
+
+	/**
+	 * API to fetch whether the batch class has any of its batches under processing i.e. not finished.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link Integer}, count of batch instances
+	 */
+	Integer getAllUnFinishedBatchInstancesCount(String batchClassIdentifier);
+
+	/**
+	 * API to test batch connection to the repository server.
+	 * 
+	 * @param pluginConfigDTOValues {@link Collection<BatchClassPluginConfigDTO>} plugin configurations of the batch class.
+	 * @return {@link Map<String,String>}
+	 * @throws GWTException {@link GWTException} If not able to connect to repository server.
+	 */
+	Map<String, String> checkCmisConnection(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues) throws GWTException;
+
+	/**
+	 * API for getting the CMIS configuration.
+	 * 
+	 * @param pluginConfigDTOValues {@link Collection<BatchClassPluginConfigDTO>} plugin configurations of the batch class.
+	 * @return {@link Map<String,String>}
+	 * @throws GWTException {@link GWTException} If not able to connect to repository server.
+	 */
+	Map<String, String> getCmisConfiguration(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues) throws GWTException;
+
+	/**
+	 * API for getting the authentication URL.
+	 * 
+	 * @param pluginConfigDTOValues {@link Collection<BatchClassPluginConfigDTO>} plugin configurations of the batch class.
+	 * @return {@link Map<String,String>}
+	 * @throws GWTException {@link GWTException} If not able to connect to repository server.
+	 */
+	String getAuthenticationURL(Collection<BatchClassPluginConfigDTO> pluginConfigDTOValues) throws GWTException;
+
+	/**
+	 * Method to fetch the box properties.
+	 * 
+	 * @return {@link Map}
+	 */
+	Map<String, String> getBoxProperties();
+
+	/**
+	 * API to get new ticket for box repository.
+	 * 
+	 * @param APIKey {@link String} API key for the box repository
+	 * @return {@link String} the new generated ticket
+	 * @throws GWTException
+	 */
+	String getNewTicket(String APIKey) throws GWTException;
+
+	/**
+	 * API to authenticate box. Returns true if authenticated otherwise false.
+	 * 
+	 * @return boolean
+	 */
+	Boolean authenticateBox();
+
+	/**
+	 * API to get authentication token for box repository.
+	 * 
+	 * @param APIKey {@link String} API key for the box repository
+	 * @param ticket {@link String} Ticket generated for the box repository
+	 * @return {@link String}
+	 * @throws {@link GWTException}
+	 */
+	String getAuthenticationToken(String APIKey, String ticket) throws GWTException;
 }

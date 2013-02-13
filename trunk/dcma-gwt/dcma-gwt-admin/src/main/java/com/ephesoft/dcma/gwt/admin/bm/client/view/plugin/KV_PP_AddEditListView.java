@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,76 +39,115 @@ import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.KV_PP_AddEditListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to show KV PP add and edit list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class KV_PP_AddEditListView extends View<KV_PP_AddEditListPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, KV_PP_AddEditListView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
+
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * kvPPDetailView KV_PP_AddEditDetailView.
+	 */
 	@UiField
 	protected KV_PP_AddEditDetailView kvPPDetailView;
 
+	/**
+	 * editKVPPView KV_PP_AddEditView.
+	 */
 	@UiField
 	protected KV_PP_AddEditView editKVPPView;
 
+	/**
+	 * kvPPTypeVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel kvPPTypeVerticalPanel;
 
+	/**
+	 * kvPPTypeConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel kvPPTypeConfigVerticalPanel;
 
+	/**
+	 * kvPPConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel kvPPConfigurationCaptionPanel;
 
-	@UiField
-	protected Button editKVPPPropertiesButton;
-
+	/**
+	 * Constructor.
+	 */
 	public KV_PP_AddEditListView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		kvPPConfigurationCaptionPanel.setCaptionHTML(AdminConstants.KV_PP_DETAILS_HTML);
-
-		editKVPPPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
-		kvPPTypeVerticalPanel.add(editKVPPPropertiesButton);
 	}
 
-	public Button getEditKVPPPropertiesButton() {
-		return editKVPPPropertiesButton;
-	}
-
+	/**
+	 * To get Kv PP Configuration Caption Panel.
+	 * 
+	 * @return CaptionPanel
+	 */
 	public CaptionPanel getKvPPConfigurationCaptionPanel() {
 		return kvPPConfigurationCaptionPanel;
 	}
 
+	/**
+	 * To get Kv PP Detail View.
+	 * 
+	 * @return KV_PP_AddEditDetailView
+	 */
 	public KV_PP_AddEditDetailView getKvPPDetailView() {
 		return kvPPDetailView;
 	}
 
+	/**
+	 * To get Edit KV PP View.
+	 * 
+	 * @return KV_PP_AddEditView
+	 */
 	public KV_PP_AddEditView getEditKVPPView() {
 		return editKVPPView;
 	}
 
+	/**
+	 * To get Kv PP Type Configuration Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getKvPPTypeConfigVerticalPanel() {
 		return kvPPTypeConfigVerticalPanel;
 	}
 
+	/**
+	 * To get Kv PP Type Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getKvPPTypeVerticalPanel() {
 		return kvPPTypeVerticalPanel;
-	}
-
-	@UiHandler("editKVPPPropertiesButton")
-	public void onEditKVPropertiesButtonClick(ClickEvent clickEvent) {
-		presenter.onEditKVPPPropertiesButtonClicked();
 	}
 
 }

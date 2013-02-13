@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,12 +36,10 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.view.batch;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
-import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.ImportBatchClassPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
@@ -51,7 +49,8 @@ import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassUserOptionDTO;
 import com.ephesoft.dcma.gwt.core.shared.StringUtil;
-import com.ephesoft.dcma.gwt.core.shared.importTree.Node;
+import com.ephesoft.dcma.gwt.core.shared.UNCFolderConfig;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Node;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -82,107 +81,298 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
+/**
+ * This class provides functionality to import batch class view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
+	/**
+	 * ATTACH_FORM_ACTION String.
+	 */
 	private static final String ATTACH_FORM_ACTION = "dcma-gwt-admin/importBatchClassUpload?";
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, ImportBatchClassView> {
 	}
 
+	/**
+	 * priority TextBox.
+	 */
 	@UiField
 	protected TextBox priority;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
+
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
+
+	/**
+	 * importFile FileUpload.
+	 */
 	@UiField
 	protected FileUpload importFile;
 
+	/**
+	 * useSource CheckBox.
+	 */
 	@UiField
 	protected CheckBox useSource;
+
+	/**
+	 * useExisting CheckBox.
+	 */
 	@UiField
 	protected CheckBox useExisting;
 
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * attachZipFilePanel FormPanel.
+	 */
 	@UiField
 	protected FormPanel attachZipFilePanel;
+
+	/**
+	 * attachButton Button.
+	 */
 	@UiField
 	protected Button attachButton;
 
+	/**
+	 * importPanel DockLayoutPanel.
+	 */
 	@UiField
 	protected DockLayoutPanel importPanel;
 
+	/**
+	 * priorityLabel Label.
+	 */
 	@UiField
 	protected Label priorityLabel;
+
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * uncLabel Label.
+	 */
 	@UiField
 	protected Label uncLabel;
+
+	/**
+	 * importLabel Label.
+	 */
 	@UiField
 	protected Label importLabel;
-	
+
+	/**
+	 * errorMessage Label.
+	 */
 	@UiField
 	protected Label errorMessage;
 
+	/**
+	 * priorityStar Label.
+	 */
 	@UiField
 	protected Label priorityStar;
 
+	/**
+	 * uncStar Label.
+	 */
 	@UiField
 	protected Label uncStar;
 
+	/**
+	 * importStar Label.
+	 */
 	@UiField
 	protected Label importStar;
 
+	/**
+	 * importBatchPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel importBatchPanel;
 
+	/**
+	 * descStar Label.
+	 */
 	@UiField
 	protected Label descStar;
 
+	/**
+	 * nameStar Label.
+	 */
 	@UiField
 	protected Label nameStar;
 
+	/**
+	 * importFolderListViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel importFolderListViewPanel;
 
+	/**
+	 * uncPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel uncPanel;
 
+	/**
+	 * batchClassFolderView Tree.
+	 */
 	@UiField
 	protected Tree batchClassFolderView;
 
+	/**
+	 * uncFolderList ListBox.
+	 */
 	private final ListBox uncFolderList;
+
+	/**
+	 * uncFolder TextBox.
+	 */
 	private final TextBox uncFolder;
 
+	/**
+	 * validateTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateTextBox;
+
+	/**
+	 * validateDescTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateDescTextBox;
+
+	/**
+	 * validateUNCTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateUNCTextBox;
+
+	/**
+	 * validateNameTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateNameTextBox;
+
+	/**
+	 * importBatchClassUserOptionDTO ImportBatchClassUserOptionDTO.
+	 */
 	private final ImportBatchClassUserOptionDTO importBatchClassUserOptionDTO;
 
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
+
+	/**
+	 * zipImported boolean.
+	 */
 	private boolean zipImported = false;
+
+	/**
+	 * zipWorkflowName String.
+	 */
 	private String zipWorkflowName = "";
 
+	/**
+	 * importExisting Hidden.
+	 */
 	private Hidden importExisting = new Hidden("importExisting", "false");
 
+	/**
+	 * To set Import Existing.
+	 * 
+	 * @param importExisting Hidden
+	 */
 	public void setImportExisting(Hidden importExisting) {
 		this.importExisting = importExisting;
 	}
 
+	/**
+	 * importBatchClassViewPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel importBatchClassViewPanel;
 
+	/**
+	 * errorText String.
+	 */
+	private String errorText = AdminConstants.EMPTY_STRING;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
+
+	/**
+	 * TRUE String.
+	 */
 	private static final String TRUE = "true";
+
+	/**
+	 * FALSE String.
+	 */
 	private static final String FALSE = "false";
 
+	/**
+	 * systemFolder TextBox.
+	 */
+	@UiField
+	protected TextBox systemFolder;
+
+	/**
+	 * systemFolderStar Label.
+	 */
+	@UiField
+	protected Label systemFolderStar;
+
+	/**
+	 * systemFolderLabel Label.
+	 */
+	@UiField
+	protected Label systemFolderLabel;
+
+	/**
+	 * validateSystemFolderTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateSystemFolderTextBox;
+
+	/**
+	 * Constructor.
+	 */
 	public ImportBatchClassView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -243,7 +433,11 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 			@Override
 			public void onChange(ChangeEvent arg0) {
-				importBatchClassUserOptionDTO.setUncFolder(uncFolderList.getValue(uncFolderList.getSelectedIndex()));
+				String selectedUNCFolder = uncFolderList.getValue(uncFolderList.getSelectedIndex());
+				importBatchClassUserOptionDTO.setUncFolder(selectedUNCFolder);
+				final String selectedBatchName = presenter.getSelectedBatchName(selectedUNCFolder);
+				name.setText(selectedBatchName);
+				systemFolder.setText(presenter.getSelectedBatchClassSystemFolder(selectedBatchName));
 			}
 		});
 
@@ -258,7 +452,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		});
 		validateNameTextBox.addValidator(new EmptyStringValidator(name));
 
-		importBatchClassViewPanel.setSpacing(5);
+		importBatchClassViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		nameLabel.setText(AdminConstants.NAME);
 		priorityLabel.setText(AdminConstants.PRIORITY);
@@ -269,7 +463,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		uncStar.setText(AdminConstants.STAR);
 		importStar.setText(AdminConstants.STAR);
 		nameStar.setText(AdminConstants.STAR);
-		
+
 		nameLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		priorityLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 		descLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
@@ -282,7 +476,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		importStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		nameStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 
-		importBatchPanel.setSpacing(10);
+		importBatchPanel.setSpacing(BatchClassManagementConstants.TEN);
 
 		attachZipFilePanel.setEncoding(FormPanel.ENCODING_MULTIPART);
 		attachZipFilePanel.setMethod(FormPanel.METHOD_POST);
@@ -292,10 +486,35 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		importPanel.setVisible(Boolean.FALSE);
 
 		useExisting.setValue(Boolean.FALSE);
-		useSource.setValue(Boolean.TRUE);
-		name.setEnabled(Boolean.FALSE);
-		description.setEnabled(Boolean.FALSE);
-		priority.setEnabled(Boolean.FALSE);
+		useSource.setVisible(false);
+
+		systemFolderLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.SYSTEM_FOLDER)
+				+ AdminConstants.COLON);
+		systemFolderLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		systemFolderStar.setText(AdminConstants.STAR);
+		systemFolderStar.setStyleName(AdminConstants.FONT_RED_STYLE);
+
+		validateSystemFolderTextBox = new ValidatableWidget<TextBox>(systemFolder);
+		validateSystemFolderTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateSystemFolderTextBox.toggleValidDateBox();
+				importBatchClassUserOptionDTO.setSystemFolder(systemFolder.getText().trim());
+			}
+		});
+
+		if (!importBatchClassUserOptionDTO.isImportExisting()) {
+			name.setEnabled(Boolean.TRUE);
+			name.setText(importBatchClassUserOptionDTO.getName());
+			systemFolder.setText(importBatchClassUserOptionDTO.getSystemFolder());
+		}
+		description.setEnabled(true);
+		priority.setEnabled(true);
+		descStar.setText(AdminConstants.STAR);
+		priorityStar.setText(AdminConstants.STAR);
+		nameStar.setText(AdminConstants.STAR);
+
 		uncPanel.add(uncFolder);
 
 		importFile.addChangeHandler(new ChangeHandler() {
@@ -311,24 +530,34 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				if (uncFolderList.getItemCount() != 0) {
-					boolean checked = event.getValue();
-					importBatchClassUserOptionDTO.setImportExisting(Boolean.valueOf(checked));
-					uncPanel.clear();
-					if (checked) {
-						uncPanel.add(uncFolderList);
-						importExisting.setValue(TRUE);
-					} else {
-						uncPanel.add(uncFolder);
-						uncFolder.setText("");
-						importExisting.setValue(FALSE);
-					}
-					presenter.setFolderList();
+				boolean checked = event.getValue();
+				importBatchClassUserOptionDTO.setImportExisting(Boolean.valueOf(checked));
+				uncPanel.clear();
+				if (checked) {
+					name.setEnabled(Boolean.TRUE);
+					uncPanel.add(uncFolderList);
+					importExisting.setValue(TRUE);
+					final String selectedBatchName = presenter.getSelectedBatchName(uncFolderList.getValue(0));
+					name.setText(selectedBatchName);
+					systemFolder.setText(presenter.getSelectedBatchClassSystemFolder(selectedBatchName));
+					errorMessage.setText(AdminConstants.EMPTY_STRING);
 				} else {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							BatchClassManagementMessages.NO_UNC_FOLDER_EXISTS));
-					useExisting.setValue(Boolean.FALSE);
+					if (!importBatchClassUserOptionDTO.isUseSource()) {
+						name.setEnabled(Boolean.TRUE);
+						name.setText(importBatchClassUserOptionDTO.getName());
+					}
+					name.setText(importBatchClassUserOptionDTO.getName());
+					uncPanel.add(uncFolder);
+					uncFolder.setText(AdminConstants.EMPTY_STRING);
+					importExisting.setValue(FALSE);
+					final String tempSystemFolder = importBatchClassUserOptionDTO.getSystemFolder();
+					if (tempSystemFolder == null) {
+						systemFolder.setText(BatchClassManagementConstants.EMPTY_STRING);
+					} else {
+						systemFolder.setText(tempSystemFolder);
+					}
 				}
+				presenter.setFolderList();
 			}
 		});
 
@@ -341,15 +570,18 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				if (checked) {
 					name.setEnabled(Boolean.FALSE);
 					description.setEnabled(false);
-					description.setText("");
+					description.setText(BatchClassManagementConstants.EMPTY_STRING);
 					name.setText(importBatchClassUserOptionDTO.getName());
 					priority.setEnabled(false);
-					priority.setText("");
-					descStar.setText("");
-					priorityStar.setText("");
-					nameStar.setText("");
+					priority.setText(BatchClassManagementConstants.EMPTY_STRING);
+					descStar.setText(BatchClassManagementConstants.EMPTY_STRING);
+					priorityStar.setText(BatchClassManagementConstants.EMPTY_STRING);
+					nameStar.setText(BatchClassManagementConstants.EMPTY_STRING);
 				} else {
-					name.setEnabled(Boolean.TRUE);
+					if (!importBatchClassUserOptionDTO.isImportExisting()) {
+						name.setEnabled(Boolean.TRUE);
+						name.setText(importBatchClassUserOptionDTO.getName());
+					}
 					description.setEnabled(true);
 					priority.setEnabled(true);
 					descStar.setText(AdminConstants.STAR);
@@ -364,7 +596,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 			@Override
 			public void onSubmit(SubmitEvent event) {
 				String fileName = importFile.getFilename();
-				String fileExt = fileName.substring(fileName.lastIndexOf('.') + 1);
+				String fileExt = fileName.substring(fileName.lastIndexOf(BatchClassManagementConstants.DOT) + 1);
 				if (!fileExt.equalsIgnoreCase("zip")) {
 					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.IMPORT_FILE_INVALID_TYPE);
 					ScreenMaskUtility.unmaskScreen();
@@ -392,17 +624,20 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				String keyWorkflowDeployed = "workflowDeployed:";
 				String keyWorkflowEqual = "workflowEqual:";
 				String keyWorkflowExistInBatchClass = "workflowExistInBatchClass:";
-				
+				String keySystemFolderPath = "systemFolderPath:";
+
 				String workFlowName = result.substring(result.indexOf(keyWorkFlowName) + keyWorkFlowName.length(), result.indexOf('|',
 						result.indexOf(keyWorkFlowName)));
 				String zipSourcePath = result.substring(result.indexOf(keyZipFolderPath) + keyZipFolderPath.length(), result.indexOf(
 						'|', result.indexOf(keyZipFolderPath)));
-				String workflowDeployed = result.substring(result.indexOf(keyWorkflowDeployed) + keyWorkflowDeployed.length(), result.indexOf(
-						'|', result.indexOf(keyWorkflowDeployed)));
+				String workflowDeployed = result.substring(result.indexOf(keyWorkflowDeployed) + keyWorkflowDeployed.length(), result
+						.indexOf('|', result.indexOf(keyWorkflowDeployed)));
 				String workflowEqual = result.substring(result.indexOf(keyWorkflowEqual) + keyWorkflowEqual.length(), result.indexOf(
 						'|', result.indexOf(keyWorkflowEqual)));
-				String workflowExistInBatchClass = result.substring(result.indexOf(keyWorkflowExistInBatchClass) + keyWorkflowExistInBatchClass.length(), result.indexOf(
-						'|', result.indexOf(keyWorkflowExistInBatchClass)));
+				String workflowExistInBatchClass = result.substring(result.indexOf(keyWorkflowExistInBatchClass)
+						+ keyWorkflowExistInBatchClass.length(), result.indexOf('|', result.indexOf(keyWorkflowExistInBatchClass)));
+				String systemFolderPath = result.substring(result.indexOf(keySystemFolderPath) + keySystemFolderPath.length(), result
+						.indexOf('|', result.indexOf(keySystemFolderPath)));
 				name.setText(workFlowName);
 				zipWorkflowName = workFlowName;
 				importBatchClassUserOptionDTO.setName(workFlowName);
@@ -410,7 +645,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				importBatchClassUserOptionDTO.setWorkflowDeployed(Boolean.valueOf(workflowDeployed));
 				importBatchClassUserOptionDTO.setWorkflowEqual(Boolean.valueOf(workflowEqual));
 				importBatchClassUserOptionDTO.setWorkflowExistsInBatchClass(Boolean.valueOf(workflowExistInBatchClass));
-			
+				importBatchClassUserOptionDTO.setSystemFolder(systemFolderPath);
 				uncPanel.clear();
 				uncPanel.add(uncFolder);
 				presenter.onAttachComplete(workFlowName, zipSourcePath);
@@ -421,18 +656,38 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		});
 	}
 
+	/**
+	 * To get Priority.
+	 * 
+	 * @return String
+	 */
 	public String getPriority() {
 		return priority.getValue();
 	}
 
+	/**
+	 * To get Import Existing.
+	 * 
+	 * @return Hidden
+	 */
 	public Hidden getImportExisting() {
 		return importExisting;
 	}
 
+	/**
+	 * To set Priority.
+	 * 
+	 * @param priority
+	 */
 	public void setPriority(String priority) {
 		this.priority.setValue(priority);
 	}
 
+	/**
+	 * To get Unc Folder.
+	 * 
+	 * @return String
+	 */
 	public String getUncFolder() {
 		String returnVal;
 		if (importExisting.equals(TRUE)) {
@@ -443,82 +698,182 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		return returnVal;
 	}
 
+	/**
+	 * To set Unc Folder.
+	 * 
+	 * @param uncFolder String
+	 */
 	public void setUncFolder(String uncFolder) {
 		this.uncFolder.setText(uncFolder);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return description.getValue();
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Validate TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateTextBox() {
 		return validateTextBox;
 	}
 
+	/**
+	 * To get Validate Desc TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescTextBox() {
 		return validateDescTextBox;
 	}
 
+	/**
+	 * To get Validate UNC TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateUNCTextBox() {
 		return validateUNCTextBox;
 	}
 
+	/**
+	 * To get Validate Name TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}
 
+	/**
+	 * To get Priority TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getPriorityTextBox() {
 		return priority;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return description;
 	}
 
+	/**
+	 * To get Save Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getSaveButton() {
 		return saveButton;
 	}
 
+	/**
+	 * To get Cancel Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getCancelButton() {
 		return cancelButton;
 	}
 
+	/**
+	 * To get Name TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getNameTextBox() {
 		return name;
 	}
 
+	/**
+	 * To get Name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return name.getValue();
 	}
 
+	/**
+	 * To set Name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setValue(name);
 	}
 
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
+	/**
+	 * To set Import File.
+	 * 
+	 * @param importFile FileUpload
+	 */
 	public void setImportFile(FileUpload importFile) {
 		this.importFile = importFile;
 	}
 
+	/**
+	 * To get Import File.
+	 * 
+	 * @return FileUpload
+	 */
 	public FileUpload getImportFile() {
 		return importFile;
 	}
 
+	/**
+	 * To get Import Batch Class User Option DTO.
+	 * 
+	 * @return ImportBatchClassUserOptionDTO
+	 */
 	public ImportBatchClassUserOptionDTO getImportBatchClassUserOptionDTO() {
 		return importBatchClassUserOptionDTO;
 	}
 
+	/**
+	 * To perform operations on OK click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onOkClick(ClickEvent clickEvent) {
 		if (!zipImported) {
@@ -549,12 +904,22 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 		return isAnyConfigApplied;
 	}
 
+	/**
+	 * To perform operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClick(ClickEvent clickEvent) {
 		presenter.deleteAttachedFolders(importBatchClassUserOptionDTO.getZipFileName());
 		dialogBox.hide(true);
 	}
 
+	/**
+	 * To perform operations on attach click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("attachButton")
 	public void onAttachClick(ClickEvent clickEvent) {
 		ScreenMaskUtility.maskScreen();
@@ -567,7 +932,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	/**
 	 * This method creates tree view of batch class configuration for selected batch class.
 	 * 
-	 * @param uiConfigList
+	 * @param uiConfigList List<Node>
 	 */
 	public void getbatchFolderListView(List<Node> uiConfigList) {
 		batchClassFolderView.removeItems();
@@ -581,7 +946,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				Node node = new Node();
 				node.getLabel().setDisplayName(rootNode.getLabel().getDisplayName());
 				node.getLabel().setKey(rootNode.getLabel().getKey());
-
+				node.setParent(rootNode.getParent());
 				CheckBox checkBox = new CheckBox();
 				checkBox.setText(rootNode.getLabel().getDisplayName().trim());
 				TreeItem treeItem = new TreeItem(checkBox);
@@ -605,6 +970,7 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 				Node node = new Node();
 				node.getLabel().setDisplayName(childNode.getLabel().getDisplayName());
 				node.getLabel().setKey(childNode.getLabel().getKey());
+				node.setParent(childNode.getParent());
 				CheckBox checkBox = new CheckBox();
 				checkBox.setText(childNode.getLabel().getDisplayName().trim());
 				TreeItem childTree = new TreeItem(checkBox);
@@ -620,34 +986,42 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	}
 
 	private void createUI(final boolean isMandatory, final CheckBox checkBox, final Node newNode, final TreeItem childTree) {
-		if (isMandatory) {
-			checkBox.setEnabled(Boolean.TRUE);
-			checkBox.setValue(Boolean.FALSE);
+		if (newNode.getParent().getLabel().getKey().equals("BatchClassModules")
+				|| newNode.getLabel().getKey().equals("BatchClassModules")) {
+			checkBox.setEnabled(Boolean.FALSE);
+			checkBox.setValue(Boolean.TRUE);
+			newNode.getLabel().setMandatory(Boolean.TRUE);
 		} else {
-			if (importExisting.getValue().equalsIgnoreCase(TRUE)) {
+			if (isMandatory) {
 				checkBox.setEnabled(Boolean.TRUE);
 				checkBox.setValue(Boolean.FALSE);
-				newNode.getLabel().setMandatory(Boolean.FALSE);
-			} else if (importExisting.getValue().equalsIgnoreCase(FALSE)) {
-				checkBox.setEnabled(Boolean.FALSE);
-				checkBox.setValue(Boolean.TRUE);
-				newNode.getLabel().setMandatory(Boolean.TRUE);
+			} else {
+				if (importExisting.getValue().equalsIgnoreCase(TRUE)) {
+					checkBox.setEnabled(Boolean.TRUE);
+					checkBox.setValue(Boolean.FALSE);
+					newNode.getLabel().setMandatory(Boolean.FALSE);
+				} else if (importExisting.getValue().equalsIgnoreCase(FALSE)) {
+					checkBox.setEnabled(Boolean.FALSE);
+					checkBox.setValue(Boolean.TRUE);
+					newNode.getLabel().setMandatory(Boolean.TRUE);
+				}
+			}
+
+			if (checkBox != null && checkBox.isEnabled()) {
+				checkBox.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						boolean checked = ((CheckBox) event.getSource()).getValue();
+						newNode.getLabel().setMandatory(checked);
+						setParentItemsUI(childTree.getParentItem(), checked, newNode);
+						setChildItemsUI(childTree, checked, newNode);
+					}
+
+				});
 			}
 		}
 
-		if (checkBox != null && checkBox.isEnabled()) {
-			checkBox.addClickHandler(new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent event) {
-					boolean checked = ((CheckBox) event.getSource()).getValue();
-					newNode.getLabel().setMandatory(checked);
-					setParentItemsUI(childTree.getParentItem(), checked, newNode);
-					setChildItemsUI(childTree, checked, newNode);
-				}
-
-			});
-		}
 	}
 
 	private void setParentItemsUI(TreeItem parentItem, boolean checked, Node childNode) {
@@ -679,35 +1053,78 @@ public class ImportBatchClassView extends View<ImportBatchClassPresenter> {
 	/**
 	 * This method sets the UNC folder list of the selected batch class.
 	 * 
-	 * @param uncFolders
+	 * @param uncFolderConfigList
 	 */
-	public void setUNCFolderList(Map<String, String> uncFolders) {
+	public void setUNCFolderList(List<UNCFolderConfig> uncFolderConfigList) {
 		uncFolderList.clear();
-		if (uncFolders != null && !uncFolders.isEmpty()) {
-			Set<String> identifierSet = uncFolders.keySet();
-			for (String identifier : identifierSet) {
-				String uncFolderPath = uncFolders.get(identifier);
-				if (uncFolderPath != null && !uncFolderPath.isEmpty()) {
-					String uncFolderName = uncFolderPath.substring(uncFolderPath.lastIndexOf('\\') + 1);
+		if (uncFolderConfigList != null && !uncFolderConfigList.isEmpty()) {
+			for (UNCFolderConfig uncFolderConfig : uncFolderConfigList) {
+				String batchClassID = uncFolderConfig.getBatchClassId();
+				String uncFolder = uncFolderConfig.getUncFolder();
+				if (uncFolder != null && !uncFolder.isEmpty()) {
+					String uncFolderName = uncFolder.substring(uncFolder.lastIndexOf('\\') + 1);
 					if (uncFolderName.length() > AdminConstants.MAX_TEXT_LENGTH) {
-						uncFolderName = StringUtil.getTrimmedText(uncFolderName, AdminConstants.MAX_TEXT_LENGTH, 4, Boolean.TRUE);
+						uncFolderName = StringUtil.getTrimmedText(uncFolderName, AdminConstants.MAX_TEXT_LENGTH,
+								BatchClassManagementConstants.FOUR, Boolean.TRUE);
 					}
-					uncFolderList.addItem(identifier + '-' + uncFolderName, uncFolderPath);
-					((Element) uncFolderList.getElement().getLastChild()).setAttribute("title", uncFolderPath);
+					uncFolderList.addItem(batchClassID + '-' + uncFolderName, uncFolder);
+					((Element) uncFolderList.getElement().getLastChild()).setAttribute("title", uncFolder);
 				}
 			}
 		}
 	}
 
+	/**
+	 * To toggle the existing state.
+	 * 
+	 * @param isEnabled boolean
+	 */
 	public void toggleUseExistingState(boolean isEnabled) {
 		useExisting.setEnabled(isEnabled);
 	}
-	
+
+	/**
+	 * To get Zip Workflow Name.
+	 * 
+	 * @return String
+	 */
 	public String getZipWorkflowName() {
 		return zipWorkflowName;
 	}
-	
-	public Label getErrorMessage() {
-		return errorMessage;
+
+	/**
+	 * To set Error Text.
+	 * 
+	 * @param errorText String
+	 */
+	public void setErrorText(final String errorText) {
+		this.errorText = errorText;
+	}
+
+	/**
+	 * To get Error Text.
+	 * 
+	 * @return String
+	 */
+	public String getErrorText() {
+		return errorText;
+	}
+
+	/**
+	 * To get Validate System Folder TextBox.
+	 * 
+	 * @return the validateSystemFolderTextBox
+	 */
+	public ValidatableWidget<TextBox> getValidateSystemFolderTextBox() {
+		return validateSystemFolderTextBox;
+	}
+
+	/**
+	 * To set name.
+	 * 
+	 * @param name TextBox
+	 */
+	public void setName(TextBox name) {
+		this.name = name;
 	}
 }

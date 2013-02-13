@@ -1,0 +1,12 @@
+<module rename-to='folderManager'>
+	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.ephesoft.dcma.gwt.core.Core' />
+	<inherits name='com.ephesoft.dcma.gwt.admin.Admin' />
+	<inherits name='org.swfupload.SWFUpload' />
+	<inherits name='com.google.gwt.user.theme.standard.Standard' />
+	<entry-point class='com.ephesoft.dcma.gwt.foldermanager.client.FolderManager' />
+
+	<source path='client' />
+	<source path='shared' />
+
+</module>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,6 +38,7 @@ package com.ephesoft.dcma.barcode;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.imageio.ImageIO;
@@ -57,45 +58,65 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.GenericMultipleBarcodeReader;
 
+/**
+ * This class is used to perform barcode extraction processes.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.barcode.BarcodeReader
+ */
 public class BarcodeExecutor extends AbstractRunnable {
 
+	/**
+	 * The source path.
+	 */
 	private final String sourcePath;
+	/**
+	 * The file name.
+	 */
 	private final String fileName;
+	/**
+	 * The type of readers.
+	 */
 	private final String[] appReaderTypes;
+	/**
+	 * To store barcode results.
+	 */
 	private BarcodeResult[] barCodeResults;
 
+	/**
+	 * Instance of this class used for logging.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BarcodeExecutor.class);
 
-	public BarcodeExecutor(String sourcePath, String fileName, final String[] appReaderTypes) {
+	/**
+	 * Parameterized constructor.
+	 * @param sourcePath {@link String}
+	 * @param fileName {@link String}
+	 * @param tempAppReaderTypes {@link String []}
+	 * 
+	 */
+	public BarcodeExecutor(String sourcePath, String fileName, final String[] tempAppReaderTypes) {
 		super();
 		this.sourcePath = sourcePath;
 		this.fileName = fileName;
-		if (appReaderTypes != null) {
-			String[] tempAppReaderTypes = new String[appReaderTypes.length];
-
-			System.arraycopy(appReaderTypes, 0, tempAppReaderTypes, 0, appReaderTypes.length);
-			this.appReaderTypes = tempAppReaderTypes;
+		if(tempAppReaderTypes == null){
+			this.appReaderTypes = new String[0];
 		} else {
-			this.appReaderTypes = null;
+			this.appReaderTypes = Arrays.copyOf(tempAppReaderTypes, tempAppReaderTypes.length);
 		}
 	}
 
 	/**
 	 * This method processes each image file supplied using Zxing library and finds the barcode results using different readers for
-	 * Code 39, QR and Datamatrix formats. Permissible barcode reader types are configurable and defined in database.
-	 * 
-	 * @param sourceImage BufferedImage
-	 * @param fileName String
-	 * @param appReaderTypes String[]
-	 * @return BarcodeResult[]
-	 * @throws DCMAApplicationException
+	 * CODE39,QR, DATAMATRIX, PDF417,CODE128, CODE93,ITF, CODABAR and EAN13 formats. Permissible barcode reader types are configurable and defined in database.
 	 */
 	@Override
 	public void run() {
 		LOGGER.info("Running barcode for the file " + fileName);
 		BufferedImage sourceImage = null;
 		Result[] codeResults = null;
-		Vector<BarcodeFormat> barCodeFormatVector = new Vector<BarcodeFormat>();
+		Vector<BarcodeFormat> barCodeFormatVector = new Vector<BarcodeFormat>(); //NOPMD
 		try {
 			if (sourcePath != null && !sourcePath.isEmpty()) {
 				sourceImage = ImageIO.read(new File(sourcePath));
@@ -148,17 +169,17 @@ public class BarcodeExecutor extends AbstractRunnable {
 	/**
 	 * This method scans the barcode information for images . If image is of different format this method will return null.
 	 * 
-	 * @param sourceImage
-	 * @param fileName
-	 * @param barCodeFormatVector
+	 * @param sourceImage {@link BufferedImage}
+	 * @param fileName {@link String}
+	 * @param barCodeFormatVector {@link Vector <BarcodeFormat>}
 	 * @return Result[]
 	 */
 	public Result[] getBarCodeResults(final BufferedImage sourceImage, final String fileName,
-			final Vector<BarcodeFormat> barCodeFormatVector) {
+			final Vector<BarcodeFormat> barCodeFormatVector) { //NOPMD
 		Result[] codeResults = null;
 		LuminanceSource source = new BufferedImageLuminanceSource(sourceImage);
 		BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-		Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>();
+		Hashtable<DecodeHintType, Object> hints = new Hashtable<DecodeHintType, Object>(); //NOPMD
 
 		MultiFormatReader mfr = new MultiFormatReader();
 
@@ -177,10 +198,10 @@ public class BarcodeExecutor extends AbstractRunnable {
 	}
 
 	/**
-	 * This method populates BarcodeResult array from Result array fetched by uzing Zxing libraries.
+	 * This method populates BarcodeResult array from Result array fetched by using Zxing libraries.
 	 * 
-	 * @param results
-	 * @return BarcodeResult[]
+	 * @param results {@link Result[]}
+	 * @return {@link BarcodeResult[]}
 	 */
 	public BarcodeResult[] setBarcodeResults(Result[] results) {
 		BarcodeResult[] barcodeResults = null;
@@ -218,18 +239,26 @@ public class BarcodeExecutor extends AbstractRunnable {
 		return barcodeResults;
 	}
 
+	/**
+	 * getter for fileName.
+	 * @return {@link String}
+	 */
 	public String getFileName() {
 		return fileName;
 	}
 
+	/**
+	 * This method is used to get the barcode results.
+	 * @return {@link BarcodeResult}
+	 */
 	public BarcodeResult[] getBarCodeResults() {
+		BarcodeResult[] tempBarCodeResults;
 		if (barCodeResults != null) {
-			BarcodeResult[] tempBarCodeResults = new BarcodeResult[barCodeResults.length];
+			tempBarCodeResults = new BarcodeResult[barCodeResults.length];
 			System.arraycopy(barCodeResults, 0, tempBarCodeResults, 0, barCodeResults.length);
-
-			return tempBarCodeResults;
+		} else {
+			tempBarCodeResults = new BarcodeResult[0];
 		}
-		return null;
-
+		return tempBarCodeResults;
 	}
 }

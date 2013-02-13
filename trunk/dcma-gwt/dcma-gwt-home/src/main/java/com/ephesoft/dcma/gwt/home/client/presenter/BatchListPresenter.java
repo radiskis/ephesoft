@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,34 +39,58 @@ import com.ephesoft.dcma.gwt.home.client.BatchListController;
 import com.ephesoft.dcma.gwt.home.client.view.LandingView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for the view the user gets on reaching batch list page.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.home.client.view.LandingView
+ */
+public class BatchListPresenter extends AbstractBatchListPresenter<LandingView> {
 
-public class BatchListPresenter extends AbstractBatchListPresenter<LandingView>{
-
+	/**
+	 * landingPresenter LandingPresenter.
+	 */
 	private final LandingPresenter landingPresenter;
-	
-	private final LandingView landingView;
-	
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchListController
+	 * @param view LandingView
+	 */
 	public BatchListPresenter(final BatchListController controller, final LandingView view) {
 
 		super(controller, view);
-		this.landingView = view;
-		this.landingPresenter = new LandingPresenter(controller, this.landingView);
+		this.landingPresenter = new LandingPresenter(controller, view);
 	}
-	
-	
+
+	/**
+	 * To get Landing Presenter.
+	 * 
+	 * @return LandingPresenter
+	 */
 	public LandingPresenter getLandingPresenter() {
 		return landingPresenter;
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// TODO Auto-generated method stub
-		
-	}	
+
+	}
 }

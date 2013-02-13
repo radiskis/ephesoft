@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch.SamplePatternPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.shared.SamplePatternDTO;
@@ -54,46 +55,85 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to view sample pattern.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class SamplePatternView extends View<SamplePatternPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, SamplePatternView> {
 	}
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	private FlexTable samplePatternTable;
+	/**
+	 * samplePatternTable FlexTable.
+	 */
+	private final FlexTable samplePatternTable;
 
+	/**
+	 * patternListPanel FlowPanel.
+	 */
 	@UiField
 	protected FlowPanel patternListPanel;
 
+	/**
+	 * backButton Button.
+	 */
 	@UiField
 	protected Button backButton;
 
+	/**
+	 * dialogBox DialogBox.
+	 */
 	private DialogBox dialogBox;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
 	@UiField
-	ScrollPanel scrollPanel;
+	protected ScrollPanel scrollPanel;
 
+	/**
+	 * Constructor.
+	 */
 	public SamplePatternView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
-
-		scrollPanel.setSize("390px", "395px");
-
+		scrollPanel.setSize("490px", "495px");
 		samplePatternTable = new FlexTable();
-		samplePatternTable.setWidth("395px");
+		samplePatternTable.setWidth("490px");
 		samplePatternTable.setCellSpacing(0);
-		samplePatternTable.addStyleName("border-result-table");
+		samplePatternTable.addStyleName(AdminConstants.BORDER_RESULT_TABLE);
 		backButton.setText(AdminConstants.CLOSE_BUTTON);
 		patternListPanel.add(samplePatternTable);
 		backButton.setFocus(true);
 	}
 
+	/**
+	 * To perform operations on back button clicked.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("backButton")
-	public void onBackButtonClicked(ClickEvent e) {
+	public void onBackButtonClicked(ClickEvent clickEvent) {
 		dialogBox.hide();
 	}
 
+	/**
+	 * To create Sample Pattern List.
+	 * 
+	 * @param samplePatternDTO SamplePatternDTO
+	 */
 	public void createSamplePatternList(SamplePatternDTO samplePatternDTO) {
 		samplePatternTable.removeAllRows();
 		setResultList(samplePatternDTO);
@@ -102,11 +142,11 @@ public class SamplePatternView extends View<SamplePatternPresenter> {
 	private void setResultList(SamplePatternDTO samplePatternDTO) {
 
 		int rows = 1;
-         
+
 		if (samplePatternDTO != null && samplePatternDTO.getPatternValueMap() != null) {
-			samplePatternTable.getCellFormatter().setWidth(0, 0, "20%");
-			samplePatternTable.setText(0, 0, "Name");
-			samplePatternTable.setText(0, 1, "Sample Regex Pattern");
+			samplePatternTable.getCellFormatter().setWidth(0, 0, "30%");
+			samplePatternTable.setText(0, 0, AdminConstants.SAMPLE_PATTERN_DESCRIPTION);
+			samplePatternTable.setText(0, 1, AdminConstants.SAMPLE_REGEX_PATTERN);
 			samplePatternTable.getRowFormatter().setStylePrimaryName(0, "header");
 			for (Entry<String, String> entrySet : samplePatternDTO.getPatternValueMap().entrySet()) {
 				samplePatternTable.setText(rows, 0, entrySet.getKey());
@@ -115,21 +155,36 @@ public class SamplePatternView extends View<SamplePatternPresenter> {
 
 			}
 		} else {
-			samplePatternTable.getFlexCellFormatter().setColSpan(1, 0, 4);
+			samplePatternTable.getFlexCellFormatter().setColSpan(1, 0, BatchClassManagementConstants.FOUR);
 			samplePatternTable.setText(0, 0, MessageConstants.MSG_NO_RESULTS_FOUND);
 
 		}
 
 	}
 
+	/**
+	 * To get Dialog Box.
+	 * 
+	 * @return DialogBox
+	 */
 	public DialogBox getDialogBox() {
 		return dialogBox;
 	}
 
+	/**
+	 * To set Dialog Box.
+	 * 
+	 * @param dialogBox DialogBox
+	 */
 	public void setDialogBox(DialogBox dialogBox) {
 		this.dialogBox = dialogBox;
 	}
 
+	/**
+	 * To get Back Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getBackButton() {
 		return backButton;
 	}

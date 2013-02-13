@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,8 @@
 
 package com.ephesoft.dcma.cmis.service;
 
+import java.util.Map;
+
 import com.ephesoft.dcma.core.DCMAException;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 
@@ -44,7 +46,6 @@ import com.ephesoft.dcma.da.id.BatchInstanceID;
  * a time it will upload only pdf or tif files.
  * 
  * @author Ephesoft
- * 
  * @version 1.0
  * @see com.ephesoft.dcma.cmis.service.CMISExportServiceImpl
  */
@@ -69,4 +70,26 @@ public interface CMISExportService {
 	 */
 	void deleteDocument(final BatchInstanceID batchInstanceID, final String pluginWorkflow) throws DCMAException;
 
+	/**
+	 * This method tests the batch connection to the repository server.
+	 * 
+	 * @param pluginPropertyValues {@link Map<String, String>} plugin properties of the batch class used for connection.
+	 * @throws DCMAException {@link DCMAException} If not able to connect to repository server.
+	 */
+	Map<String, String> cmisConnectionTest(Map<String, String> pluginPropertyValues) throws DCMAException;
+
+	/**
+	 * This method to get the CMIS authentication URL.
+	 * 
+	 * @param pluginPropertyValues {@link Map<String, String>} plugin properties of the batch class used for connection.
+	 */
+	String getAuthenticationURL(Map<String, String> pluginPropertyValues);
+
+	/**
+	 * This method to get the tokens map.
+	 * 
+	 * @param pluginPropertyValues {@link Map<String, String>} plugin properties of the batch class used for connection.
+	 * @throws DCMAException {@link DCMAException} If not able to connect to repository server.
+	 */
+	Map<String, String> getTokensMap(Map<String, String> pluginPropertyValues) throws DCMAException;
 }

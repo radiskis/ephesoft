@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,12 +40,11 @@ import com.ephesoft.dcma.gwt.core.shared.PageTypeDTO;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
+ * Used for event handling at page level.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Used for event handling at page level.
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
  */
 public class PageTypeEvent extends GwtEvent<PageTypeHandler> {
 
@@ -64,11 +63,22 @@ public class PageTypeEvent extends GwtEvent<PageTypeHandler> {
 	 */
 	private PageTypeDTO pageTypeDTO;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 */
 	public PageTypeEvent(final Action action) {
 		super();
 		this.action = action;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param action Action
+	 * @param pageTypeDTO PageTypeDTO
+	 */
 	public PageTypeEvent(final Action action, final PageTypeDTO pageTypeDTO) {
 		super();
 		this.action = action;
@@ -88,11 +98,21 @@ public class PageTypeEvent extends GwtEvent<PageTypeHandler> {
 		}
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<PageTypeHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<PageTypeHandler> getAssociatedType() {
 		return type;
 	}
 
+	/**
+	 * To get Page Type.
+	 * 
+	 * @return PageTypeDTO
+	 */
 	public PageTypeDTO getPageType() {
 		return pageTypeDTO;
 	}

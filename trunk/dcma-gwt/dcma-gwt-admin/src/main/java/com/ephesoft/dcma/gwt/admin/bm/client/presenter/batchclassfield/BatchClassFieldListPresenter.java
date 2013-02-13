@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.da.property.BatchClassFieldProperty;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
@@ -55,48 +56,101 @@ import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.comparator.BatchClassFieldComparator;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the batch class field list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class BatchClassFieldListPresenter extends AbstractBatchClassPresenter<BatchClassFieldListView> implements PaginationListner,
 		DoubleClickListner {
 
-	private Collection<BatchClassFieldDTO> BatchClassFieldDTOList;
+	/**
+	 * batchClassFieldDTOList Collection<BatchClassFieldDTO>.
+	 */
+	private Collection<BatchClassFieldDTO> batchClassFieldDTOList;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view BatchClassFieldListView
+	 */
 	public BatchClassFieldListPresenter(BatchClassManagementController controller, BatchClassFieldListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
 	}
 
+	/**
+	 * In case of pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param paramOrder Order
+	 */
 	@Override
-	public void onPagination(int startIndex, int maxResult, Order order) {
+	public void onPagination(int startIndex, int maxResult, Order paramOrder) {
+		Order order = paramOrder;
+		if (null == order) {
+			order = new Order(BatchClassFieldProperty.ORDER, true);
+		}
 		BatchClassFieldComparator comparator = new BatchClassFieldComparator(order);
-		List<BatchClassFieldDTO> newBatchClassFieldDTOList = new ArrayList<BatchClassFieldDTO>(BatchClassFieldDTOList);
+		List<BatchClassFieldDTO> newBatchClassFieldDTOList = new ArrayList<BatchClassFieldDTO>(batchClassFieldDTOList);
 		Collections.sort(newBatchClassFieldDTOList, comparator);
 		List<Record> batchClassFieldRecordList = getController().getMainPresenter().getBatchClassViewPresenter().getView()
 				.setBatchClassFieldList(newBatchClassFieldDTOList);
-		this.getView().getBatchClassFieldListView().updateRecords(batchClassFieldRecordList, 0);
+		int totalSize = batchClassFieldRecordList.size();
+		int lastIndex = startIndex + maxResult;
+		int count = Math.min(totalSize, lastIndex);
+		this.getView().getBatchClassFieldListView().updateRecords(batchClassFieldRecordList.subList(startIndex, count), startIndex,
+				totalSize);
 	}
 
+	/**
+	 * To set Batch Class Field DTO List.
+	 * 
+	 * @param batchClassFieldDTOs Collection<BatchClassFieldDTO>
+	 */
 	public void setBatchClassFieldDTOList(Collection<BatchClassFieldDTO> batchClassFieldDTOs) {
-		BatchClassFieldDTOList = batchClassFieldDTOs;
+		batchClassFieldDTOList = batchClassFieldDTOs;
 	}
 
+	/**
+	 * To get Batch Class Field DTO List.
+	 * 
+	 * @return Collection<BatchClassFieldDTO>
+	 */
 	public Collection<BatchClassFieldDTO> getBatchClassFieldDTOList() {
-		return BatchClassFieldDTOList;
+		return batchClassFieldDTOList;
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
 	public void onEditButtonClicked() {
 		String rowIndex = view.getBatchClassFieldListView().getSelectedRowIndex();
 		int rowCount = view.getBatchClassFieldListView().getTableRecordCount();

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -77,9 +77,33 @@ public interface TableExtractionConstants {
 	 * String constant for span tag.
 	 */
 	String SPAN_TAG = "<span";
-	
+
 	/**
 	 * Default value for confidence.
 	 */
 	int DEFAULT_CONFIDENCE_VALUE = 100;
+	
+	/**
+	 * int constant for zero.
+	 */
+	int ZERO = 0;
+	
+	/**
+	 * int constant for one.
+	 */
+	int ONE = 1;
+	
+	/**
+	 * int constant for hundred.
+	 */
+	int HUNDRED = 100;
+	
+	/**
+	 * int constant for twenty.
+	 */
+	int TWENTY = 20;
+	/**
+	 * String constant for logging proper messages.
+	 */
+	String BETWEEN_LEFT_FOUND = "Between left found = ";
 }

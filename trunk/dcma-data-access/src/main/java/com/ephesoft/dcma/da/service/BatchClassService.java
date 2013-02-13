@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.util.Set;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.exception.BatchAlreadyLockedException;
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.da.domain.BatchClass;
 
 /**
@@ -53,28 +54,29 @@ import com.ephesoft.dcma.da.domain.BatchClass;
 public interface BatchClassService {
 
 	/**
-	 * An api to fetch BatchClass by id.
+	 * An API to fetch BatchClass by id.
 	 * 
 	 * @param identifier {@link Serializable}
-	 * @return BatchClass
+	 * @return {@link BatchClass}
 	 */
 	BatchClass get(Serializable identifier);
 
 	/**
 	 * API to delete BatchClass by id.
+	 * 
 	 * @param identifier {@link Serializable}
 	 */
 	void delete(Serializable identifier);
 
 	/**
-	 * An api to save or update the batch class.
+	 * An API to save or update the batch class.
 	 * 
 	 * @param batchClass {@link BatchClass}
 	 */
 	void saveOrUpdate(BatchClass batchClass);
 
 	/**
-	 * An api to fetch BatchClass by uncFolder name.
+	 * An API to fetch BatchClass by uncFolder name.
 	 * 
 	 * @param folderName {@link String}
 	 * @return {@link BatchClass}
@@ -82,20 +84,20 @@ public interface BatchClassService {
 	BatchClass getBatchClassbyUncFolder(String folderName);
 
 	/**
-	 * An api to fetch BatchClass by batch Class name.
+	 * An API to fetch BatchClass by batch Class name.
 	 * 
 	 * @param batchClassName {@link String}
-	 * @return List<{@link BatchClass}>
+	 * @return {@link BatchClass}
 	 */
-	List<BatchClass> getBatchClassbyName(String batchClassName);
+	BatchClass getBatchClassbyName(String batchClassName);
 
 	/**
-	 * An api to fetch BatchClass by batch Class processName.
+	 * An API to fetch BatchClass by batch Class processName.
 	 * 
 	 * @param processName {@link String}
-	 * @return List<{@link BatchClass}>
+	 * @return {@link BatchClass}
 	 */
-	List<BatchClass> getBatchClassbyProcessName(String processName);
+	BatchClass getBatchClassbyProcessName(String processName);
 
 	/**
 	 * This API will fetch all the batch classes.
@@ -114,7 +116,7 @@ public interface BatchClassService {
 	/**
 	 * API to fetch a batch class by id.
 	 * 
-	 * @param batchClassId {@link String}
+	 * @param batchClassIdentifier {@link String}
 	 * @return {@link BatchClass}
 	 */
 	BatchClass getBatchClassByIdentifier(String batchClassIdentifier);
@@ -122,17 +124,17 @@ public interface BatchClassService {
 	/**
 	 * API to acquire a batch on the basis of batchClassID and userName.
 	 * 
-	 * @param batchClassID {@link String}
-	 * @param userName {@link String}
+	 * @param batchClassIdentifier {@link String}
+	 * @param currentUser {@link String}
 	 * @return {@link BatchClass}
+	 * @throws BatchAlreadyLockedException in case of error
 	 */
 	BatchClass acquireBatchClass(String batchClassIdentifier, String currentUser) throws BatchAlreadyLockedException;
 
 	/**
 	 * Unlocks the currently acquired batch by the user (currentUser).
 	 * 
-	 * @param batchInstanceId {@link String}
-	 * 
+	 * @param batchClassIdentifier {@link String}
 	 */
 	void unlockCurrentBatchClass(String batchClassIdentifier);
 
@@ -144,10 +146,12 @@ public interface BatchClassService {
 	void unlockAllBatchClassesForCurrentUser(String currentUser);
 
 	/**
-	 * Api to merge the batch class.
+	 * API to merge the batch class.
 	 * 
-	 * @param {@link BatchClass}
-	 */
+	 * @param batchClass {@link BatchClass}
+	 * @param isBatchClassDeleted boolean
+	 * @return {@link BatchClass}
+	 */ 
 	BatchClass merge(BatchClass batchClass, boolean isBatchClassDeleted);
 
 	/**
@@ -158,24 +162,26 @@ public interface BatchClassService {
 	void evict(BatchClass batchClass);
 
 	/**
-	 * API to get the list of Batch Classes specifying startindex, no of results and sorting if any.
+	 * API to get the list of Batch Classes specifying start index, no of results and sorting if any.
 	 * 
 	 * @param firstResult int
 	 * @param maxResults int
 	 * @param order {@link Order}
+	 * @param userRoles Set<{@link BatchClass}>
 	 * @return List<{@link BatchClass}>
 	 */
-	List<BatchClass> getBatchClassList(int firstResult, int maxResults, Order order);
+	List<BatchClass> getBatchClassList(int firstResult, int maxResults, Order order, Set<String> userRoles);
 
-	/**API to count all the batch classes.
+	/**
+	 * API to count all the batch classes. * @param userRoles
 	 * 
-	 * @param userRoles
-	 * @return
+	 * @param userRoles Set<String>
+	 * @return count int
 	 */
-	 
 	int countAllBatchClassesExcludeDeleted(Set<String> userRoles);
 
 	/**
+	 * API to create batch class.
 	 * 
 	 * @param batchClass {@link BatchClass}
 	 * @return {@link BatchClass}
@@ -192,6 +198,7 @@ public interface BatchClassService {
 
 	/**
 	 * API to get all batch classes excluding the one's deleted.
+	 * 
 	 * @return List<{@link BatchClass}>
 	 */
 	List<BatchClass> getAllBatchClassesExcludeDeleted();
@@ -199,12 +206,13 @@ public interface BatchClassService {
 	/**
 	 * This API will fetch the batch class (eagerly loaded) on the basis of identifier.
 	 * 
+	 * @param batchClassIdentifier String
 	 * @return List<{@link BatchClass}>
 	 */
 	BatchClass getLoadedBatchClassByIdentifier(String batchClassIdentifier);
 
 	/**
-	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class
+	 * This API will fetch the batch class (eagerly loaded) list excluding the deleted batch class.
 	 * 
 	 * @return List<{@link BatchClass}>
 	 */
@@ -213,13 +221,13 @@ public interface BatchClassService {
 	/**
 	 * API to merge a batch class.
 	 * 
-	 * @param {@link BatchClass}
+	 * @param batchClass {@link BatchClass}
 	 * @return {@link BatchClass}
 	 */
 	BatchClass merge(BatchClass batchClass);
 
-	
-	/** API to  get all the associated UNC folders with a workflow
+	/**
+	 * API to get all the associated UNC folders with a workflow.
 	 * 
 	 * @param workflowName {@link String}
 	 * @return List<{@link String}>
@@ -249,11 +257,11 @@ public interface BatchClassService {
 	 * @return {@link BatchClass}
 	 */
 	BatchClass getBatchClassByNameIncludingDeleted(String batchClassName);
-	
+
 	/**
 	 * API to create batch class without adding watch to it.
 	 * 
-	 * @param {@link BatchClass}
+	 * @param batchClass {@link BatchClass}
 	 * @return {@link BatchClass}
 	 */
 	BatchClass createBatchClassWithoutWatch(BatchClass batchClass);
@@ -261,7 +269,7 @@ public interface BatchClassService {
 	/**
 	 * API to get loaded batch class by workflow name.
 	 * 
-	 * @param name {@link String}
+	 * @param batchClassName {@link String}
 	 * @return {@link BatchClass}
 	 */
 	BatchClass getLoadedBatchClassByNameIncludingDeleted(String batchClassName);
@@ -271,14 +279,66 @@ public interface BatchClassService {
 	 * 
 	 * @param uncFolder {@link String}
 	 * @return {@link String}
-	 */ 
+	 */
 	String getBatchClassIdentifierByUNCfolder(String uncFolder);
-	
+
 	/**
 	 * API to get all batch class identifiers.
-	 * 
-	 * 
+	 *  
 	 * @return List<{@link String}>
-	 */ 
+	 */
 	List<String> getAllBatchClassIdentifier();
+
+	/**
+	 * API to get all batch classes on the basis of excluding the deleted batch class and on the basis of ascending or desending order
+	 * of specified property.
+	 * 
+	 * @param isExcludeDeleted boolean
+	 * @param isAsc boolean
+	 * @param propertyName String
+	 * @return List<{@link BatchClass}>
+	 */
+	List<BatchClass> getAllBatchClasses(boolean isExcludeDeleted, boolean isAsc, String propertyName);
+
+	/**
+	 * API to get all the UNC folders on the basis of excluding the deleted batch class.
+	 * 
+	 * @param isExcludeDeleted boolean
+	 * @return List<{@link String}>
+	 */
+	List<String> getAllUNCList(boolean isExcludeDeleted);
+
+	/**
+	 * API to copy the batch class with given id and create a new batch class with the details provided as arguments . This API also
+	 * creates a new batch class group with given name (if not null) and assign that group to this newly created batch class
+	 * 
+	 * @param batchClassId{@link String}
+	 * @param batchClassName{@link String}
+	 * @param batchClassDesc{@link String}
+	 * @param batchClassGroup{@link String}
+	 * @param batchClassPriority{@link String}
+	 * @param uncFolder{@link String}
+	 * @param isConfigureExportFolder boolean
+	 * @return {@link BatchClass}
+	 * @throws DCMAApplicationException in case of error
+	 */
+	BatchClass copyBatchClass(String batchClassId, String batchClassName, String batchClassDesc, String batchClassGroup,
+			String batchClassPriority, String uncFolder, boolean isConfigureExportFolder) throws DCMAApplicationException;
+
+	/**
+	 * API to fetch the system folder for the given batch class identifier.
+	 * 
+	 * @param batchClassIdentifier {@link String}
+	 * @return {@link String} the system folder path.
+	 */
+	String getSystemFolderForBatchClassIdentifier(String batchClassIdentifier);
+	
+	/**
+	 * This API will fetch the batch classes on user role if any.
+	 * 
+	 * @param userRoles Set<String>
+	 * @param batchClassID String
+	 * @return (@link BatchClass)
+	 */
+	BatchClass getBatchClassByUserRoles(Set<String> userRoles, String batchClassID);
 }

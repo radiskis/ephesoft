@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,33 +44,35 @@ import javax.persistence.Table;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
 /**
- * This class is a identity class for batch_instance_groups table.
+ * This class is a Entity class for batch_instance_groups table.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
  */
 @Entity
 @Table(name = "batch_instance_groups")
 public class BatchInstanceGroups extends AbstractChangeableEntity implements Serializable {
 
 	/**
-	 * Serial version id.
+	 * Serial version id  lond.
 	 */
 	private static final long serialVersionUID = -784230224975267031L;
 
 	/**
-	 * Group name column.
+	 * Group name column String.
 	 */
 	@Column(name = "group_name")
 	private String groupName;
 
 	/**
-	 * Batch instance identifier column.
+	 * Batch instance identifier column String.
 	 */
 	@Column(name = "batch_instance_id")
 	private String batchInstanceIdentifier;
 
 	/**
+	 * To get Batch Instance Identifier.
 	 * @return the batchInstanceIdentifier
 	 */
 	public String getBatchInstanceIdentifier() {
@@ -78,13 +80,15 @@ public class BatchInstanceGroups extends AbstractChangeableEntity implements Ser
 	}
 
 	/**
-	 * @param batchInstanceIdentifier the batchInstanceIdentifier to set
+	 * To set Batch Instance Identifier.
+	 * @param batchInstanceIdentifier String
 	 */
 	public void setBatchInstanceIdentifier(final String batchInstanceIdentifier) {
 		this.batchInstanceIdentifier = batchInstanceIdentifier;
 	}
 
 	/**
+	 * To get Group Name.
 	 * @return the groupName
 	 */
 	public String getGroupName() {
@@ -92,7 +96,8 @@ public class BatchInstanceGroups extends AbstractChangeableEntity implements Ser
 	}
 
 	/**
-	 * @param groupName the groupName to set
+	 * To set Group Name.
+	 * @param groupName String
 	 */
 	public void setGroupName(final String groupName) {
 		this.groupName = groupName;

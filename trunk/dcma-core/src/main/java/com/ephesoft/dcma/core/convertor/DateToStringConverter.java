@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,8 +39,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * This class converts date to string.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.text.SimpleDateFormat
+ */
 public class DateToStringConverter implements IConverter<Date, String> {
 
+	/**
+	 * To convert date to string.
+	 * @param date Date
+	 */
 	@Override
 	public String convert(Date date) {
 		String DATE_FORMAT = "dd-MMM-yyyy";

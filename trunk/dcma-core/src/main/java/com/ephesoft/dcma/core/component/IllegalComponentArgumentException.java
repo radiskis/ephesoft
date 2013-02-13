@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,16 +36,22 @@
 package com.ephesoft.dcma.core.component;
 
 /**
- * This exception is thrown when the type of argument sent to the component is not what the component expects
+ * This exception is thrown when the type of argument sent to the component is not what the component expects.
  * 
  * @author Ephesoft
+ * @version 1.0
  * @see DCMAComponent
- * 
  */
 public class IllegalComponentArgumentException extends RuntimeException {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 7526472295622776147L;
 
+	/**
+	 * Constructor.
+	 */
 	IllegalComponentArgumentException() {
 		super();
 	}

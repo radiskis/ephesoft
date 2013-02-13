@@ -4,7 +4,7 @@
 <hibernate-mapping>
 
 	<class name="com.ephesoft.dcma.performance.reporting.domain.ReportData"
-		table="report_data" schema="reports">
+		table="report_data">
 		<id name="id" column="id" type="long">
 			<generator class="increment"></generator>
 		</id>
@@ -15,44 +15,75 @@
 		<property column="PROCESS_KEY" name="processKey" type="java.lang.String" />
 		<property column="START_TIME" name="startTime" type="java.util.Date" />
 		<property column="END_TIME" name="endTime" type="java.util.Date" />
-		<property column="DURATION" name="duration" type="java.math.BigInteger" />		
-		<property column="BATCH_INSTANCE_ID" name="batchInstanceId" type="java.lang.String" />
-		
+		<property column="DURATION" name="duration" type="java.math.BigInteger" />
+		<property column="BATCH_INSTANCE_ID" name="batchInstanceId"
+			type="java.lang.String" />
+		<property column="USER_NAME" name="userName" type="java.lang.String" />
 		<property column="TOTAL_NUMBER_PAGES" name="totalNumberPages"
 			type="java.math.BigInteger" />
 		<property column="TOTAL_NUMBER_DOCUMENTS" name="totalNumberDocuments"
 			type="java.math.BigInteger" />
-		<property column="USER_NAME" name="userName" type="java.lang.String" />
+		<set name="users" cascade="all" inverse="false"
+			table="manual_step_data_for_multiple_users">
+			<key column="REPORT_DATA_ID" />
+			<one-to-many
+				class="com.ephesoft.dcma.performance.reporting.domain.ManualStepsData" />
+		</set>
+
 		<property column="WORKFLOW_NAME" name="workflowName" type="java.lang.String" />
-		
-		<property  column="WORKFLOW_TYPE" name="workflowType" length="30">
+
+		<property column="WORKFLOW_TYPE" name="workflowType" length="30">
 			<type name="org.hibernate.type.EnumType">
 				<param name="enumClass">com.ephesoft.dcma.core.common.WorkflowType</param>
-				<param name="type">12</param> 
+				<param name="type">12</param>
 			</type>
-		</property> 
-		
+		</property>
+
 	</class>
 
+
+	<class name="com.ephesoft.dcma.performance.reporting.domain.ManualStepsData"
+		table="manual_step_data_for_multiple_users">
+		<id name="id" column="id" type="long">
+			<generator class="increment"></generator>
+		</id>
+		<property column="START_TIME" name="startTime" type="java.util.Date" />
+		<property column="END_TIME" name="endTime" type="java.util.Date" />
+		<property column="DURATION" name="duration" type="java.math.BigInteger" />
+		<property column="BATCH_INSTANCE_ID" name="batchInstanceId"
+			type="java.lang.String" />
+		<property column="USER_NAME" name="userName" type="java.lang.String" />
+		<property column="BATCH_STATUS" name="batchStatus" type="java.lang.String" />
+		<many-to-one name="reportData"
+			class="com.ephesoft.dcma.performance.reporting.domain.ReportData">
+			<column name="REPORT_DATA_ID" />
+		</many-to-one>
+	</class>
+
+
+
 	<sql-query name="getSystemStatistics">
-	
+
 		<return-scalar column="batch" type="integer" />
 		<return-scalar column="docs" type="integer" />
 		<return-scalar column="pages" type="integer" />
 
-		SELECT 
-		   COUNT(report.PROCESS_KEY) as batch,
-		   IFNULL(SUM(report.TOTAL_NUMBER_DOCUMENTS),0) as docs,
-		   IFNULL(SUM(report.TOTAL_NUMBER_PAGES),0) as pages
+		SELECT
+		COUNT(id) as batch,
+		IFNULL(SUM(report.TOTAL_NUMBER_DOCUMENTS),0)
+		as docs,
+		IFNULL(SUM(report.TOTAL_NUMBER_PAGES),0) as pages
 		FROM
-			report_data report
-		WHERE 
-			report.PROCESS_KEY Is not null
-		AND	
-			report.END_TIME &lt;= :end_time 
+		report_data report
+		WHERE
+		report.WORKFLOW_TYPE = 'WORKFLOW'
 		AND
-			report.START_TIME &gt;= :start_time
-				
+		report.END_TIME &lt;= :end_time
+		AND
+		report.START_TIME &gt;= :start_time
+		AND
+		report.BATCH_CLASS_ID IN (:batchClassIdList)
+
 	</sql-query>
 
 	<sql-query name="getReportByWorkflow">
@@ -61,175 +92,275 @@
 		<return-scalar column="batch" type="double" />
 		<return-scalar column="docs" type="double" />
 		<return-scalar column="pages" type="double" />
-		
-		SELECT 
-			report.WORKFLOW_NAME as entityName,			 
-		    (Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
+
+		SELECT
+		report.WORKFLOW_NAME as entityName,
+		((Select count(id) from
+		report_data where report_data.WORKFLOW_TYPE =
+		'WORKFLOW')*1.0/SUM(report.DURATION))*1000 as batch,
+		(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as
+		docs,
+		(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as
+		pages
 		FROM
-			report_data report
-		WHERE 
-			report.WORKFLOW_TYPE = :workflow_type
+		report_data report
+		WHERE
+		report.WORKFLOW_TYPE = :workflow_type
 		AND
-			report.BATCH_CLASS_ID IN (:batch_class_id_list)
+		report.BATCH_CLASS_ID IN (:batch_class_id_list)
 		AND
-			report.END_TIME &lt;= :end_time 
+		report.END_TIME
+		&lt;= :end_time
 		AND
-			report.START_TIME &gt;= :start_time	
-		GROUP BY 
-			report.WORKFLOW_NAME
-		LIMIT 
-			:start_index , :range
-		
+		report.START_TIME &gt;= :start_time
+		GROUP BY
+		report.WORKFLOW_NAME
+		LIMIT
+		:start_index , :range
+
 	</sql-query>
-	
+
 	<sql-query name="getReportByUserName">
-	
+
 		<return-scalar column="entityName" type="string" />
 		<return-scalar column="batch" type="double" />
 		<return-scalar column="docs" type="double" />
 		<return-scalar column="pages" type="double" />
-		
-		SELECT 
-			report.WORKFLOW_NAME as entityName,
-			(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
-		FROM
-			report_data report
-		WHERE 
-			report.USER_NAME in (:user_name)
+		SELECT mergedReportData.WORKFLOW_NAME as entityName,
+		(count(distinct(mergedReportData.batch_instance_id))*1.0/SUM(mergedReportData.duration))*1000
+		as batch,
+		(SUM(mergedReportData.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(mergedReportData.duration))*1000
+		as docs,
+		(SUM(mergedReportData.TOTAL_NUMBER_PAGES)*1.0/SUM(mergedReportData.duration))*1000
+		as pages
+
+		from
+
+		(
+		SELECT
+		if(result.user_name IS
+		NULL,result.multipleUserDuration,result.singleUserDuration) as
+		duration ,
+		result.total_number_pages as total_number_pages,
+		result.total_number_documents as total_number_documents,
+		if(result.user_name IS NULL,users,user_name) as user_name,
+		result.batch_instance_id as batch_instance_id,
+		result. workflow_name as
+		workflow_name,
+		result.start_time as start_time,
+		result.end_time as
+		end_time,
+		result.batch_class_id as batch_class_id
+		from
+		( select
+		msd.duration as multipleUserDuration,
+		report.duration as
+		singleUserDuration,
+		report.start_time as start_time,
+		report.end_time as
+		end_time,
+		total_number_pages,
+		total_number_documents,
+		batch_status,
+		msd.user_name as users,
+		workflow_name,
+		report.user_name as user_name,
+		report.batch_instance_id as batch_instance_id,
+		report.BATCH_CLASS_ID as
+		batch_class_id
+
+		from
+		report_data report
+		LEFT JOIN
+		manual_step_data_for_multiple_users msd
+		ON
+		(msd.REPORT_DATA_ID =
+		report.id)
+		) as result
+
+		)mergedReportData
+
+		WHERE
+		mergedReportData.user_name
+		IN (:user_name)
 		AND
-			report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+		mergedReportData.batch_class_id IN
+		(:batch_class_id_list)
 		AND
-			report.END_TIME &lt;= :end_time 
+		mergedReportData.END_TIME &lt;= :end_time
 		AND
-			report.START_TIME &gt;= :start_time	
-		GROUP BY 
-			report.WORKFLOW_NAME
-		
-		LIMIT 
-			:start_index , :range
-		
+		mergedReportData.START_TIME &gt;= :start_time
+		GROUP BY
+		mergedReportData.workflow_name
+		LIMIT
+		:start_index , :range
+
+
+
+
 	</sql-query>
 
 	<sql-query name="getReportForAllUsers">
-	
+
 		<return-scalar column="entityName" type="string" />
 		<return-scalar column="batch" type="double" />
 		<return-scalar column="docs" type="double" />
 		<return-scalar column="pages" type="double" />
-		
-		SELECT 
-			report.WORKFLOW_NAME as entityName,
-			(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-			(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-			(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
+
+		SELECT
+		report.WORKFLOW_NAME as entityName,
+		(SELECT
+		COUNT(DISTINCT(report.BATCH_INSTANCE_ID))*1.0/SUM(report.DURATION))*1000
+		as batch,
+		(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as
+		docs,
+		(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as
+		pages
 		FROM
-			report_data report
+		report_data report
 		WHERE
-			report.USER_NAME Is not Null
+		report.USER_NAME Is not Null
+		OR
+		report.ID IN (
+		SELECT DISTINCT(REPORT_DATA_ID)
+		FROM
+		manual_step_data_for_multiple_users
+		)
 		AND
-			report.BATCH_CLASS_ID IN (:batch_class_id_list)		
+		report.BATCH_CLASS_ID IN
+		(:batch_class_id_list)
 		AND
-			report.END_TIME &lt;= :end_time 
+		report.END_TIME &lt;= :end_time
 		AND
-			report.START_TIME &gt;= :start_time	
-		GROUP BY 
-			report.WORKFLOW_NAME
-		
-		LIMIT 
-			:start_index , :range
-		
+		report.START_TIME &gt;= :start_time
+		GROUP BY
+		report.WORKFLOW_NAME
+
+		LIMIT
+		:start_index , :range
+
+
 	</sql-query>
-	
+
 	<sql-query name="getTotalRowCountByWorkflow">
-	
+
 		<return-scalar column="totalRowCount" type="integer" />
-		
-		SELECT COUNT(*) as totalRowCount FROM (
-			SELECT 
-				report.WORKFLOW_NAME as entityName,
-			    (Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
-			FROM
-				report_data report
-			WHERE 
-				report.WORKFLOW_TYPE = :workflow_type
-			AND
-				report.END_TIME &lt;= :end_time 
-			AND
-				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
-			AND
-				report.START_TIME &gt;= :start_time	
-			GROUP BY 
-				report.WORKFLOW_NAME
-		) reports		
+
+		SELECT COUNT(entityName) as totalRowCount FROM (
+		SELECT
+		report.WORKFLOW_NAME as entityName
+		FROM
+		report_data report
+		WHERE
+		report.WORKFLOW_TYPE = :workflow_type
+		AND
+		report.END_TIME &lt;=
+		:end_time
+		AND
+		report.BATCH_CLASS_ID IN (:batch_class_id_list)
+		AND
+		report.START_TIME &gt;= :start_time
+		GROUP BY
+		report.WORKFLOW_NAME
+		)
+		reports
 	</sql-query>
-	
+
 	<sql-query name="getTotalRowCountByUserName">
-	
+
 		<return-scalar column="totalRowCount" type="integer" />
-		
-		SELECT COUNT(*) as totalRowCount FROM (
-			SELECT 
-				report.WORKFLOW_NAME as entityName,
-				(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
-			FROM
-				report_data report
-			WHERE 
-				report.USER_NAME in (:user_name)
-			AND
-				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
-			AND
-				report.END_TIME &lt;= :end_time 
-			AND
-				report.START_TIME &gt;= :start_time	
-			GROUP BY 
-				report.WORKFLOW_NAME
-		) reports		
+
+		SELECT COUNT(*) as totalRowCount FROM
+		( SELECT
+		if(result.user_name IS
+		NULL,users,user_name) as user_name,
+		result.batch_instance_id as
+		batch_instance_id,
+		result. workflow_name as workflow_name,
+		result.start_time as start_time,
+		result.end_time as end_time,
+		result.batch_class_id as batch_class_id
+		from
+		( select
+
+		report.start_time
+		as start_time,
+		report.end_time as end_time,
+		batch_status,
+		msd.user_name
+		as users,
+		workflow_name,
+		report.user_name as user_name,
+		report.batch_instance_id as batch_instance_id,
+		report.BATCH_CLASS_ID as
+		batch_class_id
+
+		from
+		report_data report
+		LEFT JOIN
+		manual_step_data_for_multiple_users msd
+		ON
+		(msd.REPORT_DATA_ID =
+		report.id)
+		) as result
+
+		)as mergedReportData
+
+		WHERE
+		mergedReportData.user_name IN (:user_name)
+		AND
+		mergedReportData.batch_class_id IN (:batch_class_id_list)
+		AND
+		mergedReportData.END_TIME &lt;= :end_time
+		AND
+		mergedReportData.START_TIME &gt;= :start_time
+		GROUP BY
+		mergedReportData.workflow_name
+
+
 	</sql-query>
 
 	<sql-query name="getTotalRowCountByAllUsers">
-	
+
 		<return-scalar column="totalRowCount" type="integer" />
-		
-		SELECT COUNT(*) as totalRowCount FROM (
-			SELECT 
-				report.WORKFLOW_NAME as entityName,
-				(Count(Distinct report.Batch_Instance_Id)*1.0/SUM(report.DURATION))*1000 as batch,
-				(SUM(report.TOTAL_NUMBER_DOCUMENTS)*1.0/SUM(report.DURATION))*1000 as docs,
-				(SUM(report.TOTAL_NUMBER_PAGES)*1.0/SUM(report.DURATION))*1000 as pages 
-			FROM
-				report_data report
-			WHERE
-				report.USER_NAME Is not Null
-			AND
-				report.BATCH_CLASS_ID IN (:batch_class_id_list)		
-			AND
-				report.END_TIME &lt;= :end_time 
-			AND
-				report.START_TIME &gt;= :start_time	
-			GROUP BY 
-				report.WORKFLOW_NAME
-		) reports		
-	</sql-query>
-	
-	<sql-query name="getIsAlreadyUserConnected">
-				
-		<return-scalar column="isAlreadyAnotherUserConnected" type="boolean" />
 
-		SELECT 
-		   lastUpdatTime.IS_ALREADY_IN_USE as isAlreadyAnotherUserConnected
+		SELECT COUNT(entityName) as totalRowCount FROM (
+		SELECT
+		report.WORKFLOW_NAME as entityName
 		FROM
-		   last_update_time lastUpdatTime		
+		report_data report
+		WHERE
+		report.USER_NAME Is not Null
+		OR
+		report.ID IN (
+		SELECT
+		DISTINCT(REPORT_DATA_ID)
+		FROM manual_step_data_for_multiple_users
+		)
+		AND
+		report.BATCH_CLASS_ID IN (:batch_class_id_list)
+		AND
+		report.END_TIME
+		&lt;= :end_time
+		AND
+		report.START_TIME &gt;= :start_time
+		GROUP BY
+		report.WORKFLOW_NAME
+		) reports
+	</sql-query>
+
+	<sql-query name="getIsAlreadyUserConnected">
+
+		<return-scalar column="isAlreadyAnotherUserConnected"
+			type="boolean" />
+
+		SELECT
+		lastUpdatTime.IS_ALREADY_IN_USE as isAlreadyAnotherUserConnected
+		FROM
+		last_update_time lastUpdatTime
 
 	</sql-query>
-	
+
 
 </hibernate-mapping>
 

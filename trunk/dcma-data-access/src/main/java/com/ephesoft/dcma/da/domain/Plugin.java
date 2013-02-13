@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,68 +50,134 @@ import org.hibernate.annotations.NaturalId;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for plugin.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "plugin")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class Plugin extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 5694761325202724778L;
 	
-	// @Enumerated(EnumType.STRING)
+	/**
+	 * pluginName String.
+	 */
 	@Column(name = "plugin_name")
 	@NaturalId
 	private String pluginName;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "plugin_desc")
 	private String description;
 
+	/**
+	 * version String.
+	 */
 	@Column(name = "plugin_version")
 	private String version;
 
+	/**
+	 * workflowName String.
+	 */
 	@Column(name = "workflow_name")
 	private String workflowName;
 
+	/**
+	 * scriptName String.
+	 */
 	@Column(name = "script_name")
 	private String scriptName;
+	
+	/**
+	 * information String.
+	 */
+	@Column(name = "plugin_info")
+	private String information;
 
+	/**
+	 * dependencies List<Dependency>.
+	 */ 
 	@OneToMany
 	@JoinColumn(name = "plugin_id")
-	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
+	@Cascade( {CascadeType.DELETE, CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	private List<Dependency> dependencies;
 
+	/**
+	 * To get Plugin Name.
+	 * @return String
+	 */
 	public String getPluginName() {
 		return pluginName;
 	}
 
+	/**
+	 * To set Plugin Name.
+	 * @param pluginName String
+	 */
 	public void setPluginName(String pluginName) {
 		this.pluginName = pluginName;
 	}
 
+	/**
+	 * To get version.
+	 * @return String
+	 */
 	public String getVersion() {
 		return version;
 	}
 
+	/**
+	 * To set version.
+	 * @param version String
+	 */ 
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Workflow Name.
+	 * @return String
+	 */
 	public String getWorkflowName() {
 		return workflowName;
 	}
 
+	/**
+	 * To set Workflow Name.
+	 * @param workflowName String
+	 */
 	public void setWorkflowName(String workflowName) {
 		this.workflowName = workflowName;
 	}
 
 	/**
+	 * To get Script Name.
 	 * @return the scriptName
 	 */
 	public String getScriptName() {
@@ -119,13 +185,31 @@ public class Plugin extends AbstractChangeableEntity implements Serializable {
 	}
 
 	/**
-	 * @param scriptName the scriptName to set
+	 * To set Script Name.
+	 * @param scriptName String
 	 */
 	public void setScriptName(String scriptName) {
 		this.scriptName = scriptName;
 	}
+	
+	/**
+	 * To get Information.
+	 * @return the information
+	 */
+	public String getInformation() {
+		return information;
+	}
 
 	/**
+	 * To set Information.
+	 * @param information String
+	 */
+	public void setInformation(String information) {
+		this.information = information;
+	}
+
+	/**
+	 * To get Dependencies.
 	 * @return the dependencies
 	 */
 	public List<Dependency> getDependencies() {
@@ -133,12 +217,18 @@ public class Plugin extends AbstractChangeableEntity implements Serializable {
 	}
 
 	/**
-	 * @param dependencies the dependencies to set
+	 * To set Dependencies.
+	 * @param dependencies List<Dependency>
 	 */
 	public void setDependencies(List<Dependency> dependencies) {
 		this.dependencies = dependencies;
 	}
 
+	/**
+	 * To get Dependency by Id.
+	 * @param identifier Long
+	 * @return Dependency
+	 */
 	public Dependency getDependencyById(Long identifier) {
 		Dependency dependency = null;
 

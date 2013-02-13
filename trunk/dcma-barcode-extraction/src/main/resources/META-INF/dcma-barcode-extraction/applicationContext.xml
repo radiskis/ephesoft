@@ -25,7 +25,6 @@
 	</bean>
 
 	<bean id="barcodeExtractionReader" class="com.ephesoft.dcma.barcodeextraction.BarcodeExtractionReader" 
-		p:barcodeName="$barcodeExtraction{barcodeExtraction.barcode_name}"
 		p:firstPage="$barcodeExtraction{barcodeExtraction.first_page}">
 	</bean>
 

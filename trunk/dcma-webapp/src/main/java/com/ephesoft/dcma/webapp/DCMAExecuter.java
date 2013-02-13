@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,13 +38,26 @@ package com.ephesoft.dcma.webapp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is to execute DCMA.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.slf4j.LoggerFactory
+ */
 public class DCMAExecuter {
 
-	protected static final Logger log = LoggerFactory.getLogger(DCMAExecuter.class);
+	/**
+	 * LOG to print the logging information.
+	 */
+	protected static final Logger LOG = LoggerFactory.getLogger(DCMAExecuter.class);
 
+	/**
+	 * Main method.
+	 * 
+	 * @param args String[]
+	 */
 	public static void main(String[] args) {
-
-		log.info("In the main");
-
+		LOG.info("In the main");
 	}
 }

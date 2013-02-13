@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,26 +33,32 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.da.property.PluginProperty;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.DependencyManagementPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.dependencies.DependencyPresenter;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.CustomWorkflowManagementView;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.ImportPluginView;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
+import com.ephesoft.dcma.gwt.core.shared.comparator.PluginComparator;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowMessages;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.DependencyManagementPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.dependencies.DependencyPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.CustomWorkflowManagementView;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.ImportPluginView;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DialogBox;
 
 public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPresenter<CustomWorkflowManagementView> {
@@ -62,10 +68,6 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 	private final DependencyPresenter dependencyPresenter;
 
 	private final DependencyManagementPresenter dependencyManagementPresenter;
-
-	public final static String AND = ",";
-
-	public final static String OR = "/";
 
 	public static boolean isCyclic = false;
 
@@ -81,14 +83,16 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 		init();
 	}
 
-	public void init() {
+	public final void init() {
 
 		ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.LOADING_PLUGINS));
-		controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
+		controller.getRpcService().getAllPluginDetailDTOs(new EphesoftAsyncCallback<List<PluginDetailsDTO>>() {
 
 			@Override
 			public void onSuccess(List<PluginDetailsDTO> pluginsDTOList) {
-				sortPluginList(pluginsDTOList, true);
+				Order order = new Order(PluginProperty.NAME, true);
+				PluginComparator pluginComparator = new PluginComparator(order);
+				Collections.sort(pluginsDTOList, pluginComparator);
 				controller.setAllPlugins(pluginsDTOList);
 				Map<String, String> allPluginsNameToDescriptionMap = new LinkedHashMap<String, String>();
 				for (PluginDetailsDTO pluginDetailsDTO : pluginsDTOList) {
@@ -101,33 +105,11 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 			}
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						CustomWorkflowMessages.UNABLE_TO_GET_ALL_PLUGINS_LIST));
 
-			}
-		});
-	}
-
-	public void sortPluginList(List<PluginDetailsDTO> pluginsList, final boolean ascending) {
-		Collections.sort(pluginsList, new Comparator<PluginDetailsDTO>() {
-
-			@Override
-			public int compare(PluginDetailsDTO PluginDTO1, PluginDetailsDTO PluginDTO2) {
-				int result;
-				String orderNumberOne = PluginDTO1.getPluginName();
-				String orderNumberTwo = PluginDTO2.getPluginName();
-				if (orderNumberOne != null && orderNumberTwo != null) {
-					result = orderNumberOne.compareTo(orderNumberTwo);
-				} else if (orderNumberOne == null && orderNumberTwo == null) {
-					result = 0;
-				} else if (orderNumberOne == null) {
-					result = -1;
-				} else {
-					result = 1;
-				}
-				return result;
 			}
 		});
 	}
@@ -141,12 +123,16 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		/**
+		 * Inject your events here
+		 */
 	}
 
 	@Override
 	public void bind() {
-
+		/**
+		 * Bind your view with the values.
+		 */
 	}
 
 	public void showImportPluginView() {
@@ -166,42 +152,6 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 		showImportPluginView();
 	}
 
-	public void showDependenciesView() {
-
-		if (controller.getAllPlugins() == null) {
-			ScreenMaskUtility.maskScreen(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.LOADING_DEPENDENCIES));
-			controller.getRpcService().getAllPluginDetailDTOs(new AsyncCallback<List<PluginDetailsDTO>>() {
-
-				@Override
-				public void onFailure(Throwable arg0) {
-					ScreenMaskUtility.unmaskScreen();
-				}
-
-				@Override
-				public void onSuccess(List<PluginDetailsDTO> pluginDetailsDTOs) {
-					showDependenciesView(pluginDetailsDTOs);
-				}
-
-			});
-		} else {
-			showDependenciesView(controller.getAllPlugins());
-
-		}
-
-	}
-
-	/**
-	 * @param pluginDetailsDTOs
-	 */
-	private void showDependenciesView(List<PluginDetailsDTO> pluginDetailsDTOs) {
-		controller.setAllPlugins(pluginDetailsDTOs);
-		dependencyManagementPresenter.getBreadCrumbPresenter().createBreadCrumbForDependenciesList();
-		dependencyManagementPresenter.bind();
-		view.showDependencyManagementView();
-		dependencyManagementPresenter.getBreadCrumbPresenter().setbackButtonVisibility(true);
-		ScreenMaskUtility.unmaskScreen();
-	}
-
 	/**
 	 * @return the dependencyPresenter
 	 */
@@ -218,6 +168,77 @@ public class CustomWorkflowManagementPresenter extends AbstractCustomWorkflowPre
 	 */
 	public DependencyManagementPresenter getDependencyManagementPresenter() {
 		return dependencyManagementPresenter;
+	}
+
+	public void checkForDirtyPlugin() {
+		List<PluginDetailsDTO> pluginDetailsDTOs = controller.getAllPlugins();
+		boolean dirtyPlugin = false;
+		for (PluginDetailsDTO pluginDetailsDTO : pluginDetailsDTOs) {
+			if (pluginDetailsDTO.isDirty()) {
+				dirtyPlugin = true;
+				final ConfirmationDialog confirmationDialog = new ConfirmationDialog();
+
+				confirmationDialog.setText(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.WARNING));
+				confirmationDialog.setMessage(LocaleDictionary.get().getMessageValue(
+						CustomWorkflowMessages.UNSAVED_CHANGES_LOST_WARNING));
+				confirmationDialog.cancelButton
+						.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.CANCEL_BUTTON));
+				confirmationDialog.okButton.setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.OK_CONSTANT));
+				confirmationDialog.center();
+				confirmationDialog.show();
+				confirmationDialog.okButton.setFocus(true);
+				confirmationDialog.addDialogListener(new DialogListener() {
+
+					@Override
+					public void onOkClick() {
+						Window.Location.reload();
+					}
+
+					@Override
+					public void onCancelClick() {
+						confirmationDialog.hide();
+						dependencyManagementPresenter.getBreadCrumbPresenter().createBreadCrumbForDependenciesList();
+					}
+				});
+
+				break;
+			}
+
+		}
+		if (!dirtyPlugin) {
+			Window.Location.reload();
+		}
+	}
+
+	public PluginDetailsDTO getPluginDtoForName(String pluginName) {
+		PluginDetailsDTO pluginDetailsDTO = null;
+
+		final List<PluginDetailsDTO> allPlugins = controller.getAllPlugins();
+		if (allPlugins != null) {
+			for (PluginDetailsDTO pluginDto : allPlugins) {
+				if (pluginDto.getPluginName().equals(pluginName)) {
+					pluginDetailsDTO = pluginDto;
+					break;
+				}
+			}
+		}
+		return pluginDetailsDTO;
+
+	}
+
+	public PluginDetailsDTO getPluginDtoForIdentifier(String pluginIdentifier) {
+		PluginDetailsDTO pluginDetailsDTO = null;
+		final List<PluginDetailsDTO> allPlugins = controller.getAllPlugins();
+		if (allPlugins != null) {
+			for (PluginDetailsDTO pluginDto : controller.getAllPlugins()) {
+				if (pluginDto.getIdentifier().equals(pluginIdentifier)) {
+					pluginDetailsDTO = pluginDto;
+					break;
+				}
+			}
+		}
+		return pluginDetailsDTO;
+
 	}
 
 }

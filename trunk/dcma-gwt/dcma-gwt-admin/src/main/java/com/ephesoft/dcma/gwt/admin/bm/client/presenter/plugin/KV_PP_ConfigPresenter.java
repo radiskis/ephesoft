@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,42 +48,75 @@ import com.ephesoft.dcma.gwt.core.shared.KVPageProcessDTO;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 
-public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_ConfigView> implements DoubleClickListner{
+/**
+ * The presenter for view that shows KV_PP configuration.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
+public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_ConfigView> implements DoubleClickListner {
 
+	/**
+	 * batchClassPluginConfigDTO BatchClassPluginConfigDTO.
+	 */
 	private BatchClassPluginConfigDTO batchClassPluginConfigDTO;
 
+	/**
+	 * kvPageProcessDTO KVPageProcessDTO.
+	 */
 	private KVPageProcessDTO kvPageProcessDTO;
 
-	private Collection<KVPageProcessDTO> kvPageProcessDTOs;
-
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_ConfigView
+	 */
 	public KV_PP_ConfigPresenter(BatchClassManagementController controller, KV_PP_ConfigView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
+		// NO implementation
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {
 			batchClassPluginConfigDTO = controller.getSelectedPlugin().getBatchClassPluginConfigDTOByName(
 					AdminConstants.KV_PAGE_PROCESS_KV_PATTERN);
 			if (batchClassPluginConfigDTO != null) {
-				kvPageProcessDTOs = batchClassPluginConfigDTO.getKvPageProcessDTOs();
-				view.createKVPageProcessList(kvPageProcessDTOs);
-				view.getEditKVPPConfigButton().setEnabled(false);
-				view.getDeleteKVPPConfigButton().setEnabled(false);
-				disableButtonCSS(view.getEditKVPPConfigButton(), view.getDeleteKVPPConfigButton());
-				if (view.getKvPPConfigListView().listView.getTableRecordCount() > 0) {
-					view.getEditKVPPConfigButton().setEnabled(true);
-					view.getDeleteKVPPConfigButton().setEnabled(true);
-					enableButtonCSS(view.getEditKVPPConfigButton(), view.getDeleteKVPPConfigButton());
-				}
+				setViewProperties();
 			}
 		}
 	}
 
+	private void setViewProperties() {
+		Collection<KVPageProcessDTO> kvPageProcessDTOs = batchClassPluginConfigDTO.getKvPageProcessDTOs();
+		view.createKVPageProcessList(kvPageProcessDTOs);
+		view.getEditKVPPConfigButton().setEnabled(false);
+		view.getDeleteKVPPConfigButton().setEnabled(false);
+		disableButtonCSS(view.getEditKVPPConfigButton(), view.getDeleteKVPPConfigButton());
+		if (view.getKvPPConfigListView().listView.getTableRecordCount() > 0) {
+			view.getEditKVPPConfigButton().setEnabled(true);
+			view.getDeleteKVPPConfigButton().setEnabled(true);
+			enableButtonCSS(view.getEditKVPPConfigButton(), view.getDeleteKVPPConfigButton());
+		}
+	}
+
+	/**
+	 * To show edit view on edit KV_PP button click.
+	 */
 	public void onEditKVPPClicked() {
 		String selectedRow = view.getKvPPConfigListView().listView.getSelectedRowIndex();
 		long selectedRowIndex;
@@ -91,13 +124,7 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 			selectedRowIndex = Long.valueOf(selectedRow);
 			Collection<KVPageProcessDTO> kvPageProcessDTOs = batchClassPluginConfigDTO.getKvPageProcessDTOs();
 			if (kvPageProcessDTOs != null && !kvPageProcessDTOs.isEmpty()) {
-				for (KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOs) {
-					if (kvPageProcessDTO.getIdentifier() == selectedRowIndex) {
-						controller.setKvPageProcessDTO(kvPageProcessDTO);
-						kvPageProcessDTO.setBatchClassPluginConfigDTO(batchClassPluginConfigDTO);
-						break;
-					}
-				}
+				setKvPageProcessDTO(selectedRowIndex, kvPageProcessDTOs);
 			}
 			controller.setPluginConfigDTO(batchClassPluginConfigDTO);
 			controller.setAdd(false);
@@ -106,6 +133,19 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 		controller.getMainPresenter().getKvPPAddEditListPresenter().showKVPPEditView();
 	}
 
+	private void setKvPageProcessDTO(long selectedRowIndex, Collection<KVPageProcessDTO> kvPageProcessDTOs) {
+		for (KVPageProcessDTO kvPageProcessDTO : kvPageProcessDTOs) {
+			if (kvPageProcessDTO.getIdentifier() == selectedRowIndex) {
+				controller.setKvPageProcessDTO(kvPageProcessDTO);
+				kvPageProcessDTO.setBatchClassPluginConfigDTO(batchClassPluginConfigDTO);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * To show add view on add KV_PP button click.
+	 */
 	public void onAddKVPPClicked() {
 		kvPageProcessDTO = new KVPageProcessDTO();
 		kvPageProcessDTO.setIsNew(true);
@@ -114,10 +154,13 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 		controller.setPluginConfigDTO(batchClassPluginConfigDTO);
 		controller.setAdd(true);
 		controller.setKvPageProcessDTO(kvPageProcessDTO);
-		controller.getMainPresenter().showKVppPluginConfigAddEditView();
 		controller.getMainPresenter().getKvPPAddEditListPresenter().showKVPPEditView();
+		controller.getMainPresenter().showKVppPluginConfigAddEditView();
 	}
 
+	/**
+	 * To show delete view on delete KV_PP button click.
+	 */
 	public void onDeleteKVPPClicked() {
 		long selectedRowIndex = Long.valueOf(view.getKvPPConfigListView().listView.getSelectedRowIndex());
 		Collection<KVPageProcessDTO> kvPageProcessDTOs = batchClassPluginConfigDTO.getKvPageProcessDTOs();
@@ -150,14 +193,27 @@ public class KV_PP_ConfigPresenter extends AbstractBatchClassPresenter<KV_PP_Con
 		}
 	}
 
+	/**
+	 * To get Batch Class Plugin Configuration DTO.
+	 * 
+	 * @return BatchClassPluginConfigDTO
+	 */
 	public BatchClassPluginConfigDTO getBatchClassPluginConfigDTO() {
 		return batchClassPluginConfigDTO;
 	}
 
+	/**
+	 * To get KV Page Process DTO.
+	 * 
+	 * @return KVPageProcessDTO
+	 */
 	public KVPageProcessDTO getKvPageProcessDTO() {
 		return kvPageProcessDTO;
 	}
 
+	/**
+	 * To show edit view on double click on table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditKVPPClicked();

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -52,6 +52,7 @@ import javax.naming.directory.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.schema.UserInformation;
 import com.ephesoft.dcma.user.connectivity.UserConnectivity;
 import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
 
@@ -64,6 +65,11 @@ import com.ephesoft.dcma.user.connectivity.constant.UserConnectivityConstant;
  * 
  */
 public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConnectivityConstant {
+
+	/**
+	 * OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY String.
+	 */
+	private static final String OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY = "Operation not supported in MSActive Directory.";
 
 	/**
 	 * Used for handling logs.
@@ -111,6 +117,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	private String msActiveDirectoryGroupSearchFilter;
 
 	/**
+	 * To get Ms Active Directory User Name.
 	 * @return the msActiveDirectoryUserName
 	 */
 	public String getMsActiveDirectoryUserName() {
@@ -118,13 +125,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryUserName the msActiveDirectoryUserName to set
+	 * To set Ms Active Directory User Name.
+	 * @param msActiveDirectoryUserName String
 	 */
 	public void setMsActiveDirectoryUserName(final String msActiveDirectoryUserName) {
 		this.msActiveDirectoryUserName = msActiveDirectoryUserName;
 	}
 
 	/**
+	 * To get Ms Active Directory Password.
 	 * @return the msActiveDirectoryPassword
 	 */
 	public String getMsActiveDirectoryPassword() {
@@ -132,13 +141,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryPassword the msActiveDirectoryPassword to set
+	 * To set Ms Active Directory Password.
+	 * @param msActiveDirectoryPassword String
 	 */
 	public void setMsActiveDirectoryPassword(final String msActiveDirectoryPassword) {
 		this.msActiveDirectoryPassword = msActiveDirectoryPassword;
 	}
 
 	/**
+	 * To get Ms Active Directory URL.
 	 * @return the msActiveDirectoryURL
 	 */
 	public String getMsActiveDirectoryURL() {
@@ -146,13 +157,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryURL the msActiveDirectoryURL to set
+	 * To set Ms Active Directory URL.
+	 * @param msActiveDirectoryURL String
 	 */
 	public void setMsActiveDirectoryURL(final String msActiveDirectoryURL) {
 		this.msActiveDirectoryURL = msActiveDirectoryURL;
 	}
 
 	/**
+	 * To get Ms Active Directory Config.
 	 * @return the msActiveDirectoryConfig
 	 */
 	public String getMsActiveDirectoryConfig() {
@@ -160,13 +173,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryConfig the msActiveDirectoryConfig to set
+	 * To set Ms Active Directory Config.
+	 * @param msActiveDirectoryConfig String
 	 */
 	public void setMsActiveDirectoryConfig(final String msActiveDirectoryConfig) {
 		this.msActiveDirectoryConfig = msActiveDirectoryConfig;
 	}
 
 	/**
+	 * To get Ms Active Directory Domain Name.
 	 * @return the msActiveDirectoryDomainName
 	 */
 	public String getMsActiveDirectoryDomainName() {
@@ -174,13 +189,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryDomainName the msActiveDirectoryDomainName to set
+	 * To set Ms Active Directory Domain Name.
+	 * @param msActiveDirectoryDomainName String
 	 */
 	public void setMsActiveDirectoryDomainName(final String msActiveDirectoryDomainName) {
 		this.msActiveDirectoryDomainName = msActiveDirectoryDomainName;
 	}
 
 	/**
+	 * To get Ms Active Directory Domain Organization.
 	 * @return the msActiveDirectoryDomainOrganization
 	 */
 	public String getMsActiveDirectoryDomainOrganization() {
@@ -188,13 +205,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryDomainOrganization the msActiveDirectoryDomainOrganization to set
+	 * To set Ms Active Directory Domain Organization.
+	 * @param msActiveDirectoryDomainOrganization String
 	 */
 	public void setMsActiveDirectoryDomainOrganization(final String msActiveDirectoryDomainOrganization) {
 		this.msActiveDirectoryDomainOrganization = msActiveDirectoryDomainOrganization;
 	}
 
 	/**
+	 * To get Ms Active Directory Context Path.
 	 * @return the msActiveDirectoryContextPath
 	 */
 	public String getMsActiveDirectoryContextPath() {
@@ -202,13 +221,15 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryContextPath the msActiveDirectoryContextPath to set
+	 * To set Ms Active Directory Context Path.
+	 * @param msActiveDirectoryContextPath String
 	 */
 	public void setMsActiveDirectoryContextPath(String msActiveDirectoryContextPath) {
 		this.msActiveDirectoryContextPath = msActiveDirectoryContextPath;
 	}
 
 	/**
+	 * To get Ms Active Directory Group Search Filter.
 	 * @return the msActiveDirectoryGroupSearchFilter
 	 */
 	public String getMsActiveDirectoryGroupSearchFilter() {
@@ -216,7 +237,8 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * @param msActiveDirectoryGroupSearchFilter the msActiveDirectoryGroupSearchFilter to set
+	 * To set Ms Active Directory Group Search Filter.
+	 * @param msActiveDirectoryGroupSearchFilter String
 	 */
 	public void setMsActiveDirectoryGroupSearchFilter(String msActiveDirectoryGroupSearchFilter) {
 		this.msActiveDirectoryGroupSearchFilter = msActiveDirectoryGroupSearchFilter;
@@ -245,7 +267,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	 * This method is used to connect to the active directory and used to return the Set of string of result fetch in accordance of the
 	 * argument passed to it.
 	 * 
-	 * @param {@link String}
+	 * @param name {@link String}
 	 * @return Set<String> if connected and result is found else return null
 	 */
 	private Set<String> fetchActiveDirectoryList(final String name) {
@@ -301,11 +323,10 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * This method is used to create the connection to the directory server
+	 * This method is used to create the connection to the directory server.
 	 * 
-	 * @param environment
-	 * @param directory
-	 * @return
+	 * @param environment Hashtable<Object, Object>
+	 * @return DirContext
 	 */
 	private DirContext createDirectoryConnection(Hashtable<Object, Object> environment) { // NOPMD
 		// Hashtable for Active Directory
@@ -320,13 +341,6 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		return directory;
 	}
 
-	/**
-	 * This method is used to get the result from the msActiveDirectory
-	 * 
-	 * @param name
-	 * @param dctx
-	 * @return
-	 */
 	private List<NamingEnumeration<?>> getResultSet(final String name, DirContext dctx) {
 		SearchControls searchControl = new SearchControls();
 		String[] attributeFilter = {UserConnectivityConstant.COMMON_NAME};
@@ -344,7 +358,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 				filterData = msActiveDirectoryGroupFilter[index];
 			}
 			filter = getGroupFilter(name, filterData);
-			LOG.info("Filter added for "+ msActiveDirectoryFullPath+ " is:" + filter);
+			LOG.info("Filter added for " + msActiveDirectoryFullPath + " is:" + filter);
 			String paramName = null;
 			try {
 				StringBuffer stringBuffer = new StringBuffer(msActiveDirectoryFullPath);
@@ -367,11 +381,12 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		}
 		return results;
 	}
-	
+
 	/**
 	 * This method provides the group filter to be added.
-	 * @param name
-	 * @param filterString {@link String} filter String to be added. 
+	 * 
+	 * @param name String
+	 * @param filterString {@link String} filter String to be added.
 	 * @return {@link String} filter added for group.
 	 */
 	private String getGroupFilter(final String name, final String filterString) {
@@ -380,7 +395,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_AMP_SYMBOL);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
+			filterBuffer.append(UserConnectivityConstant.OBJECT_CLASS);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
 			filterBuffer.append(name);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
@@ -389,7 +404,7 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 			filter = filterBuffer.toString();
 		} else {
 			StringBuffer filterBuffer = new StringBuffer(UserConnectivityConstant.MSACTIVEDIRECTORY_START_FILTER);
-			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_OBJECT_CLASS);
+			filterBuffer.append(UserConnectivityConstant.OBJECT_CLASS);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_EQUAL_SYMBOL);
 			filterBuffer.append(name);
 			filterBuffer.append(UserConnectivityConstant.MSACTIVEDIRECTORY_END_FILTER);
@@ -399,10 +414,10 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * This method manipulates the result into string to be added in the resultset
+	 * This method manipulates the result into string to be added in the resultset.
 	 * 
-	 * @param resultList
-	 * @param results
+	 * @param resultList Set<String>
+	 * @param results NamingEnumeration<?>
 	 */
 	private void resultSetValues(Set<String> resultList, NamingEnumeration<?> results) {
 		try {
@@ -419,11 +434,11 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 					String result = searchResult.toString().split(UserConnectivityConstant.COLON_SYMBOL)[0];
 					if (null != result && !result.isEmpty()) {
 						String[] cnConnectionNameArr = result.split(UserConnectivityConstant.COLON_SYMBOL);
-						if (cnConnectionNameArr != null && cnConnectionNameArr.length >= 1) {
-							String userName = cnConnectionNameArr[0];
+						if (cnConnectionNameArr != null && cnConnectionNameArr.length >= UserConnectivityConstant.ONE) {
+							String userName = cnConnectionNameArr[UserConnectivityConstant.ZERO];
 							String[] userNameArr = userName.split(UserConnectivityConstant.EQUAL_SYMBOL);
-							if (userNameArr != null && userNameArr.length >= 2) {
-								resultList.add(userNameArr[1]);
+							if (userNameArr != null && userNameArr.length >= UserConnectivityConstant.TWO) {
+								resultList.add(userNameArr[UserConnectivityConstant.ONE]);
 							}
 						}
 					}
@@ -437,9 +452,8 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 	}
 
 	/**
-	 * Check the user-connectivity.properties are valid or not
-	 * 
-	 * @param isValid
+	 * Check the user-connectivity.properties are valid or not.
+     *
 	 * @return true if valid else false
 	 */
 	private boolean isValidData() {
@@ -511,9 +525,83 @@ public class MSActiveDirectoryConnectivity implements UserConnectivity, UserConn
 		return allUser;
 	}
 
+	/**
+	 * To get user groups.
+	 * @param userName String
+	 * @return Set<String>
+	 */
 	@Override
 	public Set<String> getUserGroups(String userName) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
 	}
+
+	/**
+	 * To add groups.
+	 * @param userInformation UserInformation
+	 */
+	@Override
+	public void addGroup(UserInformation userInformation) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To add user.
+	 * @param userInformation UserInformation
+	 */
+	@Override
+	public void addUser(UserInformation userInformation) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To check existence of user in the LDAP.
+	 * @param userName String
+	 * @return boolean
+	 */
+	@Override
+	public boolean checkUserExistence(String userName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To delete group in the LDAP.
+	 * @param groupName String
+	 */
+	@Override
+	public void deleteGroup(String groupName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To delete user in the LDAP.
+	 * @param userName String
+	 */
+	@Override
+	public void deleteUser(String userName) {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To modify user password.
+	 * @param userName String
+	 * @param newPassword String
+	 * @throws NamingException if error occurs
+	 */
+	@Override
+	public void modifyUserPassword(String userName, String newPassword) throws NamingException {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
+	/**
+	 * To verify and modify user password.
+	 * @param userName String
+	 * @param oldPassword String
+	 * @param newPassword String
+	 * @throws NamingException if error occurs
+	 */
+	@Override
+	public void verifyandmodifyUserPassword(String userName, String oldPassword, String newPassword) throws NamingException {
+		throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_IN_MS_ACTIVE_DIRECTORY);
+	}
+
 }

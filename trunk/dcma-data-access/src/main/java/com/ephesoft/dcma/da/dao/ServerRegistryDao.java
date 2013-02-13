@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,13 +41,19 @@ import java.util.List;
 import com.ephesoft.dcma.core.dao.Dao;
 import com.ephesoft.dcma.da.domain.ServerRegistry;
 
+/**
+ * A Dao representing Server_Registry table in database.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.ServerRegistryDaoImpl
+ */
 public interface ServerRegistryDao extends Dao<ServerRegistry> {
-
 
 	/**
 	 * API to fetch a Server Registry.
 	 * 
-	 * @param identifier
+	 * @param identifier Serializable
 	 * @return ServerRegistry
 	 */
 	ServerRegistry getServerRegistry(Serializable identifier);
@@ -60,7 +66,7 @@ public interface ServerRegistryDao extends Dao<ServerRegistry> {
 	List<ServerRegistry> getAllServerRegistry();
 	
 	/**
-	 * An api to fetch all the Server Registry by ip address, port number and context.
+	 * An api to fetch all the Server Registry by IP address, port number and context.
 	 * 
 	 * @param ipAddress String
 	 * @param portNumber String
@@ -73,23 +79,28 @@ public interface ServerRegistryDao extends Dao<ServerRegistry> {
 	/**
 	 * API to save or update a Server Registry.
 	 * 
-	 * @param serverRegistry
+	 * @param serverRegistry ServerRegistry
 	 */
 	void updateServerRegistry(ServerRegistry serverRegistry);
 
 	/**
 	 * API to create a new Server Registry.
 	 * 
-	 * @param serverRegistry
+	 * @param serverRegistry ServerRegistry
 	 */
 	void createServerRegistry(ServerRegistry serverRegistry);
 
 	/**
 	 * API to remove an existing Server Registry.
 	 * 
-	 * @param serverRegistry
+	 * @param serverRegistry ServerRegistry
 	 */
 	void removeServerRegistry(ServerRegistry serverRegistry);
 	
+	/**
+	 * API to get Inactive Servers.
+	 * 
+	 * @return List<ServerRegistry>
+	 */
 	List<ServerRegistry> getInactiveServers();
 }

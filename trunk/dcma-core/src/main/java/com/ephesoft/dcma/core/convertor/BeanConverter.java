@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,8 +46,18 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is bean converter class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.lang.reflect.ParameterizedType
+ */
 public class BeanConverter {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(BeanConverter.class);
 
 	public static void convertToBean(List<Object> list, Object bean, Object parent) {
@@ -139,14 +149,7 @@ public class BeanConverter {
 						Class<?> reqClass = (Class<?>) requiredType;
 						Map<Object, Object> finalList = (Map<Object, Object>) dtoMapMapping.mapClass().newInstance();
 						for (Object objk : listOfObject) {
-							List<Object> iteratableObject = new ArrayList<Object>();
-							iteratableObject.add(objk);
-							Object objct = reqClass.newInstance();
-							convertToBean(iteratableObject, objct, bean);
-							Object keyObject = getKey(objct, dtoMapMapping.keyName());
-							if (keyObject != null) {
-								finalList.put(keyObject, objct);
-							}
+							updateFinalList(dtoMapMapping, bean, reqClass, finalList, objk);
 						}
 						fieldToSet.set(bean, finalList);
 					}
@@ -154,6 +157,18 @@ public class BeanConverter {
 					LOG.error(e.getMessage(), e);
 				}
 			}
+		}
+	}
+
+	private static void updateFinalList(MapMapping dtoMapMapping, Object bean, Class<?> reqClass, Map<Object, Object> finalList,
+			Object objk) throws InstantiationException, IllegalAccessException {
+		List<Object> iteratableObject = new ArrayList<Object>();
+		iteratableObject.add(objk);
+		Object objct = reqClass.newInstance();
+		convertToBean(iteratableObject, objct, bean);
+		Object keyObject = getKey(objct, dtoMapMapping.keyName());
+		if (keyObject != null) {
+			finalList.put(keyObject, objct);
 		}
 	}
 

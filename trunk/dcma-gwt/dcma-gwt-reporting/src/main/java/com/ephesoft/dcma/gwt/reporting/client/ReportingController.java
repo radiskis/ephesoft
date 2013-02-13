@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,13 +35,13 @@
 
 package com.ephesoft.dcma.gwt.reporting.client;
 
-import com.ephesoft.dcma.gwt.core.client.Controller;
+import com.ephesoft.dcma.gwt.core.client.AbstractController;
 import com.ephesoft.dcma.gwt.reporting.client.presenter.ReportingPresenter;
 import com.ephesoft.dcma.gwt.reporting.client.view.ReportingView;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 
-public class ReportingController extends Controller {
+public class ReportingController extends AbstractController {
 
 	private ReportingPresenter reportingPresenter;
 

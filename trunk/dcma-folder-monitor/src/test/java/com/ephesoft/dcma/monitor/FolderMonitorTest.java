@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -66,6 +66,10 @@ import com.ephesoft.dcma.util.FileUtils;
  */
 public class FolderMonitorTest extends AbstractFolderMonitorTest {
 	/**
+	 * A int type constant for synchronizing(sleep time).
+	 */
+	private static final int SLEEP_TIME_5000 = 5000;
+	/**
 	 * String constants.
 	 */
 	private static final String PROPERTIES_FILE_FOLDER_MONITER_TEST = "test.properties";
@@ -115,14 +119,29 @@ public class FolderMonitorTest extends AbstractFolderMonitorTest {
 	 */
 	private transient String uncFolder;
 
+	/**
+	 * Actual output folder for sending output.
+	 */
 	private transient String actualOutputFolder;
 
+	/**
+	 * Local folder location.
+	 */
 	private transient String localFolderLocation;
 
+	/**
+	 * Initial unc folder from where batches are picked.
+	 */
 	private transient String initialUncFolder;
 
-	private transient Properties prop = new Properties();
+	/**
+	 * A new object of {@link Properties}.
+	 */
+	private final transient Properties prop = new Properties();
 
+	/**
+	 * Initial batches.
+	 */
 	private transient int initialBatches;
 
 	/**
@@ -137,7 +156,7 @@ public class FolderMonitorTest extends AbstractFolderMonitorTest {
 			assertTrue(false);
 		}
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchClassService.getSystemFolderForBatchClassIdentifier(batchClassId);
 		uncFolder = (testFolderLocation + File.separator + prop.getProperty(UNC_FOLDER));
 		actualOutputFolder = (testFolderLocation + File.separator + prop.getProperty(ACTUAL_OUTPUT_FOLDER));
 
@@ -169,7 +188,7 @@ public class FolderMonitorTest extends AbstractFolderMonitorTest {
 			folderMonitor.start();
 
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(SLEEP_TIME_5000);
 			} catch (InterruptedException e) {
 
 			}
@@ -215,7 +234,7 @@ public class FolderMonitorTest extends AbstractFolderMonitorTest {
 			folderMonitor.start();
 
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(SLEEP_TIME_5000);
 			} catch (InterruptedException e) {
 
 			}

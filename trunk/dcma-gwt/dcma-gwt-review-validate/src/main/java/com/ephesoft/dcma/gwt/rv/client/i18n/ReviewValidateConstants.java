@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,173 +39,178 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 
 public interface ReviewValidateConstants extends LocaleCommonConstants {
 
-	String rv_title = "rv_title";
+	String RV_TITLE = "rv_title";
 
-	String tabLabel_home = "tabLabel_home";
+	String TAB_LABEL_HOME = "tabLabel_home";
 
-	String tabLabel_batch_detail = "tabLabel_batch_detail";
+	String TAB_LABEL_BATCH_DETAIL = "tabLabel_batch_detail";
 
-	String tabLabel_web_scanner = "tabLabel_web_scanner";
-	
-	String tabLabel_upload_batch = "tabLabel_upload_batch";
+	String TAB_LABEL_WEB_SCANNER = "tabLabel_web_scanner";
 
-	String title_revVal_backButton = "title_revVal_backButton";
+	String TAB_LABEL_UPLOAD_BATCH = "tabLabel_upload_batch";
 
-	String title_revVal_nextButton = "title_revVal_nextButton";
+	String TITLE_REVVAL_BACKBUTTON = "title_revVal_backButton";
 
-	String title_document = "title_document";
+	String TITLE_REVVAL_NEXTBUTTON = "title_revVal_nextButton";
 
-	String title_select_doc = "title_select_doc";
+	String TITLE_DOCUMENT = "title_document";
 
-	String title_merge_confirm = "title_merge_confirm";
+	String TITLE_SELECT_DOC = "title_select_doc";
 
-	String tooltip_split = "tooltip_split";
+	String TITLE_MERGE_CONFIRM = "title_merge_confirm";
 
-	String tooltip_delete = "tooltip_delete";
+	String TOOLTIP_SPLIT = "tooltip_split";
 
-	String tooltip_duplicate = "tooltip_duplicate";
+	String TOOLTIP_DELETE = "tooltip_delete";
 
-	String tooltip_move = "tooltip_move";
+	String TOOLTIP_DUPLICATE = "tooltip_duplicate";
 
-	String tooltip_zoom_in = "tooltip_zoom_in";
+	String TOOLTIP_MOVE = "tooltip_move";
 
-	String tooltip_zoom_out = "tooltip_zoom_out";
+	String TOOLTIP_ZOOM_IN = "tooltip_zoom_in";
 
-	String tooltip_fit_to_page = "tooltip_fit_to_page";
+	String TOOLTIP_ZOOM_OUT = "tooltip_zoom_out";
 
-	String tooltip_rotate = "tooltip_rotate";
+	String TOOLTIP_FIT_TO_PAGE = "tooltip_fit_to_page";
 
-	String title_duplicate = "title_duplicate";
+	String TOOLTIP_ROTATE = "tooltip_rotate";
 
-	String title_delete = "title_delete";
+	String TITLE_DUPLICATE = "title_duplicate";
 
-	String title_split = "title_split";
+	String TITLE_DELETE = "title_delete";
 
-	String title_split_doc = "title_split_doc";
+	String TITLE_SPLIT = "title_split";
 
-	String title_topPanel_batchId = "title_topPanel_batchId";
+	String TITLE_SPLIT_DOC = "title_split_doc";
 
-	String title_topPanel_batchClass = "title_topPanel_batchClass";
+	String TITLE_TOPPANEL_BATCHID = "title_topPanel_batchId";
 
-//	String title_topPanel_batch_status = "title_topPanel_batch_status";
+	String TITLE_TOPPANEL_BATCHCLASS = "title_topPanel_batchClass";
 
-	String title_topPanel_back = "title_topPanel_back";
+	// String title_topPanel_batch_status = "title_topPanel_batch_status";
 
-	String title_topPanel_next = "title_topPanel_next";
+	String TITLE_TOPPANEL_BACK = "title_topPanel_back";
 
-	String title_topPanel_info = "title_topPanel_info";
+	String TITLE_TOPPANEL_NEXT = "title_topPanel_next";
 
-	String title_reviewPanel_docType = "title_reviewPanel_docType";
+	String TITLE_TOPPANEL_INFO = "title_topPanel_info";
 
-	String title_reviewPanel_mergeDocWith = "title_reviewPanel_mergeDocWith";
+	/**
+	 * Tool tip for shortcut button.
+	 */
+	String shortcut_button_tooltip = "shortcut_button_tooltip";
 
-	String title_confirmation_ok = "title_confirmation_ok";
+	String TITLE_REVIEWPANEL_DOCTYPE = "title_reviewPanel_docType";
 
-	String title_confirmation_cancel = "title_confirmation_cancel";
+	String TITLE_REVIEWPANEL_MERGEDOCWITH = "title_reviewPanel_mergeDocWith";
 
-	String title_movePanel_page = "title_movePanel_page";
+	String TITLE_CONFIRMATION_OK = "title_confirmation_ok";
 
-	String title_movePanel_move_before = "title_movePanel_move_before";
+	String TITLE_CONFIRMATION_CANCEL = "title_confirmation_cancel";
 
-	String title_movePanel_move_after = "title_movePanel_move_after";
+	String TITLE_MOVEPANEL_PAGE = "title_movePanel_page";
 
-	String title_movePanel_move_page = "title_movePanel_move_page";
+	String TITLE_MOVEPANEL_MOVE_BEFORE = "title_movePanel_move_before";
 
-	String title_movePanel_cancel_button = "title_movePanel_cancel_button";
+	String TITLE_MOVEPANEL_MOVE_AFTER = "title_movePanel_move_after";
 
-	String title_movePanel_document = "title_movePanel_document";
+	String TITLE_MOVEPANEL_MOVE_PAGE = "title_movePanel_move_page";
 
-	String batch_status_locked = "batch_status_locked";
+	String TITLE_MOVEPANEL_CANCEL_BUTTON = "title_movePanel_cancel_button";
 
-	String batch_status_ready = "batch_status_ready";
+	String TITLE_MOVEPANEL_DOCUMENT = "title_movePanel_document";
 
-	String batch_status_running = "batch_status_running";
+	String BATCH_STATUS_LOCKED = "batch_status_locked";
 
-	String batch_status_readyForReview = "batch_status_readyForReview";
+	String BATCH_STATUS_READY = "batch_status_ready";
 
-	String batch_status_reviewed = "batch_status_reviewed";
+	String BATCH_STATUS_RUNNING = "batch_status_running";
 
-	String batch_status_readyForValidation = "batch_status_readyForValidation";
+	String BATCH_STATUS_READYFORREVIEW = "batch_status_readyForReview";
 
-	String batch_status_validated = "batch_status_validated";
+	String BATCH_STATUS_REVIEWED = "batch_status_reviewed";
 
-	String batch_status_error = "batch_status_error";
+	String BATCH_STATUS_READYFORVALIDATION = "batch_status_readyForValidation";
 
-	String batch_status_finished = "batch_status_finished";
+	String BATCH_STATUS_VALIDATED = "batch_status_validated";
 
-	String info_save_document = "info_save_document";
+	String BATCH_STATUS_ERROR = "batch_status_error";
 
-	String info_split_document = "info_split_document";
+	String BATCH_STATUS_FINISHED = "batch_status_finished";
 
-	String info_zoom_in = "info_zoom_in";
+	String INFO_SAVE_DOCUMENT = "info_save_document";
 
-	String info_zoom_out = "info_zoom_out";
+	String INFO_SPLIT_DOCUMENT = "info_split_document";
 
-	String info_move_cursor_next_field = "info_move_cursor_next_field";
+	String INFO_ZOOM_IN = "info_zoom_in";
 
-	String info_move_cursor_next_field_error = "info_move_cursor_next_field_error";
+	String INFO_ZOOM_OUT = "info_zoom_out";
 
-	String info_move_cursor_previous_field_error = "info_move_cursor_previous_field_error";
+	String INFO_MOVE_CURSOR_NEXT_FIELD = "info_move_cursor_next_field";
 
-	String info_duplicate_page = "info_duplicate_page";
+	String INFO_MOVE_CURSOR_NEXT_FIELD_ERROR = "info_move_cursor_next_field_error";
 
-	String info_move_page = "info_move_page";
+	String INFO_MOVE_CURSOR_PREVIOUS_FIELD_ERROR = "info_move_cursor_previous_field_error";
 
-	String info_fit_page = "info_fit_page";
+	String INFO_DUPLICATE_PAGE = "info_duplicate_page";
 
-	String info_rotate_page = "info_rotate_page";
+	String INFO_MOVE_PAGE = "info_move_page";
 
-	String info_remove_page = "info_remove_page";
+	String INFO_FIT_PAGE = "info_fit_page";
 
-	String info_review_to_validate = "info_review_to_validate";
+	String INFO_ROTATE_PAGE = "info_rotate_page";
 
-	String change_document_type = "change_document_type";
+	String INFO_REMOVE_PAGE = "info_remove_page";
 
-	String merge_document_to_previous_one = "merge_document_to_previous_one";
+	String INFO_REVIEW_TO_VALIDATE = "info_review_to_validate";
 
-	String info_or = "info_or";
+	String CHANGE_DOCUMENT_TYPE = "change_document_type";
 
-	String info_delete = "info_delete";
+	String MERGE_DOCUMENT_TO_PREVIOUS_ONE = "merge_document_to_previous_one";
 
-	String info_title = "info_title";
+	String INFO_OR = "info_or";
 
-	String document_type_unknown = "document_type_unknown";
+	String INFO_DELETE = "info_delete";
 
-	String msg_save_confirmation = "msg_save_confirmation";
+	String INFO_TITLE = "info_title";
 
-	String msg_back = "msg_back";
+	String DOCUMENT_TYPE_UNKNOWN = "document_type_unknown";
 
-	String msg_next = "msg_next";
+	String MSG_SAVE_CONFIRMATION = "msg_save_confirmation";
 
-	String title_move = "title_move";
+	String MSG_BACK = "msg_back";
 
-	String alternate_value = "alternate_value";
+	String MSG_NEXT = "msg_next";
 
-	String seperator = " : ";
+	String TITLE_MOVE = "title_move";
 
-	String fuzzy_search_go_btn = "fuzzy_search_go_btn";
+	String ALTERNATE_VALUE = "alternate_value";
 
-	String fuzzy_search_title = "fuzzy_search_title";
+	String SEPERATOR = " : ";
 
-	String fuzzy_search_tooltip = "fuzzy_search_tooltip";
+	String FUZZY_SEARCH_GO_BTN = "fuzzy_search_go_btn";
+
+	String FUZZY_SEARCH_TITLE = "fuzzy_search_title";
+
+	String FUZZY_SEARCH_TOOLTIP = "fuzzy_search_title";
 
 	String TABLE_VIEW_SHORTCUT = "table_view_shortcut";
 
 	String TABLE_VIEW_BACK_SHORTCUT = "table_view_back_shortcut";
 
-	String fuzzy_search_cancel_btn = "fuzzy_search_cancel_btn";
+	String FUZZY_SEARCH_CANCEL_BTN = "fuzzy_search_cancel_btn";
 
-	String fuzzy_search_select_btn = "fuzzy_search_select_btn";
+	String FUZZY_SEARCH_SELECT_BTN = "fuzzy_search_select_btn";
 
-	String title_confirmation_save = "title_confirmation_save";
+	String TITLE_CONFIRMATION_SAVE = "title_confirmation_save";
 
-	String title_confirmation_discard = "title_confirmation_discard";
+	String TITLE_CONFIRMATION_DISCARD = "title_confirmation_discard";
 
-	String title_review_done = "title_review_done";
+	String TITLE_REVIEW_DONE = "title_review_done";
 
-	String title_validation_done = "title_validation_done";
+	String TITLE_VALIDATION_DONE = "title_validation_done";
 
-	String title_table_view_tooltip = "title_table_view_tooltip";
+	String TITLE_TABLE_VIEW_TOOLTIP = "title_table_view_tooltip";
 
 	String REGEX_RETRIEVAL_FAIL = "regex_retrieval_fail";
 
@@ -299,55 +304,128 @@ public interface ReviewValidateConstants extends LocaleCommonConstants {
 
 	String CONFIGURED_DIMENSIONS_DIALOG = "configurable-DialogBox";
 
-	String MODAL_WINDOW_SHORTCUTS ="modal_window_shortcuts";
+	String MODAL_WINDOW_SHORTCUTS = "modal_window_shortcuts";
 
 	String FUNCTION_KEY_SHORTCUTS = "function_key_shortcuts";
 
 	String TITLE_TOPANEL_BATCHNAME = "title_topPanel_batchName";
-	
+
 	String BATCH_ALERT_TEXT = "batchAlertText";
-	
+
 	String PIPE = "pipe";
-	
+
 	String FONT_BLUE = "font_blue";
-	
+
 	String COLON = ":";
-	
+
 	String FULL_STOP = ".";
-	
+
 	String EMPTY_STRING = "";
-	
-	String DISCLOSURE_PANEL_SHORCUT ="disclosure_panel_shortcut";
-	
+
+	String DISCLOSURE_PANEL_SHORCUT = "disclosure_panel_shortcut";
+
 	String REVIEW_PANEL = "review_panel";
 
-	String ON = "ON";
+	String ON_SWITCH = "ON";
 
 	String REVIEW_VALIDATE_HTML = "ReviewValidate.html";
 
 	String BATCH_LIST_HTML = "BatchList.html";
 
 	String FILE_SEPARATOR = "/";
-	
-	String save_button_tooltip = "save_button_tooltip";
-	
-	String title_topPanel_save_anchor = "title_topPanel_save_anchor";
+
+	String SAVE_BUTTON_TOOLTIP = "save_button_tooltip";
+
+	String TITLE_TOPPANEL_SAVE_ANCHOR = "title_topPanel_save_anchor";
 
 	String BATCH_ID_AS_FIRST_ARG = "?batch_id=";
 
 	String BATCH_ID_AS_ANOTHER_ARG = "&batch_id=";
-	
+
 	String BATCH_ID = "batch_id";
-	
+
 	String SPACE = " ";
 
 	String BATCH_INSTANCE_ABBREVIATION = "BI";
-	
+
 	String ERROR_TYPE_5 = "custom_error";
 
 	String REGEX_ACTIVATE_DEACTIVATE_TOGGLE_SHORTCUT = "regex_activate_deactivate_toggle_shortcut";
 
+	/**
+	 * constant for keyboard shortcut pop up.
+	 */
+	String OPEN_KEYBOARD_SHORTCUTS_POP_UP = "keyboard_shortcuts_pop_up";
+
 	String POP_UP_X_DIMENSION = "x_dimension";
-	
+
 	String POP_UP_Y_DIMENSION = "y_dimension";
+
+	String DEFAULT_REVIEW_PANEL_OPEN = "default_review_panel_open";
+
+	String THUMBNAIL_DEFAULT = "thumbnailDefault";
+
+	String THUMBNAIL_HIGHLIGHTED = "thumbnailHighlighted";
+
+	String DOCUMENT_STYLE = "document-style";
+
+	String NO_ERROR_ICON = "no_error_icon";
+
+	String ERROR_ICON = "error_icon";
+
+	String SLASHES = "\\";
+
+	String SAVING = "Saving...";
+
+	String ERROR_TYPE_1 = "1";
+
+	String ERROR_TYPE_2 = "2";
+
+	String ERROR_TYPE_3 = "3";
+
+	String ERROR_TYPE_4 = "4";
+
+	String UNKNOWN_DOC_TYPE = "Unknown";
+
+	int RADIX_BASE = 10;
+
+	String DOCUMENT = "DOC";
+
+	String POINTER = "pointer";
+
+	/**
+	 * The IE_BROWSER {@link String} is a constant for IE browser name.
+	 */
+	String IE_BROWSER = "msie";
+
+	/**
+	 * The QUESTION_MARK {@link String} is a constant for ?.
+	 */
+	String QUESTION_MARK = "?";
+
+	/**
+	 * The CSS_THUMBNAIL_HIGHLIGHTED {@link String} is css style name for highlighting thumbnail.
+	 */
+	String CSS_THUMBNAIL_HIGHLIGHTED = "thumbnailHighlighted";
+
+	/**
+	 * The BLUE_LINK {@link String} constant is the css name for showing blue link to user.
+	 */
+	String BLUE_LINK = "blue_link";
+
+	/**
+	 * The DIRECTION_NORTH {@link String} constant is dock layout panel direction attribute.
+	 */
+	String DIRECTION_NORTH = "North";
+
+	/**
+	 * The BATCH_CLASS_NAME_DESC_CHARACTER_LIMIT is the character limit for batch class name and batch class description shown on rv
+	 * screens.
+	 */
+	int BATCH_CLASS_NAME_DESC_CHARACTER_LIMIT = 18;
+
+	/**
+	 * The SOURCE {@link String} is a constant for 'src' attribute of UI elements.
+	 */
+	String SOURCE = "src";
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,7 +50,7 @@ import com.ephesoft.dcma.da.domain.KVExtraction;
 public interface KVExtractionService {
 
 	/**
-	 * An api to fetch all KV Extraction by field type.
+	 * An API to fetch all KV Extraction by field type.
 	 * 
 	 * @param fieldType {@link FieldType}
 	 * @return List<{@link KVExtraction}>
@@ -58,31 +58,31 @@ public interface KVExtractionService {
 	List<KVExtraction> getKVExtractionByFieldType(FieldType fieldType);
 
 	/**
-	 * An api to insert the kvExtraction object.
+	 * An API to insert the kvExtraction object.
 	 * 
 	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void insertKVExtraction(KVExtraction kvExtraction);
 
 	/**
-	 * An api to update the kvExtraction object.
+	 * An API to update the kvExtraction object.
 	 * 
 	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void updateKVExtraction(KVExtraction kvExtraction);
 
 	/**
-	 * An api to remove the kvExtraction object.
+	 * An API to remove the kvExtraction object.
 	 * 
 	 * @param kvExtraction {@link KVExtraction}
 	 */
 	void removeKVExtraction(KVExtraction kvExtraction);
 
 	/**
-	 * An api to check whether KVExtraction field already exists for a field type.
+	 * An API to check whether KVExtraction field already exists for a field type.
 	 * 
 	 * @param fieldType {@link FieldType}
-	 * @param {@link KVExtraction}
+	 * @param kvExtractionField {@link KVExtraction}
 	 * @return List<{@link KVExtraction}>
 	 */
 	List<KVExtraction> getDuplicateKVFields(FieldType fieldType, KVExtraction kvExtractionField);

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ephesoft.dcma.core.service.DataAccessService;
+import com.ephesoft.dcma.da.constant.DataAccessConstant;
 import com.ephesoft.dcma.da.dao.TableInfoDao;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.TableInfo;
@@ -56,18 +56,21 @@ import com.ephesoft.dcma.da.domain.TableInfo;
  * @see com.ephesoft.dcma.da.service.TableColumnsInfoService
  */
 @Service
-public class TableInfoServiceImpl extends DataAccessService implements TableInfoService {
+public class TableInfoServiceImpl implements TableInfoService {
 
 	/**
 	 * LOGGER to print the logging information.
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableInfoServiceImpl.class);
 
+	/**
+	 * tableInfoDao {@link TableInfoDao}.
+	 */
 	@Autowired
 	private TableInfoDao tableInfoDao;
 
 	/**
-	 * An api to fetch all TableInfo by document type name.
+	 * An API to fetch all TableInfo by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @param batchClassIdentifier String
@@ -77,7 +80,7 @@ public class TableInfoServiceImpl extends DataAccessService implements TableInfo
 	@Override
 	public List<TableInfo> getTableInfoByDocTypeName(String docTypeName, String batchClassIdentifier) {
 		List<TableInfo> tableInfos = null;
-		if (null == docTypeName || "".equals(docTypeName)) {
+		if (null == docTypeName || DataAccessConstant.EMPTY.equals(docTypeName)) {
 			LOGGER.info("Document type name is null or empty.");
 		} else {
 			tableInfos = tableInfoDao.getTableInfoByDocTypeName(docTypeName, batchClassIdentifier);
@@ -86,9 +89,9 @@ public class TableInfoServiceImpl extends DataAccessService implements TableInfo
 	}
 
 	/**
-	 * An api to fetch all TableInfo by document type.
+	 * An API to fetch all TableInfo by document type.
 	 * 
-	 * @param documentType DocumentType
+	 * @param documentType {@link DocumentType}
 	 * @return List<TableInfo>
 	 */
 	@Transactional(readOnly = true)
@@ -104,9 +107,9 @@ public class TableInfoServiceImpl extends DataAccessService implements TableInfo
 	}
 
 	/**
-	 * An api to insert the TableInfo object.
+	 * An API to insert the TableInfo object.
 	 * 
-	 * @param tableInfo TableInfo
+	 * @param tableInfo {@link TableInfo}
 	 */
 	@Transactional
 	@Override
@@ -119,9 +122,9 @@ public class TableInfoServiceImpl extends DataAccessService implements TableInfo
 	}
 
 	/**
-	 * An api to update the TableInfo object.
+	 * An API to update the TableInfo object.
 	 * 
-	 * @param tableInfo TableInfo
+	 * @param tableInfo {@link TableInfo}
 	 */
 	@Transactional
 	@Override
@@ -134,9 +137,9 @@ public class TableInfoServiceImpl extends DataAccessService implements TableInfo
 	}
 
 	/**
-	 * An api to remove the TableInfo object.
+	 * An API to remove the TableInfo object.
 	 * 
-	 * @param tableInfo TableInfo
+	 * @param tableInfo {@link TableInfo}
 	 */
 	@Transactional
 	@Override

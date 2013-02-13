@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,23 +37,23 @@ package com.ephesoft.dcma.batch.dao;
 
 import com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer;
 /**
- * 
+ * This is an interface to get and clear plugin properties.
  * @author Ephesoft
  * @version 1.0
- *
+ * @see com.ephesoft.dcma.batch.dao.impl.BatchPluginPropertyContainer
  */
 public interface PluginPropertiesDao {
 	
 	/**
 	 *  This method returns plugin property container for a batch.
-	 * @param batchInstanceIdentifier
+	 * @param batchInstanceIdentifier {@link String}
 	 * @return {@link BatchPluginPropertyContainer}
 	 */
 	BatchPluginPropertyContainer getPluginProperties(String batchInstanceIdentifier);
 
 	/**
 	 * This method clears the plugin properties of a batch.
-	 * @param batchInstanceIdentifier
+	 * @param batchInstanceIdentifier {@link String}
 	 */
 	void clearPluginProperties(String batchInstanceIdentifier);
 }

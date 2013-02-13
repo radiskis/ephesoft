@@ -37,7 +37,7 @@
 				<g:Label ui:field="star"></g:Label>
 			</g:cell>
 			<g:cell width="68%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="priority" width="60%" maxLength='3'/>
+				<g:TextBox ui:field="priority" width="60%" maxLength='3' />
 			</g:cell>
 		</g:HorizontalPanel>
 
@@ -50,6 +50,18 @@
 			</g:cell>
 			<g:cell width="68%" horizontalAlignment="ALIGN_LEFT">
 				<g:TextBox ui:field="uncFolder" width="60%" />
+			</g:cell>
+		</g:HorizontalPanel>
+
+		<g:HorizontalPanel width="100%">
+			<g:cell width="29%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Label ui:field="systemFolderLabel"></g:Label>
+			</g:cell>
+			<g:cell width="3%">
+				<g:Label ui:field="systemFolderStar"></g:Label>
+			</g:cell>
+			<g:cell width="68%" horizontalAlignment="ALIGN_LEFT">
+				<g:TextBox ui:field="systemFolder"  width="60%" />
 			</g:cell>
 		</g:HorizontalPanel>
 

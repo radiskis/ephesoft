@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,41 +47,88 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
+import com.ephesoft.dcma.gwt.core.shared.CmisConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.ephesoft.dcma.gwt.core.shared.EmailConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.FieldTypeDTO;
 import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.ephesoft.dcma.gwt.core.shared.KVExtractionDTO;
+import com.ephesoft.dcma.gwt.core.shared.KVPageProcessDTO;
 import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
+import com.ephesoft.dcma.gwt.core.shared.WebScannerConfigurationDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * This class provides functionality to create and add bread crumbs for different screens.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter
+ */
 public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<BatchClassBreadCrumbView> {
 
+	/**
+	 * OPENING_BRACKET String.
+	 */
 	private static final String OPENING_BRACKET = " [";
+
+	/**
+	 * CLOSING_BRACKET String.
+	 */
 	private static final String CLOSING_BRACKET = "] ";
+
+	/**
+	 * BATCH_CLASS_LISTING String.
+	 */
 	public static final String BATCH_CLASS_LISTING = ViewType.BATCH_CLASS_LISTING.getValue();
+
+	/**
+	 * CONFIGURE String.
+	 */
 	public static final String CONFIGURE = ViewType.KV_PP_PLUGIN_CONFIG.getValue();
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view BatchClassBreadCrumbView
+	 */
 	public BatchClassBreadCrumbPresenter(BatchClassManagementController controller, BatchClassBreadCrumbView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		// Processing to be done when this presenter loads.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// event handling should be done here.
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 */
 	public void createBreadCrumb() {
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassDTO BatchClassDTO
+	 */
 	public void createBreadCrumb(BatchClassDTO batchClassDTO) {
 
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
@@ -89,13 +136,18 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						+ batchClassDTO.getIdentifier() + CLOSING_BRACKET, batchClassDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param functionKeyDTO FunctionKeyDTO
+	 */
 	public void createBreadCrumb(FunctionKeyDTO functionKeyDTO) {
 		DocumentTypeDTO documentTypeDTO = functionKeyDTO.getDocTypeDTO();
 		BatchClassDTO batchClass = documentTypeDTO.getBatchClass();
 
 		String functionKeyName = functionKeyDTO.getShortcutKeyName();
 		if (functionKeyName == null || functionKeyName.isEmpty()) {
-			functionKeyName = "";
+			functionKeyName = BatchClassManagementConstants.EMPTY_STRING;
 		}
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
@@ -106,6 +158,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param kvExtractionDTO KVExtractionDTO
+	 */
 	public void createBreadCrumb(KVExtractionDTO kvExtractionDTO) {
 		BatchClassDTO batchClassDTO = kvExtractionDTO.getFieldTypeDTO().getDocTypeDTO().getBatchClass();
 		DocumentTypeDTO documentTypeDTO = kvExtractionDTO.getFieldTypeDTO().getDocTypeDTO();
@@ -122,6 +179,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_EXTRACTION, KVName, kvExtractionDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param regexDTO RegexDTO
+	 */
 	public void createBreadCrumb(RegexDTO regexDTO) {
 		BatchClassDTO batchClassDTO = regexDTO.getFieldTypeDTO().getDocTypeDTO().getBatchClass();
 		DocumentTypeDTO documentTypeDTO = regexDTO.getFieldTypeDTO().getDocTypeDTO();
@@ -138,6 +200,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.REGEX, name, regexDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param moduleDTO BatchClassModuleDTO
+	 */
 	public void createBreadCrumb(BatchClassModuleDTO moduleDTO) {
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, moduleDTO.getBatchClass().getDescription()
@@ -146,6 +213,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						.getName(), moduleDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param documentTypeDTO DocumentTypeDTO
+	 */
 	public void createBreadCrumb(DocumentTypeDTO documentTypeDTO) {
 		String documentTypeName = documentTypeDTO.getName();
 		if (documentTypeName == null || documentTypeName.length() == 0) {
@@ -158,6 +230,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						documentTypeName, documentTypeDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param emailConfigurationDTO EmailConfigurationDTO
+	 */
 	public void createBreadCrumb(EmailConfigurationDTO emailConfigurationDTO) {
 		String emailName = emailConfigurationDTO.getUserName();
 		if (emailName == null || emailName.length() == 0) {
@@ -171,6 +248,45 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						ViewType.EMAIL, emailName, emailConfigurationDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param cmisConfigurationDTO CmisConfigurationDTO
+	 */
+	public void createBreadCrumb(CmisConfigurationDTO cmisConfigurationDTO) {
+		String cmisUserName = cmisConfigurationDTO.getUserName();
+		if (cmisUserName == null || cmisUserName.length() == 0) {
+			cmisUserName = AdminConstants.NEW_CMIS;
+		}
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, cmisConfigurationDTO.getBatchClass()
+						.getDescription()
+						+ OPENING_BRACKET + cmisConfigurationDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET,
+						cmisConfigurationDTO.getBatchClass().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.CMIS, cmisUserName, cmisConfigurationDTO.getIdentifier()));
+	}
+
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param scannerConfigurationDTO WebScannerConfigurationDTO
+	 */
+	public void createBreadCrumb(WebScannerConfigurationDTO scannerConfigurationDTO) {
+		String scannerText = LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.WEB_SCANNER);
+
+		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
+				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, scannerConfigurationDTO.getBatchClass()
+						.getDescription()
+						+ OPENING_BRACKET + scannerConfigurationDTO.getBatchClass().getIdentifier() + CLOSING_BRACKET,
+						scannerConfigurationDTO.getBatchClass().getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
+						ViewType.WEB_SCANNER, scannerText, scannerConfigurationDTO.getName()));
+	}
+
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassFieldDTO BatchClassFieldDTO
+	 */
 	public void createBreadCrumb(BatchClassFieldDTO batchClassFieldDTO) {
 		String name = batchClassFieldDTO.getName();
 		if (name == null || name.length() == 0) {
@@ -183,6 +299,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						name, batchClassFieldDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassPluginDTO BatchClassPluginDTO
+	 */
 	public void createBreadCrumb(BatchClassPluginDTO batchClassPluginDTO) {
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
@@ -195,6 +316,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						batchClassPluginDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassDynamicPluginConfigDTO BatchClassDynamicPluginConfigDTO
+	 */
 	public void createBreadCrumb(BatchClassDynamicPluginConfigDTO batchClassDynamicPluginConfigDTO) {
 		BatchClassPluginDTO batchClassPluginDTO = batchClassDynamicPluginConfigDTO.getBatchClassPlugin();
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
@@ -211,6 +337,9 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb for document type.
+	 */
 	public void createBreadCrumbForDocumentType() {
 		BatchClassPluginDTO batchClassPluginDTO = controller.getSelectedPlugin();
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
@@ -225,6 +354,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						AdminConstants.DATABASE_MAPPING, batchClass.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param fieldTypeDTO FieldTypeDTO
+	 */
 	public void createBreadCrumb(FieldTypeDTO fieldTypeDTO) {
 		DocumentTypeDTO documentTypeDTO = fieldTypeDTO.getDocTypeDTO();
 		BatchClassDTO batchClass = documentTypeDTO.getBatchClass();
@@ -241,6 +375,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						documentTypeDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param tableInfoDTO TableInfoDTO
+	 */
 	public void createBreadCrumb(TableInfoDTO tableInfoDTO) {
 		DocumentTypeDTO documentTypeDTO = tableInfoDTO.getDocTypeDTO();
 		BatchClassDTO batchClass = documentTypeDTO.getBatchClass();
@@ -257,6 +396,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						documentTypeDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param tableColumnInfoDTO TableColumnInfoDTO
+	 */
 	public void createBreadCrumb(TableColumnInfoDTO tableColumnInfoDTO) {
 		TableInfoDTO tableInfoDTO = tableColumnInfoDTO.getTableInfoDTO();
 		DocumentTypeDTO documentTypeDTO = tableInfoDTO.getDocTypeDTO();
@@ -277,10 +421,26 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassPluginConfigDTO BatchClassPluginConfigDTO
+	 */
 	public void createBreadCrumbForKVPPPlugin(BatchClassPluginConfigDTO batchClassPluginConfigDTO) {
 		BatchClassPluginDTO batchClassPluginDTO = batchClassPluginConfigDTO.getBatchClassPlugin();
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
+
+		String kvPPPluginConfigAddEditValue = null;
+		ViewType kvPPPluginCOnfigAddEditViewType = null;
+		KVPageProcessDTO kvPageProcessDTO = controller.getKvPageProcessDTO();
+		if (null != kvPageProcessDTO && kvPageProcessDTO.getIsNew()) {
+			kvPPPluginCOnfigAddEditViewType = ViewType.KV_PP_PLUGIN_CONFIG_ADD;
+			kvPPPluginConfigAddEditValue = ViewType.KV_PP_PLUGIN_CONFIG_ADD.getValue();
+		} else {
+			kvPPPluginCOnfigAddEditViewType = ViewType.KV_PP_PLUGIN_CONFIG_EDIT;
+			kvPPPluginConfigAddEditValue = ViewType.KV_PP_PLUGIN_CONFIG_EDIT.getValue();
+		}
 
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS, batchClass.getDescription() + OPENING_BRACKET
@@ -289,10 +449,14 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 				new BatchClassBreadCrumbView.BreadCrumbView(ViewType.KV_PP_PLUGIN, batchClassPluginDTO.getPlugin().getPluginName(),
 						batchClassPluginDTO.getIdentifier()), new BatchClassBreadCrumbView.BreadCrumbView(
 						ViewType.KV_PP_PLUGIN_CONFIG, CONFIGURE, null), new BatchClassBreadCrumbView.BreadCrumbView(
-						ViewType.KV_PP_PLUGIN_CONFIG_ADD_EDIT, batchClassPluginConfigDTO.getName(), batchClassPluginConfigDTO
-								.getIdentifier()));
+						kvPPPluginCOnfigAddEditViewType, kvPPPluginConfigAddEditValue, batchClassPluginConfigDTO.getIdentifier()));
 	}
 
+	/**
+	 * To create Bread Crumb.
+	 * 
+	 * @param batchClassPluginDTO BatchClassPluginDTO
+	 */
 	public void createBreadCrumbForKVPPPluginConfig(BatchClassPluginDTO batchClassPluginDTO) {
 		BatchClassModuleDTO module = batchClassPluginDTO.getBatchClassModule();
 		BatchClassDTO batchClass = module.getBatchClass();
@@ -306,6 +470,9 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 						ViewType.KV_PP_PLUGIN_CONFIG, CONFIGURE, null));
 	}
 
+	/**
+	 * To create Bread Crumb for modules.
+	 */
 	public void createBreadCrumbForModules() {
 		BatchClassDTO batchClass = controller.getBatchClass();
 		view.create(new BatchClassBreadCrumbView.BreadCrumbView(ViewType.BATCH_CLASS_LISTING, BATCH_CLASS_LISTING, null),
@@ -316,6 +483,11 @@ public class BatchClassBreadCrumbPresenter extends AbstractBatchClassPresenter<B
 
 	}
 
+	/**
+	 * o create Bread Crumb for plugin select.
+	 * 
+	 * @param moduleIdentifier String
+	 */
 	public void createBreadCrumbForPluginsSelect(String moduleIdentifier) {
 		BatchClassDTO batchClass = controller.getBatchClass();
 		String moduleName = controller.getBatchClass().getModuleByIdentifier(moduleIdentifier).getModule().getName();

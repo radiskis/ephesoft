@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,21 +46,22 @@ import com.ephesoft.dcma.da.domain.FieldType;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.FieldTypeDaoImpl
  */
 public interface FieldTypeDao extends CacheableDao<FieldType> {
 
 	/**
-	 * An api to fetch all Field types by document type name
+	 * An API to fetch all Field types by document type name.
 	 * 
-	 * @param docTypeName
-	 * @param batchInstanceID
+	 * @param docTypeName String
+	 * @param batchInstanceIdentifierIdentifier String
 	 * @return List<FieldType>
 	 */
 	List<FieldType> getFdTypeByDocTypeNameForBatchInstance(String docTypeName, String batchInstanceIdentifierIdentifier);
 
 	
 	/**
-	 * An api to fetch all Field types by document type.
+	 * An API to fetch all Field types by document type.
 	 * 
 	 * @param documentType DocumentType
 	 * @return List<FieldType>
@@ -68,61 +69,61 @@ public interface FieldTypeDao extends CacheableDao<FieldType> {
 	List<FieldType> getFdTypeByDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to fetch all Field types by document type name.
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName String
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier Long
 	 * @param isKVExtraction boolean
 	 * @return List<FieldType>
 	 */
 	List<FieldType> getFdTypeByDocumentTypeName(String docTypeName, String batchInstanceIdentifier, boolean isKVExtraction);
 
 	/**
-	 * An api to fetch all Field types by document type name.
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName String
-	 * @param batchInstanceID Long
+	 * @param batchClassIdentifier String
 	 * @return List<FieldType>
 	 */
 	List<FieldType> getFdTypeAndRegexValidationByDocTypeName(String docTypeName, String batchInstanceIdentifier);
 	
 	/**
-	 * An api to fetch all Field types by document type name for a batch class.
+	 * An API to fetch all Field types by document type name for a batch class.
 	 * 
-	 * @param docTypeName
-	 * @param batchClassID
+	 * @param docTypeName String
+	 * @param batchClassIdentifier String
 	 * @return List<FieldType>
 	 */
 	List<FieldType> getFdTypeByDocumentTypeNameForBatchClass(String docTypeName, String batchClassIdentifier);
 
 	/**
-	 * An api to insert the fieldType object.
+	 * An API to insert the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
 	void insertFieldType(FieldType fieldType);
 
 	/**
-	 * An api to update the fieldType object.
+	 * An API to update the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
 	void updateFieldType(FieldType fieldType);
 
 	/**
-	 * An api to remove the fieldType object.
+	 * An API to remove the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
 	void removeFieldType(FieldType fieldType);
 	
 	/**
-	 *  API to get field type for a batch for a particular document.
+	 * An API to get field type for a batch for a particular document.
 	 *  
-	 * @param fieldTypeName
-	 * @param docTypeName
-	 * @param batchInstanceIdentifier
-	 * @return
+	 * @param fieldTypeName String
+	 * @param docTypeName String
+	 * @param batchInstanceIdentifier String
+	 * @return FieldType
 	 */
 	FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier);
 }

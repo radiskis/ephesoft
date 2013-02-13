@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -53,43 +53,50 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class AboutDialog extends DialogBox {
 
-  interface Binder extends UiBinder<Widget, AboutDialog> { }
-  private static final Binder binder = GWT.create(Binder.class);
+	interface Binder extends UiBinder<Widget, AboutDialog> {
+	}
 
-  @UiField Button closeButton;
-  @UiField Label message;
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-  public AboutDialog() {
-    setText("Split Document Confirmation");
-    setWidget(binder.createAndBindUi(this));
+	@UiField
+	protected Button closeButton;
+	@UiField
+	protected Label message;
 
-    setAnimationEnabled(true);
-    setGlassEnabled(true);
-  }
-  
-  public void setMessage(String messageText){
-	  message.setText(messageText);
-  }
+	public AboutDialog() {
+		super();
+		setText("Split Document Confirmation");
+		setWidget(BINDER.createAndBindUi(this));
 
-  @Override
-  protected void onPreviewNativeEvent(NativePreviewEvent preview) {
-    super.onPreviewNativeEvent(preview);
+		setAnimationEnabled(true);
+		setGlassEnabled(true);
+	}
 
-    NativeEvent evt = preview.getNativeEvent();
-    if (evt.getType().equals("keydown")) {
-      // Use the popup's key preview hooks to close the dialog when either
-      // enter or escape is pressed.
-      switch (evt.getKeyCode()) {
-        case KeyCodes.KEY_ENTER:
-        case KeyCodes.KEY_ESCAPE:
-          hide();
-          break;
-      }
-    }
-  }
+	public void setMessage(String messageText) {
+		message.setText(messageText);
+	}
 
-  @UiHandler("closeButton")
-  void onSignOutClicked(ClickEvent event) {
-    hide();
-  }
+	@Override
+	protected void onPreviewNativeEvent(NativePreviewEvent preview) {
+		super.onPreviewNativeEvent(preview);
+
+		NativeEvent evt = preview.getNativeEvent();
+		if (evt.getType().equals("keydown")) {
+			// Use the popup's key preview hooks to close the dialog when either
+			// enter or escape is pressed.
+			switch (evt.getKeyCode()) {
+			case KeyCodes.KEY_ENTER:
+			case KeyCodes.KEY_ESCAPE:
+				hide();
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	@UiHandler("closeButton")
+	protected void onSignOutClicked(ClickEvent event) {
+		hide();
+	}
 }

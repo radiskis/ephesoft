@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,58 +46,115 @@ import javax.persistence.Table;
 import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for page_type.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "page_type")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class PageType extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * docType {@link DocumentType}.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "document_type_id")
 	private DocumentType docType;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "page_type_name")
 	private String name;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "page_type_description")
 	private String description;
 
+	/**
+	 * identifier String.
+	 */
 	@Column(name = "identifier")
 	private String identifier;
 
+	/**
+	 * To get Doc Type.
+	 * @return DocumentType
+	 */
 	public DocumentType getDocType() {
 		return docType;
 	}
 
+	/**
+	 * To set Doc Type.
+	 * @param docType DocumentType
+	 */  
 	public void setDocType(DocumentType docType) {
 		this.docType = docType;
 	}
 
+	/**
+	 * To get name.
+	 * @return String
+	 */ 
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Identifier.
+	 * @return String
+	 */
 	public String getIdentifier() {
 		return identifier;
 	}
 
+	/**
+	 * To set Identifier.
+	 * @param identifier String
+	 */
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 	
+	/**
+	 * To add variables other than in pojo.
+	 */
 	public void postPersist() {
 		super.postPersist();
 		this.identifier = EphesoftProperty.PAGE_TYPE.getProperty() + Long.toHexString(this.getId()).toUpperCase();

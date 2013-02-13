@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,20 +38,27 @@ package com.ephesoft.dcma.core.model.common;
 import javax.persistence.MappedSuperclass;
 
 /**
- * Abstract implementation of {@link DomainObject}
+ * Abstract implementation of {@link DomainObject}.
  * 
  * @author Ephesoft
- * 
- **/
+ * @version 1.0
+ * @see javax.persistence.MappedSuperclass
+ */
 @MappedSuperclass
 public class AbstractDomainObject extends AbstractChangeableEntity implements DomainObject {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 8826899538114431504L;
+	
+	/**
+	 * deleted boolean.
+	 */
 	private boolean deleted;
 
-	// simple getters and setters
-
 	/**
+	 * To check whether deleted or not.
 	 * @return the deleted
 	 */
 	public boolean isDeleted() {
@@ -59,7 +66,8 @@ public class AbstractDomainObject extends AbstractChangeableEntity implements Do
 	}
 
 	/**
-	 * @param deleted the deleted to set
+	 * To set deleted.
+	 * @param deleted boolean
 	 */
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;

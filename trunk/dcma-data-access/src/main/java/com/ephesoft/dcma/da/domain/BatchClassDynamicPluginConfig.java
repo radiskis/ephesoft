@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,86 +50,163 @@ import org.hibernate.annotations.CascadeType;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_dynamic_plugin_config.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_dynamic_plugin_config")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class BatchClassDynamicPluginConfig extends AbstractChangeableEntity implements Cloneable {
 
 	/**
-	 * 
+	 * serialVersionUID long.
 	 */
 	private static final long serialVersionUID = -3994727578168859843L;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "config_name")
 	private String name;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "config_desc")
 	private String description;
 
+	/** 
+	 * batchClassPlugin BatchClassPlugin.
+	 */
 	@OneToOne
 	@JoinColumn(name = "batch_class_plugin_id")
 	private BatchClassPlugin batchClassPlugin;
 
+	/**
+	 * parent BatchClassDynamicPluginConfig.
+	 */  
 	@OneToOne
 	@JoinColumn(name = "parent_id")
 	private BatchClassDynamicPluginConfig parent;
 
+	/**
+	 * children List<BatchClassDynamicPluginConfig>.
+	 */
 	@OneToMany
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
 	@JoinColumn(name = "parent_id")
 	private List<BatchClassDynamicPluginConfig> children;
 
+	/**
+	 * value String.
+	 */
 	@Column(name = "plugin_config_value")
 	private String value;
 
+	/**
+	 * To get Batch Class Plugin.
+	 * @return BatchClassPlugin
+	 */
 	public BatchClassPlugin getBatchClassPlugin() {
 		return batchClassPlugin;
 	}
 
+	/**
+	 * To set Batch Class Plugin.
+	 * @param batchClassPlugin BatchClassPlugin
+	 */
 	public void setBatchClassPlugin(BatchClassPlugin batchClassPlugin) {
 		this.batchClassPlugin = batchClassPlugin;
 	}
 
+	/**
+	 * To get Parent.
+	 * @return BatchClassDynamicPluginConfig
+	 */
 	public BatchClassDynamicPluginConfig getParent() {
 		return parent;
 	}
 
+	/**
+	 * To set Parent.
+	 * @param parent BatchClassDynamicPluginConfig
+	 */
 	public void setParent(BatchClassDynamicPluginConfig parent) {
 		this.parent = parent;
 	}
 
+	/**
+	 * To get Children.
+	 * @return List<BatchClassDynamicPluginConfig>
+	 */
 	public List<BatchClassDynamicPluginConfig> getChildren() {
 		return children;
 	}
 
+	/**
+	 * To set Children.
+	 * @param children List<BatchClassDynamicPluginConfig>
+	 */
 	public void setChildren(List<BatchClassDynamicPluginConfig> children) {
 		this.children = children;
 	}
 
+	/**
+	 * To get Name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Value.
+	 * @return String
+	 */
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * To set Value.
+	 * @param value String
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To add child.
+	 * @param config BatchClassDynamicPluginConfig
+	 */
 	public void addChild(BatchClassDynamicPluginConfig config) {
 		if (this.getChildren() == null) {
 			setChildren(new ArrayList<BatchClassDynamicPluginConfig>());
@@ -142,6 +219,10 @@ public class BatchClassDynamicPluginConfig extends AbstractChangeableEntity impl
 		}
 	}
 
+	/**
+	 * To remove child.
+	 * @param config BatchClassDynamicPluginConfig
+	 */
 	public void removeChild(BatchClassDynamicPluginConfig config) {
 		int index = -1;
 		int cnt = 0;
@@ -155,6 +236,11 @@ public class BatchClassDynamicPluginConfig extends AbstractChangeableEntity impl
 		this.getChildren().remove(index);
 	}
 
+	/**
+	 * Clone method.
+	 * @return Object
+	 * @throws CloneNotSupportedException
+	 */
 	public Object clone() throws CloneNotSupportedException {
 		Object obj = null;
 		obj = super.clone();

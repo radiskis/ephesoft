@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,22 +35,54 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey;
 
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.FunctionKeyListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show function key list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FunctionKeyListView extends View<FunctionKeyListPresenter> {
 
+	/**
+	 * To get Fields List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getFieldsListView() {
 		return listView;
 	}
 
-	public HeaderColumn methodName = new HeaderColumn(1, "Method Name", 20);
-	public HeaderColumn keyName = new HeaderColumn(2, "Shortcut Key", 20);
-	public HeaderColumn description = new HeaderColumn(3, "Method Description", 20);
+	/**
+	 * methodName HeaderColumn.
+	 */
+	public HeaderColumn methodName = new HeaderColumn(1, "Method Name", BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * keyName HeaderColumn.
+	 */
+	public HeaderColumn keyName = new HeaderColumn(2, "Shortcut Key", BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * description HeaderColumn.
+	 */
+	public HeaderColumn description = new HeaderColumn(BatchClassManagementConstants.THREE, "Method Description",
+			BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public FunctionKeyListView() {
 		super();
 		listView.addHeaderColumns(methodName, keyName, description);

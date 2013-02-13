@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,27 +45,84 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.core.common.PluginProperty;
 import com.ephesoft.dcma.da.domain.BatchClass;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
 import com.ephesoft.dcma.da.domain.KVPageProcess;
 
+/**
+ * This class is to read plugin properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.PluginProperty
+ * @see com.ephesoft.dcma.da.domain.BatchClass
+ */
 public class BatchPluginPropertyContainer implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
-	private String batchIdentifier;
-	private Map<String, BatchPlugin> plugins = new HashMap<String, BatchPlugin>();
-	private Map<Long, BatchPluginConfiguration> allBatchConfiguration = new HashMap<Long, BatchPluginConfiguration>();
-	private Map<Long, BatchDynamicPluginConfiguration> allDynamicBatchConfiguration = new HashMap<Long, BatchDynamicPluginConfiguration>();
-	private Map<String, DocumentType> allDocumentTypes = new HashMap<String, DocumentType>();
+	/**
+	 * batchIdentifier String.
+	 */
+	private final String batchIdentifier;
 
-	public BatchPluginPropertyContainer(String batchIdentifier) {
+	/**
+	 * plugins Map<String, BatchPlugin>.
+	 */
+	private final Map<String, BatchPlugin> plugins = new HashMap<String, BatchPlugin>();
+
+	/**
+	 * allBatchConfiguration Map<Long, BatchPluginConfiguration>.
+	 */
+	private final Map<Long, BatchPluginConfiguration> allBatchConfiguration = new HashMap<Long, BatchPluginConfiguration>();
+
+	/**
+	 * allDynamicBatchConfiguration Map<Long, BatchDynamicPluginConfiguration>.
+	 */
+	private final Map<Long, BatchDynamicPluginConfiguration> allDynamicBatchConfiguration = new HashMap<Long, BatchDynamicPluginConfiguration>();
+
+	/**
+	 * allDocumentTypes Map<String, DocumentType>.
+	 */
+	private Map<String, DocumentType> allDocumentTypes = new HashMap<String, DocumentType>();
+	
+	/**
+	 * LOGGER to print the logging information.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchPluginPropertyContainer.class);
+	
+	/**
+	 * boolean field to get if debug mode of logging is enabled.
+	 */
+	private static final boolean IS_DEBUG_ENABLE = LOGGER.isDebugEnabled();
+	
+	/**
+	 * prefix of each log statement.
+	 */
+	private final String loggingPrefix;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param batchIdentifier String
+	 */
+	public BatchPluginPropertyContainer(final String batchIdentifier) {
 		this.batchIdentifier = batchIdentifier;
+		this.loggingPrefix = batchIdentifier + BatchConstants.LOG_AREA;
 	}
 
 	/**
+	 * To get all the documents.
+	 * 
 	 * @return the allDocumentTypes
 	 */
 	public Map<String, DocumentType> getAllDocumentTypes() {
@@ -73,20 +130,39 @@ public class BatchPluginPropertyContainer implements Serializable {
 	}
 
 	/**
-	 * @param allDocumentTypes the allDocumentTypes to set
+	 * To set all the documents.
+	 * 
+	 * @param allDocumentTypes {@link Map<{@link String}, {@link DocumentType}>} the allDocumentTypes to set
 	 */
-	public void setAllDocumentTypes(Map<String, DocumentType> allDocumentTypes) {
+	public void setAllDocumentTypes(final Map<String, DocumentType> allDocumentTypes) {
 		this.allDocumentTypes = allDocumentTypes;
 	}
 
-	public BatchPlugin getPlugin(String pluginName) {
-		if (plugins.get(pluginName) == null)
+	/**
+	 * API to get batch plugins.
+	 * 
+	 * @param pluginName {@link String}
+	 * @return BatchPlugin {@link BatchPlugin}
+	 */
+	public BatchPlugin getPlugin(final String pluginName) {
+		if (plugins.get(pluginName) == null) {
 			plugins.put(pluginName, new BatchPlugin(pluginName));
+		}
 		return plugins.get(pluginName);
 	}
 
-	private void addPluginProperty(String pluginName, final BatchPluginConfiguration configuration) {
-		BatchPlugin plugin = getPlugin(pluginName);
+	/**
+	 * API to add a plugin property.
+	 * 
+	 * @param pluginName {@link String}
+	 * @param configuration {@link BatchPluginConfiguration}
+	 */
+	private void addPluginProperty(final String pluginName, final BatchPluginConfiguration configuration) {
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix
+					+ "Executing addPluginProperty(String,BatchPluginConfiguration) API of BatchPluginPropertyContainer.");
+		}
+		final BatchPlugin plugin = getPlugin(pluginName);
 		plugin.addProperty(new PluginProperty() {
 
 			@Override
@@ -94,10 +170,23 @@ public class BatchPluginPropertyContainer implements Serializable {
 				return configuration.getKey();
 			}
 		}, configuration);
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix + "Plugin property added successfully. Plugin name is : " + pluginName);
+		}
 	}
 
-	private void addPluginProperty(String pluginName, final BatchDynamicPluginConfiguration configuration) {
-		BatchPlugin plugin = getPlugin(pluginName);
+	/**
+	 * API to add a plugin property according to dynamic plugin configuration.
+	 * 
+	 * @param pluginName {@link String}
+	 * @param configuration {@link BatchDynamicPluginConfiguration}
+	 */
+	private void addPluginProperty(final String pluginName, final BatchDynamicPluginConfiguration configuration) {
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix
+					+ "Executing addPluginProperty(String,BatchDynamicPluginConfiguration) API of BatchPluginPropertyContainer.");
+		}
+		final BatchPlugin plugin = getPlugin(pluginName);
 		plugin.addProperty(new PluginProperty() {
 
 			@Override
@@ -105,54 +194,78 @@ public class BatchPluginPropertyContainer implements Serializable {
 				return configuration.getKey();
 			}
 		}, configuration);
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix + "Plugin property added successfully. Plugin name is : " + pluginName);
+		}
 	}
 
-	public List<BatchPluginConfiguration> getPlginConfiguration(String pluginName, PluginProperty pluginProperty) {
-		BatchPlugin plugin = getPlugin(pluginName);
-		if (plugin == null)
-			return null;
-		return plugin.getPluginConfigurations(pluginProperty);
+	/**
+	 * API to get plugin configuration.
+	 * 
+	 * @param pluginName {@link String}
+	 * @param pluginProperty {@link PluginProperty}
+	 * @return List<{@link BatchPluginConfiguration}>
+	 */
+	public List<BatchPluginConfiguration> getPlginConfiguration(final String pluginName, final PluginProperty pluginProperty) {
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix + "Executing getPlginConfiguration(String,PluginProperty) API of BatchPluginPropertyContainer.");
+			LOGGER.debug(loggingPrefix + "plugin name is : " + pluginName + "Plugin propert is : " + pluginProperty.getPropertyKey());
+		}
+		List<BatchPluginConfiguration> returnList = null;
+		final BatchPlugin plugin = getPlugin(pluginName);
+		if (plugin != null) {
+			returnList = plugin.getPluginConfigurations(pluginProperty);
+		}
+		if (IS_DEBUG_ENABLE) {
+			LOGGER.debug(loggingPrefix
+					+ "Executed getPlginConfiguration(String,PluginProperty) API of BatchPluginPropertyContainer successfully.");
+		}
+		return returnList;
 	}
 
-	public void populate(List<BatchClassPluginConfig> batchClassPluginConfigs) {
-		for (BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
-			String pluginName = batchClassPluginConfig.getBatchClassPlugin().getPlugin().getPluginName();
-
+	/**
+	 * API to populate batch class plugin configurations.
+	 * 
+	 * @param batchClassPluginConfigs {@link List<{@link BatchClassPluginConfig}>}
+	 */
+	public void populate(final List<BatchClassPluginConfig> batchClassPluginConfigs) {
+		for (final BatchClassPluginConfig batchClassPluginConfig : batchClassPluginConfigs) {
+			final String pluginName = batchClassPluginConfig.getBatchClassPlugin().getPlugin().getPluginName();
 			BatchPluginConfiguration configuration = allBatchConfiguration.get(batchClassPluginConfig.getId());
 			if (configuration == null) {
-				/*
-				 * configuration = new BatchPluginConfiguration(batchClassPluginConfig.getId(), batchClassPluginConfig.getName(),
-				 * batchClassPluginConfig.getValue(), batchClassPluginConfig.getQualifier(), batchClassPluginConfig.getParent());
-				 */
 				configuration = new BatchPluginConfiguration(batchClassPluginConfig);
-
 				addPluginProperty(pluginName, configuration);
 			}
 		}
 	}
 
-	public void populateDynamicPluginConfigs(List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs) {
-		for (BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
-			String pluginName = batchClassDynamicPluginConfig.getBatchClassPlugin().getPlugin().getPluginName();
-
+	/**
+	 * API to populate dynamic batch class plugin configurations.
+	 * 
+	 * @param batchClassDynamicPluginConfigs {@link List<{@link BatchClassDynamicPluginConfig}>}
+	 */
+	public void populateDynamicPluginConfigs(final List<BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigs) {
+		for (final BatchClassDynamicPluginConfig batchClassDynamicPluginConfig : batchClassDynamicPluginConfigs) {
+			final String pluginName = batchClassDynamicPluginConfig.getBatchClassPlugin().getPlugin().getPluginName();
 			BatchDynamicPluginConfiguration configuration = allDynamicBatchConfiguration.get(batchClassDynamicPluginConfig.getId());
 			if (configuration == null) {
-				/*
-				 * configuration = new BatchPluginConfiguration(batchClassPluginConfig.getId(), batchClassPluginConfig.getName(),
-				 * batchClassPluginConfig.getValue(), batchClassPluginConfig.getQualifier(), batchClassPluginConfig.getParent());
-				 */
 				configuration = new BatchDynamicPluginConfiguration(batchClassDynamicPluginConfig);
-
 				addPluginProperty(pluginName, configuration);
 			}
 		}
 	}
 
-	public void populateDocumentTypes(List<com.ephesoft.dcma.da.domain.DocumentType> documentTypes,
-			String batchInstanceIdentifierIdentifier) {
+	/**
+	 * API to populate document types.
+	 * 
+	 * @param documentTypes {@link List< {@link com.ephesoft.dcma.da.domain.DocumentType}>}
+	 * @param batchInstanceIdentifierIdentifier {@link String}
+	 */
+	public void populateDocumentTypes(final List<com.ephesoft.dcma.da.domain.DocumentType> documentTypes,
+			final String batchInstanceIdentifierIdentifier) {
 		if (documentTypes != null && !documentTypes.isEmpty()) {
-			for (com.ephesoft.dcma.da.domain.DocumentType documentType : documentTypes) {
-				DocumentType localDocumentType = new DocumentType();
+			for (final com.ephesoft.dcma.da.domain.DocumentType documentType : documentTypes) {
+				final DocumentType localDocumentType = new DocumentType();
 				localDocumentType.setDescription(documentType.getDescription());
 				localDocumentType.setRspProjectFileName(documentType.getRspProjectFileName());
 				localDocumentType.setMinConfidenceThreshold(documentType.getMinConfidenceThreshold());
@@ -165,10 +278,10 @@ public class BatchPluginPropertyContainer implements Serializable {
 				localDocumentType.setLastModified(documentType.getLastModified());
 				localDocumentType.setHidden(documentType.isHidden());
 				// populating page types
-				List<com.ephesoft.dcma.da.domain.PageType> pageTypesList = documentType.getPages();
-				Map<String, PageType> tempPageTypes = new HashMap<String, PageType>();
-				for (com.ephesoft.dcma.da.domain.PageType pageType : pageTypesList) {
-					PageType localPageType = new PageType();
+				final List<com.ephesoft.dcma.da.domain.PageType> pageTypesList = documentType.getPages();
+				final Map<String, PageType> tempPageTypes = new HashMap<String, PageType>();
+				for (final com.ephesoft.dcma.da.domain.PageType pageType : pageTypesList) {
+					final PageType localPageType = new PageType();
 					localPageType.setId(pageType.getId());
 					localPageType.setIdentifier(pageType.getIdentifier());
 					localPageType.setCreationDate(pageType.getCreationDate());
@@ -179,10 +292,10 @@ public class BatchPluginPropertyContainer implements Serializable {
 					tempPageTypes.put(pageType.getName(), localPageType);
 				}
 				localDocumentType.setDocPageTypes(tempPageTypes);
-				List<com.ephesoft.dcma.da.domain.FunctionKey> functionKeyList = documentType.getFunctionKeys();
-				Map<String, FunctionKey> tempFunctionKeys = new HashMap<String, FunctionKey>();
-				for (com.ephesoft.dcma.da.domain.FunctionKey functionKey : functionKeyList) {
-					FunctionKey localFunctionKey = new FunctionKey();
+				final List<com.ephesoft.dcma.da.domain.FunctionKey> functionKeyList = documentType.getFunctionKeys();
+				final Map<String, FunctionKey> tempFunctionKeys = new HashMap<String, FunctionKey>();
+				for (final com.ephesoft.dcma.da.domain.FunctionKey functionKey : functionKeyList) {
+					final FunctionKey localFunctionKey = new FunctionKey();
 					localFunctionKey.setId(functionKey.getId());
 					localFunctionKey.setIdentifier(functionKey.getIdentifier());
 					localFunctionKey.setDocType(functionKey.getDocType());
@@ -193,59 +306,10 @@ public class BatchPluginPropertyContainer implements Serializable {
 				}
 				localDocumentType.setDocFunctionKeys(tempFunctionKeys);
 				// populating field types
-				List<com.ephesoft.dcma.da.domain.FieldType> allFieldTypes = documentType.getFieldTypes();
-				Map<String, FieldType> tempFieldTypes = new HashMap<String, FieldType>();
+				final List<com.ephesoft.dcma.da.domain.FieldType> allFieldTypes = documentType.getFieldTypes();
+				final Map<String, FieldType> tempFieldTypes = new HashMap<String, FieldType>();
 				if (allFieldTypes != null && !allFieldTypes.isEmpty()) {
-					for (com.ephesoft.dcma.da.domain.FieldType tempField : allFieldTypes) {
-						FieldType fieldType = new FieldType();
-						fieldType.setId(tempField.getId());
-						fieldType.setIdentifier(tempField.getIdentifier());
-						fieldType.setFieldOrderNumber(tempField.getFieldOrderNumber());
-						fieldType.setCreationDate(tempField.getCreationDate());
-						fieldType.setLastModified(tempField.getLastModified());
-						fieldType.setDocType(tempField.getDocType());
-						fieldType.setDataType(tempField.getDataType().name());
-						fieldType.setDescription(tempField.getDescription());
-						fieldType.setName(tempField.getName());
-						fieldType.setPattern(tempField.getPattern());
-						fieldType.setBarcodeType(tempField.getBarcodeType());
-						fieldType.setSampleValue(tempField.getSampleValue());
-						fieldType.setFieldOptionValueList(tempField.getFieldOptionValueList());
-						fieldType.setHidden(tempField.isHidden());
-						fieldType.setMultiLine(tempField.isMultiLine());
-						Map<String, KVExtraction> tempKVExtraction = new HashMap<String, KVExtraction>();
-						List<com.ephesoft.dcma.da.domain.KVExtraction> tempList = tempField.getKvExtraction();
-						if (tempList != null && !tempList.isEmpty()) {
-							for (com.ephesoft.dcma.da.domain.KVExtraction kvExtraction : tempList) {
-								KVExtraction var = new KVExtraction();
-								var.setId(kvExtraction.getId());
-								var.setCreationDate(kvExtraction.getCreationDate());
-								var.setLastModified(kvExtraction.getLastModified());
-								var.setFieldType(kvExtraction.getFieldType());
-								var.setKeyPattern(kvExtraction.getKeyPattern());
-								var.setLocation(kvExtraction.getLocationType().name());
-								var.setValuePattern(kvExtraction.getValuePattern());
-								tempKVExtraction.put(String.valueOf(kvExtraction.getId()), var);
-							}
-						}
-						fieldType.setFieldKVExtraction(tempKVExtraction);
-						tempFieldTypes.put(fieldType.getName(), fieldType);
-						Map<String, RegexValidation> tempRegexValidation = new HashMap<String, RegexValidation>();
-						List<com.ephesoft.dcma.da.domain.RegexValidation> tempList2 = tempField.getRegexValidation();
-						if (tempList2 != null && !tempList2.isEmpty()) {
-							for (com.ephesoft.dcma.da.domain.RegexValidation regexValidation : tempList2) {
-								RegexValidation var = new RegexValidation();
-								var.setId(regexValidation.getId());
-								var.setCreationDate(regexValidation.getCreationDate());
-								var.setLastModified(regexValidation.getLastModified());
-								var.setFieldType(regexValidation.getFieldType());
-								var.setPattern(regexValidation.getPattern());
-								tempRegexValidation.put(String.valueOf(regexValidation.getId()), var);
-							}
-						}
-						fieldType.setRegexValidation(tempRegexValidation);
-						tempFieldTypes.put(fieldType.getName(), fieldType);
-					}
+					setAllFields(allFieldTypes, tempFieldTypes);
 				}
 				localDocumentType.setDocFieldTypes(tempFieldTypes);
 				allDocumentTypes.put(documentType.getName(), localDocumentType);
@@ -253,18 +317,109 @@ public class BatchPluginPropertyContainer implements Serializable {
 		}
 	}
 
+	/**
+	 * API to set all the fields.
+	 * 
+	 * @param allFieldTypes {@link List< {@link com.ephesoft.dcma.da.domain.FieldType}>}
+	 * @param tempFieldTypes {@link Map<{@link String}, {@link FieldType}>}
+	 */
+	private void setAllFields(final List<com.ephesoft.dcma.da.domain.FieldType> allFieldTypes,
+			final Map<String, FieldType> tempFieldTypes) {
+		for (final com.ephesoft.dcma.da.domain.FieldType tempField : allFieldTypes) {
+			final FieldType fieldType = new FieldType();
+			fieldType.setId(tempField.getId());
+			fieldType.setIdentifier(tempField.getIdentifier());
+			fieldType.setFieldOrderNumber(tempField.getFieldOrderNumber());
+			fieldType.setCreationDate(tempField.getCreationDate());
+			fieldType.setLastModified(tempField.getLastModified());
+			fieldType.setDocType(tempField.getDocType());
+			fieldType.setDataType(tempField.getDataType().name());
+			fieldType.setDescription(tempField.getDescription());
+			fieldType.setName(tempField.getName());
+			fieldType.setPattern(tempField.getPattern());
+			fieldType.setBarcodeType(tempField.getBarcodeType());
+			fieldType.setSampleValue(tempField.getSampleValue());
+			fieldType.setFieldOptionValueList(tempField.getFieldOptionValueList());
+			fieldType.setHidden(tempField.isHidden());
+			fieldType.setMultiLine(tempField.isMultiLine());
+			fieldType.setReadOnly(tempField.getIsReadOnly());
+			final Map<String, KVExtraction> tempKVExtraction = new HashMap<String, KVExtraction>();
+			final List<com.ephesoft.dcma.da.domain.KVExtraction> tempList = tempField.getKvExtraction();
+			if (tempList != null && !tempList.isEmpty()) {
+				for (final com.ephesoft.dcma.da.domain.KVExtraction kvExtraction : tempList) {
+					final KVExtraction var = new KVExtraction();
+					var.setId(kvExtraction.getId());
+					var.setCreationDate(kvExtraction.getCreationDate());
+					var.setLastModified(kvExtraction.getLastModified());
+					var.setFieldType(kvExtraction.getFieldType());
+					var.setKeyPattern(kvExtraction.getKeyPattern());
+					if (kvExtraction.getLocationType() != null) {
+						var.setLocation(kvExtraction.getLocationType().name());
+					}
+					var.setValuePattern(kvExtraction.getValuePattern());
+					tempKVExtraction.put(String.valueOf(kvExtraction.getId()), var);
+				}
+			}
+			fieldType.setFieldKVExtraction(tempKVExtraction);
+			tempFieldTypes.put(fieldType.getName(), fieldType);
+			final Map<String, RegexValidation> tempRegexValidation = new HashMap<String, RegexValidation>();
+			final List<com.ephesoft.dcma.da.domain.RegexValidation> tempList2 = tempField.getRegexValidation();
+			if (tempList2 != null && !tempList2.isEmpty()) {
+				for (final com.ephesoft.dcma.da.domain.RegexValidation regexValidation : tempList2) {
+					final RegexValidation var = new RegexValidation();
+					var.setId(regexValidation.getId());
+					var.setCreationDate(regexValidation.getCreationDate());
+					var.setLastModified(regexValidation.getLastModified());
+					var.setFieldType(regexValidation.getFieldType());
+					var.setPattern(regexValidation.getPattern());
+					tempRegexValidation.put(String.valueOf(regexValidation.getId()), var);
+				}
+			}
+			fieldType.setRegexValidation(tempRegexValidation);
+			tempFieldTypes.put(fieldType.getName(), fieldType);
+		}
+	}
+
+	/**
+	 * This is batch plugin class.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public class BatchPlugin implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 2L;
-		private String pluginName;
-		private Map<String, List<BatchPluginConfiguration>> pluginProperties = new HashMap<String, List<BatchPluginConfiguration>>();
-		private Map<String, List<BatchDynamicPluginConfiguration>> dynamicPluginProperties = new HashMap<String, List<BatchDynamicPluginConfiguration>>();
 
-		public BatchPlugin(String pluginName) {
+		/**
+		 * pluginName String.
+		 */
+		private final String pluginName;
+
+		/**
+		 * pluginProperties Map<String, List<BatchPluginConfiguration>>.
+		 */
+		private final Map<String, List<BatchPluginConfiguration>> pluginProperties = new HashMap<String, List<BatchPluginConfiguration>>();
+
+		/**
+		 * dynamicPluginProperties Map<String, List<BatchDynamicPluginConfiguration>>.
+		 */
+		private final Map<String, List<BatchDynamicPluginConfiguration>> dynamicPluginProperties = new HashMap<String, List<BatchDynamicPluginConfiguration>>();
+
+		public BatchPlugin(final String pluginName) {
 			this.pluginName = pluginName;
 		}
 
-		public void addProperty(PluginProperty pluginProperty, BatchPluginConfiguration configuration) {
+		/**
+		 * API to add property to plugin.
+		 * 
+		 * @param pluginProperty {@link PluginProperty}
+		 * @param configuration {@link BatchPluginConfiguration}
+		 */
+		public void addProperty(final PluginProperty pluginProperty, final BatchPluginConfiguration configuration) {
 			List<BatchPluginConfiguration> configurations = pluginProperties.get(pluginProperty.getPropertyKey());
 			if (configurations == null) {
 				configurations = new LinkedList<BatchPluginConfiguration>();
@@ -273,7 +428,13 @@ public class BatchPluginPropertyContainer implements Serializable {
 			configurations.add(configuration);
 		}
 
-		public void addProperty(PluginProperty pluginProperty, BatchDynamicPluginConfiguration configuration) {
+		/**
+		 * API to add property to plugin for dynamic batch plugin configuration.
+		 * 
+		 * @param pluginProperty {@link PluginProperty}
+		 * @param configuration {@link BatchDynamicPluginConfiguration}
+		 */
+		public void addProperty(final PluginProperty pluginProperty, final BatchDynamicPluginConfiguration configuration) {
 			List<BatchDynamicPluginConfiguration> configurations = dynamicPluginProperties.get(pluginProperty.getPropertyKey());
 			if (configurations == null) {
 				configurations = new LinkedList<BatchDynamicPluginConfiguration>();
@@ -282,45 +443,75 @@ public class BatchPluginPropertyContainer implements Serializable {
 			configurations.add(configuration);
 		}
 
-		public List<BatchPluginConfiguration> getPluginConfigurations(PluginProperty pluginProperty) {
+		/**
+		 * API to get the list of plugin configurations.
+		 * 
+		 * @param pluginProperty {@link PluginProperty}
+		 * @return List<BatchPluginConfiguration>
+		 */
+		public List<BatchPluginConfiguration> getPluginConfigurations(final PluginProperty pluginProperty) {
 			return pluginProperties.get(pluginProperty.getPropertyKey());
 		}
 
-		public List<BatchDynamicPluginConfiguration> getDynamicPluginConfigurations(PluginProperty pluginProperty) {
+		/**
+		 * API to get list of dynamic plugin configurations.
+		 * 
+		 * @param pluginProperty {@link PluginProperty}
+		 * @return List<BatchDynamicPluginConfiguration>
+		 */
+		public List<BatchDynamicPluginConfiguration> getDynamicPluginConfigurations(final PluginProperty pluginProperty) {
 			return dynamicPluginProperties.get(pluginProperty.getPropertyKey());
 		}
 
+		/**
+		 * To get the property size.
+		 * 
+		 * @return int.
+		 */
 		public int getPropertiesSize() {
 			return pluginProperties.size();
 		}
 
+		/**
+		 * This is override method to generate hashcode.
+		 * 
+		 * @return int
+		 */
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			final int prime = BatchConstants.PRIME_CONST;
 			int result = 1;
 			result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((pluginName == null) ? 0 : pluginName.hashCode());
+			result = prime * result + ((pluginName == null) ? BatchConstants.ZERO : pluginName.hashCode());
 			return result;
 		}
 
+		/**
+		 * This is override method for checking equality of two objects.
+		 * 
+		 * @return boolean
+		 */
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			BatchPlugin other = (BatchPlugin) obj;
-			/*
-			 * if (!getOuterType().equals(other.getOuterType())) return false;
-			 */
-			if (pluginName == null) {
-				if (other.pluginName != null)
-					return false;
-			} else if (!pluginName.equals(other.pluginName))
-				return false;
-			return true;
+		public boolean equals(final Object obj) {
+			boolean returnValue = true;
+			if (this == obj) {
+				returnValue = true;
+			} else if (obj == null) {
+				returnValue = false;
+			} else if (getClass() != obj.getClass()) {
+				returnValue = false;
+			} else {
+				final BatchPlugin other = (BatchPlugin) obj;
+
+				if (pluginName == null) {
+					if (other.pluginName != null) {
+						returnValue = false;
+					}
+				} else if (!pluginName.equals(other.pluginName)) {
+					returnValue = false;
+				}
+			}
+			return returnValue;
 		}
 
 		private BatchPluginPropertyContainer getOuterType() {
@@ -328,58 +519,117 @@ public class BatchPluginPropertyContainer implements Serializable {
 		}
 	}
 
+	/**
+	 * This is override method to generate hashcode.
+	 * 
+	 * @return int
+	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		final int prime = BatchConstants.PRIME_CONST;
 		int result = 1;
-		result = prime * result + ((batchIdentifier == null) ? 0 : batchIdentifier.hashCode());
+		result = prime * result + ((batchIdentifier == null) ? BatchConstants.ZERO : batchIdentifier.hashCode());
 		return result;
 	}
 
+	/**
+	 * This is override method for checking equality of two objects.
+	 * 
+	 * @return boolean
+	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BatchPluginPropertyContainer other = (BatchPluginPropertyContainer) obj;
-		if (batchIdentifier == null) {
-			if (other.batchIdentifier != null)
-				return false;
-		} else if (!batchIdentifier.equals(other.batchIdentifier))
-			return false;
-		return true;
+	public boolean equals(final Object obj) {
+		boolean returnValue = true;
+		if (this == obj) {
+			returnValue = true;
+		} else if (obj == null) {
+			returnValue = false;
+		} else if (getClass() != obj.getClass()) {
+			returnValue = false;
+		} else {
+			final BatchPluginPropertyContainer other = (BatchPluginPropertyContainer) obj;
+			if (batchIdentifier == null) {
+				if (other.batchIdentifier != null) {
+					returnValue = false;
+				}
+			} else if (!batchIdentifier.equals(other.batchIdentifier)) {
+				returnValue = false;
+			}
+		}
+		return returnValue;
 	}
 
+	/**
+	 * This is class for batch plugin configuration.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class BatchPluginConfiguration implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 3L;
-		private Long id;
-		private String key;
-		private String qualifier;
-		private String value;
 
+		/**
+		 * identifier Long.
+		 */
+		private final Long identifier;
+
+		/**
+		 * key String.
+		 */
+		private final String key;
+
+		/**
+		 * qualifier String.
+		 */
+		private String qualifier;
+
+		/**
+		 * value String.
+		 */
+		private final String value;
+
+		/**
+		 * kvPageProcesses List<KVPageProcess>.
+		 */
 		private List<KVPageProcess> kvPageProcesses = new ArrayList<KVPageProcess>();
 
-		public BatchPluginConfiguration(Long id, String key, String value) {
-			this.id = id;
+		/**
+		 * Constructor.
+		 * 
+		 * @param identifier long
+		 * @param key String
+		 * @param value String
+		 */
+		public BatchPluginConfiguration(final Long identifier, final String key, final String value) {
+			this.identifier = identifier;
 			this.key = key;
 			this.value = value;
-			allBatchConfiguration.put(id, this);
+			allBatchConfiguration.put(identifier, this);
 		}
 
-		public BatchPluginConfiguration(Long id, String key, String value, String qualifier) {
-			this(id, key, value);
+		/**
+		 * Constructor.
+		 * 
+		 * @param identifier
+		 * @param key
+		 * @param value
+		 * @param qualifier
+		 */
+		public BatchPluginConfiguration(final Long identifier, final String key, final String value, final String qualifier) {
+			this(identifier, key, value);
 			this.qualifier = qualifier;
 		}
 
-		public BatchPluginConfiguration(Long id, String key, String value, String qualifier, BatchClassPluginConfig parent) {
-			this(id, key, value, qualifier);
-		}
-
-		public BatchPluginConfiguration(BatchClassPluginConfig batchClassPluginConfig) {
+		/**
+		 * Constructor.
+		 * 
+		 * @param batchClassPluginConfig {@link BatchClassPluginConfig}
+		 */
+		public BatchPluginConfiguration(final BatchClassPluginConfig batchClassPluginConfig) {
 			this(batchClassPluginConfig.getId(), batchClassPluginConfig.getName(), batchClassPluginConfig.getValue(),
 					batchClassPluginConfig.getQualifier());
 
@@ -388,165 +638,350 @@ public class BatchPluginPropertyContainer implements Serializable {
 			}
 		}
 
+		/**
+		 * To get identifier.
+		 * 
+		 * @return Long
+		 */
 		public Long getId() {
-			return id;
+			return identifier;
 		}
 
+		/**
+		 * To get key.
+		 * 
+		 * @return String
+		 */
 		public String getKey() {
 			return key;
 		}
 
+		/**
+		 * To get qualifier.
+		 * 
+		 * @return String
+		 */
 		public String getQualifier() {
 			return qualifier;
 		}
 
+		/**
+		 * To get value.
+		 * 
+		 * @return String
+		 */
 		public String getValue() {
 			return value;
 		}
 
+		/**
+		 * To get KV Page Processes.
+		 * 
+		 * @return List<KVPageProcess>
+		 */
 		public List<KVPageProcess> getKvPageProcesses() {
 			return kvPageProcesses;
 		}
 
-		public void setKvPageProcesses(List<KVPageProcess> kvPageProcesses) {
+		/**
+		 * To set KV Page Processes.
+		 * 
+		 * @param kvPageProcesses List<KVPageProcess>
+		 */
+		public final void setKvPageProcesses(final List<KVPageProcess> kvPageProcesses) {
 			this.kvPageProcesses = kvPageProcesses;
 		}
 
+		/**
+		 * This is override method to generate hashcode.
+		 * 
+		 * @return int
+		 */
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			// result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			final int prime = BatchConstants.PRIME_CONST;
+			int result = BatchConstants.ONE;
+
+			result = prime * result + ((identifier == null) ? BatchConstants.ZERO : identifier.hashCode());
 			return result;
 		}
 
+		/**
+		 * This is override method for checking equality of two objects.
+		 * 
+		 * @return boolean
+		 */
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			BatchPluginConfiguration other = (BatchPluginConfiguration) obj;
-			/*
-			 * if (!getOuterType().equals(other.getOuterType())) return false;
-			 */
-			if (id == null) {
-				if (other.id != null)
-					return false;
-			} else if (!id.equals(other.id))
-				return false;
-			return true;
+		public boolean equals(final Object obj) {
+			boolean returnValue = true;
+			if (this == obj) {
+				returnValue = true;
+			} else if (obj == null) {
+				returnValue = false;
+			} else if (getClass() != obj.getClass()) {
+				returnValue = false;
+			} else {
+				final BatchPluginConfiguration other = (BatchPluginConfiguration) obj;
+
+				if (identifier == null) {
+					if (other.identifier != null) {
+						returnValue = false;
+					}
+				} else if (!identifier.equals(other.identifier)) {
+					returnValue = false;
+				}
+			}
+			return returnValue;
 		}
 
-		/*
-		 * private BatchPluginPropertyContainer getOuterType() { return BatchPluginPropertyContainer.this; }
-		 */
 	}
 
+	/**
+	 * This is class for function key.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public class FunctionKey implements Serializable {
 
 		/**
-		 * 
+		 * serialVersionUID long.
 		 */
 		private static final long serialVersionUID = 1L;
-		private long id;
+
+		/**
+		 * idLong long.
+		 */
+		private long idLong;
+
+		/**
+		 * docType com.ephesoft.dcma.da.domain.DocumentType.
+		 */
 		private com.ephesoft.dcma.da.domain.DocumentType docType;
+
+		/**
+		 * shortcutKeyname String.
+		 */
 		private String shortcutKeyname;
+
+		/**
+		 * methodName String.
+		 */
 		private String methodName;
+
+		/**
+		 * uiLabel String.
+		 */
 		private String uiLabel;
+
+		/**
+		 * identifier String.
+		 */
 		private String identifier;
 
+		/**
+		 * To get id.
+		 * 
+		 * @return long
+		 */
 		public long getId() {
-			return id;
+			return idLong;
 		}
 
-		public void setId(long id) {
-			this.id = id;
+		/**
+		 * To set id.
+		 * 
+		 * @param idLong long
+		 */
+		public void setId(final long idLong) {
+			this.idLong = idLong;
 		}
 
+		/**
+		 * To get doc type.
+		 * 
+		 * @return com.ephesoft.dcma.da.domain.DocumentType
+		 */
 		public com.ephesoft.dcma.da.domain.DocumentType getDocType() {
 			return docType;
 		}
 
-		public void setDocType(com.ephesoft.dcma.da.domain.DocumentType docType) {
+		/**
+		 * To set doc type.
+		 * 
+		 * @param docType com.ephesoft.dcma.da.domain.DocumentType
+		 */
+		public void setDocType(final com.ephesoft.dcma.da.domain.DocumentType docType) {
 			this.docType = docType;
 		}
 
+		/**
+		 * To get shortcut key name.
+		 * 
+		 * @return String
+		 */
 		public String getShortcutKeyname() {
 			return shortcutKeyname;
 		}
 
-		public void setShortcutKeyname(String shortcutKeyname) {
+		/**
+		 * To set shortcut key name.
+		 * 
+		 * @param shortcutKeyname String
+		 */
+		public void setShortcutKeyname(final String shortcutKeyname) {
 			this.shortcutKeyname = shortcutKeyname;
 		}
 
+		/**
+		 * To get method name.
+		 * 
+		 * @return String
+		 */
 		public String getMethodName() {
 			return methodName;
 		}
 
-		public void setMethodName(String methodName) {
+		/**
+		 * To set method name.
+		 * 
+		 * @param methodName String
+		 */
+		public void setMethodName(final String methodName) {
 			this.methodName = methodName;
 		}
 
+		/**
+		 * To get Ui Label.
+		 * 
+		 * @return String
+		 */
 		public String getUiLabel() {
 			return uiLabel;
 		}
 
-		public void setUiLabel(String uiLabel) {
+		/**
+		 * To set Ui Label.
+		 * 
+		 * @param uiLabel String
+		 */
+		public void setUiLabel(final String uiLabel) {
 			this.uiLabel = uiLabel;
 		}
 
+		/**
+		 * To get identifier.
+		 * 
+		 * @return String
+		 */
 		public String getIdentifier() {
 			return identifier;
 		}
 
-		public void setIdentifier(String identifier) {
+		/**
+		 * To set identifier.
+		 * 
+		 * @param identifier String
+		 */
+		public void setIdentifier(final String identifier) {
 			this.identifier = identifier;
 		}
 	}
 
+	/**
+	 * This is class for Batch Dynamic Plugin Configuration.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class BatchDynamicPluginConfiguration implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 3L;
-		private Long id;
-		private String key;
-		private String value;
-		private String description;
+
+		/**
+		 * identifier Long.
+		 */
+		private final Long identifier;
+
+		/**
+		 * key String.
+		 */
+		private final String key;
+
+		/**
+		 * value String.
+		 */
+		private final String value;
+
+		/**
+		 * description String.
+		 */
+		private final String description;
+
+		/**
+		 * parent {@link BatchDynamicPluginConfiguration}.
+		 */
 		private BatchDynamicPluginConfiguration parent;
 
-		private Set<BatchDynamicPluginConfiguration> children = new HashSet<BatchDynamicPluginConfiguration>();
+		/**
+		 * children Set<BatchDynamicPluginConfiguration>.
+		 */
+		private final Set<BatchDynamicPluginConfiguration> children = new HashSet<BatchDynamicPluginConfiguration>();
 
-		public BatchDynamicPluginConfiguration(Long id, String key, String value, String description) {
-			this.id = id;
+		/**
+		 * Constructor.
+		 * 
+		 * @param identifier Long
+		 * @param key String
+		 * @param value String
+		 * @param description String
+		 */
+		public BatchDynamicPluginConfiguration(final Long identifier, final String key, final String value, final String description) {
+			this.identifier = identifier;
 			this.key = key;
 			this.value = value;
 			this.description = description;
-			allDynamicBatchConfiguration.put(id, this);
+			allDynamicBatchConfiguration.put(identifier, this);
 		}
 
-		public BatchDynamicPluginConfiguration(Long id, String key, String value, String description,
-				BatchClassDynamicPluginConfig parent) {
-			this(id, key, value, description);
+		/**
+		 * Constructor.
+		 * 
+		 * @param identifier Long
+		 * @param key String
+		 * @param value String
+		 * @param description String
+		 * @param parent {@link BatchClassDynamicPluginConfig}
+		 */
+		public BatchDynamicPluginConfiguration(final Long identifier, final String key, final String value, final String description,
+				final BatchClassDynamicPluginConfig parent) {
+			this(identifier, key, value, description);
 
 			if (parent != null) {
 				this.parent = allDynamicBatchConfiguration.get(parent.getId());
 				if (this.parent == null) {
-					this.parent = new BatchDynamicPluginConfiguration(id, parent.getName(), parent.getValue(),
-							parent.getDescription(), parent.getParent());
+					this.parent = new BatchDynamicPluginConfiguration(identifier, parent.getName(), parent.getValue(), parent
+							.getDescription(), parent.getParent());
 				}
 				this.parent.addChild(this);
 			}
 		}
 
-		public BatchDynamicPluginConfiguration(BatchClassDynamicPluginConfig batchClassDynamicPluginConfig) {
+		/**
+		 * Constructor.
+		 * 
+		 * @param batchClassDynamicPluginConfig {@link BatchClassDynamicPluginConfig}
+		 */
+		public BatchDynamicPluginConfiguration(final BatchClassDynamicPluginConfig batchClassDynamicPluginConfig) {
 			this(batchClassDynamicPluginConfig.getId(), batchClassDynamicPluginConfig.getName(), batchClassDynamicPluginConfig
 					.getValue(), batchClassDynamicPluginConfig.getDescription());
 
 			if (batchClassDynamicPluginConfig.getChildren() != null) {
-				for (BatchClassDynamicPluginConfig child : batchClassDynamicPluginConfig.getChildren()) {
+				for (final BatchClassDynamicPluginConfig child : batchClassDynamicPluginConfig.getChildren()) {
 					BatchDynamicPluginConfiguration pChild = allDynamicBatchConfiguration.get(child.getId());
 					if (pChild == null) {
 						pChild = new BatchDynamicPluginConfiguration(child);
@@ -566,802 +1001,1358 @@ public class BatchPluginPropertyContainer implements Serializable {
 
 		}
 
+		/**
+		 * To get id.
+		 * 
+		 * @return Long
+		 */
 		public Long getId() {
-			return id;
+			return identifier;
 		}
 
+		/**
+		 * To get children.
+		 * 
+		 * @return Set<BatchDynamicPluginConfiguration>
+		 */
 		public Set<BatchDynamicPluginConfiguration> getChildren() {
 			return children;
 		}
 
-		public void addChild(BatchDynamicPluginConfiguration configuration) {
+		/**
+		 * To add new child.
+		 * 
+		 * @param configuration {@link BatchDynamicPluginConfiguration}
+		 */
+		public final void addChild(final BatchDynamicPluginConfiguration configuration) {
 			children.add(configuration);
 		}
 
+		/**
+		 * To get key.
+		 * 
+		 * @return String
+		 */
 		public String getKey() {
 			return key;
 		}
 
+		/**
+		 * To get value.
+		 * 
+		 * @return String
+		 */
 		public String getValue() {
 			return value;
 		}
 
+		/**
+		 * To get parent.
+		 * 
+		 * @return {@link BatchDynamicPluginConfiguration}
+		 */
 		public BatchDynamicPluginConfiguration getParent() {
 			return parent;
 		}
 
+		/**
+		 * To get description.
+		 * 
+		 * @return String
+		 */
 		public String getDescription() {
 			return description;
 		}
 
+		/**
+		 * This is override method to generate hashcode.
+		 * 
+		 * @return int
+		 */
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			// result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((id == null) ? 0 : id.hashCode());
+			final int prime = BatchConstants.PRIME_CONST;
+			int result = BatchConstants.ONE;
+
+			result = prime * result + ((identifier == null) ? BatchConstants.ZERO : identifier.hashCode());
 			return result;
 		}
 
+		/**
+		 * This is override method for checking equality of two objects.
+		 * 
+		 * @return boolean
+		 */
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			BatchDynamicPluginConfiguration other = (BatchDynamicPluginConfiguration) obj;
-			/*
-			 * if (!getOuterType().equals(other.getOuterType())) return false;
-			 */
-			if (id == null) {
-				if (other.id != null)
-					return false;
-			} else if (!id.equals(other.id))
-				return false;
-			return true;
+		public boolean equals(final Object obj) {
+			boolean returnValue = true;
+			if (this == obj) {
+				returnValue = true;
+			} else if (obj == null) {
+				returnValue = false;
+			} else if (getClass() != obj.getClass()) {
+				returnValue = false;
+			} else {
+				final BatchDynamicPluginConfiguration other = (BatchDynamicPluginConfiguration) obj;
+
+				if (identifier == null) {
+					if (other.identifier != null) {
+						returnValue = false;
+					}
+				} else if (!identifier.equals(other.identifier)) {
+					returnValue = false;
+				}
+			}
+			return returnValue;
 		}
 
-		/*
-		 * private BatchPluginPropertyContainer getOuterType() { return BatchPluginPropertyContainer.this; }
-		 */
 	}
 
+	/**
+	 * This is class for document type.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public class DocumentType implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 4L;
-		private long id;
+
+		/**
+		 * idLong long.
+		 */
+		private long idLong;
+
+		/**
+		 * identifier String.
+		 */
 		private String identifier;
+
+		/**
+		 * creationDate Date.
+		 */
 		private Date creationDate;
+
+		/**
+		 * lastModified Date.
+		 */
 		private Date lastModified;
+
+		/**
+		 * name String.
+		 */
 		private String name;
+
+		/**
+		 * description String.
+		 */
 		private String description;
+
+		/**
+		 * rspProjectFileName String.
+		 */
 		private String rspProjectFileName;
+
+		/**
+		 * minConfidenceThreshold float.
+		 */
 		private float minConfidenceThreshold;
+
+		/**
+		 * priority String.
+		 */
 		private String priority;
-		private boolean isHidden;
+
+		/**
+		 * hidden boolean.
+		 */
+		private boolean hidden;
+
+		/**
+		 * batchClass BatchClass.
+		 */
 		private BatchClass batchClass;
+
+		/**
+		 * docPageTypes Map<String, PageType>.
+		 */
 		private Map<String, PageType> docPageTypes = new HashMap<String, PageType>();
+
+		/**
+		 * docFieldTypes Map<String, FieldType>.
+		 */
 		private Map<String, FieldType> docFieldTypes = new HashMap<String, FieldType>();
+
+		/**
+		 * docFunctionKeys Map<String, FunctionKey>.
+		 */
 		private Map<String, FunctionKey> docFunctionKeys = new HashMap<String, FunctionKey>();
 
 		/**
-		 * @return the name
+		 * To get name.
+		 * 
+		 * @return String
 		 */
 		public String getName() {
 			return name;
 		}
 
 		/**
-		 * @param name the name to set
+		 * To set name.
+		 * 
+		 * @param name String
 		 */
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
 		/**
-		 * @return the description
+		 * To get description.
+		 * 
+		 * @return String
 		 */
 		public String getDescription() {
 			return description;
 		}
 
 		/**
-		 * @param description the description to set
+		 * To set description.
+		 * 
+		 * @param description String
 		 */
-		public void setDescription(String description) {
+		public void setDescription(final String description) {
 			this.description = description;
 		}
 
 		/**
-		 * @return the minConfidenceThreshold
+		 * To get min confidence threshold.
+		 * 
+		 * @return float
 		 */
 		public float getMinConfidenceThreshold() {
 			return minConfidenceThreshold;
 		}
 
 		/**
-		 * @param minConfidenceThreshold the minConfidenceThreshold to set
+		 * To set min confidence threshold.
+		 * 
+		 * @param minConfidenceThreshold float
 		 */
-		public void setMinConfidenceThreshold(float minConfidenceThreshold) {
+		public void setMinConfidenceThreshold(final float minConfidenceThreshold) {
 			this.minConfidenceThreshold = minConfidenceThreshold;
 		}
 
 		/**
-		 * @return the priority
+		 * To get priority.
+		 * 
+		 * @return String
 		 */
 		public String getPriority() {
 			return priority;
 		}
 
 		/**
-		 * @param priority the priority to set
+		 * To set priority.
+		 * 
+		 * @param priority String
 		 */
-		public void setPriority(String priority) {
+		public void setPriority(final String priority) {
 			this.priority = priority;
 		}
 
 		/**
-		 * @return the docPageTypes
+		 * To get Doc Page Types.
+		 * 
+		 * @return Map<String, PageType>
 		 */
 		public Map<String, PageType> getDocPageTypes() {
 			return docPageTypes;
 		}
 
 		/**
-		 * @param docPageTypes the docPageTypes to set
+		 * To set Doc Page Types.
+		 * 
+		 * @param docPageTypes Map<String, PageType>
 		 */
-		public void setDocPageTypes(Map<String, PageType> docPageTypes) {
+		public void setDocPageTypes(final Map<String, PageType> docPageTypes) {
 			this.docPageTypes = docPageTypes;
 		}
 
+		/**
+		 * To get Doc Function Keys.
+		 * 
+		 * @return Map<String, FunctionKey>
+		 */
 		public Map<String, FunctionKey> getDocFunctionKeys() {
 			return docFunctionKeys;
 		}
 
-		public void setDocFunctionKeys(Map<String, FunctionKey> docFunctionKeys) {
+		/**
+		 * To set Doc Function Keys.
+		 * 
+		 * @param Map<String, FunctionKey>
+		 */
+		public void setDocFunctionKeys(final Map<String, FunctionKey> docFunctionKeys) {
 			this.docFunctionKeys = docFunctionKeys;
 		}
 
 		/**
-		 * @return the docFieldTypes
+		 * To get Doc Field Types.
+		 * 
+		 * @return Map<String, FieldType>
 		 */
 		public Map<String, FieldType> getDocFieldTypes() {
 			return docFieldTypes;
 		}
 
 		/**
-		 * @param docFieldTypes the docFieldTypes to set
+		 * To set Doc Field Types.
+		 * 
+		 * @param docFieldTypes Map<String, FieldType>
 		 */
-		public void setDocFieldTypes(Map<String, FieldType> docFieldTypes) {
+		public void setDocFieldTypes(final Map<String, FieldType> docFieldTypes) {
 			this.docFieldTypes = docFieldTypes;
 		}
 
 		/**
-		 * @return the id
+		 * To get id.
+		 * 
+		 * @return long
 		 */
 		public long getId() {
-			return id;
+			return idLong;
 		}
 
 		/**
-		 * @param id the id to set
+		 * To set id.
+		 * 
+		 * @param idLong long
 		 */
-		public void setId(long id) {
-			this.id = id;
+		public void setId(final long idLong) {
+			this.idLong = idLong;
 		}
 
 		/**
-		 * @return the creationDate
+		 * To get creation date.
+		 * 
+		 * @return Date
 		 */
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
 		/**
-		 * @param creationDate the creationDate to set
+		 * To set creation date.
+		 * 
+		 * @param creationDate Date
 		 */
-		public void setCreationDate(Date creationDate) {
+		public void setCreationDate(final Date creationDate) {
 			this.creationDate = creationDate;
 		}
 
 		/**
-		 * @return the lastModified
+		 * To get lastModified date.
+		 * 
+		 * @return Date
 		 */
 		public Date getLastModified() {
 			return lastModified;
 		}
 
 		/**
-		 * @param lastModified the lastModified to set
+		 * To set lastModified date.
+		 * 
+		 * @param lastModified Date
 		 */
-		public void setLastModified(Date lastModified) {
+		public void setLastModified(final Date lastModified) {
 			this.lastModified = lastModified;
 		}
 
 		/**
+		 * To check whether hidden is true or not.
 		 * 
-		 * @return isHidden
+		 * @return boolean
 		 */
 		public boolean isHidden() {
-			return isHidden;
+			return hidden;
 		}
 
 		/**
+		 * To set hidden.
 		 * 
-		 * @param isHidden
+		 * @param hidden boolean
 		 */
-		public void setHidden(boolean isHidden) {
-			this.isHidden = isHidden;
+		public void setHidden(final boolean hidden) {
+			this.hidden = hidden;
 		}
 
 		/**
-		 * @return the batchClass
+		 * To get batch class.
+		 * 
+		 * @return BatchClass
 		 */
 		public BatchClass getBatchClass() {
 			return batchClass;
 		}
 
 		/**
-		 * @param batchClass the batchClass to set
+		 * To set batch class.
+		 * 
+		 * @param batchClass BatchClass
 		 */
-		public void setBatchClass(BatchClass batchClass) {
+		public void setBatchClass(final BatchClass batchClass) {
 			this.batchClass = batchClass;
 		}
 
 		/**
-		 * @return the identifier
+		 * To get identifier.
+		 * 
+		 * @return String
 		 */
 		public String getIdentifier() {
 			return identifier;
 		}
 
 		/**
-		 * @param identifier the identifier to set
+		 * To set identifier.
+		 * 
+		 * @param identifier String
 		 */
-		public void setIdentifier(String identifier) {
+		public void setIdentifier(final String identifier) {
 			this.identifier = identifier;
 		}
 
 		/**
-		 * @return the rspProjectFileName
+		 * To get Rsp Project File Name.
+		 * 
+		 * @return String
 		 */
 		public String getRspProjectFileName() {
 			return rspProjectFileName;
 		}
 
 		/**
-		 * @param rspProjectFileName the rspProjectFileName to set
+		 * To set Rsp Project File Name.
+		 * 
+		 * @param rspProjectFileName String
 		 */
-		public void setRspProjectFileName(String rspProjectFileName) {
+		public void setRspProjectFileName(final String rspProjectFileName) {
 			this.rspProjectFileName = rspProjectFileName;
 		}
 
 	}
 
+	/**
+	 * This is class for page type.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public class PageType implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 5L;
-		private long id;
+
+		/**
+		 * idLong long.
+		 */
+		private long idLong;
+
+		/**
+		 * identifier String.
+		 */
 		private String identifier;
+
+		/**
+		 * creationDate Date.
+		 */
 		private Date creationDate;
+
+		/**
+		 * lastModified Date.
+		 */
 		private Date lastModified;
+
+		/**
+		 * name String.
+		 */
 		private String name;
+
+		/**
+		 * description String.
+		 */
 		private String description;
+
+		/**
+		 * docType com.ephesoft.dcma.da.domain.DocumentType.
+		 */
 		private com.ephesoft.dcma.da.domain.DocumentType docType;
 
 		/**
-		 * @return the name
+		 * To get name.
+		 * 
+		 * @return String
 		 */
 		public String getName() {
 			return name;
 		}
 
 		/**
-		 * @param name the name to set
+		 * To set name.
+		 * 
+		 * @param name String
 		 */
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
 		/**
-		 * @return the description
+		 * To get description.
+		 * 
+		 * @return String
 		 */
 		public String getDescription() {
 			return description;
 		}
 
 		/**
-		 * @param description the description to set
+		 * To set description.
+		 * 
+		 * @param description String
 		 */
-		public void setDescription(String description) {
+		public void setDescription(final String description) {
 			this.description = description;
 		}
 
 		/**
-		 * @return the id
+		 * To get id.
+		 * 
+		 * @return long
 		 */
 		public long getId() {
-			return id;
+			return idLong;
 		}
 
 		/**
-		 * @param id the id to set
+		 * To set id.
+		 * 
+		 * @param idLong long
 		 */
-		public void setId(long id) {
-			this.id = id;
+		public void setId(final long idLong) {
+			this.idLong = idLong;
 		}
 
 		/**
-		 * @return the creationDate
+		 * To get creation date.
+		 * 
+		 * @return Date
 		 */
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
 		/**
-		 * @param creationDate the creationDate to set
+		 * To set creation date.
+		 * 
+		 * @param creationDate Date
 		 */
-		public void setCreationDate(Date creationDate) {
+		public void setCreationDate(final Date creationDate) {
 			this.creationDate = creationDate;
 		}
 
 		/**
-		 * @return the lastModified
+		 * To get last modified date.
+		 * 
+		 * @return Date
 		 */
 		public Date getLastModified() {
 			return lastModified;
 		}
 
 		/**
-		 * @param lastModified the lastModified to set
+		 * To set last modified date.
+		 * 
+		 * @param lastModified Date
 		 */
-		public void setLastModified(Date lastModified) {
+		public void setLastModified(final Date lastModified) {
 			this.lastModified = lastModified;
 		}
 
 		/**
-		 * @return the docType
+		 * To get doc type.
+		 * 
+		 * @return com.ephesoft.dcma.da.domain.DocumentType
 		 */
 		public com.ephesoft.dcma.da.domain.DocumentType getDocType() {
 			return docType;
 		}
 
 		/**
-		 * @param docType the docType to set
+		 * To set doc type.
+		 * 
+		 * @param docType com.ephesoft.dcma.da.domain.DocumentType
 		 */
-		public void setDocType(com.ephesoft.dcma.da.domain.DocumentType docType) {
+		public void setDocType(final com.ephesoft.dcma.da.domain.DocumentType docType) {
 			this.docType = docType;
 		}
 
 		/**
-		 * @return the identifier
+		 * To get identifier.
+		 * 
+		 * @return String
 		 */
 		public String getIdentifier() {
 			return identifier;
 		}
 
 		/**
-		 * @param identifier the identifier to set
+		 * To set identifier.
+		 * 
+		 * @return String
 		 */
-		public void setIdentifier(String identifier) {
+		public void setIdentifier(final String identifier) {
 			this.identifier = identifier;
 		}
 
 	}
 
+	/**
+	 * This is class for Field Type.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class FieldType implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 6L;
-		private long id;
+
+		/**
+		 * identifier String.
+		 */
 		private String identifier;
+
+		/**
+		 * creationDate Date.
+		 */
 		private Date creationDate;
+
+		/**
+		 * lastModified Date.
+		 */
 		private Date lastModified;
+
+		/**
+		 * idLong long.
+		 */
+		private long idLong;
+
+		/**
+		 * name String.
+		 */
 		private String name;
+
+		/**
+		 * fieldOrderNumber int.
+		 */
 		private int fieldOrderNumber;
+
+		/**
+		 * description String.
+		 */
 		private String description;
+
+		/**
+		 * dataType String.
+		 */
 		private String dataType;
+
+		/**
+		 * pattern String.
+		 */
 		private String pattern;
+
+		/**
+		 * barcodeType String.
+		 */
 		private String barcodeType;
+
+		/**
+		 * fieldOptionValueList String.
+		 */
 		private String fieldOptionValueList;
-		private boolean isHidden;
-		private boolean isMultiLine;
+
+		/**
+		 * hidden boolean.
+		 */
+		private boolean hidden;
+
+		/**
+		 * multiLine boolean.
+		 */
+		private boolean multiLine;
+
+		/**
+		 * isReadOnly boolean.
+		 */
+		private boolean isReadOnly;
+
+		/**
+		 * sampleValue String.
+		 */
 		private String sampleValue;
+
+		/**
+		 * regexValidation Map<String, RegexValidation>.
+		 */
 		private Map<String, RegexValidation> regexValidation = new HashMap<String, RegexValidation>();
+
+		/**
+		 * docType com.ephesoft.dcma.da.domain.DocumentType.
+		 */
 		private com.ephesoft.dcma.da.domain.DocumentType docType;
+
+		/**
+		 * fieldKVExtraction Map<String, KVExtraction>.
+		 */
 		private Map<String, KVExtraction> fieldKVExtraction = new HashMap<String, KVExtraction>();
 
 		/**
-		 * @return the name
+		 * To get name.
+		 * 
+		 * @return String
 		 */
 		public String getName() {
 			return name;
 		}
 
 		/**
-		 * @param name the name to set
+		 * To set name.
+		 * 
+		 * @param name String
 		 */
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
 		/**
-		 * @return the description
+		 * To get description.
+		 * 
+		 * @return String
 		 */
 		public String getDescription() {
 			return description;
 		}
 
 		/**
-		 * @param description the description to set
+		 * To set description.
+		 * 
+		 * @param description String
 		 */
-		public void setDescription(String description) {
+		public void setDescription(final String description) {
 			this.description = description;
 		}
 
 		/**
-		 * @return the dataType
+		 * To get data type.
+		 * 
+		 * @return String
 		 */
 		public String getDataType() {
 			return dataType;
 		}
 
 		/**
-		 * @param dataType the dataType to set
+		 * To set data type.
+		 * 
+		 * @param dataType String
 		 */
-		public void setDataType(String dataType) {
+		public void setDataType(final String dataType) {
 			this.dataType = dataType;
 		}
 
 		/**
-		 * @return the pattern
+		 * To get pattern.
+		 * 
+		 * @return String
 		 */
 		public String getPattern() {
 			return pattern;
 		}
 
 		/**
-		 * @param pattern the pattern to set
+		 * To set pattern.
+		 * 
+		 * @param pattern String
 		 */
-		public void setPattern(String pattern) {
+		public void setPattern(final String pattern) {
 			this.pattern = pattern;
 		}
 
 		/**
-		 * @return the fieldKVExtraction
+		 * To get field KV Extraction.
+		 * 
+		 * @return Map<String, KVExtraction>
 		 */
 		public Map<String, KVExtraction> getFieldKVExtraction() {
 			return fieldKVExtraction;
 		}
 
 		/**
-		 * @param fieldKVExtraction the fieldKVExtraction to set
+		 * To set field KV Extraction.
+		 * 
+		 * @param fieldKVExtraction Map<String, KVExtraction>
 		 */
-		public void setFieldKVExtraction(Map<String, KVExtraction> fieldKVExtraction) {
+		public void setFieldKVExtraction(final Map<String, KVExtraction> fieldKVExtraction) {
 			this.fieldKVExtraction = fieldKVExtraction;
 		}
 
 		/**
-		 * @return the id
+		 * To get id.
+		 * 
+		 * @return long
 		 */
 		public long getId() {
-			return id;
+			return idLong;
 		}
 
 		/**
-		 * @param id the id to set
+		 * To set id.
+		 * 
+		 * @param idLong long
 		 */
-		public void setId(long id) {
-			this.id = id;
+		public void setId(final long idLong) {
+			this.idLong = idLong;
 		}
 
 		/**
-		 * @return the creationDate
+		 * To get creation date.
+		 * 
+		 * @return Date
 		 */
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
 		/**
-		 * @param creationDate the creationDate to set
+		 * To set creation date.
+		 * 
+		 * @param creationDate Date
 		 */
-		public void setCreationDate(Date creationDate) {
+		public void setCreationDate(final Date creationDate) {
 			this.creationDate = creationDate;
 		}
 
 		/**
-		 * @return the lastModified
+		 * To get last modified date.
+		 * 
+		 * @return Date
 		 */
 		public Date getLastModified() {
 			return lastModified;
 		}
 
 		/**
-		 * @param lastModified the lastModified to set
+		 * To set last modified date.
+		 * 
+		 * @param lastModified Date
 		 */
-		public void setLastModified(Date lastModified) {
+		public void setLastModified(final Date lastModified) {
 			this.lastModified = lastModified;
 		}
 
 		/**
-		 * @return the docType
+		 * To get doc type.
+		 * 
+		 * @return com.ephesoft.dcma.da.domain.DocumentType
 		 */
 		public com.ephesoft.dcma.da.domain.DocumentType getDocType() {
 			return docType;
 		}
 
 		/**
-		 * @param docType the docType to set
+		 * To set doc type.
+		 * 
+		 * @param docType com.ephesoft.dcma.da.domain.DocumentType
 		 */
-		public void setDocType(com.ephesoft.dcma.da.domain.DocumentType docType) {
+		public void setDocType(final com.ephesoft.dcma.da.domain.DocumentType docType) {
 			this.docType = docType;
 		}
 
 		/**
-		 * @return the identifier
+		 * To get identifier.
+		 * 
+		 * @return String
 		 */
 		public String getIdentifier() {
 			return identifier;
 		}
 
 		/**
-		 * @param identifier the identifier to set
+		 * To set identifier.
+		 * 
+		 * @param identifier String
 		 */
-		public void setIdentifier(String identifier) {
+		public void setIdentifier(final String identifier) {
 			this.identifier = identifier;
 		}
 
 		/**
-		 * @return the fieldOrderNumber
+		 * To get field Order Number.
+		 * 
+		 * @return int
 		 */
 		public int getFieldOrderNumber() {
 			return fieldOrderNumber;
 		}
 
 		/**
-		 * @param fieldOrderNumber the fieldOrderNumber to set
+		 * To set field Order Number.
+		 * 
+		 * @param fieldOrderNumber int
 		 */
-		public void setFieldOrderNumber(int fieldOrderNumber) {
+		public void setFieldOrderNumber(final int fieldOrderNumber) {
 			this.fieldOrderNumber = fieldOrderNumber;
 		}
 
+		/**
+		 * To get Barcode Type.
+		 * 
+		 * @return String
+		 */
 		public String getBarcodeType() {
 			return barcodeType;
 		}
 
-		public void setBarcodeType(String barcodeType) {
+		/**
+		 * To set Barcode Type.
+		 * 
+		 * @param barcodeType String
+		 */
+		public void setBarcodeType(final String barcodeType) {
 			this.barcodeType = barcodeType;
 		}
 
 		/**
-		 * @return fieldOptionValueList
+		 * To get field Option Value List.
+		 * 
+		 * @return String
 		 */
 		public String getFieldOptionValueList() {
 			return fieldOptionValueList;
 		}
 
 		/**
-		 * @param fieldOptionValueList field Option Value List to set
+		 * To set field Option Value List.
+		 * 
+		 * @param fieldOptionValueList String
 		 */
-		public void setFieldOptionValueList(String fieldOptionValueList) {
+		public void setFieldOptionValueList(final String fieldOptionValueList) {
 			this.fieldOptionValueList = fieldOptionValueList;
 		}
 
 		/**
+		 * To get hidden value.
 		 * 
-		 * @return isHidden
+		 * @return boolean
 		 */
 		public boolean isHidden() {
-			return isHidden;
+			return hidden;
 		}
 
 		/**
+		 * To set MultiLine.
 		 * 
-		 * @param isMultiLine
+		 * @param isMultiLine boolean
 		 */
-		public void setMultiLine(boolean isMultiLine) {
-			this.isMultiLine = isMultiLine;
+		public void setMultiLine(final boolean isMultiLine) {
+			this.multiLine = isMultiLine;
 		}
 
 		/**
+		 * To get MultiLine.
 		 * 
-		 * @return isMultiLine
+		 * @return boolean
 		 */
 		public boolean isMultiLine() {
-			return isMultiLine;
+			return multiLine;
 		}
 
 		/**
+		 * To set ready only.
 		 * 
-		 * @param isHidden
+		 * @param isReadOnly boolean
 		 */
-		public void setHidden(boolean isHidden) {
-			this.isHidden = isHidden;
+		public void setReadOnly(final boolean isReadOnly) {
+			this.isReadOnly = isReadOnly;
 		}
 
 		/**
+		 * To get ready only.
 		 * 
-		 * @return regexValidation
+		 * @return boolean
+		 */
+		public boolean getIsReadOnly() {
+			return isReadOnly;
+		}
+
+		/**
+		 * To set hidden.
+		 * 
+		 * @param isHidden boolean
+		 */
+		public void setHidden(final boolean isHidden) {
+			this.hidden = isHidden;
+		}
+
+		/**
+		 * To get Regex Validation.
+		 * 
+		 * @return Map<String, RegexValidation>
 		 */
 		public Map<String, RegexValidation> getRegexValidation() {
 			return regexValidation;
 		}
 
 		/**
+		 * To set Regex Validation.
 		 * 
-		 * @param regexValidation
+		 * @param regexValidation Map<String, RegexValidation>
 		 */
-		public void setRegexValidation(Map<String, RegexValidation> regexValidation) {
+		public void setRegexValidation(final Map<String, RegexValidation> regexValidation) {
 			this.regexValidation = regexValidation;
 		}
 
+		/**
+		 * To get sample value.
+		 * 
+		 * @return String
+		 */
 		public String getSampleValue() {
 			return sampleValue;
 		}
 
-		public void setSampleValue(String sampleValue) {
+		/**
+		 * To set sample value.
+		 * 
+		 * @param sampleValue String
+		 */
+		public void setSampleValue(final String sampleValue) {
 			this.sampleValue = sampleValue;
 		}
 
 	}
 
+	/**
+	 * This is class for KV Extraction.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class KVExtraction implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 7L;
-		private long id;
+
+		/**
+		 * identifier long.
+		 */
+		private long identifier;
+
+		/**
+		 * creationDate Date.
+		 */
 		private Date creationDate;
+
+		/**
+		 * lastModified Date.
+		 */
 		private Date lastModified;
+
+		/**
+		 * keyPattern String.
+		 */
 		private String keyPattern;
+
+		/**
+		 * location String.
+		 */
 		private String location;
+
+		/**
+		 * valuePattern String.
+		 */
 		private String valuePattern;
+
+		/**
+		 * fieldType com.ephesoft.dcma.da.domain.FieldType.
+		 */
 		private com.ephesoft.dcma.da.domain.FieldType fieldType;
 
 		/**
-		 * @return the keyPattern
+		 * To get key Pattern.
+		 * 
+		 * @return String
 		 */
 		public String getKeyPattern() {
 			return keyPattern;
 		}
 
 		/**
-		 * @param keyPattern the keyPattern to set
+		 * To set key Pattern.
+		 * 
+		 * @param keyPattern String
 		 */
-		public void setKeyPattern(String keyPattern) {
+		public void setKeyPattern(final String keyPattern) {
 			this.keyPattern = keyPattern;
 		}
 
 		/**
-		 * @return the location
+		 * To get location.
+		 * 
+		 * @return String
 		 */
 		public String getLocation() {
 			return location;
 		}
 
 		/**
-		 * @param location the location to set
+		 * To set location.
+		 * 
+		 * @param location String
 		 */
-		public void setLocation(String location) {
+		public void setLocation(final String location) {
 			this.location = location;
 		}
 
 		/**
-		 * @return the valuePattern
+		 * To get value Pattern.
+		 * 
+		 * @return String
 		 */
 		public String getValuePattern() {
 			return valuePattern;
 		}
 
 		/**
-		 * @param valuePattern the valuePattern to set
+		 * To set value pattern.
+		 * 
+		 * @param valuePattern String
 		 */
-		public void setValuePattern(String valuePattern) {
+		public void setValuePattern(final String valuePattern) {
 			this.valuePattern = valuePattern;
 		}
 
 		/**
-		 * @return the id
+		 * To get id.
+		 * 
+		 * @return long
 		 */
 		public long getId() {
-			return id;
+			return identifier;
 		}
 
 		/**
-		 * @param id the id to set
+		 * To set id.
+		 * 
+		 * @param identifier long
 		 */
-		public void setId(long id) {
-			this.id = id;
+		public void setId(final long identifier) {
+			this.identifier = identifier;
 		}
 
 		/**
-		 * @return the creationDate
+		 * To get creation date.
+		 * 
+		 * @return Date
 		 */
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
 		/**
-		 * @param creationDate the creationDate to set
+		 * To set creation date.
+		 * 
+		 * @param creationDate Date
 		 */
-		public void setCreationDate(Date creationDate) {
+		public void setCreationDate(final Date creationDate) {
 			this.creationDate = creationDate;
 		}
 
 		/**
-		 * @return the lastModified
+		 * To get last modified date.
+		 * 
+		 * @return Date
 		 */
 		public Date getLastModified() {
 			return lastModified;
 		}
 
 		/**
-		 * @param lastModified the lastModified to set
+		 * To set last modified date.
+		 * 
+		 * @param lastModified Date
 		 */
-		public void setLastModified(Date lastModified) {
+		public void setLastModified(final Date lastModified) {
 			this.lastModified = lastModified;
 		}
 
 		/**
-		 * @return the fieldType
+		 * To get Field Type.
+		 * 
+		 * @return com.ephesoft.dcma.da.domain.FieldType
 		 */
 		public com.ephesoft.dcma.da.domain.FieldType getFieldType() {
 			return fieldType;
 		}
 
 		/**
-		 * @param fieldType the fieldType to set
+		 * To set Field Type.
+		 * 
+		 * @param fieldType com.ephesoft.dcma.da.domain.FieldType
 		 */
-		public void setFieldType(com.ephesoft.dcma.da.domain.FieldType fieldType) {
+		public void setFieldType(final com.ephesoft.dcma.da.domain.FieldType fieldType) {
 			this.fieldType = fieldType;
 		}
 	}
 
+	/**
+	 * This is class for Regex Validation.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 * 
+	 */
 	public class RegexValidation implements Serializable {
 
+		/**
+		 * serialVersionUID long.
+		 */
 		private static final long serialVersionUID = 1L;
-		private long id;
+
+		/**
+		 * identifier long.
+		 */
+		private long identifier;
+
+		/**
+		 * creationDate Date.
+		 */
 		private Date creationDate;
+
+		/**
+		 * lastModified Date.
+		 */
 		private Date lastModified;
+
+		/**
+		 * pattern String.
+		 */
 		private String pattern;
+
+		/**
+		 * fieldType com.ephesoft.dcma.da.domain.FieldType.
+		 */
 		private com.ephesoft.dcma.da.domain.FieldType fieldType;
 
+		/**
+		 * To get the id.
+		 * 
+		 * @return identifier long
+		 */
 		public long getId() {
-			return id;
+			return identifier;
 		}
 
-		public void setId(long id) {
-			this.id = id;
+		/**
+		 * To set the id.
+		 * 
+		 * @param identifier long
+		 */
+		public void setId(final long identifier) {
+			this.identifier = identifier;
 		}
 
+		/**
+		 * To get creation date.
+		 * 
+		 * @return creationDate Date
+		 */
 		public Date getCreationDate() {
 			return creationDate;
 		}
 
-		public void setCreationDate(Date creationDate) {
+		/**
+		 * To set creation date.
+		 * 
+		 * @param creationDate Date
+		 */
+		public void setCreationDate(final Date creationDate) {
 			this.creationDate = creationDate;
 		}
 
+		/**
+		 * To get last modified date.
+		 * 
+		 * @return lastModified Date
+		 */
 		public Date getLastModified() {
 			return lastModified;
 		}
 
-		public void setLastModified(Date lastModified) {
+		/**
+		 * To set last modified date.
+		 * 
+		 * @param lastModified Date
+		 */
+		public void setLastModified(final Date lastModified) {
 			this.lastModified = lastModified;
 		}
 
+		/**
+		 * To get pattern.
+		 * 
+		 * @return pattern String
+		 */
 		public String getPattern() {
 			return pattern;
 		}
 
-		public void setPattern(String pattern) {
+		/**
+		 * To set pattern.
+		 * 
+		 * @param pattern String
+		 */
+		public void setPattern(final String pattern) {
 			this.pattern = pattern;
 		}
 
+		/**
+		 * To get Field Type.
+		 * 
+		 * @return fieldType com.ephesoft.dcma.da.domain.FieldType
+		 */
 		public com.ephesoft.dcma.da.domain.FieldType getFieldType() {
 			return fieldType;
 		}
 
-		public void setFieldType(com.ephesoft.dcma.da.domain.FieldType fieldType) {
+		/**
+		 * To set Field Type.
+		 * 
+		 * @param fieldType com.ephesoft.dcma.da.domain.FieldType
+		 */
+		public void setFieldType(final com.ephesoft.dcma.da.domain.FieldType fieldType) {
 			this.fieldType = fieldType;
 		}
 

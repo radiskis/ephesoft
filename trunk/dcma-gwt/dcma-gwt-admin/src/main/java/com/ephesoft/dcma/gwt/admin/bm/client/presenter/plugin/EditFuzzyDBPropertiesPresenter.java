@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,6 +40,7 @@ import java.util.List;
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.PluginNameConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.plugin.EditFuzzyDBPropertiesView;
@@ -51,12 +52,27 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows edit Fuzzy DB Properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditFuzzyDBPropertiesPresenter extends AbstractBatchClassPresenter<EditFuzzyDBPropertiesView> {
 
+	/**
+	 * Constructor.
+	 * @param controller BatchClassManagementController
+	 * @param view EditFuzzyDBPropertiesView
+	 */
 	public EditFuzzyDBPropertiesPresenter(BatchClassManagementController controller, EditFuzzyDBPropertiesView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		view.getDocFieldWidgets().clear();
@@ -75,8 +91,28 @@ public class EditFuzzyDBPropertiesPresenter extends AbstractBatchClassPresenter<
 			}
 		}
 		view.addButtons(row);
+		int index=0;
+		if ((view.getDocFieldWidgets()!=null)&&(view.getDocFieldWidgets().size()!=0)) {
+			while ((index < view.getDocFieldWidgets().size() && !view.getDocFieldWidgets().get(index).isListBox())
+					&& view.getDocFieldWidgets().get(index).getTextBoxWidget().getWidget().isReadOnly()) {
+				index++;
+			}
+			if (index < view.getDocFieldWidgets().size()) {
+				if (view.getDocFieldWidgets().get(index).isListBox()) {
+					view.getDocFieldWidgets().get(index).getListBoxwidget().setFocus(true);
+				} else {
+					view.getDocFieldWidgets().get(index).getTextBoxWidget().getWidget().setFocus(true);
+				}
+			}
+		}
 	}
 
+
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		view.getOkButton().addClickHandler(new ClickHandler() {
@@ -107,11 +143,11 @@ public class EditFuzzyDBPropertiesPresenter extends AbstractBatchClassPresenter<
 						BatchClassPluginConfigDTO batchClassPluginConfigDTO = docFieldWidget.getData();
 						if (docFieldWidget.isListBox()) {
 							if (docFieldWidget.getListBoxwidget().isMultipleSelect()) {
-								StringBuffer selectedItem = new StringBuffer("");
+								StringBuffer selectedItem = new StringBuffer(BatchClassManagementConstants.EMPTY_STRING);
 								Integer numberOfItemSelected = docFieldWidget.getListBoxwidget().getItemCount();
 								for (int i = 0; i < numberOfItemSelected; i++) {
 									if (docFieldWidget.getListBoxwidget().isItemSelected(i)) {
-										selectedItem.append(docFieldWidget.getListBoxwidget().getItemText(i)).append(';');
+										selectedItem.append(docFieldWidget.getListBoxwidget().getItemText(i)).append(BatchClassManagementConstants.SEMICOLON);
 									}
 								}
 								selectedItem = new StringBuffer(selectedItem.substring(0, selectedItem.length() - 1));

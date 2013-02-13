@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,16 +33,17 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.presenter;
+package com.ephesoft.dcma.gwt.customworkflow.client.presenter;
 
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
-import com.ephesoft.dcma.gwt.customWorkflow.client.CustomWorkflowController;
-import com.ephesoft.dcma.gwt.customWorkflow.client.i18n.CustomWorkflowMessages;
-import com.ephesoft.dcma.gwt.customWorkflow.client.view.ImportPluginView;
+import com.ephesoft.dcma.gwt.customworkflow.client.CustomWorkflowController;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowMessages;
+import com.ephesoft.dcma.gwt.customworkflow.client.view.ImportPluginView;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * 
@@ -60,14 +61,17 @@ public class ImportPluginPresenter extends AbstractCustomWorkflowPresenter<Impor
 
 	@Override
 	public void bind() {
+		/**
+		 * Bind your view with the values here.
+		 */
 	}
 
 	public void showPluginImportView() {
-		view.getDialogBox().setWidth("100%");
+		view.getDialogBox().setWidth(CustomWorkflowConstants._100);
 		view.getDialogBox().add(view);
 		view.getDialogBox().center();
 		view.getDialogBox().show();
-		view.getDialogBox().setText(LocaleDictionary.get().getMessageValue(CustomWorkflowMessages.ADD_NEW_PLUGIN));
+		view.getDialogBox().setText(LocaleDictionary.get().getConstantValue(CustomWorkflowConstants.ADD_NEW_PLUGIN));
 	}
 
 	@Override
@@ -91,7 +95,7 @@ public class ImportPluginPresenter extends AbstractCustomWorkflowPresenter<Impor
 
 	public void onSaveClicked(final String pluginName, final String xmlSourcePath, final String jarSourcePath) {
 
-		controller.getRpcService().addNewPlugin(pluginName, xmlSourcePath, jarSourcePath, new AsyncCallback<Boolean>() {
+		controller.getRpcService().addNewPlugin(pluginName, xmlSourcePath, jarSourcePath, new EphesoftAsyncCallback<Boolean>() {
 
 			@Override
 			public void onSuccess(Boolean isPluginAdded) {
@@ -100,14 +104,13 @@ public class ImportPluginPresenter extends AbstractCustomWorkflowPresenter<Impor
 			}
 
 			@Override
-			public void onFailure(Throwable message) {
+			public void customFailure(Throwable message) {
 
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						CustomWorkflowMessages.ERROR_ADDING_NEW_PLUGIN)
 						+ " : " + message.getMessage());
 				view.getDialogBox().hide();
 				ScreenMaskUtility.unmaskScreen();
-				// ConfirmationDialogUtil.showConfirmationDialogError(message.getMessage());
 			}
 		});
 

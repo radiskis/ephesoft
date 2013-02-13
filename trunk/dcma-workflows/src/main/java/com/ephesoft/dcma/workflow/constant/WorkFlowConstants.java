@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -34,6 +34,8 @@
 ********************************************************************************/ 
 
 package com.ephesoft.dcma.workflow.constant;
+
+import java.io.File;
 
 /**
  * This is a common constants file for Workflow plugin.
@@ -137,4 +139,211 @@ public interface WorkFlowConstants {
 	 * Variable for colon symbol.
 	 */
 	String COLON = ":";
+
+	/**
+	 * variable for workflow.deploy property.
+	 */
+	String WORKFLOW_DEPLOY = "workflow.deploy";
+
+	/**
+	 * variable for properties file name.
+	 */
+	String DCMA_WORKFLOWS_PROPERTIES = "dcma-workflows.properties";
+
+	/**
+	 * variable for plugins.
+	 */
+	String PLUGINS_CONSTANT = "plugins";
+
+	/**
+	 * variable for workflows.
+	 */
+	String WORKFLOWS_CONSTANT = "workflows";
+
+	/**
+	 * variable for modules.
+	 */
+	String MODULES_CONSTANT = "modules";
+
+	/**
+	 * variable for Workflow Status Running module.
+	 */
+	String WORKFLOW_STATUS_RUNNING = "Workflow_Status_Running";
+
+	/**
+	 * variable for Workflow Status Finished module.
+	 */
+	String WORKFLOW_STATUS_FINISHED = "Workflow_Status_Finished";
+
+	/**
+	 * variable for workflows directory path.
+	 */
+	String META_INF_DCMA_WORKFLOWS = "META-INF\\dcma-workflows";
+
+	/**
+	 * variable for empty string.
+	 */
+	String EMPTY_STRING = "";
+
+	/**
+	 * variable for lastModified string.
+	 */
+	String LAST_MODIFIED = "lastModified";
+
+	/**
+	 * variable for FIFO string.
+	 */
+	String FIFO = "FIFO";
+
+	/**
+	 * variable for workflow.batchPickingAlgo string.
+	 */
+	String WORKFLOW_BATCH_PICKING_ALGO = "workflow.batchPickingAlgo";
+
+	/**
+	 * variable for RoundRobin string.
+	 */
+	String ROUND_ROBIN = "RoundRobin";
+
+	/**
+	 * Constant for MINUS_P_KEYWORD.
+	 */
+	String MINUS_P_KEYWORD = "-p";
+
+	/**
+	 * Constant for MINUS_M_KEYWORD.
+	 */
+	String MINUS_M_KEYWORD = "-m";
+
+	/**
+	 * Constant for PERIOD.
+	 */
+	char PERIOD = '.';
+
+	/**
+	 * Batch name constant.
+	 */
+	public static final String CONSTANT_BATCH_NAME = "/batchName/";
+
+	/**
+	 * New batch instance identifier constant.
+	 */
+	public static final String CONSTANT_NEW_BATCH_INSTANCE_IDENTIFIER = "/newBatchInstanceIdentifier/";
+
+	/**
+	 * Module name constant.
+	 */
+	public static final String CONSTANT_MODULE_NAME = "/moduleName/";
+
+	/**
+	 * Batch class id constant.
+	 */
+	public static final String CONSTANT_BATCH_CLASS_ID = "/batchClassId/";
+
+	/**
+	 * Folder location constant.
+	 */
+	public static final String CONSTANT_FOLDER_LOCATION = "/folderLocation/";
+
+	/**
+	 * Server constant.
+	 */
+	public static final String CONSTANT_SERVER = "/server/";
+
+	/**
+	 * Batch identifier constant.
+	 */
+	public static final String CONSTANT_BATCH_IDENTIFIER = "/batchIdentifier/";
+
+	/**
+	 * HTTP Status code 403.
+	 */
+	public static final int STATUS_CODE_403 = 403;
+
+	/**
+	 * HTTP Status code 200.
+	 */
+	public static final int STATUS_CODE_200 = 200;
+
+	/**
+	 * NA constant.
+	 */
+	public static final String CONSTANT_NA = "NA";
+
+	/**
+	 * SPACE Constant.
+	 */
+	public static final String SPACE = " ";
+
+	/**
+	 * COMMA Constant.
+	 */
+	public static final String COMMA = ",";
+
+	/**
+	 * LOCK_MILLIS int.
+	 */
+	public static final int LOCK_MILLIS = 30 * 60 * 1000;
+
+	/**
+	 * HISTORY_SIZE int.
+	 */
+	public static final int HISTORY_SIZE = 200;
+
+	/**
+	 * IDLE_MILLIS_MAX int.
+	 */
+	public static final int IDLE_MILLIS_MAX = 5 * 60 * 1000;
+
+	/**
+	 * IDLE_MILLIS int.
+	 */
+	public static final int IDLE_MILLIS = 5 * 1000;
+
+	/**
+	 * NO_OF_THREADS int.
+	 */
+	public static final int NO_OF_THREADS = 3;
+
+	/**
+	 * FORWARD_SLASH String.
+	 */
+	public static final String FORWARD_SLASH = "/";
+
+	/**
+	 * WEB_SERVICE String.
+	 */
+	public static final String WEB_SERVICE = "ws";
+
+	/**
+	 * HTTP String.
+	 */
+	public static final String HTTP = "http://";
+
+	/**
+	 * BACKUP_PROPERTY_FILE String.
+	 */
+	public static final String BACKUP_PROPERTY_FILE = "META-INF" + File.separator + "dcma-util" + File.separator
+			+ "dcma-backup-service.properties";
+
+	/**
+	 * BATCH_INSTANCE_ID String.
+	 */
+	public static final String BATCH_INSTANCE_ID = "batchInstanceID";
+
+	/**
+	 * RESTART_WORKFLOW String.
+	 */
+	public static final String RESTART_WORKFLOW = "restartWorkflow";
+
+	/**
+	 * IS_MODULE_REMOTE String.
+	 */
+	public static final String IS_MODULE_REMOTE = "isModuleRemote";
+	
+	/**
+	 * THREAD_SLEEP int.
+	 */
+	public static final int THREAD_SLEEP = 200;
+
 }

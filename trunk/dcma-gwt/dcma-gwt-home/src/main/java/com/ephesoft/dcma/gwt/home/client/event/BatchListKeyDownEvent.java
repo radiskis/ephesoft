@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,26 +38,59 @@ package com.ephesoft.dcma.gwt.home.client.event;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.shared.GwtEvent;
 
+/**
+ * This class handles down key events.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.google.gwt.event.shared.GwtEvent
+ */
 public class BatchListKeyDownEvent extends GwtEvent<BatchListKeyDownEventHandler> {
 
-	public static Type<BatchListKeyDownEventHandler> TYPE = new Type<BatchListKeyDownEventHandler>();
+	/**
+	 * TYPE Type<BatchListKeyDownEventHandler>.
+	 */
+	public static final Type<BatchListKeyDownEventHandler> TYPE = new Type<BatchListKeyDownEventHandler>();
 
-	private KeyDownEvent event;
+	/**
+	 * event KeyDownEvent.
+	 */
+	private final KeyDownEvent event;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param event KeyDownEvent
+	 */
 	public BatchListKeyDownEvent(KeyDownEvent event) {
 		this.event = event;
 	}
 
+	/**
+	 * Overriden Dispatch method.
+	 * 
+	 * @param handler BatchListKeyDownEventHandler
+	 */
 	@Override
 	protected void dispatch(BatchListKeyDownEventHandler handler) {
 		handler.onKeyDown(this);
 	}
 
+	/**
+	 * To get Associated Type.
+	 * 
+	 * @return com.google.gwt.event.shared.GwtEvent.Type<BatchListKeyDownEventHandler>
+	 */
 	@Override
 	public com.google.gwt.event.shared.GwtEvent.Type<BatchListKeyDownEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 
+	/**
+	 * To get Event.
+	 * 
+	 * @return KeyDownEvent
+	 */
 	public KeyDownEvent getEvent() {
 		return event;
 	}

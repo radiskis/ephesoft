@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,32 +43,64 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for plugin_config_sample_value.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "plugin_config_sample_value")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class PluginConfigSampleValue extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = -4478630104435787396L;
 
+	/**
+	 * pluginConfig PluginConfig.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "plugin_config_id")
 	private PluginConfig pluginConfig;
 
+	/**
+	 * sampleValue String.
+	 */
 	@Column(name = "sample_value")
 	private String sampleValue;
 
+	/**
+	 * To get plugin config.
+	 * @return PluginConfig
+	 */
 	public PluginConfig getPluginConfig() {
 		return pluginConfig;
 	}
 
+	/**
+	 * To get sample value.
+	 * @return String
+	 */ 
 	public String getSampleValue() {
 		return sampleValue;
 	}
 
+	/**
+	 * To set sample value.
+	 * @param sampleValue String
+	 */
 	public void setSamplevalue(String sampleValue) {
 		this.sampleValue = sampleValue;
 	}
 
+	/**
+	 * To set plugin config.
+	 * @param pluginConfig PluginConfig
+	 */
 	public void setPluginConfig(PluginConfig pluginConfig) {
 		this.pluginConfig = pluginConfig;
 	}

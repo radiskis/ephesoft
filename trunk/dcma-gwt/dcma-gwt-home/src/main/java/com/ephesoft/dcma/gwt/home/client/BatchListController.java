@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,31 +35,64 @@
 
 package com.ephesoft.dcma.gwt.home.client;
 
-import com.ephesoft.dcma.gwt.core.client.Controller;
+import com.ephesoft.dcma.gwt.core.client.AbstractController;
 import com.ephesoft.dcma.gwt.home.client.presenter.BatchListPresenter;
 import com.ephesoft.dcma.gwt.home.client.view.LandingView;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Composite;
 
-public class BatchListController extends Controller {
+/**
+ * This class provides functionality to control batch list view, save, update etc.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.AbstractController
+ */
+public class BatchListController extends AbstractController {
 
+	/**
+	 * batchListPresenter BatchListPresenter.
+	 */
 	private BatchListPresenter batchListPresenter;
 
+	/**
+	 * view LandingView.
+	 */
 	private LandingView view;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param eventBus HandlerManager
+	 * @param rpcService TableModelServiceAsync
+	 */
 	public BatchListController(HandlerManager eventBus, TableModelServiceAsync rpcService) {
 		super(eventBus, rpcService);
 	}
 
+	/**
+	 * To get presenter.
+	 * 
+	 * @return BatchListPresenter
+	 */
 	public BatchListPresenter getPresenter() {
 		return batchListPresenter;
 	}
-	
-	
+
+	/**
+	 * To get view.
+	 * 
+	 * @return LandingView
+	 */
 	public LandingView getView() {
 		return view;
 	}
 
+	/**
+	 * To create View.
+	 * 
+	 * @return Composite
+	 */
 	@Override
 	public Composite createView() {
 		this.view = new LandingView();
@@ -68,18 +101,31 @@ public class BatchListController extends Controller {
 		return this.view;
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	/**
+	 * To refresh.
+	 */
 	@Override
 	public void refresh() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
+	/**
+	 * To get Rpc Service.
+	 * 
+	 * @return TableModelServiceAsync
+	 */
 	@Override
 	public TableModelServiceAsync getRpcService() {
 		return (TableModelServiceAsync) super.getRpcService();

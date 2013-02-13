@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,49 +35,89 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.tableinfo;
 
+import java.util.List;
+
+import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
+import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.TableTestResultView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo.TableInfoView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
+import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
+import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.DialogBox;
 
+/**
+ * The presenter for view that shows the table info.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class TableInfoViewPresenter extends AbstractBatchClassPresenter<TableInfoView> {
 
+	/**
+	 * tableInfoDetailPresenter TableInfoDetailPresenter.
+	 */
 	private final TableInfoDetailPresenter tableInfoDetailPresenter;
 
+	/**
+	 * editTableInfoPresenter EditTableInfoPresenter.
+	 */
 	private final EditTableInfoPresenter editTableInfoPresenter;
 
-	public TableInfoViewPresenter(BatchClassManagementController controller, TableInfoView view) {
+	/**
+	 * tableTestResultView TableTestResultView.
+	 */
+	private final TableTestResultView tableTestResultView = new TableTestResultView();
 
+	public TableInfoViewPresenter(BatchClassManagementController controller, TableInfoView view) {
 		super(controller, view);
 		this.tableInfoDetailPresenter = new TableInfoDetailPresenter(controller, view.getTableInfoDetailView());
 		this.editTableInfoPresenter = new EditTableInfoPresenter(controller, view.getEditTableInfoView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		tableInfoDetailPresenter.bind();
-		editTableInfoPresenter.bind();
 		if (controller.getSelectedTableInfoField() != null) {
 			view.createTableColumnInfoList(controller.getSelectedTableInfoField().getColumnInfoDTOs());
 
 		}
+		editTableInfoPresenter.bind();
 	}
 
+	/**
+	 * To show table info view.
+	 */
 	public void showTableInfoView() {
 		view.getTableInfoVerticalPanel().setVisible(Boolean.TRUE);
 		view.getTableInfoConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To show edit table info view.
+	 */
 	public void showEditTableInfoView() {
 		view.getTableInfoVerticalPanel().setVisible(Boolean.FALSE);
 		view.getTableInfoConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To show view on add table column button click.
+	 */
 	public void onAddTCButtonClicked() {
 		if (controller.isAdd()) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
@@ -91,6 +131,11 @@ public class TableInfoViewPresenter extends AbstractBatchClassPresenter<TableInf
 		controller.getMainPresenter().showTableColumnInfoView(true);
 	}
 
+	/**
+	 * To create Table Column Info DTO Object.
+	 * 
+	 * @return TableColumnInfoDTO
+	 */
 	public TableColumnInfoDTO createTableColumnInfoDTOObject() {
 		TableColumnInfoDTO tcColumnInfoDTO = new TableColumnInfoDTO();
 		tcColumnInfoDTO.setNew(true);
@@ -99,19 +144,43 @@ public class TableInfoViewPresenter extends AbstractBatchClassPresenter<TableInf
 		return tcColumnInfoDTO;
 	}
 
+	/**
+	 * To perform binding on edit Table Info Properties Button Click.
+	 */
 	public void onEditTableInfoPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editTableInfoPresenter.bind();
 		showEditTableInfoView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editTableInfoPresenter.bind();
 	}
 
+	/**
+	 * To show view on edit TC Button Click.
+	 * 
+	 * @param identifier String
+	 */
 	public void onEditTCButtonClicked(String identifier) {
 		controller.setSelectedTableColumnInfoField(controller.getSelectedTableInfoField().getTCInfoDTOByIdentifier(identifier));
 		controller.setAdd(false);
-		controller.getMainPresenter().showTableColumnInfoView(true);
+		controller.getMainPresenter().showTableColumnInfoView(false);
 	}
 
+	/**
+	 * To show view on advanced edit Button Click.
+	 * 
+	 * @param identifier String
+	 */
+	public void onAdvEditButtonClicked(String identifier) {
+		controller.setSelectedTableColumnInfoField(controller.getSelectedTableInfoField().getTCInfoDTOByIdentifier(identifier));
+		controller.setAdd(false);
+		controller.getMainPresenter().showAdvancedTableExtractionView();
+	}
+
+	/**
+	 * To show view on delete TC Button Click.
+	 * 
+	 * @param identifier String
+	 */
 	public void onDeleteTCButtonClicked(String identifier) {
 		controller.getSelectedTableInfoField().getTCInfoDTOByIdentifier(identifier).setDeleted(true);
 		controller.getBatchClass().setDirty(true);
@@ -119,8 +188,62 @@ public class TableInfoViewPresenter extends AbstractBatchClassPresenter<TableInf
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.
+	}
+
+	/**
+	 * To perform operations on Test Table Button Click.
+	 */
+	public void onTestTableButtonClicked() {
+		ScreenMaskUtility.maskScreen();
+		controller.setTableInfoSelectedField(controller.getSelectedTableInfoField());
+
+		controller.getRpcService().testTablePattern(controller.getBatchClass(), controller.getSelectedTableInfoField(),
+				new EphesoftAsyncCallback<List<TestTableResultDTO>>() {
+
+					@Override
+					public void customFailure(Throwable throwable) {
+						ScreenMaskUtility.unmaskScreen();
+						final ConfirmationDialog dialog = ConfirmationDialogUtil.showConfirmationDialog(throwable.getMessage(),
+								MessageConstants.TITLE_TEST_FAILURE, Boolean.TRUE, Boolean.TRUE);
+						dialog.addDialogListener(new DialogListener() {
+
+							@Override
+							public void onOkClick() {
+								dialog.hide(true);
+							}
+
+							@Override
+							public void onCancelClick() {
+								// TODO Auto-generated method stub
+							}
+						});
+
+						dialog.okButton.setStyleName(AdminConstants.BUTTON_STYLE);
+
+					}
+
+					@Override
+					public void onSuccess(List<TestTableResultDTO> outputDtos) {
+						ScreenMaskUtility.unmaskScreen();
+						DialogBox dialogBox = new DialogBox();
+						dialogBox.addStyleName("width500px");
+						dialogBox.setHeight("200px");
+						tableTestResultView.createTestTableList(outputDtos);
+						tableTestResultView.setDialogBox(dialogBox);
+						dialogBox.setText(MessageConstants.TEST_TABLE_RESULT_HEADER);
+						dialogBox.setWidget(tableTestResultView);
+						dialogBox.center();
+						tableTestResultView.getBackButton().setFocus(true);
+						dialogBox.show();
+					}
+				});
 	}
 }

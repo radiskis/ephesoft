@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,6 +37,13 @@ package com.ephesoft.dcma.core;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
+/**
+ * Class for Tesseract Version Property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.PluginProperty
+ */
 public enum TesseractVersionProperty implements PluginProperty {
 
 	/**
@@ -44,20 +51,31 @@ public enum TesseractVersionProperty implements PluginProperty {
 	 */
 	TESSERACT_VERSIONS("tesseract.versions"),
 	/**
-	 * property name of display name of tesseract version 2
+	 * property name of display name of tesseract version 2.
 	 */
 	TESSERACT_VERSION_2("tesseract_version_2"),
 	/**
-	 * property name of display name of tesseract version 3
+	 * property name of display name of tesseract version 3.
 	 */
 	TESSERACT_VERSION_3("tesseract_version_3");
 	
+	/**
+	 * key String.
+	 */
 	private String key;
 	
+	/**
+	 * Constructor.
+	 * @param key String
+	 */
 	TesseractVersionProperty(final String key) {
 		this.key = key;
 	}
 
+	/**
+	 * To get property.
+	 * @return the property
+	 */
 	@Override
 	public String getPropertyKey() {
 		return key;

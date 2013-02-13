@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,7 +59,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 
 	private Map<String, BatchClassDynamicPluginConfigDTO> batchClassDynamicPluginConfigsMap = new LinkedHashMap<String, BatchClassDynamicPluginConfigDTO>();
 	
-	public BatchClassDynamicPluginConfigDTO getChildById(String identifier) {
+	public BatchClassDynamicPluginConfigDTO getChildById(final String identifier) {
 		return batchClassDynamicPluginConfigsMap.get(identifier);
 	}
 
@@ -67,7 +67,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return batchClassPlugin;
 	}
 
-	public void setBatchClassPlugin(BatchClassPluginDTO batchClassPlugin) {
+	public void setBatchClassPlugin(final BatchClassPluginDTO batchClassPlugin) {
 		this.batchClassPlugin = batchClassPlugin;
 	}
 
@@ -75,7 +75,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -83,7 +83,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(final String value) {
 		this.value = value;
 	}
 
@@ -91,7 +91,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 
@@ -99,7 +99,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return identifier;
 	}
 
-	public void setIdentifier(String identifier) {
+	public void setIdentifier(final String identifier) {
 		this.identifier = identifier;
 	}
 
@@ -107,7 +107,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return parent;
 	}
 
-	public void setParent(BatchClassDynamicPluginConfigDTO parent) {
+	public void setParent(final BatchClassDynamicPluginConfigDTO parent) {
 		this.parent = parent;
 	}
 
@@ -115,7 +115,7 @@ public class BatchClassDynamicPluginConfigDTO implements IsSerializable {
 		return children;
 	}
 
-	public void setChildren(Collection<BatchClassDynamicPluginConfigDTO> children) {
+	public void setChildren(final Collection<BatchClassDynamicPluginConfigDTO> children) {
 		this.children = children;
 	}
 	

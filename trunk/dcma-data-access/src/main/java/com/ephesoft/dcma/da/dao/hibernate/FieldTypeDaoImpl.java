@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,28 +59,81 @@ import com.ephesoft.dcma.da.domain.FieldType;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.FieldTypeDao
  */
 @Repository
 public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTypeDao {
 
+	/**
+	 * REGEX_VALIDATION String.
+	 */
 	private static final String REGEX_VALIDATION = "regexValidation";
+	
+	/**
+	 * NAME String.
+	 */
 	private static final String NAME = "name";
+	
+	/**
+	 * BATCH_CLASS1_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS1_IDENTIFIER = "batchClass1.identifier";
+	
+	/**
+	 * BATCH_CLASS2_IDENTIFIER String.
+	 */
 	private static final String BATCH_CLASS2_IDENTIFIER = "batchClass2.identifier";
+	
+	/**
+	 * BATCH_CLASS2 String.
+	 */
 	private static final String BATCH_CLASS2 = "batchClass2";
+	
+	/**
+	 * BATCH_CLASS String.
+	 */
 	private static final String BATCH_CLASS = "batchClass";
+	
+	/** 
+	 * IDENTIFIER String.
+	 */
 	private static final String IDENTIFIER = "identifier";
+	
+	/**
+	 * BATCH_CLASS1 String.
+	 */
 	private static final String BATCH_CLASS1 = "batchClass1";
+	
+	/**
+	 * DOC_TYPE_BATCH_CLASS String.
+	 */
 	private static final String DOC_TYPE_BATCH_CLASS = "docType.batchClass";
+	
+	/**
+	 * DOC_TYPE_NAME String.
+	 */
 	private static final String DOC_TYPE_NAME = "docType.name";
+	
+	/**
+	 * DOC_TYPE String.
+	 */
 	private static final String DOC_TYPE = "docType";
+	
+	/**
+	 * FIELD_ORDER_NUMBER String.
+	 */
+	private static final String FIELD_ORDER_NUMBER = "fieldOrderNumber";
+	
+	/**
+	 * LOG to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(FieldTypeDaoImpl.class);
 
 	/**
-	 * An api to fetch all Field types by document type name.
+	 * An API to fetch all Field types by document type name.
 	 * 
-	 * @param docTypeName
-	 * @param batchInstanceID
+	 * @param docTypeName String
+	 * @param batchInstanceIdentifierIdentifier String
 	 * @return List<FieldType>
 	 */
 	@Override
@@ -96,11 +149,20 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
 		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
 		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(FIELD_ORDER_NUMBER));
 
 		return find(criteria);
 
 	}
 
+	/**
+	 * An API to get field type for a batch for a particular document.
+	 *  
+	 * @param fieldTypeName String
+	 * @param docTypeName String
+	 * @param batchInstanceIdentifier String
+	 * @return FieldType
+	 */
 	@Override
 	public FieldType getFieldType(String fieldTypeName, String docTypeName, String batchInstanceIdentifier) {
 
@@ -121,7 +183,7 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	}
 
 	/**
-	 * An api to fetch all Field types by document type.
+	 * An API to fetch all Field types by document type.
 	 * 
 	 * @param documentType DocumentType
 	 * @return List<FieldType>
@@ -130,14 +192,15 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	public List<FieldType> getFdTypeByDocumentType(DocumentType documentType) {
 		DetachedCriteria criteria = criteria();
 		criteria.add(Restrictions.eq(DOC_TYPE, documentType));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(FIELD_ORDER_NUMBER));
 		return find(criteria);
 	}
 
 	/**
-	 * An api to fetch all Field types by document type name.
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName String
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @param isKVExtraction boolean
 	 * @return List<FieldType>
 	 */
@@ -159,14 +222,15 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
 		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
 		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(FIELD_ORDER_NUMBER));
 		return find(criteria);
 	}
 
 	/**
-	 * An api to fetch all Field types by document type name.
+	 * An API to fetch all Field types by document type name.
 	 * 
 	 * @param docTypeName String
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<FieldType>
 	 */
 	@Override
@@ -186,13 +250,14 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		subQuery.createAlias(BATCH_CLASS, BATCH_CLASS2, JoinFragment.INNER_JOIN);
 		subQuery.setProjection(Projections.property(BATCH_CLASS2_IDENTIFIER));
 		criteria.add(Subqueries.propertyEq(BATCH_CLASS1_IDENTIFIER, subQuery));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(FIELD_ORDER_NUMBER));
 
 		return find(criteria);
 
 	}
 
 	/**
-	 * An api to insert the fieldType object.
+	 * An API to insert the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
@@ -201,7 +266,7 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	}
 
 	/**
-	 * An api to update the fieldType object.
+	 * An API to update the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
@@ -210,7 +275,7 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 	}
 
 	/**
-	 * An api to remove the fieldType object.
+	 * An API to remove the fieldType object.
 	 * 
 	 * @param fieldType FieldType
 	 */
@@ -218,6 +283,13 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		remove(fieldType);
 	}
 
+	/**
+	 * An API to fetch all Field types by document type name for a batch class.
+	 * 
+	 * @param docTypeName String
+	 * @param batchClassIdentifier String
+	 * @return List<FieldType>
+	 */
 	@Override
 	public List<FieldType> getFdTypeByDocumentTypeNameForBatchClass(String docTypeName, String batchClassIdentifier) {
 		LOG.info("batchClassID ID  : " + batchClassIdentifier);
@@ -226,6 +298,7 @@ public class FieldTypeDaoImpl extends HibernateDao<FieldType> implements FieldTy
 		criteria.add(Restrictions.eq(DOC_TYPE_NAME, docTypeName));
 		criteria.createAlias(DOC_TYPE_BATCH_CLASS, BATCH_CLASS1, JoinFragment.INNER_JOIN);
 		criteria.add(Restrictions.eq(BATCH_CLASS1_IDENTIFIER, batchClassIdentifier));
+		criteria.addOrder(org.hibernate.criterion.Order.asc(FIELD_ORDER_NUMBER));
 		return find(criteria);
 	}
 }

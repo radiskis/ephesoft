@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,23 +40,46 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.tableinfo.TableInfoDetailView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the table info details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class TableInfoDetailPresenter extends AbstractBatchClassPresenter<TableInfoDetailView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view TableInfoDetailView
+	 */
 	public TableInfoDetailPresenter(BatchClassManagementController controller, TableInfoDetailView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedTableInfoField() != null) {
 			view.setName(controller.getSelectedTableInfoField().getName());
 			view.setStartPattern(controller.getSelectedTableInfoField().getStartPattern());
 			view.setEndPattern(controller.getSelectedTableInfoField().getEndPattern());
+			view.setTableExtractionAPI(controller.getSelectedTableInfoField().getTableExtractionAPI());
+			view.setWidthOfMultiLine(controller.getSelectedTableInfoField().getWidthOfMultiline());
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 }

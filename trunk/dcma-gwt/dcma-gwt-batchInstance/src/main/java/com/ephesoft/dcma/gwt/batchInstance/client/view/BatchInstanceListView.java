@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,18 +33,30 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.batchInstance.client.view;
+package com.ephesoft.dcma.gwt.batchinstance.client.view;
 
 import com.ephesoft.dcma.da.property.BatchInstanceProperty;
-import com.ephesoft.dcma.gwt.batchInstance.client.i18n.BatchInstanceConstants;
-import com.ephesoft.dcma.gwt.batchInstance.client.presenter.BatchInstanceListPresenter;
+import com.ephesoft.dcma.gwt.batchinstance.client.i18n.BatchInstanceConstants;
+import com.ephesoft.dcma.gwt.batchinstance.client.presenter.BatchInstanceListPresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show batch instance list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class BatchInstanceListView extends View<BatchInstanceListPresenter> {
 
+	/**
+	 * To get Batch Instance List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getBatchInstanceListView() {
 		return listView;
 	}
@@ -53,56 +65,72 @@ public class BatchInstanceListView extends View<BatchInstanceListPresenter> {
 	 * Header column for priority.
 	 */
 	public HeaderColumn priority = new HeaderColumn(0, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_PRIORITY), 6);
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_PRIORITY), BatchInstanceConstants.SIX);
 
 	/**
 	 * Header column for batchId.
 	 */
 	public HeaderColumn batchId = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHID), 7, true, BatchInstanceProperty.ID);
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHID), BatchInstanceConstants.SEVEN, true, BatchInstanceProperty.ID);
 
 	/**
 	 * Header column for batch class name.
 	 */
-	public HeaderColumn batchClassName = new HeaderColumn(3, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHCLASSNAME), 14);
+	public HeaderColumn batchClassName = new HeaderColumn(BatchInstanceConstants.THREE, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHCLASSNAME), BatchInstanceConstants.TWELVE, true,
+			BatchInstanceProperty.BATCHCLASSNAME);
 
 	/**
 	 * Header column for batch name.
 	 */
-	public HeaderColumn batchName = new HeaderColumn(4, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHNAME), 11, true, BatchInstanceProperty.BATCHNAME);
+	public HeaderColumn batchName = new HeaderColumn(BatchInstanceConstants.FOUR, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHNAME), BatchInstanceConstants.TEN, true, BatchInstanceProperty.BATCHNAME);
+
+	/**
+	 * Header column for batch creation date.
+	 */
+	public HeaderColumn batchCreatedOn = new HeaderColumn(BatchInstanceConstants.SIX, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHCREATEDON), BatchInstanceConstants.FIFTEEN, true,
+			BatchInstanceProperty.CREATIONDATE);
 
 	/**
 	 * Header column for batch update date.
 	 */
-	public HeaderColumn batchUpdatedOn = new HeaderColumn(6, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHUPDATEDON), 16);
+	public HeaderColumn batchUpdatedOn = new HeaderColumn(BatchInstanceConstants.SEVEN, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_BATCHUPDATEDON), BatchInstanceConstants.FIFTEEN, true,
+			BatchInstanceProperty.LASTMODIFIED);
 
 	/**
 	 * Header column for current user.
 	 */
-	public HeaderColumn currentUser = new HeaderColumn(5, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_CURRENT_USER), 10);
+	public HeaderColumn currentUser = new HeaderColumn(BatchInstanceConstants.FIVE, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_CURRENT_USER), BatchInstanceConstants.EIGHT);
 
 	/**
 	 * Header column for batch status.
 	 */
 	public HeaderColumn status = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_STATUS), 18);
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_STATUS), BatchInstanceConstants.FOURTEEN);
 
 	/**
-	 * Header column for batch isRemote
+	 * Header column for batch isRemote.
 	 */
-	public HeaderColumn isRemote = new HeaderColumn(7, LocaleDictionary.get().getConstantValue(
-			BatchInstanceConstants.LABEL_TABLE_COLUMN_IS_REMOTE), 13);
+	public HeaderColumn isRemote = new HeaderColumn(BatchInstanceConstants.EIGHT, LocaleDictionary.get().getConstantValue(
+			BatchInstanceConstants.LABEL_TABLE_COLUMN_IS_REMOTE), BatchInstanceConstants.NINE);
 
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public BatchInstanceListView() {
 		super();
 		setInitiallySetViewOrder();
-		listView.addHeaderColumns(priority, status, batchId, currentUser, batchClassName, batchName, batchUpdatedOn, isRemote);
+		listView.addHeaderColumns(priority, status, batchId, currentUser, batchClassName, batchName, batchCreatedOn, batchUpdatedOn,
+				isRemote);
 	}
 
 	private void setInitiallySetViewOrder() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,19 +38,18 @@ package com.ephesoft.dcma.gwt.core.client.i18n;
 
 public class LocaleInfo {
 
-	private String locale;
-	private String constantVarName;
-	private String messageVarName;
+	private final String locale;
+	private final String constantVarName;
+	private final String messageVarName;
 	
 	public LocaleInfo(String locale, String constantVarName, String messageVarName) {
 		this.locale = locale;
-		
-		this.constantVarName = constantVarName;
-		this.messageVarName = messageVarName;
-
 		if(locale.length() > 0) {
-			this.constantVarName += '_' + locale;
-			this.messageVarName  += '_' + locale;
+			this.constantVarName = constantVarName + '_' + locale;
+			this.messageVarName  = messageVarName + '_' + locale;
+		}else{
+			this.constantVarName = constantVarName;
+			this.messageVarName = messageVarName;
 		}
 	}
 

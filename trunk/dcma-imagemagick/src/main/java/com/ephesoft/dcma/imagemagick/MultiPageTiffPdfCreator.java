@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -62,11 +62,13 @@ import com.ephesoft.dcma.core.common.FileType;
 import com.ephesoft.dcma.core.component.ICommonConstants;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.core.threadpool.BatchInstanceThread;
+import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.imagemagick.constant.ImageMagicKConstants;
 import com.ephesoft.dcma.imagemagick.impl.GhostScriptPDFCreator;
 import com.ephesoft.dcma.imagemagick.impl.HOCRtoPDFCreator;
 import com.ephesoft.dcma.imagemagick.impl.ITextPDFCreator;
 import com.ephesoft.dcma.imagemagick.impl.ImageMagicKPDFCreator;
+import com.ephesoft.dcma.kvfinder.service.KVFinderService;
 import com.ephesoft.dcma.util.FileNameFormatter;
 import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.util.IUtilCommonConstants;
@@ -78,7 +80,8 @@ import com.ephesoft.dcma.util.TIFFUtil;
  * This class is contains methods which can detect the batch.xml file in a folder and export it to the specified folder.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl 
  */
 @Component
 public class MultiPageTiffPdfCreator implements ICommonConstants {
@@ -94,10 +97,16 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MultiPageTiffPdfCreator.class);
 
 	/**
-	 * Reference for batchSchemaService.
+	 * Reference for {@link BatchSchemaService}.
 	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
+	
+	/**
+	 * Instance of {@link KVFinderService}
+	 */
+	@Autowired
+	private KVFinderService kvFinderService;
 
 	/**
 	 * List of commands for multipage tiff generation.
@@ -120,35 +129,35 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	private transient String generateDisplayPng;
 
 	/**
-	 * Input image parameters for convert command
+	 * Input image parameters for convert command.
 	 */
 	private transient String inputParameters;
 
 	/**
-	 * Output image parameters for convert command
+	 * Output image parameters for convert command.
 	 */
 	private transient String outputParameters;
 
 	/**
-	 * Reference for ghostScriptPDFCreator.
+	 * Reference for {@link GhostScriptPDFCreator}.
 	 */
 	@Autowired
 	private GhostScriptPDFCreator ghostScriptPDFCreator;
 
 	/**
-	 * Reference for imageMagicKPDFCreator.
+	 * Reference for {@link ImageMagicKPDFCreator}.
 	 */
 	@Autowired
 	private ImageMagicKPDFCreator imageMagicKPDFCreator;
 
 	/**
-	 * Reference for iTextPDFCreator.
+	 * Reference for {@link ITextPDFCreator}.
 	 */
 	@Autowired
 	private ITextPDFCreator iTextPDFCreator;
 
 	/**
-	 * Reference for hocrToPDFCreator.
+	 * Reference for {@link HOCRtoPDFCreator}.
 	 */
 	@Autowired
 	private HOCRtoPDFCreator hocrToPDFCreator;
@@ -159,70 +168,81 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	private transient String validateDocumentPage;
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * Maximum number of files to be processed by to be processed by one Image magick command for multi page tiff creation.
+	 */
+	private transient int maxFilesProcessedPerIMCmd;
+
+	/**
+	 * Instance of {@link BatchInstanceService}.
+	 */
+	@Autowired
+	private BatchInstanceService batchInstanceService;
+
+	/**
+	 * @param batchSchemaService the {@link BatchSchemaService} to set
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * @param ghostScriptPDFCreator the ghostScriptPDFCreator to set
+	 * @param ghostScriptPDFCreator the {@link GhostScriptPDFCreator} to set
 	 */
 	public void setGhostScriptPDFCreator(GhostScriptPDFCreator ghostScriptPDFCreator) {
 		this.ghostScriptPDFCreator = ghostScriptPDFCreator;
 	}
 
 	/**
-	 * @param imageMagicKPDFCreator the imageMagicKPDFCreator to set
+	 * @param imageMagicKPDFCreator the {@link ImageMagicKPDFCreator} to set
 	 */
 	public void setImageMagicKPDFCreator(ImageMagicKPDFCreator imageMagicKPDFCreator) {
 		this.imageMagicKPDFCreator = imageMagicKPDFCreator;
 	}
 
 	/**
-	 * @param iTextPDFCreator the iTextPDFCreator to set
+	 * @param iTextPDFCreator the {@link ITextPDFCreator} to set
 	 */
 	public void setiTextPDFCreator(ITextPDFCreator iTextPDFCreator) {
 		this.iTextPDFCreator = iTextPDFCreator;
 	}
 
 	/**
-	 * @param hocrToPDFCreator the hocrToPDFCreator to set
+	 * @param hocrToPDFCreator the {@link HOCRtoPDFCreator} to set
 	 */
 	public void setHocrToPDFCreator(HOCRtoPDFCreator hocrToPDFCreator) {
 		this.hocrToPDFCreator = hocrToPDFCreator;
 	}
 
 	/**
-	 * @return the validateDocumentPage
+	 * @return {@link String}
 	 */
 	public String getValidateDocumentPage() {
 		return validateDocumentPage;
 	}
 
 	/**
-	 * @param validateDocumentPage the validateDocumentPage to set
+	 * @param validateDocumentPage {@link String}
 	 */
 	public void setValidateDocumentPage(String validateDocumentPage) {
 		this.validateDocumentPage = validateDocumentPage;
 	}
 
 	/**
-	 * @return unix compatible tiff commands
+	 * @return {@link String}
 	 */
 	public String getUnixTiffCmds() {
 		return unixTiffCmds;
 	}
 
 	/**
-	 * @param unixTiffCmds unix compatible tiff commands
+	 * @param unixTiffCmds {@link String}
 	 */
 	public void setUnixTiffCmds(String unixTiffCmds) {
 		this.unixTiffCmds = unixTiffCmds;
 	}
 
 	/**
-	 * @return the tiffCmds
+	 * @return {@link String}
 	 */
 	public String getTiffCmds() {
 		String command = null;
@@ -235,81 +255,105 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 	}
 
 	/**
-	 * @param tiffCmds the tiffCmds to set
+	 * @param tiffCmds {@link String}
 	 */
 	public void setTiffCmds(String tiffCmds) {
 		this.tiffCmds = tiffCmds;
 	}
 
 	/**
-	 * @return the tifCompression
+	 * @return {@link String}
 	 */
 	public String getTifCompression() {
 		return tifCompression;
 	}
 
 	/**
-	 * @param tifCompression the pdfCompression to set
+	 * @param tifCompression {@link String}
 	 */
 	public void setTifCompression(String tifCompression) {
 		this.tifCompression = tifCompression;
 	}
 
 	/**
-	 * @param generateDisplayPng
+	 * @param generateDisplayPng {@link String}
 	 */
 	public void setGenerateDisplayPng(String generateDisplayPng) {
 		this.generateDisplayPng = generateDisplayPng;
 	}
 
 	/**
-	 * @return generateDisplayPng
+	 * @return {@link String}
 	 */
 	public String getGenerateDisplayPng() {
 		return generateDisplayPng;
 	}
 
 	/**
-	 * @param inputParameters
+	 * @param inputParameters {@link String}
 	 */
 	public void setInputParameters(String inputParameters) {
 		this.inputParameters = inputParameters;
 	}
 
 	/**
-	 * @return inputParameters
+	 * @return {@link String}
 	 */
 	public String getInputParameters() {
 		return inputParameters;
 	}
 
 	/**
-	 * @param outputParameters
+	 * @param outputParameters {@link String}
 	 */
 	public void setOutputParameters(String outputParameters) {
 		this.outputParameters = outputParameters;
 	}
 
 	/**
-	 * @return outputParameters
+	 * @return {@link String}
 	 */
 	public String getOutputParameters() {
 		return outputParameters;
 	}
 
 	/**
+	 * Getter for max files processed by one IM command for multipage tiff creation.
+	 * 
+	 * @return int
+	 */
+	public int getMaxFilesProcessedPerIMCmd() {
+		return maxFilesProcessedPerIMCmd;
+	}
+
+	/**
+	 * Setter for max files processed by one IM command for multipage tiff creation.
+	 * 
+	 * @param maxFilesProcessedPerIMCmd int
+	 */
+	public void setMaxFilesProcessedPerIMCmd(int maxFilesProcessedPerIMCmd) {
+		this.maxFilesProcessedPerIMCmd = maxFilesProcessedPerIMCmd;
+	}
+
+	/**
 	 * This method takes the FolderToBeExported path and creates multi page tiff and PDF files based on the batch.xml file found in the
 	 * folder.
-	 * 
-	 * @param sFolderToBeExported
-	 * @param batchInstanceIdentifier
-	 * @param pluginName
-	 * @throws DCMAApplicationException
+	 * @param ghostscriptPdfParameters {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pdfOptimizationParams {@link String}
+	 * @param multipageTifSwitch {@link String}
+	 * @param checkPDFExportProcess {@link String}
+	 * @param pluginName {@link String}
+	 * @param pdfOptimizationSwitch {@link String}
+	 * @throws DCMAApplicationException for any exception during processing of documents
 	 */
-	public void createMultiPageFiles(String ghostscriptPdfParameters, String batchInstanceIdentifier, String pdfOptimizationParams, String multipageTifSwitch,
-			String checkPDFExportProcess, String pluginName, String pdfOptimizationSwitch) throws DCMAApplicationException {
+	public void createMultiPageFiles(String ghostscriptPdfParameters, String batchInstanceIdentifier, String pdfOptimizationParams,
+			String multipageTifSwitch, String checkPDFExportProcess, String pluginName, String pdfOptimizationSwitch)
+			throws DCMAApplicationException {
 		LOGGER.info("Inside method createMultiPageFiles...");
-		String sFolderToBeExported = batchSchemaService.getLocalFolderLocation() + File.separator + batchInstanceIdentifier;
+
+		String sFolderToBeExported = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceIdentifier) + File.separator
+				+ batchInstanceIdentifier;
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
 		File fFolderToBeExported = new File(sFolderToBeExported);
 
@@ -328,8 +372,8 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 		try {
-			createMultiPageTiffAndPDF(ghostscriptPdfParameters, documentPageMap, fFolderToBeExported, batch, batchInstanceIdentifier, multipageTifSwitch,
-					checkPDFExportProcess, pluginName, pdfOptimizationParams, pdfOptimizationSwitch);
+			createMultiPageTiffAndPDF(ghostscriptPdfParameters, documentPageMap, fFolderToBeExported, batch, batchInstanceIdentifier,
+					multipageTifSwitch, checkPDFExportProcess, pdfOptimizationParams, pdfOptimizationSwitch);
 		} catch (Exception e) {
 			LOGGER.error("Error in creating multi page tiff and pdf. " + e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
@@ -339,14 +383,19 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 
 	/**
 	 * This method takes the parameters to create multi page tiff and PDF files. This is used for web service API.
-	 * 
-	 * @param sFolderToBeExported
-	 * @param batchInstanceIdentifier
-	 * @param pluginName
+	 * @param ghostscriptPdfParameters {@link String}
+	 * @param pdfOptimizationParams {@link String}
+	 * @param multipageTifSwitch {@link String}
+	 * @param toolName {@link String}
+	 * @param pdfOptimizationSwitch {@link String}
+	 * @param workingDir {@link String}
+	 * @param outputDir {@link String}
+	 * @param singlePageFiles {@link List<File>}
+	 * @param batchInstanceIdentifier {@link String}
 	 * @throws DCMAApplicationException
 	 */
-	public void createMultiPageFilesAPI(String ghostscriptPdfParameters, String pdfOptimizationParams, String multipageTifSwitch, String toolName,
-			String pdfOptimizationSwitch, String workingDir, String outputDir, List<File> singlePageFiles,
+	public void createMultiPageFilesAPI(String ghostscriptPdfParameters, String pdfOptimizationParams, String multipageTifSwitch,
+			String toolName, String pdfOptimizationSwitch, String workingDir, String outputDir, List<File> singlePageFiles,
 			String batchInstanceIdentifier) throws DCMAApplicationException {
 		LOGGER.info("Inside method createMultiPageFiles...");
 		File fFolderToBeExported = new File(outputDir);
@@ -356,25 +405,20 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 
 		try {
-			createMultiPageTiffAndPDFAPI(ghostscriptPdfParameters, singlePageFiles, fFolderToBeExported, multipageTifSwitch, toolName, pdfOptimizationParams,
-					pdfOptimizationSwitch, batchInstanceIdentifier, workingDir);
+			createMultiPageTiffAndPDFAPI(ghostscriptPdfParameters, singlePageFiles, fFolderToBeExported, multipageTifSwitch, toolName,
+					pdfOptimizationParams, pdfOptimizationSwitch, batchInstanceIdentifier, workingDir);
 		} catch (Exception e) {
 			LOGGER.error("Error in creating multi page tiff and pdf. " + e.getMessage(), e);
 			throw new DCMAApplicationException(e.getMessage(), e);
 		}
 	}
 
-	private void createMultiPageTiffAndPDFAPI(String ghostscriptPdfParameters,List<File> singlePageFiles, File exportToFolder, String multipageTifSwitch,
-			String toolName, String pdfOptimizationParams, String pdfOptimizationSwitch, String batchInstanceIdentifier, String workingDir)
-			throws DCMAApplicationException {
-
+	private void createMultiPageTiffAndPDFAPI(String ghostscriptPdfParameters, List<File> singlePageFiles, File exportToFolder,
+			String multipageTifSwitch, String pdfCreationTool, String pdfOptimizationParams, String pdfOptimizationSwitch,
+			String batchInstanceIdentifier, String workingDir) throws DCMAApplicationException {
 		String ghostScriptEnvVariable = System.getenv(IImageMagickCommonConstants.GHOSTSCRIPT_ENV_VARIABLE);
-		if (ghostScriptEnvVariable == null || ghostScriptEnvVariable.isEmpty()) {
-			LOGGER.info("ghostScriptEnvVariable is null or empty.");
-			throw new DCMABusinessException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
-		}
+		validatingGhostScritEnv(ghostScriptEnvVariable);
 		String documentIdInt = "0";
-		String documentName;
 		String sTargetFileNameTif;
 		File fTargetFileNameTif;
 		String sTargetFileNamePdf = null;
@@ -386,27 +430,23 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		BatchInstanceThread pdfBatchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread tifBatchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread pdfOptimizationThread = new BatchInstanceThread(batchInstanceIdentifier);
-
 		String tempFileName = null;
 		List<MultiPageExecutor> multiPageExecutorsTiff = new ArrayList<MultiPageExecutor>();
 		List<MultiPageExecutor> multiPageExecutorsPdf = new ArrayList<MultiPageExecutor>();
 		List<PdfOptimizer> pdfOptimizer = new ArrayList<PdfOptimizer>();
 		LOGGER.info("pdf Optimization Switch value" + pdfOptimizationSwitch);
+		String multiPageTiffFileName;
+		String multiPagePdfFileName;
 		try {
-			documentName = IUtilCommonConstants.DOCUMENT_ID + documentIdInt + FileType.TIF.getExtensionWithDot();
+			multiPageTiffFileName = IUtilCommonConstants.DOCUMENT_ID + documentIdInt + FileType.TIF.getExtensionWithDot();
+			multiPagePdfFileName = IUtilCommonConstants.DOCUMENT_ID + documentIdInt + FileType.PDF.getExtensionWithDot();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			throw new DCMAApplicationException("Problem getting file name", e);
+			throw new DCMAApplicationException("Problem getting file name ", e);
 		}
-		sTargetFileNameTif = exportToFolder.getAbsolutePath() + File.separator + File.separator + documentName;
+		sTargetFileNameTif = exportToFolder.getAbsolutePath() + File.separator + File.separator + multiPageTiffFileName;
 		fTargetFileNameTif = new File(sTargetFileNameTif);
-		try {
-			documentName = IUtilCommonConstants.DOCUMENT_ID + documentIdInt + FileType.PDF.getExtensionWithDot();
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
-			throw new DCMAApplicationException("Problem getting file name", e);
-		}
-		sTargetFileNamePdf = exportToFolder.getAbsolutePath() + File.separator + File.separator + documentName;
+		sTargetFileNamePdf = exportToFolder.getAbsolutePath() + File.separator + File.separator + multiPagePdfFileName;
 		fTargetFileNamePdf = new File(sTargetFileNamePdf);
 		pages = new String[singlePageFiles.size() + 1];
 		int index = 0;
@@ -414,61 +454,39 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			pages[index] = page.getAbsolutePath();
 			index++;
 		}
-
-		for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
-			File file = new File(pages[pageIndex]);
-			tifToTifThread.add(new TifToTifCreator(file.getParent(), file.getName()));
-		}
-		for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
-			File file = new File(pages[pageIndex]);
-			TifToPDFCreator tifToPDFCreator = new TifToPDFCreator(file.getParent(), file.getName());
-			tifToPdfThread.add(tifToPDFCreator);
-		}
+		addThreadToTifThread(tifToTifThread, pages);
+		addThreadToPdfThread(tifToPdfThread, pages);
 		pdfPages = new String[pages.length];
 		pages[singlePageFiles.size()] = fTargetFileNameTif.getAbsolutePath();
 		index = 0;
-		for (String page : pages) {
-			if (page != null && !page.isEmpty()) {
-				pdfPages[index++] = page.replace(page.substring(page.lastIndexOf(FULL_STOP)), FileType.PDF.getExtensionWithDot());
-			}
-		}
-		// tifPages = new String[2];
-		// tifPages[1] = fTargetFileNameTif.getAbsolutePath();
+		index = addingPageIndexes(pages, index, pdfPages);
 		if (multipageTifSwitch != null && multipageTifSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
 			LOGGER.info("Adding command for multi page tiff execution");
-			multiPageExecutorsTiff.add(new MultiPageExecutor(tifBatchInstanceThread, pages, tifCompression));
+			multiPageExecutorsTiff.add(new MultiPageExecutor(tifBatchInstanceThread, pages, tifCompression, maxFilesProcessedPerIMCmd,
+					documentIdInt));
 		}
-		if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-			if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-				tempFileName = ImageMagicKConstants.TEMP_FILE_NAME + "_" + fTargetFileNamePdf.getName();
-				pdfPages[singlePageFiles.size()] = workingDir + File.separator + tempFileName;
-				pages[singlePageFiles.size()] = pdfPages[singlePageFiles.size()];
-			} else {
-				pages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
-				pdfPages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
-			}
+		if (pdfCreationTool != null && !pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
+			tempFileName = getPagesForImageMagick(singlePageFiles, pdfOptimizationSwitch, workingDir, fTargetFileNamePdf, pages,
+					pdfPages, tempFileName);
 		} else {
 			pages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
 			pdfPages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
 		}
-		LOGGER.info("toolName : " + toolName);
+		LOGGER.info("toolName : " + pdfCreationTool);
 		LOGGER.info("Adding command for multi page pdf execution");
-
 		// use this method to create pdf using itext API
-		if (toolName != null && toolName.equalsIgnoreCase(ImageMagicKConstants.ITEXT)) {
+		if (pdfCreationTool != null && pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.ITEXT)) {
 			LOGGER.info("creating pdf using IText");
 			iTextPDFCreator.createPDFUsingIText(pages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
 		}
 		// use this method to create pdf using ghost script command
-		else if (toolName != null && toolName.equalsIgnoreCase(ImageMagicKConstants.GHOST_SCRIPT)) {
-			// tifPages[0] = pdfPages[listofPages.size()];
+		else if (pdfCreationTool != null && pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.GHOST_SCRIPT)) {
 			LOGGER.info("creating pdf using ghostscript command");
-
-			ghostScriptPDFCreator.createPDFUsingGhostScript(ghostscriptPdfParameters, batchInstanceIdentifier, exportToFolder.getAbsolutePath(), pdfPages,
-					pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
+			ghostScriptPDFCreator.createPDFUsingGhostScript(ghostscriptPdfParameters, batchInstanceIdentifier, exportToFolder
+					.getAbsolutePath(), pdfPages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
 		}
 		// use this default method to create pdf using image-magick convert command
-		else if (toolName != null && toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
+		else if (pdfCreationTool != null && pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
 			LOGGER.info("creating pdf using image-magick convert command");
 			imageMagicKPDFCreator.createPDFUsingImageMagick(pages, pdfBatchInstanceThread, multiPageExecutorsPdf,
 					pdfOptimizationSwitch);
@@ -476,62 +494,47 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			LOGGER.info("creating pdf using Itext");
 			iTextPDFCreator.createPDFUsingIText(pages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
 		}
-
 		// Fix for issue : ghostscript unable to optimise pdf produced by IM
-		if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-			if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-				ghostScriptPDFCreator.createOptimizedPdfAPI(exportToFolder.getAbsolutePath(), pdfOptimizationParams, fTargetFileNamePdf,
-						pdfOptimizationThread, tempFileName, pdfOptimizer);
-			}
+		if (pdfCreationTool != null && !pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)
+				&& pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
+			ghostScriptPDFCreator.createOptimizedPdfAPI(exportToFolder.getAbsolutePath(), pdfOptimizationParams, fTargetFileNamePdf,
+					pdfOptimizationThread, tempFileName, pdfOptimizer);
 		}
-		try {
-			LOGGER.info("Executing commands for creation of muti page tiff and pdf using thread pool ..... ");
-			tifToTifThread.execute();
-			if (toolName != null && !ImageMagicKConstants.ITEXT.equalsIgnoreCase(toolName)) {
-				tifToPdfThread.execute();
-			}
-			if (toolName != null && toolName.equalsIgnoreCase(ImageMagicKConstants.GHOST_SCRIPT)) {
-				pdfBatchInstanceThread.setUsingGhostScript(Boolean.TRUE);
-			}
-			pdfBatchInstanceThread.execute();
-			tifBatchInstanceThread.execute();
-			LOGGER.info("Multipage tiff/pdf created .....");
-		} catch (DCMAApplicationException dcmae) {
-			LOGGER.error("Error in executing command for multi page tiff and pdf using thread pool " + dcmae.getMessage(), dcmae);
-			tifToTifThread.remove();
-			tifToPdfThread.remove();
-			pdfBatchInstanceThread.remove();
-			tifBatchInstanceThread.remove();
-			// Throw the exception to set the batch status to Error by Application aspect
-			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-		}
-		try {
-			LOGGER.info("Executing commands for optimizing multi page pdf using thread pool.");
-			if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					pdfOptimizationThread.execute();
-				}
-			}
-		} catch (DCMAApplicationException dcmae) {
-			LOGGER.error("Error in executing command for optimizing multi page pdf using thread pool" + dcmae.getMessage(), dcmae);
-			if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					pdfOptimizationThread.remove();
-				}
-			}
-			// Throw the exception to set the batch status to Error by Application aspect
-			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-		}
-
-		Boolean checkDocumentPage = Boolean.FALSE;
-		if (validateDocumentPage != null) {
-			checkDocumentPage = Boolean.parseBoolean(validateDocumentPage);
-		}
+		executeCommandAndOptimizePdf(pdfCreationTool, pdfOptimizationSwitch, tifToPdfThread, tifToTifThread, pdfBatchInstanceThread,
+				tifBatchInstanceThread, pdfOptimizationThread);
+		Boolean checkDocumentPage = Boolean.parseBoolean(validateDocumentPage);
 		// Copy the pdf file from working Dir to output Dir in case of GHOSTSCRIPT
-		if(!fTargetFileNamePdf.exists()) {
+		copyPdfFile(pdfCreationTool, pdfOptimizationSwitch, workingDir, sTargetFileNamePdf, fTargetFileNamePdf, tempFileName);
+		validatePageCount(singlePageFiles, sTargetFileNamePdf, checkDocumentPage);
+	}
+
+	private String getPagesForImageMagick(List<File> singlePageFiles, String pdfOptimizationSwitch, String workingDir,
+			File fTargetFileNamePdf, String[] pages, String[] pdfPages, String tempFileName) {
+		String fileNameTemp = tempFileName;
+		if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
+			fileNameTemp = ImageMagicKConstants.TEMP_FILE_NAME + "_" + fTargetFileNamePdf.getName();
+			pdfPages[singlePageFiles.size()] = workingDir + File.separator + fileNameTemp;
+			pages[singlePageFiles.size()] = pdfPages[singlePageFiles.size()];
+		} else {
+			pages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
+			pdfPages[singlePageFiles.size()] = fTargetFileNamePdf.getAbsolutePath();
+		}
+		return fileNameTemp;
+	}
+
+	private void validatingGhostScritEnv(String ghostScriptEnvVariable) {
+		if (ghostScriptEnvVariable == null || ghostScriptEnvVariable.isEmpty()) {
+			LOGGER.info("ghostScriptEnvVariable is null or empty.");
+			throw new DCMABusinessException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
+		}
+	}
+
+	private void copyPdfFile(String pdfCreationTool, String pdfOptimizationSwitch, String workingDir, String sTargetFileNamePdf,
+			File fTargetFileNamePdf, String tempFileName) throws DCMAApplicationException {
+		if (!fTargetFileNamePdf.exists()) {
 			String inPdfFilePath = "";
 			File outDirFile = new File(sTargetFileNamePdf);
-			if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
+			if (pdfCreationTool != null && !pdfCreationTool.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
 				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
 					new File(workingDir + File.separator + tempFileName).renameTo(outDirFile);
 				} else {
@@ -547,13 +550,15 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 				}
 			}
 		}
-		
+	}
 
+	private void validatePageCount(List<File> singlePageFiles, String sTargetFileNamePdf, Boolean checkDocumentPage)
+			throws DCMAApplicationException {
 		if (sTargetFileNamePdf != null && checkDocumentPage) {
 			int numberOfPDFPage = PDFUtil.getPDFPageCount(sTargetFileNamePdf);
 			int numberOfTiffs = 0;
 			for (File page : singlePageFiles) {
-				numberOfTiffs = numberOfTiffs + TIFFUtil.getTIFFPageCount(page.getAbsolutePath()); 
+				numberOfTiffs = numberOfTiffs + TIFFUtil.getTIFFPageCount(page.getAbsolutePath());
 			}
 			if (numberOfPDFPage != numberOfTiffs) {
 				throw new DCMAApplicationException("Number of pages mismatched in multipage PDF and list of input files.");
@@ -561,12 +566,25 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * Sanity check.Checks if there are still any unknown document in the batch.xml file. If any unknown document is found an exception
-	 * is thrown.
-	 * 
-	 * @param pasrsedXMLFile
-	 */
+	private void optimizePdfUsingGhostscript(String toolName, String pdfOptimizationSwitch, BatchInstanceThread pdfOptimizationThread)
+			throws DCMAApplicationException {
+		try {
+			LOGGER.info("Executing commands for optimizing multi page pdf using thread pool.");
+			if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK) && pdfOptimizationSwitch != null
+					&& pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
+				pdfOptimizationThread.execute();
+			}
+		} catch (DCMAApplicationException dcmae) {
+			LOGGER.error("Error in executing command for optimizing multi page pdf using thread pool" + dcmae.getMessage(), dcmae);
+			if (toolName != null && !toolName.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK) && pdfOptimizationSwitch != null
+					&& pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
+				pdfOptimizationThread.remove();
+			}
+			// Throw the exception to set the batch status to Error by Application aspect
+			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
+		}
+	}
+
 	private void checkForUnknownDocument(Batch pasrsedXMLFile) {
 		Documents documents = pasrsedXMLFile.getDocuments();
 		boolean valid = true;
@@ -599,123 +617,72 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This method generates the multi page tiff and pdf files using Image Magick(Wrapped using im4java)/GhostScript. The document
-	 * classification is based on the documentPageMap.
-	 * 
-	 * @param documentPageMap
-	 * @param exportToFolder
-	 * @param pasrsedXMLFile
-	 * @param batchInstanceIdentifier
-	 * @param multipageTifSwitch
-	 * @param checkPDFExportProcess
-	 * @param pluginName
-	 * @param pdfOptimizationParams
-	 * @param pdfOptimizationSwitch
-	 * @throws DCMAApplicationException
-	 */
-	private void createMultiPageTiffAndPDF(String ghostscriptPdfParameters, Map<String, List<File>> documentPageMap, File exportToFolder, Batch pasrsedXMLFile,
-			String batchInstanceIdentifier, String multipageTifSwitch, String checkPDFExportProcess, String pluginName,
-			String pdfOptimizationParams, String pdfOptimizationSwitch) throws DCMAApplicationException {
+	private void createMultiPageTiffAndPDF(final String ghostscriptPdfParameters, final Map<String, List<File>> documentPageMap,
+			final File exportToFolder, final Batch pasrsedXMLFile, final String batchInstanceIdentifier,
+			final String multipageTifSwitch, final String checkPDFExportProcess, final String pdfOptimizationParams,
+			final String pdfOptimizationSwitch) throws DCMAApplicationException {
 		String ghostScriptEnvVariable = System.getenv(IImageMagickCommonConstants.GHOSTSCRIPT_ENV_VARIABLE);
-		if (ghostScriptEnvVariable == null || ghostScriptEnvVariable.isEmpty()) {
-			LOGGER.info("ghostScriptEnvVariable is null or empty.");
-			throw new DCMABusinessException("Enviornment Variable GHOSTSCRIPT_HOME not set.");
-		}
+		validatingGhostScritEnv(ghostScriptEnvVariable);
 		Set<String> documentNames;
 		documentNames = documentPageMap.keySet();
 		Iterator<String> iterator = documentNames.iterator();
-		String documentIdInt;
-		String documentName;
-		String sTargetFileNameTif;
-		File fTargetFileNameTif;
-		String sTargetFileNamePdf;
-		File fTargetFileNamePdf = null;
-		String[] pages;
-		// String[] tifPages;
-		String[] pdfPages;
 		BatchInstanceThread tifToPdfThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread tifToTifThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread pdfBatchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread tifBatchInstanceThread = new BatchInstanceThread(batchInstanceIdentifier);
 		BatchInstanceThread pdfOptimizationThread = new BatchInstanceThread(batchInstanceIdentifier);
-
-		String tempFileName = null;
 		List<MultiPageExecutor> multiPageExecutorsTiff = new ArrayList<MultiPageExecutor>();
 		List<MultiPageExecutor> multiPageExecutorsPdf = new ArrayList<MultiPageExecutor>();
 		List<PdfOptimizer> pdfOptimizer = new ArrayList<PdfOptimizer>();
 		LOGGER.info("pdf Optimization Switch value" + pdfOptimizationSwitch);
+		int widthOfLineInt = getWidthOfLineInt();		
 		while (iterator.hasNext()) {
-			documentIdInt = iterator.next();
+			String documentIdInt = iterator.next();
 			LOGGER.info("Started creating multipage Tif and PDF for the " + "document with document id=" + documentIdInt);
 			List<File> listofPages = documentPageMap.get(documentIdInt);
 			if (listofPages.size() == 0) {
 				continue;
 			}
+			String multiPageTiffFileName;
+			String multiPagePdfFileName;
 			try {
-				documentName = new FileNameFormatter().getMuliPageFileName(documentIdInt, batchInstanceIdentifier, FileType.TIF
-						.getExtensionWithDot());
+				multiPageTiffFileName = new FileNameFormatter().getMuliPageFileName(documentIdInt, batchInstanceIdentifier,
+						FileType.TIF.getExtensionWithDot());
+				multiPagePdfFileName = new FileNameFormatter().getMuliPageFileName(documentIdInt, batchInstanceIdentifier,
+						FileType.PDF.getExtensionWithDot());
 			} catch (Exception e) {
-				LOGGER.error(e.getMessage(), e);
 				throw new DCMAApplicationException("Problem getting file name", e);
 			}
-			sTargetFileNameTif = exportToFolder.getAbsolutePath() + File.separator + File.separator + documentName;
-			fTargetFileNameTif = new File(sTargetFileNameTif);
-			try {
-				documentName = new FileNameFormatter().getMuliPageFileName(documentIdInt, batchInstanceIdentifier, FileType.PDF
-						.getExtensionWithDot());
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage(), e);
-				throw new DCMAApplicationException("Problem getting file name", e);
-			}
-			sTargetFileNamePdf = exportToFolder.getAbsolutePath() + File.separator + File.separator + documentName;
-			fTargetFileNamePdf = new File(sTargetFileNamePdf);
-			pages = new String[listofPages.size() + 1];
+			String multiPageTiffFilePath = exportToFolder.getAbsolutePath() + File.separator + File.separator + multiPageTiffFileName;
+			File fTargetFileNameTif = new File(multiPageTiffFilePath);
+			String multiPagePdfFilePath = exportToFolder.getAbsolutePath() + File.separator + File.separator + multiPagePdfFileName;
+			File fTargetFileNamePdf = new File(multiPagePdfFilePath);
+			String[] pages = new String[listofPages.size() + 1];
 			int index = 0;
 			for (File page : listofPages) {
 				pages[index] = page.getAbsolutePath();
 				index++;
 			}
-
-			for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
-				File file = new File(pages[pageIndex]);
-				tifToTifThread.add(new TifToTifCreator(file.getParent(), file.getName()));
-			}
-			for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
-				File file = new File(pages[pageIndex]);
-				TifToPDFCreator tifToPDFCreator = new TifToPDFCreator(file.getParent(), file.getName());
-				tifToPdfThread.add(tifToPDFCreator);
-			}
-			pdfPages = new String[pages.length];
+			addThreadToTifThread(tifToTifThread, pages);
+			addThreadToPdfThread(tifToPdfThread, pages);
+			String[] pdfPages = new String[pages.length];
 			pages[listofPages.size()] = fTargetFileNameTif.getAbsolutePath();
 			index = 0;
-			for (String page : pages) {
-				if (page != null && !page.isEmpty()) {
-					pdfPages[index++] = page.replace(page.substring(page.lastIndexOf(FULL_STOP)), FileType.PDF.getExtensionWithDot());
-				}
-			}
-			// tifPages = new String[2];
-			// tifPages[1] = fTargetFileNameTif.getAbsolutePath();
+			index = addingPageIndexes(pages, index, pdfPages);
 			if (multipageTifSwitch != null && multipageTifSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
 				LOGGER.info("Adding command for multi page tiff execution");
-				multiPageExecutorsTiff.add(new MultiPageExecutor(tifBatchInstanceThread, pages, tifCompression));
+				multiPageExecutorsTiff.add(new MultiPageExecutor(tifBatchInstanceThread, pages, tifCompression,
+						maxFilesProcessedPerIMCmd, documentIdInt));
 			}
 			if (checkPDFExportProcess != null && !checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					tempFileName = ImageMagicKConstants.TEMP_FILE_NAME + "_" + fTargetFileNamePdf.getName();
-					pdfPages[listofPages.size()] = fTargetFileNamePdf.getParent() + File.separator + tempFileName;
-					pages[listofPages.size()] = pdfPages[listofPages.size()];
-				} else {
-					pages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
-					pdfPages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
-				}
+				createOptimizedPDF(batchInstanceIdentifier, pdfOptimizationParams, pdfOptimizationSwitch, pdfOptimizationThread,
+						pdfOptimizer, listofPages, fTargetFileNamePdf, pages, pdfPages);
 			} else {
 				pages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
 				pdfPages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
 			}
 			LOGGER.info("CheckPDFExportProcess : " + checkPDFExportProcess);
 			LOGGER.info("Adding command for multi page pdf execution");
-
 			// use this method to create pdf using itext API
 			if (checkPDFExportProcess != null && checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.ITEXT)) {
 				LOGGER.info("creating pdf using IText");
@@ -723,15 +690,12 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			}
 			// use this method to create pdf using ghost script command
 			else if (checkPDFExportProcess != null && checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.GHOST_SCRIPT)) {
-				// tifPages[0] = pdfPages[listofPages.size()];
 				LOGGER.info("creating pdf using ghostscript command");
-
-				ghostScriptPDFCreator.createPDFUsingGhostScript(ghostscriptPdfParameters, batchInstanceIdentifier, exportToFolder.getAbsolutePath(), pdfPages,
-						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
+				ghostScriptPDFCreator.createPDFUsingGhostScript(ghostscriptPdfParameters, batchInstanceIdentifier, exportToFolder
+						.getAbsolutePath(), pdfPages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
 			}
 			// use this method to create pdf using hocrtopdf.jar
 			else if (checkPDFExportProcess != null && checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.HOCR_TO_PDF)) {
-				// tifPages[0] = fTargetFileNamePdf.getAbsolutePath();
 				LOGGER.info("creating pdf using hOCRToPDF");
 				hocrToPDFCreator.createPDFFromHOCR(pasrsedXMLFile, batchInstanceIdentifier, exportToFolder.getAbsolutePath(), pages,
 						pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
@@ -741,19 +705,67 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 				LOGGER.info("creating pdf using image-magick convert command");
 				imageMagicKPDFCreator.createPDFUsingImageMagick(pages, pdfBatchInstanceThread, multiPageExecutorsPdf,
 						pdfOptimizationSwitch);
+			} else if (checkPDFExportProcess != null && checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.ITEXT_SEARCHABLE)) {
+				LOGGER.info("creating pdf using ITEXT_SEARCHABLE");
+				iTextPDFCreator.createPDFUsingIText(pages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt,
+						pasrsedXMLFile, batchInstanceIdentifier, widthOfLineInt);
 			} else {
 				LOGGER.info("creating pdf using Itext");
 				iTextPDFCreator.createPDFUsingIText(pages, pdfBatchInstanceThread, multiPageExecutorsPdf, documentIdInt);
 			}
+		}
+		executeCommandAndOptimizePdf(checkPDFExportProcess, pdfOptimizationSwitch, tifToPdfThread, tifToTifThread,
+				pdfBatchInstanceThread, tifBatchInstanceThread, pdfOptimizationThread);
+		updateMultiPageTifToXml(documentPageMap, pasrsedXMLFile, multipageTifSwitch, documentNames, multiPageExecutorsTiff,
+				multiPageExecutorsPdf);
+		if (Boolean.parseBoolean(validateDocumentPage)) {
+			validatingDocumentVsPdfPage(pasrsedXMLFile, batchInstanceIdentifier);
+		}
+	}
 
-			// Fix for issue : ghostscript unable to optimise pdf produced by IM
-			if (checkPDFExportProcess != null && !checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					ghostScriptPDFCreator.createOptimizedPdf(batchInstanceIdentifier, pdfOptimizationParams, fTargetFileNamePdf,
-							pdfOptimizationThread, tempFileName, pdfOptimizer);
-				}
+	private int addingPageIndexes(String[] pages, int index, String[] pdfPages) {
+		int indexTemp = index;
+		for (String page : pages) {
+			if (page != null && !page.isEmpty()) {
+				pdfPages[indexTemp++] = page.replace(page.substring(page.lastIndexOf(ImageMagicKConstants.DOT)), FileType.PDF.getExtensionWithDot());
 			}
 		}
+		return indexTemp;
+	}
+
+	private void createOptimizedPDF(final String batchInstanceIdentifier, final String pdfOptimizationParams,
+			final String pdfOptimizationSwitch, BatchInstanceThread pdfOptimizationThread, List<PdfOptimizer> pdfOptimizer,
+			List<File> listofPages, File fTargetFileNamePdf, String[] pages, String[] pdfPages) throws DCMAApplicationException {
+		if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
+			String tempFileName = ImageMagicKConstants.TEMP_FILE_NAME + "_" + fTargetFileNamePdf.getName();
+			pdfPages[listofPages.size()] = fTargetFileNamePdf.getParent() + File.separator + tempFileName;
+			pages[listofPages.size()] = pdfPages[listofPages.size()];
+			ghostScriptPDFCreator.createOptimizedPdf(batchInstanceIdentifier, pdfOptimizationParams, fTargetFileNamePdf,
+					pdfOptimizationThread, tempFileName, pdfOptimizer);
+		} else {
+			pages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
+			pdfPages[listofPages.size()] = fTargetFileNamePdf.getAbsolutePath();
+		}
+	}
+
+	private void addThreadToPdfThread(BatchInstanceThread tifToPdfThread, String[] pages) {
+		for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
+			File file = new File(pages[pageIndex]);
+			TifToPDFCreator tifToPDFCreator = new TifToPDFCreator(file.getParent(), file.getName());
+			tifToPdfThread.add(tifToPDFCreator);
+		}
+	}
+
+	private void addThreadToTifThread(BatchInstanceThread tifToTifThread, String[] pages) {
+		for (int pageIndex = 0; pageIndex < pages.length - 1; pageIndex++) {
+			File file = new File(pages[pageIndex]);
+			tifToTifThread.add(new TifToTifCreator(file.getParent(), file.getName()));
+		}
+	}
+
+	private void executeCommandAndOptimizePdf(final String checkPDFExportProcess, final String pdfOptimizationSwitch,
+			BatchInstanceThread tifToPdfThread, BatchInstanceThread tifToTifThread, BatchInstanceThread pdfBatchInstanceThread,
+			BatchInstanceThread tifBatchInstanceThread, BatchInstanceThread pdfOptimizationThread) throws DCMAApplicationException {
 		try {
 			LOGGER.info("Executing commands for creation of muti page tiff and pdf using thread pool ..... ");
 			tifToTifThread.execute();
@@ -775,35 +787,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 			// Throw the exception to set the batch status to Error by Application aspect
 			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
 		}
-		try {
-			LOGGER.info("Executing commands for optimizing multi page pdf using thread pool.");
-			if (checkPDFExportProcess != null && !checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					pdfOptimizationThread.execute();
-				}
-			}
-		} catch (DCMAApplicationException dcmae) {
-			LOGGER.error("Error in executing command for optimizing multi page pdf using thread pool" + dcmae.getMessage(), dcmae);
-			if (checkPDFExportProcess != null && !checkPDFExportProcess.equalsIgnoreCase(ImageMagicKConstants.IMAGE_MAGICK)) {
-				if (pdfOptimizationSwitch != null && pdfOptimizationSwitch.equalsIgnoreCase(ImageMagicKConstants.ON_SWITCH)) {
-					pdfOptimizationThread.remove();
-				}
-			}
-			// Throw the exception to set the batch status to Error by Application aspect
-			throw new DCMAApplicationException(dcmae.getMessage(), dcmae);
-		}
-
-		updateMultiPageTifToXml(documentPageMap, pasrsedXMLFile, multipageTifSwitch, documentNames, multiPageExecutorsTiff,
-				multiPageExecutorsPdf);
-
-		Boolean checkDocumentPage = Boolean.FALSE;
-		if (validateDocumentPage != null) {
-			checkDocumentPage = Boolean.parseBoolean(validateDocumentPage);
-		}
-
-		if (checkDocumentPage) {
-			validatingDocumentVsPdfPage(pasrsedXMLFile, batchInstanceIdentifier);
-		}
+		optimizePdfUsingGhostscript(checkPDFExportProcess, pdfOptimizationSwitch, pdfOptimizationThread);
 	}
 
 	private void validatingDocumentVsPdfPage(Batch batch, String batchInstanceIdentifier) throws DCMAApplicationException {
@@ -852,6 +836,7 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 		LOGGER.info("Processing complete at " + new Date());
 	}
+
 
 	/**
 	 * This method updates the Unmarsheled xml file with the information of multi page pdf or tif file.
@@ -935,4 +920,15 @@ public class MultiPageTiffPdfCreator implements ICommonConstants {
 		}
 		return documentPageMap;
 	}
+
+	private int getWidthOfLineInt() {
+		int widthOfLineInt = ImageMagicKConstants.DEFAULT_WIDTH_OF_LINE;
+		try {
+			widthOfLineInt = Integer.parseInt(kvFinderService.getWidthOfLine());
+		} catch (NumberFormatException nfe) {
+			LOGGER.error("Invalid width of line specified. Setting it to its default value.");
+		}
+		return widthOfLineInt;
+	}
+
 }

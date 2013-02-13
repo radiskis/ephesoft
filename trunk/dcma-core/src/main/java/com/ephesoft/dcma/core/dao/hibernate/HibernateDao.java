@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -57,16 +57,34 @@ import com.ephesoft.dcma.core.hibernate.EphesoftCriteria;
 import com.ephesoft.dcma.core.model.common.AbstractEntity;
 import com.ephesoft.dcma.util.ClassUtil;
 
-public abstract class HibernateDao<T> implements Dao<T> {
+/**
+ * This is generic class for hibernate dao.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.DataFilter
+ * @param <T>
+ */
+public class HibernateDao<T> implements Dao<T> {
 
+	/**
+	 * hibernateTemplate HibernateTemplate.
+	 */
 	@Autowired
 	@Qualifier("hibernateTemplate")
 	private HibernateTemplate hibernateTemplate;
 
+	/**
+	 * cacheableHibernateTemplate HibernateTemplate.
+	 */
 	@Autowired
 	@Qualifier("cacheableHibernateTemplate")
 	private HibernateTemplate cacheableHibernateTemplate;
 
+	/**
+	 * To get Hibernate Template.
+	 * @return HibernateTemplate
+	 */
 	@SuppressWarnings("unchecked")
 	public HibernateTemplate getHibernateTemplate() {
 		HibernateTemplate hibernateTemplate;
@@ -78,6 +96,9 @@ public abstract class HibernateDao<T> implements Dao<T> {
 		return hibernateTemplate;
 	}
 
+	/**
+	 * entityClass Class<? extends T>.
+	 */
 	private Class<? extends T> entityClass;
 
 	protected Class<? extends T> getEntityClass() {
@@ -87,26 +108,47 @@ public abstract class HibernateDao<T> implements Dao<T> {
 		return this.entityClass;
 	}
 
+	/**
+	 * objectId Serializable.
+	 */
 	@Override
 	public T get(Serializable objectId) {
 		return this.hibernateTemplate.get(getEntityClass(), objectId);
 	}
 
+	/**
+	 * To get the object.
+	 * @param objectId Serializable
+	 * @param lockMode LockMode
+	 * @return T
+	 */
 	public T get(Serializable objectId, LockMode lockMode) {
 		return this.hibernateTemplate.get(getEntityClass(), objectId, lockMode);
 	}
 
+	/**
+	 * To get all objects satisfying criteria.
+	 * @return List<T>
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getAll() {
 		return this.getHibernateTemplate().findByCriteria(criteria());
 	}
 
+	/**
+	 * To remove objects from the list.
+	 * @param object T
+	 */
 	@Override
 	public void remove(T object) {
 		this.getHibernateTemplate().delete(object);
 	}
 
+	/**
+	 * To create new objects.
+	 * @param object T
+	 */
 	@Override
 	public void create(T object) {
 		this.getHibernateTemplate().persist(object);
@@ -116,6 +158,10 @@ public abstract class HibernateDao<T> implements Dao<T> {
 		}
 	}
 
+	/**
+	 * To save or update an object.
+	 * @param object T
+	 */
 	@Override
 	public void saveOrUpdate(T object) {
 		this.getHibernateTemplate().saveOrUpdate(object);
@@ -125,11 +171,19 @@ public abstract class HibernateDao<T> implements Dao<T> {
 		}
 	}
 
+	/**
+	 * To evict an object.
+	 * @param object object
+	 */
 	@Override
 	public void evict(Object object) {
 		this.getHibernateTemplate().evict(object);
 	}
 
+	/**
+	 * To merge objects.
+	 * @param object T
+	 */
 	@Override
 	public T merge(final T object) {
 
@@ -224,11 +278,19 @@ public abstract class HibernateDao<T> implements Dao<T> {
 		return find(criteria, firstResult, maxResult);
 	}
 
+	/**
+	 * To count no. of rows satisfying criteria.
+	 * @param criteria DetachedCriteria
+	 */
 	public int count(DetachedCriteria criteria) {
 		criteria.setProjection(Projections.rowCount());
 		return (Integer) find(criteria).get(0);
 	}
 
+	/**
+	 * To count.
+	 * @return int
+	 */
 	public int countAll() {
 		DetachedCriteria criteria = criteria();
 		return count(criteria);

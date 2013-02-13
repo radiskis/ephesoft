@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,10 +33,11 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client.view;
+package com.ephesoft.dcma.gwt.customworkflow.client.view;
 
 import com.ephesoft.dcma.gwt.core.client.View;
-import com.ephesoft.dcma.gwt.customWorkflow.client.presenter.CustomWorkflowEntryPresenter;
+import com.ephesoft.dcma.gwt.customworkflow.client.i18n.CustomWorkflowConstants;
+import com.ephesoft.dcma.gwt.customworkflow.client.presenter.CustomWorkflowEntryPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -46,22 +47,20 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 @UiTemplate(value = "CustomWorkflowEntryView.ui.xml")
 public class CustomWorkflowEntryView extends View<CustomWorkflowEntryPresenter> {
 
-
+	@UiField
+	protected ViewAndAddPluginsView viewAndAddPluginsView;
 
 	@UiField
-	ViewAndAddPluginsView viewAndAddPluginsView;
-
-	@UiField
-	DockLayoutPanel customWorkflowEntryDockLayoutPanel;
+	protected DockLayoutPanel customWorkflowEntryDockLayoutPanel;
 
 	interface Binder extends UiBinder<DockLayoutPanel, CustomWorkflowEntryView> {
 	}
 
-	private static final String MAIN_PANEL_LAYOUT = "mainPanelLayout";
-	private static final Binder binder = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
 	public CustomWorkflowEntryView() {
-		initWidget(binder.createAndBindUi(this));
+		super();
+		initWidget(BINDER.createAndBindUi(this));
 		/* Add handlers */
 		addCSSStyle();
 		addFieldText();
@@ -69,7 +68,7 @@ public class CustomWorkflowEntryView extends View<CustomWorkflowEntryPresenter> 
 	}
 
 	public void addToAllPluginsList(String pluginName) {
-		//allPluginsList.addItem(pluginName);
+		// allPluginsList.addItem(pluginName);
 
 	}
 
@@ -78,11 +77,13 @@ public class CustomWorkflowEntryView extends View<CustomWorkflowEntryPresenter> 
 	}
 
 	private void addFieldText() {
-//		dependenciesHelpButton.setText(CustomWorkflowConstants.HELP_BUTTON);
+		/**
+		 * Add text to your fields here.
+		 */
 	}
 
 	private void addCSSStyle() {
-		customWorkflowEntryDockLayoutPanel.addStyleName(MAIN_PANEL_LAYOUT);
+		customWorkflowEntryDockLayoutPanel.addStyleName(CustomWorkflowConstants.MAIN_PANEL_LAYOUT);
 	}
 
 	/**
@@ -91,8 +92,5 @@ public class CustomWorkflowEntryView extends View<CustomWorkflowEntryPresenter> 
 	public ViewAndAddPluginsView getViewAndAddPluginsView() {
 		return viewAndAddPluginsView;
 	}
-
-	
-	
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -95,6 +95,14 @@ public interface FuzzyDBSearchService {
 	List<List<String>> fuzzyTextSearch(final BatchInstanceID batchInstanceID, String documentType, String searchText)
 			throws DCMAException;
 	
-	public Documents extractDataBaseFields(final String batchClassIdentifier, String documentType, HocrPages hocrPage)
+	/**
+	 * This method is used to extract the database field values.
+	 * @param batchClassIdentifier {@link String}
+	 * @param documentType {@link String}
+	 * @param hocrPage {@link HocrPages}
+	 * @return {@link Documents}
+	 * @throws DCMAException
+	 */
+	Documents extractDataBaseFields(final String batchClassIdentifier, String documentType, HocrPages hocrPage)
 	throws DCMAException;
 }

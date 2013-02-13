@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,14 +39,23 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-/** Provides access to class-related utility operations */
+/** 
+ * This class provides access to class-related utility operations.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.lang.reflect.ParameterizedType
+ */
 public final class ClassUtil {
 
+	/**
+	 * Private constructor for utility class.
+	 */
 	private ClassUtil() {
-		// private constructor for utility class
 	}
 
 	/**
+	 * to get Entity Class.
 	 * @param <T> the type
 	 * @param target the target
 	 * @return the parameterized type of {@code target}'s class
@@ -57,37 +66,45 @@ public final class ClassUtil {
 	}
 
 	/**
+	 * To get Parameterized Class.
 	 * @param <T> the type of the class
 	 * @param targetClass the requested target class
 	 * @return the generic type of {@code targetClass}
-	 * @throws IllegalArgumentException if the underlying parameterized class could not be inferred via reflection.
+	 * @throws IllegalArgumentException if the underlying parameterized class could not be inferred
+	 *             via reflection.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Class<T> getParameterizedClass(Class<?> targetClass) throws IllegalArgumentException {
+	public static <T> Class<T> getParameterizedClass(Class<?> targetClass)
+			throws IllegalArgumentException {
 		Type type = targetClass.getGenericSuperclass();
+		Class<T> returnClass = null;
+		Class<?> superClass = targetClass.getSuperclass();
 		if (type instanceof ParameterizedType) {
 			ParameterizedType paramType = (ParameterizedType) type;
-			return (Class<T>) paramType.getActualTypeArguments()[0];
-		}
-		Class<?> superClass = targetClass.getSuperclass();
-		if (superClass != targetClass) {
+			returnClass = (Class<T>) paramType.getActualTypeArguments()[0];
+		} else if (!superClass.equals(targetClass)) {
 			// check that we do not run into recursion
-			return getParameterizedClass(superClass);
+			returnClass = getParameterizedClass(superClass);
+		} else {
+			throw new IllegalArgumentException(
+					"Could not guess entity class by reflection");
 		}
-		throw new IllegalArgumentException("Could not guess entity class by reflection");
+		return returnClass;
 	}
 
 	/**
-	 * Gets a field value from an <code>Object</code> not caring about its scope. Note that only fields from the <code>Class</code>
-	 * directly are accessible with this method, not from any super <code>Class</code>.
+	 * Gets a field value from an <code>Object</code> not caring about its
+	 * scope. Note that only fields from the <code>Class</code> directly are
+	 * accessible with this method, not from any super <code>Class</code>.
 	 * 
-	 * @param object
-	 * @param field
+	 * @param object Object
+	 * @param field {2link String}
 	 * @return the field value
-	 * @throws NoSuchFieldException
-	 * @throws IllegalAccessException
+	 * @throws NoSuchFieldException {@link NoSuchFieldException}
+	 * @throws IllegalAccessException {@link IllegalAccessException}
 	 */
-	public static Object getField(Object object, String field) throws NoSuchFieldException, IllegalAccessException {
+	public static Object getField(Object object, String field)
+			throws NoSuchFieldException, IllegalAccessException {
 		Field decField = object.getClass().getDeclaredField(field);
 		decField.setAccessible(true);
 		return decField.get(object);

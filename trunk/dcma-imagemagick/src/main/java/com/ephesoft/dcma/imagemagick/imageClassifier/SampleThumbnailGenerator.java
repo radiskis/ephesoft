@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.imagemagick.imageClassifier;
+package com.ephesoft.dcma.imagemagick.imageclassifier;
 
 import java.io.File;
 import java.util.Map;
@@ -63,11 +63,17 @@ import com.ephesoft.dcma.util.CustomFileFilter;
  * image files and creates thumbnails under a folder thumbs under the <page-name> folder.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
+ * 
  * 
  */
 public class SampleThumbnailGenerator {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	/**
+	 * An instance of Logger for logging in this file.
+	 */
+	protected static final Logger LOGGER = LoggerFactory.getLogger(SampleThumbnailGenerator.class);
 
 	/**
 	 * Instance of BatchClassPluginConfigService.
@@ -86,7 +92,7 @@ public class SampleThumbnailGenerator {
 	 */
 	private String sampleBaseFolderPath;
 	/**
-	 * Specifies weather PNG or TIF Thumbnails to be generated
+	 * Specifies weather PNG or TIF Thumbnails to be generated.
 	 */
 	private String thumbnailType;
 	/**
@@ -99,71 +105,71 @@ public class SampleThumbnailGenerator {
 	private String thumbnailW;
 
 	/**
-	 * @return the batchClassPluginConfigService
+	 * @return the {@link BatchClassPluginConfigService}
 	 */
 	public BatchClassPluginConfigService getBatchClassPluginConfigService() {
 		return batchClassPluginConfigService;
 	}
 
 	/**
-	 * @param batchClassPluginConfigService the batchClassPluginConfigService to set
+	 * @param batchClassPluginConfigService the {@link BatchClassPluginConfigService} to set
 	 */
 	public void setBatchClassPluginConfigService(BatchClassPluginConfigService batchClassPluginConfigService) {
 		this.batchClassPluginConfigService = batchClassPluginConfigService;
 	}
 
 	/**
-	 * @return the batchSchemaService
+	 * @return the {@link BatchSchemaService}
 	 */
 	public BatchSchemaService getBatchSchemaService() {
 		return batchSchemaService;
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * @param batchSchemaService the {@link BatchSchemaService} to set
 	 */
 	public void setBatchSchemaService(BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
-	 * This method is used to initialize the plugin specific properties from DB.
+	 * This method is used to initialize the plug in specific properties from DB.
 	 * 
-	 * @param batchClassIdentifier String
+	 * @param batchClassIdentifier {@link String}
 	 * @throws DCMAApplicationException
 	 */
 	public void initializeProperties(String batchClassIdentifier) throws DCMAApplicationException {
 		if (batchClassIdentifier == null || batchClassIdentifier.equals("0")) {
-			logger.error("Invalid Batch class ID");
+			LOGGER.error("Invalid Batch class ID");
 			throw new DCMAApplicationException("Invalide Batch class ID");
 		} else {
-			logger.info("Retrieving Image Magic Sample generation properties from DB");
+			LOGGER.info("Retrieving Image Magic Sample generation properties from DB");
 			Map<String, String> properties = batchClassPluginConfigService.getPluginPropertiesForBatch(batchClassIdentifier,
 					ImageMagicKConstants.CREATE_THUMBNAILS_PLUGIN);
 			if (properties != null && properties.size() > 0) {
 				sampleBaseFolderPath = batchSchemaService.getImageMagickBaseFolderPath(batchClassIdentifier, false);
 				if (!(sampleBaseFolderPath != null && sampleBaseFolderPath.length() > 0)) {
-					logger.error("Error retreiving sampleBaseFolderPath");
+					LOGGER.error("Error retreiving sampleBaseFolderPath");
 					throw new DCMAApplicationException("Error retreiving sampleBaseFolderPath");
 				}
 				thumbnailH = properties.get(ImageMagicProperties.CREATE_THUMBNAILS_COMP_THUMB_HEIGHT.getPropertyKey());
 				if (!(thumbnailH != null && thumbnailH.length() > 0)) {
-					logger.error("Error retreiving thumbnailH");
+					LOGGER.error("Error retreiving thumbnailH");
 					throw new DCMAApplicationException("Error retreiving thumbnailH");
 				}
 				thumbnailType = properties.get(ImageMagicProperties.CREATE_THUMBNAILS_COMP_THUMB_TYPE.getPropertyKey());
 				if (!(thumbnailType != null && thumbnailType.length() > 0)) {
-					logger.error("Error retreiving thumbnailType");
+					LOGGER.error("Error retreiving thumbnailType");
 					throw new DCMAApplicationException("Error retreiving thumbnailType");
 				}
 				thumbnailW = properties.get(ImageMagicProperties.CREATE_THUMBNAILS_COMP_THUMB_WIDTH.getPropertyKey());
 				if (!(thumbnailW != null && thumbnailW.length() > 0)) {
-					logger.error("Error retreiving thumbnailW");
+					LOGGER.error("Error retreiving thumbnailW");
 					throw new DCMAApplicationException("Error retreiving thumbnailW");
 				}
 
 			} else {
-				logger.error("Error retreiving Image Magic Sample generation  Properties from DB");
+				LOGGER.error("Error retreiving Image Magic Sample generation  Properties from DB");
 				throw new DCMAApplicationException("Error retreiving Image Magic Sample generation  Properties from DB");
 			}
 		}
@@ -174,15 +180,16 @@ public class SampleThumbnailGenerator {
 	 * 
 	 */
 	public SampleThumbnailGenerator() {
+		LOGGER.info("Inside constructor..");
 	}
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param sampleBaseFolderPath
-	 * @param thumbnailType
-	 * @param thumbnailH
-	 * @param thumbnailW
+	 * @param sampleBaseFolderPath {@link String}
+	 * @param thumbnailType {@link String}
+	 * @param thumbnailH  {@link String}
+	 * @param thumbnailW {@link String}
 	 */
 	public SampleThumbnailGenerator(String sampleBaseFolderPath, String thumbnailType, String thumbnailH, String thumbnailW) {
 		this.sampleBaseFolderPath = sampleBaseFolderPath;
@@ -195,28 +202,25 @@ public class SampleThumbnailGenerator {
 	 * This method generates all the thumbnails for all the document-types and all page-types under all document types. if the thumbs
 	 * folder already exists it deletes it and creates it again.
 	 * 
-	 * @param batchClassId If present it generates thumbnails for that batch class. if empty or null generates thumbnails for all batch
-	 *            classes
+	 * @param batchClassId {@link String}
 	 * @throws DCMAApplicationException
 	 */
 	public void generateAllThumbnails(String batchClassID) throws DCMAApplicationException {
-		logger.info("Starting Generation of all Thumbnails for the sample Images.");
+		LOGGER.info("Starting Generation of all Thumbnails for the sample Images.");
 		File fSampleBaseFolderPath = new File(sampleBaseFolderPath);
 		if (!fSampleBaseFolderPath.exists()) {
-			logger.error("Folder Doesnot exist folder name=" + fSampleBaseFolderPath);
+			LOGGER.error("Folder Doesnot exist folder name=" + fSampleBaseFolderPath);
 			throw new DCMABusinessException("Could not find folder-->" + fSampleBaseFolderPath);
 		}
-
 		int noOfThumbnailGenertd = 0;
-
 		String[] listOfDocumetFolders = fSampleBaseFolderPath.list();
-		logger.info("*Thumbnail generation for folder = " + fSampleBaseFolderPath);
+		LOGGER.info("*Thumbnail generation for folder = " + fSampleBaseFolderPath);
 		for (String documentFolder : listOfDocumetFolders) {
-			logger.info("****Thumbnail generation for documet =" + documentFolder);
+			LOGGER.info("****Thumbnail generation for documet =" + documentFolder);
 			File fDocumentFolder = new File(fSampleBaseFolderPath.getAbsolutePath() + File.separator + documentFolder);
 			String[] listOfPageFolders = fDocumentFolder.list();
 			for (String pageFolderName : listOfPageFolders) {
-				logger.info("********Thumbnail generation started for all samples of page=" + pageFolderName);
+				LOGGER.info("********Thumbnail generation started for all samples of page=" + pageFolderName);
 				String pageFolderPath = fSampleBaseFolderPath.getAbsolutePath() + File.separator + documentFolder + File.separator
 						+ pageFolderName;
 
@@ -226,7 +230,7 @@ public class SampleThumbnailGenerator {
 				if (fthumbsFolder.exists()) {
 					// logger.info("********Deleting old thumbnails for page=" + pageFolderName);
 					// FileUtils.deleteDirectoryAndContents(thumbsFolderPath);
-					logger.info("Thumbs folder already exist for " + pageFolderPath);
+					LOGGER.info("Thumbs folder already exist for " + pageFolderPath);
 					thumbsFolderExists = true;
 					String[] thumbFiles = fthumbsFolder.list();
 					if(thumbFiles != null && thumbFiles.length > 0){
@@ -241,18 +245,11 @@ public class SampleThumbnailGenerator {
 			}
 		}
 
-		logger.info("Total Thumbnails genertated =" + noOfThumbnailGenertd);
-		logger.info("All Sample Thumbnails generated sucsesfully");
+		LOGGER.info("Total Thumbnails genertated =" + noOfThumbnailGenertd);
+		LOGGER.info("All Sample Thumbnails generated sucsesfully");
 
 	}
 
-	/**
-	 * Generates thumbnails for a particular folder.
-	 * 
-	 * @param pageFolderPath
-	 * @return
-	 * @throws DCMAApplicationException
-	 */
 	private int generateThumbnailsForFolder(final String pageFolderPath) throws DCMAApplicationException {
 		int numberOfThumbnailsGenerated = 0;
 		File pageDirectory = new File(pageFolderPath);
@@ -286,11 +283,11 @@ public class SampleThumbnailGenerator {
 			try {
 				String[] listOfFiles = {pageFilepath.toString(), thumbnailFilePath.toString()};
 				convertcmd.run(operation, (Object[]) listOfFiles);
-				logger.info("***************Thumbnail generation of file " + pageFileName + " success");
+				LOGGER.info("***************Thumbnail generation of file " + pageFileName + " success");
 				numberOfThumbnailsGenerated++;
 			} catch (Exception ex) {
-				logger.info("***************Thumbnail generation of file " + pageFileName + " Failiure");
-				logger.error("Problem generating thumbnails for the File " + pageFilepath);
+				LOGGER.info("***************Thumbnail generation of file " + pageFileName + " Failiure");
+				LOGGER.error("Problem generating thumbnails for the File " + pageFilepath);
 				throw new DCMAApplicationException("Problem generating thumbnails", ex);
 			}
 

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,10 @@
 
 package com.ephesoft.dcma.da.dao.hibernate;
 
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.ephesoft.dcma.core.dao.hibernate.HibernateDao;
@@ -46,13 +50,20 @@ import com.ephesoft.dcma.da.domain.ModulePlugin;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.ModulePluginDao
  */
 @Repository
 public class ModulePluginDaoImpl extends HibernateDao<ModulePlugin> implements ModulePluginDao {
 
-	// module plugin table data access object implementation
-
-	public ModulePluginDaoImpl() {
-		super();
+	/**
+	 * API to fetch Module Plugin for Module Id.
+	 * 
+	 * @param moduleId String
+	 * @return List<ModulePlugin> 
+	 */
+	public List<ModulePlugin> getModulePluginForModuleId(String moduleId) {
+		DetachedCriteria criteria = criteria();
+		criteria.add(Restrictions.eq("module_id", moduleId));
+		return this.findSingle(criteria);
 	}
 }

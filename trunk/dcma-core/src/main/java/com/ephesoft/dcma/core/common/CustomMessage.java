@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,54 +37,117 @@ package com.ephesoft.dcma.core.common;
 
 import javax.mail.Message;
 
+/**
+ * This class sets and return custom messages.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see javax.mail.Message
+ *
+ */
 public class CustomMessage {
 
+	/**
+	 * message Message.
+	 */
 	private Message message;
 
+	/**
+	 * content String.
+	 */
 	private String content;
 
+	/**
+	 * mailMetaData MailMetaData.
+	 */
 	private MailMetaData mailMetaData;
 
+	/**
+	 * folderPath String.
+	 */
 	private String folderPath;
 
+	/**
+	 * folderName String.
+	 */
 	private String folderName;
 
+	/**
+	 * To get message.
+	 * @return Message
+	 */
 	public Message getMessage() {
 		return message;
 	}
 
+	/**
+	 * To set message.
+	 * @param message Message
+	 */
 	public void setMessage(Message message) {
 		this.message = message;
 	}
 
+	/**
+	 * To get Content.
+	 * @return String
+	 */
 	public String getContent() {
 		return content;
 	}
 
+	/**
+	 * To set Content.
+	 * @param content String
+	 */
 	public void setContent(String content) {
 		this.content = content;
 	}
 
+	/**
+	 * To get Mail Meta Data.
+	 * @return MailMetaData
+	 */
 	public MailMetaData getMailMetaData() {
 		return mailMetaData;
 	}
 
+	/**
+	 * To set Mail Meta Data.
+	 * @param mailMetaData MailMetaData
+	 */
 	public void setMailMetaData(MailMetaData mailMetaData) {
 		this.mailMetaData = mailMetaData;
 	}
 
+	/**
+	 * To get Folder Path.
+	 * @return String
+	 */
 	public String getFolderPath() {
 		return folderPath;
 	}
 
+	/**
+	 * To set Folder Path.
+	 * @param folderPath String
+	 */
 	public void setFolderPath(String folderPath) {
 		this.folderPath = folderPath;
 	}
 
+	/**
+	 * To get Folder Name.
+	 * @return String
+	 */
 	public String getFolderName() {
 		return folderName;
 	}
 
+	/**
+	 * To set Folder Name.
+	 * @param folderName String
+	 */
 	public void setFolderName(String folderName) {
 		this.folderName = folderName;
 	}

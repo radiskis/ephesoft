@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -73,9 +73,10 @@ public class ImageClassification implements DocumentClassification {
 	 * This method will process all the unclassified pages present at document type Unknown. Process every page one by one and create
 	 * new documents.
 	 * 
-	 * @param documentAssembler DocumentAssembler
-	 * @param batchInstanceID String
-	 * @throws DCMAApplicationException If any invalid parameter found.
+	 * @param documentAssembler {@link DocumentAssembler}
+	 * @param batchInstanceID {@link String}
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} If any invalid parameter found.
 	 */
 	@Override
 	public final void processUnclassifiedPages(final DocumentAssembler documentAssembler, final String batchInstanceID,
@@ -138,6 +139,16 @@ public class ImageClassification implements DocumentClassification {
 		}
 	}
 	
+	/**
+	 * This method will process all the unclassified pages API.
+	 * 
+	 * @param docPageInfo {@link List<Page>}
+	 * @param batchClassID {@link String}
+	 * @param documentAssembler {@link DocumentAssembler}
+	 * @param pluginPropertiesService {@link PluginPropertiesService}
+	 * @return {@link List<Document>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} If any invalid parameter found.
+	 */
 	public final List<Document> processUnclassifiedPagesAPI(List<Page> docPageInfo, final DocumentAssembler documentAssembler, final String batchClassID,
 			final PluginPropertiesService pluginPropertiesService) throws DCMAApplicationException {
 		LOGGER.info("Setting all the fields for ImagePageProcess.");

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,20 +33,18 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.gwt.customWorkflow.client;
+package com.ephesoft.dcma.gwt.customworkflow.client;
 
 import com.ephesoft.dcma.gwt.core.client.DCMAEntryPoint;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleInfo;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.view.RootPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class CustomWorkflowEntryPoint extends DCMAEntryPoint<CustomWorkflowServiceAsync> {
-
-	CustomWorkflowController customWorkflowController = null;
 
 	@Override
 	public LocaleInfo createLocaleInfo(String locale) {
@@ -66,20 +64,26 @@ public class CustomWorkflowEntryPoint extends DCMAEntryPoint<CustomWorkflowServi
 	@Override
 	public void onLoad() {
 
+		CustomWorkflowController customWorkflowController = null;
+
 		LayoutPanel layoutPanel = new LayoutPanel();
 		customWorkflowController = new CustomWorkflowController(eventBus, rpcService);
 		layoutPanel.add(customWorkflowController.createView());
 
-		final RootPanel rootPanel = new RootPanel(layoutPanel);
+		final RootPanel rootPanel = new RootPanel(layoutPanel, rpcService);
 		rootPanel.getHeader().setEventBus(eventBus);
 		rootPanel.getHeader().addTab("Batch Class Management", "BatchClassManagement.html", false);
 		rootPanel.getHeader().addTab("Batch Instance Management", "BatchInstanceManagement.html", false);
-		rootPanel.getHeader().addTab("Custom Workflow Management", "CustomWorkflowManagement.html", false);
+		rootPanel.getHeader().addNonClickableTab("Workflow Management", "CustomWorkflowManagement.html");
+		rootPanel.getHeader().addTab("Folder Management", "FolderManager.html", false);
 		ScreenMaskUtility.maskScreen();
-		rpcService.isReportingEnabled(new AsyncCallback<Boolean>() {
+		rpcService.isReportingEnabled(new EphesoftAsyncCallback<Boolean>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
+				/**
+				 * NO specific failure handling
+				 */
 			}
 
 			@Override
@@ -93,7 +97,7 @@ public class CustomWorkflowEntryPoint extends DCMAEntryPoint<CustomWorkflowServi
 		rootPanel.getHeader().getTabBar().selectTab(2);
 		rootPanel.getHeader().setEventBus(eventBus);
 
-		rpcService.getUserName(new AsyncCallback<String>() {
+		rpcService.getUserName(new EphesoftAsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(final String userName) {
@@ -102,7 +106,7 @@ public class CustomWorkflowEntryPoint extends DCMAEntryPoint<CustomWorkflowServi
 			}
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 		});

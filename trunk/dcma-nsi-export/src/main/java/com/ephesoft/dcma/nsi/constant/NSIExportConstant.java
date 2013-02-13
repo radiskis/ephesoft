@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,25 +43,63 @@ package com.ephesoft.dcma.nsi.constant;
  */
 public interface NSIExportConstant {
 
+	/**
+	 * Initializing HOURS.
+	 */
 	String HOURS = "hours";
 
+	/**
+	 * Initializing DATE.
+	 */
 	String DATE = "date";
 
+	/**
+	 * Initializing EMPTY.
+	 */
+	String EMPTY = "";
+	
+	/**
+	 * Initializing COLON.
+	 */	
 	String COLON = ":";
 
+	/**
+	 * Initializing HYPEN.
+	 */
 	String HYPEN = "-";
 
+	/**
+	 * Initializing NSI_PLUGIN_NAME.
+	 */
 	String NSI_PLUGIN_NAME = "NSI_EXPORT";
 
+	/**
+	 * Initializing TIME_ZONE_ID.
+	 */
 	String TIME_ZONE_ID = "Europe/Madrid";
 
+	/**
+	 * Initializing DAT_WITH_DOT_EXTENSION.
+	 */
 	String DAT_WITH_DOT_EXTENSION = ".dat";
 
+	/**
+	 * Initializing TIF_WITH_DOT_EXTENSION.
+	 */
 	String TIF_WITH_DOT_EXTENSION = ".tif";
 
+	/**
+	 * Initializing IMAGE_FOLDER_NAME.
+	 */
 	String IMAGE_FOLDER_NAME = "images";
 
+	/**
+	 * Initializing EXPORT_FOLDER_PATH.
+	 */
 	String EXPORT_FOLDER_PATH = "nsiExportPath";
 
+	/**
+	 * Initializing BASE_DOC_FOLDER_PATH.
+	 */
 	String BASE_DOC_FOLDER_PATH = "nsiBasePath";
 }

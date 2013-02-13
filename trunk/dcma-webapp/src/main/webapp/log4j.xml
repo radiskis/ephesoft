@@ -41,8 +41,8 @@
    <!-- EMail events to an administrator -->
    <appender name="SMTP" class="org.apache.log4j.net.SMTPAppender">
      <param name="Threshold" value="ERROR"/>
-     <param name="To" value="deepak.chauhan@nagarro.com"/>
-     <param name="From" value="deepak.chauhan@nagarro.com"/>
+     <param name="To" value="enterprise.support@ephesoft.com"/>
+     <param name="From" value="enterprise.support@ephesoft.com"/>
      <param name="Subject" value="Email logs"/>
      <param name="SMTPHost" value="${mail.host}"/>
      <param name="BufferSize" value="10"/>

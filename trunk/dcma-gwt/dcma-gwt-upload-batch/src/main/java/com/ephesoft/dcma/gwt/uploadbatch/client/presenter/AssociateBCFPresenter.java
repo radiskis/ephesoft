@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,9 +40,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
-import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
+import com.ephesoft.dcma.gwt.core.client.validator.RegExValidatableWidget;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassFieldDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.uploadbatch.client.UploadBatchController;
@@ -50,7 +51,6 @@ import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchConstants;
 import com.ephesoft.dcma.gwt.uploadbatch.client.i18n.UploadBatchMessages;
 import com.ephesoft.dcma.gwt.uploadbatch.client.view.AssociateBCFView;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -69,12 +69,12 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 
 	}
 
-	public void setBatchClassFieldDTOs(final String batchClassId, final boolean isOnLoad) {
+	public final void setBatchClassFieldDTOs(final String batchClassId, final boolean isOnLoad) {
 		controller.getRpcService().getBatchClassFieldDTOByBatchClassIdentifier(batchClassId,
-				new AsyncCallback<List<BatchClassFieldDTO>>() {
+				new EphesoftAsyncCallback<List<BatchClassFieldDTO>>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.ERROR_RETRIEVING_BCF));
 
@@ -143,7 +143,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					if (!docFieldWidgets.get(index).getTextBoxWidget().validate()) {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.INVALID_REGEX_PATTERN), LocaleDictionary.get().getConstantValue(
-								UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
+								UploadBatchConstants.ASSOCIATE_BCF_BUTTON), Boolean.TRUE);
 						fieldsValid = true;
 						setVisibleDialogue = false;
 						break;
@@ -153,7 +153,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					if (docFieldWidgets.get(index).getListBoxwidget().getSelectedIndex() == -1) {
 						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 								UploadBatchMessages.BLANK_ERROR), LocaleDictionary.get().getConstantValue(
-								UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
+								UploadBatchConstants.ASSOCIATE_BCF_BUTTON), Boolean.TRUE);
 						fieldsValid = true;
 						break;
 					}
@@ -167,7 +167,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 			setVisibleDialogue = true;
 			int index = 0;
 			for (BatchClassFieldDTO batchClassFieldDTO : batchClassFieldDTOs) {
-				if (docFieldWidgets.get(index).isListBox) {
+				if (docFieldWidgets.get(index).listBox) {
 					batchClassFieldDTO.setValue(docFieldWidgets.get(index).getListBoxwidget().getItemText(
 							docFieldWidgets.get(index).getListBoxwidget().getSelectedIndex()));
 				} else {
@@ -179,7 +179,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 			if (currentBatchUploadFolder == null || currentBatchUploadFolder.isEmpty()) {
 
 				// rpc call for fetching the folder name
-				controller.getRpcService().getCurrentBatchFolderName(new AsyncCallback<String>() {
+				controller.getRpcService().getCurrentBatchFolderName(new EphesoftAsyncCallback<String>() {
 
 					@Override
 					public void onSuccess(String currentBatchUploadFolder) {
@@ -187,7 +187,10 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					}
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
+						/*
+						 * on failure
+						 */
 
 					}
 				});
@@ -197,33 +200,34 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 		}
 	}
 
-	private void serializeBatchClassField(final String currentBatchUploadFolder){
+	private void serializeBatchClassField(final String currentBatchUploadFolder) {
 		controller.setCurrentBatchUploadFolder(currentBatchUploadFolder);
-		controller.getRpcService().serializeBatchClassField(controller.getCurrentBatchUploadFolder(),
-				batchClassFieldDTOs, new AsyncCallback<Void>() {
+		controller.getRpcService().serializeBatchClassField(controller.getCurrentBatchUploadFolder(), batchClassFieldDTOs,
+				new EphesoftAsyncCallback<Void>() {
 
-				@Override
-				public void onSuccess(Void arg0) {
-					ScreenMaskUtility.unmaskScreen();
-					if (controller.isFinishButtonClicked()) {
-						controller.getMainPresenter().onFinishButtonClicked();
-						controller.getUploadBatchView().getBatchClassNameListBox().setEnabled(true);
-					} else {
-						ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-								UploadBatchMessages.ASSOCIATE_BATCH_CLASS_FIELD_SUCCESS), LocaleDictionary.get()
-								.getConstantValue(UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
+					@Override
+					public void onSuccess(Void arg0) {
+						ScreenMaskUtility.unmaskScreen();
+						if (controller.isFinishButtonClicked()) {
+							controller.getMainPresenter().onFinishButtonClicked();
+							controller.getUploadBatchView().getBatchClassNameListBox().setEnabled(true);
+						} else {
+							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
+									UploadBatchMessages.ASSOCIATE_BATCH_CLASS_FIELD_SUCCESS), LocaleDictionary.get().getConstantValue(
+									UploadBatchConstants.ASSOCIATE_BCF_BUTTON), Boolean.TRUE);
+						}
 					}
-				}
 
-				@Override
-				public void onFailure(Throwable arg0) {
-					ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
-							UploadBatchMessages.ERROR_SAVING_BCF));
+					@Override
+					public void customFailure(Throwable arg0) {
+						ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+								UploadBatchMessages.ERROR_SAVING_BCF));
 
-				}
-			});
-	
+					}
+				});
+
 	}
+
 	private void setProperties() {
 		docFieldWidgets = new ArrayList<EditableWidgetStorage>();
 		if (batchClassFieldDTOs != null && batchClassFieldDTOs.size() > 0) {
@@ -237,13 +241,13 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 					final ListBox fieldValue = view.addDropDown(batchClassFieldDTO.getFieldOptionValueList(), batchClassFieldDTO
 							.getValue());
 					view.addWidget(row, 1, fieldValue);
-					docFieldWidgets.add(new EditableWidgetStorage(fieldValue));
+					docFieldWidgets.add(new EditableWidgetStorage(null, true, fieldValue, false));
 				} else {
 					// Create a text box
-					ValidatableWidget<TextBox> validatableTextBox = view.addTextBox(batchClassFieldDTO);
+					RegExValidatableWidget<TextBox> validatableTextBox = view.addTextBox(batchClassFieldDTO);
 					view.addWidget(row, 1, validatableTextBox.getWidget());
 
-					docFieldWidgets.add(new EditableWidgetStorage(validatableTextBox));
+					docFieldWidgets.add(new EditableWidgetStorage(validatableTextBox, false, null, true));
 				}
 				row++;
 			}
@@ -253,18 +257,18 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 			List<String> fileList = new ArrayList<String>();
 			fileList.add(UploadBatchConstants.BCF_SER_FILE_NAME + UploadBatchConstants.SERIALIZATION_EXT);
 			controller.getRpcService().deleteFilesByName(controller.getCurrentBatchUploadFolder(), fileList,
-					new AsyncCallback<List<String>>() {
+					new EphesoftAsyncCallback<List<String>>() {
 
 						@Override
 						public void onSuccess(List<String> filesNotDeleted) {
 							view.getDialogBox().hide();
 							ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
 									UploadBatchMessages.NO_BATCH_CLASS_FIELD_FOUND), LocaleDictionary.get().getConstantValue(
-									UploadBatchConstants.ASSOCIATE_BCF_BUTTON),Boolean.TRUE);
+									UploadBatchConstants.ASSOCIATE_BCF_BUTTON), Boolean.TRUE);
 						}
 
 						@Override
-						public void onFailure(Throwable arg0) {
+						public void customFailure(Throwable arg0) {
 							ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 									UploadBatchMessages.ERROR_DELETING_BCF));
 
@@ -296,24 +300,21 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 
 	private static class EditableWidgetStorage {
 
-		private ValidatableWidget<TextBox> widget;
-		private boolean isListBox;
-		private ListBox listBoxwidget;
-		private boolean isValidatable;
+		private final RegExValidatableWidget<TextBox> widget;
+		private final boolean listBox;
+		private final ListBox listBoxwidget;
+		private final boolean validTable;
 
-		public EditableWidgetStorage(ValidatableWidget<TextBox> widget) {
-			this.widget = widget;
-			this.isListBox = false;
-			this.isValidatable = true;
-		}
-
-		public EditableWidgetStorage(ListBox listBoxwidget) {
+		public EditableWidgetStorage(RegExValidatableWidget<TextBox> validatableTextBox, boolean listBox, ListBox listBoxwidget,
+				boolean validTable) {
+			super();
+			this.widget = validatableTextBox;
+			this.listBox = listBox;
 			this.listBoxwidget = listBoxwidget;
-			this.isListBox = true;
-			this.isValidatable = false;
+			this.validTable = validTable;
 		}
 
-		public ValidatableWidget<TextBox> getTextBoxWidget() {
+		public RegExValidatableWidget<TextBox> getTextBoxWidget() {
 			return widget;
 		}
 
@@ -322,17 +323,17 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 		}
 
 		public boolean isListBox() {
-			return isListBox;
+			return listBox;
 		}
 
 		public boolean isValidatable() {
-			return isValidatable;
+			return validTable;
 		}
 
 	}
 
 	@Override
-	public void bind() {
+	public final void bind() {
 		view.setView();
 		setProperties();
 	}
@@ -342,7 +343,7 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 		// to be used in case of event handling
 	}
 
-	public void showAssociateBCFView() {
+	public final void showAssociateBCFView() {
 		if (batchClassFieldDTOs != null && batchClassFieldDTOs.size() > 0) {
 			view.getDialogBox().setWidth("100%");
 			view.getDialogBox().center();
@@ -352,7 +353,6 @@ public class AssociateBCFPresenter extends AbstractUploadBatchPresenter<Associat
 		}
 	}
 
-	
 	public List<BatchClassFieldDTO> getBatchClassFieldDTOs() {
 		return batchClassFieldDTOs;
 	}

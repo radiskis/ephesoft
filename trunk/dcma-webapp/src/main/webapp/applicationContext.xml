@@ -24,5 +24,10 @@
 	<!--
 	<import resource="classpath:/META-INF/applicationContext-dcma-mail-import.xml" />
 	-->
+	
+	<!-- Un-comment it to start Cmis Import Module on this machine. -->
+	<!--
+	<import resource="classpath:/META-INF/applicationContext-dcma-cmis-import.xml" />
+	-->
 
 </beans>

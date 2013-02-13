@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,28 +43,49 @@ import org.springframework.core.io.ClassPathResource;
 import com.ephesoft.dcma.core.service.DBScriptExecuter;
 import com.ephesoft.dcma.da.dao.PluginDao;
 
+/**
+ * This class makes database preparations.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.service.DBScriptExecuter
+ */
 public class DatabasePreperation {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(DatabasePreperation.class);
-	
+
+	/**
+	 * executer DBScriptExecuter.
+	 */
 	@Autowired
 	private DBScriptExecuter executer;
-	
+
+	/**
+	 * pluginDao PluginDao.
+	 */
 	@Autowired
 	private PluginDao pluginDao;
-	
+
+	/**
+	 * This method makes some initial settings for database.
+	 */
 	public void init() {
+
 		LOG.info("==============Running the Database Scripts=======================");
 		try {
-			if(pluginDao.countAll() != 0) {
+			if (pluginDao.countAll() != 0) {
 				LOG.info("Database is already prepared. Will not execute the DB Scripts.");
 				return;
 			}
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/init-master-data.sql"));
 			executer.execute(new ClassPathResource("META-INF/dcma-data-access/sample-data.sql"));
 		} catch (Exception e) {
-			LOG.error("Error in execution of Database scripts." ,e);
+			LOG.error("Error in execution of Database scripts.", e);
 		}
 		LOG.info("==============Database Scripts executed successfully==============");
 	}
+
 }

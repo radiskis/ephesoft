@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,14 +48,48 @@ import com.ephesoft.dcma.core.threadpool.ProcessExecutor;
 import com.ephesoft.dcma.tabbed.constant.TabbedPdfConstant;
 import com.ephesoft.dcma.util.OSUtil;
 
+/**
+ * This class creates thread for TabbedPdfService.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.threadpool.BatchInstanceThread
+ */
 public class TabbedPDFExecutor {
 
+	/**
+	 * outputFolderPath String.
+	 */
 	private final String outputFolderPath;
+	
+	/**
+	 * documentPDFPaths List<String>.
+	 */
 	private final List<String> documentPDFPaths;
+	
+	/**
+	 * pdfMarkPath String.
+	 */
 	private final String pdfMarkPath;
+	
+	/**
+	 * thread BatchInstanceThread.
+	 */
 	private final BatchInstanceThread thread;
+	
+	/**
+	 * tabbedPDFName String.
+	 */
 	private final String tabbedPDFName;
+	
+	/**
+	 * pdfCreationParam String.
+	 */
 	private final String pdfCreationParam;
+	
+	/**
+	 * gsCommand String.
+	 */
 	private final String gsCommand;
 
 	/**
@@ -63,6 +97,18 @@ public class TabbedPDFExecutor {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(TabbedPDFExecutor.class);
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param tabbedPDFName String
+	 * @param outputFolderPath String
+	 * @param documentPDFPaths List<String>
+	 * @param pdfMarkPath String
+	 * @param thread BatchInstanceThread
+	 * @param pdfCreationParam String
+	 * @param gsCommand String
+	 * @throws DCMAApplicationException in case of error
+	 */
 	public TabbedPDFExecutor(String tabbedPDFName, String outputFolderPath, List<String> documentPDFPaths, String pdfMarkPath,
 			BatchInstanceThread thread, String pdfCreationParam, String gsCommand) throws DCMAApplicationException {
 		this.tabbedPDFName = tabbedPDFName;
@@ -75,44 +121,43 @@ public class TabbedPDFExecutor {
 		run();
 	}
 
-	public void run() throws DCMAApplicationException {
+	/**
+	 * Run method.
+	 * @throws DCMAApplicationException in case of error
+	 */ 
+	public final void run() throws DCMAApplicationException {
 		try {
-			String pdfCreationParams[] = pdfCreationParam.split(" ");
+			String pdfCreationParams[] = pdfCreationParam.split(TabbedPdfConstant.SPACE);
 			ArrayList<String> commandList = new ArrayList<String>();
 			if (OSUtil.isWindows()) {
-				commandList.add("cmd");
-				commandList.add("/c");
+				commandList.add(TabbedPdfConstant.CMD);
+				commandList.add(TabbedPdfConstant.SLASH_C);
 			}
 			commandList.add(gsCommand);
 			for (String param : pdfCreationParams) {
 				commandList.add(param);
 			}
-			// //commandList.add(pdfCreationParam);
-			// commandList.add("-q");
-			// commandList.add("-dBATCH");
-			// commandList.add("-dNOPAUSE");
-			// commandList.add("-sDEVICE=pdfwrite");
+	
 			commandList.add("-sOutputFile=" + outputFolderPath + File.separator + tabbedPDFName);
 			for (String documentPDFPath : documentPDFPaths) {
-				if(OSUtil.isUnix()) {
+				if (OSUtil.isUnix()) {
 					commandList.add(documentPDFPath);
 				} else {
-					commandList.add("\"" + documentPDFPath + "\"");
+					commandList.add(TabbedPdfConstant.QUOTES + documentPDFPath + TabbedPdfConstant.QUOTES);
 				}
 			}
-			if(OSUtil.isUnix()) {
-				commandList.add(pdfMarkPath);	
+			if (OSUtil.isUnix()) {
+				commandList.add(pdfMarkPath);
 			} else {
-				commandList.add("\"" + pdfMarkPath + "\"");
+				commandList.add(TabbedPdfConstant.QUOTES + pdfMarkPath + TabbedPdfConstant.QUOTES);
 			}
-			
 
 			String[] cmds = new String[commandList.size()];
 			for (int i = 0; i < commandList.size(); i++) {
-				if (commandList.get(i).contains("cmd")) {
+				if (commandList.get(i).contains(TabbedPdfConstant.CMD)) {
 					LOGGER.info("inside cmd");
 					cmds[i] = commandList.get(i);
-				} else if (commandList.get(i).contains("/c")) {
+				} else if (commandList.get(i).contains(TabbedPdfConstant.SLASH_C)) {
 					LOGGER.info("inside /c");
 					cmds[i] = commandList.get(i);
 				} else {

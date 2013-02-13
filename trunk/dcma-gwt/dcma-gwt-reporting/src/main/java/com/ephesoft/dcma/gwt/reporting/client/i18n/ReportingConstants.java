@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,7 +38,7 @@ package com.ephesoft.dcma.gwt.reporting.client.i18n;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 
 /**
- * The interface is used to define all the constants used in the reporting module and support internationalization.
+ * The class is used to define all the constants used in the reporting module and support internationalization.
  * 
  * @author Ephesoft
  * 
@@ -52,8 +52,9 @@ public interface ReportingConstants extends LocaleCommonConstants {
 	String MODULE = "Module";
 
 	String PLUGIN = "Plugin";
+	String USER = "User";
 
-	String SYSTEM_STATISTICS_LABEL = "system_statistics";  //
+	String SYSTEM_STATISTICS_LABEL = "system_statistics";
 
 	String BOLD_TEXT_CSS = "bold-text";
 
@@ -65,33 +66,33 @@ public interface ReportingConstants extends LocaleCommonConstants {
 
 	String DATE_FORMAT_SPECIFIED = "MM/dd/yyyy";
 
-	String GO_BUTTON_TEXT = "go_button_text"; 
+	String GO_BUTTON_TEXT = "go_button_text";
 
-	String TOTAL_BATCHES_PROCESSED_LABEL = "total_batches_processed_label";  //
+	String TOTAL_BATCHES_PROCESSED_LABEL = "total_batches_processed_label";
 
-	String TOTAL_DOCUMENTS_PROCESSED_LABEL = "total_documents_processed_label"; //
+	String TOTAL_DOCUMENTS_PROCESSED_LABEL = "total_documents_processed_label";
 
-	String TOTAL_PAGES_PROCESSED = "total_pages_processed"; //
+	String TOTAL_PAGES_PROCESSED = "total_pages_processed";
 
-	String SYNC_DB_BUTTON_TEXT = "sync_db_button_text"; //
+	String SYNC_DB_BUTTON_TEXT = "sync_db_button_text";
 
-	String COMMON_BUTTON_TEXT="common_button_text";
-	
+	String COMMON_BUTTON_TEXT = "common_button_text";
+
 	String SYNC_BD_BUTTON_CSS = "syncDStyle";
-	
-	String COMMON_BUTTON_CSS="commonButton";
+
+	String COMMON_BUTTON_CSS = "commonButton";
 
 	String SYSTEM_STATISTICS_BOX_CSS = "top-box";
 
-	String INTERVAL_LISTBOX_TEXT_SECONDS = "interval_listbox_text_seconds"; //
+	String INTERVAL_LISTBOX_TEXT_SECONDS = "interval_listbox_text_seconds";
 
 	String INTERVAL_LISTBOX_VALUE_SECONDS = "1";
- 
-	String INTERVAL_LISTBOX_TEXT_MINUTES = "interval_list_box_text_minutes"; //
+
+	String INTERVAL_LISTBOX_TEXT_MINUTES = "interval_list_box_text_minutes";
 
 	String INTERVAL_LISTBOX_VALUE_MINUTES = "60";
 
-	String INTERVAL_LISTBOX_TEXT_HOURS = "interval_list_box_text_hours"; //
+	String INTERVAL_LISTBOX_TEXT_HOURS = "interval_list_box_text_hours";
 
 	String INTERVAL_LISTBOX_VALUE_HOURS = "3600";
 
@@ -102,15 +103,15 @@ public interface ReportingConstants extends LocaleCommonConstants {
 	String SAMPLE_FORMAT_CSS = "sample_style";
 
 	String DATE_FORMAT_SAMPLE_VALUE = "mm/dd/yyyy";
-	
-	String ALL_TEXT = "ALL";  //
-	
+
+	String ALL_TEXT = "ALL";
+
 	String CUSTOM_REPORT_URL = "custom_reports_url";
-	
+
 	String CUSTOM_REPORT_TITLE = "custom_reports_title";
-	
+
 	String CUSTOM_REPORT_POP_UP_XDIMENSION = "custom_reports_pop_up_xdimension";
 
 	String CUSTOM_REPORT_POP_UP_YDIMENSION = "custom_reports_pop_up_ydimension";
-	
+
 }

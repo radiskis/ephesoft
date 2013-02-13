@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,6 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.DocumentTypeViewPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.fieldtype.FieldTypeListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey.FunctionKeyListPresenter;
-import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.PluginListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.tableinfo.TableInfoListPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.fieldtype.FieldTypeListView;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyListView;
@@ -76,100 +76,219 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class handles document type view seen to user on editing batch class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
+	/**
+	 * MARGIN String.
+	 */
+	private static final String MARGIN = "margin";
+
+	/**
+	 * TOP_PADD String.
+	 */
+	private static final String TOP_PADD = "topPadd";
+
+	/**
+	 * HEIGHT String.
+	 */
+	private static final String HEIGHT = "20px";
+
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, DocumentTypeView> {
 	}
 
+	/**
+	 * documentTypeDetailView DocumentTypeDetailView.
+	 */
 	@UiField
 	protected DocumentTypeDetailView documentTypeDetailView;
 
+	/**
+	 * editDocumentTypeView EditDocumentTypeView.
+	 */
 	@UiField
 	protected EditDocumentTypeView editDocumentTypeView;
 
+	/**
+	 * pageTypeListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel pageTypeListPanel;
 
-	private PageTypeListView pageTypeListView;
+	/**
+	 * pageTypeListView PageTypeListView.
+	 */
+	private final PageTypeListView pageTypeListView;
 
+	/**
+	 * functionKeyListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel functionKeyListPanel;
 
-	private FunctionKeyListView functionKeyListView;
+	/**
+	 * functionKeyListView FunctionKeyListView.
+	 */
+	private final FunctionKeyListView functionKeyListView;
 
+	/**
+	 * addFunctionKeyButton Button.
+	 */
 	@UiField
 	protected Button addFunctionKeyButton;
 
+	/**
+	 * editFunctionKeyButton Button.
+	 */
 	@UiField
 	protected Button editFunctionKeyButton;
 
+	/**
+	 * deleteFunctionKeyButton Button.
+	 */
 	@UiField
 	protected Button deleteFunctionKeyButton;
 
+	/**
+	 * fieldTypeListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel fieldTypeListPanel;
 
+	/**
+	 * documentTypeVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel documentTypeVerticalPanel;
 
+	/**
+	 * documentTypeConfigVerticalPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel documentTypeConfigVerticalPanel;
 
-	private FieldTypeListView fieldTypeListView;
+	/**
+	 * fieldTypeListView FieldTypeListView.
+	 */
+	private final FieldTypeListView fieldTypeListView;
 
+	/**
+	 * documentConfigurationCaptionPanel CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel documentConfigurationCaptionPanel;
 
+	/**
+	 * fieldTypeCompletePanel DockLayoutPanel.
+	 */
 	@UiField
-	protected Button editDocumentPropertiesButton;
+	protected DockLayoutPanel fieldTypeCompletePanel;
 
-	@UiField
-	DockLayoutPanel fieldTypeCompletePanel;
-
+	/**
+	 * addFieldButton Button.
+	 */
 	@UiField
 	protected Button addFieldButton;
 
+	/**
+	 * editFieldButton Button.
+	 */
 	@UiField
 	protected Button editFieldButton;
 
+	/**
+	 * deleteFieldButton Button.
+	 */
 	@UiField
 	protected Button deleteFieldButton;
 
+	/**
+	 * fieldButtonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel fieldButtonPanel;
 
-	private TableInfoListView tableInfoListView;
+	/**
+	 * tableInfoListView TableInfoListView.
+	 */
+	private final TableInfoListView tableInfoListView;
 
+	/**
+	 * tableInfoCompletePanel DockLayoutPanel.
+	 */
 	@UiField
-	DockLayoutPanel tableInfoCompletePanel;
+	protected DockLayoutPanel tableInfoCompletePanel;
 
+	/**
+	 * addTableInfoFieldButton Button.
+	 */
 	@UiField
 	protected Button addTableInfoFieldButton;
 
+	/**
+	 * editTableInfoFieldButton Button.
+	 */
 	@UiField
 	protected Button editTableInfoFieldButton;
 
+	/**
+	 * deleteTableInfoFieldButton Button.
+	 */
 	@UiField
 	protected Button deleteTableInfoFieldButton;
 
+	/**
+	 * tableInfoListPanel LayoutPanel.
+	 */
 	@UiField
 	protected LayoutPanel tableInfoListPanel;
 
+	/**
+	 * tableInfoButtonPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel tableInfoButtonPanel;
 
+	/**
+	 * testTableButton Button.
+	 */
 	@UiField
 	protected Button testTableButton;
 
+	/**
+	 * fieldTypeListPresenter FieldTypeListPresenter.
+	 */
 	private FieldTypeListPresenter fieldTypeListPresenter;
-	
+
+	/**
+	 * tableInfoListPresenter TableInfoListPresenter.
+	 */
 	private TableInfoListPresenter tableInfoListPresenter;
-	
+
+	/**
+	 * functionKeyListPresenter FunctionKeyListPresenter.
+	 */
 	private FunctionKeyListPresenter functionKeyListPresenter;
-	
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public DocumentTypeView() {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		pageTypeListView = new PageTypeListView();
@@ -187,68 +306,95 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 		fieldTypeListView = new FieldTypeListView();
 		fieldTypeListPanel.add(fieldTypeListView.listView);
 
-		editDocumentPropertiesButton.setText(AdminConstants.EDIT_BUTTON);
 		editFieldButton.setText(AdminConstants.EDIT_BUTTON);
 		deleteFieldButton.setText(AdminConstants.DELETE_BUTTON);
-		documentTypeVerticalPanel.add(editDocumentPropertiesButton);
 
-		addFieldButton.setHeight("20px");
-		editFieldButton.setHeight("20px");
-		deleteFieldButton.setHeight("20px");
-		addFunctionKeyButton.setHeight("20px");
-		editFunctionKeyButton.setHeight("20px");
-		deleteFunctionKeyButton.setHeight("20px");
+		addFieldButton.setHeight(HEIGHT);
+		editFieldButton.setHeight(HEIGHT);
+		deleteFieldButton.setHeight(HEIGHT);
+		addFunctionKeyButton.setHeight(HEIGHT);
+		editFunctionKeyButton.setHeight(HEIGHT);
+		deleteFunctionKeyButton.setHeight(HEIGHT);
 
-		fieldButtonPanel.addStyleName("topPadd");
+		fieldButtonPanel.addStyleName(TOP_PADD);
 
 		// Table Info List View Changes
 		tableInfoListView = new TableInfoListView();
 		tableInfoListPanel.add(tableInfoListView.listView);
-		tableInfoButtonPanel.addStyleName("topPadd");
+		tableInfoButtonPanel.addStyleName(TOP_PADD);
 
 		addTableInfoFieldButton.setText(AdminConstants.ADD_BUTTON);
-		addTableInfoFieldButton.setHeight("20px");
+		addTableInfoFieldButton.setHeight(HEIGHT);
 
 		deleteTableInfoFieldButton.setText(AdminConstants.DELETE_BUTTON);
-		deleteTableInfoFieldButton.setHeight("20px");
+		deleteTableInfoFieldButton.setHeight(HEIGHT);
 
 		testTableButton.setText(AdminConstants.TEST_TABLE_BUTTON);
-		testTableButton.setHeight("20px");
-		testTableButton.addStyleName("margin");
+		testTableButton.setHeight(HEIGHT);
+		testTableButton.addStyleName(MARGIN);
 
 		editTableInfoFieldButton.setText(AdminConstants.EDIT_BUTTON);
-		editTableInfoFieldButton.setHeight("20px");
+		editTableInfoFieldButton.setHeight(HEIGHT);
 	}
 
+	/**
+	 * To create Page Type List.
+	 * 
+	 * @param pageTypes Collection<PageTypeDTO>
+	 */
 	public void createPageTypeList(Collection<PageTypeDTO> pageTypes) {
 		List<Record> recordList = setPluginList(pageTypes);
 
-		pageTypeListView.listView.initTable(recordList.size(),recordList);
+		pageTypeListView.listView.initTable(recordList.size(), recordList);
 	}
 
+	/**
+	 * To create Field Type List.
+	 * 
+	 * @param fieldTypes Collection<FieldTypeDTO>
+	 */
 	public void createFieldTypeList(Collection<FieldTypeDTO> fieldTypes) {
-		List<Record> recordList = setFieldsList(fieldTypes);
-		fieldTypeListPresenter = new FieldTypeListPresenter(presenter.getController(),fieldTypeListView);
-		fieldTypeListView.listView.initTable(recordList.size(),null,null, recordList, true,false,fieldTypeListPresenter);
+		List<FieldTypeDTO> fieldTypeList = new ArrayList<FieldTypeDTO>(fieldTypes);
+		presenter.getController().getMainPresenter().sortDocumentLevelFieldsList(fieldTypeList);
+		List<Record> recordList = setFieldsList(fieldTypeList);
+		fieldTypeListPresenter = new FieldTypeListPresenter(presenter.getController(), fieldTypeListView);
+		fieldTypeListPresenter.setFieldTypeDTOList(fieldTypeList);
+		fieldTypeListView.listView.initTable(recordList.size(), null, null, recordList, true, false, fieldTypeListPresenter,
+				fieldTypeListPresenter, true);
 	}
 
+	/**
+	 * To create Table Info List.
+	 * 
+	 * @param tableInfos Collection<TableInfoDTO>
+	 */
 	public void createTableInfoList(Collection<TableInfoDTO> tableInfos) {
 		List<Record> recordList = setTableInfoList(tableInfos);
-		tableInfoListPresenter = new TableInfoListPresenter(presenter.getController(),tableInfoListView);
-        tableInfoListView.listView.initTable(recordList.size(),null,null, recordList, true,false,tableInfoListPresenter);
+		tableInfoListPresenter = new TableInfoListPresenter(presenter.getController(), tableInfoListView);
+		tableInfoListView.listView.initTable(recordList.size(), null, null, recordList, true, false, tableInfoListPresenter, null,
+				false);
 	}
 
-	private List<Record> setFieldsList(Collection<FieldTypeDTO> fields) {
+	/**
+	 * To set Fields List.
+	 * 
+	 * @param fields Collection<FieldTypeDTO>
+	 * @return List<Record>
+	 */
+	public List<Record> setFieldsList(Collection<FieldTypeDTO> fields) {
 
 		List<Record> recordList = new LinkedList<Record>();
 		for (final FieldTypeDTO fieldTypeDTO : fields) {
 			CheckBox isHidden = new CheckBox();
 			CheckBox isMultiLine = new CheckBox();
+			CheckBox isReadOnly = new CheckBox();
 			isHidden.setValue(fieldTypeDTO.isHidden());
 			isHidden.setEnabled(false);
 			isMultiLine.setValue(fieldTypeDTO.isMultiLine());
 			isMultiLine.setEnabled(false);
-		    Record record = new Record(fieldTypeDTO.getIdentifier());
+			isReadOnly.setValue(fieldTypeDTO.getIsReadOnly());
+			isReadOnly.setEnabled(false);
+			Record record = new Record(fieldTypeDTO.getIdentifier());
 			record.addWidget(fieldTypeListView.name, new Label(fieldTypeDTO.getName()));
 			record.addWidget(fieldTypeListView.description, new Label(fieldTypeDTO.getDescription()));
 			record.addWidget(fieldTypeListView.type, new Label(fieldTypeDTO.getDataType().name()));
@@ -257,6 +403,7 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 			record.addWidget(fieldTypeListView.barcode, new Label(fieldTypeDTO.getBarcodeType()));
 			record.addWidget(fieldTypeListView.isHidden, isHidden);
 			record.addWidget(fieldTypeListView.isMultiLine, isMultiLine);
+			record.addWidget(fieldTypeListView.isReadOnly, isReadOnly);
 			recordList.add(record);
 		}
 
@@ -283,6 +430,8 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 			record.addWidget(tableInfoListView.name, new Label(tableInfoDTO.getName()));
 			record.addWidget(tableInfoListView.startPattern, new Label(tableInfoDTO.getStartPattern()));
 			record.addWidget(tableInfoListView.endPattern, new Label(tableInfoDTO.getEndPattern()));
+			record.addWidget(tableInfoListView.tableExtractionAPI, new Label(tableInfoDTO.getTableExtractionAPI()));
+			record.addWidget(tableInfoListView.widthOfMultiline, new Label(tableInfoDTO.getWidthOfMultiline()));
 			recordList.add(record);
 		}
 
@@ -291,101 +440,185 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 
 	private List<Record> setPluginList(Collection<PageTypeDTO> pageTypes) {
 
-		if (null == pageTypes) {
-			return null;
-		}
-
 		List<Record> recordList = new LinkedList<Record>();
-		int index = 1;
+		if (null == pageTypes) {
+			recordList = null;
+		} else {
+			int index = 1;
+			for (final PageTypeDTO pageType : pageTypes) {
+				Record record = new Record(String.valueOf(index));
+				record.addWidget(pageTypeListView.name, new Label(pageType.getName()));
+				record.addWidget(pageTypeListView.description, new Label(pageType.getDescription()));
 
-		for (final PageTypeDTO pageType : pageTypes) {
-			Record record = new Record(String.valueOf(index));
-			record.addWidget(pageTypeListView.name, new Label(pageType.getName()));
-			record.addWidget(pageTypeListView.description, new Label(pageType.getDescription()));
-
-			recordList.add(record);
-			index++;
+				recordList.add(record);
+				index++;
+			}
 		}
 		return recordList;
 	}
 
+	/**
+	 * To set Presenter.
+	 * 
+	 * @param presenter DocumentTypeViewPresenter
+	 */
 	public void setPresenter(DocumentTypeViewPresenter presenter) {
 		this.presenter = presenter;
 	}
 
+	/**
+	 * To get Document Type Detail View.
+	 * 
+	 * @return DocumentTypeDetailView
+	 */
 	public DocumentTypeDetailView getDocumentTypeDetailView() {
 		return documentTypeDetailView;
 	}
 
+	/**
+	 * To get Page Type List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getPageTypeListView() {
 		return pageTypeListView.listView;
 	}
 
+	/**
+	 * To get Field Type View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getFieldTypeView() {
 		return fieldTypeListView.getFieldsListView();
 	}
 
+	/**
+	 * To get Function Key List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getFunctionKeyListView() {
 		return functionKeyListView.listView;
 	}
 
+	/**
+	 * To get Edit Document Type View.
+	 * 
+	 * @return EditDocumentTypeView
+	 */
 	public EditDocumentTypeView getEditDocumentTypeView() {
 		return editDocumentTypeView;
 	}
 
-	public Button getEditDocumentPropertiesButtonButton() {
-		return editDocumentPropertiesButton;
-	}
-
+	/**
+	 * This class provides functionality to show page type list view.
+	 * 
+	 * @author Ephesoft
+	 * @version 1.0
+	 */
 	public class PageTypeListView {
 
-		HeaderColumn blank = new HeaderColumn(1, "", 5);
-		HeaderColumn name = new HeaderColumn(1, "Name", 30);
-		HeaderColumn description = new HeaderColumn(2, "Description", 65);
+		/**
+		 * blank HeaderColumn.
+		 */
+		private final HeaderColumn blank = new HeaderColumn(1, "", 5);
 
-		ListView listView = new ListView();
+		/**
+		 * name HeaderColumn.
+		 */
+		private final HeaderColumn name = new HeaderColumn(1, "Name", 30);
 
+		/**
+		 * description HeaderColumn.
+		 */
+		private final HeaderColumn description = new HeaderColumn(2, "Description", 65);
+
+		/**
+		 * listView ListView.
+		 */
+		private final ListView listView = new ListView();
+
+		/**
+		 * Constructor.
+		 */
 		public PageTypeListView() {
 			listView.addHeaderColumns(blank, name, description);
 		}
 	}
 
+	/**
+	 * To get Document Type Configuration Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getDocumentTypeConfigVerticalPanel() {
 		return documentTypeConfigVerticalPanel;
 	}
 
+	/**
+	 * To get Document Type Vertical Panel.
+	 * 
+	 * @return VerticalPanel
+	 */
 	public VerticalPanel getDocumentTypeVerticalPanel() {
 		return documentTypeVerticalPanel;
 	}
 
+	/**
+	 * To get Add Field Button.
+	 * 
+	 * @return Button
+	 */
 	public Button getAddFieldButtonButton() {
 		return addFieldButton;
 	}
 
+	/**
+	 * To perform operations on add Field Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addFieldButton")
 	public void onAddFieldButtonClick(ClickEvent clickEvent) {
 		presenter.onAddFieldButtonClicked();
 	}
 
+	/**
+	 * To perform operations on add function key Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addFunctionKeyButton")
 	public void onAddFunctionKeyButtonClick(ClickEvent clickEvent) {
 		presenter.onAddFunctionKeyButtonClicked();
 	}
 
+	/**
+	 * To perform operations on edit function key Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editFunctionKeyButton")
 	public void onEditFunctionKeyButtonClick(ClickEvent clickEvent) {
 		functionKeyListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on delete function key Button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteFunctionKeyButton")
 	public void onDeleteFunctionKeyButtonClick(ClickEvent clickEvent) {
 		final String identifier = functionKeyListView.listView.getSelectedRowIndex();
 		int rowCount = functionKeyListView.listView.getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
 			if (rowCount == 0) {
-				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchClassManagementMessages.NO_RECORD_TO_DELETE), LocaleDictionary.get().getConstantValue(
 						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), Boolean.TRUE);
-				
+
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -399,13 +632,12 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 					}
 
 				});
-				
 
 			} else {
-				final ConfirmationDialog confirmationDialog =ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-						BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
+				final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+						.getMessageValue(BatchClassManagementMessages.NONE_SELECTED_WARNING), LocaleDictionary.get().getConstantValue(
 						BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), Boolean.TRUE);
-				
+
 				confirmationDialog.addDialogListener(new DialogListener() {
 
 					@Override
@@ -419,14 +651,14 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 					}
 
 				});
-			
+
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_FUNCTION_KEY_CONFORMATION), LocaleDictionary.get().getConstantValue(
-				BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), false);
-		
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_FUNCTION_KEY_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_FUNCTION_KEY_TITLE), false);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -440,19 +672,34 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-	
+
 	}
 
-	@UiHandler("editDocumentPropertiesButton")
+	/**
+	 * To perform operations on edit document properties button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
+
 	public void onEditDocumentPropertiesButtonClick(ClickEvent clickEvent) {
 		presenter.onEditDocumentPropertiesButtonClicked();
 	}
 
+	/**
+	 * To perform operations on edit field button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editFieldButton")
 	public void onEditFieldButtonClicked(ClickEvent clickEvent) {
 		fieldTypeListPresenter.onEditButtonClicked();
 	}
 
+	/**
+	 * To perform operations on delete field button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteFieldButton")
 	public void onDeleteFieldButtonClicked(ClickEvent clickEvent) {
 		final String identifier = fieldTypeListView.listView.getSelectedRowIndex();
@@ -466,9 +713,10 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
 		}
-		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_FIELD_TYPE_CONFORMATION), LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_FIELD_TITLE), Boolean.FALSE);
-		
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_FIELD_TYPE_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_FIELD_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -482,20 +730,35 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		
+
 	}
 
+	/**
+	 * To perform operations on add table info field button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("addTableInfoFieldButton")
 	public void onAddTableInfoFieldButtonClick(ClickEvent clickEvent) {
 		presenter.onAddTableInfoFieldButtonClicked();
 	}
 
+	/**
+	 * To perform operations on edit table info field button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("editTableInfoFieldButton")
 	public void onEditTableInfoFieldButtonClick(ClickEvent clickEvent) {
 		tableInfoListPresenter.onEditButtonClicked();
 
-		}
+	}
 
+	/**
+	 * To perform operations on delete table info field button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("deleteTableInfoFieldButton")
 	public void onDeleteTableInfoFieldButtonClicked(ClickEvent clickEvent) {
 		final String identifier = tableInfoListView.listView.getSelectedRowIndex();
@@ -510,9 +773,10 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 			}
 			return;
 		}
-		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get().getMessageValue(
-				BatchClassManagementMessages.DELETE_TABLE_INFO_CONFORMATION), LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DELETE_TABLE_TITLE),Boolean.FALSE);
-		
+		final ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(LocaleDictionary.get()
+				.getMessageValue(BatchClassManagementMessages.DELETE_TABLE_INFO_CONFORMATION), LocaleDictionary.get()
+				.getConstantValue(BatchClassManagementConstants.DELETE_TABLE_TITLE), Boolean.FALSE);
+
 		confirmationDialog.addDialogListener(new DialogListener() {
 
 			@Override
@@ -526,9 +790,14 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 				confirmationDialog.hide();
 			}
 		});
-		
+
 	}
 
+	/**
+	 * To perform operations on test table button Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("testTableButton")
 	public void onTestTableButtonClicked(ClickEvent clickEvent) {
 		String identifier = tableInfoListView.listView.getSelectedRowIndex();
@@ -546,9 +815,16 @@ public class DocumentTypeView extends View<DocumentTypeViewPresenter> {
 		presenter.onTestTableButtonClicked(identifier);
 	}
 
+	/**
+	 * To create Document Function Key List.
+	 * 
+	 * @param functionKeyInfo Collection<FunctionKeyDTO>
+	 */
 	public void createDocumentFunctionKeyList(Collection<FunctionKeyDTO> functionKeyInfo) {
 		List<Record> recordList = setFunctionKeyList(functionKeyInfo);
-		functionKeyListPresenter = new FunctionKeyListPresenter(presenter.getController(),functionKeyListView);
-		functionKeyListView.listView.initTable(recordList.size(),null,null, recordList, true,false,functionKeyListPresenter);
+		functionKeyListPresenter = new FunctionKeyListPresenter(presenter.getController(), functionKeyListView);
+		functionKeyListView.listView.initTable(recordList.size(), null, null, recordList, true, false, functionKeyListPresenter, null,
+				true);
 	}
+
 }

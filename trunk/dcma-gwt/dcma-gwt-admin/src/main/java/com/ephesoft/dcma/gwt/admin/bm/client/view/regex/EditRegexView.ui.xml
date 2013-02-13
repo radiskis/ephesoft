@@ -2,29 +2,46 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editRegexViewPanel">
-
-		<g:HorizontalPanel width="100%">
+		<g:ScrollPanel height="7em" width="100%">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
 			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
 				<g:Label ui:field="patternLabel"></g:Label>
 			</g:cell>
 			<g:cell width="1%">
 				<g:Label ui:field="patternStar"></g:Label>
 			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+			<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
 				<g:TextBox ui:field="pattern" />
+			</g:cell>
+			<g:cell width="4%">
+				<g:Label></g:Label>
+			</g:cell>
+			<g:cell  horizontalAlignment="ALIGN_LEFT">
+				<g:Button ui:field="validatePatternButton" />
 			</g:cell>
 		</g:HorizontalPanel>
 
-		<g:HorizontalPanel ui:field="editKVPanel">
-			<g:Button ui:field="saveButton" />
-			<g:cell width="7%">
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+		<g:HorizontalPanel width="100%" ui:field="editKVPanel">
+
+			<g:cell width="66%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
+			</g:cell>
+			<g:cell width="1%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="cancelButton" />
-			<g:cell width="7%">
+			<g:cell width="1%">
+				<g:Button ui:field="cancelButton" />
+			</g:cell>
+			<g:cell width="1%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="samplePatternButton" />
+			<g:cell width="11%">
+				<g:Button ui:field="samplePatternButton" />
+			</g:cell>
+
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

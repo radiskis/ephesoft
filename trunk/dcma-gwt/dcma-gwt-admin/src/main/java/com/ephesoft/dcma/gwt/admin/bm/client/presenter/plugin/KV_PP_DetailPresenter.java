@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,10 +48,23 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 
+/**
+ * The presenter for view that shows KV_PP details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KV_PP_DetailPresenter extends AbstractBatchClassPresenter<KV_PP_DetailView> {
 
+	/**
+	 * viewTable FlexTable.
+	 */
 	private FlexTable viewTable;
 
+	/**
+	 * dataTable FlexTable.
+	 */
 	private FlexTable dataTable;
 
 	private void setProperties() {
@@ -60,7 +73,7 @@ public class KV_PP_DetailPresenter extends AbstractBatchClassPresenter<KV_PP_Det
 		if (values != null) {
 			for (BatchClassPluginConfigDTO pluginDTO : values) {
 				if (!pluginDTO.getPluginConfig().getFieldName().equals(BatchClassManagementConstants.KV_PAGE_PROCESS_CONFIG_NAME)) {
-					viewTable.setWidget(row, 0, new Label(pluginDTO.getDescription() + ":"));
+					viewTable.setWidget(row, 0, new Label(pluginDTO.getDescription() + BatchClassManagementConstants.COLON));
 					viewTable.setWidget(row, 2, new Label(pluginDTO.getValue()));
 					viewTable.getFlexCellFormatter().addStyleName(row, 0, "bold_text");
 					viewTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT,
@@ -71,15 +84,29 @@ public class KV_PP_DetailPresenter extends AbstractBatchClassPresenter<KV_PP_Det
 		}
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KV_PP_DetailView
+	 */
 	public KV_PP_DetailPresenter(BatchClassManagementController controller, KV_PP_DetailView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// No implementation
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedPlugin() != null) {

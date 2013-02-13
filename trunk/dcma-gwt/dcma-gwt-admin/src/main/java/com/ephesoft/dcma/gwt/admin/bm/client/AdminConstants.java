@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -34,6 +34,14 @@
 ********************************************************************************/ 
 
 package com.ephesoft.dcma.gwt.admin.bm.client;
+
+/**
+ * This is a common constants file for AdminConstant.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client
+ */
 
 public interface AdminConstants {
 
@@ -74,6 +82,7 @@ public interface AdminConstants {
 	String DELETE_BUTTON = "Delete";
 	String ADD_BUTTON = "Add";
 	String BUTTON_STYLE = "gwt-Button";
+	String CURSOR_POINTER = "cursorHand";
 	String VALIDATION_STYLE = "dateBoxFormatError";
 	String DISABLED_BUTTON_STYLE = "disableButton";
 	String FULL_WIDTH_STYLE = "fullWidth";
@@ -96,27 +105,81 @@ public interface AdminConstants {
 
 	String EMPTY_STRING = "";
 
-	String NO = "No";
-	String YES = "Yes";
-	
-	String AND = ",";
-	String OR = "/";
+	String STRING_NO = "No";
+	String STRING_YES = "Yes";
 
-	String PLUGIN_CONFIGURATION_HTML = "<b>Plugin Configuration</b>";
-	String DATABASE_MAPPING_HTML = "<b>Database Mapping</b>";
-	String PLUGIN_DETAILS_HTML = "<b>Plugin Details</b>";
-	String DOCUMENT_DETAILS_HTML = "<b>Document Details</b>";
-	String FIELD_DETAILS_HTML = "<b>Document Index Field Details</b>";
-	String BATCH_CLASS_CONFIGURATION_HTML = "<b>Batch class configuration</b>";
-	String KVEXTRACTION_DETAILS_HTML = "<b>KV Extraction Configuration</b>";
-	String TABLE_INFO_DETAILS_HTML = "<b>Table Info Configuration</b>";
-	String TCINFO_DETAILS_HTML = "<b>Table Column Info Configuration</b>";
-	String DOCUMENT_CONFIGURATION_HTML = "<b>Document Type configuration</b>";
-	String EMAIL_CONFIGURATION_HTML = "<b>Email configuration</b>";
-	String REGEX_CONFIGURATION_HTML = "<b>Regular Expression configuration</b>";
-	String MODULE_CONFIGURATION = "<b>Module configuration</b>";
-	String DOCUMENT_TYPE_HTML = "<b>Document Type</b>";
-	String FIELD_MAPPING_HTML = "<b>Field Mapping</b>";
+	String SEPERATOR = ",";
+	String SLASH = "/";
+
+	/**
+	 * The PLUGIN_CONFIGURATION_HTML {@link String} is a constant for Plugin Configuration header.
+	 */
+	String PLUGIN_CONFIGURATION_HTML = "<b><font color=\"black\">Plugin Configuration</font></b>";
+	/**
+	 * The DATABASE_MAPPING_HTML {@link String} is a constant for Database Mapping header.
+	 */
+	String DATABASE_MAPPING_HTML = "<b><font color=\"black\">Database Mapping</font></b>";
+	/**
+	 * The PLUGIN_DETAILS_HTML {@link String} is a constant for Plugin Details header.
+	 */
+	String PLUGIN_DETAILS_HTML = "<b><font color=\"black\">Plugin Details</font></b>";
+	/**
+	 * The DOCUMENT_DETAILS_HTML {@link String} is a constant for Document Details header.
+	 */
+	String DOCUMENT_DETAILS_HTML = "<b><font color=\"black\">Document Details</font></b>";
+	/**
+	 * The FIELD_DETAILS_HTML {@link String} is a constant for Document Index Field Details header.
+	 */
+	String FIELD_DETAILS_HTML = "<b><font color=\"black\">Document Index Field Details</font></b>";
+	/**
+	 * The BATCH_CLASS_CONFIGURATION_HTML {@link String} is a constant for Batch Class Configuration header.
+	 */
+	String BATCH_CLASS_CONFIGURATION_HTML = "<b><font color=\"black\">Batch class configuration</font></b>";
+	/**
+	 * The KVEXTRACTION_DETAILS_HTML {@link String} is a constant for KV Extraction Configuration header.
+	 */
+	String KVEXTRACTION_DETAILS_HTML = "<b><font color=\"black\">KV Extraction Configuration</font></b>";
+	/**
+	 * The TABLE_INFO_DETAILS_HTML {@link String} is a constant for Table Info Configuration header.
+	 */
+	String TABLE_INFO_DETAILS_HTML = "<b><font color=\"black\">Table Info Configuration</font></b>";
+	/**
+	 * The TCINFO_DETAILS_HTML {@link String} is a constant for Table Column Info Configuration header.
+	 */
+	String TCINFO_DETAILS_HTML = "<b><font color=\"black\">Table Column Info Configuration</font></b>";
+	/**
+	 * The DOCUMENT_CONFIGURATION_HTML {@link String} is a constant for Document Type Configuration header.
+	 */
+	String DOCUMENT_CONFIGURATION_HTML = "<b><font color=\"black\">Document Type configuration</font></b>";
+	/**
+	 * The EMAIL_CONFIGURATION_HTML {@link String} is a constant for Email Configuration header.
+	 */
+	String EMAIL_CONFIGURATION_HTML = "<b><font color=\"black\">Email configuration</font></b>";
+	/**
+	 * The SCANNER_CONFIGURATION_HTML {@link String} is a constant for Scanner Profiles header.
+	 */
+	String SCANNER_CONFIGURATION_HTML = "<b><font color=\"black\">Scanner Profiles</font></b>";
+	/**
+	 * The REGEX_CONFIGURATION_HTML {@link String} is a constant for Regular Expression Configuration header.
+	 */
+	String REGEX_CONFIGURATION_HTML = "<b><font color=\"black\">Regular Expression configuration</font></b>";
+	/**
+	 * The MODULE_CONFIGURATION {@link String} is a constant for Module Configuration header.
+	 */
+	String MODULE_CONFIGURATION = "<b><font color=\"black\">Module configuration</font></b>";
+	/**
+	 * The DOCUMENT_TYPE_HTML {@link String} is a constant for Document Type header.
+	 */
+	String DOCUMENT_TYPE_HTML = "<b><font color=\"black\">Document Type</font></b>";
+	/**
+	 * The FIELD_MAPPING_HTML {@link String} is a constant for Field Mapping header.
+	 */
+	String FIELD_MAPPING_HTML = "<b><font color=\"black\">Field Mapping</font></b>";
+
+	/**
+	 * The CMIS_CONFIGURATION_HTML {@link String} is a constant for CMIS Account Configuration header.
+	 */
+	String CMIS_CONFIGURATION_HTML = "<b><font color=\"black\">CMIS Account configuration</font></b>";
 
 	String DATABASE_MAPPING = "Database Mapping";
 	String TABLE_MAPPING = "Table Mapping";
@@ -136,6 +199,7 @@ public interface AdminConstants {
 	String BLANK_IMAGE_STYLE = "blankImage";
 	String BOLD_TEXT_STYLE = "bold_text";
 	String FONT_RED_STYLE = "font_red";
+	String WIDTH_COORDINATE_LABELS = "text_area";
 	String PADDING_STYLE = "padd";
 	String PADDING_STYLE_TOPPADD = "topPadd";
 
@@ -158,6 +222,7 @@ public interface AdminConstants {
 	String KV_PAGE_PLUGIN = "KV Page Process";
 	String CONFIG_BUTTON = "Configure";
 	String KV_PAGE_PLUGIN_DESCRIPTION = "KV Patterns for Page Process";
+	String BUTTON_PADDING_STYLE = "button_padding";
 
 	/**
 	 * Lower limit on priority value possible.
@@ -171,7 +236,10 @@ public interface AdminConstants {
 
 	String TEST_KV_BUTTON = "Test KV";
 
-	String KV_PP_DETAILS_HTML = "<b>KV Page Process Configuration</b>";
+	/**
+	 * The KV_PP_DETAILS_HTML {@link String} is a constant for KV Page Process Configuration header.
+	 */
+	String KV_PP_DETAILS_HTML = "<b><font color=\"black\">KV Page Process Configuration</font></b>";
 
 	String TOOLTIP_TEST_KV_BUTTON = "Key Value based Testing on Sample Data";
 
@@ -191,21 +259,24 @@ public interface AdminConstants {
 
 	String TEST_TABLE_BUTTON = "Test Table";
 
-	String BATCH_CLASS_FIELD_HTML = "<b>Batch Class Field</b>";
+	/**
+	 * The BATCH_CLASS_FIELD_HTML {@link String} is a constant for Batch Class Field header.
+	 */
+	String BATCH_CLASS_FIELD_HTML = "<b><font color=\"black\">Batch Class Field</font></b>";
 
-	String FUNCTION_KEY_HTML = "<b>Function Key</b>";
+	/**
+	 * The FUNCTION_KEY_HTML {@link String} is a constant for Function Key header.
+	 */
+	String FUNCTION_KEY_HTML = "<b><font color=\"black\">Function Key</font></b>";
 
 	String ATTACH_BUTTON = "Attach";
 
 	String SAVE_BATCH_TITLE = "Save Batch";
 
 	String BATCH_CLASS_FIELD_DATATYPE = "datatype";
-	String BATCH_CLASS_FIELD_NAME = "name";
+	String NAME_CONSTANT = "name";
+	String DESCRIPTION_CONSTANT = "description";
 	String BATCH_CLASS_FIELD_ORDER_NUMBER = "fieldOrderNumber";
-	String BATCH_CLASS_FIELD_DESCRIPTION = "description";
-
-	String DOCUMENT_TYPE_NAME = "name";
-	String DOCUMENT_TYPE_DESCRIPTION = "description";
 
 	String EMAIL_USERNAME = "username";
 	String EMAIL_PASSWORD = "password";
@@ -214,25 +285,128 @@ public interface AdminConstants {
 	String EMAIL_FOLDER_NAME = "folderName";
 	String EMAIL_PORTNUMBER = "portNumber";
 
-	String MODULE_NAME = "name";
-	String MODULE_DESCRIPTION = "description";
-
-	String PLUGIN_NAME = "name";
-	String PLUGIN_DESCRIPTION = "description";
-
 	/**
 	 * Maximum length of text that can be shown in listBox beyond which it will be trimmed.
 	 */
 	int MAX_TEXT_LENGTH = 26;
 
 	int INITIAL_ORDER_NUMBER = 1;
-	
+
 	int ORDER_NUMBER_OFFSET = 10;
-	
+
 	String SWITCH_OFF = "OFF";
 	String SWITCH_ON = "ON";
+
+	String SAMPLE_REGEX_BUTTON = "Sample Regex";
+	String SAMPLE_REGEX_PATTRENS = "Sample Regular Expression Patterns";
+	String SAMPLE_REGEX_PATTERN_TITLE = "Sample Regular Expressions";
+
+	String EDIT_VALUE = "Edit Value";
+	String EDIT_KEY = "Edit Key";
+
+	String PREVIOUS = "<";
+	String NEXT = ">";
+
+	String WEB_SCANNER_PROFILE_TEXT_CONST = "ProfileName";
+
+	String LOGICAL_AND_OPERATOR = "&&";
+
+	String LOGICAL_OR_OPERATOR = "||";
+
+	String AND_LABEL = "AND";
+
+	String OR_LEBEL = "OR";
+
+	char SPACE = ' ';
+
+	String ADV_EDIT = "Set Coordinates";
+
+	String EXTENSION_PNG = "png";
+
+	String EXTENSION_CHAR = ".";
+
+	String EXTENSION_TIF = ".tif";
+
+	String EXTENSION_TIFF = ".tiff";
+
+	String FILE_SEPARATOR_PARAM = "file_seperator:";
+
+	String BUTTON_HEIGHT = "20px";
+
+	String SAMPLE_PATTERN_DIALOG_BOX_STYLE = "gwt-sample-pattern-DialogBox";
+
+	String BORDER_RESULT_TABLE = "border-result-table";
+
+	String SAMPLE_REGEX_PATTERN = "Sample Regex Pattern";
+
+	String SAMPLE_PATTERN_DESCRIPTION = "Description";
+
+	String DATE_BOX_FORMAT_ERROR = "dateBoxFormatError";
+
+	String VALIDATE_BUTTON = "Validate";
+
+	String GWT_ADVANCED_KV_TEXT_BOX = "gwt-Advanced-KV-TextBox";
+
+	String NEW_CMIS = "CMIS Import";
+
+	/**
+	 * Upper characters limit for bread crumbs list to be shown to user.
+	 */
+	int BREADCRUMB_CHARACTER_LIMIT = 110;
+
+	/**
+	 * String constant for dots.
+	 */
+	String DOTS = "...";
 	
-	String SAMPLE_REGEX_BUTTON="Sample Regex";
-	String SAMPLE_REGEX_PATTRENS="Sample Regular Expression Patterns";
-	String SAMPLE_REGEX_PATTERN_TITLE="Sample Regular Expressions";
+	/**
+	 * String constant for validation button css name.
+	 */
+	String VALIDATE_BUTTON_IMAGE = "validate_button_image";
+	
+	/**
+	 * String constant for percentage 90.
+	 */
+	String PERCENTAGE_90 = "90.0%";
+	
+	/**
+	 * String constant for percentage 80.
+	 */
+	String PERCENTAGE_80 = "80.0%";
+
+	/**
+	 * The SCROLL_PANEL_HEIGHT {@link String} is a constant to set the height of scroll panel.
+	 */
+	String SCROLL_PANEL_HEIGHT = "scroll_panel_height";
+
+	/**
+	 * The SCROLL_PANEL_PLUGIN {@link String} is a constant to set the height of scroll panel in plugin pages.
+	 */
+	String SCROLL_PANEL_PLUGIN = "scroll_panel_plugin";
+
+	/**
+	 * The SCROLL_PANEL_HEIGHT_IE {@link String} is a constant to set the height of scroll panel height for IE only in batch class
+	 * panel.
+	 */
+	String SCROLL_PANEL_HEIGHT_IE = "7em\0";
+	
+	/**
+	 * Label for test cmis config button.
+	 */
+	String TEST_CMIS_BUTTON = "Test CMIS Connection";
+	
+	/**
+	 * Label for authenticate button. 
+	 */
+	String AUTHENTICATE_BUTTON = "Test Connection";
+	
+	/**
+	 * Label for authenticate token button.
+	 */
+	String AUTHENTICATION_TOKEN_BUTTON = "Get New Authentication Token";
+
+	/**
+	 * Label for cmis config button.
+	 */
+	String GET_TOKEN = "Get Token";
 }

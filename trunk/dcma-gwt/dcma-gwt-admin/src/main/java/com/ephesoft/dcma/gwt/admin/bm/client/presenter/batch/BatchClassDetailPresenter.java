@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,34 +38,52 @@ package com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.BatchClassDetailView;
+import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
 /**
+ * The presenter for view that shows the batch details.
  * 
  * @author Ephesoft
- *
- */
-/**
- * The presenter for view that shows the batch details.
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class BatchClassDetailPresenter extends AbstractBatchClassPresenter<BatchClassDetailView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view BatchClassDetailView
+	 */
 	public BatchClassDetailPresenter(final BatchClassManagementController controller, final BatchClassDetailView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		if (controller.getBatchClass() != null) {
-			view.setName(controller.getBatchClass().getName());
-			view.setDescription(controller.getBatchClass().getDescription());
-			view.setPriority(controller.getBatchClass().getPriority());
-			view.setUncFolder(controller.getBatchClass().getUncFolder());
-			view.setVersion(controller.getBatchClass().getVersion());
-			view.setRole(controller.getBatchClass().getAssignedRole());
+		final BatchClassDTO batchClass = controller.getBatchClass();
+		if (batchClass != null) {
+			view.setName(batchClass.getName());
+			view.setDescription(batchClass.getDescription());
+			view.setPriority(batchClass.getPriority());
+			view.setUncFolder(batchClass.getUncFolder());
+			view.setVersion(batchClass.getVersion());
+			view.setRole(batchClass.getAssignedRole());
+			view.setSystemFolder(batchClass.getSystemFolder());
+			// To enable/disable edit button for super-admin role
+			view.setButtonsEnableAttributeForSuperAdmin(controller.isSuperAdmin());
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.

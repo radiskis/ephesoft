@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,61 +39,63 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonMessages;
 
 public interface ReviewValidateMessages extends LocaleCommonMessages {
 
-	String msg_userName_error = "msg_userName_error";
+	String MSG_USERNAME_ERROR = "msg_userName_error";
 
-	String msg_backButton_confm = "msg_backButton_confm";
+	String MSG_BACKBUTTON_CONFM = "msg_backButton_confm";
 
-	String error_topPanel_ok_failure = "error_topPanel_ok_failure";
+	String ERROR_TOPPANEL_OK_FAILURE = "error_topPanel_ok_failure";
 
-	String error_topPanel_ok_success = "error_topPanel_ok_success";
+	String ERROR_TOPPANEL_OK_SUCCESS = "error_topPanel_ok_success";
 
-	String error_topPanel_noMoreBatches = "error_topPanel_noMoreBatches";
+	String ERROR_TOPPANEL_NOMOREBATCHES = "error_topPanel_noMoreBatches";
 
-	String error_topPanel_lock_acquire = "error_topPanel_lock_acquire";
+	String ERROR_TOPPANEL_LOCK_ACQUIRE = "error_topPanel_lock_acquire";
 
-	String error_ret_next_batch = "error_ret_next_batch";
+	String ERROR_RET_NEXT_BATCH = "error_ret_next_batch";
 
-	String error_batch_already_locked = "error_batch_already_locked";
+	String ERROR_BATCH_ALREADY_LOCKED = "error_batch_already_locked";
 
-	String error_ret_batch = "error_ret_batch";
+	String ERROR_RET_BATCH = "error_ret_batch";
+	
+	String NO_BATCH_IN_REVIEW_VALIDATION = "no_batch_in_review_validation";
 
-	String error_ret_specific_batch = "error_ret_specific_batch";
+	String ERROR_RET_SPECIFIC_BATCH = "error_ret_specific_batch";
 
-	String error_save_batch = "error_save_batch";
+	String ERROR_SAVE_BATCH = "error_save_batch";
 
-	String msg_review_confirm = "msg_review_confirm";
+	String MSG_REVIEW_CONFIRM = "msg_review_confirm";
 
-	String msg_validation_confirm = "msg_validation_confirm";
+	String MSG_VALIDATION_CONFIRM = "msg_validation_confirm";
 
-	String msg_tree_merge_doc = "msg_tree_merge_doc";
+	String MSG_TREE_MERGE_DOC = "msg_tree_merge_doc";
 
-	String msg_tree_merge_doc_failure = "msg_tree_merge_doc_failure";
+	String MSG_TREE_MERGE_DOC_FAILURE = "msg_tree_merge_doc_failure";
 
-	String msg_overlayPanel_duplicate = "msg_overlayPanel_duplicate";
+	String MSG_OVERLAYPANEL_DUPLICATE = "msg_overlayPanel_duplicate";
 
-	String msg_overlayPanel_duplicate_error = "msg_overlayPanel_duplicate_error";
+	String MSG_OVERLAYPANEL_DUPLICATE_ERROR = "msg_overlayPanel_duplicate_error";
 
-	String msg_overlayPanel_delete = "msg_overlayPanel_delete";
+	String MSG_OVERLAYPANEL_DELETE = "msg_overlayPanel_delete";
 
-	String msg_overlayPanel_delete_error = "msg_overlayPanel_delete_error";
+	String MSG_OVERLAYPANEL_DELETE_ERROR = "msg_overlayPanel_delete_error";
 
-	String msg_overlayPanel_split_fst_page = "msg_overlayPanel_split_fst_page";
+	String MSG_OVERLAYPANEL_SPLIT_FST_PAGE = "msg_overlayPanel_split_fst_page";
 
-	String msg_fuzzy_search_unsuccessful = "msg_fuzzy_search_unsuccessful";
+	String MSG_FUZZY_SEARCH_UNSUCCESSFUL = "msg_fuzzy_search_unsuccessful";
 
-	String msg_fuzzy_search_no_result = "msg_fuzzy_search_no_result";
+	String MSG_FUZZY_SEARCH_NO_RESULT = "msg_fuzzy_search_no_result";
 
-	String msg_fuzzy_search_invalid_entry = "msg_fuzzy_search_invalid_entry";
+	String MSG_FUZZY_SEARCH_INVALID_ENTRY = "msg_fuzzy_search_invalid_entry";
 
-	String msg_overlayPanel_split = "msg_overlayPanel_split";
+	String MSG_OVERLAYPANEL_SPLIT = "msg_overlayPanel_split";
 
-	String msg_overlayPanel_split_error = "msg_overlayPanel_split_error";
+	String MSG_OVERLAYPANEL_SPLIT_ERROR = "msg_overlayPanel_split_error";
 
-	String msg_overlayPanel_rotate_error = "msg_overlayPanel_rotate_error";
+	String MSG_OVERLAYPANEL_ROTATE_ERROR = "msg_overlayPanel_rotate_error";
 
-	String msg_movePanel_move_error = "msg_movePanel_move_error";
+	String MSG_MOVEPANEL_MOVE_ERROR = "msg_movePanel_move_error";
 
-	String msg_overlayPanel_last_page_delete_error = "msg_overlayPanel_last_page_delete_error";
+	String MSG_OVERLAYPANEL_LAST_PAGE_DELETE_ERROR = "msg_overlayPanel_last_page_delete_error";
 
 	String REGEX_RETRIEVAL_FAIL = "regex_retrieval_fail";
 
@@ -129,7 +131,7 @@ public interface ReviewValidateMessages extends LocaleCommonMessages {
 
 	String NONE_SELECTED_TEXT = "none_selected";
 
-	String msg_script_execution_failed = "msg_script_execution_failed";
+	String MSG_SCRIPT_EXECUTION_FAILED = "msg_script_execution_failed";
 
 	String ERROR_MESSAGE = "error_value";
 
@@ -180,5 +182,25 @@ public interface ReviewValidateMessages extends LocaleCommonMessages {
 	String UNABLE_TO_ACQUIRE_LOCK = "unable_to_acquire_lock";
 
 	String NO_RIGHT_TO_OPEN_BATCH = "no_right_to_open_batch";
+	
+	String UNABLE_TO_UPDATE_ACTUAL_REVIEW_VALIDATE_TIME="unable_to_update_actual_review_validate_time";
+	
+	/**
+	 * The EXECUTING_SCRIPT {@link String} constant is for executing script
+	 * message displayed to user while executing script.
+	 */
+	String EXECUTING_SCRIPT = "executing_script";
+
+	/**
+	 * The SAVING {@link String} constant is for saving message displayed to
+	 * user while saving.
+	 */
+	String SAVING = "saving";
+
+	/**
+	 * The EXECUTING_AND_SAVING {@link String} constant is for executing script
+	 * and saving message displayed to user while saving.
+	 */
+	String EXECUTING_AND_SAVING = "executing_and_saving";
 
 }

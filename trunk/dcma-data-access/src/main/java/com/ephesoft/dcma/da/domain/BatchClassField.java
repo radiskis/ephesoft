@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,126 +48,248 @@ import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for batch_class_field.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "batch_class_field")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class BatchClassField extends AbstractChangeableEntity implements
 		Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * batchClass BatchClass.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "batch_class_id")
 	private BatchClass batchClass;
 
+	/** 
+	 * dataType DataType.
+	 */
 	@Column(name = "field_data_type")
 	@Enumerated(EnumType.STRING)
 	private DataType dataType;
 
+	/**
+	 * identifier String.
+	 */
 	@Column(name = "identifier")
 	private String identifier;
 
+	/**
+	 * name String.
+	 */
 	@Column(name = "field_type_name")
 	private String name;
 
+	/**
+	 * fieldOrderNumber int.
+	 */
 	@Column(name = "field_order_number", nullable = false)
 	private int fieldOrderNumber;
 
+	/**
+	 * description String.
+	 */
 	@Column(name = "field_type_description")
 	private String description;
 
+	/**
+	 * validationPattern String.
+	 */
 	@Column(name = "validation_pattern")
 	private String validationPattern;
 
+	/**
+	 * sampleValue String.
+	 */
 	@Column(name = "sample_value")
 	private String sampleValue;
 
+	/**
+	 * fieldOptionValueList String.
+	 */
 	@Column(name = "field_option_value_list")
 	private String fieldOptionValueList;
 	
+	/**
+	 * value String.
+	 */
 	private String value;
 
+	/**
+	 * To get Batch Class.
+	 * @return BatchClass
+	 */
 	public BatchClass getBatchClass() {
 		return batchClass;
 	}
 
+	/**
+	 * To set Batch Class.
+	 * @param batchClass BatchClass
+	 */
 	public void setBatchClass(BatchClass batchClass) {
 		this.batchClass = batchClass;
 	}
 
+	/**
+	 * To get Data Type.
+	 * @return DataType
+	 */
 	public DataType getDataType() {
 		return dataType;
 	}
 
+	/**
+	 * To set Data Type.
+	 * @param dataType DataType
+	 */
 	public void setDataType(DataType dataType) {
 		this.dataType = dataType;
 	}
 
+	/**
+	 * To get name.
+	 * @return String
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * To set name.
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * To get Description.
+	 * @return String
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To set Description.
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * To get Validation Pattern.
+	 * @return String
+	 */
 	public String getValidationPattern() {
 		return validationPattern;
 	}
 
+	/**
+	 * To set Validation Pattern.
+	 * @param validationPattern String
+	 */
 	public void setValidationPattern(String validationPattern) {
 		this.validationPattern = validationPattern;
 	}
 
+	/**
+	 * To get Identifier.
+	 * @return String
+	 */
 	public String getIdentifier() {
 		return identifier;
 	}
 
+	/**
+	 * To set Identifier.
+	 * @param identifier String
+	 */
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
 
+	/**
+	 * To get Field Order Number.
+	 * @return int
+	 */
 	public int getFieldOrderNumber() {
 		return fieldOrderNumber;
 	}
 
+	/**
+	 * To set Field Order Number.
+	 * @param fieldOrderNumber int
+	 */
 	public void setFieldOrderNumber(int fieldOrderNumber) {
 		this.fieldOrderNumber = fieldOrderNumber;
 	}
 
+	/**
+	 * To get Sample Value.
+	 * @return String
+	 */
 	public String getSampleValue() {
 		return sampleValue;
 	}
 
+	/**
+	 * To set Sample Value.
+	 * @param sampleValue String
+	 */
 	public void setSampleValue(String sampleValue) {
 		this.sampleValue = sampleValue;
 	}
 
+	/**
+	 * To get Field Option Value List.
+	 * @return String
+	 */
 	public String getFieldOptionValueList() {
 		return fieldOptionValueList;
 	}
 
+	/**
+	 * To set Field Option Value List.
+	 * @param fieldOptionValueList String
+	 */
 	public void setFieldOptionValueList(String fieldOptionValueList) {
 		this.fieldOptionValueList = fieldOptionValueList;
 	}
 	
+	/**
+	 * To get Value.
+	 * @return String
+	 */
 	public String getValue() {
 		return value;
 	}
 
-	
+	/**
+	 * To set Value.
+	 * @param value String
+	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * To get variables other than in pojo.
+	 */
 	public void postPersist() {
 		super.postPersist();
 		this.identifier = EphesoftProperty.BATCH_CLASS_FIELD.getProperty() + Long.toHexString(this.getId()).toUpperCase();

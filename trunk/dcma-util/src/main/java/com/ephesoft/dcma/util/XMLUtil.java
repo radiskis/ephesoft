@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -49,6 +49,7 @@ import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -56,35 +57,93 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyHtmlSerializer;
 import org.htmlcleaner.TagNode;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+/**
+ * This is XML Util class.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see javax.xml.parsers.DocumentBuilder
+ * 
+ */
 public class XMLUtil {
 
+	/**
+	 * WRITER_CONST int.
+	 */
+	private static final int WRITER_CONST = 1024;
+
+	/**
+	 * ISO_ENCODING String.
+	 */
 	private static final String ISO_ENCODING = "iso-8859-1";
+
+	/**
+	 * DOC_TYPE_OMIT String.
+	 */
 	private static final String DOC_TYPE_OMIT = "omit";
+
+	/**
+	 * UTF_ENCODING String.
+	 */
 	private static final String UTF_ENCODING = "UTF-8";
+
+	/**
+	 * PROPERTY_INDENT String.
+	 */
 	private static final String PROPERTY_INDENT = "indent";
+
+	/**
+	 * VALUE_YES String.
+	 */
 	private static final String VALUE_YES = "yes";
+
+	/**
+	 * HTML_PARSER String.
+	 */
 	public static final String HTML_PARSER = "html_parser";
+
+	/**
+	 * HTML_CLEANER String.
+	 */
 	public static final String HTML_CLEANER = "0";
+
+	/**
+	 * JTIDY String.
+	 */
 	public static final String JTIDY = "1";
 
-	private static DocumentBuilder getBuilder() throws Exception {
+	/**
+	 * WRITER_SIZE int.
+	 */
+	public static final int WRITER_SIZE = WRITER_CONST * 4;
+
+	private static DocumentBuilder getBuilder() throws ParserConfigurationException {
 		return getBuilder(false);
 	}
 
-	private static DocumentBuilder getBuilder(boolean isXPATH) throws Exception {
+	private static DocumentBuilder getBuilder(boolean isXPATH) throws ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		if (isXPATH) {
 			factory.setNamespaceAware(true);
@@ -92,48 +151,136 @@ public class XMLUtil {
 		return factory.newDocumentBuilder();
 	}
 
-	public static Document createDocumentFrom(InputStream input) throws Exception {
+	/**
+	 * To create Document from given inputstream.
+	 * 
+	 * @param input InputStream
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFrom(InputStream input) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilder builder = getBuilder();
 		return builder.parse(input);
 	}
 
-	public static Document createDocumentFrom(File file) throws Exception {
+	/**
+	 * To create Document from given file.
+	 * 
+	 * @param file File
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFrom(File file) throws ParserConfigurationException, SAXException, IOException {
 		return createDocumentFrom(file, false);
 	}
 
-	public static Document createDocumentFrom(File file, boolean isXPATH) throws Exception {
+	/**
+	 * To create Document from given file.
+	 * 
+	 * @param file File
+	 * @param isXPATH boolean
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFrom(File file, boolean isXPATH) throws ParserConfigurationException, SAXException,
+			IOException {
 		DocumentBuilder builder = getBuilder(isXPATH);
 		return builder.parse(file);
 	}
 
-	public static Document createDocumentFromResource(String resourceName) throws Exception {
+	/**
+	 * To create Document from Resource.
+	 * 
+	 * @param resourceName String
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFromResource(String resourceName) throws ParserConfigurationException, SAXException,
+			IOException {
 		ClassLoader loader = XMLUtil.class.getClassLoader();
 		InputStream inputStream = loader.getResourceAsStream(resourceName);
 		return createDocumentFrom(inputStream);
 	}
 
-	public static Document createDocumentFromAbsoluteResource(String resourceName) throws Exception {
+	/**
+	 * To create Document from Absolute Resource.
+	 * 
+	 * @param resourceName String
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFromAbsoluteResource(String resourceName) throws ParserConfigurationException, SAXException,
+			IOException {
 		return createDocumentFrom(new File(resourceName));
 	}
 
-	public static Document createDocumentFrom(String xmlString) throws Exception {
+	/**
+	 * To create Document from string.
+	 * 
+	 * @param xmlString String
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document createDocumentFrom(String xmlString) throws ParserConfigurationException, SAXException, IOException {
 		StringReader strReader = new StringReader(xmlString);
 		InputSource iSrc = new InputSource(strReader);
 		DocumentBuilder builder = getBuilder();
 		return builder.parse(iSrc);
 	}
 
-	public static Document createNewDocument() throws Exception {
+	/**
+	 * To create new Document.
+	 * 
+	 * @return Document
+	 * @throws ParserConfigurationException
+	 */
+	public static Document createNewDocument() throws ParserConfigurationException {
 		DocumentBuilder builder = getBuilder();
 		return builder.newDocument();
 	}
 
-	public static DOMSource createSourceFromFile(File file) throws Exception {
+	/**
+	 * To create Source from File.
+	 * 
+	 * @param file File
+	 * @return DOMSource
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws TransformerConfigurationException
+	 * @throws TransformerFactoryConfigurationError
+	 */
+	public static DOMSource createSourceFromFile(File file) throws ParserConfigurationException, SAXException, IOException,
+			TransformerConfigurationException, TransformerFactoryConfigurationError {
 		Document document = createDocumentFrom(file);
 		return getDomSourceForDoc(document);
 	}
 
-	public static DOMSource createSourceFromStream(InputStream inputStream) throws Exception {
+	/**
+	 * To create Source from Stream.
+	 * 
+	 * @param inputStream InputStream
+	 * @return DOMSource
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws TransformerConfigurationException
+	 * @throws TransformerFactoryConfigurationError
+	 */
+	public static DOMSource createSourceFromStream(InputStream inputStream) throws ParserConfigurationException, SAXException,
+			IOException, TransformerConfigurationException, TransformerFactoryConfigurationError {
 		Document document = createDocumentFrom(inputStream);
 		return getDomSourceForDoc(document);
 	}
@@ -146,15 +293,20 @@ public class XMLUtil {
 		return new javax.xml.transform.dom.DOMSource(document);
 	}
 
-	public static final int WRITER_SIZE = 1024 * 4;
-
-	public static String toXMLString(Document document) throws Exception {
+	/**
+	 * toXMLString.
+	 * 
+	 * @param document
+	 * @return
+	 * @throws TransformerException
+	 */
+	public static String toXMLString(Document document) throws TransformerException {
 
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
 		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(document);
-		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
+		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(WRITER_CONST);
 		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
 		transformer.transform(src, result);
 		return writer.toString();
@@ -163,21 +315,30 @@ public class XMLUtil {
 	/**
 	 * This method should eventually replace the toXMLString(Document doc) method.
 	 * 
-	 * @param xmlNode
-	 * @return
+	 * @param xmlNode Node
+	 * @return String
+	 * @throws TransformerException
 	 * @throws Exception
 	 */
-	public static String xmlNode2String(Node xmlNode) throws Exception {
+	public static String xmlNode2String(Node xmlNode) throws TransformerException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
 		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(xmlNode);
-		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
+		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(WRITER_CONST);
 		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
 		transformer.transform(src, result);
 		return writer.toString();
 	}
 
+	/**
+	 * To flush Document to File.
+	 * 
+	 * @param document Document
+	 * @param fileName String
+	 * @throws FileNotFoundException
+	 * @throws TransformerException
+	 */
 	public static void flushDocumentToFile(Document document, String fileName) throws FileNotFoundException, TransformerException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
@@ -188,6 +349,14 @@ public class XMLUtil {
 
 	}
 
+	/**
+	 * To append Leaf Child.
+	 * 
+	 * @param doc Document
+	 * @param parent Node
+	 * @param childName String
+	 * @param childData String
+	 */
 	public static void appendLeafChild(Document doc, Node parent, String childName, String childData) {
 		Element child = doc.createElement(childName);
 		if (childData != null && childData.length() != 0) {
@@ -198,36 +367,65 @@ public class XMLUtil {
 		parent.appendChild(child);
 	}
 
-	public static Document getClonedXMLDocument(Document xmlDoc) throws Exception {
+	/**
+	 * To get Cloned XML Document.
+	 * 
+	 * @param xmlDoc Document
+	 * @return Document
+	 * @throws TransformerException
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static Document getClonedXMLDocument(Document xmlDoc) throws TransformerException, ParserConfigurationException,
+			SAXException, IOException {
 		String XMLString = toXMLString(xmlDoc);
 		return createDocumentFrom(XMLString);
 
 	}
 
-	public static String applyTransformation(Document doc, String xsltPath) throws Exception {
+	/**
+	 * To apply Transformation.
+	 * 
+	 * @param doc Document
+	 * @param xsltPath String
+	 * @return String
+	 * @throws TransformerException
+	 */
+	public static String applyTransformation(Document doc, String xsltPath) throws TransformerException {
 		InputStream xsltFile = XMLUtil.class.getClassLoader().getResourceAsStream(xsltPath);
 		TransformerFactory xsltFactory = TransformerFactory.newInstance();
 		StreamSource inputSource = new StreamSource(xsltFile);
 		Transformer transformer = xsltFactory.newTransformer(inputSource);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(doc);
-		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
+		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(WRITER_CONST);
 		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
 		transformer.transform(src, result);
 		return writer.toString();
 	}
 
-	public static byte[] applyXSLTransformation(Document xmlDocument, String stylesheetFileLocation) throws Exception {
+	/**
+	 * To apply XSL Transformation.
+	 * 
+	 * @param xmlDocument Document
+	 * @param stylesheetFileLocation String
+	 * @return byte[]
+	 * @throws TransformerException
+	 */
+	public static byte[] applyXSLTransformation(Document xmlDocument, String stylesheetFileLocation) throws TransformerException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer(new StreamSource(stylesheetFileLocation));
 		transformer.setOutputProperty(PROPERTY_INDENT, VALUE_YES);
 		javax.xml.transform.dom.DOMSource src = new javax.xml.transform.dom.DOMSource(xmlDocument);
-		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(1024);
+		java.io.CharArrayWriter writer = new java.io.CharArrayWriter(WRITER_CONST);
 		javax.xml.transform.stream.StreamResult result = new javax.xml.transform.stream.StreamResult(writer);
 		transformer.transform(src, result);
 		return writer.toString().getBytes();
 	}
 
 	/**
+	 * To output html Stream.
+	 * 
 	 * @param pathOfHOCRFile String
 	 * @param outputFilePath String
 	 * @return FileWriter
@@ -243,6 +441,13 @@ public class XMLUtil {
 		}
 	}
 
+	/**
+	 * To Output html Stream via Tidy.
+	 * 
+	 * @param pathOfHOCRFile String
+	 * @param outputFilePath String
+	 * @throws IOException
+	 */
 	public static void htmlOutputStreamViaTidy(final String pathOfHOCRFile, final String outputFilePath) throws IOException {
 
 		Tidy tidy = new Tidy();
@@ -269,48 +474,20 @@ public class XMLUtil {
 			inputStream = new FileInputStream(pathOfHOCRFile);
 			tidy.parse(inputStream, out);
 		} finally {
-			try {
-				if (null != inputStream) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-
-			}
-
-			try {
-				if (null != inputStream) {
-					inputStream.close();
-				}
-			} catch (IOException e) {
-
-			}
-			try {
-				if (null != fout) {
-					fout.flush();
-					fout.close();
-				}
-			} catch (IOException e) {
-
-			}
-			try {
-				if (null != bout) {
-					bout.flush();
-					bout.close();
-				}
-			} catch (IOException e) {
-
-			}
-			try {
-				if (null != out) {
-					out.close();
-				}
-			} catch (IOException e) {
-
-			}
-
+			IOUtils.closeQuietly(inputStream);
+			IOUtils.closeQuietly(out);
+			IOUtils.closeQuietly(bout);
+			IOUtils.closeQuietly(fout);
 		}
 	}
 
+	/**
+	 * To Output html Stream via Html Cleaner.
+	 * 
+	 * @param pathOfHOCRFile String
+	 * @param outputFilePath String
+	 * @throws IOException
+	 */
 	public static void htmlOutputStreamViaHtmlCleaner(String pathOfHOCRFile, String outputFilePath) throws IOException {
 		CleanerProperties cleanerProps = new CleanerProperties();
 
@@ -331,18 +508,18 @@ public class XMLUtil {
 		}
 		try {
 			new PrettyHtmlSerializer(cleanerProps).writeToFile(tagNode, outputFilePath, UTF_ENCODING);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) { // NOPMD.
 		}
 	}
 
 	/**
+	 * To Output html Stream for ISO Encoding.
+	 * 
 	 * @param pathOfHOCRFile String
 	 * @param outputFilePath String
 	 * @return FileWriter
 	 * @throws IOException
 	 */
-
 	public static void htmlOutputStreamForISOEncoding(final String pathOfHOCRFile, final String outputFilePath) throws IOException {
 
 		Tidy tidy = new Tidy();
@@ -376,18 +553,21 @@ public class XMLUtil {
 	 * @param pathToTargetXML String
 	 * @param pathToXSL String
 	 * @throws TransformerException
-	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws TransformerFactoryConfigurationError
 	 */
 	public static void transformXML(final String pathToSourceXML, final String pathToTargetXML, final InputStream xslStream)
-			throws TransformerException, FileNotFoundException, Exception {
+			throws TransformerException, TransformerFactoryConfigurationError, IOException {
 		InputStream fis = new FileInputStream(new File(pathToSourceXML));
 		transformXMLWithStream(fis, pathToTargetXML, xslStream);
 	}
 
 	/**
-	 * @param pathToSourceXML
-	 * @param pathToTargetXML
-	 * @param xslStream
+	 * To transform XML with Stream.
+	 * 
+	 * @param fis {@link InputStream}
+	 * @param pathToTargetXML {@link String}
+	 * @param xslStream {@link InputStream}
 	 * @throws TransformerFactoryConfigurationError
 	 * @throws TransformerConfigurationException
 	 * @throws FileNotFoundException
@@ -420,10 +600,11 @@ public class XMLUtil {
 	 * API for creating JDOM document using file path.
 	 * 
 	 * @param filePath {@link String}
-	 * @return
-	 * @throws Exception
+	 * @return org.jdom.Document
+	 * @throws IOException
+	 * @throws JDOMException
 	 */
-	public static org.jdom.Document createJDOMDocumentFrom(String filePath) throws Exception {
+	public static org.jdom.Document createJDOMDocumentFrom(String filePath) throws JDOMException, IOException {
 		return new SAXBuilder().build(filePath);
 	}
 
@@ -431,10 +612,11 @@ public class XMLUtil {
 	 * API for creating JDOM document using file.
 	 * 
 	 * @param file {@link File}
-	 * @return
-	 * @throws Exception
+	 * @return org.jdom.Document
+	 * @throws IOException
+	 * @throws JDOMException
 	 */
-	public static org.jdom.Document createJDOMDocumentFromFile(File file) throws Exception {
+	public static org.jdom.Document createJDOMDocumentFromFile(File file) throws JDOMException, IOException {
 		return new SAXBuilder().build(file);
 	}
 
@@ -442,10 +624,29 @@ public class XMLUtil {
 	 * API for creating JDOM document from input stream.
 	 * 
 	 * @param inputStream {@link InputStream}
-	 * @return
-	 * @throws Exception
+	 * @return org.jdom.Document
+	 * @throws IOException
+	 * @throws JDOMException
 	 */
-	public static org.jdom.Document createJDOMDocumentFromInputStream(InputStream inputStream) throws Exception {
+	public static org.jdom.Document createJDOMDocumentFromInputStream(InputStream inputStream) throws JDOMException, IOException {
 		return new SAXBuilder().build(inputStream);
+	}
+
+	/**
+	 * @param doc {@link org.w3c.dom.Document}
+	 * @param xPathExpression {@link String}
+	 * @return
+	 */
+	public static String getValueFromXML(final Document doc, final String xPathExpression) throws XPathExpressionException {
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		String requiredValue = "";
+		XPathExpression expr = xpath.compile(xPathExpression);
+		Object result = expr.evaluate(doc, XPathConstants.NODESET);
+		NodeList nodes = (NodeList) result;
+		Node item = nodes.item(0);
+		if (item != null) {
+			requiredValue = item.getFirstChild().getNodeValue();
+		}
+		return requiredValue;
 	}
 }

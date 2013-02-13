@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,7 +35,17 @@
 
 package com.ephesoft.dcma.gwt.core.shared;
 
+/**
+ * This class is utility class containing various string related APIs which can be accessed directly.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public class StringUtil {
+
+	private static final char SPACE = ' ';
+	
+	private static final String DOTS = "...";
 
 	/**
 	 * This method is used to trim the string to the size of the characters passed with dots appended or in the middle according to the
@@ -55,11 +65,11 @@ public class StringUtil {
 			if (isDotAtEnd) {
 				trimmedText.append(text.substring(effectiveTextLength / 2, effectiveTextLength));
 				for (int numberOfDotsAdded = 0; numberOfDotsAdded < numberOfDots; numberOfDotsAdded++) {
-					trimmedText.append(".");
+					trimmedText.append('.');
 				}
 			} else {
 				for (int numberOfDotsAdded = 0; numberOfDotsAdded < numberOfDots; numberOfDotsAdded++) {
-					trimmedText.append(".");
+					trimmedText.append('.');
 				}
 				trimmedText.append(text.substring(text.length() - effectiveTextLength / 2));
 			}
@@ -67,5 +77,39 @@ public class StringUtil {
 			trimmedText = new StringBuffer(text);
 		}
 		return trimmedText.toString();
+	}
+
+	/**
+	 * API to check whether a string contains special characters. Only alphabets, digits and space characters are allowed.
+	 * 
+	 * @param text {@link String}
+	 * @return boolean
+	 */
+	public static boolean checkForSpecialCharacter(final String text) {
+		boolean containsSpecialCharacter = false;
+		for (Character character : text.toCharArray()) {
+
+			if (!Character.isLetterOrDigit(character) && !Character.valueOf(SPACE).equals(character)) {
+				containsSpecialCharacter = true;
+				break;
+			}
+		}
+		return containsSpecialCharacter;
+	}
+	
+	/**
+	 * The <code>getDotAppendedSubString</code> method returns a substring of a string up to a 
+	 * given limit appended with '...'.
+	 * 
+	 * @param characterLimit character limit
+	 * @param string {@link String} string from which substring has to be returned
+	 * @return {@link String} substring of a given string
+	 */
+	public static String getDotAppendedSubString(int characterLimit, String string) {
+		String tempString = string;
+		if (null != string && !string.isEmpty() && string.length() > characterLimit && characterLimit > DOTS.length()) {
+			tempString = string.substring(0, characterLimit) + DOTS; 
+		}
+		return tempString;
 	}
 }

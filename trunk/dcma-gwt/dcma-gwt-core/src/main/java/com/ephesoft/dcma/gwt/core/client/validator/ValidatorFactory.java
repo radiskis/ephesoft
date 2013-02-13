@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,7 +38,7 @@ package com.ephesoft.dcma.gwt.core.client.validator;
 import com.ephesoft.dcma.core.common.DataType;
 import com.google.gwt.user.client.ui.HasValue;
 
-public class ValidatorFactory {
+public final class ValidatorFactory {
 
 	private ValidatorFactory() {
 
@@ -51,9 +51,12 @@ public class ValidatorFactory {
 				validator = new DateFormatValidator(value);
 				break;
 
-			case LONG:
-			case FLOAT:
 			case DOUBLE:
+			case FLOAT:
+				validator = new NumberValidator(value, true);
+				break;
+				
+			case LONG:
 			case INTEGER:
 				validator = new NumberValidator(value, false);
 				break;

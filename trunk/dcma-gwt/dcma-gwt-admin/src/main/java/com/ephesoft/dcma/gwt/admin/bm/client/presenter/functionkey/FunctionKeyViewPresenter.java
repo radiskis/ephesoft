@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,47 +40,88 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.FunctionKeyView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the function key view details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class FunctionKeyViewPresenter extends AbstractBatchClassPresenter<FunctionKeyView> {
 
+	/**
+	 * functionKeyDetailPresenter FunctionKeyDetailPresenter.
+	 */
 	private final FunctionKeyDetailPresenter functionKeyDetailPresenter;
 
+	/**
+	 * editFunctionKeyPresenter EditFunctionKeyPresenter.
+	 */
 	private final EditFunctionKeyPresenter editFunctionKeyPresenter;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view FunctionKeyView
+	 */
 	public FunctionKeyViewPresenter(BatchClassManagementController controller, FunctionKeyView view) {
 		super(controller, view);
 		this.functionKeyDetailPresenter = new FunctionKeyDetailPresenter(controller, view.getFunctionKeyDetailView());
 		this.editFunctionKeyPresenter = new EditFunctionKeyPresenter(controller, view.getEditFunctionKeyView());
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	public void bind() {
-		this.editFunctionKeyPresenter.bind();
 		this.functionKeyDetailPresenter.bind();
+		this.editFunctionKeyPresenter.bind();
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-
+		// no implementation
 	}
 
+	/**
+	 * To show Edit Function Key View.
+	 */
 	public void showEditFunctionKeyView() {
 		view.getFunctionKeyVerticalPanel().setVisible(Boolean.FALSE);
 		view.getFunctionKeyConfigVerticalPanel().setVisible(Boolean.TRUE);
 	}
 
+	/**
+	 * To show Function Key View.
+	 */
 	public void showFunctionKeyView() {
 		view.getFunctionKeyVerticalPanel().setVisible(Boolean.TRUE);
 		view.getFunctionKeyConfigVerticalPanel().setVisible(Boolean.FALSE);
 	}
 
+	/**
+	 * To perform operations on Edit Function Key Properties button click.
+	 */
 	public void onEditFunctionKeyPropertiesButtonClicked() {
 		controller.setAdd(false);
-		editFunctionKeyPresenter.bind();
 		showEditFunctionKeyView();
 		controller.getBatchClass().setDirty(Boolean.TRUE);
+		editFunctionKeyPresenter.bind();
 
 	}
 
+	/**
+	 * To get Edit Function Key Presenter.
+	 * 
+	 * @return EditFunctionKeyPresenter
+	 */
 	public EditFunctionKeyPresenter getEditFunctionKeyPresenter() {
 		return editFunctionKeyPresenter;
 	}

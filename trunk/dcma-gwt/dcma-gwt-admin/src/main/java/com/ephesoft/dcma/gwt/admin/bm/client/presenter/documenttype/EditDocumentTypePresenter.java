@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,19 +42,36 @@ import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.documenttype.EditDocumentTypeView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.NumberValidator;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
+import com.ephesoft.dcma.gwt.core.shared.constants.CoreCommonConstants;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * The presenter for view that shows the edit document type details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditDocumentTypeView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditDocumentTypeView
+	 */
 	public EditDocumentTypePresenter(BatchClassManagementController controller, EditDocumentTypeView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getMainPresenter().showBatchClassView(controller.getSelectedDocument().getBatchClass());
@@ -64,6 +81,9 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 		}
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		boolean validFlag = true;
 		if (validFlag && view.getConfidence().length() != 0) {
@@ -76,13 +96,21 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 				validFlag = false;
 			}
 		}
-		if (validFlag
-				&& (!view.getValidateConfidenceTextBox().validate() || !view.getValidateDescriptionTextBox().validate() || !view
-						.getValidateNameTextBox().validate())) {
+		if (validFlag && (!view.getValidateNameTextBox().validate())) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.INVALID_DOCUMENT_NAME_MESSAGE)
+					+ " \" "
+					+ CoreCommonConstants.INVALID_FILE_EXTENSIONS
+					+ " \". "
+					+ LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.CHANGE_AND_TRY_AGAIN));
+			validFlag = false;
+		}
+		if (validFlag && (!view.getValidateConfidenceTextBox().validate() || !view.getValidateDescriptionTextBox().validate())) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.BLANK_ERROR));
 			validFlag = false;
 		}
+
 		if (validFlag && (controller.isAdd() && controller.getBatchClass().checkDocumentTypeName(view.getName()))) {
 			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 					BatchClassManagementMessages.NAME_COMMON_ERROR));
@@ -106,16 +134,19 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 		}
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedDocument() != null) {
 			view.setDescription(controller.getSelectedDocument().getDescription());
 
 			controller.getRpcService().getProjectFilesForDocumentType(controller.getBatchClass().getIdentifier(),
-					controller.getSelectedDocument().getName(), new AsyncCallback<List<String>>() {
+					controller.getSelectedDocument().getName(), new EphesoftAsyncCallback<List<String>>() {
 
 						@Override
-						public void onFailure(Throwable arg0) {
+						public void customFailure(Throwable arg0) {
 							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNABLE_TO_RETRIEVE_FIELDS);
 
 						}
@@ -138,9 +169,20 @@ public class EditDocumentTypePresenter extends AbstractBatchClassPresenter<EditD
 			view.getValidateNameTextBox().toggleValidDateBox();
 			view.getValidateConfidenceTextBox().toggleValidDateBox();
 			view.getValidateDescriptionTextBox().toggleValidDateBox();
+			if (!view.getNameTextBox().isReadOnly()) {
+				view.getNameTextBox().setFocus(true);
+			} else {
+				view.getDescriptionTextBox().setFocus(true);
+			}
+
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		// Event handling is done here.

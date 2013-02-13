@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,29 +41,70 @@ import java.util.List;
 import org.hibernate.criterion.DetachedCriteria;
 
 /**
- * Generic interface for data access objects
+ * Generic interface for data access objects.
  * 
  * @param <T> the underlying entity type.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see org.hibernate.criterion.DetachedCriteria
  */
 public interface Dao<T> {
 
+	/**
+	 * To get the object.
+	 * @param objectId Serializable
+	 * @return T
+	 */
 	T get(Serializable objectId);
 
-	 void create(T object);
+	/**
+	 * To create new objects.
+	 * @param object T
+	 */
+	void create(T object);
 
-	 void saveOrUpdate(T object);
+	/**
+	 * To save or update an object.
+	 * @param object T
+	 */
+	void saveOrUpdate(T object);
 
-     void remove(T object);
+	/**
+	 * To remove objects from the list.
+	 * @param object T
+	 */
+    void remove(T object);
 
-     List<T> getAll();
+    /**
+	 * To get all objects satisfying criteria.
+	 * @return List<T>
+	 */
+    List<T> getAll();
 
-	 T merge(T object);
+    /**
+	 * To merge objects.
+	 * @param object T
+	 * @return T
+	 */
+    T merge(T object);
 
-	 void evict(Object object);
+    /**
+	 * To evict an object.
+	 * @param object object
+	 */
+	void evict(Object object);
 
+	/**
+	 * To count.
+	 * @param criteria DetachedCriteria
+	 * @return int
+	 */
 	int count(DetachedCriteria criteria);
 
+	/**
+	 * To count.
+	 * @return int
+	 */
 	int countAll();
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -38,32 +38,58 @@ package com.ephesoft.dcma.workflow.service.common;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class contains JBPM Variables.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.util.HashMap
+ * 
+ */
 public final class JBPMVariables {
 
-	public static final String BATCH_INSTANCE_ID = "batchInstanceID";
-
-	public static final String RESTART_WORKFLOW = "restartWorkflow";
-
-	public static final String IS_MODULE_REMOTE = "isModuleRemote";
-
+	/**
+	 * variables Map<String, Object>.
+	 */
 	private Map<String, Object> variables;
 
 	private JBPMVariables() {
 		this.variables = new HashMap<String, Object>();
 	}
 
+	/**
+	 * To create JBPM variables.
+	 * 
+	 * @return JBPMVariables
+	 */
 	public static JBPMVariables create() {
 		return new JBPMVariables();
 	}
 
+	/**
+	 * To get variables.
+	 * 
+	 * @return Map<String, Object>
+	 */
 	public Map<String, Object> getVariables() {
 		return variables;
 	}
 
+	/**
+	 * To set variables.
+	 * 
+	 * @param variables Map<String, Object>
+	 */
 	public void setVariables(Map<String, Object> variables) {
 		this.variables = variables;
 	}
 
+	/**
+	 * To add variables.
+	 * 
+	 * @param key String
+	 * @param value Object
+	 */
 	public void addVariable(String key, Object value) {
 		this.variables.put(key, value);
 	}

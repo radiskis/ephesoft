@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,17 +39,18 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class FuzzySearchEvent extends GwtEvent<FuzzySearchEventHandler> {
 
-	public static Type<FuzzySearchEventHandler> TYPE = new Type<FuzzySearchEventHandler>();
+	public static Type<FuzzySearchEventHandler> type = new Type<FuzzySearchEventHandler>();
 
-	private int index;
+	private final int index;
 
 	public FuzzySearchEvent(int index) {
+		super();
 		this.index = index;
 	}
 
 	@Override
 	public Type<FuzzySearchEventHandler> getAssociatedType() {
-		return TYPE;
+		return type;
 	}
 
 	@Override

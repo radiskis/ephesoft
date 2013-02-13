@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -55,25 +55,26 @@ import com.ephesoft.dcma.performance.reporting.domain.ReportDisplayData;
 public interface ReportDataService {
 
 	/**
-	 * Method to get System Level Statistics for a specified time
+	 * Method to get System Level Statistics for a specified time.
 	 * 
 	 * @param endTime {@link Date} upto which the reporting data needs to be fetched
 	 * @param startTime {@link Date}Starting Date from which the reporting data needs to be fetched
+	 * @param batchClassIdList List<String>
 	 * @return List<{@link Integer}> list of integers specifying the system statistics
 	 * @throws DCMAException
 	 */
-	public List<Integer> getSystemStatistics(Date endTime, Date startTime) throws DCMAException;
+	List<Integer> getSystemStatistics(Date endTime, Date startTime, List<String> batchClassIdList) throws DCMAException;
 
 	/**
-	 * Method to get whether another user is connected to the reporting DB
+	 * Method to get whether another user is connected to the reporting DB.
 	 * 
 	 * @return Boolean , true if another user is connected to the report database
 	 * @throws DCMAException
 	 */
-	public Boolean isAnotherUserConnected() throws DCMAException;
+	Boolean isAnotherUserConnected() throws DCMAException;
 
 	/**
-	 * Method to get Reports Per page for a WorkflowType for a specified time
+	 * Method to get Reports Per page for a WorkflowType for a specified time.
 	 * 
 	 * @param batchClassIds List<{@link String}> Batch Class Ids for which the report data needs to be fetched
 	 * @param workflowType {@link WorkflowType}, One of Module , Plugin or Workflow specifying the type of filter
@@ -85,11 +86,11 @@ public interface ReportDataService {
 	 * @return List<{@link ReportDisplayData}> List of RepoertDisplayData DTOs
 	 * @throws DCMAException
 	 */
-	public List<ReportDisplayData> getReportByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime,
-			Date startTime, int StartIndex, int range, Order order) throws DCMAException;
+	List<ReportDisplayData> getReportByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime, Date startTime,
+			int StartIndex, int range, Order order) throws DCMAException;
 
 	/**
-	 * Method to get Reports Per page for a User for a specified time
+	 * Method to get Reports Per page for a User for a specified time.
 	 * 
 	 * @param batchClassIds List<{@link String}>, Batch Class Ids for which the report data needs to be fetched
 	 * @param userName {@link String}, User name for which the report are to be fetched
@@ -101,23 +102,24 @@ public interface ReportDataService {
 	 * @return List<{@link ReportDisplayData}>, List of RepoertDisplayData DTOs
 	 * @throws DCMAException
 	 */
-	public List<ReportDisplayData> getReportByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime,
-			int StartIndex, int range, Order order) throws DCMAException;
+	List<ReportDisplayData> getReportByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime, int StartIndex,
+			int range, Order order) throws DCMAException;
 
 	/**
-	 * Method to get total records for a WorkflowType for a specified time
+	 * Method to get total records for a WorkflowType for a specified time.
 	 * 
 	 * @param batchClassIds List<{@link String}>, Batch Class Ids for which the report data needs to be fetched
 	 * @param workflowType {@link WorkflowType}, One of Module , Plugin or Workflow specifying the type of filter
 	 * @param endTime {@link Date}, Date upto which the reporting data needs to be fetched
+	 * @param startTime {@link Date}, Starting Date from which the reporting data needs to be fetched
 	 * @return Total {@link Integer}, Record count for the crtieria parameters
 	 * @throws DCMAException
 	 */
-	public Integer getReportTotalRowCountByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime, Date startTime)
+	Integer getReportTotalRowCountByWorkflow(List<String> batchClassIds, WorkflowType workflowType, Date endTime, Date startTime)
 			throws DCMAException;
 
 	/**
-	 * Method to get total records for a User for a specified time
+	 * Method to get total records for a User for a specified time.
 	 * 
 	 * @param batchClassIds List<{@link String}>, Batch Class Ids for which the report data needs to be fetched
 	 * @param userName {@link String}, User name for which the report are to be fetched
@@ -126,23 +128,23 @@ public interface ReportDataService {
 	 * @return Total {@link Integer}, Record count for the crtieria parameters
 	 * @throws DCMAException
 	 */
-	public Integer getReportTotalRowCountByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime)
+	Integer getReportTotalRowCountByUser(List<String> batchClassIds, String userName, Date endTime, Date startTime)
 			throws DCMAException;
 
 	/**
-	 * Method to get custom reports button configs from properties file
+	 * Method to get custom reports button configs from properties file.
 	 * 
 	 * @return Total {@link Map<String,String>}, Map of pop-up configs
 	 * @throws DCMAException
 	 */
-	public Map<String,String> getCustomReportButtonPopUpConfigs() throws DCMAException;
+	Map<String, String> getCustomReportButtonPopUpConfigs() throws DCMAException;
 
 	/**
 	 * Method to run reporting Sync DB option.
 	 * 
-	 * @param antPath
-	 * @throws Exception
+	 * @param antPath {@link String}
+	 * @throws DCMAException
 	 */
-	public void syncDatabase(String antPath) throws Exception;
+	void syncDatabase(String antPath) throws DCMAException;
 
 }

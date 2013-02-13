@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,8 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class BatchFolderListDTO implements IsSerializable {
+	private static final String FALSE = "false";
+	private static final String TRUE = "true";
 	public static final String FOLDER_NAME = "folderName";
 	public static final String CHECKED = "checked";
 	public static final String ENABLED = "enabled";
@@ -56,7 +58,7 @@ public class BatchFolderListDTO implements IsSerializable {
 	private String batchClassSerializableFile;
 	private String fileboundPluginMappingFolderName;
 	
-	List<HashMap<String, String>> folderList = new ArrayList<HashMap<String,String>>();
+	private List<HashMap<String, String>> folderList = new ArrayList<HashMap<String,String>>();
 	
 	public String getSearchSampleName() {
 		return searchSampleName;
@@ -139,38 +141,38 @@ public class BatchFolderListDTO implements IsSerializable {
 	public void initFolderList() {
 		HashMap<String,String> batchClassSerializableFilePropertyMap = new HashMap<String,String>();		
 		batchClassSerializableFilePropertyMap.put(FOLDER_NAME, batchClassSerializableFile);
-		batchClassSerializableFilePropertyMap.put(CHECKED, "true");
-		batchClassSerializableFilePropertyMap.put(ENABLED, "false");
+		batchClassSerializableFilePropertyMap.put(CHECKED, TRUE);
+		batchClassSerializableFilePropertyMap.put(ENABLED, FALSE);
 		folderList.add(batchClassSerializableFilePropertyMap);
 		
 		HashMap<String,String> searchIndexPropertyMap = new HashMap<String,String>();		
 		searchIndexPropertyMap.put(FOLDER_NAME, searchIndexFolderName);
-		searchIndexPropertyMap.put(CHECKED, "true");
-		searchIndexPropertyMap.put(ENABLED, "false");
+		searchIndexPropertyMap.put(CHECKED, TRUE);
+		searchIndexPropertyMap.put(ENABLED, FALSE);
 		folderList.add(searchIndexPropertyMap);
 
 		HashMap<String,String> fuzzyDBPropertyMap = new HashMap<String,String>();		
 		fuzzyDBPropertyMap.put(FOLDER_NAME, fuzzyDBIndexFolderName);
-		fuzzyDBPropertyMap.put(CHECKED, "true");
-		fuzzyDBPropertyMap.put(ENABLED, "false");
+		fuzzyDBPropertyMap.put(CHECKED, TRUE);
+		fuzzyDBPropertyMap.put(ENABLED, FALSE);
 		folderList.add(fuzzyDBPropertyMap);
 
 		HashMap<String,String> projectFilesPropertyMap = new HashMap<String,String>();		
 		projectFilesPropertyMap.put(FOLDER_NAME, projectFilesBaseFolder);
-		projectFilesPropertyMap.put(CHECKED, "true");
-		projectFilesPropertyMap.put(ENABLED, "false");
+		projectFilesPropertyMap.put(CHECKED, TRUE);
+		projectFilesPropertyMap.put(ENABLED, FALSE);
 		folderList.add(projectFilesPropertyMap);
 
 		HashMap<String,String> cmisPropertyMap = new HashMap<String,String>();		
 		cmisPropertyMap.put(FOLDER_NAME, cmisPluginMapping);
-		cmisPropertyMap.put(CHECKED, "true");
-		cmisPropertyMap.put(ENABLED, "false");
+		cmisPropertyMap.put(CHECKED, TRUE);
+		cmisPropertyMap.put(ENABLED, FALSE);
 		folderList.add(cmisPropertyMap);
 
 		HashMap<String,String> scriptsPropertyMap = new HashMap<String,String>();		
 		scriptsPropertyMap.put(FOLDER_NAME, scripts);
-		scriptsPropertyMap.put(CHECKED, "true");
-		scriptsPropertyMap.put(ENABLED, "false");
+		scriptsPropertyMap.put(CHECKED, TRUE);
+		scriptsPropertyMap.put(ENABLED, FALSE);
 		folderList.add(scriptsPropertyMap);
 
 		/*HashMap<String,String> fileboundPluginPropertyMap = new HashMap<String,String>();		
@@ -181,14 +183,14 @@ public class BatchFolderListDTO implements IsSerializable {
 		
 		HashMap<String,String> imageMagickPropertyMap = new HashMap<String,String>();		
 		imageMagickPropertyMap.put(FOLDER_NAME, imageMagickBaseFolderName);
-		imageMagickPropertyMap.put(CHECKED, "false");
-		imageMagickPropertyMap.put(ENABLED, "true");
+		imageMagickPropertyMap.put(CHECKED, FALSE);
+		imageMagickPropertyMap.put(ENABLED, TRUE);
 		folderList.add(imageMagickPropertyMap);
 		
 		HashMap<String,String> searchSamplePropertyMap = new HashMap<String,String>();		
 		searchSamplePropertyMap.put(FOLDER_NAME, searchSampleName);
-		searchSamplePropertyMap.put(CHECKED, "false");
-		searchSamplePropertyMap.put(ENABLED, "true");
+		searchSamplePropertyMap.put(CHECKED, FALSE);
+		searchSamplePropertyMap.put(ENABLED, TRUE);
 		folderList.add(searchSamplePropertyMap);
 	}
 	

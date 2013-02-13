@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -44,28 +44,55 @@ import com.ephesoft.dcma.gwt.core.client.ui.table.ListView.DoubleClickListner;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.google.gwt.event.shared.HandlerManager;
 
-public class TableColumnInfoListPresenter extends AbstractBatchClassPresenter<TableColumnInfoListView> implements DoubleClickListner{
+/**
+ * The presenter for view that shows the table column info list details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
+public class TableColumnInfoListPresenter extends AbstractBatchClassPresenter<TableColumnInfoListView> implements DoubleClickListner {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view TableColumnInfoListView
+	 */
 	public TableColumnInfoListPresenter(BatchClassManagementController controller, TableColumnInfoListView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
-		//Processing to be done when initializing this presenter.
+		// Processing to be done when initializing this presenter.
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 
+	/**
+	 * In case of Double Click on Table.
+	 */
 	@Override
 	public void onDoubleClickTable() {
 		onEditButtonClicked();
 	}
 	
-	public void onEditButtonClicked(){
+	/**
+	 * To perform operations in case of edit button clicked.
+	 */
+	public void onEditButtonClicked() {
 		String identifier = view.getTableColumnInfoListView().getSelectedRowIndex();
 		int rowCount = view.getTableColumnInfoListView().getTableRecordCount();
 		if (identifier == null || identifier.isEmpty()) {
@@ -76,10 +103,31 @@ public class TableColumnInfoListPresenter extends AbstractBatchClassPresenter<Ta
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchClassManagementMessages.NONE_SELECTED_WARNING));
 			}
-			
-		}else{
-		controller.getMainPresenter().getTableInfoViewPresenter().onEditTCButtonClicked(identifier);
+
+		} else {
+			controller.getMainPresenter().getTableInfoViewPresenter().onEditTCButtonClicked(identifier);
 		}
-	
+
+	}
+
+	/**
+	 * To perform operations in case of advanced edit button clicked.
+	 */
+	public void onAdvEditButtonClicked() {
+		String identifier = view.getTableColumnInfoListView().getSelectedRowIndex();
+		int rowCount = view.getTableColumnInfoListView().getTableRecordCount();
+		if (identifier == null || identifier.isEmpty()) {
+			if (rowCount == 0) {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NO_COLUMN_TO_EDIT));
+			} else {
+				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+						BatchClassManagementMessages.NONE_SELECTED_WARNING));
+			}
+
+		} else {
+			controller.getMainPresenter().getTableInfoViewPresenter().onAdvEditButtonClicked(identifier);
+		}
+
 	}
 }

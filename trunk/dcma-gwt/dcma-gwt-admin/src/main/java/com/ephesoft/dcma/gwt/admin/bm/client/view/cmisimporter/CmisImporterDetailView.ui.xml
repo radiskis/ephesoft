@@ -1,0 +1,97 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+	<g:VerticalPanel width="100%">
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="serverUrlLabel"></g:Label>
+					</g:cell>
+
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="serverUrl" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="userNameLabel"></g:Label>
+					</g:cell>
+
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="userName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="passwordLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="password" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="repositoryIDLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="repositoryID" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="fileExtensionLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="fileExtension" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="folderNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="folderName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="cmisPropertyLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="cmisProperty" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="valueLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="value" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="valueToUpdateLabel"></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="valueToUpdate" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+		<g:HorizontalPanel width="100%">
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editCmisImporterPropertiesButton"></g:Button>
+			</g:cell>
+		</g:HorizontalPanel>
+	</g:VerticalPanel>
+</ui:UiBinder>   

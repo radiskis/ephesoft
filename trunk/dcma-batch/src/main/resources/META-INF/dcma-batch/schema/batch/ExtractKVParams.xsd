@@ -11,10 +11,11 @@
 				<xs:element name="Params" minOccurs="0" maxOccurs="unbounded">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="AdvancedKV" type="xs:boolean" />
+							<xs:element name="AdvancedKV" type="xs:boolean"
+								default="false" />
 							<xs:element name="LocationType" type="xs:string" />
 							<xs:element name="NoOfWords" type="xs:int" />
-							<xs:element name="Multiplier" type="xs:float" />
+							<xs:element name="Multiplier" type="xs:float" default="1" />
 							<xs:element name="KeyPattern" type="xs:string" />
 							<xs:element name="ValuePattern" type="xs:string" />
 							<xs:element name="KVFetchValue" type="xs:string" />

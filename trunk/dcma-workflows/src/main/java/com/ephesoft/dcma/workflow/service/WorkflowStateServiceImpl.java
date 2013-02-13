@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -87,7 +87,7 @@ public class WorkflowStateServiceImpl implements WorkflowStateService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowStateServiceImpl.class);
 
 	/**
-	 * An api to fetch all the batch instance id for input process instance state.
+	 * An API to fetch all the batch instance id for input process instance state.
 	 * 
 	 * @param state String
 	 * @return list of all the batch instance id for input of process instance state.

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,43 +37,23 @@ package com.ephesoft.dcma.gwt.core.client.ui;
 
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleCommonConstants;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
-import com.google.gwt.user.client.Window;
 
 public class ScreenMaskUtility {
 
-	private static final String REVIEW_VALIDATE = "ReviewValidate";
 	private static ScreenMask screenMask = new ScreenMask();
-	private static String currentBrowser = getUserAgent();
 
 	public static void maskScreen(String message) {
-		if (isMaskingEnabled()) {
-			screenMask.setMessage(message);
-			screenMask.show();
-			screenMask.center();
-		}
-	}
-
-	private static boolean isMaskingEnabled() {
-		boolean isMaskingEnabled = true;
-		String href = Window.Location.getHref();
-		if (href.contains(REVIEW_VALIDATE)) {
-			if (currentBrowser != null && currentBrowser.length() > 0
-					&& (currentBrowser.contains("msie") || currentBrowser.contains("chrome"))) {
-				isMaskingEnabled = false;
-			}
-		}
-		return isMaskingEnabled;
-
+		screenMask.setMessage(message);
+		screenMask.show();
+		screenMask.center();
 	}
 
 	public static void maskScreen() {
-		maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.msg_mask_wait));
+		maskScreen(LocaleDictionary.get().getConstantValue(LocaleCommonConstants.MSG_MASK_WAIT));
 	}
 
 	public static void unmaskScreen() {
-		if (isMaskingEnabled()) {
-			screenMask.hide();
-		}
+		screenMask.hide();
 	}
 
 	public static native String getUserAgent() /*-{

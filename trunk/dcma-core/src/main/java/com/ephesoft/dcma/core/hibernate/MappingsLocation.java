@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,26 +42,51 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.util.ApplicationContextUtil;
 
+/**
+ * Class for mapping locations.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.exception.DCMAApplicationException
+ *
+ */
 public class MappingsLocation implements ApplicationContextAware {
 
+	/**
+	 * applicationContext ApplicationContext.
+	 */
 	private ApplicationContext applicationContext;
-	
-	
-	
+
+	/**
+	 * To set application context.
+	 * @param applicationContext ApplicationContext
+	 * @throws BeansException in case of error
+	 */
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
-	
+
+	/**
+	 * To get locations.
+	 * 
+	 * @return Collection<String>
+	 * @throws DCMAApplicationException in case of error
+	 */
 	@SuppressWarnings("unchecked")
-	public Collection<String> getLocations() throws Exception {
-		Collection<MappingFactoryBean> mappingListColl = ApplicationContextUtil.getBeansOfType(applicationContext, MappingFactoryBean.class);
-		Collection<String>locations = new LinkedHashSet<String>();
+	public Collection<String> getLocations() throws DCMAApplicationException {
+		Collection<MappingFactoryBean> mappingListColl = ApplicationContextUtil.getBeansOfType(applicationContext,
+				MappingFactoryBean.class);
+		Collection<String> locations = new LinkedHashSet<String>();
 		for (MappingFactoryBean bean : mappingListColl) {
-			locations.addAll(bean.getObject());
+			try {
+				locations.addAll(bean.getObject());
+			} catch (Exception e) {
+				throw new DCMAApplicationException(e.getMessage(), e);
+			}
 		}
 		return locations;
 	}

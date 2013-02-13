@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,12 +42,9 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,6 +68,8 @@ import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
+import com.ephesoft.dcma.common.HocrUtil;
+import com.ephesoft.dcma.common.LineDataCarrier;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.common.KVFetchValue;
 import com.ephesoft.dcma.core.common.LocationType;
@@ -84,7 +83,6 @@ import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
 import com.ephesoft.dcma.da.service.KVExtractionService;
 import com.ephesoft.dcma.kvfieldcreation.constant.KVFieldCreatorConstants;
-import com.ephesoft.dcma.kvfinder.LineDataCarrier;
 import com.ephesoft.dcma.kvfinder.service.KVFinderService;
 
 /**
@@ -92,81 +90,130 @@ import com.ephesoft.dcma.kvfinder.service.KVFinderService;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.kvfieldcreation.service.KVFieldCreatorService
  */
 @Component
 public class KVFieldCreator implements ICommonConstants {
 
+	/**
+	 * An instance of Logger for proper logging in this file using slf4j.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(KVFieldCreator.class);
-
-	private static final String KV_FIELD_LEARNING_PLUGIN = "KEY_VALUE_LEARNING_PLUGIN";
-
+	/**
+	 * Location order to be followed.
+	 */
 	private String locationOrder;
+	/**
+	 * Maximum number of records per dlf.
+	 */
 	private String maxNumberRecordPerDlf;
+	/**
+	 * Tolerance threshold.
+	 */
 	private String toleranceThreshold;
+	/**
+	 * Array of location of type String.
+	 */
 	private String[] locationArr;
+	/**
+	 * Maximum number of records per dlf in integer.
+	 */
 	private int maxNumberRecordPerDlfInt;
+	/**
+	 * Tolerance threshold in integer.
+	 */
 	private int toleranceThresholdInt;
+	/**
+	 * To store the value of multiplier.
+	 */
 	private String multiplier;
+	/**
+	 * The fetch value.
+	 */
 	private String fetchValue;
+	/**
+	 * Minimum key character count.
+	 */
 	private String minKeyCharCount;
+	/**
+	 * The gap between the keys.
+	 */
 	private int gapBetweenKeys;
-
+	
+	/**
+	 * getter for gapBetweenKeys.
+	 * @return int
+	 */
 	public int getGapBetweenKeys() {
 		return gapBetweenKeys;
 	}
-
+	/**
+	 * setter for gapBetweenKeys.
+	 * @param gapBetweenKeys int
+	 */
 	public void setGapBetweenKeys(int gapBetweenKeys) {
 		this.gapBetweenKeys = gapBetweenKeys;
 	}
-
+	/**
+	 * getter for minKeyCharCount.
+	 * @return {@link String}
+	 */
 	public String getMinKeyCharCount() {
 		return minKeyCharCount;
 	}
-
+	/**
+	 * setter for minKeyCharCount.
+	 * @param minKeyCharCount {@link String}
+	 */
 	public void setMinKeyCharCount(String minKeyCharCount) {
 		this.minKeyCharCount = minKeyCharCount;
 	}
-
+	/**
+	 * getter for fetchValue.
+	 * @return {@link String}
+	 */
 	public String getFetchValue() {
 		return fetchValue;
 	}
-
+	/**
+	 * setter for fetchValue.
+	 * @param fetchValue {@link String}
+	 */
 	public void setFetchValue(final String fetchValue) {
 		this.fetchValue = fetchValue;
 	}
-
+	/**
+	 * getter for multiplier.
+	 * @return {@link String}
+	 */
 	public String getMultiplier() {
 		return multiplier;
 	}
-
+	/**
+	 * setter for multiplier.
+	 * @param multiplier {@link String}
+	 */
 	public void setMultiplier(final String multiplier) {
 		this.multiplier = multiplier;
 	}
-
-	public int getMaxNumberRecordPerDlfInt() {
-		return maxNumberRecordPerDlfInt;
-	}
-
+	/**
+	 * setter for maxNumberRecordPerDlfInt.
+	 * @param maxNumberRecordPerDlfInt {@link Integer}
+	 */
 	public void setMaxNumberRecordPerDlfInt(final Integer maxNumberRecordPerDlfInt) {
 		this.maxNumberRecordPerDlfInt = maxNumberRecordPerDlfInt;
 	}
-
-	public int getToleranceThresholdInt() {
-		return toleranceThresholdInt;
-	}
-
+	/**
+	 * setter for toleranceThresholdInt.
+	 * @param toleranceThresholdInt {@link String}
+	 */
 	public void setToleranceThresholdInt(final Integer toleranceThresholdInt) {
 		this.toleranceThresholdInt = toleranceThresholdInt;
 	}
-
-	final public String[] getLocationArr() {
-		return locationArr;
-	}
-
-	final public String getLocationOrder() {
-		return locationOrder;
-	}
-
+	/**
+	 * setter for locationOrder.
+	 * @param locationOrder {@link String}
+	 */
 	final public void setLocationOrder(final String locationOrder) {
 		this.locationOrder = locationOrder;
 		if (locationOrder == null || locationOrder.isEmpty()) {
@@ -175,11 +222,17 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 		this.locationArr = locationOrder.split(KVFieldCreatorConstants.SEMI_COLON);
 	}
-
+	/**
+	 * getter for maxNumberRecordPerDlf.
+	 * @return {@link String}
+	 */
 	final public String getMaxNumberRecordPerDlf() {
 		return maxNumberRecordPerDlf;
 	}
-
+	/**
+	 * This method is used to set the maximum number of records per dlf.
+	 * @param maxNumberRecordPerDlf {@link String}
+	 */
 	final public void setMaxNumberRecordPerDlf(final String maxNumberRecordPerDlf) {
 		this.maxNumberRecordPerDlf = maxNumberRecordPerDlf;
 		Integer maxRecordsPerDlf = KVFieldCreatorConstants.DEFAULT_MAX_RECORD_PER_DLF;
@@ -190,11 +243,18 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 		setMaxNumberRecordPerDlfInt(maxRecordsPerDlf);
 	}
-
+	
+	/**
+	 * Getter for toleranceThreshold.
+	 * @return {@link String}
+	 */
 	final public String getToleranceThreshold() {
 		return toleranceThreshold;
 	}
-
+	/**
+	 * This method is used to set the tolerance threshold value.
+	 * @param toleranceThreshold {@link String}
+	 */
 	final public void setToleranceThreshold(final String toleranceThreshold) {
 		this.toleranceThreshold = toleranceThreshold;
 		Integer toleranceThresholdInt = KVFieldCreatorConstants.DEFAULT_TOLEANCE_THRESHOLD;
@@ -206,55 +266,67 @@ public class KVFieldCreator implements ICommonConstants {
 		setToleranceThresholdInt(toleranceThresholdInt);
 	}
 
+	/**
+	 * A list to store the patterns or strings mentioned in key regex list.
+	 */
 	private List<String> keyRegexList = null;
 
+	/**
+	 * A list to store the patterns or strings mentioned in value regex list.
+	 */
 	private List<String> valueRegexList = null;
 
+	/**
+	 * A list to store the patterns or strings mentioned in exclusion list.
+	 */
+	private List<String> exclusionRegexList = null;
+
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
+	/**
+	 * An instance of {@link BatchClassService}.
+	 */
 	@Autowired
 	private BatchClassService batchClassService;
 
+	/**
+	 * An instance of {@link KVFinderService}.
+	 */
 	@Autowired
 	private KVFinderService kvFinderService;
 
+	/**
+	 * An instance of {@link BatchInstanceService}.
+	 */
 	@Autowired
 	private BatchInstanceService batchInstanceService;
 
+	/**
+	 * An instance of {@link KVExtractionService}.
+	 */
 	@Autowired
 	private KVExtractionService kvExtractionService;
 
 	/**
-	 * Instance of PluginPropertiesService.
+	 * Instance of {@link PluginPropertiesService}.
 	 **/
 	@Autowired
 	@Qualifier("batchInstancePluginPropertiesService")
 	private PluginPropertiesService pluginPropertiesService;
 
 	/**
-	 * @return the batchSchemaService
-	 */
-	public BatchSchemaService getBatchSchemaService() {
-		return batchSchemaService;
-	}
-
-	/**
-	 * @return the pluginPropertiesService
-	 */
-	public PluginPropertiesService getPluginPropertiesService() {
-		return pluginPropertiesService;
-	}
-
-	/**
 	 * This method creates key value field for each document level field of every document.
 	 * 
-	 * @param batchInstanceIdentifier
-	 * @param pluginWorkflow
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param pluginWorkflow {@link String}
 	 * @throws DCMAApplicationException
 	 */
 	public void createKeyValueFields(String batchInstanceIdentifier, String pluginWorkflow) throws DCMAApplicationException {
-		String kvFieldCreatorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, KV_FIELD_LEARNING_PLUGIN,
+		String kvFieldCreatorSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, KVFieldCreatorConstants.KV_FIELD_LEARNING_PLUGIN,
 				KVFieldCreatorProperties.LEARNING_KEY_VALUE_SWTICH);
 		LOGGER.info("KV creation plugin switch value  : " + kvFieldCreatorSwitch);
 		if (KVFieldCreatorConstants.SWITCH_ON.equalsIgnoreCase(kvFieldCreatorSwitch)) {
@@ -266,6 +338,11 @@ public class KVFieldCreator implements ICommonConstants {
 				valueRegexList = new ArrayList<String>();
 				readRegexPropertyFile(KVFieldCreatorConstants.VALUE_REGEX_FILE_PATH, valueRegexList);
 			}
+			// get the exclusion list.
+			if (null == exclusionRegexList) {
+				exclusionRegexList = new ArrayList<String>();
+				readRegexPropertyFile(KVFieldCreatorConstants.EXCLUSION_REGEX_FILE_PATH, exclusionRegexList);
+			}
 			Float multiplierFloat = getMultiplierFloat();
 			KVFetchValue kvFetchValue = getKVFetchValue();
 			int minKeyCharsInt = getminKeyCharsInt();
@@ -274,7 +351,9 @@ public class KVFieldCreator implements ICommonConstants {
 					.getBatchClassIdentifier(batchInstanceIdentifier));
 
 			List<Document> documentList = batch.getDocuments().getDocument();
+			Map<String, List<LineDataCarrier>> pageIdToLineDataCarrier = new HashMap<String, List<LineDataCarrier>>();
 			boolean isSuccess = false;
+			int widthOfLine = getWidthOfLineInt();
 			for (Document document : documentList) {
 				DocumentLevelFields documentLevelFields = document.getDocumentLevelFields();
 				if (null == documentLevelFields) {
@@ -286,79 +365,98 @@ public class KVFieldCreator implements ICommonConstants {
 					KVExtraction kvExtractionField = new KVExtraction();
 					String pageID = getPageId(document, docLevelField.getPage());
 					String docLevelFieldValue = docLevelField.getValue();
-					Map<String, List<LineDataCarrier>> pageIdToLineDataCarrier = new HashMap<String, List<LineDataCarrier>>();
 					List<LineDataCarrier> lineDataCarrierList = null;
-					if (pageID != null && docLevelFieldValue != null && !docLevelFieldValue.trim().isEmpty()) {
-						if (pageIdToLineDataCarrier != null && !pageIdToLineDataCarrier.containsKey(pageID)) {
-							final HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageID);
-							if (null == hocrPages) {
-								LOGGER.info("hocrPages is null. pageID = " + pageID + ". batchInstanceIdentifier = "
-										+ batchInstanceIdentifier);
-								continue;
-							}
-							HocrPage hocrPage = hocrPages.getHocrPage().get(0);
-							Spans spans = hocrPage.getSpans();
-							if (hocrPage != null && spans != null) {
-								lineDataCarrierList = createLineDataCarrier(spans, hocrPage.getPageID());
-							}
-							if (lineDataCarrierList != null) {
-								pageIdToLineDataCarrier.put(pageID, lineDataCarrierList);
-							}
-						} else {
-							lineDataCarrierList = pageIdToLineDataCarrier.get(pageID);
-						}
-						isSuccess = createKeyValuePattern(kvExtractionField, lineDataCarrierList, docLevelField, minKeyCharsInt);
-						if (!isSuccess) {
-							LOGGER.info("Key value field not created for DLF " + docLevelField.getName() + " for document "
-									+ document.getType());
+					if (pageID == null || docLevelFieldValue == null || docLevelFieldValue.trim().isEmpty()) {
+						continue;
+					}
+					if (pageIdToLineDataCarrier != null && !pageIdToLineDataCarrier.containsKey(pageID)) {
+						final HocrPages hocrPages = batchSchemaService.getHocrPages(batchInstanceIdentifier, pageID);
+						if (null == hocrPages) {
+							LOGGER.info("hocrPages is null. pageID = " + pageID + ". batchInstanceIdentifier = "
+									+ batchInstanceIdentifier);
 							continue;
-						} else {
-							kvExtractionField.setMultiplier(multiplierFloat);
-							kvExtractionField.setFetchValue(kvFetchValue);
-							// kvExtractionField.setPageValue();
-							addKVField(batchClass, document, docLevelField, kvExtractionField);
 						}
+						HocrPage hocrPage = hocrPages.getHocrPage().get(0);
+						Spans spans = hocrPage.getSpans();
+						if (hocrPage != null && spans != null) {
+							lineDataCarrierList = HocrUtil.getLineDataCarrierList(spans, hocrPage.getPageID(), widthOfLine);
+						}
+						if (lineDataCarrierList != null) {
+							pageIdToLineDataCarrier.put(pageID, lineDataCarrierList);
+						}
+					} else {
+						lineDataCarrierList = pageIdToLineDataCarrier.get(pageID);
+					}
+					isSuccess = createKeyValuePattern(kvExtractionField, lineDataCarrierList, docLevelField, minKeyCharsInt);
+					if (!isSuccess) {
+						LOGGER.info("Key value field not created for DLF " + docLevelField.getName() + " for document "
+								+ document.getType());
+						continue;
+					} else {
+						kvExtractionField.setMultiplier(multiplierFloat);
+						kvExtractionField.setFetchValue(kvFetchValue);
+						// kvExtractionField.setPageValue();
+						addKVField(batchClass, document, docLevelField, kvExtractionField);
 					}
 				}
 			}
 			batchClassService.merge(batchClass);
 		}
 	}
-	
-	private List<KVExtraction> createKeyValuePatternList(KVFetchValue kvFetchValue, Float multiplierFloat, final String value, final List<LineDataCarrier> lineDataCarrierList, final int minKeyCharsInt) throws DCMAApplicationException {
+
+	private int getWidthOfLineInt() {
+		int widthOfLineInt = KVFieldCreatorConstants.DEFAULT_WIDTH_OF_LINE;
+		try {
+			widthOfLineInt = Integer.parseInt(kvFinderService.getWidthOfLine());
+		} catch (NumberFormatException nfe) {
+			LOGGER.error("Error in reading line width from properties file, setting iit to 20.", nfe);
+		}
+		return widthOfLineInt;
+	}
+
+	private List<KVExtraction> createKeyValuePatternList(KVFetchValue kvFetchValue, Float multiplierFloat, final String value,
+			final List<LineDataCarrier> lineDataCarrierList, final int minKeyCharsInt) throws DCMAApplicationException {
 		List<KVExtraction> kvExtractionList = new ArrayList<KVExtraction>();
 		boolean valueFound = false;
 		boolean keyFound = false;
-			if (null != lineDataCarrierList) {
-				for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
-					if (null != lineDataCarrier) {
-						LOGGER.info("Searching for value: " + value + " in row == " + lineDataCarrier.getLineRowData());
-						List<Span> spanList = lineDataCarrier.getSpanList();
-						if (null != spanList) {
-							for (Span span : spanList) {
-								if (null != span) {
-									String valueSpan = span.getValue();
-									if (valueSpan != null && value.contains(valueSpan)) {
-										KVExtraction kvExtractionField = new KVExtraction();
-										String valuePattern = getRegexPattern(valueSpan, valueRegexList);
-										kvExtractionField.setValuePattern(valuePattern);
-										keyFound = searchKey(kvExtractionField, span.getCoordinates(), span, lineDataCarrier,
-												lineDataCarrierList, minKeyCharsInt);
-										kvExtractionField.setMultiplier(multiplierFloat);
-										kvExtractionField.setFetchValue(kvFetchValue);
-										kvExtractionList.add(kvExtractionField);
-										LOGGER.info("Value Found=" + valueFound);
-										LOGGER.info("Key Found=" + keyFound);
-									}
-								}
+		if (null != lineDataCarrierList) {
+			for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
+				if (null != lineDataCarrier) {
+					LOGGER.info("Searching for value: " + value + " in row == " + lineDataCarrier.getLineRowData());
+					List<Span> spanList = lineDataCarrier.getSpanList();
+					if (null == spanList) {
+						continue;
+					}
+					for (Span span : spanList) {
+						if (null != span) {
+							String valueSpan = span.getValue();
+							if (valueSpan != null && value.contains(valueSpan)) {
+								KVExtraction kvExtractionField = new KVExtraction();
+								String valuePattern = getRegexPattern(valueSpan, valueRegexList);
+								kvExtractionField.setValuePattern(valuePattern);
+								keyFound = searchKey(kvExtractionField, span.getCoordinates(), span, lineDataCarrier,
+										lineDataCarrierList, minKeyCharsInt);
+								kvExtractionField.setMultiplier(multiplierFloat);
+								kvExtractionField.setFetchValue(kvFetchValue);
+								kvExtractionList.add(kvExtractionField);
+								LOGGER.info("Value Found=" + valueFound);
+								LOGGER.info("Key Found=" + keyFound);
 							}
 						}
 					}
 				}
 			}
+		}
 		return kvExtractionList;
 	}
-	
+
+	/**
+	 * This api is used to create the key value fields.
+	 * @param value {@link String}
+	 * @param hocrPage {@link com.ephesoft.dcma.batch.schema.HocrPages.HocrPage}
+	 * @return {@link List<KVExtraction>}
+	 * @throws DCMAApplicationException
+	 */
 	public List<KVExtraction> createKeyValueFieldsAPI(final String value, final HocrPage hocrPage) throws DCMAApplicationException {
 		if (null == keyRegexList) {
 			keyRegexList = new ArrayList<String>();
@@ -368,12 +466,19 @@ public class KVFieldCreator implements ICommonConstants {
 			valueRegexList = new ArrayList<String>();
 			readRegexPropertyFile(KVFieldCreatorConstants.VALUE_REGEX_FILE_PATH, valueRegexList);
 		}
+		int widthOfLine = KVFieldCreatorConstants.DEFAULT_WIDTH_OF_LINE;
+		try {
+			widthOfLine = Integer.parseInt(kvFinderService.getWidthOfLine());
+		} catch (NumberFormatException nfe) {
+			LOGGER.error("Error in reading line width from properties file, setting iit to 20.", nfe);
+		}
 		Float multiplierFloat = getMultiplierFloat();
 		KVFetchValue kvFetchValue = getKVFetchValue();
 		int minKeyCharsInt = getminKeyCharsInt();
 
 		List<KVExtraction> kvExtractionList = new ArrayList<KVExtraction>();
-		List<LineDataCarrier> lineDataCarrierList = createLineDataCarrier(hocrPage.getSpans(), hocrPage.getPageID());
+		List<LineDataCarrier> lineDataCarrierList = HocrUtil.getLineDataCarrierList(hocrPage.getSpans(), hocrPage.getPageID(),
+				widthOfLine);
 		kvExtractionList = createKeyValuePatternList(kvFetchValue, multiplierFloat, value, lineDataCarrierList, minKeyCharsInt);
 		return kvExtractionList;
 	}
@@ -419,14 +524,6 @@ public class KVFieldCreator implements ICommonConstants {
 		return kvFetchValue;
 	}
 
-	/**
-	 * This method adds the key value field to the batch class.
-	 * 
-	 * @param batchClass
-	 * @param document
-	 * @param docLevelField
-	 * @param kvExtractionField
-	 */
 	private void addKVField(final BatchClass batchClass, final Document document, final DocField docLevelField,
 			final KVExtraction kvExtractionField) {
 		boolean fieldAdded = false;
@@ -450,7 +547,7 @@ public class KVFieldCreator implements ICommonConstants {
 							if (kvExtractionList == null) {
 								fieldType.setKvExtraction(new ArrayList<KVExtraction>());
 							}
-							if (kvExtractionList.size() < getMaxNumberRecordPerDlfInt()) {
+							if (kvExtractionList.size() < this.maxNumberRecordPerDlfInt) {
 								LOGGER.info("Field added to field type " + fieldName + " of document type " + documentType.getName());
 								fieldType.addKVExtraction(kvExtractionField);
 								fieldAdded = true;
@@ -466,14 +563,7 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This method checks if the new KV field already exists for the field type.
-	 * 
-	 * @param fieldType
-	 * @param kvExtractionField
-	 * @return
-	 */
-	private boolean isDuplicateKVField(FieldType fieldType, KVExtraction kvExtractionField) {
+	private boolean isDuplicateKVField(final FieldType fieldType, final KVExtraction kvExtractionField) {
 		LOGGER.info("checking for duplicate key value field ..");
 		boolean isDuplicateField = false;
 		List<KVExtraction> kvExtractionList = kvExtractionService.getDuplicateKVFields(fieldType, kvExtractionField);
@@ -501,16 +591,6 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 	}
 
-	/**
-	 * This method creates key value pattern for doc level field.
-	 * 
-	 * @param kvExtractionField
-	 * @param lineDataCarrierList
-	 * @param docLevelField
-	 * @param minKeyCharsInt
-	 * @return keyFound
-	 * @throws DCMAApplicationException
-	 */
 	private boolean createKeyValuePattern(final KVExtraction kvExtractionField, final List<LineDataCarrier> lineDataCarrierList,
 			final DocField docLevelField, final int minKeyCharsInt) throws DCMAApplicationException {
 		CoordinatesList coordinates = docLevelField.getCoordinatesList();
@@ -518,7 +598,7 @@ public class KVFieldCreator implements ICommonConstants {
 		boolean keyFound = false;
 		if (coordinates != null) {
 			List<Coordinates> coordinatesList = coordinates.getCoordinates();
-			Coordinates recCoordinates = getRectangleCoordinates(coordinatesList);
+			Coordinates recCoordinates = HocrUtil.getRectangleCoordinates(coordinatesList);
 			String docLevelFieldValue = docLevelField.getValue();
 			if (null != lineDataCarrierList) {
 				for (LineDataCarrier lineDataCarrier : lineDataCarrierList) {
@@ -552,18 +632,6 @@ public class KVFieldCreator implements ICommonConstants {
 		return keyFound && valueFound;
 	}
 
-	/**
-	 * This method look for key in directions as ordered in locationArr array.
-	 * 
-	 * @param kvExtractionField
-	 * @param recCoordinates
-	 * @param span
-	 * @param lineDataCarrier
-	 * @param lineDataCarrierList
-	 * @param minKeyCharsInt
-	 * @return {@link Boolean}
-	 * @throws DCMAApplicationException
-	 */
 	private boolean searchKey(final KVExtraction kvExtractionField, final Coordinates recCoordinates, final Span span,
 			LineDataCarrier lineDataCarrier, final List<LineDataCarrier> lineDataCarrierList, int minKeyCharsInt)
 			throws DCMAApplicationException {
@@ -571,29 +639,27 @@ public class KVFieldCreator implements ICommonConstants {
 		try {
 			Coordinates keyCoordinates = new Coordinates();
 			if (locationOrder == null || locationOrder.isEmpty()) {
-				LOGGER.info("locationOrder is not defined in the specified property file ....");
-				throw new DCMAApplicationException("locationOrder is not definedin the specified property file ....");
+				LOGGER.error("locationOrder is not defined in the specified property file ....");
+				throw new DCMAApplicationException("locationOrder is not defined in the specified property file ....");
 			}
 
-			for (String location : this.getLocationArr()) {
+			for (String location : this.locationArr) {
 				LocationType locationType = LocationType.valueOf(location);
+				LOGGER.info("Searching key at location : " + locationType);
 				switch (locationType) {
 					case TOP:
 					case TOP_LEFT:
 					case TOP_RIGHT:
-						LOGGER.info("Searching key at location : " + locationType);
 						keyFound = createKeyTop(kvExtractionField, recCoordinates, lineDataCarrier, lineDataCarrierList, locationType,
 								keyCoordinates, minKeyCharsInt);
 						break;
 
 					case RIGHT:
-						LOGGER.info("Searching key at location : " + locationType);
 						keyFound = createKeyRight(kvExtractionField, recCoordinates, span, lineDataCarrier, locationType,
 								keyCoordinates, minKeyCharsInt);
 						break;
 
 					case LEFT:
-						LOGGER.info("Searching key at location : " + locationType);
 						keyFound = createKeyLeft(kvExtractionField, recCoordinates, span, lineDataCarrier, locationType,
 								keyCoordinates, minKeyCharsInt);
 						break;
@@ -601,7 +667,6 @@ public class KVFieldCreator implements ICommonConstants {
 					case BOTTOM:
 					case BOTTOM_LEFT:
 					case BOTTOM_RIGHT:
-						LOGGER.info("Searching key at location : " + locationType);
 						keyFound = createKeyBottom(kvExtractionField, recCoordinates, lineDataCarrier, lineDataCarrierList,
 								locationType, keyCoordinates, minKeyCharsInt);
 						break;
@@ -610,12 +675,10 @@ public class KVFieldCreator implements ICommonConstants {
 						LOGGER.info("***********  Default case found. In valid case.*************");
 						break;
 				}
+				LOGGER.info("Key found = " + keyFound);
 				if (keyFound) {
-					LOGGER.info("Key found at location " + location);
-					findLocation(kvExtractionField, keyCoordinates, recCoordinates);
+					setValues(kvExtractionField, keyCoordinates, recCoordinates);
 					break;
-				} else {
-					LOGGER.info("Key not found at location " + location);
 				}
 			}
 		} catch (IllegalArgumentException illArgExcep) {
@@ -625,98 +688,41 @@ public class KVFieldCreator implements ICommonConstants {
 		return keyFound;
 	}
 
-	/**
-	 * This method sets the length, width, x-offset and y-offset values of the new KV Field.
-	 * 
-	 * @param kvExtractionField {@link KVExtraction}
-	 * @param locationType {@link LocationType}
-	 * @param keyCoordinates {@link Coordinates}
-	 * @param valueCoordinates {@link Coordinates}
-	 */
-	private void setValues(final KVExtraction kvExtractionField, final LocationType locationType, final Coordinates keyCoordinates,
-			final Coordinates valueCoordinates) {
-		long keyX0 = keyCoordinates.getX0().longValue();
-		long keyY0 = keyCoordinates.getY0().longValue();
-		long keyX1 = keyCoordinates.getX1().longValue();
-		long keyY1 = keyCoordinates.getY1().longValue();
+	private void setValues(final KVExtraction kvExtractionField, final Coordinates keyCoordinates, final Coordinates valueCoordinates) {
+		if (isValidCoordinate(keyCoordinates) && isValidCoordinate(valueCoordinates)) {
+			long keyX1 = keyCoordinates.getX1().longValue();
+			long keyY1 = keyCoordinates.getY1().longValue();
 
-		long valueX0 = valueCoordinates.getX0().longValue();
-		long valueY0 = valueCoordinates.getY0().longValue();
-		long valueX1 = valueCoordinates.getX1().longValue();
-		long valueY1 = valueCoordinates.getY1().longValue();
+			long valueX0 = valueCoordinates.getX0().longValue();
+			long valueY0 = valueCoordinates.getY0().longValue();
+			long valueX1 = valueCoordinates.getX1().longValue();
+			long valueY1 = valueCoordinates.getY1().longValue();
 
-		int lengthOfBoxInInt = (int) Math.round(valueX1 - valueX0);
-		int widthOfBoxInInt = (int) Math.round(valueY1 - valueY0);
-		double xOffset = 0;
-		double yOffset = 0;
+			int xOffsetInInt = (int) Math.round(valueX0 - keyX1);
+			int yOffsetInInt = (int) Math.round(valueY0 - keyY1);
+			LOGGER.debug("X offset : " + xOffsetInInt);
+			LOGGER.debug("Y offset : " + yOffsetInInt);
 
-		switch (locationType) {
-			case TOP_LEFT:
-				xOffset = keyX0 - valueCoordinates.getX1().longValue();
-				yOffset = keyY0 - valueCoordinates.getY1().longValue();
-				break;
-			case TOP_RIGHT:
-				xOffset = valueCoordinates.getX0().longValue() - keyX1;
-				yOffset = keyY0 - valueCoordinates.getY1().longValue();
-				break;
-			case TOP:
-				xOffset = 0;
-				yOffset = keyY0 - valueCoordinates.getY1().longValue();
-				break;
-			case LEFT:
-				yOffset = 0;
-				xOffset = keyX0 - valueCoordinates.getX1().longValue();
-				break;
-			case RIGHT:
-				yOffset = 0;
-				xOffset = valueCoordinates.getX0().longValue() - keyX1;
-				break;
-			case BOTTOM_LEFT:
-				xOffset = keyX0 - valueCoordinates.getX1().longValue();
-				yOffset = valueCoordinates.getY0().longValue() - keyY1;
-				break;
-			case BOTTOM_RIGHT:
-				xOffset = valueCoordinates.getX0().longValue() - keyX1;
-				yOffset = valueCoordinates.getY0().longValue() - keyY1;
-				break;
-			case BOTTOM:
-				xOffset = 0;
-				yOffset = valueCoordinates.getY0().longValue() - keyY1;
-				break;
-			default:
-				LOGGER.info("Invalid location = " + locationType);
-				break;
+			int lengthOfBoxInInt = (int) Math.round(valueX1 - valueX0);
+			int widthOfBoxInInt = (int) Math.round(valueY1 - valueY0);
+			lengthOfBoxInInt = lengthOfBoxInInt + (this.toleranceThresholdInt * lengthOfBoxInInt) / KVFieldCreatorConstants.CONSTANT_VALUE_100;
+			widthOfBoxInInt = widthOfBoxInInt + (this.toleranceThresholdInt * widthOfBoxInInt) / KVFieldCreatorConstants.CONSTANT_VALUE_100;
+			LOGGER.debug("value zone length : " + lengthOfBoxInInt);
+			LOGGER.debug("value zone width : " + widthOfBoxInInt);
+
+			kvExtractionField.setXoffset(xOffsetInInt);
+			kvExtractionField.setYoffset(yOffsetInInt);
+			kvExtractionField.setLength(lengthOfBoxInInt);
+			kvExtractionField.setWidth(widthOfBoxInInt);
+			// kvExtractionField.setLocationType(locationType);
 		}
-
-		int xOffsetInInt = (int) Math.round(xOffset);
-		int yOffsetInInt = (int) Math.round(yOffset);
-
-		lengthOfBoxInInt = lengthOfBoxInInt + (getToleranceThresholdInt() * lengthOfBoxInInt) / 100;
-		widthOfBoxInInt = widthOfBoxInInt + (getToleranceThresholdInt() * widthOfBoxInInt) / 100;
-		kvExtractionField.setXoffset(xOffsetInInt);
-		kvExtractionField.setYoffset(yOffsetInInt);
-		kvExtractionField.setLength(lengthOfBoxInInt);
-		kvExtractionField.setWidth(widthOfBoxInInt);
-		kvExtractionField.setLocationType(locationType);
 	}
 
-	/**
-	 * This method creates key at TOP,TOP_LEFT and TOP_RIGHT of value.
-	 * 
-	 * @param kvExtractionField {@link KVExtraction}
-	 * @param recCoordinates
-	 * @param lineDataCarrier
-	 * @param lineDataCarrierList
-	 * @param location
-	 * @param keyCoordinates
-	 * @param minKeyCharsInt
-	 * @return {@link Boolean}
-	 */
 	private boolean createKeyTop(final KVExtraction kvExtractionField, final Coordinates recCoordinates,
 			final LineDataCarrier lineDataCarrier, final List<LineDataCarrier> lineDataCarrierList, final LocationType location,
 			final Coordinates keyCoordinates, int minKeyCharsInt) {
 		boolean keyFound = false;
-		LOGGER.info("Creating key at location : " + location.toString());
+		LOGGER.info(KVFieldCreatorConstants.MSG_KEY_CREATION + location.toString());
 		int index = lineDataCarrierList.indexOf(lineDataCarrier);
 		Coordinates spanCoordinates = null;
 		LineDataCarrier topLineDataCarrier = null;
@@ -751,24 +757,11 @@ public class KVFieldCreator implements ICommonConstants {
 		return keyFound;
 	}
 
-	/**
-	 * This method creates key at BOTTOM,BOTTOM_LEFT and BOTTOM_RIGHT of value.
-	 * 
-	 * @param kvExtractionField {@link KVExtraction}
-	 * @param recCoordinates {@link Coordinates}
-	 * @param lineDataCarrier {@link LineDataCarrier}
-	 * @param lineDataCarrierList {@link List<LineDataCarrier>}
-	 * @param location {@link LocationType}
-	 * @param keyCoordinates
-	 * @param keyCoordinates {@link Coordinates}
-	 * @param minKeyCharsInt
-	 * @return {@link Boolean}
-	 */
 	private boolean createKeyBottom(final KVExtraction kvExtractionField, final Coordinates recCoordinates,
 			final LineDataCarrier lineDataCarrier, final List<LineDataCarrier> lineDataCarrierList, final LocationType location,
 			final Coordinates keyCoordinates, final int minKeyCharsInt) {
 		boolean keyFound = false;
-		LOGGER.info("Creating key at location : " + location.toString());
+		LOGGER.info(KVFieldCreatorConstants.MSG_KEY_CREATION + location.toString());
 		int index = lineDataCarrierList.indexOf(lineDataCarrier);
 		int length = lineDataCarrierList.size();
 		Coordinates spanCoordinates = null;
@@ -804,21 +797,9 @@ public class KVFieldCreator implements ICommonConstants {
 		return keyFound;
 	}
 
-	/**
-	 * This method searches key to left of value.
-	 * 
-	 * @param kvExtractionField {@link KVExtraction}
-	 * @param recCoordinates
-	 * @param span
-	 * @param lineDataCarrier
-	 * @param location
-	 * @param keyCoordinates
-	 * @param minKeyCharsInt
-	 * @return {@link Boolean}
-	 */
 	private boolean createKeyLeft(KVExtraction kvExtractionField, Coordinates recCoordinates, Span span,
 			LineDataCarrier lineDataCarrier, LocationType location, Coordinates keyCoordinates, int minKeyCharsInt) {
-		LOGGER.info("Creating key at location : " + location.toString());
+		LOGGER.info(KVFieldCreatorConstants.MSG_KEY_CREATION + location.toString());
 		int prevKeyX0 = 0;
 		boolean keyFound = false;
 		int gapBetweenWords = 0;
@@ -837,10 +818,7 @@ public class KVFieldCreator implements ICommonConstants {
 						prevKeyX0 = leftSpan.getCoordinates().getX0().intValue();
 						LOGGER.info("Key == " + keyString);
 					} else {
-						keyFound = setKeyPattern(kvExtractionField, keyCoordinates, minKeyCharsInt, keyString, keyCoordinatesList);
-						if (keyFound) {
-							break;
-						}
+						break;
 					}
 				} else if (key != null && !key.trim().isEmpty() && !KVFieldCreatorConstants.KEY_VALUE_SEPARATORS.contains(key)
 						&& isValidKey(recCoordinates, leftSpan.getCoordinates(), location)) {
@@ -853,25 +831,29 @@ public class KVFieldCreator implements ICommonConstants {
 				spanIndex = spanIndex - 1;
 				leftSpan = lineDataCarrier.getLeftSpan(spanIndex);
 			}
+			if (keyFound) {
+				keyFound = setKeyPattern(kvExtractionField, keyCoordinates, minKeyCharsInt, keyString, keyCoordinatesList);
+			}
 		}
 		return keyFound;
 	}
 
-	/**
-	 * This method searches key to right of value.
-	 * 
-	 * @param kvExtractionField {@link KVExtraction}
-	 * @param recCoordinates
-	 * @param span
-	 * @param lineDataCarrier
-	 * @param location
-	 * @param keyCoordinates
-	 * @param minKeyCharsInt
-	 * @return {@link Boolean}
-	 */
+	private boolean checkExclusionList(String keyString) {
+		boolean isValidkey = true;
+		if (!exclusionRegexList.isEmpty()) {
+			for (String exclusionString : exclusionRegexList) {
+				if (keyString.matches(exclusionString)) {
+					isValidkey = false;
+					break;
+				}
+			}
+		}
+		return isValidkey;
+	}
+
 	private boolean createKeyRight(KVExtraction kvExtractionField, Coordinates recCoordinates, Span span,
 			LineDataCarrier lineDataCarrier, LocationType location, Coordinates keyCoordinates, int minKeyCharsInt) {
-		LOGGER.info("Creating key at location : " + location.toString());
+		LOGGER.info(KVFieldCreatorConstants.MSG_KEY_CREATION + location.toString());
 		boolean keyFound = false;
 		Integer spanIndex = lineDataCarrier.getIndexOfSpan(span);
 		if (spanIndex != null) {
@@ -887,13 +869,11 @@ public class KVFieldCreator implements ICommonConstants {
 					gapBetweenWords = prevKeyX1 - rightSpan.getCoordinates().getX0().intValue();
 					if (Math.abs(gapBetweenWords) < gapBetweenKeys) {
 						keyCoordinatesList.add(rightSpan.getCoordinates());
-						keyString.append(KVFieldCreatorConstants.SPACE + key.trim());
+						keyString.append(KVFieldCreatorConstants.SPACE);
+						keyString.append(key.trim());
 						prevKeyX1 = rightSpan.getCoordinates().getX1().intValue();
 					} else {
-						keyFound = setKeyPattern(kvExtractionField, keyCoordinates, minKeyCharsInt, keyString, keyCoordinatesList);
-						if (keyFound) {
-							break;
-						}
+						break;
 					}
 				} else if (key != null && !key.trim().isEmpty() && !KVFieldCreatorConstants.KEY_VALUE_SEPARATORS.contains(key)
 						&& isValidKey(recCoordinates, rightSpan.getCoordinates(), location)) {
@@ -905,6 +885,9 @@ public class KVFieldCreator implements ICommonConstants {
 				spanIndex = spanIndex + 1;
 				rightSpan = lineDataCarrier.getRightSpan(spanIndex);
 			}
+			if (keyFound) {
+				keyFound = setKeyPattern(kvExtractionField, keyCoordinates, minKeyCharsInt, keyString, keyCoordinatesList);
+			}
 		}
 		return keyFound;
 	}
@@ -913,32 +896,26 @@ public class KVFieldCreator implements ICommonConstants {
 			StringBuffer keyString, List<Coordinates> keyCoordinatesList) {
 		boolean keyFound;
 		final String finalKeyString = keyString.toString().trim();
-		if (finalKeyString.length() >= minKeyCharsInt) {
+
+		// check if the found key is present in exclusion list or not.
+		if (finalKeyString.length() >= minKeyCharsInt && checkExclusionList(finalKeyString)) {
 			LOGGER.info("Key found: " + finalKeyString);
 			final String keyPattern = getRegexPattern(finalKeyString, keyRegexList);
+
 			kvExtractionField.setKeyPattern(keyPattern);
 			setKeyCoordinates(keyCoordinates, keyCoordinatesList);
 			LOGGER.info("Key Pattern Created : " + keyPattern);
 			keyFound = true;
 		} else {
-			LOGGER.info("Required no of characters in key= " + minKeyCharsInt + " , Chars found= "
-					+ keyString.toString().trim().length());
+			LOGGER.info("Required no of characters in key= " + minKeyCharsInt + " , Chars found= " + finalKeyString.length());
 			keyFound = false;
 		}
 		return keyFound;
 	}
 
-	/**
-	 * This method checks if span is valid with respect to value coordinates.
-	 * 
-	 * @param recCoordinates
-	 * @param spanCoordinates
-	 * @param location
-	 * @return {@link Boolean}
-	 */
 	private boolean isValidKey(Coordinates recCoordinates, Coordinates spanCoordinates, LocationType location) {
 		boolean isValidKey = false;
-		LOGGER.info("Creating key at location : " + location.toString());
+		LOGGER.info(KVFieldCreatorConstants.MSG_KEY_CREATION + location.toString());
 		long rectangleX0 = recCoordinates.getX0().longValue();
 		long rectangleY0 = recCoordinates.getY0().longValue();
 		long rectangleX1 = recCoordinates.getX1().longValue();
@@ -994,56 +971,6 @@ public class KVFieldCreator implements ICommonConstants {
 		return isValidKey;
 	}
 
-	/**
-	 * This method gets the rectangle coordinates for the value.
-	 * 
-	 * @param coordinatesList
-	 * @return Coordinates
-	 */
-	private Coordinates getRectangleCoordinates(List<Coordinates> coordinatesList) {
-		long minX0 = 0;
-		long minY0 = 0;
-		long maxX1 = 0;
-		long maxY1 = 0;
-		Coordinates recCoord = new Coordinates();
-		boolean isFirstCoord = true;
-		for (Coordinates coordinate : coordinatesList) {
-			if (isFirstCoord) {
-				recCoord = coordinate;
-				isFirstCoord = false;
-			} else {
-				minX0 = recCoord.getX0().longValue();
-				minY0 = recCoord.getY0().longValue();
-				maxX1 = recCoord.getX1().longValue();
-				maxY1 = recCoord.getY1().longValue();
-				long coordX0 = coordinate.getX0().longValue();
-				long coordY0 = coordinate.getY0().longValue();
-				long coordX1 = coordinate.getX1().longValue();
-				long coordY1 = coordinate.getY1().longValue();
-				if (coordX0 < minX0) {
-					recCoord.setX0(coordinate.getX0());
-				}
-				if (coordY0 < minY0) {
-					recCoord.setY0(coordinate.getY0());
-				}
-				if (coordX1 > maxX1) {
-					recCoord.setX1(coordinate.getX1());
-				}
-				if (coordY1 > maxY1) {
-					recCoord.setY1(coordinate.getY1());
-				}
-			}
-		}
-		return recCoord;
-	}
-
-	/**
-	 * This method checks if span exists inside the value rectangle zone.
-	 * 
-	 * @param span {@link Span}
-	 * @param recCoordinates {@link List<Coordinates}
-	 * @return {@link Boolean}
-	 */
 	private boolean matchCoordinates(final Span span, final Coordinates recCoordinates) {
 		boolean isValidCoor = false;
 		Coordinates spanCoordinates = span.getCoordinates();
@@ -1051,87 +978,30 @@ public class KVFieldCreator implements ICommonConstants {
 		long spanY0 = spanCoordinates.getY0().longValue();
 		long spanX1 = spanCoordinates.getX1().longValue();
 		long spanY1 = spanCoordinates.getY1().longValue();
-		long valueX0 = recCoordinates.getX0().longValue();
-		long valueY0 = recCoordinates.getY0().longValue();
-		long valueX1 = recCoordinates.getX1().longValue();
-		long valueY1 = recCoordinates.getY1().longValue();
+		long x0Coordinate = recCoordinates.getX0().longValue();
+		long y0Coordinate = recCoordinates.getY0().longValue();
+		long x1Coordinate = recCoordinates.getX1().longValue();
+		long y1Coordinate = recCoordinates.getY1().longValue();
 		// Verify whether span lie inside value rectangle.
-		if ((spanX0 >= valueX0 && spanX0 <= valueX1) && (spanX1 >= valueX0 && spanX0 <= valueX1)
-				&& (spanY0 >= valueY0 && spanY0 <= valueY1) && (spanY1 >= valueY0 && spanY1 <= valueY1)) {
+		if (((spanX1 >= x0Coordinate && spanX1 <= x1Coordinate) || (spanX0 >= x0Coordinate && spanX0 <= x1Coordinate))
+				&& ((spanY1 <= y1Coordinate && spanY1 >= y0Coordinate) || (spanY0 <= y1Coordinate && spanY0 >= y0Coordinate))) {
 			isValidCoor = true;
+		} else if (((x0Coordinate <= spanX0 && x1Coordinate >= spanX0) || (x0Coordinate >= spanX1 && x1Coordinate <= spanX1))
+				&& ((y0Coordinate >= spanY0 && y0Coordinate <= spanY1) || (y1Coordinate >= spanY0 && y1Coordinate <= spanY1))
+				|| ((y0Coordinate <= spanY0 && y1Coordinate >= spanY0) || (y0Coordinate >= spanY1 && y1Coordinate <= spanY1))
+				&& ((x0Coordinate >= spanX0 && x0Coordinate <= spanX1) || (x1Coordinate >= spanX0 && x1Coordinate <= spanX1))) {
+			isValidCoor = true;
+		} else {
+			if (((x0Coordinate > spanX0 && x0Coordinate < spanX1) || (x1Coordinate > spanX0 && x1Coordinate < spanX1))
+					&& ((y0Coordinate > spanY0 && y0Coordinate < spanY1) || (y1Coordinate > spanY0 && y1Coordinate < spanY1))) {
+				isValidCoor = true;
+			}
 		}
+
 		return isValidCoor;
 	}
 
-	/**
-	 * Creates the line data carrier list.
-	 * 
-	 * @param spans {@link Spans}
-	 * @param pageID {@link String}
-	 * @return List<LineDataCarrier>
-	 */
-	private List<LineDataCarrier> createLineDataCarrier(final Spans spans, final String pageID) {
-
-		final List<Span> mainSpanList = spans.getSpan();
-		List<LineDataCarrier> lineDataCarrierList = new ArrayList<LineDataCarrier>();
-
-		if (null != mainSpanList) {
-
-			int defaultValue = 0;
-			try {
-				defaultValue = Integer.parseInt(kvFinderService.getWidthOfLine());
-			} catch (NumberFormatException nfe) {
-				LOGGER.error("Error in reading line width from properties file, setting iit to 20.", nfe);
-				defaultValue = KVFieldCreatorConstants.DEFAULT_WIDTH_OF_LINE;
-			}
-
-			final int compareValue = defaultValue;
-
-			final Set<Span> set = new TreeSet<Span>(new Comparator<Span>() {
-
-				public int compare(final Span firstSpan, final Span secSpan) {
-					BigInteger s1Y1 = firstSpan.getCoordinates().getY1();
-					BigInteger s2Y1 = secSpan.getCoordinates().getY1();
-					int returnValue = 0;
-					int compare = s1Y1.intValue() - s2Y1.intValue();
-					if (compare >= -compareValue && compare <= compareValue) {
-						BigInteger s1X1 = firstSpan.getCoordinates().getX1();
-						BigInteger s2X1 = secSpan.getCoordinates().getX1();
-						returnValue = s1X1.compareTo(s2X1);
-					} else {
-						returnValue = s1Y1.compareTo(s2Y1);
-					}
-					return returnValue;
-				}
-			});
-
-			set.addAll(mainSpanList);
-
-			LineDataCarrier lineDataCarrier = new LineDataCarrier(pageID);
-			lineDataCarrierList.add(lineDataCarrier);
-			List<Span> spanList = lineDataCarrier.getSpanList();
-
-			for (Span span : set) {
-				if (spanList.isEmpty()) {
-					spanList.add(span);
-				} else {
-					Span lastSpan = spanList.get(spanList.size() - 1);
-					int compare = lastSpan.getCoordinates().getY1().intValue() - span.getCoordinates().getY1().intValue();
-					if (compare >= -defaultValue && compare <= defaultValue) {
-						spanList.add(span);
-					} else {
-						lineDataCarrier = new LineDataCarrier(pageID);
-						lineDataCarrierList.add(lineDataCarrier);
-						spanList = lineDataCarrier.getSpanList();
-						spanList.add(span);
-					}
-				}
-			}
-		}
-		return lineDataCarrierList;
-	}
-
-	private String getPageId(Document document, String pageIdentifier) {
+	private String getPageId(final Document document, final String pageIdentifier) {
 		String pageID = null;
 		Pages pages = document.getPages();
 		if (null != pages) {
@@ -1145,16 +1015,9 @@ public class KVFieldCreator implements ICommonConstants {
 		return pageID;
 	}
 
-	/**
-	 * This method gets the matched regex pattern for input string.
-	 * 
-	 * @param inputString
-	 * @param regexList
-	 * @return String
-	 */
 	private String getRegexPattern(String inputString, List<String> regexList) {
 		String matchedPattern = null;
-		int confidenceInt = 100;
+		int confidenceInt = KVFieldCreatorConstants.CONSTANT_VALUE_100;
 		Pattern pattern = null;
 		Matcher matcher = null;
 		float previousMatchedConfidence = 0;
@@ -1186,16 +1049,6 @@ public class KVFieldCreator implements ICommonConstants {
 		return matchedPattern;
 	}
 
-	/**
-	 * Concatenate keys found at left location.
-	 * 
-	 * @param kvExtractionField
-	 * @param lineDataCarrier
-	 * @param span
-	 * @param minKeyCharsInt
-	 * @param keyCoordinates
-	 * @return
-	 */
 	private boolean concatenateKeysLeft(final KVExtraction kvExtractionField, final LineDataCarrier lineDataCarrier, final Span span,
 			final int minKeyCharsInt, final Coordinates keyCoordinates) {
 		LOGGER.info("Concatenating keys on left....");
@@ -1235,16 +1088,6 @@ public class KVFieldCreator implements ICommonConstants {
 		return keyFound;
 	}
 
-	/**
-	 * Concatenate keys found at right location.
-	 * 
-	 * @param kvExtractionField
-	 * @param lineDataCarrier
-	 * @param span
-	 * @param minKeyCharsInt
-	 * @param keyCoordinates
-	 * @return
-	 */
 	private boolean concatenateKeysRight(final KVExtraction kvExtractionField, final LineDataCarrier lineDataCarrier, final Span span,
 			final int minKeyCharsInt, final Coordinates keyCoordinates) {
 		LOGGER.info("Concatenating keys on right....");
@@ -1285,7 +1128,7 @@ public class KVFieldCreator implements ICommonConstants {
 	}
 
 	private void setKeyCoordinates(final Coordinates keyCoordinates, final List<Coordinates> keyCoordinatesList) {
-		Coordinates recCoordinates = getRectangleCoordinates(keyCoordinatesList);
+		Coordinates recCoordinates = HocrUtil.getRectangleCoordinates(keyCoordinatesList);
 		if (null != recCoordinates) {
 			keyCoordinates.setX0(recCoordinates.getX0());
 			keyCoordinates.setY0(recCoordinates.getY0());
@@ -1294,119 +1137,21 @@ public class KVFieldCreator implements ICommonConstants {
 		}
 	}
 
-	public void findLocation(KVExtraction kvExtractionField, Coordinates keyCoordinates, Coordinates valueCoordinates) {
-
-		if (keyCoordinates.getY0().intValue() >= valueCoordinates.getY1().intValue()) {
-			// it is in top of key
-			if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in top left
-				setValues(kvExtractionField, LocationType.TOP_LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX1().intValue() <= valueCoordinates.getX0().intValue()) {
-				// it is in top right
-				setValues(kvExtractionField, LocationType.TOP_RIGHT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() <= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in top
-				setValues(kvExtractionField, LocationType.TOP, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in top left
-				setValues(kvExtractionField, LocationType.TOP_LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() <= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() <= valueCoordinates.getX1().intValue()) {
-				// it is top right
-				setValues(kvExtractionField, LocationType.TOP_RIGHT, keyCoordinates, valueCoordinates);
-			} else {
-				// it spans all three quadrants
-				double x0diff = valueCoordinates.getX0().intValue() - keyCoordinates.getX0().intValue();
-				double x1diff = valueCoordinates.getX1().intValue() - keyCoordinates.getX1().intValue();
-				if (x0diff < x1diff) {
-					setValues(kvExtractionField, LocationType.TOP_RIGHT, keyCoordinates, valueCoordinates);
-				} else {
-					setValues(kvExtractionField, LocationType.TOP_LEFT, keyCoordinates, valueCoordinates);
-				}
-			}
-		} else if (keyCoordinates.getY1().intValue() <= valueCoordinates.getY0().intValue()) {
-			// it is in bottom of key
-			if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in bottom left
-				setValues(kvExtractionField, LocationType.BOTTOM_LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX1().intValue() <= valueCoordinates.getX0().intValue()) {
-				// it is in bottom right
-				setValues(kvExtractionField, LocationType.BOTTOM_RIGHT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() <= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in bottom
-				setValues(kvExtractionField, LocationType.BOTTOM, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in bottom left
-				setValues(kvExtractionField, LocationType.BOTTOM_LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() <= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() <= valueCoordinates.getX1().intValue()) {
-				// it is bottom right
-				setValues(kvExtractionField, LocationType.BOTTOM_RIGHT, keyCoordinates, valueCoordinates);
-			} else {
-				// it spans all three quadrants
-				double x0diff = valueCoordinates.getX0().intValue() - keyCoordinates.getX0().intValue();
-				double x1diff = valueCoordinates.getX1().intValue() - keyCoordinates.getX1().intValue();
-				if (x0diff < x1diff) {
-					setValues(kvExtractionField, LocationType.BOTTOM_RIGHT, keyCoordinates, valueCoordinates);
-				} else {
-					setValues(kvExtractionField, LocationType.BOTTOM_LEFT, keyCoordinates, valueCoordinates);
-				}
-			}
-		} else if (keyCoordinates.getY0().intValue() >= valueCoordinates.getY0().intValue()
-				&& keyCoordinates.getY1().intValue() >= valueCoordinates.getY1().intValue()) {
-			// it is in line with key
-			if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in left
-				setValues(kvExtractionField, LocationType.LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX1().intValue() <= valueCoordinates.getX0().intValue()) {
-				// it is in right
-				setValues(kvExtractionField, LocationType.RIGHT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() >= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() >= valueCoordinates.getX1().intValue()) {
-				// it is in left
-				setValues(kvExtractionField, LocationType.LEFT, keyCoordinates, valueCoordinates);
-			} else if (keyCoordinates.getX0().intValue() <= valueCoordinates.getX0().intValue()
-					&& keyCoordinates.getX1().intValue() <= valueCoordinates.getX1().intValue()) {
-				// it is right
-				setValues(kvExtractionField, LocationType.RIGHT, keyCoordinates, valueCoordinates);
-			} else {
-				// it spans all three quadrants
-				double x0diff = valueCoordinates.getX0().intValue() - keyCoordinates.getX0().intValue();
-				double x1diff = valueCoordinates.getX1().intValue() - keyCoordinates.getX1().intValue();
-				if (x0diff < x1diff) {
-					setValues(kvExtractionField, LocationType.TOP_RIGHT, keyCoordinates, valueCoordinates);
-				} else {
-					setValues(kvExtractionField, LocationType.TOP_LEFT, keyCoordinates, valueCoordinates);
-				}
-			}
-		} else {
-			// it spans more than two quadrants
-			double y0diff = valueCoordinates.getY0().intValue() - keyCoordinates.getY0().intValue();
-			double y1diff = valueCoordinates.getY1().intValue() - keyCoordinates.getY1().intValue();
-			if (y0diff < y1diff) {
-				// it is in bottom
-				double x0diff = valueCoordinates.getX0().intValue() - keyCoordinates.getX0().intValue();
-				double x1diff = valueCoordinates.getX1().intValue() - keyCoordinates.getX1().intValue();
-				if (x0diff < x1diff) {
-					setValues(kvExtractionField, LocationType.BOTTOM_RIGHT, keyCoordinates, valueCoordinates);
-				} else {
-					setValues(kvExtractionField, LocationType.BOTTOM_LEFT, keyCoordinates, valueCoordinates);
-				}
-			} else {
-				// it is in top
-				double x0diff = valueCoordinates.getX0().intValue() - keyCoordinates.getX0().intValue();
-				double x1diff = valueCoordinates.getX1().intValue() - keyCoordinates.getX1().intValue();
-				if (x0diff < x1diff) {
-					setValues(kvExtractionField, LocationType.TOP_RIGHT, keyCoordinates, valueCoordinates);
-				} else {
-					setValues(kvExtractionField, LocationType.TOP_LEFT, keyCoordinates, valueCoordinates);
-				}
-			}
+	private boolean isValidCoordinate(final Coordinates coordinate) {
+		boolean validCoordinate = false;
+		BigInteger x0Coord = coordinate.getX0();
+		BigInteger y0Coord = coordinate.getY0();
+		BigInteger x1Coord = coordinate.getX1();
+		BigInteger y1Coord = coordinate.getY1();
+		LOGGER.debug("X0:\t" + x0Coord);
+		LOGGER.debug("Y0:\t" + y0Coord);
+		LOGGER.debug("X1:\t" + x1Coord);
+		LOGGER.debug("Y1:\t" + y1Coord);
+		if (x0Coord != null || y0Coord != null || x1Coord != null || y1Coord != null) {
+			validCoordinate = true;
 		}
+		LOGGER.debug("Is valid coordinates = " + validCoordinate);
+		return validCoordinate;
 	}
 
 }

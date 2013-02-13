@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -48,6 +48,9 @@ import com.ephesoft.dcma.gwt.core.shared.BatchInstanceDTO;
  * Custom sorter for {@link Message} objects.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see java.util.Collections
+ * @see java.util.Comparator
  */
 public class BatchSorter {
 
@@ -69,7 +72,7 @@ public class BatchSorter {
 	}
 
 	/**
-	 * {@link Comparator} for sorting by {@link Message} ID.
+	 * Class to sort on the basis of identifier. {@link Comparator} for sorting by {@link Message} ID.
 	 */
 	public static final class IdComparator implements Comparator<BatchInstanceDTO> {
 
@@ -78,10 +81,22 @@ public class BatchSorter {
 		 */
 		private final boolean ascending;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param ascending boolean
+		 */
 		public IdComparator(final boolean ascending) {
 			this.ascending = ascending;
 		}
 
+		/**
+		 * Override compare method.
+		 * 
+		 * @param batchInstanceDTO1 BatchInstanceDTO
+		 * @param batchInstanceDTO2 BatchInstanceDTO
+		 * @return int
+		 */
 		@Override
 		public int compare(final BatchInstanceDTO batchInstanceDTO1, final BatchInstanceDTO batchInstanceDTO2) {
 			final String identifier1 = batchInstanceDTO1.getBatchIdentifier();
@@ -97,7 +112,7 @@ public class BatchSorter {
 	}
 
 	/**
-	 * {@link Comparator} for sorting by {@link Message} TEXT.
+	 * Class to sort on the basis of text. {@link Comparator} for sorting by {@link Message} TEXT.
 	 */
 	public static final class TextComparator implements Comparator<BatchInstanceDTO> {
 
@@ -106,10 +121,22 @@ public class BatchSorter {
 		 */
 		private final boolean ascending;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param ascending boolean
+		 */
 		public TextComparator(final boolean ascending) {
 			this.ascending = ascending;
 		}
 
+		/**
+		 * Override compare method.
+		 * 
+		 * @param batchInstanceDTO1 BatchInstanceDTO
+		 * @param batchInstanceDTO2 BatchInstanceDTO
+		 * @return int
+		 */
 		@Override
 		public int compare(final BatchInstanceDTO batchInstanceDTO1, final BatchInstanceDTO batchInstanceDTO2) {
 			final String string1 = batchInstanceDTO1.getBatchName();
@@ -125,7 +152,7 @@ public class BatchSorter {
 	}
 
 	/**
-	 * {@link Comparator} for sorting by {@link Message} DATE.
+	 * Class to sort on the basis of date. {@link Comparator} for sorting by {@link Message} DATE.
 	 */
 	public static final class DateComparator implements Comparator<BatchInstanceDTO> {
 
@@ -134,10 +161,22 @@ public class BatchSorter {
 		 */
 		private final boolean ascending;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param ascending boolean
+		 */
 		public DateComparator(final boolean ascending) {
 			this.ascending = ascending;
 		}
 
+		/**
+		 * Override compare method.
+		 * 
+		 * @param batchInstanceDTO1 BatchInstanceDTO
+		 * @param batchInstanceDTO2 BatchInstanceDTO
+		 * @return int
+		 */
 		@Override
 		public int compare(final BatchInstanceDTO batchInstanceDTO1, final BatchInstanceDTO batchInstanceDTO2) {
 			final String dString1 = batchInstanceDTO1.getUploadedOn();
@@ -153,7 +192,7 @@ public class BatchSorter {
 	}
 
 	/**
-	 * {@link Comparator} for sorting by {@link Message} Priority.
+	 * Class to sort on the basis of priority. {@link Comparator} for sorting by {@link Message} Priority.
 	 */
 	public static final class PriorityComparator implements Comparator<BatchInstanceDTO> {
 
@@ -162,10 +201,22 @@ public class BatchSorter {
 		 */
 		private final boolean ascending;
 
+		/**
+		 * Constructor.
+		 * 
+		 * @param ascending boolean
+		 */
 		public PriorityComparator(final boolean ascending) {
 			this.ascending = ascending;
 		}
 
+		/**
+		 * Override compare method.
+		 * 
+		 * @param batchInstanceDTO1 BatchInstanceDTO
+		 * @param batchInstanceDTO2 BatchInstanceDTO
+		 * @return int
+		 */
 		@Override
 		public int compare(final BatchInstanceDTO batchInstanceDTO1, final BatchInstanceDTO batchInstanceDTO2) {
 			final Integer priority1 = batchInstanceDTO1.getPriority();

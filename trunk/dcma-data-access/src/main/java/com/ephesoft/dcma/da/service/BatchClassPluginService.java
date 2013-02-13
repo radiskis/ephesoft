@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -39,7 +39,13 @@ import java.util.List;
 
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 
-
+/**
+ * This is a database service to read data required by Batch Class plugin service.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.service.BatchClassPluginServiceImpl
+ */
 public interface BatchClassPluginService {
 
 	/**
@@ -48,4 +54,11 @@ public interface BatchClassPluginService {
 	 * @return {@link List}< {@link BatchClassPlugin}>
 	 */
 	List<BatchClassPlugin> getBatchClassPluginForPluginId(Long pluginId);
+	
+	/**
+	 * API to update batch class plugin.
+	 *  
+	 * @param batchClassPlugin {@link BatchClassPlugin}
+	 */
+	void updateBatchClassPlugin(BatchClassPlugin  batchClassPlugin);
 }

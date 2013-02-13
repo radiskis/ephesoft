@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,25 +40,37 @@ import java.util.Map;
 import org.jbpm.api.jpdl.DecisionHandler;
 import org.jbpm.api.model.OpenExecution;
 
-import com.ephesoft.dcma.workflow.service.common.JBPMVariables;
+import com.ephesoft.dcma.workflow.constant.WorkFlowConstants;
 
-
+/**
+ * This class is used to resume evaluation.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see org.jbpm.api.jpdl.DecisionHandler
+ */
 public class ResumeEvaluation implements DecisionHandler {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String WORKFLOW_STATUS_RUNNING = "Workflow_Status_Running";
-
-
+	/**
+	 * To decide which transition will execute.
+	 * 
+	 * @param execution OpenExecution
+	 * @return String
+	 */
 	public String decide(OpenExecution execution) {
 
 		Map<String, Object> map = execution.getVariables();
-		String resumeOption=null;
+		String resumeOption = null;
 		if (null != map) {
-			resumeOption = (String) map.get(JBPMVariables.RESTART_WORKFLOW);
+			resumeOption = (String) map.get(WorkFlowConstants.RESTART_WORKFLOW);
 		}
-		if (resumeOption==null){
-			resumeOption = WORKFLOW_STATUS_RUNNING;
+		if (resumeOption == null) {
+			resumeOption = WorkFlowConstants.WORKFLOW_STATUS_RUNNING;
 		}
 		return resumeOption;
 	}

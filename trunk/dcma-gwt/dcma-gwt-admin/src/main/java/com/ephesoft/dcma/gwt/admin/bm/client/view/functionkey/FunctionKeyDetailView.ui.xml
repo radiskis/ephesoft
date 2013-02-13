@@ -2,42 +2,49 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%">
+		<g:ScrollPanel ui:field="scrollPanel">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="methodNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="methodName" />
+					</g:cell>
+				</g:HorizontalPanel>
 
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="keyNameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="keyName" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="methodDescriptionLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
+						<g:Label ui:field="methodDescription" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
 		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="methodNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="methodName" />
+			<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="editFunctionKeyPropertiesButton"></g:Button>
 			</g:cell>
 		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="keyNameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="keyName" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="40%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="methodDescriptionLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="60%" horizontalAlignment="ALIGN_LEFT">
-				<g:Label ui:field="methodDescription" />
-			</g:cell>
-		</g:HorizontalPanel>
-
 	</g:VerticalPanel>
 </ui:UiBinder>   

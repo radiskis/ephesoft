@@ -2,136 +2,160 @@
 	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 	<g:VerticalPanel width="100%" ui:field="editDocumentTypeViewPanel">
+		<g:ScrollPanel height="6em" width="100%">
+			<g:VerticalPanel width="100%" spacing="4">
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="nameLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="nameStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="name" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="nameLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="nameStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="name" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="descLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="descStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="description" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="descLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="descStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="description" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="dataTypeLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="dataTypeStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:ListBox ui:field="dataType" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="dataTypeLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="dataTypeStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:ListBox ui:field="dataType" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="97%">
+					<g:cell width="13%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="patternLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="patternStar"></g:Label>
+					</g:cell>
+					<g:cell width="16%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="pattern" />
+					</g:cell>
+					<g:cell horizontalAlignment="ALIGN_LEFT">
+						<g:Button ui:field="validateButton" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="patternLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="patternStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="pattern" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="fdOrderLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="fdOrderStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="fdOrder" />
+					</g:cell>
+				</g:HorizontalPanel>
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="fdOrderLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="fdOrderStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="fdOrder" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="sampleValueLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label ui:field="sampleValueStar"></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="sampleValue" />
-			</g:cell>
-		</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="sampleValueLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label ui:field="sampleValueStar"></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="sampleValue" />
+					</g:cell>
+				</g:HorizontalPanel>
 
 
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="fieldOptionValueListLabel"></g:Label>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="fieldOptionValueListLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:TextBox ui:field="fieldOptionValueList" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="barcodeTypeLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:ListBox ui:field="barcodeTypeListBox" />
+					</g:cell>
+				</g:HorizontalPanel>
+
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isHiddenLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="hidden" />
+					</g:cell>
+				</g:HorizontalPanel>
+				<g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isMultiLineLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="multiLine" />
+					</g:cell>
+				</g:HorizontalPanel>
+                  <g:HorizontalPanel width="100%">
+					<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
+						<g:Label ui:field="isReadOnlyLabel"></g:Label>
+					</g:cell>
+					<g:cell width="1%">
+						<g:Label></g:Label>
+					</g:cell>
+					<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
+						<g:CheckBox ui:field="isReadOnly" />
+					</g:cell>
+				</g:HorizontalPanel>
+			</g:VerticalPanel>
+		</g:ScrollPanel>
+		<g:HorizontalPanel width="100%" ui:field="editFieldPanel">
+			<g:cell width="90%" horizontalAlignment="ALIGN_RIGHT">
+				<g:Button ui:field="saveButton" />
 			</g:cell>
 			<g:cell width="1%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:TextBox ui:field="fieldOptionValueList" />
-			</g:cell>
-		</g:HorizontalPanel>
-
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="barcodeTypeLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:ListBox ui:field="barcodeTypeListBox" />
-			</g:cell>
-		</g:HorizontalPanel>
-		
-		<g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isHiddenLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isHidden" />
-			</g:cell>
-		</g:HorizontalPanel>
-    <g:HorizontalPanel width="100%">
-			<g:cell width="10%" horizontalAlignment="ALIGN_RIGHT">
-				<g:Label ui:field="isMultiLineLabel"></g:Label>
-			</g:cell>
-			<g:cell width="1%">
-				<g:Label></g:Label>
-			</g:cell>
-			<g:cell width="70%" horizontalAlignment="ALIGN_LEFT">
-				<g:CheckBox ui:field="isMultiLine" />
-			</g:cell>
-		</g:HorizontalPanel>
-		<g:HorizontalPanel ui:field="editFieldPanel">
-			<g:Button ui:field="saveButton" />
 			<g:cell width="7%">
+				<g:Button ui:field="cancelButton" />
+			</g:cell>
+			<g:cell width="1%">
 				<g:Label></g:Label>
 			</g:cell>
-			<g:Button ui:field="cancelButton" />
 			<g:cell width="7%">
-				<g:Label></g:Label>
+				<g:Button ui:field="samplePatternButton" />
 			</g:cell>
-			<g:Button ui:field="samplePatternButton" />
+
 		</g:HorizontalPanel>
 
 	</g:VerticalPanel>

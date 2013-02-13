@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -43,19 +43,50 @@ import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
 import com.ephesoft.dcma.gwt.core.client.ui.table.TableHeader.HeaderColumn;
 
+/**
+ * This class provides functionality to show document list view.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class DocumentTypeListView extends View<DocumentTypeListPresenter> {
 
+	/**
+	 * To get Document Type List View.
+	 * 
+	 * @return ListView
+	 */
 	public ListView getDocumentTypeListView() {
 		return listView;
 	}
 
-	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME), 30,
-			true, DocumentTypeProperty.NAME);
+	/**
+	 * name HeaderColumn.
+	 */
+	public HeaderColumn name = new HeaderColumn(1, LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME),
+			BatchClassManagementConstants.THIRTY, true, DocumentTypeProperty.NAME);
+
+	/**
+	 * description HeaderColumn.
+	 */
 	public HeaderColumn description = new HeaderColumn(2, LocaleDictionary.get().getConstantValue(
-			BatchClassManagementConstants.DESCRIPTION), 30, true, DocumentTypeProperty.DESC);
-	public HeaderColumn isHidden = new HeaderColumn(3, "Hidden", 20);
+			BatchClassManagementConstants.DESCRIPTION), BatchClassManagementConstants.THIRTY, true, DocumentTypeProperty.DESC);
+
+	/**
+	 * isHidden HeaderColumn.
+	 */
+	public HeaderColumn isHidden = new HeaderColumn(BatchClassManagementConstants.THREE, "Hidden",
+			BatchClassManagementConstants.TWENTY);
+
+	/**
+	 * listView ListView.
+	 */
 	public ListView listView = new ListView();
 
+	/**
+	 * Constructor.
+	 */
 	public DocumentTypeListView() {
 		super();
 		listView.addHeaderColumns(name, description, isHidden);

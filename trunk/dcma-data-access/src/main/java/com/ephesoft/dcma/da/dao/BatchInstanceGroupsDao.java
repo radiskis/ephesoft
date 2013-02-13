@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,7 @@ import java.util.Set;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.BatchInstanceGroupsDaoImpl
  */
 public interface BatchInstanceGroupsDao {
 	
@@ -53,8 +54,8 @@ public interface BatchInstanceGroupsDao {
 	Set<String> getBatchInstanceIdentifierForUserRoles(Set<String> userRoles);
 	
 	/**
-	 * API for getting roles for the specified batch instance
-	 * @param batchInstanceId
+	 * API for getting roles for the specified batch instance.
+	 * @param batchInstanceId String
 	 * @return Set<String>
 	 */
 	Set<String> getRolesForBatchInstance(String batchInstanceId);
@@ -65,5 +66,13 @@ public interface BatchInstanceGroupsDao {
 	 * @param userRole {@link String}
 	 */
 	void addUserRolesToBatchInstanceIdentifier(String batchInstanceIdentifier, String userRole);
+	
+	/**
+	 * API for getting the batch instance identifiers except provided user roles.
+	 * @param userRoles Set<String>
+	 * @return Set<String>
+	 */
+	Set<String> getBatchInstanceIdentifiersExceptUserRoles(Set<String> userRoles);
+
 
 }

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,7 +40,12 @@ import java.util.List;
 import com.ephesoft.dcma.core.dao.Dao;
 import com.ephesoft.dcma.mail.domain.EmailData;
 
-
+/**
+ * This interface is Email queue dao implemented by EmailQueueDaoImpl.
+ * 
+ * @author Ephesoft
+ *
+ */
 public interface EmailQueueDao extends Dao<EmailData> {
 	
 	List<EmailData> findReadyToSend(int fetchMaxCount);

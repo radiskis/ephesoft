@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,26 +37,57 @@ package com.ephesoft.dcma.core.model.common;
 
 import java.util.Date;
 
-/** Interface for generic entities
+/** 
+ * Interface for generic entities.
+ * 
  *  @author Ephesoft
- **/
+ *  @version 1.0
+ *  @see com.ephesoft.dcma.core.model.common.EntityObject
+ */
 public interface DomainEntity extends EntityObject {
 
 	/**
+	 * To get creation Date.
 	 * @return the creationDate
 	 */
 	Date getCreationDate();
 
 	/**
+	 * To set creation Date.
 	 * @param creationDate the creationDate to set
 	 */
 	void setCreationDate(Date creationDate);
     
+	/**
+	 * getEntityState EntityState.
+	 * @return
+	 */
     EntityState getEntityState();
     
+    /**
+     * To set entity state.
+     * @param entityState EntityState
+     */
     void setEntityState(EntityState entityState);
     
+    /**
+     * Enum for entity state.
+     * @author Ephesoft
+     * @version 1.0
+     *
+     */
     public enum EntityState{
-    	UNCHANGED, NEW, PURGED
+    	/**
+    	 * UNCHANGED.
+    	 */
+    	UNCHANGED, 
+    	/**
+    	 * NEW.
+    	 */
+    	NEW, 
+    	/**
+    	 * PURGED.
+    	 */
+    	PURGED
     }
 }

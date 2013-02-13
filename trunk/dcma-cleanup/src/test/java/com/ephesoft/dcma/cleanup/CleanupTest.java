@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -84,15 +84,8 @@ public class CleanupTest extends AbstractCleanupTest {
 	/**
 	 * String constants.
 	 */
-	private static final String TEST_CASE1_BATCH_INSTANCE_ID = "testCase1.batchInstanceID";
-	/**
-	 * String constants.
-	 */
 	private static final String TEST_CASE2_BATCH_INSTANCE_ID = "testCase2.batchInstanceID";
-	/**
-	 * String constants.
-	 */
-	private static final String TEST_CASE1_BATCH_CLASS_ID = "testCase1.batchClassID";
+	
 	/**
 	 * String constants.
 	 */
@@ -123,11 +116,7 @@ public class CleanupTest extends AbstractCleanupTest {
 	 * Batch instance for test scenario.
 	 */
 	private transient String batchInstanceId;
-	/**
-	 * Batch class for test scenario.
-	 */
-	private transient String batchClassId;
-
+	
 	/**
 	 * The folder where input files are kept and output files will be written.
 	 */
@@ -161,7 +150,7 @@ public class CleanupTest extends AbstractCleanupTest {
 	/**
 	 * Variable for property file.
 	 */
-	private transient Properties prop = new Properties();
+	private final transient Properties prop = new Properties();
 
 	/**
 	 * Method to initialize resources.
@@ -170,7 +159,7 @@ public class CleanupTest extends AbstractCleanupTest {
 	public void setUp() {
 		boolean result = false;
 		Properties prop = new Properties();
-		localFolderLocation = batchSchemaService.getLocalFolderLocation();
+		localFolderLocation = batchInstanceService.getSystemFolderForBatchInstanceId(batchInstanceId);
 		testFolderLocation = batchSchemaService.getTestFolderLocation();
 		try {
 			prop.load(CleanupTest.class.getClassLoader().getResourceAsStream(PROP_FILE_CLEANUP_TEST));
@@ -249,7 +238,7 @@ public class CleanupTest extends AbstractCleanupTest {
 	public void testCleanupFalse() {
 		boolean result = true;
 		batchInstanceId = prop.getProperty(TEST_CASE2_BATCH_INSTANCE_ID);
-		batchClassId = prop.getProperty(TEST_CASE2_BATCH_CLASS_ID);
+		String batchClassId = prop.getProperty(TEST_CASE2_BATCH_CLASS_ID);
 		boolean created = false;
 		BatchClass initialBatchClass = new BatchClass();
 		try {
@@ -330,9 +319,9 @@ public class CleanupTest extends AbstractCleanupTest {
 	 * This method tests whether clean up operation is performed successfully or not, if clean up is not performed successfully
 	 * exception is thrown.
 	 * 
-	 * @param batchInstanceId
-	 * @param folderPath
-	 * @throws DCMAException
+	 * @param batchInstanceId  {@link String}
+	 * @param folderPath {@link String}
+	 * @throws DCMAException {@link DCMAException} exception to be thrown 
 	 */
 	public void cleanupTest(final String batchInstanceId, final String folderPath) throws DCMAException {
 		final File file = new File(folderPath + File.separator + batchInstanceId);

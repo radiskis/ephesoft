@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -40,25 +40,64 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.plugin.FuzzyDBPropertiesV
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit fuzzy DB properties.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class FuzzyDBPropertiesView extends View<FuzzyDBPropertiesViewPresenter> {
 
-	interface Binder extends UiBinder<FlexTable, FuzzyDBPropertiesView> {
+	/**
+	 * UI binder.
+	 */
+	interface Binder extends UiBinder<VerticalPanel, FuzzyDBPropertiesView> {
 	}
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * viewTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable viewTable;
 
+	/**
+	 * detailTable FlexTable.
+	 */
 	private final FlexTable detailTable;
 
+	/**
+	 * edit Button.
+	 */
+	@UiField
+	protected Button edit;
+
+	/**
+	 * mappingButton Button.
+	 */
+	@UiField
+	protected Button mappingButton;
+
+	/**
+	 * Constructor.
+	 */
 	public FuzzyDBPropertiesView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -69,24 +108,65 @@ public class FuzzyDBPropertiesView extends View<FuzzyDBPropertiesViewPresenter> 
 		detailTable.getColumnFormatter().setWidth(2, "59%");
 		viewTable.setWidget(0, 0, detailTable);
 		viewTable.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+		edit.setText(AdminConstants.EDIT_BUTTON);
+		mappingButton.setText(AdminConstants.MAPPING_BUTTON);
+		mappingButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				presenter.getController().getMainPresenter().showDocTypeMappingView();
+			}
+		});
 	}
 
+	/**
+	 * To get Detail Table.
+	 * 
+	 * @return FlexTable
+	 */
 	public FlexTable getDetailTable() {
 		return detailTable;
 	}
 
+	/**
+	 * To get View Table.
+	 * 
+	 * @return FlexTable
+	 */
 	public FlexTable getViewTable() {
 		return viewTable;
 	}
 
+	/**
+	 * To set Properties.
+	 * 
+	 * @param pluginConfigDTO BatchClassPluginConfigDTO
+	 * @param row int
+	 */
 	public void setProperties(BatchClassPluginConfigDTO pluginConfigDTO, int row) {
 		Label propertyName = new Label(pluginConfigDTO.getDescription() + AdminConstants.COLON);
 		Label propertyValue = new Label(pluginConfigDTO.getValue());
 		detailTable.setWidget(row, 0, propertyName);
 		detailTable.setWidget(row, 2, propertyValue);
 		detailTable.getFlexCellFormatter().addStyleName(row, 0, AdminConstants.BOLD_TEXT_STYLE);
-		detailTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT,
-				HasVerticalAlignment.ALIGN_MIDDLE);
+		detailTable.getFlexCellFormatter().setAlignment(row, 0, HasHorizontalAlignment.ALIGN_RIGHT, HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
+	/**
+	 * To get Edit Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getEditButton() {
+		return edit;
+	}
+
+	/**
+	 * To get Mapping Button.
+	 * 
+	 * @return Button
+	 */
+	public Button getMappingButton() {
+		return mappingButton;
+	}
 }

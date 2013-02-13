@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,7 +36,7 @@
 package com.ephesoft.dcma.gwt.core.server;
 
 import java.io.File;
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,10 +54,10 @@ import com.ephesoft.dcma.batch.schema.DataTable;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.core.common.DataType;
 import com.ephesoft.dcma.core.common.FileType;
-import com.ephesoft.dcma.core.common.ModuleJpdlPluginCreationInfo;
 import com.ephesoft.dcma.core.model.common.DomainEntity.EntityState;
 import com.ephesoft.dcma.da.domain.AdvancedKVExtraction;
 import com.ephesoft.dcma.da.domain.BatchClass;
+import com.ephesoft.dcma.da.domain.BatchClassCmisConfiguration;
 import com.ephesoft.dcma.da.domain.BatchClassDynamicPluginConfig;
 import com.ephesoft.dcma.da.domain.BatchClassEmailConfiguration;
 import com.ephesoft.dcma.da.domain.BatchClassField;
@@ -66,6 +66,7 @@ import com.ephesoft.dcma.da.domain.BatchClassModule;
 import com.ephesoft.dcma.da.domain.BatchClassModuleConfig;
 import com.ephesoft.dcma.da.domain.BatchClassPlugin;
 import com.ephesoft.dcma.da.domain.BatchClassPluginConfig;
+import com.ephesoft.dcma.da.domain.BatchClassScannerConfiguration;
 import com.ephesoft.dcma.da.domain.Dependency;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.FieldType;
@@ -73,21 +74,20 @@ import com.ephesoft.dcma.da.domain.FunctionKey;
 import com.ephesoft.dcma.da.domain.KVExtraction;
 import com.ephesoft.dcma.da.domain.KVPageProcess;
 import com.ephesoft.dcma.da.domain.Module;
-import com.ephesoft.dcma.da.domain.ModuleConfig;
 import com.ephesoft.dcma.da.domain.PageType;
 import com.ephesoft.dcma.da.domain.Plugin;
 import com.ephesoft.dcma.da.domain.PluginConfig;
 import com.ephesoft.dcma.da.domain.RegexValidation;
+import com.ephesoft.dcma.da.domain.ScannerMasterConfiguration;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.property.DependencyTypeProperty;
 import com.ephesoft.dcma.da.service.BatchClassPluginConfigService;
 import com.ephesoft.dcma.da.service.BatchClassPluginService;
 import com.ephesoft.dcma.da.service.BatchClassService;
-import com.ephesoft.dcma.da.service.ModuleConfigService;
-import com.ephesoft.dcma.da.service.ModuleService;
 import com.ephesoft.dcma.da.service.PluginConfigService;
 import com.ephesoft.dcma.da.service.PluginService;
+import com.ephesoft.dcma.gwt.core.client.RandomIdGenerator;
 import com.ephesoft.dcma.gwt.core.shared.AdvancedKVExtractionDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDynamicPluginConfigDTO;
@@ -96,6 +96,7 @@ import com.ephesoft.dcma.gwt.core.shared.BatchClassModuleDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginConfigDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassPluginDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchConstants;
+import com.ephesoft.dcma.gwt.core.shared.CmisConfigurationDTO;
 import com.ephesoft.dcma.gwt.core.shared.CoordinatesDTO;
 import com.ephesoft.dcma.gwt.core.shared.DependencyDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
@@ -112,22 +113,28 @@ import com.ephesoft.dcma.gwt.core.shared.PluginDetailsDTO;
 import com.ephesoft.dcma.gwt.core.shared.RegexDTO;
 import com.ephesoft.dcma.gwt.core.shared.RoleDTO;
 import com.ephesoft.dcma.gwt.core.shared.SamplePatternDTO;
+import com.ephesoft.dcma.gwt.core.shared.ScannerMasterDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableColumnInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.TableInfoDTO;
 import com.ephesoft.dcma.gwt.core.shared.TestTableResultDTO;
-import com.ephesoft.dcma.gwt.core.shared.importTree.Label;
-import com.ephesoft.dcma.gwt.core.shared.importTree.Node;
+import com.ephesoft.dcma.gwt.core.shared.WebScannerConfigurationDTO;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Label;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Node;
 import com.ephesoft.dcma.kvfinder.data.InputDataCarrier;
 import com.ephesoft.dcma.kvfinder.data.OutputDataCarrier;
 import com.ephesoft.dcma.util.CustomFileFilter;
 import com.ephesoft.dcma.util.FileUtils;
 
+/**
+ * This class is a utility for performing different operation on BatchClass like copy, merge, create.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.server
+ */
 public class BatchClassUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchClassUtil.class);
-
-	private static final String EMPTY_STRING = "";
-	private static final String SEMI_COLON = ";";
 
 	/**
 	 * 
@@ -135,12 +142,14 @@ public class BatchClassUtil {
 	 * @param batchClassDTO the batchClassDTO which has to be replicated on the batch class
 	 * @param batchClassPluginConfigService
 	 * @param batchClassPluginService
+	 * @param superAdminGroupsSet
 	 * @return a list of document type names that have been deleted.
 	 */
 
 	public static List<String> mergeBatchClassFromDTO(BatchClass batchClass, BatchClassDTO batchClassDTO, Set<String> groupNameSet,
 			BatchClassPluginConfigService batchClassPluginConfigService, BatchClassPluginService batchClassPluginService,
-			PluginConfigService pluginConfigService) {
+			PluginConfigService pluginConfigService, List<ScannerMasterConfiguration> scannerMasterConfigs,
+			Set<String> superAdminGroupsSet) {
 		List<String> docTypeNameList = null;
 		int priority = Integer.parseInt(batchClassDTO.getPriority());
 		batchClass.setPriority(priority);
@@ -148,75 +157,17 @@ public class BatchClassUtil {
 		batchClass.setName(batchClassDTO.getName());
 		batchClass.setLastModifiedBy(batchClass.getCurrentUser());
 		updateRevisionNumber(batchClass);
-
+		batchClass.setSystemFolder(batchClassDTO.getSystemFolder());
 		batchClassDTO.setVersion(batchClass.getVersion());
 		batchClass.setDeleted(batchClassDTO.isDeleted());
 
 		List<BatchClassModuleDTO> allBatchClassModuleDTOs = new ArrayList<BatchClassModuleDTO>(batchClassDTO.getModules(true));
 		List<BatchClassModuleDTO> removedBatchClassModuleDTOs = new ArrayList<BatchClassModuleDTO>();
 
-		for (BatchClassModuleDTO moduleDTO : allBatchClassModuleDTOs) {
-
-			if (!batchClassDTO.isDeployed()) {
-				if (moduleDTO.isDeleted() && !moduleDTO.isNew()) {
-					batchClass.removeModuleByIdentifier(moduleDTO.getIdentifier());
-				} else if (moduleDTO.isNew() && !moduleDTO.isDeleted()) {
-					BatchClassModule batchClassModule = new BatchClassModule();
-					batchClassModule.setBatchClass(batchClass);
-					mergeBatchClassModuleFromDTO(batchClassModule, moduleDTO, batchClassPluginConfigService, batchClassPluginService,
-							pluginConfigService);
-					moduleDTO.setNew(false);
-					batchClass.addModule(batchClassModule);
-
-				} else if (!moduleDTO.isNew() && !moduleDTO.isDeleted()) {
-					BatchClassModule batchClassModule = null;
-					try {
-						long moduleIdentifier = Long.valueOf(moduleDTO.getIdentifier());
-						batchClassModule = batchClass.getBatchClassModuleById(moduleIdentifier);
-						mergeBatchClassModuleFromDTO(batchClassModule, moduleDTO, batchClassPluginConfigService,
-								batchClassPluginService, pluginConfigService);
-					} catch (NumberFormatException e) {
-						LOGGER.error(BatchConstants.ERROR_CONVERT_NUMBER + e.getMessage());
-					}
-
-				} else {
-					removedBatchClassModuleDTOs.add(moduleDTO);
-				}
-			} else {
-				BatchClassModule batchClassModule = null;
-				try {
-					long moduleIdentifier = Long.valueOf(moduleDTO.getIdentifier());
-					batchClassModule = batchClass.getBatchClassModuleById(moduleIdentifier);
-					mergeBatchClassModuleFromDTO(batchClassModule, moduleDTO, batchClassPluginConfigService, batchClassPluginService,
-							pluginConfigService);
-				} catch (NumberFormatException e) {
-					LOGGER.error(BatchConstants.ERROR_CONVERT_NUMBER + e.getMessage());
-				}
-
-			}
-
-		}
+		mergeBatchClassModuleDTO(batchClass, batchClassPluginConfigService, batchClassPluginService, pluginConfigService,
+				allBatchClassModuleDTOs, removedBatchClassModuleDTOs);
 		allBatchClassModuleDTOs.removeAll(removedBatchClassModuleDTOs);
-		for (DocumentTypeDTO documentTypeDTO : batchClassDTO.getDocuments(true)) {
-			if (documentTypeDTO.isDeleted()) {
-				batchClass.removeDocumentTypeByIdentifier(documentTypeDTO.getIdentifier());
-				if (null == docTypeNameList) {
-					docTypeNameList = new ArrayList<String>();
-					docTypeNameList.add(documentTypeDTO.getName());
-				} else {
-					docTypeNameList.add(documentTypeDTO.getName());
-				}
-			} else if (documentTypeDTO.isNew()) {
-				DocumentType documentType = new DocumentType();
-				documentTypeDTO.setNew(false);
-				mergeBatchClassDocumentFromDTO(documentType, documentTypeDTO);
-				addAutoGeneratedPageType(documentType);
-				batchClass.addDocumentType(documentType);
-			} else {
-				DocumentType documentType = batchClass.getDocumentTypeByIdentifier(documentTypeDTO.getIdentifier());
-				mergeBatchClassDocumentFromDTO(documentType, documentTypeDTO);
-			}
-		}
+		docTypeNameList = mergeDocumentTypeDTO(batchClass, batchClassDTO, docTypeNameList);
 		for (EmailConfigurationDTO emailConfigurationDTO : batchClassDTO.getEmailConfiguration(true)) {
 			if (emailConfigurationDTO.isDeleted()) {
 				batchClass.removeEmailConfigurationByIdentifier(emailConfigurationDTO.getIdentifier());
@@ -229,6 +180,41 @@ public class BatchClassUtil {
 				BatchClassEmailConfiguration batchClassEmailConfiguration = batchClass
 						.getEmailConfigurationByIdentifier(emailConfigurationDTO.getIdentifier());
 				mergeBatchClassEmailFromDTO(batchClassEmailConfiguration, emailConfigurationDTO);
+			}
+		}
+
+		for (CmisConfigurationDTO cmisConfigurationDTO : batchClassDTO.getCmisConfiguration(true)) {
+			if (cmisConfigurationDTO.isDeleted()) {
+				batchClass.removeCmisConfigurationByIdentifier(cmisConfigurationDTO.getIdentifier());
+			} else if (cmisConfigurationDTO.isNew()) {
+				BatchClassCmisConfiguration cmisConfiguration = new BatchClassCmisConfiguration();
+				cmisConfigurationDTO.setNew(false);
+				mergeBatchClassCmisFromDTO(cmisConfiguration, cmisConfigurationDTO);
+				batchClass.addCmisConfiguration(cmisConfiguration);
+			} else {
+				BatchClassCmisConfiguration batchClassCmisConfiguration = batchClass
+						.getCmisConfigurationByIdentifier(cmisConfigurationDTO.getIdentifier());
+				mergeBatchClassCmisFromDTO(batchClassCmisConfiguration, cmisConfigurationDTO);
+			}
+		}
+
+		for (WebScannerConfigurationDTO configurationDTO : batchClassDTO.getScannerConfiguration(true)) {
+			if (configurationDTO.getParent() == null) {
+				// update only the parent configs here
+				if (configurationDTO.isDeleted()) {
+					batchClass.removeScannerConfigIdentifier(configurationDTO.getIdentifier());
+				} else if (configurationDTO.isNew()) {
+					BatchClassScannerConfiguration config = new BatchClassScannerConfiguration();
+					config.setBatchClass(batchClass);
+					config.setParent(null);
+
+					configurationDTO.setNew(false);
+					mergeBatchClassScannerFromDTO(config, configurationDTO, batchClass, scannerMasterConfigs);
+					batchClass.addScannerConfiguration(config);
+				} else {
+					BatchClassScannerConfiguration config = batchClass.getScannerConfigByIdentifier(configurationDTO.getIdentifier());
+					mergeBatchClassScannerFromDTO(config, configurationDTO, batchClass, scannerMasterConfigs);
+				}
 			}
 		}
 
@@ -247,26 +233,172 @@ public class BatchClassUtil {
 		}
 
 		List<BatchClassGroups> assignedRoles = batchClass.getAssignedGroups();
-		if (assignedRoles == null) {
-			assignedRoles = new ArrayList<BatchClassGroups>();
+		assignedRoles = getAssignedRolesList(batchClass, batchClassDTO, groupNameSet, superAdminGroupsSet, assignedRoles);
+		batchClass.setAssignedGroups(assignedRoles);
+
+		return docTypeNameList;
+	}
+
+	private static List<BatchClassGroups> getAssignedRolesList(BatchClass batchClass, BatchClassDTO batchClassDTO,
+			Set<String> groupNameSet, Set<String> superAdminGroupsSet, List<BatchClassGroups> assignedRoles) {
+		List<BatchClassGroups> assignedRolesTemp = assignedRoles;
+		if (assignedRolesTemp == null) {
+			assignedRolesTemp = new ArrayList<BatchClassGroups>();
 		}
-		assignedRoles.clear();
+		assignedRolesTemp.clear();
 		if (null != groupNameSet && !groupNameSet.isEmpty()) {
+			List<String> addedRoles = new ArrayList<String>();
 			for (RoleDTO roleDTO : batchClassDTO.getAssignedRole()) {
 				for (String group : groupNameSet) {
-					if (roleDTO.getName().equals(group)) {
+					if (!addedRoles.contains(group) && (superAdminGroupsSet.contains(group) || roleDTO.getName().equals(group))) {
 						BatchClassGroups batchClassGroups = new BatchClassGroups();
 						batchClassGroups.setGroupName(group);
+						addedRoles.add(group);
 						batchClassGroups.setBatchClass(batchClass);
-						assignedRoles.add(batchClassGroups);
+						assignedRolesTemp.add(batchClassGroups);
 					}
 				}
 			}
 		}
 
-		batchClass.setAssignedGroups(assignedRoles);
+		// This is when super-admin has unmapped all roles from batch class but super-admin role needs to persist
+		if (assignedRolesTemp.isEmpty() && batchClassDTO.getAssignedRole().isEmpty()) {
+			for (String group : groupNameSet) {
+				if (superAdminGroupsSet.contains(group)) {
+					BatchClassGroups batchClassGroups = new BatchClassGroups();
+					batchClassGroups.setGroupName(group);
+					batchClassGroups.setBatchClass(batchClass);
+					assignedRolesTemp.add(batchClassGroups);
+				}
+			}
+		}
+		return assignedRolesTemp;
+	}
 
-		return docTypeNameList;
+	private static List<String> mergeDocumentTypeDTO(BatchClass batchClass, BatchClassDTO batchClassDTO, List<String> docTypeNameList) {
+		List<String> docTypeNameListTemp = docTypeNameList;
+		for (DocumentTypeDTO documentTypeDTO : batchClassDTO.getDocuments(true)) {
+			if (documentTypeDTO.isDeleted()) {
+				batchClass.removeDocumentTypeByIdentifier(documentTypeDTO.getIdentifier());
+				if (null == docTypeNameListTemp) {
+					docTypeNameListTemp = new ArrayList<String>();
+					docTypeNameListTemp.add(documentTypeDTO.getName());
+				} else {
+					docTypeNameListTemp.add(documentTypeDTO.getName());
+				}
+			} else if (documentTypeDTO.isNew()) {
+				DocumentType documentType = new DocumentType();
+				documentTypeDTO.setNew(false);
+				mergeBatchClassDocumentFromDTO(documentType, documentTypeDTO);
+				addAutoGeneratedPageType(documentType);
+				batchClass.addDocumentType(documentType);
+			} else {
+				DocumentType documentType = batchClass.getDocumentTypeByIdentifier(documentTypeDTO.getIdentifier());
+				mergeBatchClassDocumentFromDTO(documentType, documentTypeDTO);
+			}
+		}
+		return docTypeNameListTemp;
+	}
+
+	private static void mergeBatchClassModuleDTO(BatchClass batchClass, BatchClassPluginConfigService batchClassPluginConfigService,
+			BatchClassPluginService batchClassPluginService, PluginConfigService pluginConfigService,
+			List<BatchClassModuleDTO> allBatchClassModuleDTOs, List<BatchClassModuleDTO> removedBatchClassModuleDTOs) {
+		for (BatchClassModuleDTO moduleDTO : allBatchClassModuleDTOs) {
+
+			if (moduleDTO.isDeleted() && !moduleDTO.isNew()) {
+				batchClass.removeModuleByIdentifier(moduleDTO.getIdentifier());
+			} else if (moduleDTO.isNew() && !moduleDTO.isDeleted()) {
+				BatchClassModule batchClassModule = new BatchClassModule();
+				batchClassModule.setBatchClass(batchClass);
+				mergeBatchClassModuleFromDTO(batchClassModule, moduleDTO, batchClassPluginConfigService, batchClassPluginService,
+						pluginConfigService);
+				moduleDTO.setNew(false);
+				batchClass.addModule(batchClassModule);
+
+			} else if (!moduleDTO.isNew() && !moduleDTO.isDeleted()) {
+				BatchClassModule batchClassModule = null;
+				try {
+					long moduleIdentifier = Long.valueOf(moduleDTO.getIdentifier());
+					batchClassModule = batchClass.getBatchClassModuleById(moduleIdentifier);
+					mergeBatchClassModuleFromDTO(batchClassModule, moduleDTO, batchClassPluginConfigService, batchClassPluginService,
+							pluginConfigService);
+				} catch (NumberFormatException e) {
+					LOGGER.error(BatchConstants.ERROR_CONVERT_NUMBER + e.getMessage());
+				}
+
+			} else {
+				removedBatchClassModuleDTOs.add(moduleDTO);
+			}
+
+		}
+	}
+
+	private static ScannerMasterConfiguration getScannerMasterConfigByName(List<ScannerMasterConfiguration> scannerMasterConfigs,
+			final String name) {
+		ScannerMasterConfiguration scannerMasterConfiguration = null;
+		for (ScannerMasterConfiguration eachMasterConfiguration : scannerMasterConfigs) {
+			if (eachMasterConfiguration.getName().equalsIgnoreCase(name)) {
+				scannerMasterConfiguration = eachMasterConfiguration;
+				break;
+			}
+		}
+		return scannerMasterConfiguration;
+	}
+
+	private static void mergeBatchClassScannerFromDTO(BatchClassScannerConfiguration config,
+			WebScannerConfigurationDTO configurationDTO, BatchClass batchClass, List<ScannerMasterConfiguration> scannerMasterConfigs) {
+
+		// update the parent config DTO name value.
+		config.setValue(configurationDTO.getValue());
+		config.setScannerMasterConfig(getScannerMasterConfigByName(scannerMasterConfigs, configurationDTO.getName()));
+
+		if (config.getChildren() == null || config.getChildren().isEmpty()) {
+			for (WebScannerConfigurationDTO childDTO : configurationDTO.getChildren()) {
+				BatchClassScannerConfiguration childConfig = new BatchClassScannerConfiguration();
+				childConfig.setBatchClass(batchClass);
+				childConfig.setParent(config);
+				childConfig.setValue(childDTO.getValue());
+				childConfig.setScannerMasterConfig(getScannerMasterConfigByName(scannerMasterConfigs, childDTO.getName()));
+				config.addChild(childConfig);
+			}
+		} else {
+			// update the existing config of child with values
+			for (WebScannerConfigurationDTO childDTO : configurationDTO.getChildren()) {
+				for (BatchClassScannerConfiguration childConfig : config.getChildren()) {
+					if (childConfig.getScannerMasterConfig().getName().equalsIgnoreCase(childDTO.getName())) {
+						childConfig.setValue(childDTO.getValue());
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	public static void mergeBatchClassScannerConfigDTO(BatchClassScannerConfiguration sConfiguration, WebScannerConfigurationDTO sDTO) {
+
+		// Setting the parent
+
+		if (sDTO.getParent() != null) {
+			WebScannerConfigurationDTO parentConfig = sDTO.getParent();
+			BatchClassScannerConfiguration parent = mergeScannerConfig(sConfiguration, parentConfig);
+			parent.setParent(null);
+			sConfiguration.setParent(parent);
+		}
+
+		// setting the children
+
+		if (sDTO.getChildren() != null) {
+			List<BatchClassScannerConfiguration> children = new ArrayList<BatchClassScannerConfiguration>();
+			for (WebScannerConfigurationDTO child : sDTO.getChildren()) {
+				BatchClassScannerConfiguration childConfig = new BatchClassScannerConfiguration();
+				mergeScannerConfig(childConfig, child);
+				childConfig.setParent(sConfiguration);
+				childConfig.setChildren(null);
+				children.add(childConfig);
+			}
+
+			sConfiguration.setChildren(children);
+		}
 	}
 
 	public static void mergeBatchClassEmailFromDTO(BatchClassEmailConfiguration batchClassEmailConfiguration,
@@ -278,6 +410,19 @@ public class BatchClassUtil {
 		batchClassEmailConfiguration.setFolderName(emailConfigurationDTO.getFolderName());
 		batchClassEmailConfiguration.setPortNumber(emailConfigurationDTO.getPortNumber());
 		batchClassEmailConfiguration.setIsSSL(emailConfigurationDTO.getIsSSL());
+	}
+
+	public static void mergeBatchClassCmisFromDTO(BatchClassCmisConfiguration batchClassCmisConfiguration,
+			CmisConfigurationDTO cmisConfigurationDTO) {
+		batchClassCmisConfiguration.setCmisProperty(cmisConfigurationDTO.getCmisProperty());
+		batchClassCmisConfiguration.setFileExtension(cmisConfigurationDTO.getFileExtension());
+		batchClassCmisConfiguration.setFolderName(cmisConfigurationDTO.getFolderName());
+		batchClassCmisConfiguration.setPassword(cmisConfigurationDTO.getPassword());
+		batchClassCmisConfiguration.setRepositoryID(cmisConfigurationDTO.getRepositoryID());
+		batchClassCmisConfiguration.setServerURL(cmisConfigurationDTO.getServerURL());
+		batchClassCmisConfiguration.setUserName(cmisConfigurationDTO.getUserName());
+		batchClassCmisConfiguration.setValue(cmisConfigurationDTO.getValue());
+		batchClassCmisConfiguration.setValueToUpdate(cmisConfigurationDTO.getValueToUpdate());
 	}
 
 	public static void mergeBatchClassFieldFromDTO(BatchClassField batchClassField, BatchClassFieldDTO batchClassFieldDTO) {
@@ -390,8 +535,15 @@ public class BatchClassUtil {
 	public static void mergeDocumentTypeFieldFromDTO(TableInfo tableInfo, TableInfoDTO tableInfoDTO) {
 		// merge the field types edited by user.
 		tableInfo.setEndPattern(tableInfoDTO.getEndPattern());
+		if (tableInfoDTO.getWidthOfMultiline() != null && !tableInfoDTO.getWidthOfMultiline().isEmpty()) {
+			tableInfo.setWidthOfMultiline(Integer.parseInt(tableInfoDTO.getWidthOfMultiline()));
+		} else {
+			tableInfo.setWidthOfMultiline(null);
+		}
 		tableInfo.setStartPattern(tableInfoDTO.getStartPattern());
 		tableInfo.setName(tableInfoDTO.getName());
+		tableInfo.setTableExtractionAPI(tableInfoDTO.getTableExtractionAPI());
+		tableInfo.setDisplayImage(tableInfoDTO.getDisplayImage());
 
 		if (tableInfoDTO.getTableColumnInfoList(true) != null) {
 			for (TableColumnInfoDTO tableColumnInfoDTO : tableInfoDTO.getTableColumnInfoList(true)) {
@@ -428,6 +580,7 @@ public class BatchClassUtil {
 		fieldType.setBarcodeType(fieldTypeDTO.getBarcodeType());
 		fieldType.setHidden(fieldTypeDTO.isHidden());
 		fieldType.setMultiLine(fieldTypeDTO.isMultiLine());
+		fieldType.setReadOnly(fieldTypeDTO.getIsReadOnly());
 		fieldType.setFieldOptionValueList(fieldTypeDTO.getFieldOptionValueList());
 		if (fieldTypeDTO.getKvExtractionList(true) != null) {
 			for (KVExtractionDTO kvExtractionDTO : fieldTypeDTO.getKvExtractionList(true)) {
@@ -485,14 +638,15 @@ public class BatchClassUtil {
 		kvExtraction.setFetchValue(kvExtractionDTO.getFetchValue());
 		kvExtraction.setPageValue(kvExtractionDTO.getKvPageValue());
 		kvExtraction.setMultiplier(kvExtractionDTO.getMultiplier());
+		kvExtraction.setUseExistingKey(kvExtractionDTO.isUseExistingKey());
 		AdvancedKVExtractionDTO advancedKVExtractionDTO = kvExtractionDTO.getAdvancedKVExtractionDTO();
-		if (null != advancedKVExtractionDTO && !advancedKVExtractionDTO.getDisplayImageName().isEmpty()) {
+		if (null != advancedKVExtractionDTO && advancedKVExtractionDTO.getDisplayImageName() != null
+				&& !advancedKVExtractionDTO.getDisplayImageName().isEmpty()) {
 			AdvancedKVExtraction advancedKVExtraction = kvExtraction.getAdvancedKVExtraction();
 			if (null == advancedKVExtraction) {
 				advancedKVExtraction = new AdvancedKVExtraction();
 				kvExtraction.setAdvancedKVExtraction(advancedKVExtraction);
 			}
-			advancedKVExtractionDTO.setNew(false);
 			mergeAdvancedKVExtractionFromDTO(advancedKVExtraction, advancedKVExtractionDTO);
 		}
 	}
@@ -517,7 +671,28 @@ public class BatchClassUtil {
 		tabColumnsInfo.setColumnName(tableColumnInfoDTO.getColumnName());
 		tabColumnsInfo.setColumnPattern(tableColumnInfoDTO.getColumnPattern());
 		tabColumnsInfo.setRequired(tableColumnInfoDTO.isRequired());
+		tabColumnsInfo.setMandatory(tableColumnInfoDTO.isMandatory());
 		tabColumnsInfo.setColumnHeaderPattern(tableColumnInfoDTO.getColumnHeaderPattern());
+		if (tableColumnInfoDTO.getColumnStartCoordinate() != null && !tableColumnInfoDTO.getColumnStartCoordinate().isEmpty()) {
+			tabColumnsInfo.setColumnStartCoordinate(Integer.parseInt(tableColumnInfoDTO.getColumnStartCoordinate()));
+		} else {
+			tabColumnsInfo.setColumnStartCoordinate(null);
+		}
+		if (tableColumnInfoDTO.getColumnEndCoordinate() != null && !tableColumnInfoDTO.getColumnEndCoordinate().isEmpty()) {
+			tabColumnsInfo.setColumnEndCoordinate(Integer.parseInt(tableColumnInfoDTO.getColumnEndCoordinate()));
+		} else {
+			tabColumnsInfo.setColumnEndCoordinate(null);
+		}
+		if (tableColumnInfoDTO.getColumnCoordY0() != null && !tableColumnInfoDTO.getColumnCoordY0().isEmpty()) {
+			tabColumnsInfo.setColumnCoordinateY0(Integer.parseInt(tableColumnInfoDTO.getColumnCoordY0()));
+		} else {
+			tabColumnsInfo.setColumnCoordinateY0(null);
+		}
+		if (tableColumnInfoDTO.getColumnCoordY1() != null && !tableColumnInfoDTO.getColumnCoordY1().isEmpty()) {
+			tabColumnsInfo.setColumnCoordinateY1(Integer.parseInt(tableColumnInfoDTO.getColumnCoordY1()));
+		} else {
+			tabColumnsInfo.setColumnCoordinateY1(null);
+		}
 	}
 
 	public static void mergeDocumentTypePageFromDTO(PageType pageType, PageTypeDTO pageTypeDTO) {
@@ -548,10 +723,10 @@ public class BatchClassUtil {
 			module.setDescription(batchClassModuleDTO.getModule().getDescription());
 			module.setVersion(batchClassModuleDTO.getModule().getVersion());
 			batchClassModule.setModule(module);
-			if (!batchClassModuleDTO.getWorkflowName().contains(batchClassModuleDTO.getBatchClass().getIdentifier())) {
-				batchClassModule.setWorkflowName(batchClassModuleDTO.getWorkflowName() + "_"
-						+ batchClassModuleDTO.getBatchClass().getIdentifier());
-			}
+			// if (!batchClassModuleDTO.getWorkflowName().contains(batchClassModuleDTO.getBatchClass().getIdentifier())) {
+			// batchClassModule.setWorkflowName(batchClassModuleDTO.getWorkflowName() + UNDERSCORE
+			// + batchClassModuleDTO.getBatchClass().getIdentifier());
+			// }
 		} else {
 
 			try {
@@ -562,16 +737,21 @@ public class BatchClassUtil {
 			}
 			batchClassModule.setWorkflowName(batchClassModuleDTO.getWorkflowName());
 		}
-		if (!batchClassModuleDTO.getBatchClass().isDeployed()
-				&& !batchClassModuleDTO.getWorkflowName().contains(batchClassModuleDTO.getBatchClass().getIdentifier())) {
-			batchClassModule.setWorkflowName(batchClassModuleDTO.getWorkflowName() + "_"
-					+ batchClassModuleDTO.getBatchClass().getIdentifier());
-		}
 
 		List<BatchClassPluginDTO> allPluginDTOs = new ArrayList<BatchClassPluginDTO>(batchClassModuleDTO.getBatchClassPlugins(true));
-		// batchClassModule.s
 		List<BatchClassPluginDTO> removedPluginDTOs = new ArrayList<BatchClassPluginDTO>();
 
+		mergeBatchClassPluginDTO(batchClassModule, batchClassModuleDTO, batchClassPluginConfigService, batchClassPluginService,
+				pluginConfigService, allPluginDTOs, removedPluginDTOs);
+
+		allPluginDTOs.removeAll(removedPluginDTOs);
+
+	}
+
+	private static void mergeBatchClassPluginDTO(BatchClassModule batchClassModule, BatchClassModuleDTO batchClassModuleDTO,
+			BatchClassPluginConfigService batchClassPluginConfigService, BatchClassPluginService batchClassPluginService,
+			PluginConfigService pluginConfigService, List<BatchClassPluginDTO> allPluginDTOs,
+			List<BatchClassPluginDTO> removedPluginDTOs) {
 		for (BatchClassPluginDTO pluginDTO : allPluginDTOs) {
 
 			if (batchClassModuleDTO.isNew()) {
@@ -628,9 +808,6 @@ public class BatchClassUtil {
 			}
 
 		}
-
-		allPluginDTOs.removeAll(removedPluginDTOs);
-
 	}
 
 	public static void mergeBatchClassPluginFromDTO(BatchClassPlugin batchClassPlugin, BatchClassPluginDTO pluginDTO,
@@ -667,6 +844,15 @@ public class BatchClassUtil {
 			}
 
 		}
+		mergeBatchClassFromDTOOld(batchClassPlugin, pluginDTO, batchClassPluginConfigMap, batchClassDynamicPluginConfigMap,
+				pluginConfigDTOs, dynamicPluginConfigDTOs);
+	}
+
+	private static void mergeBatchClassFromDTOOld(BatchClassPlugin batchClassPlugin, BatchClassPluginDTO pluginDTO,
+			Map<String, BatchClassPluginConfig> batchClassPluginConfigMap,
+			Map<String, BatchClassDynamicPluginConfig> batchClassDynamicPluginConfigMap,
+			Collection<BatchClassPluginConfigDTO> pluginConfigDTOs,
+			Collection<BatchClassDynamicPluginConfigDTO> dynamicPluginConfigDTOs) {
 		if (!pluginDTO.isNew()) {
 			for (BatchClassPluginConfigDTO batchClassPluginConfigDTO : pluginConfigDTOs) {
 
@@ -698,22 +884,7 @@ public class BatchClassUtil {
 				batchClassPlugin.addBatchClassPluginConfig(batchClassPluginConfig);
 
 				if (batchClassPluginConfigDTO.getKvPageProcessDTOs(true) != null) {
-					for (KVPageProcessDTO kvPageProcessDTO : batchClassPluginConfigDTO.getKvPageProcessDTOs(true)) {
-						if (kvPageProcessDTO.getIsDeleted()) {
-							batchClassPluginConfig.removeKvPageProcessById(kvPageProcessDTO.getIdentifier());
-						} else if (kvPageProcessDTO.getIsNew()) {
-							KVPageProcess kvPageProcess = new KVPageProcess();
-							kvPageProcessDTO.setIsNew(false);
-							kvPageProcessDTO.setIdentifier(0L);
-							kvPageProcess.setBatchClassPluginConfig(batchClassPluginConfig);
-							mergeKvPageProcessFromDTO(kvPageProcess, kvPageProcessDTO);
-							batchClassPluginConfig.addKVPageProcess(kvPageProcess);
-						} else {
-							KVPageProcess kvPageProcess = batchClassPluginConfig.getKVPageProcessbyIdentifier(String
-									.valueOf(kvPageProcessDTO.getIdentifier()));
-							mergeKvPageProcessFromDTO(kvPageProcess, kvPageProcessDTO);
-						}
-					}
+					mergeKVPageProcessDTO(batchClassPluginConfigDTO, batchClassPluginConfig);
 				}
 
 				batchClassPluginConfigMap.put(batchClassPluginConfigDTO.getIdentifier(), batchClassPluginConfig);
@@ -768,6 +939,26 @@ public class BatchClassUtil {
 		} else {
 			batchClassPlugin.setBatchClassDynamicPluginConfigs(new ArrayList<BatchClassDynamicPluginConfig>(0));
 
+		}
+	}
+
+	private static void mergeKVPageProcessDTO(BatchClassPluginConfigDTO batchClassPluginConfigDTO,
+			BatchClassPluginConfig batchClassPluginConfig) {
+		for (KVPageProcessDTO kvPageProcessDTO : batchClassPluginConfigDTO.getKvPageProcessDTOs(true)) {
+			if (kvPageProcessDTO.getIsDeleted()) {
+				batchClassPluginConfig.removeKvPageProcessById(kvPageProcessDTO.getIdentifier());
+			} else if (kvPageProcessDTO.getIsNew()) {
+				KVPageProcess kvPageProcess = new KVPageProcess();
+				kvPageProcessDTO.setIsNew(false);
+				kvPageProcessDTO.setIdentifier(0L);
+				kvPageProcess.setBatchClassPluginConfig(batchClassPluginConfig);
+				mergeKvPageProcessFromDTO(kvPageProcess, kvPageProcessDTO);
+				batchClassPluginConfig.addKVPageProcess(kvPageProcess);
+			} else {
+				KVPageProcess kvPageProcess = batchClassPluginConfig.getKVPageProcessbyIdentifier(String.valueOf(kvPageProcessDTO
+						.getIdentifier()));
+				mergeKvPageProcessFromDTO(kvPageProcess, kvPageProcessDTO);
+			}
 		}
 	}
 
@@ -836,7 +1027,8 @@ public class BatchClassUtil {
 		batchClassDynamicPluginConfig.setValue(batchClassDynamicPluginConfigDTO.getValue());
 	}
 
-	public static BatchClassDTO createBatchClassDTO(BatchClass batchClass, PluginService pluginService) {
+	public static BatchClassDTO createBatchClassDTO(List<ScannerMasterConfiguration> masterScannerConfigs, BatchClass batchClass,
+			PluginService pluginService) {
 		BatchClassDTO batchClassDTO = new BatchClassDTO();
 		batchClassDTO.setIdentifier(batchClass.getIdentifier());
 		batchClassDTO.setDescription(batchClass.getDescription());
@@ -845,11 +1037,24 @@ public class BatchClassUtil {
 		batchClassDTO.setUncFolder(batchClass.getUncFolder());
 		batchClassDTO.setVersion(batchClass.getVersion());
 		batchClassDTO.setDeleted(batchClass.isDeleted());
+		batchClassDTO.setSystemFolder(batchClass.getSystemFolder());
 		List<DocumentType> documentTypes = batchClass.getDocumentTypes();
 
 		for (DocumentType documentType : documentTypes) {
 			DocumentTypeDTO documentTypeDTO = createDocumentTypeDTO(batchClassDTO, documentType);
 			batchClassDTO.addDocumentType(documentTypeDTO);
+		}
+
+		for (ScannerMasterConfiguration masterScannerConfig : masterScannerConfigs) {
+			ScannerMasterDTO dto = new ScannerMasterDTO();
+			dto.setBatchClass(batchClassDTO);
+			dto.setName(masterScannerConfig.getName());
+			dto.setType(masterScannerConfig.getType());
+			dto.setMultiValue(masterScannerConfig.isMultiValue());
+			dto.setSampleValue(masterScannerConfig.getSampleValue());
+			dto.setDescription(masterScannerConfig.getDescription());
+			dto.setMandatory(masterScannerConfig.isMandatory());
+			batchClassDTO.addScannerMaster(dto);
 		}
 
 		for (BatchClassModule batchClassModule : batchClass.getBatchClassModules()) {
@@ -860,6 +1065,19 @@ public class BatchClassUtil {
 		for (BatchClassEmailConfiguration batchClassEmailConfiguration : batchClass.getEmailConfigurations()) {
 			EmailConfigurationDTO emailConfigurationDTO = createEmailDTO(batchClassDTO, batchClassEmailConfiguration);
 			batchClassDTO.addEmailConfiguration(emailConfigurationDTO);
+		}
+
+		for (BatchClassCmisConfiguration batchClassCmisConfiguration : batchClass.getCmisConfigurations()) {
+			CmisConfigurationDTO cmisConfigurationDTO = createCmisDTO(batchClassDTO, batchClassCmisConfiguration);
+			batchClassDTO.addCmisConfiguration(cmisConfigurationDTO);
+		}
+
+		for (BatchClassScannerConfiguration configuration : batchClass.getBatchClassScannerConfiguration()) {
+			if (configuration.getParent() == null) {
+				// set only the parent node
+				WebScannerConfigurationDTO configurationDTO = createScannerDTO(batchClassDTO, configuration);
+				batchClassDTO.addScannerConfiguration(configurationDTO);
+			}
 		}
 
 		for (BatchClassField batchClassField : batchClass.getBatchClassField()) {
@@ -888,6 +1106,60 @@ public class BatchClassUtil {
 		emailConfigurationDTO.setPortNumber(batchClassEmailConfiguration.getPortNumber());
 		emailConfigurationDTO.setIsSSL(batchClassEmailConfiguration.isSSL());
 		return emailConfigurationDTO;
+	}
+
+	public static CmisConfigurationDTO createCmisDTO(BatchClassDTO batchClassDTO,
+			BatchClassCmisConfiguration batchClassCmisConfiguration) {
+		CmisConfigurationDTO cmisConfigurationDTO = new CmisConfigurationDTO();
+		cmisConfigurationDTO.setBatchClass(batchClassDTO);
+		cmisConfigurationDTO.setCmisProperty(batchClassCmisConfiguration.getCmisProperty());
+		cmisConfigurationDTO.setFileExtension(batchClassCmisConfiguration.getFileExtension());
+		cmisConfigurationDTO.setFolderName(batchClassCmisConfiguration.getFolderName());
+		cmisConfigurationDTO.setPassword(batchClassCmisConfiguration.getPassword());
+		cmisConfigurationDTO.setRepositoryID(batchClassCmisConfiguration.getRepositoryID());
+		cmisConfigurationDTO.setServerURL(batchClassCmisConfiguration.getServerURL());
+		cmisConfigurationDTO.setUserName(batchClassCmisConfiguration.getUserName());
+		cmisConfigurationDTO.setIdentifier(String.valueOf(batchClassCmisConfiguration.getId()));
+		cmisConfigurationDTO.setValue(batchClassCmisConfiguration.getValue());
+		cmisConfigurationDTO.setValueToUpdate(batchClassCmisConfiguration.getValueToUpdate());
+		return cmisConfigurationDTO;
+	}
+
+	public static WebScannerConfigurationDTO createScannerDTO(BatchClassDTO batchClassDTO,
+			BatchClassScannerConfiguration batchClassScannerConfiguration) {
+
+		WebScannerConfigurationDTO configurationDTO = new WebScannerConfigurationDTO();
+		configurationDTO.setBatchClass(batchClassDTO);
+		configurationDTO.setIdentifier(BatchConstants.EMPTY_STRING + batchClassScannerConfiguration.getId());
+		configurationDTO.setName(batchClassScannerConfiguration.getScannerMasterConfig().getName());
+		configurationDTO.setValue(batchClassScannerConfiguration.getValue());
+		configurationDTO.setDescription(batchClassScannerConfiguration.getScannerMasterConfig().getDescription());
+		configurationDTO.setMandatory(batchClassScannerConfiguration.getScannerMasterConfig().isMandatory());
+		configurationDTO.setDataType(batchClassScannerConfiguration.getScannerMasterConfig().getType());
+		configurationDTO.setSampleValue(batchClassScannerConfiguration.getScannerMasterConfig().getSampleValue());
+		configurationDTO.setMultiValue(batchClassScannerConfiguration.getScannerMasterConfig().isMultiValue());
+
+		// Setting the parent
+
+		if (batchClassScannerConfiguration.getParent() != null) {
+			BatchClassScannerConfiguration parentConfig = batchClassScannerConfiguration.getParent();
+			WebScannerConfigurationDTO parent = setScannerConfigDTO(batchClassDTO, parentConfig);
+			parent.setParent(null);
+			configurationDTO.setParent(parent);
+		}
+
+		// setting the children
+		if (batchClassScannerConfiguration.getChildren() != null) {
+			List<WebScannerConfigurationDTO> children = new ArrayList<WebScannerConfigurationDTO>();
+			for (BatchClassScannerConfiguration child : batchClassScannerConfiguration.getChildren()) {
+				WebScannerConfigurationDTO childConfigDTO = setScannerConfigDTO(batchClassDTO, child);
+				childConfigDTO.setParent(configurationDTO);
+				childConfigDTO.setChildren(null);
+				children.add(childConfigDTO);
+			}
+			configurationDTO.setChildren(children);
+		}
+		return configurationDTO;
 	}
 
 	public static BatchClassFieldDTO createBatchClassFieldDTO(BatchClassDTO batchClassDTO, BatchClassField batchClassField) {
@@ -944,10 +1216,16 @@ public class BatchClassUtil {
 
 		tableInfoDTO.setDocTypeDTO(documentTypeDTO);
 		tableInfoDTO.setEndPattern(tableInfo.getEndPattern());
+		tableInfoDTO.setTableExtractionAPI(tableInfo.getTableExtractionAPI());
 		tableInfoDTO.setName(tableInfo.getName());
 		tableInfoDTO.setIdentifier(String.valueOf(tableInfo.getId()));
 		tableInfoDTO.setStartPattern(tableInfo.getStartPattern());
-
+		tableInfoDTO.setDisplayImage(tableInfo.getDisplayImage());
+		if (tableInfo.getWidthOfMultiline() != null) {
+			tableInfoDTO.setWidthOfMultiline(String.valueOf(tableInfo.getWidthOfMultiline()));
+		} else {
+			tableInfoDTO.setWidthOfMultiline("");
+		}
 		for (TableColumnsInfo tableColumnsInfo : tableInfo.getTableColumnsInfo()) {
 			TableColumnInfoDTO columnInfoDTO = createTableColumnInfoDTO(tableInfoDTO, tableColumnsInfo);
 			tableInfoDTO.addColumnInfo(columnInfoDTO);
@@ -978,6 +1256,7 @@ public class BatchClassUtil {
 		fieldTypeDTO.setBarcodeType(fieldType.getBarcodeType());
 		fieldTypeDTO.setHidden(Boolean.valueOf(fieldType.isHidden()));
 		fieldTypeDTO.setMultiLine(fieldType.isMultiLine());
+		fieldTypeDTO.setReadOnly(fieldType.getIsReadOnly());
 		for (KVExtraction kvExtraction : fieldType.getKvExtraction()) {
 			KVExtractionDTO kvExtractionDTO = createKVExtractionDTO(fieldTypeDTO, kvExtraction);
 			fieldTypeDTO.addKvExtraction(kvExtractionDTO);
@@ -1004,6 +1283,7 @@ public class BatchClassUtil {
 		kvExtractionDTO.setFetchValue(kvExtraction.getFetchValue());
 		kvExtractionDTO.setKvPageValue(kvExtraction.getPageValue());
 		kvExtractionDTO.setMultiplier(kvExtraction.getMultiplier());
+		kvExtractionDTO.setUseExistingKey(kvExtraction.isUseExistingKey());
 		AdvancedKVExtraction advancedKVExtraction = kvExtraction.getAdvancedKVExtraction();
 		if (advancedKVExtraction != null) {
 			kvExtractionDTO.setAdvancedKVExtractionDTO(createAdvancedKVExtractionDTO(kvExtractionDTO, advancedKVExtraction));
@@ -1044,8 +1324,29 @@ public class BatchClassUtil {
 		columnInfoDTO.setColumnName(tableColumnsInfo.getColumnName());
 		columnInfoDTO.setColumnPattern(tableColumnsInfo.getColumnPattern());
 		columnInfoDTO.setRequired(tableColumnsInfo.isRequired());
+		columnInfoDTO.setMandatory(tableColumnsInfo.isMandatory());
 		columnInfoDTO.setIdentifier(String.valueOf(tableColumnsInfo.getId()));
 		columnInfoDTO.setColumnHeaderPattern(tableColumnsInfo.getColumnHeaderPattern());
+		if (tableColumnsInfo.getColumnStartCoordinate() != null) {
+			columnInfoDTO.setColumnStartCoordinate(String.valueOf(tableColumnsInfo.getColumnStartCoordinate()));
+		} else {
+			columnInfoDTO.setColumnStartCoordinate("");
+		}
+		if (tableColumnsInfo.getColumnEndCoordinate() != null) {
+			columnInfoDTO.setColumnEndCoordinate(String.valueOf(tableColumnsInfo.getColumnEndCoordinate()));
+		} else {
+			columnInfoDTO.setColumnEndCoordinate("");
+		}
+		if (tableColumnsInfo.getColumnCoordinateY0() != null) {
+			columnInfoDTO.setColumnCoordY0(String.valueOf(tableColumnsInfo.getColumnCoordinateY0()));
+		} else {
+			columnInfoDTO.setColumnCoordY0("");
+		}
+		if (tableColumnsInfo.getColumnCoordinateY1() != null) {
+			columnInfoDTO.setColumnCoordY1(String.valueOf(tableColumnsInfo.getColumnCoordinateY1()));
+		} else {
+			columnInfoDTO.setColumnCoordY1("");
+		}
 		columnInfoDTO.setTableInfoDTO(tableInfoDTO);
 		return columnInfoDTO;
 	}
@@ -1138,6 +1439,7 @@ public class BatchClassUtil {
 		pluginDetailsDTO.setPluginName(plugin.getPluginName());
 		pluginDetailsDTO.setPluginWorkflowName(plugin.getWorkflowName());
 		pluginDetailsDTO.setScriptName(plugin.getScriptName());
+		pluginDetailsDTO.setPluginInformation(plugin.getInformation());
 
 		List<Dependency> dependenciesList = plugin.getDependencies();
 		if (dependenciesList == null) {
@@ -1145,10 +1447,11 @@ public class BatchClassUtil {
 		}
 		pluginDetailsDTO.setDependencies(new ArrayList<DependencyDTO>(0));
 		for (Dependency dependency : dependenciesList) {
-			DependencyDTO dependencyDTO = createDepndencyDTO(dependency, pluginService);
-			dependencyDTO.setPluginDTO(pluginDetailsDTO);
-
-			pluginDetailsDTO.getDependencies().add(dependencyDTO);
+			DependencyDTO dependencyDTO = createDependencyDTO(dependency, pluginService);
+			if (dependencyDTO != null) {
+				dependencyDTO.setPluginDTO(pluginDetailsDTO);
+				pluginDetailsDTO.getDependencies().add(dependencyDTO);
+			}
 		}
 		return pluginDetailsDTO;
 	}
@@ -1282,28 +1585,52 @@ public class BatchClassUtil {
 		return batchClassDynamicPluginConfigDTO;
 	}
 
+	public static WebScannerConfigurationDTO setScannerConfigDTO(BatchClassDTO batchClassDTO,
+			BatchClassScannerConfiguration batchClassScannerConfig) {
+		WebScannerConfigurationDTO configDTO = new WebScannerConfigurationDTO();
+		configDTO.setBatchClass(batchClassDTO);
+		configDTO.setIdentifier(BatchConstants.EMPTY_STRING + batchClassScannerConfig.getId());
+		configDTO.setName(batchClassScannerConfig.getScannerMasterConfig().getName());
+		configDTO.setValue(batchClassScannerConfig.getValue());
+
+		configDTO.setSampleValue(batchClassScannerConfig.getScannerMasterConfig().getSampleValue());
+		configDTO.setMultiValue(batchClassScannerConfig.getScannerMasterConfig().isMultiValue());
+		configDTO.setDescription(batchClassScannerConfig.getScannerMasterConfig().getDescription());
+		configDTO.setMandatory(batchClassScannerConfig.getScannerMasterConfig().isMandatory());
+		configDTO.setDataType(batchClassScannerConfig.getScannerMasterConfig().getType());
+		return configDTO;
+	}
+
+	public static BatchClassScannerConfiguration mergeScannerConfig(BatchClassScannerConfiguration config,
+			WebScannerConfigurationDTO configDTO) {
+		config.setId(Long.valueOf(configDTO.getIdentifier()));
+		config.getScannerMasterConfig().setName(configDTO.getName());
+		config.setValue(configDTO.getValue());
+		return config;
+	}
+
 	public static void updateRevisionNumber(BatchClass batchClass) {
-		if (null == batchClass) {
-			return;
+		if (null != batchClass) {
+
+			String version = batchClass.getVersion();
+			if (null != version) {
+
+				String newVersion = version;
+				if (version.contains(".")) {
+					int lastIndex = version.lastIndexOf('.');
+					String preFix = version.substring(0, lastIndex);
+					String postFix = version.substring(lastIndex + 1);
+					int revNumber = Integer.parseInt(postFix);
+					revNumber++;
+					newVersion = preFix + "." + revNumber;
+				} else {
+					int revNumber = Integer.parseInt(version);
+					revNumber++;
+					newVersion = String.valueOf(revNumber);
+				}
+				batchClass.setVersion(newVersion);
+			}
 		}
-		String version = batchClass.getVersion();
-		if (null == version) {
-			return;
-		}
-		String newVersion = version;
-		if (version.contains(".")) {
-			int lastIndex = version.lastIndexOf('.');
-			String preFix = version.substring(0, lastIndex);
-			String postFix = version.substring(lastIndex + 1);
-			int revNumber = Integer.parseInt(postFix);
-			revNumber++;
-			newVersion = preFix + "." + revNumber;
-		} else {
-			int revNumber = Integer.parseInt(version);
-			revNumber++;
-			newVersion = String.valueOf(revNumber);
-		}
-		batchClass.setVersion(newVersion);
 	}
 
 	public static void copyModules(BatchClass batchClass) {
@@ -1391,6 +1718,27 @@ public class BatchClassUtil {
 		batchClassDynamicPluginConfig.setChildren(newChildrenList);
 	}
 
+	public static void copyScannerConfig(BatchClass batchClass) {
+		List<BatchClassScannerConfiguration> configs = batchClass.getBatchClassScannerConfiguration();
+		List<BatchClassScannerConfiguration> newConfigsList = new ArrayList<BatchClassScannerConfiguration>();
+		for (BatchClassScannerConfiguration config : configs) {
+			if (config.getParent() == null) {
+				newConfigsList.add(config);
+				config.setId(0);
+				config.setBatchClass(null);
+
+				List<BatchClassScannerConfiguration> children = config.getChildren();
+				for (BatchClassScannerConfiguration child : children) {
+					child.setId(0);
+					newConfigsList.add(child);
+					child.setBatchClass(null);
+					child.setParent(config);
+				}
+			}
+		}
+		batchClass.setBatchClassScannerConfiguration(newConfigsList);
+	}
+
 	public static void copyDocumentTypes(BatchClass batchClass) {
 		List<DocumentType> documentTypes = batchClass.getDocumentTypes();
 		List<DocumentType> newDocumentType = new ArrayList<DocumentType>();
@@ -1418,6 +1766,25 @@ public class BatchClassUtil {
 		}
 		documentType.setFunctionKeys(newFunctionKeys);
 
+	}
+
+	/**
+	 * This method copies function keys for given document type.
+	 * 
+	 * @param documentType to be copied document type.
+	 */
+	public static void copyFunctionKeysForCopyDocument(DocumentType documentType) {
+		LOGGER.info("Copying function key for:" + documentType.getIdentifier());
+		List<FunctionKey> functionKeys = documentType.getFunctionKeys();
+		List<FunctionKey> newFunctionKeys = new ArrayList<FunctionKey>();
+		for (FunctionKey functionKey : functionKeys) {
+			newFunctionKeys.add(functionKey);
+			functionKey.setId(0);
+			functionKey.setDocType(null);
+			functionKey.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+		}
+		documentType.setFunctionKeys(newFunctionKeys);
+		LOGGER.info("Function keys copied for:" + documentType.getIdentifier());
 	}
 
 	public static void copyBatchClassField(BatchClass batchClass) {
@@ -1468,6 +1835,27 @@ public class BatchClassUtil {
 		documentType.setFieldTypes(newFieldType);
 	}
 
+	/**
+	 * This method copies field types for given document type.
+	 * 
+	 * @param documentType to be copied document type.
+	 */
+	public static void copyFieldTypesForCopyDocument(DocumentType documentType) {
+		LOGGER.info("Copying field type for:" + documentType.getIdentifier());
+		List<FieldType> fieldTypes = documentType.getFieldTypes();
+		List<FieldType> newFieldType = new ArrayList<FieldType>();
+		for (FieldType fieldType : fieldTypes) {
+			newFieldType.add(fieldType);
+			fieldType.setId(0);
+			fieldType.setDocType(null);
+			fieldType.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
+			copyKVExtractionFields(fieldType);
+			copyRegex(fieldType);
+		}
+		documentType.setFieldTypes(newFieldType);
+		LOGGER.info("Field types copied for:" + documentType.getIdentifier());
+	}
+
 	public static void copyKVExtractionFields(FieldType fieldType) {
 		List<KVExtraction> kvExtraction2 = fieldType.getKvExtraction();
 		List<KVExtraction> newKvExtraction = new ArrayList<KVExtraction>();
@@ -1475,8 +1863,20 @@ public class BatchClassUtil {
 			newKvExtraction.add(kvExtraction);
 			kvExtraction.setId(0);
 			kvExtraction.setFieldType(null);
+			copyAdvancedKVExtraction(kvExtraction);
 		}
 		fieldType.setKvExtraction(newKvExtraction);
+	}
+
+	public static void copyAdvancedKVExtraction(final KVExtraction kvExtraction) {
+		if (kvExtraction != null) {
+			AdvancedKVExtraction advancedKVExtraction = kvExtraction.getAdvancedKVExtraction();
+			if (advancedKVExtraction != null) {
+				advancedKVExtraction.setId(0);
+				advancedKVExtraction.setKvExtraction(null);
+			}
+			// advancedKVExtraction
+		}
 	}
 
 	public static void copyRegex(FieldType fieldType) {
@@ -1502,14 +1902,20 @@ public class BatchClassUtil {
 		documentType.setPages(newPageTypes);
 	}
 
+	/**
+	 * This method create Page Type for new document type.
+	 * 
+	 * @param documentType document type for which page type is to be created
+	 */
 	public static void changePageTypeForNewDocument(DocumentType documentType) {
+		LOGGER.info("Creating page type for:" + documentType.getIdentifier());
 		List<PageType> pages = documentType.getPages();
 		List<PageType> newPageTypes = new ArrayList<PageType>();
 		int iVar = 0;
 		for (PageType pageType : pages) {
 			pageType.setId(0);
 			pageType.setDocType(null);
-			pageType.setIdentifier(null);
+			pageType.setIdentifier(String.valueOf(RandomIdGenerator.getIdentifier()));
 			newPageTypes.add(pageType);
 			switch (iVar) {
 				case 0:
@@ -1530,6 +1936,7 @@ public class BatchClassUtil {
 			iVar++;
 		}
 		documentType.setPages(newPageTypes);
+		LOGGER.info("Page type created for:" + documentType.getIdentifier());
 	}
 
 	public static void mergeKvPageProcessFromDTO(KVPageProcess kvPageProcess, KVPageProcessDTO kvPageProcessDTO) {
@@ -1541,10 +1948,25 @@ public class BatchClassUtil {
 	}
 
 	public static InputDataCarrier createInputDataCarrierFromKVExtDTO(KVExtractionDTO kvExtractionDTO) {
+		AdvancedKVExtractionDTO advancedKVExtraction = kvExtractionDTO.getAdvancedKVExtractionDTO();
+		Coordinates keyRectangleCoordinates = null;
+		Coordinates valueRectangleCoordinates = null;
+		if (advancedKVExtraction != null) {
+			keyRectangleCoordinates = new Coordinates();
+			valueRectangleCoordinates = new Coordinates();
+			keyRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getKeyX0Coord()));
+			keyRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getKeyY0Coord()));
+			keyRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getKeyX1Coord()));
+			keyRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getKeyY1Coord()));
+			valueRectangleCoordinates.setX0(BigInteger.valueOf(advancedKVExtraction.getValueX0Coord()));
+			valueRectangleCoordinates.setY0(BigInteger.valueOf(advancedKVExtraction.getValueY0Coord()));
+			valueRectangleCoordinates.setX1(BigInteger.valueOf(advancedKVExtraction.getValueX1Coord()));
+			valueRectangleCoordinates.setY1(BigInteger.valueOf(advancedKVExtraction.getValueY1Coord()));
+		}
 		InputDataCarrier inputDataCarrier = new InputDataCarrier(kvExtractionDTO.getLocationType(), kvExtractionDTO.getKeyPattern(),
 				kvExtractionDTO.getValuePattern(), kvExtractionDTO.getNoOfWords(), kvExtractionDTO.getMultiplier(), kvExtractionDTO
 						.getFetchValue(), kvExtractionDTO.getLength(), kvExtractionDTO.getWidth(), kvExtractionDTO.getXoffset(),
-				kvExtractionDTO.getYoffset());
+				kvExtractionDTO.getYoffset(), kvExtractionDTO.isUseExistingKey(), keyRectangleCoordinates, valueRectangleCoordinates);
 		return inputDataCarrier;
 	}
 
@@ -1638,8 +2060,15 @@ public class BatchClassUtil {
 
 		TableInfo tableInfo = new TableInfo();
 		tableInfo.setEndPattern(tableInfoDTO.getEndPattern());
+		tableInfo.setTableExtractionAPI(tableInfoDTO.getTableExtractionAPI());
 		tableInfo.setStartPattern(tableInfoDTO.getStartPattern());
+		if (tableInfoDTO.getWidthOfMultiline() != null && !tableInfoDTO.getWidthOfMultiline().isEmpty()) {
+			tableInfo.setWidthOfMultiline(Integer.parseInt(tableInfoDTO.getWidthOfMultiline()));
+		} else {
+			tableInfo.setWidthOfMultiline(null);
+		}
 		tableInfo.setName(tableInfoDTO.getName());
+		tableInfo.setDisplayImage(tableInfoDTO.getDisplayImage());
 
 		for (TableColumnInfoDTO tableColumnsInfo : tableInfoDTO.getColumnInfoDTOs()) {
 			TableColumnsInfo columnInfo = mapTableColumnFromDTO(tableInfoDTO, tableColumnsInfo);
@@ -1657,7 +2086,29 @@ public class BatchClassUtil {
 		columnInfo.setColumnName(tableColumnsInfo.getColumnName());
 		columnInfo.setColumnPattern(tableColumnsInfo.getColumnPattern());
 		columnInfo.setColumnHeaderPattern(tableColumnsInfo.getColumnHeaderPattern());
+		if (tableColumnsInfo.getColumnStartCoordinate() != null && !tableColumnsInfo.getColumnStartCoordinate().isEmpty()) {
+			columnInfo.setColumnStartCoordinate(Integer.parseInt(tableColumnsInfo.getColumnStartCoordinate()));
+		} else {
+			columnInfo.setColumnStartCoordinate(null);
+		}
+		if (tableColumnsInfo.getColumnEndCoordinate() != null && !tableColumnsInfo.getColumnEndCoordinate().isEmpty()) {
+			columnInfo.setColumnEndCoordinate(Integer.parseInt(tableColumnsInfo.getColumnEndCoordinate()));
+		} else {
+			columnInfo.setColumnEndCoordinate(null);
+		}
+		if (tableColumnsInfo.getColumnCoordY0() != null && !tableColumnsInfo.getColumnCoordY0().isEmpty()) {
+			columnInfo.setColumnCoordinateY0(Integer.parseInt(tableColumnsInfo.getColumnCoordY0()));
+		} else {
+			columnInfo.setColumnCoordinateY0(null);
+		}
+		if (tableColumnsInfo.getColumnCoordY1() != null && !tableColumnsInfo.getColumnCoordY1().isEmpty()) {
+			columnInfo.setColumnCoordinateY1(Integer.parseInt(tableColumnsInfo.getColumnCoordY1()));
+		} else {
+			columnInfo.setColumnCoordinateY1(null);
+		}
+
 		columnInfo.setRequired(tableColumnsInfo.isRequired());
+		columnInfo.setMandatory(tableColumnsInfo.isMandatory());
 		return columnInfo;
 	}
 
@@ -1704,26 +2155,7 @@ public class BatchClassUtil {
 			String[] scriptsFileList = new File(scriptFolderPath).list(new CustomFileFilter(false,
 					FileType.JAVA.getExtensionWithDot(), FileType.JAVA.getExtensionWithDot()));
 
-			if (scriptsFileList.length > 0) {
-				Node branch = new Node();
-				Label labelBranch = branch.getLabel();
-				labelBranch.setDisplayName(BatchConstants.SCRIPTS);
-				labelBranch.setKey(batchSchemaService.getScriptFolderName());
-				labelBranch.setMandatory(false);
-				branch.setLabel(labelBranch);
-				for (String scriptFileName : scriptsFileList) {
-					Node leaf = new Node();
-					Label leafLabel = leaf.getLabel();
-					leafLabel.setDisplayName(scriptFileName);
-					leafLabel.setKey(scriptFileName);
-					leafLabel.setMandatory(false);
-					leaf.setLabel(leafLabel);
-					leaf.setParent(branch);
-					branch.getChildren().add(leaf);
-				}
-				branch.setParent(nodeBatchClassDef);
-				nodeBatchClassDef.getChildren().add(branch);
-			}
+			populateScripts(batchSchemaService, nodeBatchClassDef, scriptsFileList);
 
 			Node branchFolder = new Node();
 			Label labelBranchFolder = branchFolder.getLabel();
@@ -1736,22 +2168,20 @@ public class BatchClassUtil {
 
 			File[] listFiles = new File(zipSourcePath).listFiles();
 			for (File file : listFiles) {
-				if (file.isDirectory()) {
-					if (!file.getName().equalsIgnoreCase(batchSchemaService.getScriptFolderName())) {
-						Node leaf = new Node();
-						Label leafLabel = leaf.getLabel();
-						if (file.getName().equals(batchSchemaService.getSearchSampleName())
-								|| file.getName().equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())) {
-							leafLabel.setMandatory(true);
-						} else {
-							leafLabel.setMandatory(false);
-						}
-						leafLabel.setDisplayName(file.getName());
-						leafLabel.setKey(file.getName());
-						leaf.setLabel(leafLabel);
-						leaf.setParent(branchFolder);
-						branchFolder.getChildren().add(leaf);
+				if (file.isDirectory() && !file.getName().equalsIgnoreCase(batchSchemaService.getScriptFolderName())) {
+					Node leaf = new Node();
+					Label leafLabel = leaf.getLabel();
+					if (file.getName().equals(batchSchemaService.getSearchSampleName())
+							|| file.getName().equalsIgnoreCase(batchSchemaService.getImagemagickBaseFolderName())) {
+						leafLabel.setMandatory(true);
+					} else {
+						leafLabel.setMandatory(false);
 					}
+					leafLabel.setDisplayName(file.getName());
+					leafLabel.setKey(file.getName());
+					leaf.setLabel(leafLabel);
+					leaf.setParent(branchFolder);
+					branchFolder.getChildren().add(leaf);
 				}
 			}
 
@@ -1759,7 +2189,7 @@ public class BatchClassUtil {
 			Label labelBCM = branchBCM.getLabel();
 			labelBCM.setDisplayName("Batch Class Modules");
 			labelBCM.setKey("BatchClassModules");
-			labelBCM.setMandatory(false);
+			labelBCM.setMandatory(true);
 			branchBCM.setLabel(labelBCM);
 			branchBCM.setParent(nodeBatchClassDef);
 			nodeBatchClassDef.getChildren().add(branchBCM);
@@ -1769,11 +2199,34 @@ public class BatchClassUtil {
 				Label leafLabel = leaf.getLabel();
 				leafLabel.setDisplayName(module.getWorkflowName());
 				leafLabel.setKey(module.getWorkflowName());
-				leafLabel.setMandatory(false);
+				leafLabel.setMandatory(true);
 				leaf.setLabel(leafLabel);
 				leaf.setParent(branchBCM);
 				branchBCM.getChildren().add(leaf);
 			}
+		}
+	}
+
+	private static void populateScripts(BatchSchemaService batchSchemaService, Node nodeBatchClassDef, String[] scriptsFileList) {
+		if (scriptsFileList != null && scriptsFileList.length > 0) {
+			Node branch = new Node();
+			Label labelBranch = branch.getLabel();
+			labelBranch.setDisplayName(BatchConstants.SCRIPTS);
+			labelBranch.setKey(batchSchemaService.getScriptFolderName());
+			labelBranch.setMandatory(false);
+			branch.setLabel(labelBranch);
+			for (String scriptFileName : scriptsFileList) {
+				Node leaf = new Node();
+				Label leafLabel = leaf.getLabel();
+				leafLabel.setDisplayName(scriptFileName);
+				leafLabel.setKey(scriptFileName);
+				leafLabel.setMandatory(false);
+				leaf.setLabel(leafLabel);
+				leaf.setParent(branch);
+				branch.getChildren().add(leaf);
+			}
+			branch.setParent(nodeBatchClassDef);
+			nodeBatchClassDef.getChildren().add(branch);
 		}
 	}
 
@@ -1839,32 +2292,6 @@ public class BatchClassUtil {
 		samplePatterns.setPatternValueMap(patternValueVPatternDesc);
 	}
 
-	public static List<ModuleJpdlPluginCreationInfo> getCustomJpdlCreationInfos(BatchClassDTO batchClassDTO, String moduleName) {
-		List<ModuleJpdlPluginCreationInfo> customJpdlCreationInfos = new ArrayList<ModuleJpdlPluginCreationInfo>();
-
-		for (BatchClassPluginDTO pluginDetails : batchClassDTO.getModuleByWorkflowName(moduleName).getBatchClassPlugins()) {
-			String subProcessName = BatchConstants.EMPTY_STRING;
-			String scriptName = BatchConstants.EMPTY_STRING;
-			String backUpFileName = BatchConstants.EMPTY_STRING;
-			boolean isScriptingPlugin = false;
-			subProcessName = pluginDetails.getPlugin().getPluginWorkflowName();
-			if (pluginDetails.getPlugin().getScriptName() == null) {
-				isScriptingPlugin = false;
-				scriptName = BatchConstants.EMPTY_STRING;
-				backUpFileName = BatchConstants.EMPTY_STRING;
-			} else {
-				isScriptingPlugin = true;
-				scriptName = pluginDetails.getPlugin().getScriptName();
-				backUpFileName = subProcessName;
-			}
-
-			customJpdlCreationInfos
-					.add(new ModuleJpdlPluginCreationInfo(subProcessName, isScriptingPlugin, scriptName, backUpFileName));
-		}
-
-		return customJpdlCreationInfos;
-	}
-
 	public static void setBatchClassModuleDTOPluginConfigList(BatchClassPlugin batchClassPlugin2,
 			BatchClassPluginDTO batchClassPluginDTO, BatchClassPluginConfigService batchClassPluginConfigService,
 			BatchClassPluginService batchClassPluginService, PluginConfigService pluginConfigService) {
@@ -1882,7 +2309,7 @@ public class BatchClassUtil {
 
 					batchClassPluginConfig.setPluginConfig(pluginConfig);
 					batchClassPluginConfig.setId(0);
-					setDefaultValueForNewConfig(pluginConfig, batchClassPluginConfig);
+					setDefaultValueForNewConfig(batchClassPluginConfig);
 					batchClassPluginConfig.setDescription(pluginConfig.getDescription());
 					batchClassPluginConfig.setName(pluginConfig.getName());
 					batchClassPlugin2.addBatchClassPluginConfig(batchClassPluginConfig);
@@ -1922,52 +2349,71 @@ public class BatchClassUtil {
 	 * @param pluginConfig
 	 * @param batchClassPluginConfig
 	 */
-	private static void setDefaultValueForNewConfig(PluginConfig pluginConfig, BatchClassPluginConfig batchClassPluginConfig) {
-		if (pluginConfig.getDataType() == DataType.BOOLEAN) {
+	private static void setDefaultValueForNewConfig(BatchClassPluginConfig batchClassPluginConfig) {
+		DataType pluginConfigDataType = batchClassPluginConfig.getPluginConfig().getDataType();
+		if (pluginConfigDataType == DataType.BOOLEAN) {
 			batchClassPluginConfig.setValue(BatchConstants.YES);
-		} else if (pluginConfig.getDataType() == DataType.STRING && pluginConfig.isMandatory()) {
-			batchClassPluginConfig.setValue(BatchConstants.DEFAULT);
-		} else if (pluginConfig.getDataType() == DataType.INTEGER && pluginConfig.isMandatory()) {
-			batchClassPluginConfig.setValue(BatchConstants.ZERO);
+		} else {
+			boolean isMandatory = batchClassPluginConfig.getPluginConfig().isMandatory();
+			if (pluginConfigDataType == DataType.STRING && isMandatory) {
+				List<String> sampleValues = batchClassPluginConfig.getSampleValue();
+				if (sampleValues == null || sampleValues.isEmpty()) {
+					batchClassPluginConfig.setValue(BatchConstants.DEFAULT);
+				} else if (sampleValues.size() > 0) {
+					batchClassPluginConfig.setValue(sampleValues.get(0));
+				}
+			} else if (pluginConfigDataType == DataType.INTEGER && isMandatory) {
+				batchClassPluginConfig.setValue(BatchConstants.ZERO);
+			}
 		}
 	}
 
-	public static DependencyDTO createDepndencyDTO(Dependency dependency, PluginService pluginService) {
-		DependencyDTO dependencyDTO = new DependencyDTO();
-		dependencyDTO.setIdentifier(String.valueOf(dependency.getId()));
+	public static DependencyDTO createDependencyDTO(Dependency dependency, PluginService pluginService) {
+		DependencyDTO dependencyDTO = null;
+
 		if (dependency.getDependencyType() == DependencyTypeProperty.ORDER_BEFORE) {
-			dependencyDTO.setDependencies(changeDependenciesIdentifierToName(dependency.getDependencies(), pluginService));
+			final String dependenciesInName = changeDependenciesIdentifierToName(dependency.getDependencies(), pluginService);
+			if (!dependenciesInName.isEmpty()) {
+				dependencyDTO = new DependencyDTO();
+				dependencyDTO.setDependencies(dependenciesInName);
+			}
 		} else {
+			dependencyDTO = new DependencyDTO();
 			dependencyDTO.setDependencies(BatchConstants.EMPTY_STRING);
 
 		}
-		dependencyDTO.setDependencyType(dependency.getDependencyType().getProperty());
+		if (dependencyDTO != null) {
+			dependencyDTO.setIdentifier(String.valueOf(dependency.getId()));
+			dependencyDTO.setDependencyType(dependency.getDependencyType().getProperty());
+		}
 		return dependencyDTO;
 
 	}
 
 	private static String changeDependenciesIdentifierToName(String dependencyNames, PluginService pluginService) {
 
-		String[] andDependencies = dependencyNames.split(BatchConstants.AND);
+		String[] andDependencies = dependencyNames.split(BatchConstants.CONDITION_AND);
 		StringBuffer andDependenciesNameAsString = new StringBuffer();
 
 		for (String andDependency : andDependencies) {
 
 			if (!andDependenciesNameAsString.toString().isEmpty()) {
-				andDependenciesNameAsString.append(BatchConstants.AND);
+				andDependenciesNameAsString.append(BatchConstants.CONDITION_AND);
 			}
 
-			String[] orDependencies = andDependency.split(BatchConstants.OR);
+			String[] orDependencies = andDependency.split(BatchConstants.CONDITION_OR);
 			StringBuffer orDependenciesNameAsString = new StringBuffer();
 
 			for (String dependencyIdentifier : orDependencies) {
-				if (!orDependenciesNameAsString.toString().isEmpty()) {
-					orDependenciesNameAsString.append(BatchConstants.OR);
-				}
-
 				try {
 					long dependencyId = Long.valueOf(dependencyIdentifier);
-					orDependenciesNameAsString.append(pluginService.getPluginPropertiesForPluginId(dependencyId).getPluginName());
+					final Plugin plugin = pluginService.getPluginPropertiesForPluginId(dependencyId);
+					if (plugin != null) {
+						if (!orDependenciesNameAsString.toString().isEmpty()) {
+							orDependenciesNameAsString.append(BatchConstants.CONDITION_OR);
+						}
+						orDependenciesNameAsString.append(plugin.getPluginName());
+					}
 				} catch (NumberFormatException e) {
 					LOGGER.error(BatchConstants.ERROR_CONVERT_NUMBER + e.getMessage());
 				}
@@ -1981,23 +2427,28 @@ public class BatchClassUtil {
 
 	private static String changeDependenciesNameToIdentifier(String dependencyNames, PluginService pluginService) {
 
-		String[] andDependencies = dependencyNames.split(BatchConstants.AND);
+		String[] andDependencies = dependencyNames.split(BatchConstants.CONDITION_AND);
 		StringBuffer andDependenciesNameAsString = new StringBuffer();
 
 		for (String andDependency : andDependencies) {
 
 			if (!andDependenciesNameAsString.toString().isEmpty()) {
-				andDependenciesNameAsString.append(BatchConstants.AND);
+				andDependenciesNameAsString.append(BatchConstants.CONDITION_AND);
 			}
 
-			String[] orDependencies = andDependency.split(BatchConstants.OR);
+			String[] orDependencies = andDependency.split(BatchConstants.CONDITION_OR);
 			StringBuffer orDependenciesNameAsString = new StringBuffer();
 
 			for (String dependencyName : orDependencies) {
-				if (!orDependenciesNameAsString.toString().isEmpty()) {
-					orDependenciesNameAsString.append(BatchConstants.OR);
+				final Plugin plugin = pluginService.getPluginPropertiesForPluginName(dependencyName);
+
+				if (plugin != null) {
+					if (!orDependenciesNameAsString.toString().isEmpty()) {
+						orDependenciesNameAsString.append(BatchConstants.CONDITION_OR);
+					}
+					orDependenciesNameAsString.append(plugin.getId());
 				}
-				orDependenciesNameAsString.append(pluginService.getPluginPropertiesForPluginName(dependencyName).getId());
+
 			}
 
 			andDependenciesNameAsString.append(orDependenciesNameAsString);
@@ -2046,7 +2497,7 @@ public class BatchClassUtil {
 		}
 		List<DependencyDTO> removedDependencyDTOs = null;
 		for (DependencyDTO dependencyDTO : pluginDetailsDTO.getDependencies()) {
-			if (dependencyDTO.isNew()) {
+			if (dependencyDTO.isNew() && !dependencyDTO.isDeleted()) {
 				Dependency dependency = new Dependency();
 				mergeDependencyFromDTO(dependency, dependencyDTO, pluginService);
 				dependency.setPlugin(plugin);
@@ -2063,7 +2514,7 @@ public class BatchClassUtil {
 						long dependencyIdentifier = Long.valueOf(dependencyDTO.getIdentifier());
 						Dependency dependency = plugin.getDependencyById(dependencyIdentifier);
 						plugin.getDependencies().remove(dependency);
-
+						dependency.setPlugin(null);
 					}
 				} else if (dependencyDTO.isDirty()) {
 
@@ -2103,5 +2554,11 @@ public class BatchClassUtil {
 		}
 
 		return pluginConfig;
+	}
+
+	public static void mergeModuleFromDTO(Module module, ModuleDTO moduleDTO) {
+		module.setDescription(moduleDTO.getDescription());
+		module.setName(moduleDTO.getName());
+		module.setVersion(BatchConstants.VERSION);
 	}
 }

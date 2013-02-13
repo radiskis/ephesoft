@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -58,16 +58,17 @@ public class SlidingPanel extends ResizeComposite implements HasWidgets {
 	private HandlerManager eventBus;
 
 	public SlidingPanel() {
+		super();
 		initWidget(layoutPanel);
 	}
 
-	public void add(Widget w) {
-		widgets.remove(w);
-		widgets.add(w);
+	public void add(Widget widget) {
+		widgets.remove(widget);
+		widgets.add(widget);
 
 		// Display the first widget added by default
 		if (currentIndex < 0) {
-			layoutPanel.add(w);
+			layoutPanel.add(widget);
 			currentIndex = 0;
 		}
 	}
@@ -89,8 +90,8 @@ public class SlidingPanel extends ResizeComposite implements HasWidgets {
 		return Collections.unmodifiableList(widgets).iterator();
 	}
 
-	public boolean remove(Widget w) {
-		return widgets.remove(w);
+	public boolean remove(Widget widget) {
+		return widgets.remove(widget);
 	}
 
 	public void setWidget(Widget widget) {
@@ -147,6 +148,9 @@ public class SlidingPanel extends ResizeComposite implements HasWidgets {
 			}
 
 			public void onLayout(Layer layer, double progress) {
+				/*
+				 * on lay out
+				 */
 			}
 		});
 	}

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -67,23 +67,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * This is office document convertor class.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see org.artofsolving.jodconverter.office.OfficeManager
  */
+@SuppressWarnings("PMD")
 public class OfficeDocumentConverter {
 
+	/**
+	 * officeManager OfficeManager.
+	 */
 	private final OfficeManager officeManager;
+	
+	/**
+	 * formatRegistry DocumentFormatRegistry.
+	 */
 	private final DocumentFormatRegistry formatRegistry;
 
+	/**
+	 * defaultLoadProperties Map<String, ?>.
+	 */
 	private Map<String, ?> defaultLoadProperties = createDefaultLoadProperties();
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * Constructor.
+	 * @param officeManager OfficeManager
+	 */
 	public OfficeDocumentConverter(OfficeManager officeManager) {
 		this(officeManager, new DefaultDocumentFormatRegistry());
 	}
 
+	/**
+	 * Constructor.
+	 * @param officeManager OfficeManager
+	 * @param formatRegistry DocumentFormatRegistry
+	 */
 	public OfficeDocumentConverter(OfficeManager officeManager, DocumentFormatRegistry formatRegistry) {
 		this.officeManager = officeManager;
 		this.formatRegistry = formatRegistry;
@@ -96,20 +121,39 @@ public class OfficeDocumentConverter {
 		return loadProperties;
 	}
 
+	/**
+	 * To set Default Load Properties.
+	 * @param defaultLoadProperties Map<String, ?>
+	 */
 	public void setDefaultLoadProperties(Map<String, ?> defaultLoadProperties) {
 		this.defaultLoadProperties = defaultLoadProperties;
 	}
 
+	/**
+	 * To get Format Registry.
+	 * @return DocumentFormatRegistry
+	 */
 	public DocumentFormatRegistry getFormatRegistry() {
 		return formatRegistry;
 	}
 
+	/**
+	 * Conversion method.
+	 * @param inputFile File
+	 * @param outputFile File
+	 */
 	public void convert(File inputFile, File outputFile) {
 		String outputExtension = FilenameUtils.getExtension(outputFile.getName());
 		DocumentFormat outputFormat = formatRegistry.getFormatByExtension(outputExtension);
 		convert(inputFile, outputFile, outputFormat);
 	}
 
+	/**
+	 * Conversion method.
+	 * @param inputFile File
+	 * @param outputFile File
+	 * @param outputFormat DocumentFormat
+	 */
 	public void convert(File inputFile, File outputFile, DocumentFormat outputFormat) {
 		String inputExtension = FilenameUtils.getExtension(inputFile.getName());
 		DocumentFormat inputFormat = formatRegistry.getFormatByExtension(inputExtension);
@@ -119,7 +163,15 @@ public class OfficeDocumentConverter {
 		officeManager.execute(conversionTask);
 	}
 
+	/**
+	 * Conversion method.
+	 * @param inputFileURL String
+	 * @param outputFileURL String
+	 * @param outputFormat DocumentFormat
+	 */
 	public void convert(String inputFileURL, String outputFileURL, DocumentFormat outputFormat) {
+		logger.info("Inside convert method ...");
+		logger.info("Input file url : " + inputFileURL + " , Output file url : " + outputFileURL);
 		File inputFile = new File(inputFileURL);
 		File outputFile = new File(outputFileURL);
 		String inputExtension = FilenameUtils.getExtension(inputFile.getName());
@@ -128,6 +180,7 @@ public class OfficeDocumentConverter {
 		conversionTask.setDefaultLoadProperties(defaultLoadProperties);
 		conversionTask.setInputFormat(inputFormat);
 		officeManager.execute(conversionTask);
+		logger.info("Exiting convert method ...");
 	}
 
 }

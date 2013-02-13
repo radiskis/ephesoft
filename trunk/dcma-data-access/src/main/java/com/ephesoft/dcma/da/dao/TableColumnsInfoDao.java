@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -46,11 +46,12 @@ import com.ephesoft.dcma.da.domain.TableInfo;
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.TableColumnsInfoDaoImpl
  */
 public interface TableColumnsInfoDao extends CacheableDao<TableColumnsInfo> {
 
 	/**
-	 * An api to fetch all TableColumnsInfo by TableInfo.
+	 * An API to fetch all TableColumnsInfo by TableInfo.
 	 * 
 	 * @param tableInfo TableInfo
 	 * @return List<TableColumnsInfo>
@@ -58,30 +59,30 @@ public interface TableColumnsInfoDao extends CacheableDao<TableColumnsInfo> {
 	List<TableColumnsInfo> getTableColumnsInfoByTableInfo(TableInfo tableInfo);
 
 	/**
-	 * An api to fetch all TableColumnsInfo by document type name and table name.
+	 * An API to fetch all TableColumnsInfo by document type name and table name.
 	 * 
-	 * @param docTypeName
-	 * @param tableName
+	 * @param docTypeName String
+	 * @param tableName String
 	 * @return List<TableInfo>
 	 */
 	List<TableColumnsInfo> getTableColumnsInfo(String docTypeName, String tableName);
 
 	/**
-	 * An api to insert the TableColumnsInfo object.
+	 * An API to insert the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */
 	void insertTableColumnsInfo(TableColumnsInfo TableColumnsInfo);
 
 	/**
-	 * An api to update the TableColumnsInfo object.
+	 * An API to update the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */
 	void updateTableColumnsInfo(TableColumnsInfo TableColumnsInfo);
 
 	/**
-	 * An api to remove the TableColumnsInfo object.
+	 * An API to remove the TableColumnsInfo object.
 	 * 
 	 * @param TableColumnsInfo TableColumnsInfo
 	 */

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,13 +45,31 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
+/**
+ * This service deploys a JPDL existing on the given process definition path.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.workflow.service.WorflowDeploymentService
+ */
 public class WorkflowDeploymentServiceImpl implements WorflowDeploymentService {
 
+	/**
+	 * LOGGER to print the logging information.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowDeploymentServiceImpl.class);
 
+	/**
+	 * Instance of {@link RepositoryService}.
+	 */
 	@Autowired
 	private RepositoryService repositoryService;
 
+	/**
+	 * Deployment method.
+	 * 
+	 * @param processDefinition String
+	 */
 	@Override
 	public void deploy(String processDefinition) {
 		LOGGER.info("Deploying process at " + processDefinition);
@@ -67,7 +85,7 @@ public class WorkflowDeploymentServiceImpl implements WorflowDeploymentService {
 			LOGGER.info("Deploying process");
 			deployment.deploy();
 		} catch (IOException e) {
-			LOGGER.error("Error while deploying " + e.getMessage());
+			LOGGER.error("Error while deploying " + e.getMessage(),e);
 		}
 	}
 

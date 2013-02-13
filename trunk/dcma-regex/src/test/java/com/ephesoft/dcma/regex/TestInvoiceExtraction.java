@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,8 +45,11 @@ import org.slf4j.LoggerFactory;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 
 /**
+ * This class is to test the invoice extraction.
+ * 
  * @author Ephesoft
  * @version 1.0
+ * @see junit.framework.JUnit4TestAdapter
  */
 public class TestInvoiceExtraction extends TestCase {
 
@@ -56,7 +59,7 @@ public class TestInvoiceExtraction extends TestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestInvoiceExtraction.class);
 
 	/**
-	 * 
+	 * To test all the page content.
 	 */
 	@Test
 	public void testGetAllPageContent() {
@@ -73,7 +76,7 @@ public class TestInvoiceExtraction extends TestCase {
 	}
 
 	/**
-	 * @return
+	 * @return junit.framework.Test
 	 */
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(TestInvoiceExtraction.class);

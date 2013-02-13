@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,22 +37,41 @@ package com.ephesoft.dcma.core.common;
 
 import java.io.Serializable;
 
+/**
+ * This class handles the ordering.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see java.io.Serializable
+ */
 public class Order implements Serializable {
 
 	/**
-	 * 
+	 * serialVersionUID long.
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * sortProperty DomainProperty.
+	 */
 	private DomainProperty sortProperty;
+	
+	/** 
+	 * ascending boolean.
+	 */
 	private boolean ascending;
 
+	/**
+	 * Constructor.
+	 */
 	public Order() {
 		super();
 	}
 
 	/**
-	 * @param sortProperty
-	 * @param ascending
+	 * Constructor.
+	 * @param sortProperty DomainProperty
+	 * @param ascending boolean
 	 */
 	public Order(DomainProperty sortProperty, boolean ascending) {
 		super();
@@ -61,6 +80,7 @@ public class Order implements Serializable {
 	}
 
 	/**
+	 * To get Sort Property.
 	 * @return the sortProperty
 	 */
 	public DomainProperty getSortProperty() {
@@ -68,6 +88,7 @@ public class Order implements Serializable {
 	}
 
 	/**
+	 * To check whether ascending or not.
 	 * @return the ascending
 	 */
 	public boolean isAscending() {

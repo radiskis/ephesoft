@@ -3,7 +3,7 @@
 
 	<g:DockLayoutPanel ui:field="editDependencyDockLayoutPanel"
 		width="98%" height="92%" unit="PCT">
-		<g:north size="80">
+		<g:north size="88">
 			<g:VerticalPanel ui:field="editDependencyPanel"
 				width="100%" spacing="10">
 				<g:HorizontalPanel spacing="20">
@@ -24,6 +24,9 @@
 							</g:cell>
 							<g:cell width="40%">
 								<g:VerticalPanel ui:field="buttonsPanel" width="100%">
+									<g:cell width="40%">
+										<g:Label></g:Label>
+									</g:cell>
 									<g:Button ui:field="andButton"></g:Button>
 									<g:Button ui:field="orButton"></g:Button>
 								</g:VerticalPanel>
@@ -43,8 +46,11 @@
 			</g:VerticalPanel>
 
 		</g:north>
-		<g:south size="20">
+		<g:south size="12">
 			<g:HorizontalPanel spacing="10">
+				<g:cell width="10%">
+					<g:Label></g:Label>
+				</g:cell>
 				<g:Button ui:field="okButton"></g:Button>
 				<g:Button ui:field="cancelButton"></g:Button>
 			</g:HorizontalPanel>

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -33,7 +33,7 @@
 * "Powered by Ephesoft". 
 ********************************************************************************/ 
 
-package com.ephesoft.dcma.imagemagick.imageClassifier;
+package com.ephesoft.dcma.imagemagick.imageclassifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +61,6 @@ import com.ephesoft.dcma.batch.schema.Document.Pages;
 import com.ephesoft.dcma.batch.schema.Page.PageLevelFields;
 import com.ephesoft.dcma.batch.service.BatchSchemaService;
 import com.ephesoft.dcma.batch.service.PluginPropertiesService;
-import com.ephesoft.dcma.core.EphesoftProperty;
 import com.ephesoft.dcma.core.common.DCMABusinessException;
 import com.ephesoft.dcma.core.exception.DCMAApplicationException;
 import com.ephesoft.dcma.imagemagick.IImageMagickCommonConstants;
@@ -77,10 +76,15 @@ import com.ephesoft.dcma.util.CustomValueSortedMap;
  * SampleThumbnailGenerator. The sampleBaseFolderPath is picked from the properties file imagemagick.properties.
  * 
  * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.imagemagick.service.ImageProcessServiceImpl
  * 
  */
 public class ImageClassifier {
 
+	/**
+	 * Constant LOGGER for proper logging in this class.
+	 */
 	protected final static Logger LOGGER = LoggerFactory.getLogger(ImageClassifier.class);
 
 	/**
@@ -97,18 +101,21 @@ public class ImageClassifier {
 	// @Qualifier("imageComparisonUtil")
 	private ImageComparisonUtil imageComparisonUtil;
 
+	/**
+	 * An instance of {@link BatchSchemaService}.
+	 */
 	@Autowired
 	private BatchSchemaService batchSchemaService;
 
 	/**
-	 * @return the pluginPropertiesService
+	 * @return the {@link PluginPropertiesService}
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
 		return pluginPropertiesService;
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * @param pluginPropertiesService the {@link PluginPropertiesService} to set
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
@@ -118,12 +125,10 @@ public class ImageClassifier {
 	 * This method takes in the batch InstanceID and subsequently gets the parsedXMLFile. Then it fetches all the Pages from it as they
 	 * are with a document type unknown. and it classifies all the pages based on Image comparison. In the end the result is put in the
 	 * batch.xml file.
-	 * 
-	 * @param batchInstanceIdentifier Batch instance Id.
-	 * @param batchClassIdentifier Batch ClassId.
-	 * @param sBatchFolder Batch Folder Path.
-	 * @param batchSchemaService
-	 * @throws IOException
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param sBatchFolder {@link String}
+	 * @throws IOException for any input output exception
+	 * @throws DCMAApplicationException for any other type of exception that occurs.
 	 */
 	public void classifyAllImgsOfBatch(String batchInstanceIdentifier, String sBatchFolder) throws IOException,
 			DCMAApplicationException {
@@ -166,7 +171,7 @@ public class ImageClassifier {
 		File batchClassFolder = new File(sampleBaseFolderPath);
 		String[] documentTypeArray = batchClassFolder.list();
 
-		int maxValue = 10;
+		int maxValue = ImageMagicKConstants.DEFAULT_MAX_VALUE_10;
 		try {
 			maxValue = Integer.valueOf(maxVal);
 			LOGGER.info("maxValue = " + maxValue);
@@ -203,13 +208,15 @@ public class ImageClassifier {
 	 * This method takes in the batch InstanceID and subsequently gets the parsedXMLFile. Then it fetches all the Pages from it as they
 	 * are with a document type unknown. and it classifies all the pages based on Image comparison. In the end the result is put in the
 	 * batch.xml file.
-	 * 
-	 * @param batchInstanceIdentifier Batch instance Id.
-	 * @param batchClassIdentifier Batch ClassId.
-	 * @param sBatchFolder Batch Folder Path.
-	 * @param isFromWebService 
-	 * @param batchSchemaService
-	 * @throws IOException
+	 * @param maxVal {@link String}
+	 * @param imMetric {@link String}
+	 * @param imFuzz {@link String}
+	 * @param batchInstanceIdentifier {@link String}
+	 * @param batchClassIdentifier {@link String}
+	 * @param sBatchFolder {@link String}
+	 * @param listOfPages {@link List<Page>}
+	 * @throws IOException for any input output exception
+	 * @throws DCMAApplicationException for any other type of exception that occurs.
 	 */
 	public void classifyAllImgsOfBatchInternal(String maxVal, String imMetric, String imFuzz,String batchInstanceIdentifier, String batchClassIdentifier, String sBatchFolder, List<Page> listOfPages) throws IOException,
 			DCMAApplicationException {
@@ -231,17 +238,6 @@ public class ImageClassifier {
 		
 	}
 
-	/**
-	 * This method updates the xml object with the PAGE level field Image_Compare_Classification.This contains the name of the page to
-	 * which the unclassified page has the maximum similarity score. also it has 5 alternate values which contains the next 5 highest
-	 * similarity scores along with the page names.
-	 * 
-	 * @param finalUnclasifiedPageConfidenceMap Key UnclassifiedPage path Value a list of SampleConfidenceBean objects which contains
-	 *            the sample page name and maximum confidence score.
-	 * @param unclassifiedPgIndexMap Key UnclassifiedPage path Value Index value where the page is stored in the xml object (including
-	 *            this information for faster traversal).
-	 * @param parsedXmlFile The xml file object.
-	 */
 	private void updateXmlObject(Map<String, CustomValueSortedMap> finalUnclasifiedPageConfidenceMap,
 			Map<String, Integer> unclassifiedPgIndexMap, List<Page> listOfPages) {
 		Set<String> unclasifiedPgsSet = finalUnclasifiedPageConfidenceMap.keySet();
@@ -285,15 +281,6 @@ public class ImageClassifier {
 		}
 	}
 
-	/**
-	 * One page can have many sample images.This method compares the unclassified page with all the sample images and gives the maximum
-	 * confidence score.
-	 * 
-	 * @param unclasifiedPagePath The unclassified page.
-	 * @param listOfSambleThumbsPaths list of all thumnails for a given Sample page.
-	 * @return Maximum confidence score.
-	 * @throws IOException
-	 */
 	private double getMaxCondifence(final String unclasifiedPagePath, List<String> listOfSambleThumbsPaths,
 			final String imMetric, final String imFuzz) throws IOException, DCMAApplicationException {
 		if (imageComparisonUtil == null) {
@@ -325,15 +312,6 @@ public class ImageClassifier {
 		return maxConfidence;
 	}
 
-	/**
-	 * This method returns a list of all thumbnail paths of a sample page. We compare thumbnails of images rather than images itself
-	 * for better accuracy.
-	 * 
-	 * @param samplePageType
-	 * @param documentType
-	 * @param sampleBaseFolderPath2
-	 * @return List of thumbnail paths.
-	 */
 	private List<String> getListOfThumbnailPaths(final String samplePageType, final String documentType,
 			final String sampleBaseFolderPath) {
 		List<String> listOfThumbnailPaths = new LinkedList<String>();
@@ -361,13 +339,6 @@ public class ImageClassifier {
 		return listOfThumbnailPaths;
 	}
 
-	/**
-	 * This method returns the list of pages for a document. It computes this by traversing the sampleBaseFolderPath.
-	 * 
-	 * @param documentType
-	 * @param sampleBaseFolderPath
-	 * @return List of Pages for a document.
-	 */
 	private List<String> getListOfSamplePagesForDoc(String documentType, String sampleBaseFolderPath) {
 
 		List<String> listOfSamplePageTypes = new LinkedList<String>();
@@ -397,14 +368,6 @@ public class ImageClassifier {
 		return listOfSamplePageTypes;
 	}
 
-	/**
-	 * It gives us the list of Paths of unclassified pages.
-	 * 
-	 * @param parsedXmlFile
-	 * @param listOfUnclasifiedPages
-	 * @param unclassifiedPgIndexMap
-	 * @param sBatchFolder
-	 */
 	private void getPathOfPagesOfBatch(Batch parsedXmlFile, List<String> listOfUnclasifiedPages,
 			Map<String, Integer> unclassifiedPgIndexMap, String sBatchFolder) {
 		Documents documents = parsedXmlFile.getDocuments();
@@ -448,12 +411,6 @@ public class ImageClassifier {
 		}
 	}
 
-	/**
-	 * This method simply takes in the decimal value and restricts the prcision to two places after the decimal.
-	 * 
-	 * @param decimalValue
-	 * @return decimalValue
-	 */
 	private float formatDecimalValue(double decimalValue) {
 		DecimalFormat twoDForm = new DecimalFormat("#.##");
 		return Float.valueOf(twoDForm.format(decimalValue));

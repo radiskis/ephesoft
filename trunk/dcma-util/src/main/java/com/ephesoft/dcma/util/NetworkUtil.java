@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,21 +42,27 @@ import java.util.Enumeration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.ephesoft.dcma.constant.UtilConstants;
+
 /**
  * This is a Utility class which will fetch the ip address for the application.
  * 
  * @author Ephesoft
  * @version 1.0
+ * @see java.net.NetworkInterface
  */
 public class NetworkUtil {
 
-	private static final char FORWARD_SLASH = '/';
+
 
 	/**
 	 * log reference.
 	 */
 	private static final Log LOG = LogFactory.getLog(NetworkUtil.class);
 
+	/**
+	 * IPADDRESS String.
+	 */
 	private static final String IPADDRESS = "127.0.0.1";
 
 	/**
@@ -66,7 +72,7 @@ public class NetworkUtil {
 	 */
 	public static String getSystemIPAddress() {
 
-		StringBuilder input = new StringBuilder(1024);
+		StringBuilder input = new StringBuilder(UtilConstants.INPUT_CONST);
 		boolean first = true;
 		String returnAddress = null;
 		try {
@@ -79,7 +85,7 @@ public class NetworkUtil {
 						if (first) {
 							first = false;
 						} else {
-							input.append(FORWARD_SLASH);
+							input.append(UtilConstants.FORWARD_SLASH);
 						}
 						input.append(inetAddress.getHostAddress());
 					}

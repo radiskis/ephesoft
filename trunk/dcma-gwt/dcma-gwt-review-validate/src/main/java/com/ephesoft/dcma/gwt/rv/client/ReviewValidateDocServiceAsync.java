@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -45,6 +45,7 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
+import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.gwt.core.client.DCMARemoteServiceAsync;
 import com.ephesoft.dcma.gwt.core.shared.BatchDTO;
 import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDBBean;
@@ -204,9 +205,10 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
 	 * API to execute Script for a batch asynchronously.
 	 * 
 	 * @param batch {@link Batch}
+	 * @param document {@link Document}
 	 * @param callback {@link AsyncCallback} < {@link BatchDTO} >
 	 */
-	void executeScript(Batch batch, AsyncCallback<BatchDTO> callback);
+	void executeScript(Batch batch, Document document, AsyncCallback<BatchDTO> callback);
 
 	/**
 	 * API to get HOCR Content the given coordinates set for a page of a batch asynchronously.
@@ -297,7 +299,7 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
 	 * @param callback {@link AsyncCallback} < {@link BatchDTO} >
 	 */
 	void executeScriptOnFieldChange(Batch batch, Document document, String fieldName, AsyncCallback<BatchDTO> asyncCallback);
-
+	
 	/**
 	 * API to get Generated Security Token For External Application asynchronously.
 	 * 
@@ -345,5 +347,17 @@ public interface ReviewValidateDocServiceAsync extends DCMARemoteServiceAsync {
      */
     void getZoomCount(AsyncCallback<String> asyncCallback);
 
+    /**API to update the end time of review or validation of batchInstance 
+     * @param batchInstanceId
+     * @param asyncCallback
+     */
+    void updateEndTimeAndCalculateDuration(String batchInstanceId,AsyncCallback<Void> asyncCallback);
+    
+    /**API to record the start time of review or validation of batchInstance 
+     * @param batchInstanceId
+     * @param asyncCallback
+     * @param batchInstanceStatus
+     */
+    void recordReviewOrValidateDuration( String batchInstanceId, BatchInstanceStatus batchInstanceStatus,AsyncCallback<Void> asyncCallback);
 
 }

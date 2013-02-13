@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,6 +36,7 @@
 package com.ephesoft.dcma.gwt.admin.bm.client.presenter.functionkey;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.functionkey.EditFunctionKeyView;
 import com.ephesoft.dcma.gwt.core.client.validator.EmptyStringValidator;
@@ -43,18 +44,39 @@ import com.ephesoft.dcma.gwt.core.shared.DocumentTypeDTO;
 import com.ephesoft.dcma.gwt.core.shared.FunctionKeyDTO;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the edit function key details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFunctionKeyView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view EditFunctionKeyView
+	 */
 	public EditFunctionKeyPresenter(BatchClassManagementController controller, EditFunctionKeyView view) {
 		super(controller, view);
 
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedFunctionKeyDTO() != null) {
@@ -66,15 +88,19 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 			functionKeyDTO.setMethodName(view.getMethodName());
 			functionKeyDTO.setShortcutKeyName(view.getKeyName());
 			functionKeyDTO.setMethodDescription(view.getMethodDescription());
-			controller.setAdd(true);
+			// controller.setAdd(true);
 			controller.setSelectedFunctionKeyDTO(functionKeyDTO);
 		}
 		view.getValidateMethodNameTextBox().addValidator(new EmptyStringValidator(view.getMethodNameTextBox()));
 		view.getValidateMethodDescriptionTextBox().addValidator(new EmptyStringValidator(view.getMethodDescriptionTextBox()));
 		view.getValidateMethodNameTextBox().toggleValidDateBox();
 		view.getValidateMethodDescriptionTextBox().toggleValidDateBox();
+		view.getMethodNameTextBox().setFocus(true);
 	}
 
+	/**
+	 * In case of save click.
+	 */
 	public void onSave() {
 		if (controller.isAdd()) {
 			controller.getSelectedDocument().addFunctionKey(controller.getSelectedFunctionKeyDTO());
@@ -89,6 +115,9 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 		controller.getMainPresenter().getBatchClassBreadCrumbPresenter().createBreadCrumb(controller.getSelectedFunctionKeyDTO());
 	}
 
+	/**
+	 * In case of cancel click.
+	 */
 	public void onCancel() {
 		if (controller.isAdd()) {
 			controller.getMainPresenter().showDocumentTypeView(controller.getSelectedFunctionKeyDTO().getDocTypeDTO(), true);
@@ -99,12 +128,21 @@ public class EditFunctionKeyPresenter extends AbstractBatchClassPresenter<EditFu
 
 	}
 
+	/**
+	 * To clear the fields.
+	 */
 	public void clearFields() {
-		view.setKeyName("");
-		view.setMethodName("");
-		view.setMethodDescription("");
+		view.setKeyName(BatchClassManagementConstants.EMPTY_STRING);
+		view.setMethodName(BatchClassManagementConstants.EMPTY_STRING);
+		view.setMethodDescription(BatchClassManagementConstants.EMPTY_STRING);
 	}
 
+	/**
+	 * To check Key Used Already.
+	 * 
+	 * @param keyName String
+	 * @return boolean
+	 */
 	public boolean checkKeyUsedAlready(String keyName) {
 		boolean result = false;
 		DocumentTypeDTO docuTypeDTO = controller.getSelectedDocument();

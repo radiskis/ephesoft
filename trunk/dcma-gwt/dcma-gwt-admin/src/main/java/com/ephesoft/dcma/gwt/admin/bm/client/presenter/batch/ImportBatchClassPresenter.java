@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,31 +37,34 @@ package com.ephesoft.dcma.gwt.admin.bm.client.presenter.batch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.ephesoft.dcma.gwt.admin.bm.client.AdminConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.BatchClassManagementController;
 import com.ephesoft.dcma.gwt.admin.bm.client.MessageConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
+import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementMessages;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter;
 import com.ephesoft.dcma.gwt.admin.bm.client.view.batch.ImportBatchClassView;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
+import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.shared.BatchClassDTO;
 import com.ephesoft.dcma.gwt.core.shared.BatchFolderListDTO;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialogUtil;
 import com.ephesoft.dcma.gwt.core.shared.ImportBatchClassSuperConfig;
+import com.ephesoft.dcma.gwt.core.shared.UNCFolderConfig;
 import com.ephesoft.dcma.gwt.core.shared.ConfirmationDialog.DialogListener;
-import com.ephesoft.dcma.gwt.core.shared.importTree.Node;
+import com.ephesoft.dcma.gwt.core.shared.constants.CoreCommonConstants;
+import com.ephesoft.dcma.gwt.core.shared.importtree.Node;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
+ * Presenter for Importing a batch class.
  * 
  * @author Ephesoft
- *
- */
-/**
- * Presenter for Importing a batch class.
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
  */
 public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<ImportBatchClassView> {
 
@@ -70,16 +73,37 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 	 */
 	private BatchFolderListDTO batchFolderListDTO;
 
+	/**
+	 * uiConfigList List<Node>.
+	 */
 	private final List<Node> uiConfigList = new ArrayList<Node>();
 
+	/**
+	 * uncFolderConfigList List<UNCFolderConfig>.
+	 */
+	private List<UNCFolderConfig> uncFolderConfigList;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view ImportBatchClassView
+	 */
 	public ImportBatchClassPresenter(final BatchClassManagementController controller, final ImportBatchClassView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
+		// no implementation
 	}
 
+	/**
+	 * To show Batch Class Import View.
+	 */
 	public void showBatchClassImportView() {
 		view.getDialogBox().setWidth("100%");
 		view.getDialogBox().add(view);
@@ -88,23 +112,46 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 		view.getDialogBox().setText(MessageConstants.BATCH_CLASS_IMPORT);
 	}
 
+	/**
+	 * For event handling.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(final HandlerManager eventBus) {
 		// Event handling to be done here.
 	}
 
+	/**
+	 * To get Batch Folder List DTO.
+	 * 
+	 * @return BatchFolderListDTO
+	 */
 	public BatchFolderListDTO getBatchFolderListDTO() {
 		return batchFolderListDTO;
 	}
 
+	/**
+	 * To set Batch Folder List DTO.
+	 * 
+	 * @param batchFolderListDTO BatchFolderListDTO
+	 */
 	public void setBatchFolderListDTO(BatchFolderListDTO batchFolderListDTO) {
 		this.batchFolderListDTO = batchFolderListDTO;
 	}
 
+	/**
+	 * To get UI Configuration List.
+	 * 
+	 * @return List<Node>
+	 */
 	public List<Node> getUiConfigList() {
 		return uiConfigList;
 	}
 
+	/**
+	 * In case of submit complete.
+	 */
 	public void onSubmitComplete() {
 		ConfirmationDialog confirmationDialog = ConfirmationDialogUtil.showConfirmationDialog(
 				MessageConstants.BATCH_CLASS_IMPORTED_SUCCESSFULLY, MessageConstants.IMPORT_SUCCESSFUL, Boolean.TRUE);
@@ -125,6 +172,12 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 
 	}
 
+	/**
+	 * To perform operations in case of OK clicked.
+	 * 
+	 * @param isUseSource boolean
+	 * @param isImportExisting boolean
+	 */
 	public void onOkClicked(final boolean isUseSource, final boolean isImportExisting) {
 		boolean validCheck = true;
 		if (!isUseSource) {
@@ -150,7 +203,9 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 				validCheck = false;
 			}
 
-			if (validCheck && (view.getName().indexOf(" ") > -1 || view.getName().indexOf("-") > -1)) {
+			if (validCheck
+					&& (view.getName().indexOf(BatchClassManagementConstants.SPACE) > -1 || view.getName().indexOf(
+							BatchClassManagementConstants.HYPHEN) > -1)) {
 				ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.WORKFLOW_IMPROPER_CHARACTER);
 				ScreenMaskUtility.unmaskScreen();
 				validCheck = false;
@@ -163,11 +218,21 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 			validCheck = false;
 		}
 
+		if (validCheck && !view.getValidateSystemFolderTextBox().validate()) {
+			ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
+					BatchClassManagementMessages.INVALID_SYSTEM_FOLDER_PATH)
+					+ " \" "
+					+ CoreCommonConstants.INVALID_FILE_EXTENSIONS
+					+ " \". "
+					+ LocaleDictionary.get().getMessageValue(BatchClassManagementMessages.CHANGE_AND_TRY_AGAIN));
+			ScreenMaskUtility.unmaskScreen();
+			validCheck = false;
+		}
 		if (validCheck) {
-			controller.getRpcService().getAllBatchClassesIncludingDeleted(new AsyncCallback<List<BatchClassDTO>>() {
+			controller.getRpcService().getAllBatchClassesIncludingDeleted(new EphesoftAsyncCallback<List<BatchClassDTO>>() {
 
 				@Override
-				public void onFailure(final Throwable arg0) {
+				public void customFailure(final Throwable arg0) {
 					ScreenMaskUtility.unmaskScreen();
 					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_VERIFIED);
 				}
@@ -197,63 +262,13 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 							ScreenMaskUtility.unmaskScreen();
 							return;
 						}
+						if (isNameExistInDatabaseFinal) {
+							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.BATCH_CLASS_NAME_NOT_UNIQUE);
+							ScreenMaskUtility.unmaskScreen();
+							return;
+						}
 					}
-					controller.getRpcService().isWorkflowContentEqual(view.getImportBatchClassUserOptionDTO(), view.getName(),
-							new AsyncCallback<Map<String, Boolean>>() {
-
-								@Override
-								public void onFailure(Throwable arg0) {
-									// TODO Auto-generated method stub
-
-								}
-
-								public void onSuccess(Map<String, Boolean> results) {
-									boolean isContentEqual = results.get("isEqual");
-									boolean isDeployed = results.get("isDepoyed");
-									view.getImportBatchClassUserOptionDTO().setWorkflowDeployed(isDeployed);
-									// verify the contents are equal to the deployed workflow
-									if (isNameExistInDatabaseFinal && !isContentEqual) {
-										ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.WORKFLOWNAME_EXISTS);
-										ScreenMaskUtility.unmaskScreen();
-										return;
-									}
-									// verify the contents are equal to the deployed workflow
-									if (!isNameExistInDatabaseFinal && isDeployed) {
-										// warning
-										// if yes, import with the specified workflow name.
-										ConfirmationDialog cf = ConfirmationDialogUtil.showConfirmationDialog(
-												MessageConstants.CONFIRM_IMPORT, MessageConstants.BATCH_CLASS_IMPORT, false, true);
-										cf.addDialogListener(new DialogListener() {
-
-											@Override
-											public void onOkClick() {
-												saveBatchClass();
-											}
-
-											@Override
-											public void onCancelClick() {
-												ScreenMaskUtility.unmaskScreen();
-												return;
-											}
-										});
-									} else {
-										saveBatchClass();
-									}
-								}
-							});
-
-					/*
-					 * if ((!isImportExisting || !view.getImportBatchClassUserOptionDTO().isWorkflowDeployed()) && !isUNCPathUnique) {
-					 * ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.UNC_PATH_NOT_UNIQUE);
-					 * ScreenMaskUtility.unmaskScreen(); return; }
-					 * 
-					 * if (!view.getImportBatchClassUserOptionDTO().isWorkflowDeployed() && isNameExistInDatabase ||
-					 * view.getName().isEmpty()) {
-					 * ConfirmationDialogUtil.showConfirmationDialogError("Batch name should not be any of the existing batch name.");
-					 * ScreenMaskUtility.unmaskScreen(); return; } if (isImportExisting && !isNameExistInDatabase) {
-					 * ConfirmationDialogUtil.showConfirmationDialogError("Batch name should MATCH any of the existing batch name.");
-					 * ScreenMaskUtility.unmaskScreen(); return; }
-					 */
+					saveBatchClass();
 				}
 			});
 		} else if (validCheck && isImportExisting) {
@@ -264,7 +279,7 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 
 	private void saveBatchClass() {
 		view.getImportBatchClassUserOptionDTO().setName(view.getName());
-		controller.getRpcService().importBatchClass(view.getImportBatchClassUserOptionDTO(), new AsyncCallback<Boolean>() {
+		controller.getRpcService().importBatchClass(view.getImportBatchClassUserOptionDTO(), new EphesoftAsyncCallback<Boolean>() {
 
 			@Override
 			public void onSuccess(final Boolean isSuccess) {
@@ -277,11 +292,10 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 					ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.IMPORT_UNSUCCESSFUL);
 				}
 				view.getDialogBox().hide(true);
-
 			}
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.IMPORT_UNSUCCESSFUL);
 				view.getDialogBox().hide(true);
@@ -290,6 +304,9 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 		});
 	}
 
+	/**
+	 * To set Folder List.
+	 */
 	public void setFolderList() {
 		view.getbatchFolderListView(uiConfigList);
 	}
@@ -304,13 +321,19 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 		return returnValue;
 	}
 
+	/**
+	 * In case of complete attachment.
+	 * 
+	 * @param workFlowName String
+	 * @param lastAttachedZipSourcePath String
+	 */
 	public void onAttachComplete(final String workFlowName, final String lastAttachedZipSourcePath) {
 
 		controller.getRpcService().getImportBatchClassUIConfig(workFlowName, lastAttachedZipSourcePath,
-				new AsyncCallback<ImportBatchClassSuperConfig>() {
+				new EphesoftAsyncCallback<ImportBatchClassSuperConfig>() {
 
 					@Override
-					public void onFailure(Throwable arg0) {
+					public void customFailure(Throwable arg0) {
 						ConfirmationDialogUtil.showConfirmationDialogError(arg0.getMessage());
 					}
 
@@ -321,37 +344,89 @@ public class ImportBatchClassPresenter extends AbstractBatchClassPresenter<Impor
 							ConfirmationDialogUtil.showConfirmationDialogError(MessageConstants.IMPORT_UNSUCCESSFUL);
 							return;
 						}
-						view.setUNCFolderList(importBatchClassSuperConfig.getUncFolderList());
-						if (!view.getImportBatchClassUserOptionDTO().isWorkflowEqual()
-								|| !view.getImportBatchClassUserOptionDTO().isWorkflowExistsInBatchClass()) {
+						List<UNCFolderConfig> uncFolderConfigList = importBatchClassSuperConfig.getUncFolderConfigList();
+						view.setUNCFolderList(uncFolderConfigList);
+						if (uncFolderConfigList == null || uncFolderConfigList.isEmpty()) {
 							view.toggleUseExistingState(false);
-							view.getErrorMessage().setText(MessageConstants.WORKFLOWNAME_EXISTS);
+						}
+						setUncFolderConfigList(uncFolderConfigList);
+						// if (!view.getImportBatchClassUserOptionDTO().isWorkflowEqual()
+						// || !view.getImportBatchClassUserOptionDTO().isWorkflowExistsInBatchClass()) {
+						if (!view.getImportBatchClassUserOptionDTO().isWorkflowEqual()) {
+							// view.toggleUseExistingState(false);
+							view.setErrorText(MessageConstants.WORKFLOWNAME_EXISTS);
 						} else {
 							view.toggleUseExistingState(true);
-							view.getErrorMessage().setText("");
+							view.setErrorText(BatchClassManagementConstants.EMPTY_STRING);
 						}
 						uiConfigList.clear();
 						uiConfigList.addAll(importBatchClassSuperConfig.getUiConfigRoot().getChildren());
 						setFolderList();
 					}
 				});
-
 	}
 
+	/**
+	 * In case of deletion of attached folders.
+	 * 
+	 * @param lastAttachedZipSourcePath String
+	 */
 	public void deleteAttachedFolders(final String lastAttachedZipSourcePath) {
-		controller.getRpcService().deleteAttachedFolders(lastAttachedZipSourcePath, new AsyncCallback<Void>() {
+		controller.getRpcService().deleteAttachedFolders(lastAttachedZipSourcePath, new EphesoftAsyncCallback<Void>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
 				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void onSuccess(Void arg0) {
 				// TODO Auto-generated method stub
-
 			}
 		});
 	}
+
+	private void setUncFolderConfigList(final List<UNCFolderConfig> uncFolderConfigList) {
+		this.uncFolderConfigList = uncFolderConfigList;
+	}
+
+	/**
+	 * To get Selected Batch Name.
+	 * 
+	 * @param selectedUNCFolder String
+	 * @return String
+	 */
+	public String getSelectedBatchName(final String selectedUNCFolder) {
+		String batchClassName = null;
+		if (uncFolderConfigList != null) {
+			for (UNCFolderConfig uncFolderConfig : uncFolderConfigList) {
+				String uncFolder = uncFolderConfig.getUncFolder();
+				if (uncFolder.equalsIgnoreCase(selectedUNCFolder)) {
+					batchClassName = uncFolderConfig.getBatchClassName();
+					break;
+				}
+			}
+		}
+		return batchClassName;
+	}
+
+	/**
+	 * To get selected Batch Class System Folder.
+	 * 
+	 * @param selectedBatchName String
+	 * @return String
+	 */
+	public String getSelectedBatchClassSystemFolder(final String selectedBatchName) {
+		String systemFolderName = null;
+		final List<BatchClassDTO> batchClassList = controller.getBatchClassList();
+		if (null != batchClassList) {
+			for (BatchClassDTO batchClassDTO : batchClassList) {
+				if (null != batchClassDTO && batchClassDTO.getName().equals(selectedBatchName)) {
+					systemFolderName = batchClassDTO.getSystemFolder();
+				}
+			}
+		}
+		return systemFolderName;
+	}
+
 }

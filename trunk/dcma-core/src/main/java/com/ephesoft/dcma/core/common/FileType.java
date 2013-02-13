@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,22 +35,145 @@
 
 package com.ephesoft.dcma.core.common;
 
+/**
+ * Enum for file types.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ */
 public enum FileType {
 
-	PNG("png"), TIFF("tiff"), XML("xml"), PDF("pdf"), DOC("doc"), XLS("xls"), PPT("ppt"), DOCX("docx"), XLSX("xlsx"), PPTX("pptx"),
-	TIF("tif"), TXT("txt"), HTML("html"), ODT("odt"), SER("ser"), ZIP("zip"), JPDL("jpdl.xml"), JAR("jar"), JAVA("java");
+	/**
+	 * PNG.
+	 */
+	PNG("png"),
+	/**
+	 * TIFF.
+	 */
+	TIFF("tiff"),
+	/**
+	 * XML.
+	 */
+	XML("xml"),
+	/**
+	 * PDF.
+	 */
+	PDF("pdf"),
+	/**
+	 * DOC.
+	 */
+	DOC("doc"),
+	/**
+	 * XLS.
+	 */
+	XLS("xls"),
+	/**
+	 * PPT.
+	 */
+	PPT("ppt"),
+	/**
+	 * DOCX.
+	 */
+	DOCX("docx"),
+	/**
+	 * XLSX.
+	 */
+	XLSX("xlsx"),
+	/**
+	 * PPTX.
+	 */
+	PPTX("pptx"),
+	/**
+	 * TIF.
+	 */
+	TIF("tif"),
+	/**
+	 * TXT.
+	 */
+	TXT("txt"),
+	/**
+	 * HTML.
+	 */
+	HTML("html"),
+	/**
+	 * ODT.
+	 */
+	ODT("odt"),
+	/**
+	 * SER.
+	 */
+	SER("ser"),
+	/**
+	 * ZIP.
+	 */
+	ZIP("zip"),
+	/**
+	 * JPDL.
+	 */
+	JPDL("jpdl.xml"),
+	/**
+	 * JAR.
+	 */
+	JAR("jar"),
+	/**
+	 * JAVA.
+	 */
+	JAVA("java"),
+	/**
+	 * DIR.
+	 */
+	DIR("dir"),
+	/**
+	 * MM.
+	 */
+	MM("mm"),
+	/**
+	 * IMG.
+	 */
+	IMG("img"),
+	/**
+	 * OTHER.
+	 */
+	OTHER("othr"),
+	/**
+	 * PROPERTIES.
+	 */
+	PROPERTIES("properties");
 
+	/**
+	 * Constant for DOT_CHAR.
+	 */
+	private static final char DOT_CHAR = '.';
+
+	/**
+	 * extension String.
+	 */
 	private String extension;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param extension String
+	 */
 	FileType(String extension) {
 		this.extension = extension;
 	}
 
+	/**
+	 * To get Extension.
+	 * 
+	 * @return String
+	 */
 	public String getExtension() {
 		return extension;
 	}
 
+	/**
+	 * To get Extension with Dot.
+	 * 
+	 * @return String
+	 */
 	public String getExtensionWithDot() {
-		return '.' + extension;
+		return DOT_CHAR + extension;
 	}
 }

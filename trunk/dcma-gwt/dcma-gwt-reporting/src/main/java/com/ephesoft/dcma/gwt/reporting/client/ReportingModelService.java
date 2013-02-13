@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -36,9 +36,9 @@
 package com.ephesoft.dcma.gwt.reporting.client;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.ephesoft.dcma.core.common.Order;
 import com.ephesoft.dcma.core.common.WorkflowType;
@@ -64,7 +64,7 @@ public interface ReportingModelService extends DCMARemoteService {
 	 * @return List<{@link Integer}>
 	 * @throws GWTException
 	 */
-	List<Integer> getSystemStatistics(Date startDate, Date endDate) throws GWTException;
+	List<Integer> getSystemStatistics(Date startDate, Date endDate,List<String> batchClassIdList) throws GWTException;
 
 	/**
 	 * API to get flag whether another user is already connected with the report DB.
@@ -127,7 +127,7 @@ public interface ReportingModelService extends DCMARemoteService {
 	 * 
 	 * @return HashMap<{@link String}, {@link String}>
 	 */
-	HashMap<String, String> getAllBatchClasses();
+	Map<String, String> getAllBatchClasses();
 
 	/**
 	 * API to get Total Row Count for workflow type between the given startDate and endDate and list of batch class id's.
@@ -159,5 +159,13 @@ public interface ReportingModelService extends DCMARemoteService {
 	 * @throws GWTException
 	 */
 	void syncDatabase() throws GWTException;
+	/**
+	 * API to get All Batch Classes for the given user ,available in the form of map of identifier and it's description.
+	 * 
+	 * @return HashMap<{@link String}, {@link String}>
+	 */
+	Map<String, String> getAllBatchClassesForUserRoles(Set<String> userRoles);
+	
+	
 
 }

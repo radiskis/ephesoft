@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -37,27 +37,74 @@ package com.ephesoft.dcma.docassembler;
 
 import com.ephesoft.dcma.core.common.PluginProperty;
 
-
+/**
+ * Document Assembler Property.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.common.PluginProperty
+ */
 public enum DocumentAssemblerProperties implements PluginProperty {
 	
+	/**
+	 * DA_BARCODE_CONFIDENCE.
+	 */
 	DA_BARCODE_CONFIDENCE("da.barcode_confidence"), 
+	/**
+	 * DA_RULE_FP_MP_LP.
+	 */
 	DA_RULE_FP_MP_LP("da.rule_fp_mp_lp"), 
+	/**
+	 * DA_RULE_FP.
+	 */
 	DA_RULE_FP("da.rule_fp"), 
+	/**
+	 * DA_RULE_MP.
+	 */
 	DA_RULE_MP("da.rule_mp"), 
+	/**
+	 * DA_RULE_LP.
+	 */
 	DA_RULE_LP("da.rule_lp"), 
+	/**
+	 * DA_RULE_FP_LP.
+	 */
 	DA_RULE_FP_LP("da.rule_fp_lp"), 
+	/**
+	 * DA_RULE_FP_MP.
+	 */
 	DA_RULE_FP_MP("da.rule_fp_mp"), 
+	/**
+	 * DA_RULE_MP_LP.
+	 */
 	DA_RULE_MP_LP("da.rule_mp_lp"), 
+	/**
+	 * DA_FACTORY_CLASS.
+	 */
 	DA_FACTORY_CLASS("da.factory_classification"),
+	/**
+	 * DA_MERGE_UNKNOWN_DOCUMENT_SWITCH.
+	 */
 	DA_MERGE_UNKNOWN_DOCUMENT_SWITCH("da.merge_unknown_document_switch");
 	
+	/**
+	 * Key String.
+	 */
 	String key;
 	
+	/**
+	 * Constructor.
+	 * @param key String
+	 */
 	DocumentAssemblerProperties(String key) {
 		this.key = key;
 	}
-
-	@Override
+	
+	/**
+	 * To get property key.
+	 * @return the key
+	 */
+    @Override
 	public String getPropertyKey() {
 		return key;
 	}

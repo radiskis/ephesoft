@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.util.Map;
 
 import com.ephesoft.dcma.core.common.BatchInstanceStatus;
 import com.ephesoft.dcma.core.common.Order;
+import com.ephesoft.dcma.gwt.core.client.EphesoftAsyncCallback;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
 import com.ephesoft.dcma.gwt.core.client.ui.ScreenMaskUtility;
 import com.ephesoft.dcma.gwt.core.client.ui.table.ListView;
@@ -58,22 +59,23 @@ import com.ephesoft.dcma.gwt.home.client.event.BatchListKeyDownEventHandler;
 import com.ephesoft.dcma.gwt.home.client.i18n.BatchListConstants;
 import com.ephesoft.dcma.gwt.home.client.i18n.BatchListMessages;
 import com.ephesoft.dcma.gwt.home.client.view.LandingView;
-import com.ephesoft.dcma.gwt.home.client.view.ReviewTable.ReviewValidateTable;
+import com.ephesoft.dcma.gwt.home.client.view.reviewtable.ReviewValidateTable;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * The presenter for the view the user gets on reaching batch list page..
+ * The presenter for the view the user gets on reaching batch list page.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.ui.table.ListView.PaginationListner
+ * @see com.ephesoft.dcma.gwt.core.client.ui.table.RowSelectionListner
  */
 public class LandingPresenter extends AbstractBatchListPresenter<LandingView> implements PaginationListner, RowSelectionListner {
 
@@ -109,6 +111,11 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	private static final String EMPTY_STRING = "";
 
 	/**
+	 * To indicate refresh functionality.
+	 */
+	private boolean isRefresh = false;
+
+	/**
 	 * Constructor.
 	 * 
 	 * @param view corresponding this presenter
@@ -120,12 +127,18 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		this.service = controller.getRpcService();
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	public void bind() {
 		reviewTable = view.getReviewTable();
-		service.getBatchListTableRowCount(new AsyncCallback<Integer>() {
+		service.getBatchListTableRowCount(new EphesoftAsyncCallback<Integer>() {
 
 			@Override
-			public void onFailure(Throwable arg0) {
+			public void customFailure(Throwable arg0) {
+				/*
+				 * on failure
+				 */
 
 			}
 
@@ -136,12 +149,13 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 				}
 			}
 		});
+		isRefresh = false;
 		validateTable = view.getValidateTable();
 		final ListBox reviewTableListBox = reviewTable.getPriorityListBox();
 		final ListBox validateTableListBox = validateTable.getPriorityListBox();
-		service.getBatchListPriorityFilter(new AsyncCallback<Map<BatchInstanceStatus, Integer>>() {
+		service.getBatchListPriorityFilter(new EphesoftAsyncCallback<Map<BatchInstanceStatus, Integer>>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
 				loadDefaultData();
 				addClickHandlers();
@@ -187,6 +201,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onClick(ClickEvent arg0) {
+				isRefresh = true;
 				refreshTable();
 			}
 		});
@@ -194,6 +209,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 			@Override
 			public void onClick(ClickEvent arg0) {
+				isRefresh = true;
 				refreshTable();
 			}
 		});
@@ -202,7 +218,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 			@Override
 			public void onClick(ClickEvent arg0) {
 				if (checkTextEntered(reviewTable.getSearchBatchTextBox())) {
-					onSearchButtonClicked(reviewTable.getSearchBatchTextBox().getText(), reviewTable);
+					onSearchButtonClicked(reviewTable);
 				}
 			}
 		});
@@ -211,15 +227,20 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 			@Override
 			public void onClick(ClickEvent arg0) {
 				if (checkTextEntered(validateTable.getSearchBatchTextBox())) {
-					onSearchButtonClicked(validateTable.getSearchBatchTextBox().getText(), validateTable);
+					onSearchButtonClicked(validateTable);
 				}
 			}
 		});
 	}
 
 	private void refreshTable() {
-		reviewTable.getSearchBatchTextBox().setText(EMPTY_STRING);
-		validateTable.getSearchBatchTextBox().setText(EMPTY_STRING);
+
+		// Empty search text box according to selected tab.
+		if (view.getReviewValidateTabLayoutPanel().getSelectedIndex() == 0) {
+			reviewTable.getSearchBatchTextBox().setText(EMPTY_STRING);
+		} else {
+			validateTable.getSearchBatchTextBox().setText(EMPTY_STRING);
+		}
 		ReviewValidateTable rvTable = getSelectedTable();
 		populateFilters(rvTable);
 		ListView listView = rvTable.getListView();
@@ -234,16 +255,16 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		return check;
 	}
 
-	private void onSearchButtonClicked(final String searchText, final ReviewValidateTable selectedTable) {
+	private void onSearchButtonClicked(final ReviewValidateTable selectedTable) {
 		ScreenMaskUtility.maskScreen();
 		selectedTable.getPriorityListBox().setSelectedIndex(0);
 		populateFilters(selectedTable);
 		final String batchName = selectedTable.getSearchBatchTextBox().getText();
 
-		service.getRowsCount(batchName, filters, new AsyncCallback<Integer>() {
+		service.getRowsCount(batchName, filters, new EphesoftAsyncCallback<Integer>() {
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				// nothing to do in case of failure.
 			}
 
@@ -251,9 +272,9 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 			public void onSuccess(final Integer arg0) {
 
 				service.getRows(batchName, 0, selectedTable.getListView().getTableRowCount(), filters, null,
-						new AsyncCallback<List<BatchInstanceDTO>>() {
+						new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
-							public void onFailure(final Throwable caught) {
+							public void customFailure(final Throwable caught) {
 								ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 										BatchListMessages.MSG_SEARCH_ERROR));
 								ScreenMaskUtility.unmaskScreen();
@@ -274,9 +295,9 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	}
 
 	private void persistPriorityFilter(final int reviewBatchListPriority, final int validateBatchListPriority) {
-		service.setBatchListPriorityFilter(reviewBatchListPriority, validateBatchListPriority, new AsyncCallback<Void>() {
+		service.setBatchListPriorityFilter(reviewBatchListPriority, validateBatchListPriority, new EphesoftAsyncCallback<Void>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				// Priority filter cannot be saved in HTTP session.
 				ConfirmationDialogUtil.showConfirmationDialogError(LocaleDictionary.get().getMessageValue(
 						BatchListMessages.ERROR_WHILE_RETAINING_BATCH_LIST_PRIORITY));
@@ -306,9 +327,9 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	private void updateTableData(final ReviewValidateTable table) {
 		populateFilters(table);
-		updateRowsCount(filters, new AsyncCallback<Integer>() {
+		updateRowsCount(filters, new EphesoftAsyncCallback<Integer>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(caught.getMessage());
 			}
@@ -319,12 +340,18 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		});
 	}
 
+	/**
+	 * To update changes done on table.
+	 * 
+	 * @param table ReviewValidateTable
+	 * @param rowCount int
+	 */
 	public void updateTable(final ReviewValidateTable table, final int rowCount) {
 		ScreenMaskUtility.maskScreen();
 		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, table.getListView().getTableOrder(),
-				new AsyncCallback<List<BatchInstanceDTO>>() {
+				new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
-					public void onFailure(final Throwable caught) {
+					public void customFailure(final Throwable caught) {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialogError(caught.getMessage());
 					}
@@ -336,12 +363,15 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 				});
 	}
 
+	/**
+	 * To load default data.
+	 */
 	public void loadDefaultData() {
 		ScreenMaskUtility.maskScreen();
-		service.getIndividualRowCounts(new AsyncCallback<Integer[]>() {
+		service.getIndividualRowCounts(new EphesoftAsyncCallback<Integer[]>() {
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(arg0.getMessage());
 			}
@@ -356,18 +386,18 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	private void updateTables() {
 		populateFilters(reviewTable);
-		service.getRowsCount(filters, new AsyncCallback<Integer>() {
+		service.getRowsCount(filters, new EphesoftAsyncCallback<Integer>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 
 			public void onSuccess(final Integer rowCount) {
 				initializeTable(reviewTable, rowCount);
 				populateFilters(validateTable);
-				service.getRowsCount(filters, new AsyncCallback<Integer>() {
+				service.getRowsCount(filters, new EphesoftAsyncCallback<Integer>() {
 
-					public void onFailure(final Throwable caught) {
+					public void customFailure(final Throwable caught) {
 						ScreenMaskUtility.unmaskScreen();
 					}
 
@@ -379,12 +409,15 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		});
 	}
 
+	/**
+	 * To update default data.
+	 */
 	public void updateDefaultData() {
 		ScreenMaskUtility.maskScreen();
-		service.getIndividualRowCounts(new AsyncCallback<Integer[]>() {
+		service.getIndividualRowCounts(new EphesoftAsyncCallback<Integer[]>() {
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				ScreenMaskUtility.unmaskScreen();
 				ConfirmationDialogUtil.showConfirmationDialogError(arg0.getMessage());
 			}
@@ -399,26 +432,55 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		});
 	}
 
+	/**
+	 * This method updates table labels for review and validate screen with the given result.
+	 * @param result {@link Integer} count of batch instances for review and validation
+	 */
 	private void updateTabLabels(final Integer[] result) {
 		view.getReviewLabel().setText(EMPTY_STRING + result[0]);
 		view.getValidationLabel().setText(EMPTY_STRING + result[1]);
 		view.getTotalBatchLabel().setText(EMPTY_STRING + (result[0] + result[1]));
+
+		if (isRefresh) {
+			isRefresh = false;
+			if (view.getReviewValidateTabLayoutPanel().getSelectedIndex() == 0) {
+				updateReviewTableLabel(result[0]);
+			} else {
+				updateValidateTableLabel(result[1]);
+			}
+		} else {
+			updateReviewTableLabel(result[0]);
+			updateValidateTableLabel(result[1]);
+		}
+	}
+	
+	/**
+	 * This method updates review table label for the given count.
+	 * @param count {@link Integer} count of batch instances
+	 */
+	private void updateReviewTableLabel(Integer count) {
 		view.getReviewValidateTabLayoutPanel().setTabText(0,
-				LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TABLE_REVIEW) + " (" + result[0] + ")");
+				LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TABLE_REVIEW) + " (" + count + ")");
 		view.getReviewValidateTabLayoutPanel().getTabWidget(0).setTitle(
 				LocaleDictionary.get().getConstantValue(BatchListConstants.REVIEW_TAB_SHORTCUT));
-
+	}
+	
+	/**
+	 * This method updates validate table label for the given count.
+	 * @param count {@link Integer} count of batch instances
+	 */
+	private void updateValidateTableLabel(Integer count) {
 		view.getReviewValidateTabLayoutPanel().setTabText(1,
-				LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TABLE_VALIDATION) + " (" + result[1] + ")");
+				LocaleDictionary.get().getConstantValue(BatchListConstants.LABEL_TABLE_VALIDATION) + " (" + count + ")");
 		view.getReviewValidateTabLayoutPanel().getTabWidget(1).setTitle(
 				LocaleDictionary.get().getConstantValue(BatchListConstants.VALIDATE_TAB_SHORTCUT));
 	}
 
-	private void updateRowsCount(final DataFilter[] filters, final AsyncCallback<Integer> completedCallback) {
+	private void updateRowsCount(final DataFilter[] filters, final EphesoftAsyncCallback<Integer> completedCallback) {
 		ScreenMaskUtility.maskScreen();
-		service.getRowsCount(filters, new AsyncCallback<Integer>() {
+		service.getRowsCount(filters, new EphesoftAsyncCallback<Integer>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
 				completedCallback.onFailure(caught);
 			}
@@ -432,9 +494,9 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 
 	private void initializeTable(final ReviewValidateTable table, final Integer count) {
 		ScreenMaskUtility.maskScreen();
-		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, null, new AsyncCallback<List<BatchInstanceDTO>>() {
+		service.getRows(null, 0, table.getListView().getTableRowCount(), filters, null, new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
-			public void onFailure(final Throwable caught) {
+			public void customFailure(final Throwable caught) {
 				ScreenMaskUtility.unmaskScreen();
 			}
 
@@ -450,6 +512,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 					record.addWidget(table.batchClassName, new Label(batch.getBatchClassName()));
 					record.addWidget(table.batchName, new Label(batch.getBatchName()));
 					record.addWidget(table.batchUpdatedOn, new Label(batch.getUploadedOn()));
+					record.addWidget(table.batchCreatedOn, new Label(batch.getCreatedOn()));
 					list.add(record);
 				}
 				initializeTable(table, list, count);
@@ -459,7 +522,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	}
 
 	private void initializeTable(final ReviewValidateTable table, final List<Record> list, final Integer count) {
-		table.getListView().initTable(count, this, this, list, true, false);
+		table.getListView().initTable(count, this, this, list, true, false, null, false);
 	}
 
 	private String[] convertPriority(final int priority) {
@@ -480,6 +543,13 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 		return priorityList;
 	}
 
+	/**
+	 * To perform operations on pagination.
+	 * 
+	 * @param startIndex int
+	 * @param maxResult int
+	 * @param order Order
+	 */
 	@Override
 	public void onPagination(final int startIndex, final int maxResult, final Order order) {
 		ReviewValidateTable rvTable = getSelectedTable();
@@ -489,19 +559,19 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	}
 
 	private void getRowCount(final int startIndex, final int maxResult, final Order order, final String batchName) {
-		service.getRowsCount(batchName, filters, new AsyncCallback<Integer>() {
+		service.getRowsCount(batchName, filters, new EphesoftAsyncCallback<Integer>() {
 
 			@Override
-			public void onFailure(final Throwable arg0) {
+			public void customFailure(final Throwable arg0) {
 				// nothing to do in case of failure.
 			}
 
 			@Override
 			public void onSuccess(final Integer arg0) {
 
-				service.getRows(batchName, startIndex, maxResult, filters, order, new AsyncCallback<List<BatchInstanceDTO>>() {
+				service.getRows(batchName, startIndex, maxResult, filters, order, new EphesoftAsyncCallback<List<BatchInstanceDTO>>() {
 
-					public void onFailure(final Throwable caught) {
+					public void customFailure(final Throwable caught) {
 						ScreenMaskUtility.unmaskScreen();
 						ConfirmationDialogUtil.showConfirmationDialogError(caught.getMessage());
 					}
@@ -534,6 +604,7 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 			record.addWidget(table.batchClassName, new Label(batch.getBatchClassName()));
 			record.addWidget(table.batchName, new Label(batch.getBatchName()));
 			record.addWidget(table.batchUpdatedOn, new Label(batch.getUploadedOn()));
+			record.addWidget(table.batchCreatedOn, new Label(batch.getCreatedOn()));
 			list.add(record);
 		}
 		table.getListView().updateRecords(list, startIndex, count);
@@ -548,15 +619,15 @@ public class LandingPresenter extends AbstractBatchListPresenter<LandingView> im
 	}
 
 	@Override
-	public BatchListController getController() {
-		return super.getController();
-	}
-
-	@Override
 	public void onRowSelected(final String identifer) {
 		view.gotoReviewAndValidatePage(identifer);
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
 		eventBus.addHandler(BatchListKeyDownEvent.TYPE, new BatchListKeyDownEventHandler() {

@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -51,48 +51,111 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit module type.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditModuleView extends View<EditModulePresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditModuleView> {
 	}
 
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
+
+	/**
+	 * remoteUrl TextBox.
+	 */
 	@UiField
 	protected TextBox remoteUrl;
+
+	/**
+	 * remoteBatchClassIdentifier TextBox.
+	 */
 	@UiField
 	protected TextBox remoteBatchClassIdentifier;
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * remoteUrlLabel Label.
+	 */
 	@UiField
 	protected Label remoteUrlLabel;
+
+	/**
+	 * remoteBatchClassIdentifierLabel Label.
+	 */
 	@UiField
 	protected Label remoteBatchClassIdentifierLabel;
+
+	/**
+	 * editModulePanel HorizontalPanel.
+	 */
 	@UiField
-    HorizontalPanel editModulePanel;
+	protected HorizontalPanel editModulePanel;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * editPanel VerticalPanel.
+	 */
 	@UiField
 	protected VerticalPanel editPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditModuleView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 
-		editPanel.setSpacing(5);
+		editPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
 
 		name.setReadOnly(true);
 		description.setReadOnly(true);
@@ -110,42 +173,104 @@ public class EditModuleView extends View<EditModulePresenter> {
 		remoteBatchClassIdentifierLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
 	}
 
+	/**
+	 * To set name.
+	 * 
+	 * @param name
+	 */
 	public void setName(String name) {
 		this.name.setText(name);
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description
+	 */
 	public void setDescription(String description) {
 		this.description.setText(description);
 	}
 
+	/**
+	 * To set Remote Url.
+	 * 
+	 * @param remoteUrl String
+	 */
 	public void setRemoteUrl(String remoteUrl) {
 		this.remoteUrl.setText(remoteUrl);
 	}
 
+	/**
+	 * To set Remote Batch Class Identifier.
+	 * 
+	 * @param remoteBatchClassIdentifier String
+	 */
 	public void setRemoteBatchClassIdentifier(String remoteBatchClassIdentifier) {
 		this.remoteBatchClassIdentifier.setText(remoteBatchClassIdentifier);
 	}
 
+	/**
+	 * To set Presenter.
+	 * 
+	 * @param presenter EditModulePresenter
+	 */
 	public void setPresenter(EditModulePresenter presenter) {
 		this.presenter = presenter;
 	}
 
+	/**
+	 * To perform operations on Save Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
+	/**
+	 * To perform operations on cancel Click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
+	/**
+	 * To get Remote Url.
+	 * 
+	 * @return String
+	 */
 	public String getRemoteUrl() {
 		return remoteUrl.getText();
 	}
 
+	/**
+	 * To get Remote Batch Class Identifier.
+	 * 
+	 * @return String
+	 */
 	public String getRemoteBatchClassIdentifier() {
 		return remoteBatchClassIdentifier.getText();
 	}
 
+	/**
+	 * To get Name.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getName() {
+		return name;
+	}
+
+	/**
+	 * To get Remote Url Text Box.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getRemoteUrlTextBox() {
+		return remoteUrl;
+	}
 }

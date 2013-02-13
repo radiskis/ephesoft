@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -54,70 +54,113 @@ import com.ephesoft.dcma.core.common.KVPageValue;
 import com.ephesoft.dcma.core.common.LocationType;
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for kv_extraction.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "kv_extraction")
 @org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class KVExtraction extends AbstractChangeableEntity implements Serializable {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * fieldType FieldType.
+	 */
 	@ManyToOne
 	@JoinColumn(name = "field_type_id")
 	private FieldType fieldType;
 
+	/**
+	 * useExistingKey boolean.
+	 */
+	@Column(name = "use_existing_key", columnDefinition = "bit default 0")
+	private boolean useExistingKey;
+
+	/**
+	 * keyPattern String.
+	 */
 	@Column(name = "key_pattern", nullable = false)
 	private String keyPattern;
 
+	/**
+	 * valuePattern String.
+	 */
 	@Column(name = "value_pattern")
 	private String valuePattern;
 
-	@Column(name = "location", nullable = false)
+	/**
+	 * locationType LocationType.
+	 */
+	@Column(name = "location")
 	@Enumerated(EnumType.STRING)
 	private LocationType locationType;
 
+	/**
+	 * noOfWords Integer.
+	 */
 	@Column(name = "no_of_words")
 	private Integer noOfWords;
 
+	/**
+	 * distance String.
+	 */
 	@Column(name = "distance")
 	private String distance;
 
+	/**
+	 * multiplier Float.
+	 */
 	@Column(name = "multiplier")
 	private Float multiplier;
 
+	/**
+	 * fetchValue KVFetchValue.
+	 */
 	@Column(name = "fetch_value")
 	@Enumerated(EnumType.STRING)
 	private KVFetchValue fetchValue;
 
+	/**
+	 * pageValue KVPageValue.
+	 */
 	@Column(name = "page_value")
 	@Enumerated(EnumType.STRING)
 	private KVPageValue pageValue;
 
 	/**
-	 * length.
+	 * length Integer.
 	 */
 	@Column(name = "length")
 	private Integer length;
 
 	/**
-	 * width.
+	 * width Integer.
 	 */
 	@Column(name = "width")
 	private Integer width;
 
 	/**
-	 * x-offset.
+	 * x-offset Integer.
 	 */
 	@Column(name = "x_offset")
 	private Integer xoffset;
 
 	/**
-	 * y-offset.
+	 * y-offset Integer.
 	 */
 	@Column(name = "y_offset")
 	private Integer yoffset;
 
 	/**
-	 * 
+	 * advancedKVExtraction AdvancedKVExtraction.
 	 */
 	@OneToOne
 	@Cascade( {CascadeType.SAVE_UPDATE, CascadeType.DELETE_ORPHAN, CascadeType.MERGE, CascadeType.EVICT})
@@ -125,6 +168,7 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	private AdvancedKVExtraction advancedKVExtraction;
 
 	/**
+	 * To get Field Type.
 	 * @return the fieldType
 	 */
 	public FieldType getFieldType() {
@@ -132,13 +176,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param fieldType the fieldType to set
+	 * To set Field Type.
+	 * @param fieldType FieldType
 	 */
 	public void setFieldType(FieldType fieldType) {
 		this.fieldType = fieldType;
 	}
 
 	/**
+	 * To get Key Pattern.
 	 * @return the keyPattern
 	 */
 	public String getKeyPattern() {
@@ -146,13 +192,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param keyPattern the keyPattern to set
+	 * To set Key Pattern.
+	 * @param keyPattern String
 	 */
 	public void setKeyPattern(String keyPattern) {
 		this.keyPattern = keyPattern;
 	}
 
 	/**
+	 * To get Value Pattern.
 	 * @return the valuePattern
 	 */
 	public String getValuePattern() {
@@ -160,13 +208,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param valuePattern the valuePattern to set
+	 * To set Value Pattern.
+	 * @param valuePattern String
 	 */
 	public void setValuePattern(String valuePattern) {
 		this.valuePattern = valuePattern;
 	}
 
 	/**
+	 * To get Location Type.
 	 * @return the locationType
 	 */
 	public LocationType getLocationType() {
@@ -174,13 +224,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param locationType the locationType to set
+	 * To set Location Type.
+	 * @param locationType LocationType
 	 */
 	public void setLocationType(LocationType locationType) {
 		this.locationType = locationType;
 	}
 
 	/**
+	 * To get No. of Words.
 	 * @return the noOfWords
 	 */
 	public Integer getNoOfWords() {
@@ -188,13 +240,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param noOfWords the noOfWords to set
+	 * To set No. of Words.
+	 * @param noOfWords Integer
 	 */
 	public void setNoOfWords(Integer noOfWords) {
 		this.noOfWords = noOfWords;
 	}
 
 	/**
+	 * To get Distance.
 	 * @return the distance
 	 */
 	public String getDistance() {
@@ -202,13 +256,15 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param distance the distance to set
+	 * To set Distance.
+	 * @param distance String
 	 */
 	public void setDistance(String distance) {
 		this.distance = distance;
 	}
 
 	/**
+	 * To get Multiplier.
 	 * @return the multiplier
 	 */
 	public Float getMultiplier() {
@@ -216,66 +272,139 @@ public class KVExtraction extends AbstractChangeableEntity implements Serializab
 	}
 
 	/**
-	 * @param multiplier the multiplier to set
+	 * To set Multiplier.
+	 * @param multiplier Float
 	 */
 	public void setMultiplier(Float multiplier) {
 		this.multiplier = multiplier;
 	}
 
+	/**
+	 * To get Fetch Value.
+	 * @return KVFetchValue
+	 */
 	public KVFetchValue getFetchValue() {
 		return fetchValue;
 	}
 
+	/**
+	 * To set Fetch Value.
+	 * @param fetchValue KVFetchValue
+	 */
 	public void setFetchValue(KVFetchValue fetchValue) {
 		this.fetchValue = fetchValue;
 	}
 
+	/**
+	 * To get Length.
+	 * @return Integer
+	 */
 	public Integer getLength() {
 		return length;
 	}
 
+	/**
+	 * To set Length.
+	 * @param length Integer
+	 */
 	public void setLength(Integer length) {
 		this.length = length;
 	}
 
+	/**
+	 * To get Width.
+	 * @return Integer
+	 */
 	public Integer getWidth() {
 		return width;
 	}
 
+	/**
+	 * To set Width.
+	 * @param width Integer
+	 */
 	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
+	/**
+	 * To get X-offset.
+	 * @return Integer
+	 */
 	public Integer getXoffset() {
 		return xoffset;
 	}
 
+	/**
+	 * To set X-offset.
+	 * @param xoffset Integer
+	 */ 
 	public void setXoffset(Integer xoffset) {
 		this.xoffset = xoffset;
 	}
 
+	/**
+	 * To get Y-offset.
+	 * @return Integer
+	 */
 	public Integer getYoffset() {
 		return yoffset;
 	}
 
+	/**
+	 * To get Page Value.
+	 * @return KVPageValue
+	 */
 	public KVPageValue getPageValue() {
 		return pageValue;
 	}
 
+	/**
+	 * To set Page Value.
+	 * @param pageValue KVPageValue
+	 */
 	public void setPageValue(KVPageValue pageValue) {
 		this.pageValue = pageValue;
 	}
 
+	/**
+	 * To set Y-offset.
+	 * @param yoffset Integer
+	 */
 	public void setYoffset(Integer yoffset) {
 		this.yoffset = yoffset;
 	}
 
+	/**
+	 * To get Advanced KV Extraction.
+	 * @return AdvancedKVExtraction
+	 */
 	public AdvancedKVExtraction getAdvancedKVExtraction() {
 		return advancedKVExtraction;
 	}
 
+	/**
+	 * To set Advanced KV Extraction.
+	 * @param advancedKVExtraction AdvancedKVExtraction
+	 */
 	public void setAdvancedKVExtraction(AdvancedKVExtraction advancedKVExtraction) {
 		this.advancedKVExtraction = advancedKVExtraction;
+	}
+
+	/**
+	 * Returns true or false depending on UseExistingKey.
+	 * @return boolean
+	 */
+	public boolean isUseExistingKey() {
+		return useExistingKey;
+	}
+
+	/**
+	 * To set UseExistingKey.
+	 * @param useExistingKey boolean
+	 */
+	public void setUseExistingKey(boolean useExistingKey) {
+		this.useExistingKey = useExistingKey;
 	}
 
 }

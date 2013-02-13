@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,6 +47,7 @@ import java.util.StringTokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.DocField;
 import com.ephesoft.dcma.batch.schema.Document;
@@ -120,6 +121,7 @@ public class AutomaticPageProcess {
 	private String barcodeClassification;
 
 	/**
+	 * To get Property Map.
 	 * @return the propertyMap
 	 */
 	public Map<String, String> getPropertyMap() {
@@ -127,13 +129,15 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param propertyMap the propertyMap to set
+	 * To set Property Map.
+	 * @param propertyMap Map<String, String>
 	 */
 	public void setPropertyMap(Map<String, String> propertyMap) {
 		this.propertyMap = propertyMap;
 	}
 
 	/**
+	 * To get Batch Schema Service.
 	 * @return the batchSchemaService
 	 */
 	public final BatchSchemaService getBatchSchemaService() {
@@ -141,13 +145,15 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param batchSchemaService the batchSchemaService to set
+	 * To set Batch Schema Service.
+	 * @param batchSchemaService BatchSchemaService
 	 */
 	public final void setBatchSchemaService(final BatchSchemaService batchSchemaService) {
 		this.batchSchemaService = batchSchemaService;
 	}
 
 	/**
+	 * To get Page Type Service.
 	 * @return the pageTypeService
 	 */
 	public final PageTypeService getPageTypeService() {
@@ -155,13 +161,15 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param pageTypeService the pageTypeService to set
+	 * To set Page Type Service.
+	 * @param pageTypeService PageTypeService
 	 */
 	public final void setPageTypeService(final PageTypeService pageTypeService) {
 		this.pageTypeService = pageTypeService;
 	}
 
 	/**
+	 * To get Xml Documents.
 	 * @return List<DocumentType>
 	 */
 	public final List<Document> getXmlDocuments() {
@@ -169,6 +177,7 @@ public class AutomaticPageProcess {
 	}
 
 	/**
+	 * To set Xml Documents.
 	 * @param xmlDocuments List<DocumentType>
 	 */
 	public final void setXmlDocuments(final List<Document> xmlDocuments) {
@@ -176,6 +185,7 @@ public class AutomaticPageProcess {
 	}
 
 	/**
+	 * To get Batch Instance ID.
 	 * @return batchInstanceID
 	 */
 	public final String getBatchInstanceID() {
@@ -183,6 +193,7 @@ public class AutomaticPageProcess {
 	}
 
 	/**
+	 * To set Batch Instance ID.
 	 * @param batchInstanceID String
 	 */
 	public final void setBatchInstanceID(final String batchInstanceID) {
@@ -190,6 +201,7 @@ public class AutomaticPageProcess {
 	}
 
 	/**
+	 * To get Plugin Properties Service.
 	 * @return the pluginPropertiesService
 	 */
 	public PluginPropertiesService getPluginPropertiesService() {
@@ -197,13 +209,15 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param pluginPropertiesService the pluginPropertiesService to set
+	 * To set Plugin Properties Service.
+	 * @param pluginPropertiesService PluginPropertiesService
 	 */
 	public void setPluginPropertiesService(PluginPropertiesService pluginPropertiesService) {
 		this.pluginPropertiesService = pluginPropertiesService;
 	}
 
 	/**
+	 * To get Barcode Confidence.
 	 * @return the barcodeConfidence
 	 */
 	public final String getBarcodeConfidence() {
@@ -211,13 +225,15 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param barcodeConfidence the barcodeConfidence to set
+	 * To set Barcode Confidence.
+	 * @param barcodeConfidence String
 	 */
 	public final void setBarcodeConfidence(final String barcodeConfidence) {
 		this.barcodeConfidence = barcodeConfidence;
 	}
 
 	/**
+	 * To get Barcode Classification.
 	 * @return the barcodeClassification
 	 */
 	public final String getBarcodeClassification() {
@@ -225,7 +241,8 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * @param barcodeClassification the barcodeClassification to set
+	 * To set Barcode Classification.
+	 * @param barcodeClassification String
 	 */
 	public final void setBarcodeClassification(final String barcodeClassification) {
 		this.barcodeClassification = barcodeClassification;
@@ -234,8 +251,8 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will set the document type name and ConfidenceThreshold.
 	 * 
-	 * @param docType DocumentType
-	 * @param pageTypeName String
+	 * @param docType {@link DocumentType}
+	 * @param pageTypeName {@link String}
 	 */
 	public void setDocTypeNameAndConfThreshold(final Document docType, final String pageTypeName) {
 
@@ -274,30 +291,23 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will create new document for pages that was found in the batch.xml file for Unknown type document.
 	 * 
-	 * @param docPageInfo List<PageType>
-	 * @throws DCMAApplicationException Check for input parameters, create new documents for page found in document type Unknown.
+	 * @param docPageInfo {@link List<PageType>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, create new documents for page found in document type Unknown.
 	 */
 	public final void createDocForPages(final List<Page> docPageInfo) throws DCMAApplicationException {
-
 		String errMsg = null;
-
 		if (null == this.xmlDocuments) {
 			throw new DCMAApplicationException("Unable to write pages for the document.");
 		}
-
 		try {
-
 			List<Document> insertAllDocument = new ArrayList<Document>();
 			List<Integer> removeIndexList = new ArrayList<Integer>();
-
 			Document document = null;
 			Long idGenerator = 0L;
-
 			boolean isLast = true;
 			boolean isFirst = true;
 
 			for (int index = 0; index < docPageInfo.size(); index++) {
-
 				Page pgType = docPageInfo.get(index);
 				DocField docFieldType = getPgLevelField(pgType);
 				if (null == docFieldType) {
@@ -305,43 +315,39 @@ public class AutomaticPageProcess {
 							+ getPropertyMap().get(DocumentAssemblerConstants.AUTOMATIC_CLASSIFICATION) + " classification is null.";
 					throw new DCMAApplicationException(errMsg);
 				}
-
 				String value = docFieldType.getValue();
 				float confidenceScore = docFieldType.getConfidence();
-
 				if (null == value) {
 					errMsg = "Invalid format of page level fields. Value found for "
 							+ getPropertyMap().get(DocumentAssemblerConstants.AUTOMATIC_CLASSIFICATION) + " classification is null.";
 					throw new DCMAApplicationException(errMsg);
 				}
-
 				// check for zero confidence score value
 				// for zero value just leave the page to unknown type.
-
 				if (confidenceScore == 0) {
 					document = new Document();
 					Pages pages = new Pages();
 					idGenerator++;
 					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 					document.setPages(pages);
+					document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 					insertAllDocument.add(document);
 					document.getPages().getPage().add(pgType);
 					document.setType(EphesoftProperty.UNKNOWN.getProperty());
 					removeIndexList.add(index);
 					continue;
 				}
-
 				if (isLast) {
 					document = new Document();
 					Pages pages = new Pages();
 					idGenerator++;
 					document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 					document.setPages(pages);
+					document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 					insertAllDocument.add(document);
 					isLast = false;
 					isFirst = false;
 				}
-
 				if (value.contains(getPropertyMap().get(DocumentAssemblerConstants.CHECK_FIRST_PAGE))) {
 					if (isFirst) {
 						document = new Document();
@@ -349,6 +355,7 @@ public class AutomaticPageProcess {
 						idGenerator++;
 						document.setIdentifier(EphesoftProperty.DOCUMENT.getProperty() + idGenerator);
 						document.setPages(pages);
+						document.setDocumentDisplayInfo(BatchConstants.EMPTY);
 						insertAllDocument.add(document);
 					}
 					isFirst = true;
@@ -376,7 +383,6 @@ public class AutomaticPageProcess {
 					}
 				}
 			}
-
 			// update the xml file.
 			updateBatchXML(insertAllDocument, removeIndexList);
 
@@ -390,9 +396,9 @@ public class AutomaticPageProcess {
 	/**
 	 * Update Batch XML file.
 	 * 
-	 * @param insertAllDocument List<DocumentType>
-	 * @param removeIndexList List<Integer>
-	 * @throws DCMAApplicationException Check for input parameters, update the batch xml.
+	 * @param insertAllDocument {@link List<DocumentType>}
+	 * @param removeIndexList {@link List<Integer>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
 	private void updateBatchXML(final List<Document> insertAllDocument, final List<Integer> removeIndexList)
 			throws DCMAApplicationException {
@@ -472,7 +478,7 @@ public class AutomaticPageProcess {
 		// Set the error message explicitly to blank to display the node in batch xml
 		for (int i = 0; i < xmlDocuments.size(); i++) {
 			final Document document = xmlDocuments.get(i);
-			document.setErrorMessage("");
+			document.setErrorMessage(DocumentAssemblerConstants.EMPTY);
 		}
 		// now write the state of the object to the xml file.
 		batchSchemaService.updateBatch(batch);
@@ -486,8 +492,8 @@ public class AutomaticPageProcess {
 	 * fetches the type with a max confidence score.In case of equal max scores , the precedence is given to the order as defined in
 	 * the include list in the properties file.
 	 * 
-	 * @param pgType PageType
-	 * @return docFieldType DocFieldType
+	 * @param pgType {@link PageType}
+	 * @return docFieldType {@link DocFieldType}
 	 */
 	private DocField getPgLevelField(final Page pgType) {
 		StringTokenizer tokenList = new StringTokenizer(getPropertyMap().get(DocumentAssemblerConstants.AUTOMATIC_INCLUDE_LIST), ";=");
@@ -496,7 +502,7 @@ public class AutomaticPageProcess {
 			String includeListElem = (String) tokenList.nextElement();
 			includeList.add(includeListElem);
 		}
-		String name = "";
+		String name = DocumentAssemblerConstants.EMPTY;
 		int lastIncludeListIndex = -1, includeListIndex = -1;
 		DocField docFieldType = null;
 		Float confidence, maxConfidence = -1f;
@@ -535,8 +541,8 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will set the confidence score of every document on the basis of average of all the page confidence score.
 	 * 
-	 * @param xmlDocuments List<DocumentType>
-	 * @throws DCMAApplicationException
+	 * @param xmlDocuments {@link List<DocumentType>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
 	 */
 	@SuppressWarnings("unchecked")
 	private void setDocConfAndDocType(final List<Document> xmlDocuments) throws DCMAApplicationException {
@@ -628,6 +634,13 @@ public class AutomaticPageProcess {
 
 	}
 
+	/**
+	 * This method will check the barcode classification.
+	 * 
+	 * @param docType {@link Document}
+	 * @return {@link String}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters, update the batch xml.
+	 */
 	private String checkBarcodeDAClassification(Document docType) throws DCMAApplicationException {
 
 		List<Page> pages = docType.getPages().getPage();
@@ -666,18 +679,10 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will apply the rule to calculate the confidence score.
 	 * 
-	 * @param checkTypeList List<String>
+	 * @param checkTypeList {@link List<String>}
 	 * @return multiplyingFactor float
 	 */
 	private float multiplyingFactor(List<String> checkTypeList) {
-
-		// fp + mp + lp = 1
-		// fp = 0.50
-		// lp = 0.50
-		// mp = 0.25
-		// fp + lp = 0.75
-		// fp + mp = 0.50
-		// mp + lp = 0.50
 
 		float multiplyingFactor = 1.00f;
 		float intialFactor = 1.00f;
@@ -693,16 +698,6 @@ public class AutomaticPageProcess {
 		int mlPage = Integer.parseInt(getPropertyMap().get(DocumentAssemblerConstants.RULE_ML_PAGE));
 
 		if (null != checkTypeList) {
-
-			// A = First_Page
-			// B = Middle_Page
-			// C = Last_Page
-			// CBA
-			// 101 = 5
-			// 100 = 4
-			// 111 = 7
-			// 010 = 2
-
 			int placeHolder = 0;
 
 			if (checkTypeList.contains(checkFirstPage)) {
@@ -759,7 +754,8 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will traverse the page level fields.
 	 * 
-	 * @param pageLevelFields PageLevelFields
+	 * @param pageLevelFields {@link PageLevelFields}
+	 * @param classificationType {@link String}
 	 * @param docConfidence Map<String, List<Float>>
 	 */
 	@SuppressWarnings("unchecked")
@@ -820,8 +816,8 @@ public class AutomaticPageProcess {
 	/**
 	 * This method will read all the pages of the document for document type Unknown.
 	 * 
-	 * @return docPageInfo List<PageType>
-	 * @throws DCMAApplicationException Check for input parameters and read all pages of the document.
+	 * @return docPageInfo {@link List<PageType>}
+	 * @throws DCMAApplicationException {@link DCMAApplicationException} Check for input parameters and read all pages of the document.
 	 */
 	public final List<Page> readAllPages() throws DCMAApplicationException {
 		LOGGER.info("Reading the document for Document Assembler.");
@@ -844,10 +840,10 @@ public class AutomaticPageProcess {
 	}
 
 	/**
-	 * Method to check whether one of the include list String as mentioned in the properties file , is contained in the xml
+	 * Method to check whether one of the include list String as mentioned in the properties file , is contained in the xml.
 	 * 
 	 * @param list include list from the properties file
-	 * @param str String to be checked
+	 * @param str {@link String} to be checked
 	 * @return index at which the string is present in the include list
 	 */
 	private int contains(List<String> list, String str) {

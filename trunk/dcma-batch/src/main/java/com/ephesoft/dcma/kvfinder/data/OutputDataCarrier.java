@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -35,6 +35,7 @@
 
 package com.ephesoft.dcma.kvfinder.data;
 
+import com.ephesoft.dcma.batch.constant.BatchConstants;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage.Spans.Span;
 
 /**
@@ -65,9 +66,9 @@ public class OutputDataCarrier {
 	/**
 	 * Constructor.
 	 * 
-	 * @param span Span
+	 * @param span {@link Span>}
 	 * @param confidence float
-	 * @param value String
+	 * @param value {@link String>}
 	 */
 	public OutputDataCarrier(final Span span, final float confidence, final String value) {
 		super();
@@ -80,19 +81,19 @@ public class OutputDataCarrier {
 	 * Compare a given OutputDataCarrier with this object. If confidence of this object is greater than the received object, then this
 	 * object is greater than the other. As we have to finder larger confidence score value we will return -1 for this case.
 	 * 
-	 * @param outputDataCarrier OutputDataCarrier
+	 * @param outputDataCarrier {@link OutputDataCarrier)
 	 * @return int
 	 */
 	public int compareTo(final OutputDataCarrier outputDataCarrier) {
 
-		int returnValue = 0;
+		int returnValue = BatchConstants.ZERO;
 		final float diffConfidence = this.getConfidence() - outputDataCarrier.getConfidence();
 
-		if (diffConfidence > 0) {
-			returnValue = -1;
+		if (diffConfidence > BatchConstants.ZERO) {
+			returnValue = - BatchConstants.ONE;
 		}
-		if (diffConfidence < 0) {
-			returnValue = 1;
+		if (diffConfidence < BatchConstants.ZERO) {
+			returnValue = BatchConstants.ONE;
 		}
 
 		return returnValue;

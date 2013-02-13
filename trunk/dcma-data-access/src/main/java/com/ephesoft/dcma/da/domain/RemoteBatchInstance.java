@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,28 +41,54 @@ import javax.persistence.Table;
 
 import com.ephesoft.dcma.core.model.common.AbstractChangeableEntity;
 
+/**
+ * Entity class for remote_batch_instance.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.core.model.common.AbstractChangeableEntity
+ */
 @Entity
 @Table(name = "remote_batch_instance")
 public class RemoteBatchInstance extends AbstractChangeableEntity {
 
+	/**
+	 * serialVersionUID long.
+	 */
 	private static final long serialVersionUID = 8261921740668252061L;
 
+	/**
+	 * remoteURL String.
+	 */
 	@Column(name = "remote_url")
 	private String remoteURL;
 
+	/**
+	 * remoteBatchInstanceIdentifier String.
+	 */
 	@Column(name = "remote_batch_instance_identifier")
 	private String remoteBatchInstanceIdentifier;
 
+	/**
+	 * previousRemoteURL String.
+	 */
 	@Column(name = "previous_remote_url")
 	private String previousRemoteURL;
 
+	/**
+	 * previousRemoteBatchInstanceIdentifier String.
+	 */
 	@Column(name = "previous_remote_batch_instance_identifier")
 	private String previousRemoteBatchInstanceIdentifier;
 	
+	/**
+	 * sourceModule String.
+	 */
 	@Column(name = "source_module")
 	private String sourceModule;
 
 	/**
+	 * To get Remote URL.
 	 * @return the remoteURL
 	 */
 	public String getRemoteURL() {
@@ -70,13 +96,15 @@ public class RemoteBatchInstance extends AbstractChangeableEntity {
 	}
 
 	/**
-	 * @param remoteURL the remoteURL to set
+	 * To set Remote URL.
+	 * @param remoteURL String
 	 */
 	public void setRemoteURL(String remoteURL) {
 		this.remoteURL = remoteURL;
 	}
 
 	/**
+	 * To get Remote Batch Instance Identifier.
 	 * @return the remoteBatchInstanceIdentifier
 	 */
 	public String getRemoteBatchInstanceIdentifier() {
@@ -84,13 +112,15 @@ public class RemoteBatchInstance extends AbstractChangeableEntity {
 	}
 
 	/**
-	 * @param remoteBatchInstanceIdentifier the remoteBatchInstanceIdentifier to set
+	 * To set Remote Batch Instance Identifier.
+	 * @param remoteBatchInstanceIdentifier String
 	 */
 	public void setRemoteBatchInstanceIdentifier(String remoteBatchInstanceIdentifier) {
 		this.remoteBatchInstanceIdentifier = remoteBatchInstanceIdentifier;
 	}
 
 	/**
+	 * To get Previous Remote URL.
 	 * @return the previousRemoteURL
 	 */
 	public String getPreviousRemoteURL() {
@@ -98,13 +128,15 @@ public class RemoteBatchInstance extends AbstractChangeableEntity {
 	}
 
 	/**
-	 * @param previousRemoteURL the previousRemoteURL to set
+	 * To set Previous Remote URL.
+	 * @param previousRemoteURL String
 	 */
 	public void setPreviousRemoteURL(String previousRemoteURL) {
 		this.previousRemoteURL = previousRemoteURL;
 	}
 	
 	/**
+	 * To get Previous Remote Batch Instance Identifier.
 	 * @return the previousRemoteBatchInstanceIdentifier
 	 */
 	public String getPreviousRemoteBatchInstanceIdentifier() {
@@ -112,13 +144,15 @@ public class RemoteBatchInstance extends AbstractChangeableEntity {
 	}
 	
 	/**
-	 * @param previousRemoteBatchInstanceIdentifier the previousRemoteBatchInstanceIdentifier to set
+	 * To set Previous Remote Batch Instance Identifier.
+	 * @param previousRemoteBatchInstanceIdentifier String
 	 */
 	public void setPreviousRemoteBatchInstanceIdentifier(String previousRemoteBatchInstanceIdentifier) {
 		this.previousRemoteBatchInstanceIdentifier = previousRemoteBatchInstanceIdentifier;
 	}
 	
 	/**
+	 * To get Source Module.
 	 * @return the sourceModule
 	 */
 	public String getSourceModule() {
@@ -126,7 +160,8 @@ public class RemoteBatchInstance extends AbstractChangeableEntity {
 	}
 	
 	/**
-	 * @param sourceModule the sourceModule to set
+	 * To set Source Module.
+	 * @param sourceModule String
 	 */
 	public void setSourceModule(String sourceModule) {
 		this.sourceModule = sourceModule;

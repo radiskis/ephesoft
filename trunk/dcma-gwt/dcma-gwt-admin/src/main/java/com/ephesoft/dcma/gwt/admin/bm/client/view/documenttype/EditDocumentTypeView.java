@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -42,6 +42,7 @@ import com.ephesoft.dcma.gwt.admin.bm.client.i18n.BatchClassManagementConstants;
 import com.ephesoft.dcma.gwt.admin.bm.client.presenter.documenttype.EditDocumentTypePresenter;
 import com.ephesoft.dcma.gwt.core.client.View;
 import com.ephesoft.dcma.gwt.core.client.i18n.LocaleDictionary;
+import com.ephesoft.dcma.gwt.core.client.validator.FileNameValidator;
 import com.ephesoft.dcma.gwt.core.client.validator.ValidatableWidget;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -54,65 +55,157 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit document type.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditDocumentTypeView> {
 	}
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * nameStar Label.
+	 */
 	@UiField
 	protected Label nameStar;
+
+	/**
+	 * name TextBox.
+	 */
 	@UiField
 	protected TextBox name;
 
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * descStar Label.
+	 */
 	@UiField
 	protected Label descStar;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
 
+	/**
+	 * confLabel Label.
+	 */
 	@UiField
 	protected Label confLabel;
+
+	/**
+	 * confStar Label.
+	 */
 	@UiField
 	protected Label confStar;
+
+	/**
+	 * confidence TextBox.
+	 */
 	@UiField
 	protected TextBox confidence;
 
+	/**
+	 * recostarExtractionLabel Label.
+	 */
 	@UiField
 	protected Label recostarExtractionLabel;
+
+	/**
+	 * recostarExtraction ListBox.
+	 */
 	@UiField
 	protected ListBox recostarExtraction;
 
+	/**
+	 * isHiddenLabel Label.
+	 */
 	@UiField
 	protected Label isHiddenLabel;
-	@UiField
-	protected CheckBox isHidden;
 
+	/**
+	 * hidden CheckBox.
+	 */
+	@UiField
+	protected CheckBox hidden;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * scrollPanel ScrollPanel.
+	 */
+	@UiField
+	protected ScrollPanel scrollPanel;
+
+	/**
+	 * validateDescriptionTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateDescriptionTextBox;
+
+	/**
+	 * validateConfidenceTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateConfidenceTextBox;
+
+	/**
+	 * validateNameTextBox ValidatableWidget<TextBox>.
+	 */
 	private ValidatableWidget<TextBox> validateNameTextBox;
 
+	/**
+	 * editDocumentTypeViewPanel VerticalPanel.
+	 */
 	@UiField
-	VerticalPanel editDocumentTypeViewPanel;
+	protected VerticalPanel editDocumentTypeViewPanel;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditDocumentTypeView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
 		saveButton.setText(AdminConstants.OK_BUTTON);
 		cancelButton.setText(AdminConstants.CANCEL_BUTTON);
 
+		scrollPanel.setStyleName(AdminConstants.SCROLL_PANEL_HEIGHT);
 		validateDescriptionTextBox = new ValidatableWidget<TextBox>(description);
 		validateDescriptionTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -132,6 +225,7 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 		});
 
 		validateNameTextBox = new ValidatableWidget<TextBox>(name);
+		validateNameTextBox.addValidator(new FileNameValidator(name));
 		validateNameTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
 
 			@Override
@@ -140,7 +234,7 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 			}
 		});
 
-		editDocumentTypeViewPanel.setSpacing(5);
+		editDocumentTypeViewPanel.setSpacing(BatchClassManagementConstants.FIVE);
 
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + AdminConstants.COLON);
@@ -162,97 +256,196 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 		descStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		confStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
 		recostarExtraction.setWidth("125px");
 	}
 
 	@UiHandler("saveButton")
-	void onSaveClicked(ClickEvent clickEvent) {
+	protected void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
 	@UiHandler("cancelButton")
-	void onCancelClicked(ClickEvent clickEvent) {
+	protected void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
+	/**
+	 * To set name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setText(name);
 	}
 
+	/**
+	 * To get name.
+	 * 
+	 * @return String
+	 */
 	public String getName() {
 		return this.name.getText();
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return this.description.getValue();
 	}
 
+	/**
+	 * To get Confidence.
+	 * 
+	 * @return String
+	 */
 	public String getConfidence() {
 		return this.confidence.getValue();
 	}
 
+	/**
+	 * To set Confidence.
+	 * 
+	 * @param confidence String
+	 */
 	public void setConfidence(String confidence) {
 		this.confidence.setValue(confidence);
 	}
 
+	/**
+	 * To add Confidence.
+	 * 
+	 * @param minThreshConfidence String
+	 */
 	public void addConfidence(String minThreshConfidence) {
 		this.confidence.setValue(minThreshConfidence);
 	}
 
+	/**
+	 * To get Validate Description TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescriptionTextBox() {
 		return validateDescriptionTextBox;
 	}
 
+	/**
+	 * To set Validate Description TextBox.
+	 * 
+	 * @param validateDescriptionTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateDescriptionTextBox(ValidatableWidget<TextBox> validateDescriptionTextBox) {
 		this.validateDescriptionTextBox = validateDescriptionTextBox;
 	}
 
+	/**
+	 * To get Validate Confidence TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateConfidenceTextBox() {
 		return validateConfidenceTextBox;
 	}
 
+	/**
+	 * To set Validate Confidence TextBox.
+	 * 
+	 * @param validateConfidenceTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateConfidenceTextBox(ValidatableWidget<TextBox> validateConfidenceTextBox) {
 		this.validateConfidenceTextBox = validateConfidenceTextBox;
 	}
 
+	/**
+	 * To get validate Name TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateNameTextBox() {
 		return validateNameTextBox;
 	}
 
+	/**
+	 * To get validate Name TextBox.
+	 * 
+	 * @param validateNameTextBox ValidatableWidget<TextBox>
+	 */
 	public void setValidateNameTextBox(ValidatableWidget<TextBox> validateNameTextBox) {
 		this.validateNameTextBox = validateNameTextBox;
 	}
 
+	/**
+	 * To get Confidence TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getConfidenceTextBox() {
 		return confidence;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return description;
 	}
 
+	/**
+	 * To get Conf Label.
+	 * 
+	 * @return String
+	 */
 	public String getConfLabel() {
 		return confLabel.getText();
 	}
 
+	/**
+	 * To get Name TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getNameTextBox() {
 		return name;
 	}
 
+	/**
+	 * To get Recostar Extraction.
+	 * 
+	 * @return String
+	 */
 	public String getRecostarExtraction() {
 
 		int index = this.recostarExtraction.getSelectedIndex();
 		String selected = null;
-		if (index > 0)
+		if (index > 0) {
 			selected = this.recostarExtraction.getItemText(index);
+		}
 
 		return selected;
 	}
 
+	/**
+	 * To set Recostar Extraction.
+	 * 
+	 * @param rspFileName String
+	 * @param rspFileNameList List<String>
+	 */
 	public void setRecostarExtraction(String rspFileName, List<String> rspFileNameList) {
 		this.recostarExtraction.setVisibleItemCount(1);
 
@@ -282,12 +475,22 @@ public class EditDocumentTypeView extends View<EditDocumentTypePresenter> {
 		}
 	}
 
+	/**
+	 * To get is hidden field.
+	 * 
+	 * @return boolean
+	 */
 	public boolean isHidden() {
-		return this.isHidden.getValue();
+		return this.hidden.getValue();
 	}
 
+	/**
+	 * To set is hidden field.
+	 * 
+	 * @param isHidden boolean
+	 */
 	public void setHidden(boolean isHidden) {
-		this.isHidden.setValue(isHidden);
+		this.hidden.setValue(isHidden);
 	}
 
 }

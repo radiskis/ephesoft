@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,12 +41,28 @@ import com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresent
 import com.ephesoft.dcma.gwt.admin.bm.client.view.kvextraction.KVExtractionDetailView;
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * The presenter for view that shows the KV extraction details.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.admin.bm.client.presenter.AbstractBatchClassPresenter
+ */
 public class KVExtractionDetailPresenter extends AbstractBatchClassPresenter<KVExtractionDetailView> {
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param controller BatchClassManagementController
+	 * @param view KVExtractionDetailView
+	 */
 	public KVExtractionDetailPresenter(BatchClassManagementController controller, KVExtractionDetailView view) {
 		super(controller, view);
 	}
 
+	/**
+	 * Processing to be done on load of this presenter.
+	 */
 	@Override
 	public void bind() {
 		if (controller.getSelectedKVExtraction() != null) {
@@ -54,17 +70,22 @@ public class KVExtractionDetailPresenter extends AbstractBatchClassPresenter<KVE
 			view.setValuePattern(controller.getSelectedKVExtraction().getValuePattern());
 			view.setKeyPattern(controller.getSelectedKVExtraction().getKeyPattern());
 			String noOfWords = String.valueOf(controller.getSelectedKVExtraction().getNoOfWords());
-			if (noOfWords!=null && noOfWords.length()!=0) {
-			view.setNoOfWords(String.valueOf(controller.getSelectedKVExtraction().getNoOfWords()));
+			if (noOfWords != null && noOfWords.length() != 0) {
+				view.setNoOfWords(String.valueOf(controller.getSelectedKVExtraction().getNoOfWords()));
 			} else {
 				view.setNoOfWords(AdminConstants.EMPTY_STRING);
 			}
 		}
 	}
 
+	/**
+	 * To handle events.
+	 * 
+	 * @param eventBus HandlerManager
+	 */
 	@Override
 	public void injectEvents(HandlerManager eventBus) {
-		//Event handling is done here.
+		// Event handling is done here.
 	}
 
 }

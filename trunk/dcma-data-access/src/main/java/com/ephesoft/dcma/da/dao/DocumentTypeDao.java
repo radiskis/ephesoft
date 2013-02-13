@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,25 +41,26 @@ import com.ephesoft.dcma.core.dao.CacheableDao;
 import com.ephesoft.dcma.da.domain.DocumentType;
 
 /**
- * Dao representing document_type table in database
+ * Dao representing document_type table in database.
  * 
  * @author Ephesoft
- * 
+ * @version 1.0
+ * @see com.ephesoft.dcma.da.dao.hibernate.DocumentTypeDaoImpl
  */
 public interface DocumentTypeDao extends CacheableDao<DocumentType> {
 
 	/**
-	 * An api to fetch all DocumentType by batch instance id.
+	 * An API to fetch all DocumentType by batch instance id.
 	 * 
-	 * @param batchInstanceID Long
+	 * @param batchInstanceIdentifier String
 	 * @return List<DocumentType>
 	 */
 	List<DocumentType> getDocTypeByBatchInstanceIdentifier(String batchInstanceIdentifier);
 
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID Long
+	 * @param batchClassID String
 	 * @param firstIndex int
 	 * @param maxResults int
 	 * @return List<DocumentType>
@@ -67,7 +68,7 @@ public interface DocumentTypeDao extends CacheableDao<DocumentType> {
 	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassID, final int firstIndex, final int maxResults);
 
 	/**
-	 * An api to fetch all DocumentType by document type name.
+	 * An API to fetch all DocumentType by document type name.
 	 * 
 	 * @param docTypeName String
 	 * @return List<DocumentType>
@@ -75,38 +76,38 @@ public interface DocumentTypeDao extends CacheableDao<DocumentType> {
 	List<DocumentType> getDocTypeByDocTypeName(String docTypeName);
 
 	/**
-	 * An api to insert the documentType object.
+	 * An API to insert the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
 	void insertDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to update the documentType object.
+	 * An API to update the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
 	void updateDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to remove the documentType object.
+	 * An API to remove the documentType object.
 	 * 
 	 * @param documentType DocumentType
 	 */
 	void removeDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to get document type based on document type identifier
+	 * An API to get document type based on document type identifier.
 	 * 
-	 * @param identifier
+	 * @param identifier String
 	 * @return DocumentType
 	 */
 	DocumentType getDocTypeByIdentifier(String identifier);
 	
 	/**
-	 * An api to fetch all DocumentType by batch class id.
+	 * An API to fetch all DocumentType by batch class id.
 	 * 
-	 * @param batchClassID Long
+	 * @param batchClassID String
 	 * @return List<DocumentType>
 	 */
 	List<DocumentType> getDocTypeByBatchClassIdentifier(final String batchClassID);

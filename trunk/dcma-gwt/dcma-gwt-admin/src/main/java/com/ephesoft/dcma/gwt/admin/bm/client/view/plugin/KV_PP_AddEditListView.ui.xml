@@ -4,17 +4,11 @@
 		<g:north size="43">
 			<g:CaptionPanel ui:field="kvPPConfigurationCaptionPanel"
 				height="80%" width="97%">
-				<g:ScrollPanel height="80%" width="100%">
 					<g:VerticalPanel height="100%" width="100%">
 						<g:VerticalPanel ui:field="kvPPTypeVerticalPanel"
 							height="100%" width="100%">
 							<plugin:KV_PP_AddEditDetailView
 								ui:field="kvPPDetailView" width='100%' height="100%" />
-							<g:HorizontalPanel width="100%">
-								<g:cell width="100%" horizontalAlignment="ALIGN_RIGHT">
-									<g:Button ui:field="editKVPPPropertiesButton"></g:Button>
-								</g:cell>
-							</g:HorizontalPanel>
 						</g:VerticalPanel>
 
 						<g:VerticalPanel ui:field="kvPPTypeConfigVerticalPanel"
@@ -23,7 +17,6 @@
 								width='100%' />
 						</g:VerticalPanel>
 					</g:VerticalPanel>
-				</g:ScrollPanel>
 			</g:CaptionPanel>
 		</g:north>
 	</g:DockLayoutPanel>

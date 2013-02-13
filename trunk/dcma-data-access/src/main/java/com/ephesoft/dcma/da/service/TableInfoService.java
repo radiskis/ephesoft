@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -50,7 +50,7 @@ import com.ephesoft.dcma.da.domain.TableInfo;
 public interface TableInfoService {
 
 	/**
-	 * An api to fetch all TableInfo by document type name.
+	 * An API to fetch all TableInfo by document type name.
 	 * 
 	 * @param docTypeName {@link String}
 	 * @param batchClassIdentifier {@link String}
@@ -59,7 +59,7 @@ public interface TableInfoService {
 	List<TableInfo> getTableInfoByDocTypeName(String docTypeName, String batchClassIdentifier);
 
 	/**
-	 * An api to fetch all TableInfo by document type.
+	 * An API to fetch all TableInfo by document type.
 	 * 
 	 * @param documentType {@link DocumentType}
 	 * @return List<{@link TableInfo}>
@@ -67,21 +67,21 @@ public interface TableInfoService {
 	List<TableInfo> getTableInfoByDocumentType(DocumentType documentType);
 
 	/**
-	 * An api to insert the TableInfo object.
+	 * An API to insert the TableInfo object.
 	 * 
 	 * @param TableInfo {@link TableInfo}
 	 */
 	void insertTableInfo(TableInfo TableInfo);
 
 	/**
-	 * An api to update the TableInfo object.
+	 * An API to update the TableInfo object.
 	 * 
 	 * @param TableInfo {@link TableInfo}
 	 */
 	void updateTableInfo(TableInfo TableInfo);
 
 	/**
-	 * An api to remove the TableInfo object.
+	 * An API to remove the TableInfo object.
 	 * 
 	 * @param TableInfo {@link TableInfo}
 	 */

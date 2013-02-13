@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -59,62 +59,175 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * This class provides functionality to edit individual batch class and it's child.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class EditBatchClassView extends View<EditBatchClassPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<VerticalPanel, EditBatchClassView> {
 	}
 
+	/**
+	 * priority TextBox.
+	 */
 	@UiField
 	protected TextBox priority;
+
+	/**
+	 * uncFolder Label.
+	 */
 	@UiField
 	protected Label uncFolder;
+
+	/**
+	 * name Label.
+	 */
 	@UiField
 	protected Label name;
+
+	/**
+	 * description TextBox.
+	 */
 	@UiField
 	protected TextBox description;
+
+	/**
+	 * version Label.
+	 */
 	@UiField
 	protected Label version;
+
+	/**
+	 * saveButton Button.
+	 */
 	@UiField
 	protected Button saveButton;
+
+	/**
+	 * cancelButton Button.
+	 */
 	@UiField
 	protected Button cancelButton;
 
+	/**
+	 * nameLabel Label.
+	 */
 	@UiField
 	protected Label nameLabel;
+
+	/**
+	 * priorityLabel Label.
+	 */
 	@UiField
 	protected Label priorityLabel;
+
+	/**
+	 * descLabel Label.
+	 */
 	@UiField
 	protected Label descLabel;
+
+	/**
+	 * uncLabel Label.
+	 */
 	@UiField
 	protected Label uncLabel;
+
+	/**
+	 * versionLabel Label.
+	 */
 	@UiField
 	protected Label versionLabel;
 
+	/**
+	 * star Label.
+	 */
 	@UiField
 	protected Label star;
 
+	/**
+	 * editBatchPanel HorizontalPanel.
+	 */
 	@UiField
-	HorizontalPanel editBatchPanel;
+	protected HorizontalPanel editBatchPanel;
 
+	/**
+	 * descStar Label.
+	 */
 	@UiField
 	protected Label descStar;
 
+	/**
+	 * roleLabel Label.
+	 */
 	@UiField
 	protected Label roleLabel;
 
+	/**
+	 * listBoxPanel HorizontalPanel.
+	 */
 	@UiField
 	protected HorizontalPanel listBoxPanel;
 
-	private ListBox role;
+	/**
+	 * role ListBox.
+	 */
+	private final ListBox role;
 
+	/**
+	 * validateTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateTextBox;
+
+	/**
+	 * validateDescTextBox ValidatableWidget<TextBox>.
+	 */
 	private final ValidatableWidget<TextBox> validateDescTextBox;
 
+	/**
+	 * editBatchClassViewPanel VerticalPanel.
+	 */
 	@UiField
-	VerticalPanel editBatchClassViewPanel;
+	protected VerticalPanel editBatchClassViewPanel;
 
+	/**
+	 * systemFolder TextBox.
+	 */
+	@UiField
+	protected TextBox systemFolder;
+
+	/**
+	 * systemFolderStar Label.
+	 */
+	@UiField
+	protected Label systemFolderStar;
+
+	/**
+	 * systemFolderLabel Label.
+	 */
+	@UiField
+	protected Label systemFolderLabel;
+
+	/**
+	 * validateSystemFolderTextBox ValidatableWidget<TextBox>.
+	 */
+	private final ValidatableWidget<TextBox> validateSystemFolderTextBox;
+
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public EditBatchClassView() {
 		super();
 		initWidget(BINDER.createAndBindUi(this));
@@ -139,8 +252,6 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 			}
 		});
 
-		editBatchClassViewPanel.setSpacing(5);
-
 		nameLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.NAME) + AdminConstants.COLON);
 		priorityLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.PRIORITY) + AdminConstants.COLON);
 		descLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.DESCRIPTION) + AdminConstants.COLON);
@@ -159,87 +270,194 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 		star.setStyleName(AdminConstants.FONT_RED_STYLE);
 		descStar.setStyleName(AdminConstants.FONT_RED_STYLE);
 		listBoxPanel.add(role);
+		saveButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+		cancelButton.setHeight(AdminConstants.BUTTON_HEIGHT);
+
+		systemFolderLabel.setText(LocaleDictionary.get().getConstantValue(BatchClassManagementConstants.SYSTEM_FOLDER)
+				+ AdminConstants.COLON);
+		systemFolderLabel.setStyleName(AdminConstants.BOLD_TEXT_STYLE);
+		systemFolderStar.setText(AdminConstants.STAR);
+		systemFolderStar.setStyleName(AdminConstants.FONT_RED_STYLE);
+
+		validateSystemFolderTextBox = new ValidatableWidget<TextBox>(systemFolder);
+		validateSystemFolderTextBox.getWidget().addValueChangeHandler(new ValueChangeHandler<String>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				validateSystemFolderTextBox.toggleValidDateBox();
+			}
+		});
 	}
 
+	/**
+	 * To do operations on save click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("saveButton")
 	public void onSaveClicked(ClickEvent clickEvent) {
 		presenter.onSave();
 	}
 
+	/**
+	 * To do operations on cancel click.
+	 * 
+	 * @param clickEvent ClickEvent
+	 */
 	@UiHandler("cancelButton")
 	public void onCancelClicked(ClickEvent clickEvent) {
 		presenter.onCancel();
 	}
 
+	/**
+	 * To get Priority.
+	 * 
+	 * @return String
+	 */
 	public String getPriority() {
 		return priority.getValue();
 	}
 
+	/**
+	 * To set Priority.
+	 * 
+	 * @param priority String
+	 */
 	public void setPriority(String priority) {
 		this.priority.setValue(priority);
 	}
 
+	/**
+	 * To get Unc Folder.
+	 * 
+	 * @return String
+	 */
 	public String getUncFolder() {
 		return uncFolder.getText();
 	}
 
+	/**
+	 * To set Unc Folder.
+	 * 
+	 * @param uncFolder String
+	 */
 	public void setUncFolder(String uncFolder) {
 		this.uncFolder.setText(uncFolder);
 	}
 
+	/**
+	 * To get Description.
+	 * 
+	 * @return String
+	 */
 	public String getDescription() {
 		return description.getValue();
 	}
 
+	/**
+	 * To get name.
+	 * 
+	 * @return String
+	 */
 	public String getname() {
 		return name.getText();
 	}
 
+	/**
+	 * To set name.
+	 * 
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name.setText(name);
 	}
 
+	/**
+	 * To set Description.
+	 * 
+	 * @param description String
+	 */
 	public void setDescription(String description) {
 		this.description.setValue(description);
 	}
 
+	/**
+	 * To get Version.
+	 * 
+	 * @return String
+	 */
 	public String getVersion() {
 		return version.getText();
 	}
 
+	/**
+	 * To set Version.
+	 * 
+	 * @param version String
+	 */
 	public void setVersion(String version) {
 		this.version.setText(version);
 	}
 
+	/**
+	 * To get Validate TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateTextBox() {
 		return validateTextBox;
 	}
 
+	/**
+	 * To get Validate Desc TextBox.
+	 * 
+	 * @return ValidatableWidget<TextBox>
+	 */
 	public ValidatableWidget<TextBox> getValidateDescTextBox() {
 		return validateDescTextBox;
 	}
 
+	/**
+	 * To get Priority TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getPriorityTextBox() {
 		return priority;
 	}
 
+	/**
+	 * To get Description TextBox.
+	 * 
+	 * @return TextBox
+	 */
 	public TextBox getDescriptionTextBox() {
 		return description;
 	}
 
+	/**
+	 * To get role.
+	 * 
+	 * @return String
+	 */
 	public String getRole() {
 		int numberOfRole = role.getItemCount();
-		StringBuffer selected = new StringBuffer("");
+		StringBuffer selected = new StringBuffer(BatchClassManagementConstants.EMPTY_STRING);
 		if (role.getSelectedIndex() >= 0) {
 			for (int index = 0; index < numberOfRole; index++) {
 				if (role.isItemSelected(index)) {
-					selected.append(role.getItemText(index)).append(';');
+					selected.append(role.getItemText(index)).append(BatchClassManagementConstants.SEMICOLON);
 				}
 			}
 		}
 		return selected.toString();
 	}
 
+	/**
+	 * To get role list.
+	 * 
+	 * @return List<RoleDTO>
+	 */
 	public List<RoleDTO> getRoleList() {
 		List<RoleDTO> assignedRole = new ArrayList<RoleDTO>();
 		List<RoleDTO> allRoleList = presenter.getController().getAllRoles();
@@ -256,6 +474,8 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	}
 
 	/**
+	 * To get Name Label.
+	 * 
 	 * @return the nameLabel
 	 */
 	public Label getNameLabel() {
@@ -263,15 +483,23 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 	}
 
 	/**
-	 * @param nameLabel the nameLabel to set
+	 * To set Name Label.
+	 * 
+	 * @param nameLabel Label
 	 */
 	public void setNameLabel(Label nameLabel) {
 		this.nameLabel = nameLabel;
 	}
 
+	/**
+	 * To set role.
+	 * 
+	 * @param assignedRole List<RoleDTO>
+	 * @param roleList List<RoleDTO>
+	 */
 	public void setRole(List<RoleDTO> assignedRole, List<RoleDTO> roleList) {
-		if (roleList.size() > 4) {
-			role.setVisibleItemCount(4);
+		if (roleList.size() > BatchClassManagementConstants.FOUR) {
+			role.setVisibleItemCount(BatchClassManagementConstants.FOUR);
 		} else {
 			role.setVisibleItemCount(roleList.size());
 		}
@@ -302,4 +530,39 @@ public class EditBatchClassView extends View<EditBatchClassPresenter> {
 		}
 	}
 
+	/**
+	 * To set System Folder.
+	 * 
+	 * @param systemFolder String
+	 */
+	public void setSystemFolder(String systemFolder) {
+		this.systemFolder.setText(systemFolder);
+	}
+
+	/**
+	 * To get System Folder.
+	 * 
+	 * @return String
+	 */
+	public String getSystemFolder() {
+		return systemFolder.getValue();
+	}
+
+	/**
+	 * To get System Folder TextBox.
+	 * 
+	 * @return TextBox
+	 */
+	public TextBox getSystemFolderTextBox() {
+		return systemFolder;
+	}
+
+	/**
+	 * To get Validate System Folder Text Box.
+	 * 
+	 * @return the validateSystemFolderTextBox
+	 */
+	public ValidatableWidget<TextBox> getValidateSystemFolderTextBox() {
+		return validateSystemFolderTextBox;
+	}
 }

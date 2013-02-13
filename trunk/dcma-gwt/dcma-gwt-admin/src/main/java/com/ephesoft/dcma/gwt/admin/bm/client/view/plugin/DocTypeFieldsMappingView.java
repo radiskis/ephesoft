@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -47,35 +47,84 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 
+/**
+ * This class provides functionality to edit document type fields mapping.
+ * 
+ * @author Ephesoft
+ * @version 1.0
+ * @see com.ephesoft.dcma.gwt.core.client.View
+ */
 public class DocTypeFieldsMappingView extends View<DocTypeFieldsMappingPresenter> {
 
+	/**
+	 * UI binder.
+	 */
 	interface Binder extends UiBinder<DockLayoutPanel, DocTypeFieldsMappingView> {
 	}
 
+	/**
+	 * documentTypeDetails CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel documentTypeDetails;
 
+	/**
+	 * fieldMapping CaptionPanel.
+	 */
 	@UiField
 	protected CaptionPanel fieldMapping;
 
+	/**
+	 * flexEditTable FlexTable.
+	 */
 	@UiField
 	protected FlexTable flexEditTable;
 
-	private FlexTable detailsTable;
+	/**
+	 * detailsTable FlexTable.
+	 */
+	private final FlexTable detailsTable;
 
+	/**
+	 * rowCounter int.
+	 */
 	private int rowCounter = 0;
 
+	/**
+	 * fuzzyDBDocTypeDetailView FuzzyDBDocTypeDetailView.
+	 */
 	@UiField
 	protected FuzzyDBDocTypeDetailView fuzzyDBDocTypeDetailView;
 
+	/**
+	 * driverName String.
+	 */
 	private String driverName;
+
+	/**
+	 * url String.
+	 */
 	private String url;
+	/**
+	 * userName String.
+	 */
 	private String userName;
+
+	/**
+	 * password String.
+	 */
 	private String password;
 
+	/**
+	 * Instantiates a class via deferred binding.
+	 */
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+	/**
+	 * Constructor.
+	 */
 	public DocTypeFieldsMappingView() {
+		super();
 		initWidget(BINDER.createAndBindUi(this));
 
 		documentTypeDetails.setCaptionHTML(AdminConstants.DOCUMENT_TYPE_HTML);
@@ -88,48 +137,101 @@ public class DocTypeFieldsMappingView extends View<DocTypeFieldsMappingPresenter
 
 	}
 
+	/**
+	 * To add Row.
+	 * 
+	 * @param widget CustomWidget
+	 */
 	public void addRow(CustomWidget widget) {
 		detailsTable.setWidget(rowCounter, 0, widget);
 		rowCounter++;
 	}
 
+	/**
+	 * To clear Details Table.
+	 */
 	public void clearDetailsTable() {
 		detailsTable.clear();
 		rowCounter = 0;
 	}
 
+	/**
+	 * To get Fuzzy DB DocType Detail View.
+	 * 
+	 * @return FuzzyDBDocTypeDetailView
+	 */
 	public FuzzyDBDocTypeDetailView getFuzzyDBDocTypeDetailView() {
 		return fuzzyDBDocTypeDetailView;
 	}
 
+	/**
+	 * To get Driver Name.
+	 * 
+	 * @return String
+	 */
 	public String getDriverName() {
 		return driverName;
 	}
 
+	/**
+	 * To set Driver Name.
+	 * 
+	 * @param driverName String
+	 */
 	public void setDriverName(String driverName) {
 		this.driverName = driverName;
 	}
 
+	/**
+	 * To get Url.
+	 * 
+	 * @return String
+	 */
 	public String getUrl() {
 		return url;
 	}
 
+	/**
+	 * To set Url.
+	 * 
+	 * @param url String
+	 */
 	public void setUrl(String url) {
 		this.url = url;
 	}
 
+	/**
+	 * To get User Name.
+	 * 
+	 * @return String
+	 */
 	public String getUserName() {
 		return userName;
 	}
 
+	/**
+	 * To set User Name.
+	 * 
+	 * @param userName String
+	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
+	/**
+	 * To get Password.
+	 * 
+	 * @return String
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * To set Password.
+	 * 
+	 * @param password String
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}

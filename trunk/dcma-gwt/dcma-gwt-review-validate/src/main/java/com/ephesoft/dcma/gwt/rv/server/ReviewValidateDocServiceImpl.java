@@ -1,6 +1,6 @@
 /********************************************************************************* 
 * Ephesoft is a Intelligent Document Capture and Mailroom Automation program 
-* developed by Ephesoft, Inc. Copyright (C) 2010-2011 Ephesoft Inc. 
+* developed by Ephesoft, Inc. Copyright (C) 2010-2012 Ephesoft Inc. 
 * 
 * This program is free software; you can redistribute it and/or modify it under 
 * the terms of the GNU Affero General Public License version 3 as published by the 
@@ -41,6 +41,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -54,8 +55,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
-
 import com.ephesoft.dcma.batch.schema.Batch;
 import com.ephesoft.dcma.batch.schema.Column;
 import com.ephesoft.dcma.batch.schema.Coordinates;
@@ -66,7 +65,6 @@ import com.ephesoft.dcma.batch.schema.Document;
 import com.ephesoft.dcma.batch.schema.HocrPages;
 import com.ephesoft.dcma.batch.schema.Page;
 import com.ephesoft.dcma.batch.schema.Row;
-import com.ephesoft.dcma.batch.schema.Batch.Documents;
 import com.ephesoft.dcma.batch.schema.Document.DocumentLevelFields;
 import com.ephesoft.dcma.batch.schema.Field.CoordinatesList;
 import com.ephesoft.dcma.batch.schema.HocrPages.HocrPage;
@@ -84,12 +82,14 @@ import com.ephesoft.dcma.da.domain.BatchInstance;
 import com.ephesoft.dcma.da.domain.DocumentType;
 import com.ephesoft.dcma.da.domain.FieldType;
 import com.ephesoft.dcma.da.domain.FunctionKey;
+import com.ephesoft.dcma.da.domain.ManualStepHistoryInWorkflow;
 import com.ephesoft.dcma.da.domain.RegexValidation;
 import com.ephesoft.dcma.da.domain.TableColumnsInfo;
 import com.ephesoft.dcma.da.domain.TableInfo;
 import com.ephesoft.dcma.da.id.BatchInstanceID;
 import com.ephesoft.dcma.da.service.BatchClassService;
 import com.ephesoft.dcma.da.service.BatchInstanceService;
+import com.ephesoft.dcma.da.service.ManualStepHistoryService;
 import com.ephesoft.dcma.da.service.TableColumnsInfoService;
 import com.ephesoft.dcma.da.service.TableInfoService;
 import com.ephesoft.dcma.encryption.security.SecurityTokenHandler;
@@ -106,6 +106,7 @@ import com.ephesoft.dcma.gwt.rv.client.ReviewValidateDocService;
 import com.ephesoft.dcma.gwt.rv.client.constant.ReviewProperties;
 import com.ephesoft.dcma.gwt.rv.client.constant.ValidateProperties;
 import com.ephesoft.dcma.gwt.rv.client.i18n.ReviewValidateConstants;
+import com.ephesoft.dcma.imagemagick.service.ImageProcessService;
 import com.ephesoft.dcma.script.service.ScriptService;
 import com.ephesoft.dcma.tablefinder.service.TableFinderService;
 import com.ephesoft.dcma.util.ApplicationConfigProperties;
@@ -113,6 +114,8 @@ import com.ephesoft.dcma.util.FileUtils;
 import com.ephesoft.dcma.workflow.service.common.WorkflowService;
 
 public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet implements ReviewValidateDocService {
+
+	private static final String BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE = "batchInstancePluginPropertiesService";
 
 	private static final String ERROR_TYPE_1 = "1";
 
@@ -152,35 +155,31 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 	private static String preloadedImageCount = null;
 
-	private static String ZOOM_COUNT = "zoom_count";
-	
-	private static final int DOC_TYPE=1;
-	
-	private static final int DOC_SIZE=2;
-	
-	private static final int DOC_CONFIDENCE=3;
-	
-	private static final int DOC_CONFIDENCE_THRESHOLD=4;
-	
+	private final static String ZOOM_COUNT = "zoom_count";
+
+	private static final int DOC_TYPE = 1;
+
+	private static final String MODULE_ID_FOR_REVIEW = "5";
+
+	private static final String MODULE_ID_FOR_VALIDATE = "6";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReviewValidateDocServiceImpl.class);
 
 	@Override
 	public BatchDTO getHighestPriortyBatch() throws GWTException {
 		BatchDTO batchDTO = null;
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
-		if(isSuperAdmin()){
-			ephesoftUser=EphesoftUser.SUPER_ADMIN;
-		}
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
 		BatchInstance batchInstance = batchInstanceService.getHighestPriorityBatchInstance(getUserRoles(), ephesoftUser);
 		if (batchInstance != null) {
 			String batchInstanceIdentifier = batchInstance.getIdentifier();
 			batchDTO = getBatch(batchInstanceIdentifier);
+			recordReviewOrValidateDuration(batchInstanceIdentifier, batchDTO.getBatchInstanceStatus());
 			try {
 				acquireLock(batchInstanceIdentifier);
 			} catch (GWTException e) {
 				throw new GWTException(e.getMessage() + ReviewValidateConstants.SPACE + ReviewValidateConstants.ERROR_TYPE_5
-						+ ReviewValidateConstants.SPACE + batchInstanceIdentifier);
+						+ ReviewValidateConstants.SPACE + batchInstanceIdentifier, e);
 			}
 		}
 		return batchDTO;
@@ -214,10 +213,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	public BatchDTO getBatch(String batchInstanceIdentifier) throws GWTException {
 		checkCurrentUser(batchInstanceIdentifier);
 		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
-		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
-		if(isSuperAdmin()){
-			ephesoftUser=EphesoftUser.SUPER_ADMIN;
-		}
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
 		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByUserRole(getUserRoles(), batchInstanceIdentifier,
 				getUserName(), ephesoftUser);
 		if (batchInstance == null) {
@@ -225,8 +221,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		}
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		Batch batch = batchSchemaService.getBatch(batchInstanceIdentifier);
-
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
+		PluginPropertiesService pluginPropertiesService = this.getBeanByName(BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE,
 				BatchInstancePluginPropertiesService.class);
 		String externalApplicationSwitchState = null;
 		String validateScriptSwitch = null;
@@ -239,18 +234,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		Map<String, String> dimensionsForPopUp = null;
 		Map<String, String> urlAndTitleMap = null;
 		BatchInstanceStatus batchInstanceStatus = batchInstance.getStatus();
-
 		switch (batchInstanceStatus) {
 			case READY_FOR_VALIDATION:
 				validateScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 						ValidateProperties.VAILDATE_DOCUMENT_SCRIPTING_SWITCH);
-
 				fieldValueChangeScriptSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FIELD_VALUE_CHANGE_SCRIPT_SWITCH);
-
 				fuzzySearchSwitch = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 						ValidateProperties.FUZZY_SEARCH_SWITCH);
-
 				suggestionBoxSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier, VALIDATE_DOCUMENT_PLUGIN,
 						ValidateProperties.SUGGESTION_BOX_SWITCH);
 				fuzzySearchPopUpXDimension = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
@@ -259,20 +250,18 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.FUZZY_SEARCH_POP_UP_Y_DIMENSION);
 				externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 						VALIDATE_DOCUMENT_PLUGIN, ValidateProperties.EXTERNAL_APP_SWITCH);
-				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON)) {
+				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON_SWITCH)) {
 					dimensionsForPopUp = new HashMap<String, String>();
 					urlAndShortcutMap = new LinkedHashMap<String, String>();
 					urlAndTitleMap = new LinkedHashMap<String, String>();
 					getPropertiesOfExternalApplicationForValidation(pluginPropertiesService, batchInstanceIdentifier,
 							urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap);
-
 				}
 				break;
-
 			case READY_FOR_REVIEW:
 				externalApplicationSwitchState = pluginPropertiesService.getPropertyValue(batchInstanceIdentifier,
 						REVIEW_DOCUMENT_PLUGIN, ReviewProperties.EXTERNAL_APP_SWITCH);
-				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON)) {
+				if (null != externalApplicationSwitchState && externalApplicationSwitchState.equals(ReviewValidateConstants.ON_SWITCH)) {
 					dimensionsForPopUp = new HashMap<String, String>();
 					urlAndShortcutMap = new LinkedHashMap<String, String>();
 					urlAndTitleMap = new LinkedHashMap<String, String>();
@@ -281,15 +270,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				}
 				break;
 			default:
-
 		}
-
 		if (updateInterval == null) {
 			try {
 				ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 				updateInterval = applicationConfigProperties.getProperty(UPDATE_INTERVAL);
 			} catch (IOException e) {
-
+				// do nothing if update interval is not readable since handling of such scenarios with null handling is done
+				LOG.info(e.getMessage());
 			}
 		}
 		if (preloadedImageCount == null) {
@@ -297,20 +285,37 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
 				preloadedImageCount = applicationConfigProperties.getProperty(PRELOADED_IMAGE_COUNT);
 			} catch (IOException e) {
-
+				// do nothing if pre loaded image count is not readable since handling of such scenarios with null handling is done
+				LOG.info(e.getMessage());
 			}
 		}
-
 		URL batchURL = batchSchemaService.getBatchContextURL(batchInstanceIdentifier);
-       
-		//displaying document type in tree view
-		
-		int docDisplayName=DOC_TYPE;
-			
-        
+		// displaying document type in tree view
+		int docDisplayName = DOC_TYPE;
+		String defaultReviewPanelState = null;
+		try {
+			ApplicationConfigProperties applicationConfigProperties = ApplicationConfigProperties.getApplicationConfigProperties();
+			defaultReviewPanelState = applicationConfigProperties.getProperty(ReviewValidateConstants.DEFAULT_REVIEW_PANEL_OPEN);
+		} catch (IOException e) {
+			LOGGER.info("Unable to fetch default state for review panel.", e);
+		}
 		return new BatchDTO(batch, batchURL.toString(), validateScriptSwitch, fieldValueChangeScriptSwitch, fuzzySearchSwitch,
 				suggestionBoxSwitchState, externalApplicationSwitchState, urlAndShortcutMap, dimensionsForPopUp, urlAndTitleMap,
-				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension, updateInterval, preloadedImageCount, batchInstanceStatus,docDisplayName);
+				fuzzySearchPopUpXDimension, fuzzySearchPopUpYDimension, updateInterval, preloadedImageCount, batchInstanceStatus,
+				docDisplayName, defaultReviewPanelState);
+	}
+
+	@Override
+	public void recordReviewOrValidateDuration(String batchInstanceId, BatchInstanceStatus batchInstanceStatus) {
+		LOGGER.info("Inside recordReviewOrValidateDuration....");
+		ManualStepHistoryInWorkflow manualStepHistoryInWorkflow = new ManualStepHistoryInWorkflow();
+		manualStepHistoryInWorkflow.setUserName(getUserName());
+		manualStepHistoryInWorkflow.setStartTime(new Date());
+		manualStepHistoryInWorkflow.setEndTime(new Date(0L));
+		manualStepHistoryInWorkflow.setBatchInstanceId(batchInstanceId);
+		manualStepHistoryInWorkflow.setBatchInstanceStatus(batchInstanceStatus.name());
+		ManualStepHistoryService manualStepHistoryService = this.getSingleBeanOfType(ManualStepHistoryService.class);
+		manualStepHistoryService.updateManualStepHistory(manualStepHistoryInWorkflow);
 	}
 
 	private void getPropertiesOfExternalApplicationForValidation(PluginPropertiesService pluginPropertiesService,
@@ -435,7 +440,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		 */
 		// PluginPropertiesService pluginPropertiesService = this
 		// .getSingleBeanOfType(BatchInstancePluginPropertiesService.class);
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
+		PluginPropertiesService pluginPropertiesService = this.getBeanByName(BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE,
 				BatchInstancePluginPropertiesService.class);
 		List<com.ephesoft.dcma.da.domain.DocumentType> documentTypes = pluginPropertiesService.getDocumentTypes(batchInstanceID);
 
@@ -488,7 +493,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		// Long.parseLong(batchID));
 		// PluginPropertiesService pluginPropertiesService = this
 		// .getSingleBeanOfType(BatchInstancePluginPropertiesService.class);
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
+		PluginPropertiesService pluginPropertiesService = this.getBeanByName(BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE,
 				BatchInstancePluginPropertiesService.class);
 		List<FieldType> listFieldTypes = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier, docTypeName);
 
@@ -523,8 +528,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			saveBatch(batch);
 			batchSchemaService.duplicatePageOfDocument(batchInstanceIdentifier, docID, duplicatePageID);
 		} catch (Exception e) {
-			// TODO: handle exception
-			// For now eat me.
+			LOGGER.error("Unable to duplicate page: " + duplicatePageID + " for document id:" + docID, e);
 		}
 
 		return getBatch(batchInstanceIdentifier);
@@ -672,10 +676,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		statusList.add(BatchInstanceStatus.READY_FOR_VALIDATION);
 		int rowCount = 0;
 		BatchInstanceService batchClassService = this.getSingleBeanOfType(BatchInstanceService.class);
-		EphesoftUser ephesoftUser=EphesoftUser.NORMAL_USER;
-		if(isSuperAdmin()){
-			ephesoftUser=EphesoftUser.SUPER_ADMIN;
-		}
+		EphesoftUser ephesoftUser = EphesoftUser.NORMAL_USER;
 		rowCount = batchClassService.getCount(statusList, null, getUserRoles(), getUserName(), ephesoftUser);
 		return rowCount;
 	}
@@ -683,7 +684,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	@Override
 	public List<FieldTypeDTO> getFieldTypeDTOs(String documentName, String batchInstanceIdentifier) {
 
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
+		PluginPropertiesService pluginPropertiesService = this.getBeanByName(BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE,
 				BatchInstancePluginPropertiesService.class);
 		List<FieldType> allFdTypes = pluginPropertiesService.getFieldTypes(batchInstanceIdentifier, documentName);
 
@@ -715,6 +716,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					fieldTypeDTO.setDescription(fdType.getDescription());
 					fieldTypeDTO.setHidden(fdType.isHidden());
 					fieldTypeDTO.setMultiLine(fdType.isMultiLine());
+					fieldTypeDTO.setReadOnly(fdType.getIsReadOnly());
 					fieldTypeDTOs.add(fieldTypeDTO);
 					continue;
 				}
@@ -740,6 +742,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 					fieldTypeDTO.setDescription(fdType.getDescription());
 					fieldTypeDTO.setHidden(fdType.isHidden());
 					fieldTypeDTO.setMultiLine(fdType.isMultiLine());
+					fieldTypeDTO.setReadOnly(fdType.getIsReadOnly());
 					fieldTypeDTOs.add(fieldTypeDTO);
 				}
 			}
@@ -778,7 +781,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			}
 		} else {
 			String errorMessage = "Could not get batch for batch id: " + batchInstanceIdentifier;
-			log.error(errorMessage);
+			LOGGER.error(errorMessage);
 			throw new GWTException(errorMessage);
 		}
 	}
@@ -810,11 +813,9 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 
 		if (null != tableInfoList && !tableInfoList.isEmpty()) {
 			for (TableInfo tableInfo : tableInfoList) {
-				if (null != tableInfo) {
-					if (tableInfo.getName().equalsIgnoreCase(tableName)) {
-						tableEndPattern = tableInfo.getEndPattern();
-						break;
-					}
+				if (null != tableInfo && tableInfo.getName().equalsIgnoreCase(tableName)) {
+					tableEndPattern = tableInfo.getEndPattern();
+					break;
 				}
 			}
 		}
@@ -839,17 +840,17 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	}
 
 	@Override
-	public BatchDTO executeScript(Batch batch) throws GWTException {
+	public BatchDTO executeScript(Batch batch, Document document) throws GWTException {
 		ScriptService scriptService = this.getSingleBeanOfType(ScriptService.class);
 		saveBatch(batch);
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		BatchInstanceID batchInstanceID = new BatchInstanceID(batch.getBatchInstanceIdentifier());
 		String nameOfPluginScript = batchSchemaService.getValidationScriptName();
 		try {
-			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, null, null);
+			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, document.getIdentifier(), null);
 		} catch (DCMAException e) {
 			LOGGER.error(e.getMessage(), e);
-			throw new GWTException(e.getMessage());
+			throw new GWTException(e.getMessage(), e);
 		}
 		return getBatch(batch.getBatchInstanceIdentifier());
 	}
@@ -871,112 +872,122 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			if (hocrPages != null && hocrPages.getHocrPage() != null) {
 				List<HocrPage> hocrPageList = hocrPages.getHocrPage();
 				if (!hocrPageList.isEmpty()) {
-					HocrPage hocrPage = hocrPageList.get(0);
-					List<Span> spanList = new ArrayList<Span>();
-					if (hocrPage.getSpans() != null) {
-						spanList = hocrPage.getSpans().getSpan();
-					}
-					Integer firstSpanIndex = null;
-					Integer lastSpanIndex = null;
-
-					Integer x0Coordinate = pointCoordinate1.getxCoordinate();
-					Integer y0Coordinate = pointCoordinate1.getyCoordinate();
-					Integer x1Coordinate = pointCoordinate2.getxCoordinate();
-					Integer y1Coordinate = pointCoordinate2.getyCoordinate();
-					List<Span> spanSortedList = getSortedList(spanList);
-					if (!rectangularCoordinateSet) {
-
-						int counter = 0;
-
-						for (Span span : spanSortedList) {
-							long spanX0 = span.getCoordinates().getX0().longValue();
-							long spanY0 = span.getCoordinates().getY0().longValue();
-							long spanX1 = span.getCoordinates().getX1().longValue();
-							long spanY1 = span.getCoordinates().getY1().longValue();
-							if (spanX0 < x0Coordinate && spanX1 > x0Coordinate && spanY0 < y0Coordinate && spanY1 > y0Coordinate) {
-								firstSpanIndex = counter;
-							}
-							if (spanX0 < x1Coordinate && spanX1 > x1Coordinate && spanY0 < y1Coordinate && spanY1 > y1Coordinate) {
-								lastSpanIndex = counter;
-							}
-							if (firstSpanIndex != null && lastSpanIndex != null) {
-								break;
-							}
-							counter++;
-						}
-						if (firstSpanIndex != null && lastSpanIndex != null) {
-							counter = 0;
-							for (Span span : spanSortedList) {
-								if ((counter >= firstSpanIndex && counter <= lastSpanIndex)
-										|| (counter <= firstSpanIndex && counter >= lastSpanIndex)) {
-									if (spanSelectedList == null) {
-										spanSelectedList = new ArrayList<Span>();
-									}
-									spanSelectedList.add(span);
-								}
-								counter++;
-							}
-						}
-					} else {
-						boolean isValidSpan = false;
-						int defaultvalue = 20;
-						int counter = 0;
-						StringBuffer valueStringBuffer = new StringBuffer();
-						long currentYCoor = spanSortedList.get(0).getCoordinates().getY1().longValue();
-						for (Span span : spanSortedList) {
-							isValidSpan = false;
-							long spanX0 = span.getCoordinates().getX0().longValue();
-							long spanY0 = span.getCoordinates().getY0().longValue();
-							long spanX1 = span.getCoordinates().getX1().longValue();
-							long spanY1 = span.getCoordinates().getY1().longValue();
-							if ((spanY1 - currentYCoor) > defaultvalue) {
-								currentYCoor = spanY1;
-								if (spanSelectedList != null && spanSelectedList.size() > 0) {
-									break;
-								}
-							}
-							if (((spanX1 >= x0Coordinate && spanX1 <= x1Coordinate) || (spanX0 >= x0Coordinate && spanX0 <= x1Coordinate))
-									&& ((spanY1 <= y1Coordinate && spanY1 >= y0Coordinate) || (spanY0 <= y1Coordinate && spanY0 >= y0Coordinate))) {
-								isValidSpan = true;
-							} else if (((x0Coordinate <= spanX0 && x1Coordinate >= spanX0) || (x0Coordinate >= spanX1 && x1Coordinate <= spanX1))
-									&& ((y0Coordinate >= spanY0 && y0Coordinate <= spanY1) || (y1Coordinate >= spanY0 && y1Coordinate <= spanY1))
-									|| ((y0Coordinate <= spanY0 && y1Coordinate >= spanY0) || (y0Coordinate >= spanY1 && y1Coordinate <= spanY1))
-									&& ((x0Coordinate >= spanX0 && x0Coordinate <= spanX1) || (x1Coordinate >= spanX0 && x1Coordinate <= spanX1))) {
-								isValidSpan = true;
-							} else {
-								if (((x0Coordinate > spanX0 && x0Coordinate < spanX1) || (x1Coordinate > spanX0 && x1Coordinate < spanX1))
-										&& ((y0Coordinate > spanY0 && y0Coordinate < spanY1) || (y1Coordinate > spanY0 && y1Coordinate < spanY1))) {
-									isValidSpan = true;
-								}
-							}
-							if (isValidSpan) {
-								if (counter != 0) {
-									valueStringBuffer.append(' ');
-								}
-								valueStringBuffer.append(span.getValue());
-								counter++;
-							}
-
-						}
-						if (spanSelectedList == null) {
-							spanSelectedList = new ArrayList<Span>();
-						}
-						Span span = new Span();
-						Coordinates coordinates = new Coordinates();
-						coordinates.setX0(BigInteger.valueOf(x0Coordinate));
-						coordinates.setX1(BigInteger.valueOf(x1Coordinate));
-						coordinates.setY0(BigInteger.valueOf(y0Coordinate));
-						coordinates.setY1(BigInteger.valueOf(y1Coordinate));
-						span.setCoordinates(coordinates);
-						span.setValue(valueStringBuffer.toString());
-						spanSelectedList.add(span);
-
-					}
+					spanSelectedList = getContentForHOCR(pointCoordinate1, pointCoordinate2, rectangularCoordinateSet,
+							spanSelectedList, hocrPageList);
 				}
 			}
 		}
-
 		return spanSelectedList;
+	}
+
+	private List<Span> getContentForHOCR(PointCoordinate pointCoordinate1, PointCoordinate pointCoordinate2,
+			boolean rectangularCoordinateSet, List<Span> spanSelectedList, List<HocrPage> hocrPageList) {
+		List<Span> spanSelectedListTemp = spanSelectedList;
+		HocrPage hocrPage = hocrPageList.get(0);
+		List<Span> spanList = new ArrayList<Span>();
+		if (hocrPage.getSpans() != null) {
+			spanList = hocrPage.getSpans().getSpan();
+		}
+		Integer firstSpanIndex = null;
+		Integer lastSpanIndex = null;
+		Integer x0Coordinate = pointCoordinate1.getxCoordinate();
+		Integer y0Coordinate = pointCoordinate1.getyCoordinate();
+		Integer x1Coordinate = pointCoordinate2.getxCoordinate();
+		Integer y1Coordinate = pointCoordinate2.getyCoordinate();
+		List<Span> spanSortedList = getSortedList(spanList);
+		if (!rectangularCoordinateSet) {
+			int counter = 0;
+			for (Span span : spanSortedList) {
+				long spanX0 = span.getCoordinates().getX0().longValue();
+				long spanY0 = span.getCoordinates().getY0().longValue();
+				long spanX1 = span.getCoordinates().getX1().longValue();
+				long spanY1 = span.getCoordinates().getY1().longValue();
+				if (spanX0 < x0Coordinate && spanX1 > x0Coordinate && spanY0 < y0Coordinate && spanY1 > y0Coordinate) {
+					firstSpanIndex = counter;
+				}
+				if (spanX0 < x1Coordinate && spanX1 > x1Coordinate && spanY0 < y1Coordinate && spanY1 > y1Coordinate) {
+					lastSpanIndex = counter;
+				}
+				if (firstSpanIndex != null && lastSpanIndex != null) {
+					break;
+				}
+				counter++;
+			}
+			if (firstSpanIndex != null && lastSpanIndex != null) {
+				counter = 0;
+				for (Span span : spanSortedList) {
+					if ((counter >= firstSpanIndex && counter <= lastSpanIndex)
+							|| (counter <= firstSpanIndex && counter >= lastSpanIndex)) {
+						if (spanSelectedListTemp == null) {
+							spanSelectedListTemp = new ArrayList<Span>();
+						}
+						spanSelectedListTemp.add(span);
+					}
+					counter++;
+				}
+			}
+		} else {
+			spanSelectedListTemp = setCoordinateValues(spanSelectedListTemp, x0Coordinate, y0Coordinate, x1Coordinate, y1Coordinate,
+					spanSortedList);
+		}
+		return spanSelectedListTemp;
+	}
+
+	private List<Span> setCoordinateValues(List<Span> spanSelectedListTemp, Integer x0Coordinate, Integer y0Coordinate,
+			Integer x1Coordinate, Integer y1Coordinate, List<Span> spanSortedList) {
+		List<Span> tempSpanSelectedList = spanSelectedListTemp;
+		boolean isValidSpan = false;
+		int defaultvalue = 20;
+		int counter = 0;
+		StringBuffer valueStringBuffer = new StringBuffer();
+		long currentYCoor = spanSortedList.get(0).getCoordinates().getY1().longValue();
+		for (Span span : spanSortedList) {
+			isValidSpan = false;
+			long spanX0 = span.getCoordinates().getX0().longValue();
+			long spanY0 = span.getCoordinates().getY0().longValue();
+			long spanX1 = span.getCoordinates().getX1().longValue();
+			long spanY1 = span.getCoordinates().getY1().longValue();
+			if ((spanY1 - currentYCoor) > defaultvalue) {
+				currentYCoor = spanY1;
+				if (tempSpanSelectedList != null && tempSpanSelectedList.size() > 0) {
+					break;
+				}
+			}
+			if (((spanX1 >= x0Coordinate && spanX1 <= x1Coordinate) || (spanX0 >= x0Coordinate && spanX0 <= x1Coordinate))
+					&& ((spanY1 <= y1Coordinate && spanY1 >= y0Coordinate) || (spanY0 <= y1Coordinate && spanY0 >= y0Coordinate))) {
+				isValidSpan = true;
+			} else if (((x0Coordinate <= spanX0 && x1Coordinate >= spanX0) || (x0Coordinate >= spanX1 && x1Coordinate <= spanX1))
+					&& ((y0Coordinate >= spanY0 && y0Coordinate <= spanY1) || (y1Coordinate >= spanY0 && y1Coordinate <= spanY1))
+					|| ((y0Coordinate <= spanY0 && y1Coordinate >= spanY0) || (y0Coordinate >= spanY1 && y1Coordinate <= spanY1))
+					&& ((x0Coordinate >= spanX0 && x0Coordinate <= spanX1) || (x1Coordinate >= spanX0 && x1Coordinate <= spanX1))) {
+				isValidSpan = true;
+			} else {
+				if (((x0Coordinate > spanX0 && x0Coordinate < spanX1) || (x1Coordinate > spanX0 && x1Coordinate < spanX1))
+						&& ((y0Coordinate > spanY0 && y0Coordinate < spanY1) || (y1Coordinate > spanY0 && y1Coordinate < spanY1))) {
+					isValidSpan = true;
+				}
+			}
+			if (isValidSpan) {
+				if (counter != 0) {
+					valueStringBuffer.append(' ');
+				}
+				valueStringBuffer.append(span.getValue());
+				counter++;
+			}
+		}
+		if (tempSpanSelectedList == null) {
+			tempSpanSelectedList = new ArrayList<Span>();
+		}
+		Span span = new Span();
+		Coordinates coordinates = new Coordinates();
+		coordinates.setX0(BigInteger.valueOf(x0Coordinate));
+		coordinates.setX1(BigInteger.valueOf(x1Coordinate));
+		coordinates.setY0(BigInteger.valueOf(y0Coordinate));
+		coordinates.setY1(BigInteger.valueOf(y1Coordinate));
+		span.setCoordinates(coordinates);
+		span.setValue(valueStringBuffer.toString());
+		tempSpanSelectedList.add(span);
+		return tempSpanSelectedList;
 	}
 
 	private List<Span> getSortedList(List<Span> spanList) {
@@ -1078,7 +1089,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		try {
 			scriptService.executeScript(batchInstanceID, null, nameOfTableScript, documentIdentifier, null);
 		} catch (DCMAException e) {
-			throw new GWTException(e.getMessage());
+			throw new GWTException(e.getMessage(), e);
 		}
 		return getBatch(batch.getBatchInstanceIdentifier());
 	}
@@ -1092,14 +1103,12 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		BatchClass batchClass = batchClassService.getBatchClassByIdentifier(batch.getBatchClassIdentifier());
 		if (batchClass.getDocumentTypes() != null && !batchClass.getDocumentTypes().isEmpty()) {
 			for (DocumentType docType : batchClass.getDocumentTypes()) {
-				if (docType.getName().equals(document.getType())) {
-					if (docType.getFunctionKeys() != null && !docType.getFunctionKeys().isEmpty()) {
-						for (FunctionKey functionKey : docType.getFunctionKeys()) {
-							if (functionKey.getShortcutKeyname().equals(shortcutKeyName)) {
-								executeScript(batchInstanceID, nameOfPluginScript, functionKey.getMethodName(), document
-										.getIdentifier());
-								break;
-							}
+				if (docType.getName().equals(document.getType()) && docType.getFunctionKeys() != null
+						&& !docType.getFunctionKeys().isEmpty()) {
+					for (FunctionKey functionKey : docType.getFunctionKeys()) {
+						if (functionKey.getShortcutKeyname().equals(shortcutKeyName)) {
+							executeScript(batchInstanceID, nameOfPluginScript, functionKey.getMethodName(), document.getIdentifier());
+							break;
 						}
 					}
 				}
@@ -1130,14 +1139,14 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, docIdentifier, methodName);
 		} catch (DCMAException e) {
 			LOGGER.error(e.getMessage(), e);
-			throw new GWTException(e.getMessage());
+			throw new GWTException(e.getMessage(), e);
 		}
 	}
 
 	@Override
 	public List<FunctionKeyDTO> getFunctionKeyDTOs(String documentTypeName, String batchInstanceIdentifier) {
 		List<FunctionKeyDTO> functionKeyDTOs = new ArrayList<FunctionKeyDTO>();
-		PluginPropertiesService pluginPropertiesService = this.getBeanByName("batchInstancePluginPropertiesService",
+		PluginPropertiesService pluginPropertiesService = this.getBeanByName(BATCH_INSTANCE_PLUGIN_PROPERTIES_SERVICE,
 				BatchInstancePluginPropertiesService.class);
 		List<FunctionKey> allFunctionkeys = pluginPropertiesService.getFunctionKeys(batchInstanceIdentifier, documentTypeName);
 
@@ -1335,7 +1344,6 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		}
 		Coordinates rowCoordinates = new Coordinates();
 		Row row = createNewRow(columnList);
-		boolean isValidSpan = false;
 		Pattern pattern = null;
 		Matcher matcher = null;
 		if (tableEndPattern != null) {
@@ -1362,28 +1370,8 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				counter++;
 			}
 			if ((spanY1Coor - currentYCoor) > defaultvalue) {
-				isValidSpan = false;
-				for (int i = 0; i < colValue.length; i++) {
-					if (colValue[i] != null && !colValue[i].toString().trim().isEmpty()) {
-						isValidSpan = true;
-					}
-				}
-				if (isValidSpan) {
-					List<Column> rowColumnList = row.getColumns().getColumn();
-					for (Integer colNo : columnVsCoordinates.keySet()) {
-						rowColumnList.get(colNo).setValue(colValue[colNo].toString().trim());
-					}
-					row.setRowCoordinates(rowCoordinates);
-					rowList.add(row);
-					row = createNewRow(columnList);
-				}
-				for (int i = 0; i < colValue.length; i++) {
-					colValue[i] = new StringBuffer(ReviewValidateConstants.EMPTY_STRING);
-				}
-				currentYCoor = spanY1Coor;
-				rowCoordinates = new Coordinates();
-				rowCoordinates.setX0(span.getCoordinates().getX0());
-				rowCoordinates.setY0(span.getCoordinates().getY0());
+				row = setCoordinatesForNewRow(columnList, columnVsCoordinates, rowList, colValue, rowCoordinates, row, span
+						);
 			} else {
 				rowCoordinates.setX1(span.getCoordinates().getX1());
 				rowCoordinates.setY1(span.getCoordinates().getY1());
@@ -1404,9 +1392,44 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 				break;
 			}
 		}
-
 		// setAlternateValues(rowList, columnList.size());
 		return rowList;
+	}
+
+	private Row setCoordinatesForNewRow(final List<Column> columnList, final Map<Integer, Coordinates> columnVsCoordinates,
+			List<Row> rowList, StringBuffer[] colValue, Coordinates rowCoordinates, Row row, Span span) {
+		Row rowTemp = row;
+		Coordinates rowCoordinatesTemp = rowCoordinates;
+		boolean isValidSpan;
+		isValidSpan = false;
+		for (int i = 0; i < colValue.length; i++) {
+			if (colValue[i] != null && !colValue[i].toString().trim().isEmpty()) {
+				isValidSpan = true;
+			}
+		}
+		if (isValidSpan) {
+			rowTemp = createNewRowForCoordinates(columnList, columnVsCoordinates, rowList, colValue, rowCoordinatesTemp, rowTemp);
+		}
+		for (int i = 0; i < colValue.length; i++) {
+			colValue[i] = new StringBuffer(ReviewValidateConstants.EMPTY_STRING);
+		}
+		rowCoordinatesTemp = new Coordinates();
+		rowCoordinatesTemp.setX0(span.getCoordinates().getX0());
+		rowCoordinatesTemp.setY0(span.getCoordinates().getY0());
+		return rowTemp;
+	}
+
+	private Row createNewRowForCoordinates(final List<Column> columnList, final Map<Integer, Coordinates> columnVsCoordinates,
+			List<Row> rowList, StringBuffer[] colValue, Coordinates rowCoordinates, Row row) {
+		Row rowTemp = row;
+		List<Column> rowColumnList = rowTemp.getColumns().getColumn();
+		for (Integer colNo : columnVsCoordinates.keySet()) {
+			rowColumnList.get(colNo).setValue(colValue[colNo].toString().trim());
+		}
+		rowTemp.setRowCoordinates(rowCoordinates);
+		rowList.add(rowTemp);
+		rowTemp = createNewRow(columnList);
+		return rowTemp;
 	}
 
 	private Row createNewRow(final List<Column> columnList) {
@@ -1443,7 +1466,7 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 		try {
 			scriptService.executeScript(batchInstanceID, null, nameOfPluginScript, document.getIdentifier(), fieldName);
 		} catch (DCMAException e) {
-			throw new GWTException(e.getMessage());
+			throw new GWTException(e.getMessage(), e);
 		}
 		return getBatch(batchInstanceIdentifier);
 	}
@@ -1483,11 +1506,40 @@ public class ReviewValidateDocServiceImpl extends DCMARemoteServiceServlet imple
 	public String getEncodedStringForXMLPath(final String pathOfBatchXml) {
 		BatchSchemaService batchSchemaService = this.getSingleBeanOfType(BatchSchemaService.class);
 		boolean isZipSwitchOn = batchSchemaService.isZipSwitchOn();
-		log.info("Zipped Batch XML switch is:" + isZipSwitchOn);
+		LOGGER.info("Zipped Batch XML switch is:" + isZipSwitchOn);
 		String pathOfBatchXmlLocal = pathOfBatchXml + ICommonConstants.UNDERSCORE_BATCH_XML;
 		if (isZipSwitchOn && FileUtils.isZipFileExists(pathOfBatchXmlLocal)) {
 			pathOfBatchXmlLocal = pathOfBatchXml + ICommonConstants.UNDERSCORE_BATCH_XML_ZIP;
 		}
 		return SecurityTokenHandler.getEncodedString(pathOfBatchXmlLocal);
 	}
+
+	@Override
+	public void updateEndTimeAndCalculateDuration(String batchInstanceId) {
+		LOGGER.info("Inside updateEndTimeAndCalculateDuration of ReviewValidateDocServiceImpl.");
+		BatchInstanceService batchInstanceService = this.getSingleBeanOfType(BatchInstanceService.class);
+		BatchInstance batchInstance = batchInstanceService.getBatchInstanceByIdentifier(batchInstanceId);
+		if (batchInstance != null) {
+			String batchInstanceStatus = batchInstance.getStatus().name();
+
+			// Checking the batch instance status, which may be 'RUNNING' or 'READY' after review or validation has been done
+			// and based on the executed modules setting the batch instance status as READY_FOR_REVIEW' or 'READY_FOR_VALIDATION'
+			// to store it in 'hist_manual_steps_in_workflow' table
+			if (batchInstanceStatus.equalsIgnoreCase(BatchInstanceStatus.RUNNING.name())
+					|| batchInstanceStatus.equalsIgnoreCase(BatchInstanceStatus.READY.name())) {
+				String executedModules = batchInstance.getExecutedModules();
+				if (executedModules.contains(MODULE_ID_FOR_REVIEW) && !executedModules.contains(MODULE_ID_FOR_VALIDATE)) {
+					batchInstanceStatus = BatchInstanceStatus.READY_FOR_REVIEW.name();
+				} else {
+					batchInstanceStatus = BatchInstanceStatus.READY_FOR_VALIDATION.name();
+				}
+			}
+			ManualStepHistoryService manualStepHistoryService = this.getSingleBeanOfType(ManualStepHistoryService.class);
+			manualStepHistoryService.updateEndTimeAndCalculateDuration(batchInstanceId, batchInstanceStatus, getUserName());
+		} else {
+			LOGGER.error("Not able to update End Time. BatchInstance is null");
+		}
+
+	}
+
 }
