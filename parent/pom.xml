@@ -508,7 +508,7 @@
 
 	<!-- Repositories -->
 	<repositories>
-		<repository>
+		<!-- <repository>
 			<id>mvn-repo</id>
 			<url>http://mvnrepository.com/</url>
 		</repository>
@@ -532,7 +532,7 @@
 			<id>cedar-repo</id>
 			<url>http://maven.cedarsoft.com/content/repositories/thirdparty/</url>
 		</repository>
-		<!-- <repository>
+		<repository>
 			<id>zxing-repo</id>
 			<url>http://opensaga.org/maven/content/repositories/</url>
 		</repository>
